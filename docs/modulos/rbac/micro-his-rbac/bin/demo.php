@@ -50,3 +50,10 @@ $enviar('4. El administrador consulta la denegación por su correlation_id', 'GE
 $enviar('5. La enfermera intenta asignarse un rol (denegado: no tiene roles.asignar)', 'POST', '/api/v1/roles/asignaciones', 'token-ana', [
     'usuario_id' => 'ana', 'rol' => 'medico', 'valido_desde' => '2026-11-15T00:00:00-06:00',
 ]);
+
+// Semana 6 — cambio práctico: revocar un rol cambia la decisión de autorización.
+$enviar('6. El administrador revoca el rol «enfermeria» de la enfermera, con motivo', 'POST', '/api/v1/roles/revocaciones', 'token-admin-oriente', [
+    'usuario_id' => 'ana', 'rol' => 'enfermeria', 'motivo' => 'Traslado a otro hospital de la red',
+]);
+$tras = $enviar('7. La enfermera intenta registrar signos vitales otra vez (ahora denegado)', 'POST', '/api/v1/signos-vitales', 'token-ana');
+$enviar('8. El administrador ve el motivo de esa denegación en la bitácora', 'GET', '/api/v1/auditoria/eventos/' . $tras['correlation_id'], 'token-admin-oriente');

@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Rbac\Aplicacion\CasosDeUso\AsignarRol;
 use Rbac\Aplicacion\CasosDeUso\AutorizarOperacion;
 use Rbac\Aplicacion\CasosDeUso\ConsultarEventoAuditoria;
+use Rbac\Aplicacion\CasosDeUso\RevocarRol;
 use Rbac\Dominio\Puertos\RegistroAuditoria;
 use Rbac\Dominio\Reglas\Asignacion\ReglaNoAutoasignacion;
 use Rbac\Dominio\Reglas\Asignacion\ReglaRolEnCatalogo;
@@ -22,6 +23,10 @@ use Rbac\Dominio\Reglas\Autorizacion\ReglaRolConcedePermiso;
 use Rbac\Dominio\Reglas\Autorizacion\ReglaTenantCoincide;
 use Rbac\Dominio\Servicios\PoliticaAsignacion;
 use Rbac\Dominio\Servicios\PoliticaAutorizacion;
+use Rbac\Dominio\Servicios\PoliticaRevocacion;
+use Rbac\Dominio\Reglas\Revocacion\ReglaMembresiaRevocable;
+use Rbac\Dominio\Reglas\Revocacion\ReglaMotivoSuficiente;
+use Rbac\Dominio\Reglas\Revocacion\ReglaNoAutorrevocacion;
 use Rbac\Persistencia\Archivo\RegistroAuditoriaArchivo;
 use Rbac\Persistencia\ConjuntoAdaptadores;
 use Rbac\Persistencia\EnMemoria\FabricaEnMemoria;
@@ -33,6 +38,7 @@ use Rbac\Presentacion\Http\Controladores\AsignacionRolControlador;
 use Rbac\Presentacion\Http\Controladores\AuditoriaControlador;
 use Rbac\Presentacion\Http\Controladores\AutorizacionControlador;
 use Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador;
+use Rbac\Presentacion\Http\Controladores\RevocacionRolControlador;
 use Rbac\Presentacion\Http\Kernel;
 use Rbac\Presentacion\Http\MiddlewareAutorizacion;
 use Rbac\Presentacion\Http\Rutas;
@@ -56,7 +62,7 @@ function crearAdaptadores(array $config): ConjuntoAdaptadores
 /**
  * Dominio + Aplicación (el «Modelo» de MVC) sobre cualquier conjunto de adaptadores.
  *
- * @return array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria}
+ * @return array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria, revocarRol: RevocarRol}
  */
 function construirCasosDeUso(
     ConjuntoAdaptadores $adaptadores,
@@ -98,6 +104,20 @@ function construirCasosDeUso(
             $reloj,
         ),
         'consultar' => new ConsultarEventoAuditoria($adaptadores->auditoria),
+        // Semana 6 — cambio práctico: mismas piezas reutilizables (autorizar, transacción, auditoría).
+        'revocarRol' => new RevocarRol(
+            $autorizar,
+            new PoliticaRevocacion([
+                new ReglaNoAutorrevocacion(),
+                new ReglaMotivoSuficiente(),
+                new ReglaMembresiaRevocable($adaptadores->membresias),
+            ]),
+            $adaptadores->membresias,
+            $adaptadores->auditoria,
+            $adaptadores->transaccion,
+            $generarCorrelacion,
+            $reloj,
+        ),
     ];
 }
 
@@ -109,16 +129,28 @@ function construirCasosDeUso(
 function construirKernel(array $casos, Autenticador $autenticador, ?\Closure $registrarAcceso = null): Kernel
 {
     return new Kernel(
-        Rutas::definir(
-            new AsignacionRolControlador($casos['asignarRol']),
-            new AuditoriaControlador($casos['consultar']),
-            new OperacionClinicaControlador(),
-            new AutorizacionControlador($casos['autorizar']),
-        ),
+        construirRutas($casos),
         $autenticador,
         new MiddlewareAutorizacion($casos['autorizar']),
         $registrarAcceso,
         generarUuid(...),
+    );
+}
+
+/**
+ * Controladores y tabla de rutas sobre los casos de uso (la usan el Kernel y las pruebas de contrato).
+ *
+ * @param array<string, object> $casos
+ * @return list<\Rbac\Presentacion\Http\Ruta>
+ */
+function construirRutas(array $casos): array
+{
+    return Rutas::definir(
+        new AsignacionRolControlador($casos['asignarRol']),
+        new AuditoriaControlador($casos['consultar']),
+        new OperacionClinicaControlador(),
+        new AutorizacionControlador($casos['autorizar']),
+        new RevocacionRolControlador($casos['revocarRol']),
     );
 }
 
