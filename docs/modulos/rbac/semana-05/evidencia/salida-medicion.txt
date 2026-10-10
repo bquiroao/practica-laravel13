@@ -1,0 +1,10 @@
+Micro-HIS RBAC — costo de una decisión de autorización (PHP 8.4.26, Windows)
+--------------------------------------------------------------------------------------------
+Escenario                         n     p50 ms     p95 ms     p99 ms   media ms  x vs. A p50
+A) módulo en proceso          5000      0.006      0.007      0.010      0.005           1x
+B) API HTTP en proceso         5000      0.016      0.028      0.052      0.018           3x
+C) servicio por red local       300     32.892     73.878     85.700     38.161        5482x
+C0) control: 404 por red        300     22.680     42.592     49.369     24.756        3780x
+--------------------------------------------------------------------------------------------
+Decisiones incorrectas por red: 0
+Nota: C usa el servidor embebido de PHP (un proceso, arranque por petición); es indicativo, no de producción.

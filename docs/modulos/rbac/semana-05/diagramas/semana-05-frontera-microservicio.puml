@@ -1,0 +1,27 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Frontera de microservicio evaluada (estado condicional: solo si se cumplen los criterios C1–C5)
+
+System_Boundary(his, "HIS") {
+    Container(mod, "Módulos clínicos", "PHP / Laravel", "Usan ClienteRbac: timeout 0,5 s, 1 reintento, circuit breaker, fail-closed")
+    Container(gob, "Gobernanza y auditoría", "", "Consulta eventos por correlation_id")
+}
+
+System_Boundary(svc, "Servicio RBAC (dueño de sus datos)") {
+    Container(api, "API RBAC", "PHP 8.2+ (Micro-HIS)", "POST /autorizaciones/decisiones · POST /roles/asignaciones · GET /auditoria/eventos/{id}")
+    ContainerDb(db, "BD RBAC", "PostgreSQL", "membresías, catálogo, eventos_auditoria, outbox")
+}
+
+Container(bus, "Canal de eventos", "outbox → inbox del HIS (central_inbox_messages)", "Entrega al menos una vez")
+ContainerDb(replica, "Réplicas locales", "HOSPITAL.local_user_refs", "Lectura local si el servicio no responde (solo lectura)")
+
+Rel(mod, api, "Decisión síncrona", "REST/JSON + Bearer del usuario + X-Request-ID")
+Rel(gob, api, "Consulta", "REST/JSON")
+Rel(api, db, "Lee/escribe (único dueño)", "PDO")
+Rel(api, bus, "Publica rbac.membresia.asignada / .revocada", "outbox transaccional")
+Rel(bus, replica, "Actualiza réplica", "idempotente por event_id")
+
+SHOW_LEGEND()
+@enduml

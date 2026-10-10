@@ -1,0 +1,8 @@
+$ MICROHIS_PERSISTENCIA=memoria php -S 127.0.0.1:8096 -t public
+$ curl -i -X POST http://127.0.0.1:8096/api/v1/autorizaciones/decisiones -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-ana" -H "X-Request-ID: traza-modulo-0002" -d {"permiso":"prescripciones.crear","recurso":"POST /api/v1/prescripciones"}
+HTTP/1.1 200 OK
+X-Request-ID: traza-modulo-0002
+{"decision":"DENEGADO","correlation_id":"d4924168-98b7-4683-8ad8-5203f71cd2bc"}
+
+# Registro de acceso emitido por el servidor (stderr):
+{"tipo":"acceso","request_id":"traza-modulo-0002","metodo":"POST","ruta":"/api/v1/autorizaciones/decisiones","estado":200,"duracion_ms":4.137,"usuario":"ana","tenant":"hosp-oriente","correlation_id":"d4924168-98b7-4683-8ad8-5203f71cd2bc"}
