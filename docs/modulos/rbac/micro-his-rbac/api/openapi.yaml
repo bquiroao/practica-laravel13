@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  title: Micro-HIS RBAC — API de roles, permisos y autorización
+  version: 1.0.0
+  summary: Asignación de roles, decisión de autorización y consulta de denegaciones trazables.
+  description: |
+    Contrato del módulo RBAC del Sistema Hospitalario Integrado (HIS).
+
+    Reglas comunes a todas las operaciones:
+    - `X-Tenant-ID` es obligatorio (400 si falta). Identifica al hospital.
+    - `Authorization: Bearer <token>` es obligatorio (401 si falta o es inválido).
+    - Cada operación declara su permiso en la extensión `x-permiso`. Si se deniega, la
+      respuesta es 403 con un mensaje genérico y un `correlation_id`; el motivo NUNCA
+      se revela al cliente y queda en la bitácora de auditoría.
+    - Toda respuesta incluye `X-Request-ID` (el recibido, si es válido, o uno nuevo).
+
+    Versionado: la versión mayor va en la ruta (`/api/v1`). Cambios compatibles (campos
+    opcionales nuevos) no cambian la versión; cambios incompatibles crean `/api/v2` y
+    `/api/v1` se mantiene durante al menos un semestre académico con aviso de deprecación.
+  contact:
+    name: Boris Alexander Quiroa Orellana
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8080
+    description: Desarrollo local (php -S)
+security:
+  - tokenPortador: []
+tags:
+  - name: Roles
+    description: Asignación de roles (CU-01).
+  - name: Autorización
+    description: Punto de decisión de políticas para otros módulos (CU-02, CU-03).
+  - name: Auditoría
+    description: Consulta de eventos trazables (CU-06).
+  - name: Operaciones demo
+    description: Operaciones clínicas simuladas para demostrar la protección de rutas.
+paths:
+  /api/v1/roles/asignaciones:
+    post:
+      operationId: asignarRol
+      tags: [Roles]
+      summary: Asigna un rol a un usuario dentro del hospital del token.
+      x-permiso: roles.asignar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudAsignacion'
+            example:
+              usuario_id: nuevo-01
+              rol: laboratorio
+              valido_desde: '2026-11-15T00:00:00-06:00'
+      responses:
+        '201':
+          description: Rol asignado; la membresía y el evento ROL_ASIGNADO se guardaron en una transacción.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsignacionCreada'
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/AccesoDenegado'
+        '404':
+          description: El usuario destino no existe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCodigo'
+              example:
+                codigo: USUARIO_NO_ENCONTRADO
+        '409':
+          description: Ya existe una membresía activa igual.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCodigo'
+              example:
+                codigo: ASIGNACION_DUPLICADA
+        '422':
+          description: Formato inválido (DATOS_INVALIDOS) o regla de negocio (ROL_INVALIDO, AUTOASIGNACION, USUARIO_INACTIVO, VIGENCIA_INVALIDA).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/ErrorCodigo'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/autorizaciones/decisiones:
+    post:
+      operationId: decidirAutorizacion
+      tags: [Autorización]
+      summary: Decide si el usuario del token puede ejercer un permiso en el hospital indicado.
+      description: |
+        Punto de decisión de políticas (PDP) para los demás módulos del HIS. El módulo cliente
+        reenvía el token del usuario final; RBAC no acepta preguntas sobre otro usuario.
+        Responde 200 en ambos casos (la consulta fue atendida); toda denegación queda auditada.
+        No exige un permiso propio: este endpoint ES la autorización.
+      x-permiso: null
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudDecision'
+            example:
+              permiso: prescripciones.crear
+              recurso: POST /api/v1/prescripciones
+      responses:
+        '200':
+          description: Decisión tomada.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+              examples:
+                permitido:
+                  value:
+                    decision: PERMITIDO
+                denegado:
+                  value:
+                    decision: DENEGADO
+                    correlation_id: 6f0b0f8e-2a63-4c55-9b7e-0d2f4f6b1c11
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '422':
+          $ref: '#/components/responses/DatosInvalidos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/auditoria/eventos/{correlationId}:
+    get:
+      operationId: consultarEvento
+      tags: [Auditoría]
+      summary: Devuelve un evento de auditoría del hospital del token.
+      x-permiso: auditoria.consultar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - name: correlationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9-]{1,64}$'
+      responses:
+        '200':
+          description: Evento encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoAuditoria'
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/AccesoDenegado'
+        '404':
+          description: No existe un evento con ese id en este hospital (aislamiento por tenant).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/prescripciones:
+    post:
+      operationId: crearPrescripcionDemo
+      tags: [Operaciones demo]
+      summary: Operación clínica simulada protegida por permiso.
+      x-permiso: prescripciones.crear
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          description: Operación registrada (demo).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/AccesoDenegado'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/signos-vitales:
+    post:
+      operationId: registrarSignosVitalesDemo
+      tags: [Operaciones demo]
+      summary: Operación clínica simulada protegida por permiso.
+      x-permiso: signos_vitales.registrar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          description: Operación registrada (demo).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/AccesoDenegado'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+components:
+  securitySchemes:
+    tokenPortador:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: En el HIS lo emite el módulo de usuarios (JwtAuth). En el micro-HIS se usan tokens de demostración.
+  parameters:
+    TenantId:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital sobre el que se opera. Debe coincidir con el hospital del token.
+      schema:
+        type: string
+        example: hosp-oriente
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Id de traza propagado entre módulos. Si falta o es inválido, el servidor genera uno.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+  headers:
+    RequestId:
+      description: Id de traza de la petición.
+      schema:
+        type: string
+  responses:
+    SinTenant:
+      description: Falta la cabecera X-Tenant-ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Mensaje'
+          example:
+            mensaje: La cabecera X-Tenant-ID es obligatoria.
+    NoAutenticado:
+      description: Token ausente, inválido o expirado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Mensaje'
+          example:
+            mensaje: Token inválido o expirado.
+    AccesoDenegado:
+      description: El usuario no tiene el permiso de la operación. El motivo no se revela; queda en la bitácora.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccesoDenegado'
+    DatosInvalidos:
+      description: La entrada no tiene el formato esperado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorValidacion'
+    ErrorInterno:
+      description: Error inesperado; sin detalles técnicos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Mensaje'
+  schemas:
+    SolicitudAsignacion:
+      type: object
+      required: [usuario_id, rol, valido_desde]
+      additionalProperties: false
+      properties:
+        usuario_id:
+          type: string
+          minLength: 1
+        rol:
+          type: string
+          minLength: 1
+        valido_desde:
+          type: string
+          description: Fecha u hora ISO-8601.
+          examples: ['2026-11-15', '2026-11-15T00:00:00-06:00']
+        valido_hasta:
+          type: string
+          description: Opcional; posterior a valido_desde.
+    AsignacionCreada:
+      type: object
+      required: [codigo, correlation_id]
+      properties:
+        codigo:
+          const: ROL_ASIGNADO
+        correlation_id:
+          type: string
+    SolicitudDecision:
+      type: object
+      required: [permiso, recurso]
+      additionalProperties: false
+      properties:
+        permiso:
+          type: string
+          pattern: '^[a-z_]+\.[a-z_]+$'
+        recurso:
+          type: string
+          minLength: 1
+          maxLength: 200
+    Decision:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [PERMITIDO, DENEGADO]
+        correlation_id:
+          type: string
+          description: Presente solo si la decisión es DENEGADO.
+    EventoAuditoria:
+      type: object
+      required: [correlation_id, tipo, actor, hospital, datos, ocurrido_en]
+      properties:
+        correlation_id:
+          type: string
+        tipo:
+          type: string
+          enum: [ROL_ASIGNADO, ACCESO_DENEGADO]
+        actor:
+          type: string
+        hospital:
+          type: string
+        datos:
+          type: object
+          additionalProperties:
+            type: [string, 'null']
+        ocurrido_en:
+          type: string
+          format: date-time
+    AccesoDenegado:
+      type: object
+      required: [mensaje, correlation_id]
+      additionalProperties: false
+      properties:
+        mensaje:
+          const: Acceso denegado.
+        correlation_id:
+          type: string
+    ErrorCodigo:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+    ErrorValidacion:
+      type: object
+      required: [codigo, campos]
+      properties:
+        codigo:
+          const: DATOS_INVALIDOS
+        campos:
+          type: array
+          items:
+            type: string
+    Mensaje:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje:
+          type: string

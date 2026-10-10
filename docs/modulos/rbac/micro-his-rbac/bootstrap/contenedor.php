@@ -31,6 +31,7 @@ use Rbac\Presentacion\Http\Autenticacion\Autenticador;
 use Rbac\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Rbac\Presentacion\Http\Controladores\AsignacionRolControlador;
 use Rbac\Presentacion\Http\Controladores\AuditoriaControlador;
+use Rbac\Presentacion\Http\Controladores\AutorizacionControlador;
 use Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador;
 use Rbac\Presentacion\Http\Kernel;
 use Rbac\Presentacion\Http\MiddlewareAutorizacion;
@@ -105,17 +106,26 @@ function construirCasosDeUso(
  *
  * @param array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria} $casos
  */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+function construirKernel(array $casos, Autenticador $autenticador, ?\Closure $registrarAcceso = null): Kernel
 {
     return new Kernel(
         Rutas::definir(
             new AsignacionRolControlador($casos['asignarRol']),
             new AuditoriaControlador($casos['consultar']),
             new OperacionClinicaControlador(),
+            new AutorizacionControlador($casos['autorizar']),
         ),
         $autenticador,
         new MiddlewareAutorizacion($casos['autorizar']),
+        $registrarAcceso,
+        generarUuid(...),
     );
+}
+
+/** Registro de acceso estructurado (una línea JSON por petición) hacia el log de PHP / stderr. */
+function registrarAccesoEnLog(array $registro): void
+{
+    error_log((string) json_encode(['tipo' => 'acceso'] + $registro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 /**
@@ -137,7 +147,7 @@ function crearKernel(array $config): Kernel
         static fn (): \DateTimeImmutable => new \DateTimeImmutable(),
     );
 
-    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']), registrarAccesoEnLog(...));
 }
 
 /** UUID v4 para el correlation_id. */
