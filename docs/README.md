@@ -29,3 +29,4 @@ docs/
 | Módulo | Carpeta |
 |---|---|
 | RBAC: roles, permisos y protección de rutas | [`modulos/rbac`](modulos/rbac/README.md) |
+| Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
