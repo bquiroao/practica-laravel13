@@ -1,0 +1,76 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title Notas SOAP — Diseño DESPUÉS de aplicar SRP
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package Presentacion {
+  class NotaSoapController {
+    + registrar(peticion) : array
+    + firmar(peticion, notaId) : array
+  }
+}
+
+package Servicios {
+  class RegistrarNotaConDiagnostico {
+    + ejecutar(usuario, solicitud) : array
+  }
+  class FirmarNota {
+    + ejecutar(usuario, notaId) : NotaSoap
+  }
+}
+
+package Dominio {
+  class NotaSoap {
+    + registrar(...) : NotaSoap
+    + firmar(momento) : NotaSoap
+  }
+  class SeccionesSoap
+  class Diagnostico {
+    + registrar(codigo, descripcion, tipo) : Diagnostico
+  }
+  enum TipoDiagnostico {
+    primary
+    secondary
+    differential
+  }
+  class UsuarioAutenticado
+}
+
+package Contratos {
+  interface AutenticadorToken
+  interface VerificadorAcceso
+  interface RepositorioExpedientes
+  interface RepositorioNotas
+  interface RepositorioDiagnosticos
+  interface Transaccion
+  interface RegistroAuditoria
+  interface Reloj
+}
+
+NotaSoapController --> AutenticadorToken
+NotaSoapController --> RegistrarNotaConDiagnostico
+NotaSoapController --> FirmarNota
+RegistrarNotaConDiagnostico --> VerificadorAcceso
+RegistrarNotaConDiagnostico --> RepositorioExpedientes
+RegistrarNotaConDiagnostico --> RepositorioNotas
+RegistrarNotaConDiagnostico --> RepositorioDiagnosticos
+RegistrarNotaConDiagnostico --> Transaccion
+RegistrarNotaConDiagnostico --> RegistroAuditoria
+RegistrarNotaConDiagnostico ..> NotaSoap : crea
+RegistrarNotaConDiagnostico ..> Diagnostico : crea
+FirmarNota --> RepositorioNotas
+FirmarNota --> Reloj
+FirmarNota --> RegistroAuditoria
+NotaSoap *-- SeccionesSoap
+Diagnostico --> TipoDiagnostico
+
+note bottom of Contratos
+  Implementaciones en EnMemoria/ para las pruebas;
+  en el HIS serán adaptadores de PostgreSQL y JWT.
+  Solo composicion.php conoce las clases concretas.
+end note
+@enduml
