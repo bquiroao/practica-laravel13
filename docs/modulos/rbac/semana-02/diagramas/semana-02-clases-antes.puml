@@ -1,0 +1,38 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title Diseño ANTES de OCP — una clase concentra reglas, motivos y bitácora
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFF5F5
+  BorderColor #A33A3A
+}
+
+class "Controlador\n(ruta protegida)" as Controlador
+
+class ServicioAutorizacion <<monolítico>> {
+  - membresias : array
+  - permisosPorRol : array
+  - archivoBitacora : string
+  + autorizar(usuarioId, tenantToken, tenantSolicitud,\n  permiso, recurso, ip, ahora) : array
+}
+
+class "file_put_contents()\n(archivo de texto)" as Archivo <<concreto>>
+
+Controlador --> ServicioAutorizacion : usa
+ServicioAutorizacion --> Archivo : escribe ACCESO_DENEGADO
+
+note right of ServicioAutorizacion
+  **autorizar()** contiene:
+  if tenant ≠ token → TENANT_NO_COINCIDE
+  elseif sin membresía vigente → MEMBRESIA_NO_VIGENTE
+  elseif rol sin permiso → PERMISO_NO_ASIGNADO
+  // regla nueva = otro elseif AQUÍ
+
+  Problemas:
+  • Cada regla nueva MODIFICA esta clase (viola OCP).
+  • 4 razones para cambiar: tenant, vigencia,
+    permisos y formato/destino de la bitácora.
+  • Depende de un archivo concreto; no hay respaldo
+    ni transacción y no se puede probar con dobles.
+end note
+@enduml
