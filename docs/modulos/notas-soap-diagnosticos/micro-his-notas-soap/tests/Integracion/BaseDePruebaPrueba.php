@@ -96,7 +96,7 @@ prueba('INT-05', 'La base también protege: no deja modificar una nota firmada n
     igual('signed', $repo->buscar($id)?->estado, 'la nota sigue firmada');
 });
 
-prueba('INT-06', 'PostgreSQL real (opcional): camino feliz y reversión con el esquema de database/schema.sql', function () use ($kernelSobre, $contar): void {
+prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, bandeja de salida en jsonb y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
     $dsn = getenv('NOTASSOAP_DB_DSN');
     if ($dsn === false || $dsn === '') {
         omitir('defina NOTASSOAP_DB_DSN para probar contra PostgreSQL');
@@ -108,10 +108,14 @@ prueba('INT-06', 'PostgreSQL real (opcional): camino feliz y reversión con el e
         $pdo->exec("SET search_path TO $esquema");
         $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/schema.sql'));
         $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
-        $k = $kernelSobre($pdo);
+        $ids = new GeneradorSecuencial();
+        $k = construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), new PdoVerificadorAcceso($pdo), new PdoRepositorioExpedientes($pdo),
+            new NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos(new PdoRepositorioNotas($pdo), new NotasSoap\Persistencia\Pdo\PdoBandejaSalida($pdo), $ids),
+            new PdoRepositorioDiagnosticos($pdo), new PdoRegistroAuditoria($pdo), new PdoTransaccion($pdo), $ids, new RelojFijo());
         $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'] ?? null;
         afirmar($id !== null, 'registro en PostgreSQL');
         igual(200, $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"))->estado, 'firma');
+        igual('NotaSoapFirmada', $pdo->query("SELECT payload_minimal->>'clinical_note_id' = '$id' AS ok, event_type FROM outbox_events")->fetch()['event_type'] ?? null, 'outbox en jsonb');
         $pdo->exec("CREATE FUNCTION $esquema.romper() RETURNS trigger LANGUAGE plpgsql AS \$\$ BEGIN RAISE EXCEPTION 'falla simulada'; END; \$\$");
         $pdo->exec("CREATE TRIGGER romper BEFORE INSERT ON diagnoses FOR EACH ROW EXECUTE FUNCTION $esquema.romper()");
         $r = $kernelSobre($pdo)->manejar(Escenario::peticion());
@@ -120,4 +124,33 @@ prueba('INT-06', 'PostgreSQL real (opcional): camino feliz y reversión con el e
     } finally {
         $pdo->exec("DROP SCHEMA $esquema CASCADE");
     }
+});
+
+prueba('INT-07', 'Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico', function () use ($sqlite, $contar): void {
+    $pdo = $sqlite();
+    $ids = new GeneradorSecuencial();
+    $k = construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), new PdoVerificadorAcceso($pdo), new PdoRepositorioExpedientes($pdo),
+        new NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos(new PdoRepositorioNotas($pdo), new NotasSoap\Persistencia\Pdo\PdoBandejaSalida($pdo), $ids),
+        new PdoRepositorioDiagnosticos($pdo), new PdoRegistroAuditoria($pdo), new PdoTransaccion($pdo), $ids, new RelojFijo());
+    $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    igual(0, $contar($pdo, 'outbox_events'), 'el borrador no genera evento');
+    $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+    $fila = $pdo->query('SELECT event_type, aggregate_id, payload_minimal, published_at FROM outbox_events')->fetch();
+    igual(['NotaSoapFirmada', $id, null], [$fila['event_type'], $fila['aggregate_id'], $fila['published_at']], 'fila pendiente de publicar');
+    afirmar(!str_contains((string) $fila['payload_minimal'], 'Tos'), 'payload sin contenido clínico');
+});
+
+prueba('INT-08', 'Objetos reutilizables: el mismo flujo con adaptadores PDO y en memoria da respuestas idénticas', function () use ($sqlite, $kernelSobre): void {
+    $flujo = static function (NotasSoap\Presentacion\Http\Kernel $k): array {
+        $r1 = $k->manejar(Escenario::peticion());
+        $id = $r1->cuerpo['clinical_note_id'];
+        $r2 = $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+        $r3 = $k->manejar(Escenario::peticion([], [], 'GET', "/api/v1/notas-soap/$id"));
+        $r4 = $k->manejar(Escenario::peticion([], ['authorization' => 'Bearer token-lopez']));
+
+        return [[$r1->estado, $r1->cuerpo], [$r2->estado, $r2->cuerpo], [$r3->estado, $r3->cuerpo], [$r4->estado, $r4->cuerpo]];
+    };
+    $enMemoria = crearKernelEnMemoria(['tokens_demo' => Escenario::TOKENS],
+        new NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php'), new GeneradorSecuencial(), new RelojFijo());
+    igual($flujo($kernelSobre($sqlite())), $flujo($enMemoria), 'PDO vs memoria');
 });

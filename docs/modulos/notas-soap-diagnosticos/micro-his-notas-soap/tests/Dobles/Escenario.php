@@ -8,11 +8,23 @@ use NotasSoap\Aplicacion\CasosDeUso\ConsultarNota;
 use NotasSoap\Aplicacion\CasosDeUso\FirmarNota;
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\RegistrarNotaComando;
+use NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos;
+use NotasSoap\Aplicacion\Puertos\BandejaSalida;
+use NotasSoap\Dominio\Puertos\RepositorioDiagnosticos;
+use NotasSoap\Dominio\Puertos\VerificadorAcceso;
+use NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria;
+use NotasSoap\Persistencia\EnMemoria\BandejaSalidaEnMemoria;
+use NotasSoap\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use NotasSoap\Persistencia\EnMemoria\RepositorioNotasEnMemoria;
 use NotasSoap\Presentacion\Http\AutenticadorTokenDemo;
 use NotasSoap\Presentacion\Http\Kernel;
 use NotasSoap\Presentacion\Http\Solicitud;
 
-/** Arma un sistema completo con dobles en memoria y datos ficticios. Uno nuevo por prueba. */
+/**
+ * Sistema completo con los adaptadores EN MEMORIA de src/ (los mismos del modo demostración)
+ * y los datos de config/datos-demo-memoria.php. Uno nuevo por prueba.
+ * Se le pueden cambiar piezas para provocar fallas (diagnósticos, acceso o bandeja que fallan).
+ */
 final class Escenario
 {
     public const TOKENS = [
@@ -21,33 +33,34 @@ final class Escenario
         'token-ana' => ['enf-ana', 'hosp-oriente', ['enfermeria']],
     ];
 
+    public readonly AlmacenesEnMemoria $almacenes;
     public readonly RepositorioNotasEnMemoria $notas;
-    public readonly RepositorioDiagnosticosEnMemoria $diagnosticos;
     public readonly RegistroAuditoriaEnMemoria $auditoria;
-    public readonly VerificadorAccesoEnMemoria $acceso;
+    public readonly BandejaSalidaEnMemoria $bandeja;
     public readonly RegistrarNotaConDiagnostico $registrar;
     public readonly FirmarNota $firmar;
     public readonly ConsultarNota $consultar;
     public readonly Kernel $kernel;
 
-    public function __construct()
-    {
-        $this->notas = new RepositorioNotasEnMemoria();
-        $this->diagnosticos = new RepositorioDiagnosticosEnMemoria();
-        $this->auditoria = new RegistroAuditoriaEnMemoria();
-        $this->acceso = new VerificadorAccesoEnMemoria(['epi-100' => ['dra-mendez'], 'epi-200' => ['dra-mendez']]);
-        $expedientes = new RepositorioExpedientesEnMemoria(
-            ['exp-carlos' => ['paciente' => 'pac-carlos', 'abierto' => true], 'exp-rosa' => ['paciente' => 'pac-rosa', 'abierto' => false]],
-            ['epi-100' => 'pac-carlos', 'epi-200' => 'pac-rosa'],
-        );
-        $tx = new TransaccionEnMemoria([$this->notas, $this->diagnosticos, $this->auditoria]);
+    public function __construct(
+        ?RepositorioDiagnosticos $diagnosticos = null,
+        ?VerificadorAcceso $acceso = null,
+        ?BandejaSalida $bandeja = null,
+    ) {
+        $this->almacenes = $a = new AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php');
+        $this->notas = $a->notas;
+        $this->auditoria = $a->auditoria;
+        $this->bandeja = $a->bandeja;
         $ids = new GeneradorSecuencial();
         $reloj = new RelojFijo();
+        $notas = new RepositorioNotasConEventos($a->notas, $bandeja ?? $a->bandeja, $ids);
+        $diagnosticos ??= $a->diagnosticos;
+        $acceso ??= $a->acceso;
 
-        $this->registrar = new RegistrarNotaConDiagnostico($this->acceso, $expedientes, $this->notas, $this->diagnosticos, $this->auditoria, $tx, $ids, $reloj);
-        $this->firmar = new FirmarNota($this->notas, $this->auditoria, $tx, $reloj);
-        $this->consultar = new ConsultarNota($this->notas, $this->diagnosticos);
-        $this->kernel = construirKernel(new AutenticadorTokenDemo(self::TOKENS), $this->acceso, $expedientes, $this->notas, $this->diagnosticos, $this->auditoria, $tx, $ids, $reloj);
+        $this->registrar = new RegistrarNotaConDiagnostico($acceso, $a->expedientes, $notas, $diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj);
+        $this->firmar = new FirmarNota($notas, $diagnosticos, $a->auditoria, $a->transaccion, $reloj);
+        $this->consultar = new ConsultarNota($notas, $diagnosticos);
+        $this->kernel = construirKernel(new AutenticadorTokenDemo(self::TOKENS), $acceso, $a->expedientes, $notas, $diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj);
     }
 
     /** Comando válido: la Dra. Méndez registra la nota de Carlos (neumonía). */

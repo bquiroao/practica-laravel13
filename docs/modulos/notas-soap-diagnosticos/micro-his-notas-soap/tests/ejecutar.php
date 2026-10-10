@@ -15,6 +15,7 @@ $grupos = [
     'Dominio' => 'Reglas de dominio',
     'Aplicacion' => 'Casos de uso (camino feliz y rechazos)',
     'Persistencia' => 'Errores de persistencia (dobles de PDO)',
+    'Contrato' => 'Contrato del Repository (mismas pruebas para el adaptador en memoria y el PDO)',
     'Presentacion' => 'Presentación HTTP',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con base de prueba (SQLite en memoria y PostgreSQL opcional)',

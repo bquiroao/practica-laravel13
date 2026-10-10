@@ -48,6 +48,16 @@ CREATE TABLE audit_events (
     created_at text NOT NULL
 );
 
+CREATE TABLE outbox_events (
+    event_id        text PRIMARY KEY,
+    event_type      text NOT NULL CHECK (trim(event_type) <> ''),
+    aggregate_id    text NOT NULL,
+    payload_minimal text NOT NULL,
+    occurred_at     text NOT NULL,
+    published_at    text,
+    attempts        integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
+);
+
 CREATE TRIGGER clinical_notes_firmada BEFORE UPDATE ON clinical_notes WHEN OLD.status = 'signed'
 BEGIN SELECT RAISE(ABORT, 'clinical_notes_signed_immutable'); END;
 CREATE TRIGGER clinical_notes_borrar BEFORE DELETE ON clinical_notes

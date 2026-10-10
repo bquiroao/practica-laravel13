@@ -66,3 +66,12 @@ prueba('DOM-08', 'Las secciones se guardan en un solo campo content y se reconst
     igual([$s->subjetivo, $s->objetivo, $s->analisis, $s->plan], [$r->subjetivo, $r->objetivo, $r->analisis, $r->plan], 'secciones');
     afirmar(str_contains($s->comoContenido(), '°C'), 'conserva acentos y símbolos sin escapar');
 });
+
+prueba('DOM-09', 'El evento NotaSoapFirmada solo se crea de una nota firmada y lleva identificadores, no el texto clínico', function () use ($nota): void {
+    lanza(LogicException::class, fn () => NotasSoap\Dominio\Eventos\EventoClinico::notaFirmada('ev-1', $nota()), 'nota en borrador');
+    $ev = NotasSoap\Dominio\Eventos\EventoClinico::notaFirmada('ev-1', $nota()->firmar(new DateTimeImmutable('2026-10-12T10:00:00-06:00')));
+    igual(['NotaSoapFirmada', 'n-1'], [$ev->tipo, $ev->agregadoId], 'tipo y agregado');
+    igual(['clinical_note_id', 'medical_record_id', 'care_episode_id', 'author_user_ref_id', 'version_no', 'signed_at'], array_keys($ev->datos), 'campos del payload mínimo');
+    $texto = (string) json_encode($ev->datos, JSON_UNESCAPED_UNICODE);
+    afirmar(!str_contains($texto, 'Tos') && !str_contains($texto, 'neumonía'), 'no lleva contenido clínico');
+});
