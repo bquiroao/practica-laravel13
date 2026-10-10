@@ -18,7 +18,9 @@ use Rbac\Persistencia\Pdo\PdoTransaccion;
 use Rbac\Pruebas\Dobles\Escenario;
 use Rbac\Pruebas\Dobles\PdoEspia;
 use Rbac\Pruebas\Dobles\PdoQueFalla;
-use Rbac\Pruebas\Dobles\RegistroAuditoriaEnMemoria;
+use Rbac\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use Rbac\Persistencia\Pdo\FabricaPdo;
+use Rbac\Pruebas\Dobles\RegistroAuditoriaConFallas;
 
 $membresiaNueva = static fn (): Membresia => new Membresia('u1', 'h1', 'medico', 'active', new DateTimeImmutable('2026-11-15'));
 
@@ -99,7 +101,7 @@ prueba('PER-09', 'Bitácora principal caída: el evento va al respaldo en archiv
     $ruta = tempnam(sys_get_temp_dir(), 'microhis');
     try {
         $respaldo = new RegistroAuditoriaArchivo((string) $ruta);
-        $principal = new RegistroAuditoriaEnMemoria();
+        $principal = new RegistroAuditoriaConFallas(new RegistroAuditoriaEnMemoria());
         $principal->fallar = true;
         $evento = new EventoAuditoria('ACCESO_DENEGADO', 'corr-x', 'ana', 'h1', ['motivo' => 'PERMISO_NO_ASIGNADO'], new DateTimeImmutable());
         lanza(ErrorPersistencia::class, fn () => $principal->registrar($evento), 'principal');
@@ -123,12 +125,8 @@ prueba('PER-10', 'Capas completas sobre PDO caído: Aplicación + adaptadores PD
     $pdo = new PdoQueFalla('08006');
     $respaldo = new RegistroAuditoriaEnMemoria();
     $casos = construirCasosDeUso(
-        new PdoRepositorioMembresias($pdo),
-        new PdoCatalogoPermisos($pdo),
-        new PdoDirectorioUsuarios($pdo),
-        new PdoRegistroAuditoria($pdo),
+        FabricaPdo::crear($pdo),
         $respaldo,
-        new PdoTransaccion($pdo),
         static fn (): string => 'corr-pdo',
         static fn (): DateTimeImmutable => new DateTimeImmutable(Escenario::AHORA),
     );
