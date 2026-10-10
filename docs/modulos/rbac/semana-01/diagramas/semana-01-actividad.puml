@@ -1,0 +1,107 @@
+@startuml semana-01-actividad
+title Módulo RBAC — Diagrama de actividad\n«Asignación de rol, autorización de una operación y denegación trazable»
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Administrador de hospital|
+start
+:A-01 Seleccionar usuario, rol y vigencia
+  (ej. Ana López → enfermeria, desde 01/11/2026);
+note right: <b>Fase 1 — Asignación de rol [CU-01]</b>
+  |Sistema HIS — RBAC|
+  :A-02 Autorizar al administrador
+  sobre el permiso «roles.asignar» [CU-03];
+  if (D-01 ¿El administrador tiene\nel permiso en este hospital?) then (no)
+    :A-03 Denegar con trazabilidad
+    motivo PERMISO_NO_ASIGNADO [CU-04];
+    |Bitácora de auditoría|
+    :A-04 Registrar ACCESO_DENEGADO [CU-05];
+    |Sistema HIS — RBAC|
+    :Responder 403 + correlation_id;
+    stop
+  else (sí)
+  endif
+  if (D-02 ¿Usuario destino existe y está activo?) then (no)
+    :E-01 Excepción: usuario no encontrado / inactivo
+    (404 / 422);
+    stop
+  else (sí)
+  endif
+  if (D-03 ¿Rol existe en el catálogo\ny no es autoasignación?) then (no)
+    :E-02 Excepción: rol inválido o autoasignación
+    (422);
+    stop
+  else (sí)
+  endif
+  if (D-04 ¿Existe ya una membresía activa\ncon el mismo rol en el hospital?) then (sí)
+    :E-03 Excepción: asignación duplicada (409);
+    stop
+  else (no)
+  endif
+  :A-05 Crear membresía (status active,
+  valid_from, valid_to opcional);
+  |Bitácora de auditoría|
+  :A-06 Registrar ROL_ASIGNADO
+  en la misma transacción [CU-05];
+  if (E-04 ¿Falló el registro\nde auditoría?) then (sí)
+    |Sistema HIS — RBAC|
+    :Revertir transacción (500);
+    note right: Sin evidencia no hay asignación.
+    stop
+  else (no)
+  endif
+  |Sistema HIS — RBAC|
+  :A-07 Confirmar asignación (201);
+
+|Usuario clínico|
+:A-08 Solicitar operación protegida
+  (ej. POST /api/v1/prescripciones
+  → permiso «prescripciones.crear»);
+note right: <b>Fase 2 — Autorización [CU-02, CU-03]</b>
+  |Sistema HIS — RBAC|
+  if (D-05 ¿Cabecera X-Tenant-ID presente\ny hospital existe?) then (no)
+    :E-05 Excepción: 400 / 404
+    (solicitud inválida, sin evaluar permisos);
+    stop
+  else (sí)
+  endif
+  if (D-06 ¿Token JWT válido y vigente?) then (no)
+    :E-06 Excepción: 401 no autenticado;
+    stop
+  else (sí)
+  endif
+  :A-09 Obtener membresía del usuario
+  en el hospital (tenant);
+  if (D-07 ¿Membresía activa y vigente\npara este tenant?) then (no)
+    :motivo MEMBRESIA_NO_VIGENTE
+    o TENANT_NO_COINCIDE;
+  elseif (D-08 ¿El rol concede el permiso\nrequerido por la operación?) then (no)
+    :motivo PERMISO_NO_ASIGNADO;
+  else (sí)
+    :A-10 Permitir y ejecutar la operación;
+    :A-11 Responder 2xx al usuario;
+    stop
+  endif
+
+:A-12 Generar correlation_id y armar evento
+  (actor, hospital, permiso, recurso, motivo, IP, fecha);
+note right: <b>Fase 3 — Denegación trazable [CU-04, CU-05]</b>
+  |Bitácora de auditoría|
+  :A-13 Registrar ACCESO_DENEGADO
+  (append-only, inmutable);
+  if (E-07 ¿Falló el registro\nde auditoría?) then (sí)
+    |Sistema HIS — RBAC|
+    :Escribir evento en log de respaldo
+    y alertar a operaciones;
+    note right: Fail-closed: la operación\nsigue denegada.
+  else (no)
+  endif
+  |Sistema HIS — RBAC|
+  :A-14 Responder 403 con correlation_id
+  (sin revelar detalles internos);
+  |Usuario clínico|
+  :A-15 Ver mensaje «Acceso denegado»
+  y el código de referencia;
+stop
+@enduml

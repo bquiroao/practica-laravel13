@@ -1,0 +1,78 @@
+@startuml semana-01-secuencia
+title Módulo RBAC — Diagrama de secuencia\n«Asignación de rol, autorización de una operación y denegación trazable»
+autonumber "<b>S-00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Administrador\nde hospital" as Admin
+actor "Usuario clínico" as Clinico
+boundary "SPA Vue" as UI
+control "API /api/v1\n(Tenant + JWT)" as API
+control "Middleware de\nautorización" as MW
+control "Servicio de\nautorización" as Authz
+control "Servicio de\nasignación de rol" as Asig
+entity "Repositorio de\nmembresías" as Repo
+database "Bitácora de\nauditoría" as Audit
+
+== Fase 1 — Asignación de rol [CU-01] ==
+Admin -> UI : Asignar rol «enfermeria» a Ana López
+UI -> API : POST /roles/asignaciones\nX-Tenant-ID, Bearer JWT, {usuario, rol, vigencia}
+API -> API : Validar tenant y token [D-05, D-06]
+API -> MW : verificar(«roles.asignar»)
+MW -> Authz : autorizar(admin, hospital, «roles.asignar») [CU-03]
+Authz -> Repo : membresiaVigente(admin, hospital)
+Repo --> Authz : rol admin_hospital
+Authz --> MW : PERMITIDO [D-01]
+MW -> Asig : asignar(usuario, rol, vigencia)
+Asig -> Asig : Validar usuario activo, rol del catálogo,\nno autoasignación [D-02, D-03]
+Asig -> Repo : existeMembresiaActiva(usuario, hospital, rol) [D-04]
+Repo --> Asig : no existe
+group Transacción única
+  Asig -> Repo : crearMembresia(active, valid_from, valid_to) [A-05]
+  Asig -> Audit : registrar(ROL_ASIGNADO) [A-06, CU-05]
+  Audit --> Asig : ok
+end
+Asig --> API : membresía creada
+API --> UI : 201 Created
+UI --> Admin : «Rol asignado»
+
+alt Excepciones de la asignación
+  Asig --> API : usuario no encontrado / rol inválido [E-01, E-02]
+  API --> UI : 404 / 422
+else Asignación duplicada
+  Asig --> API : duplicado [E-03]
+  API --> UI : 409 Conflict
+else Falla la auditoría [E-04]
+  Asig -> Repo : rollback
+  API --> UI : 500 (sin asignación)
+end
+
+== Fase 2 — Autorización de una operación [CU-02, CU-03] ==
+Clinico -> UI : Crear prescripción
+UI -> API : POST /prescripciones\nX-Tenant-ID, Bearer JWT [A-08]
+API -> API : Validar tenant y token [D-05, D-06]
+API -> MW : verificar(«prescripciones.crear»)
+MW -> Authz : autorizar(ana, hospital, «prescripciones.crear»)
+Authz -> Repo : membresiaVigente(ana, hospital) [A-09]
+Repo --> Authz : rol enfermeria (active, vigente) [D-07]
+Authz -> Authz : ¿enfermeria concede\n«prescripciones.crear»? [D-08]
+
+alt Permiso concedido
+  Authz --> MW : PERMITIDO
+  MW -> API : continuar al controlador [A-10]
+  API --> UI : 201 Created [A-11]
+else Permiso no concedido (PERMISO_NO_ASIGNADO) [CU-04]
+  Authz --> MW : DENEGADO(motivo)
+  == Fase 3 — Denegación trazable [CU-04, CU-05] ==
+  MW -> MW : Generar correlation_id [A-12]
+  MW -> Audit : registrar(ACCESO_DENEGADO, actor, hospital,\npermiso, recurso, motivo, IP, fecha) [A-13]
+  alt Auditoría disponible
+    Audit --> MW : ok
+  else Falla la auditoría [E-07]
+    MW -> MW : log de respaldo + alerta\n(se mantiene la denegación)
+  end
+  MW --> API : 403 Forbidden {mensaje, correlation_id} [A-14]
+  API --> UI : 403 Forbidden
+  UI --> Clinico : «Acceso denegado. Ref: correlation_id» [A-15]
+end
+@enduml
