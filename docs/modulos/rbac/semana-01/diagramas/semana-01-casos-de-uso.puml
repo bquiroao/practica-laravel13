@@ -1,0 +1,40 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo RBAC — Casos de uso\n«Asignación de rol, autorización de una operación y denegación trazable»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Administrador\nde hospital" as Admin
+actor "Usuario clínico\n(médico, enfermería,\nlaboratorio)" as Clinico
+actor "Auditor /\nSuper administrador" as Auditor
+
+rectangle "Sistema Hospitalario Integrado — Módulo RBAC (tenant = hospital)" {
+  usecase "CU-01\nAsignar rol a usuario" as CU01
+  usecase "CU-02\nEjecutar operación protegida" as CU02
+  usecase "CU-03\nAutorizar operación" as CU03
+  usecase "CU-04\nDenegar operación\ncon trazabilidad" as CU04
+  usecase "CU-05\nRegistrar evento\nde auditoría" as CU05
+  usecase "CU-06\nConsultar denegaciones\nregistradas" as CU06
+}
+
+Admin --> CU01
+Clinico --> CU02
+Auditor --> CU06
+
+CU01 ..> CU03 : <<include>>\n(permiso roles.asignar)
+CU02 ..> CU03 : <<include>>
+CU04 ..> CU03 : <<extend>>\n[permiso no concedido,\nmembresía no vigente o\ntenant no coincide]
+CU01 ..> CU05 : <<include>>\n(ROL_ASIGNADO)
+CU04 ..> CU05 : <<include>>\n(ACCESO_DENEGADO)
+
+note bottom of CU04
+  Punto de extensión: «resultado de la decisión».
+  Respuesta HTTP 403 con correlation_id;
+  la decisión es fail-closed (ante duda, se deniega).
+end note
+@enduml
