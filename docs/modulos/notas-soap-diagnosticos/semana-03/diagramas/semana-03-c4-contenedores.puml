@@ -1,0 +1,26 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Semana 3 · C4 nivel 2 · Contenedores
+
+Person(medico, "Médico tratante", "Usa un cliente HTTP (curl, Postman o la interfaz del HIS).")
+
+System_Boundary(micro, "Micro-HIS Notas SOAP y diagnósticos") {
+    Container(api, "API HTTP", "PHP 8.2 · servidor embebido · public/index.php", "Front controller. Valida tenant y token, ejecuta los casos de uso y traduce errores a HTTP.")
+    ContainerDb(db, "Base de datos del micro-HIS", "PostgreSQL 15+ · database/schema.sql", "medical_records, care_episodes, care_assignments, clinical_notes, diagnoses, audit_events. Triggers: nota firmada inmutable, sin DELETE, auditoría append-only.")
+    Container(pruebas, "Suite de pruebas", "PHP CLI · tests/ejecutar.php", "44 pruebas: dominio, casos de uso, errores de persistencia con dobles, HTTP, arquitectura e integración.")
+    ContainerDb(sqlite, "Base de prueba", "SQLite en memoria", "Se crea y se destruye en cada prueba de integración.")
+}
+
+System_Ext(rbac, "Módulo 1 · Identidad y RBAC", "Token JWT con usuario, hospital y roles.")
+
+Rel(medico, api, "POST/GET /api/v1/notas-soap", "HTTP/JSON · X-Tenant-ID · Bearer")
+Rel(api, db, "Sentencias preparadas en una transacción", "PDO pdo_pgsql")
+Rel_L(api, rbac, "Identidad del token (simulada en semana 3)")
+Rel(pruebas, api, "Ejecuta el Kernel en proceso con dobles")
+Rel(pruebas, sqlite, "Mismos adaptadores PDO", "PDO pdo_sqlite")
+Rel(pruebas, db, "INT-06 opcional en un esquema temporal", "PDO pdo_pgsql")
+
+SHOW_LEGEND()
+@enduml

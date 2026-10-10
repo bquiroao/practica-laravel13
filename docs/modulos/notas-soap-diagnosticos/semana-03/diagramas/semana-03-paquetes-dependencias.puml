@@ -1,0 +1,70 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+skinparam package {
+    BorderColor #4A6FA5
+}
+skinparam note {
+    BackgroundColor #FFF8DC
+    BorderColor #C9A227
+}
+
+title Semana 3 · Paquetes y regla de dependencias\nPresentación → Aplicación → Dominio ← Persistencia
+
+package "bootstrap (raíz de composición)" as boot #F2F2F2 {
+    rectangle "contenedor.php\nconstruirKernel() · crearKernel()" as cont
+}
+
+package "NotasSoap\\Presentacion\\Http" as P #EAF2FB {
+    rectangle "Kernel\nNotasSoapController" as pctrl
+    rectangle "Solicitud · Respuesta\nIdentidad" as phttp
+    rectangle "«interface» Autenticador\nAutenticadorTokenDemo" as pauth
+}
+
+package "NotasSoap\\Aplicacion" as A #EAF7EA {
+    rectangle "CasosDeUso\nRegistrarNotaConDiagnostico\nFirmarNota · ConsultarNota" as acu
+    rectangle "Comandos · Resultados\nRegistrarNotaComando ...\nNotaResultado" as acmd
+    rectangle "Puertos «interface»\nTransaccion · Reloj\nGeneradorId" as apu
+}
+
+package "NotasSoap\\Dominio" as D #FFF6E5 {
+    rectangle "Modelo\nNotaSoap · SeccionesSoap\nDiagnostico · TipoDiagnostico\nUsuarioClinico" as dmod
+    rectangle "Puertos «interface»\nRepositorioNotas · RepositorioDiagnosticos\nRepositorioExpedientes · VerificadorAcceso\nRegistroAuditoria" as dpu
+    rectangle "Excepciones\nAccesoDenegado · ExpedienteNoDisponible\nNotaIncompleta · DiagnosticoInvalido\nNotaFirmada · NotaNoEncontrada\nErrorPersistencia" as dexc
+}
+
+package "NotasSoap\\Persistencia" as Per #F3ECF9 {
+    rectangle "Pdo\nRepositorioPdo (abstracta)\nPdoRepositorioNotas · PdoRepositorioDiagnosticos\nPdoRepositorioExpedientes · PdoVerificadorAcceso\nPdoRegistroAuditoria · FabricaConexion" as ppdo
+    rectangle "PdoTransaccion\nSistema: RelojSistema · GeneradorUuid" as ptx
+}
+
+pctrl ..> acu : «use» comandos
+pctrl ..> dexc : «use» excepción → HTTP
+acu ..> dmod : «use» crea entidades
+acu ..> dpu : «use»
+acu ..> apu : «use»
+ppdo ..|> dpu : «realize»
+ppdo ..> dmod : reconstruye
+ppdo ..> dexc : lanza ErrorPersistencia
+ptx ..|> apu : «realize»
+cont ..> pctrl : crea
+cont ..> acu : crea
+cont ..> ppdo : crea
+
+legend bottom left
+  <b>Reglas comprobadas por las pruebas ARQ</b>
+  ARQ-01 · Dominio no importa ninguna otra capa.
+  ARQ-02 · Aplicación solo depende de Dominio.
+  ARQ-03 · Presentación no conoce Persistencia ni los puertos de Dominio.
+  ARQ-04 · Persistencia implementa puertos; no conoce Presentación ni casos de uso.
+  ARQ-05 · PDO y SQL solo en Persistencia.  ARQ-06 · Solo prepare() + execute().
+  ARQ-07 · Dominio y Aplicación sin E/S (echo, header, getenv, $_SERVER).
+  ARQ-08 · Sin framework ni Composer.
+endlegend
+@enduml
