@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Rbac\Presentacion\Http;
 
-/** Una ruta protegida: método, patrón, permiso requerido y acción que la atiende. */
+/** Una ruta protegida: método, patrón, permiso requerido y método de controlador que la atiende. */
 final class Ruta
 {
+    /** @param \Closure(Peticion): Respuesta $destino método de controlador, p. ej. $controlador->crear(...) */
     public function __construct(
         public readonly string $metodo,
         public readonly string $patron,
         public readonly string $permiso,
-        public readonly Accion $accion,
+        public readonly \Closure $destino,
     ) {
     }
 

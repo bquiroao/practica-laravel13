@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Rbac\Presentacion\Http;
 
 use Rbac\Presentacion\Http\Autenticacion\Autenticador;
+use Rbac\Presentacion\Http\Vistas\ErrorVista;
 
 /**
  * Front controller: resuelve la ruta y aplica la cadena
- * tenant (400) → autenticación (401) → autorización (403) → acción.
+ * tenant (400) → autenticación (401) → autorización (403) → controlador.
  */
 final class Kernel
 {
@@ -31,27 +32,26 @@ final class Kernel
 
             // D-05 / E-05: sin hospital no se evalúan permisos.
             if ($solicitud->cabecera('X-Tenant-ID') === '') {
-                return Respuesta::json(400, ['mensaje' => 'La cabecera X-Tenant-ID es obligatoria.']);
+                return ErrorVista::sinTenant();
             }
 
             // D-06 / E-06: sin identidad no hay a quién autorizar.
             $identidad = $this->autenticador->autenticar($solicitud);
             if ($identidad === null) {
-                return Respuesta::json(401, ['mensaje' => 'Token inválido o expirado.']);
+                return ErrorVista::noAutenticado();
             }
 
             // CU-03 / CU-04: protección de la ruta por su permiso declarado.
             $autorizacion = $this->autorizacion->verificar($solicitud, $identidad, $ruta->permiso);
             if (!$autorizacion->permitido) {
-                return Respuesta::json(403, [
-                    'mensaje' => 'Acceso denegado.',
-                    'correlation_id' => $autorizacion->correlationId,
-                ]);
+                return ErrorVista::accesoDenegado($autorizacion->correlationId);
             }
 
-            return $ruta->accion->ejecutar($solicitud, $identidad, $parametros);
+            $respuesta = ($ruta->destino)(new Peticion($solicitud, $identidad, $parametros));
+
+            return $respuesta instanceof Respuesta ? $respuesta : ErrorVista::errorInterno();
         } catch (\Throwable) {
-            return Respuesta::json(500, ['mensaje' => 'Error interno.']);
+            return ErrorVista::errorInterno();
         }
     }
 
@@ -70,8 +70,6 @@ final class Kernel
             $metodoNoPermitido = true;
         }
 
-        return $metodoNoPermitido
-            ? Respuesta::json(405, ['mensaje' => 'Método no permitido.'])
-            : Respuesta::json(404, ['mensaje' => 'Ruta no encontrada.']);
+        return $metodoNoPermitido ? ErrorVista::metodoNoPermitido() : ErrorVista::rutaNoEncontrada();
     }
 }
