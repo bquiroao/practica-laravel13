@@ -1,0 +1,47 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo Notas SOAP y diagnósticos — Casos de uso\n«Registro de nota SOAP y asociación de diagnóstico clínico»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Médico tratante" as Medico
+actor "Enfermería\n(solo lectura)" as Enfermeria
+
+rectangle "Sistema Hospitalario Integrado — Módulo Notas SOAP y diagnósticos (tenant = hospital)" {
+  usecase "CU-01\nRegistrar nota SOAP" as CU01
+  usecase "CU-02\nAsociar diagnóstico\nCIE-10" as CU02
+  usecase "CU-03\nFirmar nota SOAP" as CU03
+  usecase "CU-04\nConsultar historial\nde notas" as CU04
+  usecase "CU-05\nVerificar acceso clínico" as CU05
+}
+
+Medico --> CU01
+Medico --> CU03
+Medico --> CU04
+Enfermeria --> CU04
+
+CU01 ..> CU02 : <<include>>\n(al menos un diagnóstico)
+CU01 ..> CU05 : <<include>>
+CU04 ..> CU05 : <<include>>
+CU03 ..> CU01 : <<extend>>
+
+note right of CU05
+  Tenant (X-Tenant-ID), token JWT,
+  rol permitido y, para escribir,
+  asignación activa del médico
+  al episodio de atención.
+end note
+
+note bottom of CU03
+  Extiende a CU-01 cuando el médico
+  decide firmar al terminar el registro.
+  Una nota firmada no se modifica.
+  Se corrige con una versión nueva
+  (supersedes_id + correction_reason).
+end note
+@enduml
