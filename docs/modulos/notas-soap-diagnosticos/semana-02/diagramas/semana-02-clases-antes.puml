@@ -1,0 +1,38 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title Notas SOAP — Diseño ANTES de aplicar SRP
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFF5F5
+  BorderColor #A33A34
+}
+
+class ServicioNotaSoap {
+  - bd : BaseDatosFalsa
+  + registrar(peticion : array) : array
+  --
+  .. responsabilidades mezcladas ..
+  1. leer token y tenant (HTTP)
+  2. revisar rol y asignación
+  3. revisar expediente
+  4. validar las 4 secciones
+  5. validar el CIE-10
+  6. guardar nota y diagnóstico
+  7. escribir la bitácora
+  8. armar la respuesta HTTP
+}
+
+class BaseDatosFalsa {
+  + tokens, asignaciones, expedientes,
+    episodios, notas, diagnosticos, bitacora
+}
+
+ServicioNotaSoap --> BaseDatosFalsa : usa directo\n(sin interfaz)
+
+note right of ServicioNotaSoap
+  8 razones para cambiar en una sola clase.
+  Defectos: guarda la nota antes de validar
+  el diagnóstico (nota huérfana), no usa
+  transacción y toma el autor del cuerpo.
+end note
+@enduml
