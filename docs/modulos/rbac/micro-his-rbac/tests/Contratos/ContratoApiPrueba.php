@@ -8,12 +8,6 @@ declare(strict_types=1);
  * estas pruebas fallan.
  */
 
-use Rbac\Presentacion\Http\Controladores\AsignacionRolControlador;
-use Rbac\Presentacion\Http\Controladores\AuditoriaControlador;
-use Rbac\Presentacion\Http\Controladores\AutorizacionControlador;
-use Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador;
-use Rbac\Presentacion\Http\Ruta;
-use Rbac\Presentacion\Http\Rutas;
 use Rbac\Pruebas\Dobles\Escenario;
 
 /**
@@ -52,16 +46,8 @@ function operacionesDelContrato(): array
 /** @return array<string, ?string> clave "METODO /ruta" => permiso, desde la tabla de rutas real */
 function operacionesDelCodigo(): array
 {
-    $e = new Escenario();
-    $rutas = Rutas::definir(
-        new AsignacionRolControlador($e->asignarRol),
-        new AuditoriaControlador($e->consultar),
-        new OperacionClinicaControlador(),
-        new AutorizacionControlador($e->autorizar),
-    );
-
     $operaciones = [];
-    foreach ($rutas as $ruta) {
+    foreach ((new Escenario())->rutas() as $ruta) {
         // '#^/api/v1/x/(?<id>[A-Za-z0-9-]{1,64})$#' → '/api/v1/x/{id}'
         $plantilla = preg_replace('/\(\?<(\w+)>[^)]*\)/', '{$1}', substr($ruta->patron, 2, -2));
         $operaciones[$ruta->metodo . ' ' . $plantilla] = $ruta->permiso;
@@ -110,6 +96,11 @@ prueba('API-03', 'Cada código HTTP que devuelve el servidor en escenarios reale
         ['GET', '/api/v1/auditoria/eventos/' . $cid, 'token-ana', Escenario::H_ORIENTE, null],
         ['POST', '/api/v1/prescripciones', 'token-marta', Escenario::H_ORIENTE, null],
         ['POST', '/api/v1/signos-vitales', 'token-ana', Escenario::H_ORIENTE, null],
+        // Semana 6 — cambio práctico «revocar rol»
+        ['POST', '/api/v1/roles/revocaciones', 'token-ana', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'medico', 'motivo' => 'Traslado a otro hospital']],
+        ['POST', '/api/v1/roles/revocaciones', 'token-admin-oriente', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'enfermeria', 'motivo' => 'Traslado a otro hospital']],
+        ['POST', '/api/v1/roles/revocaciones', 'token-admin-oriente', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'medico', 'motivo' => 'corto']],
+        ['POST', '/api/v1/roles/revocaciones', 'token-admin-oriente', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'medico', 'motivo' => 'Traslado a otro hospital']],
     ];
 
     $contrato = operacionesDelContrato();
@@ -123,6 +114,6 @@ prueba('API-03', 'Cada código HTTP que devuelve el servidor en escenarios reale
         }
         $vistos++;
     }
-    igual(15, $vistos, 'escenarios ejecutados');
+    igual(19, $vistos, 'escenarios ejecutados');
     afirmar($noDocumentados === [], 'códigos no documentados: ' . implode(', ', $noDocumentados));
 });
