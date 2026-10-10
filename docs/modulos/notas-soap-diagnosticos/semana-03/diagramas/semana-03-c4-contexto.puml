@@ -1,0 +1,23 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title Semana 3 · C4 nivel 1 · Contexto del Micro-HIS Notas SOAP y diagnósticos
+
+Person(medico, "Médico tratante", "Registra la nota SOAP, asocia el diagnóstico CIE-10 y firma (CU-01, CU-02, CU-03).")
+Person(lector, "Personal clínico autorizado", "Consulta la nota y sus diagnósticos (CU-04).")
+
+System(micro, "Micro-HIS Notas SOAP y diagnósticos", "PHP 8.2 vanilla + PostgreSQL propio. Registra nota + diagnóstico en una transacción, firma y consulta.")
+
+System_Ext(rbac, "Módulo 1 · Identidad y RBAC", "Emite el token con usuario, hospital y roles. En el micro-HIS se simula con AutenticadorTokenDemo.")
+System_Ext(expediente, "Módulos de expediente y episodios (HIS)", "Dueños de medical_records, care_episodes y care_assignments. El micro-HIS solo los lee; en semana 3 trae una copia reducida en su propia base.")
+System_Ext(his, "Sistema Hospitalario Integrado (Laravel 12)", "Destino final del módulo: tablas clinical_notes y diagnoses de la base HOSPITAL.")
+
+Rel(medico, micro, "Registra y firma notas", "HTTPS/JSON")
+Rel(lector, micro, "Consulta notas", "HTTPS/JSON")
+Rel(micro, rbac, "Valida token y obtiene roles", "Bearer token")
+Rel(micro, expediente, "Verifica expediente abierto y asignación activa (R-02, R-03)", "lectura")
+Rel_U(his, micro, "Reutilizará el dominio y los casos de uso (semanas 4-5)", "migración")
+
+SHOW_LEGEND()
+@enduml

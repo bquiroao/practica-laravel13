@@ -1,0 +1,69 @@
+@startuml semana-03-dinamica-registro
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign left
+autonumber "<b>V-00"
+
+title Semana 3 · Vista dinámica · POST /api/v1/notas-soap a través de las cuatro capas
+
+actor "Médico\n(dra-mendez)" as M
+box "Presentación" #EAF2FB
+    participant Kernel
+    participant "NotasSoapController" as C
+end box
+box "Aplicación" #EAF7EA
+    participant "RegistrarNotaConDiagnostico" as UC
+end box
+box "Dominio" #FFF6E5
+    participant "NotaSoap /\nSeccionesSoap" as N
+    participant Diagnostico as DX
+end box
+box "Persistencia" #F3ECF9
+    participant "PdoVerificadorAcceso" as VA
+    participant "PdoRepositorioExpedientes" as RE
+    participant "PdoTransaccion" as TX
+    participant "PdoRepositorioNotas\nPdoRepositorioDiagnosticos\nPdoRegistroAuditoria" as R
+end box
+database "PostgreSQL" as DB
+
+M -> Kernel : POST /api/v1/notas-soap\nX-Tenant-ID, Bearer, JSON
+Kernel -> Kernel : resolver ruta; X-Tenant-ID (400); token → Identidad (401)
+Kernel -> C : registrar(solicitud, identidad, hospital)
+C -> C : ¿cuerpo JSON con objeto "diagnostico"? (400)
+C -> UC : ejecutar(RegistrarNotaComando)
+UC -> UC : R-01 hospital del token = X-Tenant-ID
+UC -> VA : puedeEscribir(usuario, epi-100)
+VA -> DB : SELECT 1 FROM care_assignments WHERE ... (preparada)
+DB --> VA : 1 fila
+VA --> UC : true (si false → AccesoDenegado → 403)
+UC -> RE : estaDisponible(exp-carlos, epi-100)
+RE -> DB : SELECT 1 FROM medical_records JOIN care_episodes ...
+RE --> UC : true (si false → ExpedienteNoDisponible → 409)
+UC -> N : registrar(id, ..., SeccionesSoap(S, O, A, P))
+N --> UC : nota en borrador, versión 1 (si falta sección → NotaIncompleta → 422)
+UC -> DX : registrar(id, nota, "J18.9", ..., "primary")
+DX --> UC : diagnóstico (si formato inválido → DiagnosticoInvalido → 422)
+note over UC, DX : R-04 y R-05: todo se valida ANTES de abrir la transacción
+UC -> TX : ejecutar(trabajo)
+TX -> DB : BEGIN
+TX -> R : guardar(nota)
+R -> DB : INSERT INTO clinical_notes ... :contenido ...
+TX -> R : guardar(diagnóstico)
+R -> DB : INSERT INTO diagnoses ...
+TX -> R : registrar("NOTA_REGISTRADA", ...)
+R -> DB : INSERT INTO audit_events ...
+alt todo bien
+    TX -> DB : COMMIT
+    TX --> UC : ok
+    UC --> C : NotaResultado
+    C --> Kernel : Respuesta 201
+    Kernel --> M : 201 {clinical_note_id, status: "draft", diagnoses: [J18.9]}
+else PDOException en cualquier INSERT (R-06)
+    R --> TX : ErrorPersistencia(sqlState)
+    TX -> DB : ROLLBACK
+    TX --> UC : ErrorPersistencia
+    UC --> Kernel : ErrorPersistencia
+    Kernel --> M : 500 {code: "error_persistencia"} (sin SQL ni SQLSTATE)
+end
+@enduml

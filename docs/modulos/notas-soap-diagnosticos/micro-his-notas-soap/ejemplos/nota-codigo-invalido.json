@@ -1,0 +1,13 @@
+{
+    "medical_record_id": "exp-carlos",
+    "care_episode_id": "epi-100",
+    "subjetivo": "Tos productiva y fiebre de 3 días",
+    "objetivo": "T 38.6 °C, estertores en base derecha",
+    "analisis": "Probable neumonía adquirida en la comunidad",
+    "plan": "Radiografía de tórax y antibiótico",
+    "diagnostico": {
+        "code": "NEUMO",
+        "description": "Neumonía no especificada",
+        "type": "primary"
+    }
+}

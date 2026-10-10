@@ -1,0 +1,60 @@
+Micro-HIS Notas SOAP - prueba manual de la API contra PostgreSQL (16.15)
+Servidor: php -S 127.0.0.1:8080 -t public   (PHP 8.3.6)
+Fecha: 2026-10-10 11:41
+
+## 1. Registrar nota SOAP con diagnóstico (Dra. Méndez, asignada al episodio)
+$ curl -X POST /api/v1/notas-soap -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez' --data @ejemplos/nota.json
+{"clinical_note_id":"031fae73-49f7-46ce-9c6d-142dce57a73d","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"diagnoses":[{"id":"944c58ae-b20a-4edb-93aa-9a2881742102","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 201]
+
+## 2. Consultar la nota
+$ curl /api/v1/notas-soap/031fae73-49f7-46ce-9c6d-142dce57a73d -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez'
+{"clinical_note_id":"031fae73-49f7-46ce-9c6d-142dce57a73d","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"diagnoses":[{"id":"944c58ae-b20a-4edb-93aa-9a2881742102","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 200]
+
+## 3. Firmar la nota (solo el autor)
+$ curl -X POST /api/v1/notas-soap/031fae73-49f7-46ce-9c6d-142dce57a73d/firma -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez'
+{"clinical_note_id":"031fae73-49f7-46ce-9c6d-142dce57a73d","author_user_ref_id":"dra-mendez","status":"signed","version_no":1,"signed_at":"2026-10-10T11:41:46-06:00","diagnoses":[]}
+[HTTP 200]
+
+## 4. Firmar otra vez: la nota firmada no cambia (R-07)
+$ curl -X POST /api/v1/notas-soap/031fae73-49f7-46ce-9c6d-142dce57a73d/firma ... token-mendez
+{"error":{"code":"nota_firmada","message":"La nota ya está firmada y no se puede modificar."}}
+[HTTP 409]
+
+## 5. Médico no asignado al episodio (R-02)
+$ curl -X POST /api/v1/notas-soap ... -H 'Authorization: Bearer token-lopez' --data @ejemplos/nota.json
+{"error":{"code":"acceso_denegado","message":"No tiene permiso para escribir en este expediente."}}
+[HTTP 403]
+
+## 6. Sin cabecera X-Tenant-ID (R-01)
+$ curl -X POST /api/v1/notas-soap -H 'Authorization: Bearer token-mendez' --data @ejemplos/nota.json
+{"error":{"code":"tenant_requerido","message":"Falta la cabecera X-Tenant-ID."}}
+[HTTP 400]
+
+## 7. Código CIE-10 inválido (R-05)
+$ curl -X POST /api/v1/notas-soap ... --data @ejemplos/nota-codigo-invalido.json
+{"error":{"code":"diagnostico_invalido","message":"El código \"NEUMO\" no tiene formato CIE-10 (ejemplo: J18.9)."}}
+[HTTP 422]
+
+## 8. Estado de la base después de las pruebas (solo la petición 1 guardó datos)
+ note_type | status | version_no | firmada 
+-----------+--------+------------+---------
+ soap      | signed |          1 | t
+(1 row)
+
+ code  |  type   | status 
+-------+---------+--------
+ J18.9 | primary | active
+(1 row)
+
+      event      |   autor    
+-----------------+------------
+ NOTA_REGISTRADA | dra-mendez
+ NOTA_FIRMADA    | dra-mendez
+(2 rows)
+
+## 9. Intento de modificar la nota firmada directamente en SQL (trigger de la base)
+$ psql -c "UPDATE clinical_notes SET content = 'alterado'"
+ERROR:  clinical_notes_signed_immutable
+CONTEXT:  PL/pgSQL function notas_soap_proteger() line 7 at RAISE

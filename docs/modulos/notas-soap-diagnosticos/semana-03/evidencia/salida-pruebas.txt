@@ -1,0 +1,78 @@
+Micro-HIS Notas SOAP y diagnósticos - evidencia de pruebas (semana 3)
+Fecha: 2026-10-10 11:46
+
+=== Ejecución 1: sin PostgreSQL (dobles en memoria + SQLite en memoria) ===
+$ php tests/ejecutar.php
+Micro-HIS Notas SOAP - pruebas (PHP 8.3.6)
+
+== Reglas de dominio ==
+[PASA ] DOM-01   Una nota nueva nace en borrador, versión 1 y sin fecha de firma (R-07)
+[PASA ] DOM-02   Las cuatro secciones S, O, A y P son obligatorias (R-04, CA-07)
+[PASA ] DOM-03   El código CIE-10 debe tener formato válido (R-05, CA-08)
+[PASA ] DOM-04   El tipo de diagnóstico solo puede ser primary, secondary o differential (R-05, CA-09)
+[PASA ] DOM-05   El diagnóstico hereda nota, episodio y autor de la nota (R-05)
+[PASA ] DOM-06   Firmar cambia el estado y guarda la fecha sin mutar el original (R-07)
+[PASA ] DOM-07   Una nota firmada no se puede volver a firmar ni modificar (R-07, CA-11)
+[PASA ] DOM-08   Las secciones se guardan en un solo campo content y se reconstruyen igual
+
+== Casos de uso (camino feliz y rechazos) ==
+[PASA ] APP-01   Camino feliz: guarda la nota, su diagnóstico y el evento de auditoría (CU-01, CU-02, CA-01)
+[PASA ] APP-02   Médico sin asignación al episodio: 403 y no se guarda nada (R-02, CA-04)
+[PASA ] APP-03   Enfermería no puede registrar notas SOAP (R-02, CA-03)
+[PASA ] APP-04   Token de un hospital usado contra otro hospital: 403 (R-01, CA-05)
+[PASA ] APP-05   Expediente cerrado o episodio de otro paciente: no se registra (R-03, CA-06)
+[PASA ] APP-06   Regla de dominio en el caso de uso: sección vacía o CIE-10 inválido no tocan la base (R-04, R-05, CA-07, CA-08)
+[PASA ] APP-07   El autor firma su nota y queda evento NOTA_FIRMADA (CU-03, CA-11)
+[PASA ] APP-08   Otro médico no puede firmar; una nota firmada no se firma otra vez (R-07, CA-11)
+[PASA ] APP-09   Consultar devuelve la nota con sus diagnósticos (CU-04)
+
+== Errores de persistencia (dobles de PDO) ==
+[PASA ] PER-01   Si PDO falla, el repositorio lanza ErrorPersistencia con el SQLSTATE y no deja salir PDOException
+[PASA ] PER-02   Un fallo al verificar el acceso también se traduce a ErrorPersistencia
+[PASA ] PER-03   PdoTransaccion confirma si todo sale bien y revierte si el trabajo falla
+[PASA ] PER-04   Si el COMMIT falla, se revierte y se informa ErrorPersistencia
+[PASA ] PER-05   Error al guardar el diagnóstico: la nota tampoco queda guardada (R-06, CA-10)
+[PASA ] PER-06   Por HTTP el error de persistencia es 500 genérico, sin SQL ni SQLSTATE en la respuesta (RNF-03)
+
+== Presentación HTTP ==
+[PASA ] HTTP-01  POST /api/v1/notas-soap válido responde 201 con la nota en borrador
+[PASA ] HTTP-02  Sin X-Tenant-ID responde 400; sin token o con token desconocido responde 401 (CA-02)
+[PASA ] HTTP-03  Cada error de dominio se traduce a su código HTTP (403, 409, 422)
+[PASA ] HTTP-04  Cuerpo sin objeto diagnostico responde 400 cuerpo_invalido
+[PASA ] HTTP-05  Firmar y consultar por HTTP; firmar dos veces responde 409
+[PASA ] HTTP-06  Ruta inexistente 404, método equivocado 405 y error inesperado 500 sin detalles
+[PASA ] HTTP-07  El autor sale del token, no del cuerpo: enviar author_user_ref_id no cambia la autoría (RF-06, CA-12)
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de ninguna otra capa
+[PASA ] ARQ-02   Aplicación solo depende de Dominio
+[PASA ] ARQ-03   Presentación usa Aplicación y las excepciones de Dominio; nunca Persistencia ni puertos de Dominio
+[PASA ] ARQ-04   Persistencia implementa puertos y no conoce Presentación ni casos de uso
+[PASA ] ARQ-05   PDO y SQL solo aparecen en Persistencia
+[PASA ] ARQ-06   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL armado con variables
+[PASA ] ARQ-07   Dominio y Aplicación no hacen entrada/salida ni leen globales (echo, header, $_SERVER, archivos, getenv)
+[PASA ] ARQ-08   Sin framework: ningún archivo usa Illuminate, Symfony, Laminas ni vendor/autoload
+
+== Integración con base de prueba (SQLite en memoria y PostgreSQL opcional) ==
+[PASA ] INT-01   Camino feliz con PDO real: la nota, el diagnóstico y el evento quedan en la base
+[PASA ] INT-02   Las reglas de acceso y de expediente se leen de la base (care_assignments, medical_records)
+[PASA ] INT-03   Firmar y consultar contra la base; firmar dos veces responde 409
+[PASA ] INT-04   Error de persistencia real: si falla el INSERT del diagnóstico se revierte la nota (R-06)
+[PASA ] INT-05   La base también protege: no deja modificar una nota firmada ni borrar notas (defensa en profundidad)
+[OMITE] INT-06   PostgreSQL real (opcional): camino feliz y reversión con el esquema de database/schema.sql
+         -> defina NOTASSOAP_DB_DSN para probar contra PostgreSQL
+
+Total: 44  Pasan: 43  Fallan: 0  Omitidas: 1
+
+=== Ejecución 2: con PostgreSQL 16.15 (activa INT-06) ===
+$ NOTASSOAP_DB_DSN='pgsql:host=127.0.0.1;port=5433;dbname=micro_his_notas_soap' NOTASSOAP_DB_USUARIO=postgres NOTASSOAP_DB_CLAVE=*** php tests/ejecutar.php
+
+== Integración con base de prueba (SQLite en memoria y PostgreSQL opcional) ==
+[PASA ] INT-01   Camino feliz con PDO real: la nota, el diagnóstico y el evento quedan en la base
+[PASA ] INT-02   Las reglas de acceso y de expediente se leen de la base (care_assignments, medical_records)
+[PASA ] INT-03   Firmar y consultar contra la base; firmar dos veces responde 409
+[PASA ] INT-04   Error de persistencia real: si falla el INSERT del diagnóstico se revierte la nota (R-06)
+[PASA ] INT-05   La base también protege: no deja modificar una nota firmada ni borrar notas (defensa en profundidad)
+[PASA ] INT-06   PostgreSQL real (opcional): camino feliz y reversión con el esquema de database/schema.sql
+
+Total: 44  Pasan: 44  Fallan: 0  Omitidas: 0
