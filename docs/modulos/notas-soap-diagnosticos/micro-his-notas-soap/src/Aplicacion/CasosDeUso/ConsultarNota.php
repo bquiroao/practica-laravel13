@@ -26,10 +26,7 @@ final class ConsultarNota
             throw new AccesoDenegado('El token no corresponde a este hospital.');
         }
         $nota = $this->notas->buscar($c->notaId) ?? throw new NotaNoEncontrada('La nota no existe.');
-        $dx = array_map(static fn ($d): array => [
-            'id' => $d->id, 'code' => $d->codigo, 'description' => $d->descripcion, 'type' => $d->tipo->value,
-        ], $this->diagnosticos->deNota($nota->id));
 
-        return new NotaResultado($nota->id, $nota->autorId, $nota->estado, $nota->version, $nota->firmadaEn?->format(DATE_ATOM), $dx);
+        return NotaResultado::desde($nota, $this->diagnosticos->deNota($nota->id));
     }
 }

@@ -67,8 +67,6 @@ final class RegistrarNotaConDiagnostico
             $this->auditoria->registrar('NOTA_REGISTRADA', ['nota_id' => $nota->id, 'autor_id' => $usuario->id]);
         });
 
-        return new NotaResultado($nota->id, $nota->autorId, $nota->estado, $nota->version, null, [[
-            'id' => $diagnostico->id, 'code' => $diagnostico->codigo, 'description' => $diagnostico->descripcion, 'type' => $diagnostico->tipo->value,
-        ]]);
+        return NotaResultado::desde($nota, [$diagnostico]);
     }
 }
