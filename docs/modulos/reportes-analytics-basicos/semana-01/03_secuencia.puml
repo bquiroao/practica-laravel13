@@ -1,0 +1,72 @@
+@startuml m23_secuencia
+title M23 · Secuencia: cálculo y visualización trazable de un indicador
+skinparam shadowing false
+autonumber
+
+actor Usuario as U
+participant "Vista\n(Vue)" as V
+participant "ReportController" as C
+participant "Middleware\nauth + permiso" as MW
+participant "ReportRegistry" as R
+participant "Servicio del reporte\n(ej. OcupacionReportService)" as S
+database "Base HOSPITAL\n(módulos fuente)" as DB
+
+== 1 · Consultar indicador (CU-01 a CU-06) ==
+U -> V : abrir indicador y elegir filtros
+V -> C : GET /api/v1/reportes/{tipo}?desde&hasta&granularidad
+C -> MW : validar sesión y permiso (CU-05)
+alt Sin permiso
+  MW --> V : 403 "No tiene permiso"
+else Con permiso
+  C -> C : validar filtros (RN-02, RN-03)
+  alt Filtros inválidos
+    C --> V : 422 errores por campo
+  else Filtros válidos
+    C -> R : obtener servicio del {tipo}
+    R --> C : servicio del reporte
+    C -> S : calcular(filtros) (CU-03)
+    S -> DB : consultas de agregación (solo lectura)
+    DB --> S : datos agregados
+    alt Sin datos
+      C --> V : 200 {estado: "sin_datos"} (RN-06)
+    else Con datos
+      S -> S : valor, comparación y tendencia
+      opt Grupo con menos de 3 casos
+        S -> S : agrupar como "Otro" (CU-06, RN-04)
+      end
+      S -> S : armar trazabilidad (CU-04, RN-05)
+      S --> C : indicador + trazabilidad
+      C --> V : 200 {valor, comparacion, tendencia, trazabilidad}
+    end
+  end
+end
+V --> U : tarjetas, tendencia y ficha de trazabilidad
+
+== 2 · Desglosar indicador (CU-07) ==
+U -> V : "Desglosar por sala"
+V -> C : GET /api/v1/reportes/{tipo}/desglose?dimension=sala&desde&hasta
+C -> MW : validar sesión y permiso (CU-05)
+C -> S : desglosar(filtros, "sala")
+S -> DB : agregación agrupada por sala (mismos filtros, RN-08)
+DB --> S : valor por sala
+S -> S : verificar suma del desglose = valor del indicador (RN-07)
+S --> C : partes del desglose
+C --> V : 200 [{sala: "Medicina", valor: 90 %}, ...]
+V --> U : desglose por sala
+
+== 3 · Ver registros de origen (CU-08) ==
+U -> V : abrir la sala "Medicina"
+V -> C : GET /api/v1/reportes/{tipo}/registros?sala_id=3&desde&hasta
+C -> MW : validar sesión y permiso del detalle (CU-05)
+alt Sin permiso (ej. Médico fuera de sus citas)
+  MW --> V : 403 "No tiene permiso"
+else Con permiso
+  C -> S : registros(filtros, sala_id)
+  S -> DB : camas y estancias de la sala en el período
+  DB --> S : registros de origen
+  S -> S : dejar solo los datos mínimos (RN-09)
+  S --> C : registros
+  C --> V : 200 [{cama: "101", estado: "ocupada", desde: "08/10"}, ...]
+end
+V --> U : cada registro que forma la cifra
+@enduml

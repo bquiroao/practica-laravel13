@@ -1,0 +1,63 @@
+@startuml m23_actividad
+title M23 · Actividad: cálculo y visualización trazable de un indicador
+skinparam shadowing false
+
+|Usuario|
+start
+:Abrir un indicador (CU-01);
+:Elegir período, granularidad y filtros (CU-02);
+|Sistema|
+if (¿Sesión válida?) then (no)
+  :Responder 401;
+  end
+endif
+if (¿El rol tiene permiso para el indicador? (CU-05, RN-01)) then (no)
+  :Responder 403 "No tiene permiso";
+  end
+endif
+if (¿Filtros válidos? (RN-02, RN-03)) then (no)
+  :Responder 422 con el error de cada filtro;
+  |Usuario|
+  :Corregir los filtros;
+  end
+endif
+|Sistema|
+:Consultar datos de los módulos fuente (solo lectura) (CU-03);
+if (¿Hay datos en el período?) then (no)
+  :Responder "Sin datos" (RN-06);
+  |Usuario|
+  :Ver estado vacío;
+  stop
+endif
+|Sistema|
+:Calcular valor, comparación con el período anterior y tendencia;
+if (¿Algún grupo con menos de 3 casos?) then (sí)
+  :Agrupar como "Otro" en el gráfico (CU-06, RN-04);
+endif
+:Armar la ficha de trazabilidad: fórmula, período,\nfiltros, fuente y fecha del cálculo (CU-04, RN-05);
+:Responder 200 con el indicador y su trazabilidad;
+|Usuario|
+:Ver tarjetas, tendencia y ficha de trazabilidad;
+if (¿Desea desglosar el indicador?) then (sí)
+  :Elegir la dimensión (sala, médico, estado o día) (CU-07);
+  |Sistema|
+  :Calcular el desglose con los mismos filtros y permisos (RN-08);
+  :Verificar que la suma del desglose coincida con el valor (RN-07);
+  :Responder 200 con cada parte y su valor;
+  |Usuario|
+  :Ver el desglose;
+  if (¿Desea ver los registros de una parte?) then (sí)
+    :Abrir una parte, por ejemplo la sala Medicina (CU-08);
+    |Sistema|
+    if (¿El rol puede ver esos registros? (CU-05, RN-08)) then (no)
+      :Responder 403 "No tiene permiso";
+      end
+    endif
+    :Consultar los registros de origen de esa parte;
+    :Devolver solo los datos mínimos (RN-09);
+    |Usuario|
+    :Ver cada registro que forma la cifra;
+  endif
+endif
+stop
+@enduml
