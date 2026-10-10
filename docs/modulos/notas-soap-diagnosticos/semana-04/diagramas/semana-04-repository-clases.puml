@@ -1,0 +1,84 @@
+@startuml semana-04-repository-clases
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+title Semana 4 · Patrón Repository: interfaz en el límite del Dominio y dos adaptadores
+
+package "Aplicación" #EAF7EA {
+    class RegistrarNotaConDiagnostico
+    class FirmarNota
+    class ConsultarNota
+    interface BandejaSalida <<puerto>> {
+        +agregar(EventoClinico)
+    }
+    class RepositorioNotasConEventos <<decorador>> {
+        -interno: RepositorioNotas
+        -bandeja: BandejaSalida
+        +registrarFirma(NotaSoap)
+    }
+}
+
+package "Dominio" #FFF6E5 {
+    interface RepositorioNotas <<puerto>> {
+        +guardar(NotaSoap)
+        +buscar(id): ?NotaSoap
+        +registrarFirma(NotaSoap)
+    }
+    interface RepositorioDiagnosticos <<puerto>> {
+        +guardar(Diagnostico)
+        +deNota(notaId): list<Diagnostico>
+    }
+    class NotaSoap
+    class Diagnostico
+    class EventoClinico
+}
+
+package "Persistencia · Pdo" #F3ECF9 {
+    abstract class RepositorioPdo {
+        #ejecutar(sql, params)
+    }
+    class PdoRepositorioNotas
+    class PdoRepositorioDiagnosticos
+    class PdoBandejaSalida
+}
+
+package "Persistencia · EnMemoria" #F3ECF9 {
+    class RepositorioNotasEnMemoria
+    class RepositorioDiagnosticosEnMemoria
+    class BandejaSalidaEnMemoria
+}
+
+RegistrarNotaConDiagnostico .down.> RepositorioNotas
+RegistrarNotaConDiagnostico .down.> RepositorioDiagnosticos
+FirmarNota .down.> RepositorioNotas
+ConsultarNota .down.> RepositorioDiagnosticos
+RepositorioNotas .right.> NotaSoap
+RepositorioDiagnosticos .right.> Diagnostico
+
+PdoRepositorioNotas -down-|> RepositorioPdo
+PdoRepositorioDiagnosticos -down-|> RepositorioPdo
+PdoBandejaSalida -down-|> RepositorioPdo
+
+PdoRepositorioNotas .up.|> RepositorioNotas
+RepositorioNotasEnMemoria .up.|> RepositorioNotas
+RepositorioNotasConEventos .down.|> RepositorioNotas
+PdoRepositorioDiagnosticos .up.|> RepositorioDiagnosticos
+RepositorioDiagnosticosEnMemoria .up.|> RepositorioDiagnosticos
+PdoBandejaSalida .up.|> BandejaSalida
+BandejaSalidaEnMemoria .up.|> BandejaSalida
+
+RepositorioNotasConEventos o--> RepositorioNotas : envuelve
+RepositorioNotasConEventos --> BandejaSalida
+RepositorioNotasConEventos ..> EventoClinico : crea
+RepositorioDiagnosticosEnMemoria --> RepositorioNotasEnMemoria : imita la FK
+
+legend bottom
+  Los casos de uso solo conocen las interfaces (ARQ-12). Cada interfaz tiene un adaptador PDO y uno en memoria (ARQ-10).
+  Las pruebas REP-01 a REP-06 corren iguales contra los dos adaptadores. El decorador agrega la bandeja de salida
+  sin tocar los casos de uso ni los adaptadores. Cuál se usa lo decide bootstrap/contenedor.php.
+endlegend
+@enduml
