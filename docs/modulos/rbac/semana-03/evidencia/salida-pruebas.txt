@@ -1,0 +1,49 @@
+Micro-HIS RBAC - pruebas (PHP 8.4.26)
+
+== Reglas de dominio ==
+[PASA ] DOM-01   Membresía vigente solo si está activa y dentro de [desde, hasta)
+[PASA ] DOM-02   Política de autorización: la primera regla que falla define el motivo
+[PASA ] DOM-03   Fail-closed: sin reglas o con una regla que lanza excepción se deniega
+[PASA ] DOM-04   Reglas de asignación: autoasignación, vigencia, rol y usuario destino
+
+== Casos de uso (camino feliz y denegación) ==
+[PASA ] APP-01   Camino feliz: asignar rol crea la membresía y registra ROL_ASIGNADO (201)
+[PASA ] APP-02   Camino feliz: operación permitida por el rol vigente, sin eventos
+[PASA ] APP-03   Denegación trazable: 403 + correlation_id + ACCESO_DENEGADO completo; el resultado no expone el motivo
+[PASA ] APP-04   Asignar sin «roles.asignar»: 403, ACCESO_DENEGADO y ninguna membresía nueva
+[PASA ] APP-05   Reglas de dominio desde el caso de uso: duplicado 409, autoasignación 422, usuario inactivo 422
+[PASA ] APP-06   Consultar evento: solo desde el mismo hospital (aislamiento por tenant)
+
+== Errores de persistencia (dobles) ==
+[PASA ] PER-01   Adaptador PDO: una PDOException (08006) se traduce a ErrorPersistencia sin perder la causa
+[PASA ] PER-02   Adaptador PDO: violación de unicidad (23505) se traduce a MembresiaDuplicada
+[PASA ] PER-03   Todos los adaptadores PDO traducen sus fallas a ErrorPersistencia
+[PASA ] PER-04   PdoTransaccion: COMMIT si todo sale bien; ROLLBACK si el trabajo o el COMMIT fallan
+[PASA ] PER-05   AsignarRol con escritura fallida: 500 y sin ROL_ASIGNADO
+[PASA ] PER-06   AsignarRol con bitácora caída: la transacción se revierte (500, sin membresía nueva)
+[PASA ] PER-07   Carrera entre dos solicitudes: la base rechaza el duplicado y el caso de uso responde 409
+[PASA ] PER-08   Autorizar con la base caída: fail-closed (403) y evento con motivo ERROR_EVALUACION
+[PASA ] PER-09   Bitácora principal caída: el evento va al respaldo en archivo y la operación sigue denegada
+[PASA ] PER-10   Capas completas sobre PDO caído: Aplicación + adaptadores PDO reales → 403 y evento en el respaldo
+
+== Presentación HTTP ==
+[PASA ] HTTP-01  Camino feliz HTTP: POST asignaciones con token de administrador → 201 + correlation_id
+[PASA ] HTTP-02  Cadena del Kernel: 404 ruta, 405 método, 400 sin tenant, 401 sin token o token inválido
+[PASA ] HTTP-03  Ruta protegida denegada: 403 solo con mensaje genérico y correlation_id (sin motivo ni rol)
+[PASA ] HTTP-04  Ruta protegida permitida: la médica crea una prescripción (201)
+[PASA ] HTTP-05  Validación de entrada en la acción: datos faltantes o fechas inválidas → 422 DATOS_INVALIDOS
+[PASA ] HTTP-06  Consulta de auditoría: admin del mismo hospital 200; admin de otro hospital 404; enfermera 403
+[PASA ] HTTP-07  Token de un hospital con X-Tenant-ID de otro → 403
+[PASA ] HTTP-08  Error inesperado en una acción → 500 genérico, sin traza ni detalles
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia
+[PASA ] ARQ-02   PDO y SQL solo existen en la capa de Persistencia
+[PASA ] ARQ-03   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL concatenado
+[PASA ] ARQ-04   El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP
+
+== Integración con PostgreSQL ==
+[OMITE] INT-00   Integración PostgreSQL (asignación, denegación, 23505, append-only, rollback)
+         -> defina MICROHIS_DB_DSN para ejecutarla
+
+Total: 33  Pasan: 32  Fallan: 0  Omitidas: 1

@@ -1,0 +1,51 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+title UML · Paquetes y regla de dependencias del Micro-HIS RBAC
+skinparam packageStyle rectangle
+skinparam package {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+top to bottom direction
+
+package "Presentacion\\Http" as Pres {
+  [Kernel] as K
+  [TablaRutas · Ruta] as R
+  [MiddlewareAutorizacion] as MW
+  [Acciones] as AC
+  [Autenticador] as AU
+}
+
+package "Aplicacion" as Apl {
+  [CasosDeUso] as UC
+  [Comandos · Resultados] as CR
+  [Puertos\\Transaccion] as TX
+}
+
+package "Dominio" as Dom #E8F5E9 {
+  [Modelo · Excepciones] as MO
+  [Servicios (Políticas)] as POL
+  [Reglas] as RE
+  [Puertos\\Repositorios] as PR
+}
+
+package "Persistencia" as Per #FDECEC {
+  [Pdo\\Adaptadores] as PDO
+  [Pdo\\PdoTransaccion] as PTX
+  [Archivo\\RegistroAuditoriaArchivo] as ARC
+}
+
+Pres -down-> Apl : «use»
+Apl -down-> Dom : «use»
+Per -left-> Dom : «implementa» Repositorios
+Per -up-> Apl : «implementa» Transaccion
+
+legend bottom
+  | Capa | Puede depender de | Verificado por |
+  | Presentación | Aplicación | ARQ-01 |
+  | Aplicación | Dominio | ARQ-01 |
+  | Dominio | (ninguna) — sin PDO, SQL ni E/S | ARQ-01, ARQ-02, ARQ-04 |
+  | Persistencia | Dominio, Aplicación (implementa sus puertos) | ARQ-01, ARQ-03 |
+  | bootstrap/contenedor.php | todas (raíz de composición: solo crea y conecta) | — |
+endlegend
+@enduml

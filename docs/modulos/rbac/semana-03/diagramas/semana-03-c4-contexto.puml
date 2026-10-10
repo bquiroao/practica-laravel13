@@ -1,0 +1,25 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS RBAC
+
+Person(admin, "Administrador de hospital", "Asigna roles a los usuarios de su hospital.")
+Person(clinico, "Usuario clínico", "Médico, enfermería o laboratorio; ejecuta operaciones protegidas.")
+Person(auditor, "Auditor / Super administrador", "Consulta denegaciones por correlation_id.")
+
+System(rbac, "Micro-HIS RBAC", "PHP 8.2+ vanilla. Asigna roles, autoriza operaciones por permiso y deja trazabilidad de cada denegación.")
+
+System_Ext(identidad, "Proveedor de identidad", "Módulo de usuarios del HIS (JWT). En el micro-HIS se reemplaza por tokens de demostración.")
+System_Ext(clinicos, "Módulos clínicos del HIS", "Prescripciones, signos vitales, laboratorio. Consumen la autorización.")
+System_Ext(gobernanza, "Módulo de gobernanza y auditoría", "Interfaz de consulta y filtros de la bitácora.")
+
+Rel(admin, rbac, "Asigna roles", "HTTPS/JSON")
+Rel(clinico, rbac, "Solicita operaciones protegidas", "HTTPS/JSON")
+Rel(auditor, rbac, "Consulta eventos", "HTTPS/JSON")
+Rel(rbac, identidad, "Obtiene la identidad del token", "Bearer token")
+Rel(clinicos, rbac, "Delegan la decisión de acceso", "por permiso")
+Rel(gobernanza, rbac, "Lee eventos de auditoría", "correlation_id")
+
+SHOW_LEGEND()
+@enduml
