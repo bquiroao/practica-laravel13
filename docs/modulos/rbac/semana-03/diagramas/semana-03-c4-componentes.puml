@@ -1,0 +1,62 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes de la Aplicación PHP
+
+Container(cliente, "Cliente HTTP", "curl / SPA")
+ContainerDb(db, "Base de datos RBAC", "PostgreSQL")
+Container(respaldo, "Bitácora de respaldo", "JSON Lines")
+
+Container_Boundary(app, "Aplicación PHP") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "Front controller", "Resuelve la ruta y aplica: tenant 400 → autenticación 401 → autorización 403 → acción.")
+        Component(rutas, "TablaRutas", "Ruta[]", "Cada ruta declara el permiso que la protege.")
+        Component(autent, "Autenticador", "interfaz + AutenticadorTokenDemo", "Token → Identidad.")
+        Component(mw, "MiddlewareAutorizacion", "", "Protege la ruta pidiendo AutorizarOperacion.")
+        Component(acciones, "Acciones", "AsignarRolAccion, ConsultarDenegacionAccion, OperacionClinicaDemoAccion", "Validan formato y traducen HTTP ↔ caso de uso.")
+    }
+    Boundary(apl, "Aplicación") {
+        Component(ucAut, "AutorizarOperacion", "Caso de uso", "CU-03/CU-04: decide y deja trazabilidad.")
+        Component(ucAsig, "AsignarRol", "Caso de uso", "CU-01: autoriza, valida y guarda en una transacción.")
+        Component(ucCons, "ConsultarEventoAuditoria", "Caso de uso", "CU-06: busca por correlation_id dentro del tenant.")
+        Component(ptx, "Transaccion", "Puerto", "Atomicidad membresía + evento.")
+    }
+    Boundary(dom, "Dominio") {
+        Component(polAut, "PoliticaAutorizacion", "Servicio de dominio", "Recorre ReglaAutorizacion[] (OCP), fail-closed.")
+        Component(polAsig, "PoliticaAsignacion", "Servicio de dominio", "Recorre ReglaAsignacion[].")
+        Component(reglas, "Reglas", "Estrategias", "TenantCoincide, MembresiaVigente, RolConcedePermiso, NoAutoasignacion, ...")
+        Component(puertos, "Puertos de repositorio", "Interfaces", "RepositorioMembresias, CatalogoPermisos, DirectorioUsuarios, RegistroAuditoria.")
+    }
+    Boundary(per, "Persistencia") {
+        Component(pdo, "Adaptadores PDO", "PdoRepositorioMembresias, PdoCatalogoPermisos, PdoDirectorioUsuarios, PdoRegistroAuditoria", "Sentencias preparadas; PDOException → ErrorPersistencia.")
+        Component(pdotx, "PdoTransaccion", "", "BEGIN / COMMIT / ROLLBACK.")
+        Component(arch, "RegistroAuditoriaArchivo", "", "Respaldo append-only.")
+    }
+}
+
+Rel(cliente, kernel, "HTTP/JSON")
+Rel(kernel, rutas, "resuelve")
+Rel(kernel, autent, "autentica")
+Rel(kernel, mw, "autoriza")
+Rel(kernel, acciones, "despacha")
+Rel(mw, ucAut, "ComandoAutorizar")
+Rel(acciones, ucAsig, "ComandoAsignarRol")
+Rel(acciones, ucCons, "correlation_id")
+Rel(ucAsig, ucAut, "roles.asignar")
+Rel(ucAut, polAut, "evalúa")
+Rel(ucAsig, polAsig, "evalúa")
+Rel(ucAsig, ptx, "usa")
+Rel(polAut, reglas, "usa")
+Rel(polAsig, reglas, "usa")
+Rel(ucAut, puertos, "usa")
+Rel(ucCons, puertos, "usa")
+Rel(pdo, puertos, "implementa")
+Rel(arch, puertos, "implementa")
+Rel(pdotx, ptx, "implementa")
+Rel(pdo, db, "SQL preparado")
+Rel(pdotx, db, "transacción")
+Rel(arch, respaldo, "append")
+
+SHOW_LEGEND()
+@enduml

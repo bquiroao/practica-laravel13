@@ -1,0 +1,24 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS RBAC
+
+Person(usuario, "Usuario del HIS", "Administrador, clínico o auditor.")
+System_Ext(identidad, "Proveedor de identidad", "JWT (simulado con tokens demo).")
+
+System_Boundary(rbac, "Micro-HIS RBAC") {
+    Container(cliente, "Cliente HTTP", "curl / SPA Vue", "Envía Authorization: Bearer y X-Tenant-ID.")
+    Container(app, "Aplicación PHP", "PHP 8.2+ vanilla, servidor embebido", "Front controller public/index.php. Cuatro capas: Presentación, Aplicación, Dominio y Persistencia.")
+    ContainerDb(db, "Base de datos RBAC", "PostgreSQL 15+", "hospitales, usuarios, roles, permisos, rol_permiso, membresias, eventos_auditoria (append-only).")
+    Container(respaldo, "Bitácora de respaldo", "Archivo JSON Lines", "var/auditoria-respaldo.jsonl. Se usa solo si la bitácora principal falla.")
+}
+
+Rel(usuario, cliente, "Usa")
+Rel(cliente, app, "Peticiones REST", "HTTP/JSON")
+Rel(app, identidad, "Valida el token", "Bearer")
+Rel(app, db, "Lee y escribe", "PDO pdo_pgsql, sentencias preparadas")
+Rel(app, respaldo, "Agrega eventos si la base falla", "file_put_contents LOCK_EX")
+
+SHOW_LEGEND()
+@enduml

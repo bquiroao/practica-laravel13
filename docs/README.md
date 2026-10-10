@@ -10,6 +10,7 @@ docs/
 └── modulos/
     └── rbac/                        ← un directorio por módulo
         ├── README.md                ← índice del módulo y entregas por semana
+        ├── micro-his-rbac/          ← código que evoluciona entre semanas (desde la semana 3)
         └── semana-01/               ← un directorio por entrega semanal
             ├── semana-01-<tema>.md  ← documento principal de la entrega
             ├── DECLARACION_IA.md    ← declaración de uso de IA
