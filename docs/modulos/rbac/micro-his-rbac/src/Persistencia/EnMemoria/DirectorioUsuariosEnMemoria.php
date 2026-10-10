@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Rbac\Pruebas\Dobles;
+namespace Rbac\Persistencia\EnMemoria;
 
 use Rbac\Dominio\Puertos\DirectorioUsuarios;
 

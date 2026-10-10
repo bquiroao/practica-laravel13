@@ -2,24 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Rbac\Pruebas\Dobles;
+namespace Rbac\Persistencia\EnMemoria;
 
-use Rbac\Dominio\Excepciones\ErrorPersistencia;
 use Rbac\Dominio\Modelo\EventoAuditoria;
 use Rbac\Dominio\Puertos\RegistroAuditoria;
 
-final class RegistroAuditoriaEnMemoria implements RegistroAuditoria
+/** Bitácora append-only en memoria: no ofrece ninguna forma de editar ni borrar eventos. */
+final class RegistroAuditoriaEnMemoria implements RegistroAuditoria, Restaurable
 {
-    public bool $fallar = false;
-
     /** @var list<EventoAuditoria> */
     private array $eventos = [];
 
     public function registrar(EventoAuditoria $evento): void
     {
-        if ($this->fallar) {
-            throw new ErrorPersistencia('Bitácora simulada no disponible', '08006');
-        }
         $this->eventos[] = $evento;
     }
 
@@ -40,9 +35,13 @@ final class RegistroAuditoriaEnMemoria implements RegistroAuditoria
         return $this->eventos;
     }
 
-    /** @return list<EventoAuditoria> */
-    public function eventosDeTipo(string $tipo): array
+    public function instantanea(): mixed
     {
-        return array_values(array_filter($this->eventos, static fn (EventoAuditoria $e): bool => $e->tipo === $tipo));
+        return $this->eventos;
+    }
+
+    public function restaurar(mixed $instantanea): void
+    {
+        $this->eventos = $instantanea;
     }
 }

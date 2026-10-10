@@ -1,0 +1,96 @@
+@startuml semana-04-mvc
+!pragma layout smetana
+title MVC en la capa de Presentación del Micro-HIS RBAC
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Entrada (Front Controller)" #FFF8E1 {
+  class Kernel {
+    + manejar(Solicitud) : Respuesta
+    - resolver(Solicitud)
+  }
+  class Rutas {
+    + {static} definir(...) : list<Ruta>
+  }
+  class Ruta {
+    + metodo, patron, permiso
+    + destino : Closure(Peticion): Respuesta
+  }
+  class MiddlewareAutorizacion {
+    + verificar(Solicitud, Identidad, permiso) : ResultadoAutorizacion
+  }
+  interface Autenticador
+}
+
+package "C — Controladores" #E3F2FD {
+  class AsignacionRolControlador {
+    + crear(Peticion) : Respuesta
+  }
+  class AuditoriaControlador {
+    + mostrar(Peticion) : Respuesta
+  }
+  class OperacionClinicaControlador {
+    + prescribir(Peticion) : Respuesta
+    + registrarSignosVitales(Peticion) : Respuesta
+  }
+}
+
+package "Formularios (entrada)" #E3F2FD {
+  class FormularioAsignacion {
+    + {static} aComando(Peticion) : ComandoAsignarRol
+  }
+  class DatosInvalidos
+}
+
+package "V — Vistas" #E8F5E9 {
+  class AsignacionVista {
+    + {static} resultado(ResultadoAsignacion) : Respuesta
+  }
+  class EventoAuditoriaVista {
+    + {static} evento(?array) : Respuesta
+  }
+  class ErrorVista {
+    + {static} accesoDenegado(correlationId)
+    + {static} datosInvalidos(campos)
+    + {static} ... 400/401/404/405/500/503
+  }
+  class OperacionVista
+}
+
+package "M — Modelo (Aplicación + Dominio)" #FDECEC {
+  class AsignarRol <<caso de uso>>
+  class ConsultarEventoAuditoria <<caso de uso>>
+  class AutorizarOperacion <<caso de uso>>
+}
+
+Kernel --> Rutas : tabla
+Kernel --> Ruta
+Kernel --> Autenticador : 401
+Kernel --> MiddlewareAutorizacion : 403
+Kernel ..> ErrorVista : 400/401/403/404/405/500
+MiddlewareAutorizacion --> AutorizarOperacion
+Ruta ..> AsignacionRolControlador : destino
+Ruta ..> AuditoriaControlador : destino
+Ruta ..> OperacionClinicaControlador : destino
+
+AsignacionRolControlador --> AsignarRol
+AsignacionRolControlador ..> FormularioAsignacion
+AsignacionRolControlador ..> AsignacionVista
+AsignacionRolControlador ..> ErrorVista : 422
+FormularioAsignacion ..> DatosInvalidos : lanza
+AuditoriaControlador --> ConsultarEventoAuditoria
+AuditoriaControlador ..> EventoAuditoriaVista
+OperacionClinicaControlador ..> OperacionVista
+
+note bottom of AsignacionRolControlador
+  3 líneas útiles: formulario → caso de uso → vista.
+  Sin SQL, sin reglas de negocio, sin «new» (ARQ-05).
+end note
+note bottom of ErrorVista
+  Solo las Vistas llaman a Respuesta::json (ARQ-07).
+end note
+@enduml

@@ -112,7 +112,7 @@ prueba('ARQ-03', 'Persistencia usa solo sentencias preparadas: sin query()/exec(
     afirmar($violaciones === [], implode(', ', $violaciones));
 });
 
-prueba('ARQ-04', 'El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP', function (): void {
+prueba('ARQ-04','El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP', function (): void {
     $violaciones = [];
     foreach (fuentesDeCapa('Dominio') as $archivo => $codigo) {
         if (preg_match('/\$_(SERVER|GET|POST|REQUEST)|file_(put|get)_contents|\bheader\s*\(|\becho\b|http_response_code/', sinComentarios($codigo)) === 1) {
@@ -120,4 +120,75 @@ prueba('ARQ-04', 'El Dominio no hace E/S: ni superglobales, ni archivos, ni sali
         }
     }
     afirmar($violaciones === [], 'E/S en el dominio: ' . implode(', ', $violaciones));
+});
+
+/** @return list<class-string> clases e interfaces definidas en src/, cargadas por el autoload */
+function clasesDelProyecto(): array
+{
+    $clases = [];
+    foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
+        foreach (array_keys(fuentesDeCapa($capa)) as $archivo) {
+            $clase = 'Rbac\\' . str_replace('/', '\\', substr($archivo, 0, -4));
+            if (class_exists($clase) || interface_exists($clase)) {
+                $clases[] = $clase;
+            }
+        }
+    }
+
+    return $clases;
+}
+
+prueba('ARQ-05', 'Controladores MVC: solo reciben casos de uso, no crean objetos, sin SQL ni códigos de reglas de negocio', function (): void {
+    $violaciones = [];
+    foreach (fuentesDeCapa('Presentacion') as $archivo => $codigo) {
+        if (!str_contains($archivo, '/Controladores/')) {
+            continue;
+        }
+        $limpio = sinComentarios($codigo);
+        if (preg_match('/\bnew\s+[\\\\A-Za-z]/', $limpio) === 1) {
+            $violaciones[] = "$archivo crea objetos con new";
+        }
+        if (preg_match("/'(active|inactive|revoked|admin_hospital|medico|enfermeria|laboratorio|roles\\.asignar|PERMISO_NO_ASIGNADO|ASIGNACION_DUPLICADA|AUTOASIGNACION)'/", $limpio) === 1) {
+            $violaciones[] = "$archivo contiene códigos de reglas de negocio";
+        }
+        $clase = 'Rbac\\' . str_replace('/', '\\', substr($archivo, 0, -4));
+        foreach ((new ReflectionClass($clase))->getConstructor()?->getParameters() ?? [] as $parametro) {
+            $tipo = (string) $parametro->getType();
+            if (!str_starts_with($tipo, 'Rbac\\Aplicacion\\CasosDeUso\\')) {
+                $violaciones[] = "$archivo recibe $tipo (solo se admiten casos de uso)";
+            }
+        }
+    }
+    afirmar($violaciones === [], implode('; ', $violaciones));
+});
+
+prueba('ARQ-06', 'Patrón Repository: cada puerto tiene un adaptador PDO y uno InMemory en Persistencia', function (): void {
+    $clases = clasesDelProyecto();
+    $puertos = array_filter($clases, static fn (string $c): bool => interface_exists($c)
+        && (str_starts_with($c, 'Rbac\\Dominio\\Puertos\\') || str_starts_with($c, 'Rbac\\Aplicacion\\Puertos\\')));
+    afirmar(count($puertos) === 5, 'se esperaban 5 puertos, hay ' . count($puertos));
+
+    $faltantes = [];
+    foreach ($puertos as $puerto) {
+        $adaptadores = array_filter($clases, static fn (string $c): bool => class_exists($c) && is_subclass_of($c, $puerto)
+            && str_starts_with($c, 'Rbac\\Persistencia\\'));
+        foreach (['Pdo', 'EnMemoria'] as $tecnologia) {
+            $hay = array_filter($adaptadores, static fn (string $c): bool => str_starts_with($c, "Rbac\\Persistencia\\$tecnologia\\"));
+            if ($hay === []) {
+                $faltantes[] = "$puerto sin adaptador $tecnologia";
+            }
+        }
+    }
+    afirmar($faltantes === [], implode('; ', $faltantes));
+});
+
+prueba('ARQ-07', 'MVC: solo las Vistas dan formato a la respuesta (Respuesta::json fuera de Vistas está prohibido)', function (): void {
+    $violaciones = [];
+    foreach (fuentesDeCapa('Presentacion') as $archivo => $codigo) {
+        if (!str_contains($archivo, '/Vistas/') && !str_ends_with($archivo, '/Respuesta.php')
+            && str_contains(sinComentarios($codigo), 'Respuesta::json(')) {
+            $violaciones[] = $archivo;
+        }
+    }
+    afirmar($violaciones === [], 'formato de respuesta fuera de las vistas: ' . implode(', ', $violaciones));
 });

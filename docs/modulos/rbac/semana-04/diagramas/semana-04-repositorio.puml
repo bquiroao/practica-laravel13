@@ -1,0 +1,69 @@
+@startuml semana-04-repositorio
+!pragma layout smetana
+title Patrón Repository: interfaces en el límite del Dominio, adaptadores PDO e InMemory en Persistencia
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam nodesep 14
+skinparam ranksep 70
+
+package "Puertos (interfaces) — Dominio\\Puertos y Aplicacion\\Puertos" #E8F5E9 {
+  interface RepositorioMembresias {
+    + membresiasDe(usuario, hospital)
+    + existeActiva(usuario, hospital, rol)
+    + guardar(Membresia)
+  }
+  interface CatalogoPermisos {
+    + existeRol(rol)
+    + rolConcede(rol, permiso)
+  }
+  interface DirectorioUsuarios {
+    + estadoDe(usuario)
+  }
+  interface RegistroAuditoria {
+    + registrar(EventoAuditoria)
+    + buscarPorCorrelacion(id)
+  }
+  interface Transaccion {
+    + ejecutar(Closure)
+  }
+}
+
+package "Persistencia\\Pdo  (PostgreSQL, sentencias preparadas)" #FDECEC {
+  class PdoRepositorioMembresias
+  class PdoCatalogoPermisos
+  class PdoDirectorioUsuarios
+  class PdoRegistroAuditoria
+  class PdoTransaccion
+}
+
+package "Persistencia\\EnMemoria  (datos semilla, sin base)" #E3F2FD {
+  class RepositorioMembresiasEnMemoria
+  class CatalogoPermisosEnMemoria
+  class DirectorioUsuariosEnMemoria
+  class RegistroAuditoriaEnMemoria
+  class TransaccionEnMemoria
+}
+
+PdoRepositorioMembresias .up.|> RepositorioMembresias
+PdoCatalogoPermisos .up.|> CatalogoPermisos
+PdoDirectorioUsuarios .up.|> DirectorioUsuarios
+PdoRegistroAuditoria .up.|> RegistroAuditoria
+PdoTransaccion .up.|> Transaccion
+
+RepositorioMembresiasEnMemoria .up.|> RepositorioMembresias
+CatalogoPermisosEnMemoria .up.|> CatalogoPermisos
+DirectorioUsuariosEnMemoria .up.|> DirectorioUsuarios
+RegistroAuditoriaEnMemoria .up.|> RegistroAuditoria
+TransaccionEnMemoria .up.|> Transaccion
+
+PdoTransaccion -[hidden]right- RepositorioMembresiasEnMemoria
+
+legend bottom
+  | Objeto reutilizable | Rol |
+  | RepositorioPdo (base de los Pdo*) | prepare + execute; PDOException → ErrorPersistencia |
+  | FabricaPdo / FabricaEnMemoria | crean un ConjuntoAdaptadores coherente (misma conexión / mismos almacenes) |
+  | Restaurable + TransaccionEnMemoria | ROLLBACK en memoria |
+  | *ConFallas (tests) | decoradores que inyectan fallas sobre el adaptador InMemory real |
+  bootstrap elige PDO o InMemory con MICROHIS_PERSISTENCIA. Misma suite de contrato para ambos (CON-MEM / CON-PDO).
+endlegend
+@enduml
