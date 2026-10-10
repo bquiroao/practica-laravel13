@@ -15,8 +15,9 @@ $grupos = [
     'Dominio' => 'Reglas de dominio',
     'Aplicacion' => 'Casos de uso (camino feliz y denegación)',
     'Persistencia' => 'Errores de persistencia (dobles)',
-    'Contratos' => 'Contrato del patrón Repository (InMemory y PDO)',
-    'Presentacion' => 'Presentación MVC y HTTP',
+    'Contratos' => 'Contratos: Repository (InMemory y PDO) y API (OpenAPI)',
+    'Presentacion' => 'Presentación MVC, HTTP y observabilidad',
+    'Cliente' => 'Cliente-servidor: librería cliente y resiliencia',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL',
 ];

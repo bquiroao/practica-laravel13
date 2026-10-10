@@ -35,6 +35,8 @@ final class Escenario
     public AsignarRol $asignarRol;
     public ConsultarEventoAuditoria $consultar;
     public Kernel $kernel;
+    /** @var list<array<string, mixed>> registros de acceso que emite el Kernel (observabilidad) */
+    public array $accesos = [];
     private int $contador = 0;
 
     public function __construct()
@@ -64,7 +66,15 @@ final class Escenario
             'token-admin-norte' => ['admin-02', self::H_NORTE],
             'token-ana' => ['ana', self::H_ORIENTE],
             'token-marta' => ['marta', self::H_ORIENTE],
-        ]));
+        ]), function (array $registro): void {
+            $this->accesos[] = $registro;
+        });
+    }
+
+    /** @return array<string, mixed> casos de uso para armar otros kernels en pruebas */
+    public function casos(): array
+    {
+        return ['autorizar' => $this->autorizar, 'asignarRol' => $this->asignarRol, 'consultar' => $this->consultar];
     }
 
     /** @return array<string, mixed> */
