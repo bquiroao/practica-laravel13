@@ -1,0 +1,93 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title Diseño DESPUÉS de OCP — reglas como extensiones de una abstracción
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam nodesep 25
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Servicios (cerrados a modificación)" {
+  class Autorizador {
+    - reglas : list<ReglaAutorizacion>
+    + autorizar(SolicitudAutorizacion) : Decision
+    - denegar(solicitud, motivo) : Decision
+  }
+  class ServicioAsignacionRol {
+    - reglas : list<ReglaAsignacion>
+    + asignar(SolicitudAsignacion) : ResultadoAsignacion
+  }
+}
+
+package "Contratos (abstracciones)" {
+  interface ReglaAutorizacion {
+    + evaluar(ContextoAutorizacion) : ?string
+  }
+  interface ReglaAsignacion {
+    + evaluar(SolicitudAsignacion) : ?ErrorAsignacion
+  }
+  interface RepositorioMembresias
+  interface RegistroAuditoria
+  interface CatalogoPermisos
+  interface DirectorioUsuarios
+  interface Transaccion
+}
+
+package "Reglas de autorización (extensiones)" {
+  class ReglaTenantCoincide
+  class ReglaMembresiaVigente
+  class ReglaRolConcedePermiso
+}
+
+package "Reglas de asignación (extensiones)" {
+  class ReglaUsuarioDestinoActivo
+  class ReglaRolEnCatalogo
+  class ReglaNoAutoasignacion
+  class ReglaSinMembresiaDuplicada
+}
+
+package "Extensión nueva (semana 2)" #E8F5E9 {
+  class ReglaRedHospitalaria <<nueva>> {
+    - permisosSensibles : list<string>
+    - redPermitida : string
+    + evaluar(ContextoAutorizacion) : ?string
+  }
+}
+
+class "composicion.php\n(raíz de composición)" as Composicion
+
+Autorizador o--> "1..*" ReglaAutorizacion
+Autorizador --> RepositorioMembresias
+Autorizador --> "2" RegistroAuditoria : principal\n+ respaldo
+ServicioAsignacionRol --> Autorizador : roles.asignar
+ServicioAsignacionRol o--> "1..*" ReglaAsignacion
+
+ReglaTenantCoincide ..|> ReglaAutorizacion
+ReglaMembresiaVigente ..|> ReglaAutorizacion
+ReglaRolConcedePermiso ..|> ReglaAutorizacion
+ReglaRedHospitalaria ..|> ReglaAutorizacion
+
+ReglaUsuarioDestinoActivo ..|> ReglaAsignacion
+ReglaRolEnCatalogo ..|> ReglaAsignacion
+ReglaNoAutoasignacion ..|> ReglaAsignacion
+ReglaSinMembresiaDuplicada ..|> ReglaAsignacion
+
+Composicion ..> Autorizador : crea e inyecta reglas
+Composicion ..> ReglaRedHospitalaria : + 1 línea
+
+note as N2
+  Dependencias omitidas por claridad:
+  • las reglas usan CatalogoPermisos,
+    DirectorioUsuarios y RepositorioMembresias;
+  • ServicioAsignacionRol usa RepositorioMembresias,
+    RegistroAuditoria y Transaccion.
+end note
+
+note bottom of ReglaRedHospitalaria
+  Requerimiento nuevo = clase nueva + 1 línea en composicion.php.
+  Autorizador.php: 0 líneas modificadas.
+end note
+@enduml
