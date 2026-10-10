@@ -29,3 +29,4 @@ docs/
 | Módulo | Carpeta |
 |---|---|
 | RBAC: roles, permisos y protección de rutas | [`modulos/rbac`](modulos/rbac/README.md) |
+| Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
