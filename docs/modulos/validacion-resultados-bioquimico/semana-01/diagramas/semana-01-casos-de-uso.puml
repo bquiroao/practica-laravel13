@@ -1,0 +1,41 @@
+@startuml
+title Módulo de laboratorio — Casos de uso\n«Revisión, validación o rechazo de un resultado por bioquímico»
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Bioquímico/a\nvalidador/a" as Bio
+actor "Personal de laboratorio\nautorizado para captura" as Lab
+
+rectangle "HIS — Validación de resultados" {
+  usecase "CU-01\nConsultar y revisar\nresultado pendiente" as UC01
+  usecase "CU-02\nValidar resultado" as UC02
+  usecase "CU-03\nRechazar resultado\ncon motivo" as UC03
+  usecase "Verificar autorización,\nhospital y versión vigente\n[R-01, R-02]" as UC04
+  usecase "Registrar decisión,\nautoría y fecha/hora\n[R-04, R-05, R-06]" as UC05
+  usecase "Conservar resultado y\ndejar rechazo para seguimiento\n[R-06, R-07]" as UC06
+}
+
+Bio --> UC01
+Bio --> UC02
+Bio --> UC03
+Lab --> UC06 : recibe para\nseguimiento
+
+UC01 ..> UC04 : <<include>>
+UC02 ..> UC04 : <<include>>
+UC03 ..> UC04 : <<include>>
+UC02 ..> UC05 : <<include>>
+UC03 ..> UC05 : <<include>>
+UC03 ..> UC06 : <<include>>
+
+note bottom of UC03
+  Rechazar exige motivo no vacío.
+  No elimina ni modifica el valor revisado.
+end note
+
+note bottom of UC02
+  La versión validada queda inmutable.
+  Los criterios clínicos dependen de la prueba
+  y del procedimiento institucional.
+end note
+@enduml
