@@ -196,13 +196,7 @@ prueba('ARQ-07', 'MVC: solo las Vistas dan formato a la respuesta (Respuesta::js
 });
 
 prueba('ARQ-08', 'Toda ruta exige un permiso, salvo el endpoint de decisión (que ES la autorización)', function (): void {
-    $e = new \Rbac\Pruebas\Dobles\Escenario();
-    $rutas = \Rbac\Presentacion\Http\Rutas::definir(
-        new \Rbac\Presentacion\Http\Controladores\AsignacionRolControlador($e->asignarRol),
-        new \Rbac\Presentacion\Http\Controladores\AuditoriaControlador($e->consultar),
-        new \Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador(),
-        new \Rbac\Presentacion\Http\Controladores\AutorizacionControlador($e->autorizar),
-    );
+    $rutas = (new \Rbac\Pruebas\Dobles\Escenario())->rutas();
     $sinPermiso = array_values(array_map(
         static fn (\Rbac\Presentacion\Http\Ruta $r): string => $r->metodo . ' ' . $r->patron,
         array_filter($rutas, static fn (\Rbac\Presentacion\Http\Ruta $r): bool => $r->permiso === null),

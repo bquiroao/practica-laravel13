@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS RBAC — API de roles, permisos y autorización
-  version: 1.0.0
+  version: 1.1.0
   summary: Asignación de roles, decisión de autorización y consulta de denegaciones trazables.
   description: |
     Contrato del módulo RBAC del Sistema Hospitalario Integrado (HIS).
@@ -29,7 +29,7 @@ security:
   - tokenPortador: []
 tags:
   - name: Roles
-    description: Asignación de roles (CU-01).
+    description: Asignación (CU-01) y revocación (CU-07, semana 6) de roles.
   - name: Autorización
     description: Punto de decisión de políticas para otros módulos (CU-02, CU-03).
   - name: Auditoría
@@ -90,6 +90,63 @@ paths:
                 codigo: ASIGNACION_DUPLICADA
         '422':
           description: Formato inválido (DATOS_INVALIDOS) o regla de negocio (ROL_INVALIDO, AUTOASIGNACION, USUARIO_INACTIVO, VIGENCIA_INVALIDA).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/ErrorCodigo'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/roles/revocaciones:
+    post:
+      operationId: revocarRol
+      tags: [Roles]
+      summary: Revoca un rol activo de un usuario del hospital del token (semana 6).
+      description: |
+        Marca como revocadas las membresías activas y no vencidas del rol y registra
+        ROL_REVOCADO con el motivo en la misma transacción. Desde ese momento las
+        decisiones de autorización del usuario para ese rol son DENEGADO (MEMBRESIA_NO_VIGENTE).
+      x-permiso: roles.revocar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudRevocacion'
+            example:
+              usuario_id: ana
+              rol: enfermeria
+              motivo: Traslado a otro hospital de la red
+      responses:
+        '200':
+          description: Rol revocado; la revocación y el evento ROL_REVOCADO se guardaron en una transacción.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevocacionRealizada'
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/AccesoDenegado'
+        '404':
+          description: El usuario no tiene una membresía activa y vigente de ese rol.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCodigo'
+              example:
+                codigo: MEMBRESIA_NO_ENCONTRADA
+        '422':
+          description: Formato inválido (DATOS_INVALIDOS) o regla de negocio (AUTORREVOCACION, MOTIVO_INSUFICIENTE).
           content:
             application/json:
               schema:
@@ -322,6 +379,30 @@ components:
           const: ROL_ASIGNADO
         correlation_id:
           type: string
+    SolicitudRevocacion:
+      type: object
+      required: [usuario_id, rol, motivo]
+      additionalProperties: false
+      properties:
+        usuario_id:
+          type: string
+          minLength: 1
+        rol:
+          type: string
+          minLength: 1
+        motivo:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: Justificación auditable (mínimo 10 caracteres; regla de dominio).
+    RevocacionRealizada:
+      type: object
+      required: [codigo, correlation_id]
+      properties:
+        codigo:
+          const: ROL_REVOCADO
+        correlation_id:
+          type: string
     SolicitudDecision:
       type: object
       required: [permiso, recurso]
@@ -352,7 +433,7 @@ components:
           type: string
         tipo:
           type: string
-          enum: [ROL_ASIGNADO, ACCESO_DENEGADO]
+          enum: [ROL_ASIGNADO, ROL_REVOCADO, ACCESO_DENEGADO]
         actor:
           type: string
         hospital:

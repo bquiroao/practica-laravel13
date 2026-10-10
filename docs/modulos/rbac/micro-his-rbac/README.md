@@ -7,6 +7,7 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 | 3 | Cuatro capas, PDO con sentencias preparadas, pruebas por capa y de arquitectura |
 | 4 | Entrada con **MVC** (controladores, formularios, vistas); patrón **Repository** con adaptadores **PDO e InMemory**; suite de contrato |
 | 5 | **Cliente-servidor**: contrato **OpenAPI 3.1**, endpoint de decisión (PDP), librería **cliente** con resiliencia, observabilidad (`X-Request-ID`) y medición de la frontera de microservicio |
+| 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
 
 ## Estructura
 
@@ -97,6 +98,7 @@ Contrato completo en [`api/openapi.yaml`](api/openapi.yaml). Toda respuesta incl
 | Método | Ruta | Permiso | Controlador |
 |---|---|---|---|
 | POST | `/api/v1/roles/asignaciones` | `roles.asignar` | `AsignacionRolControlador::crear` |
+| POST | `/api/v1/roles/revocaciones` | `roles.revocar` | `RevocacionRolControlador::crear` |
 | GET | `/api/v1/auditoria/eventos/{correlationId}` | `auditoria.consultar` | `AuditoriaControlador::mostrar` |
 | POST | `/api/v1/autorizaciones/decisiones` | — (solo autenticación) | `AutorizacionControlador::decidir` (PDP) |
 | POST | `/api/v1/prescripciones` | `prescripciones.crear` | `OperacionClinicaControlador::prescribir` (demo) |
