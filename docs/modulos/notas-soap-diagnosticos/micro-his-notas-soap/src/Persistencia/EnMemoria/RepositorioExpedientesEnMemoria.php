@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NotasSoap\Pruebas\Dobles;
+namespace NotasSoap\Persistencia\EnMemoria;
 
 use NotasSoap\Dominio\Puertos\RepositorioExpedientes;
 
@@ -10,7 +10,7 @@ final class RepositorioExpedientesEnMemoria implements RepositorioExpedientes
 {
     /**
      * @param array<string, array{paciente: string, abierto: bool}> $expedientes
-     * @param array<string, string> $episodios
+     * @param array<string, string> $episodios episodio => paciente
      */
     public function __construct(private readonly array $expedientes, private readonly array $episodios)
     {

@@ -56,6 +56,20 @@ CREATE TABLE audit_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Bandeja de salida (patrón outbox) hacia el repositorio compartido CENTRAL (semana 4).
+-- Se escribe en la MISMA transacción que la firma; un publicador aparte la envía a central_inbox_messages
+-- y llena published_at. payload_minimal lleva solo identificadores, nunca el texto de la nota.
+CREATE TABLE outbox_events (
+    event_id        text PRIMARY KEY,
+    event_type      text NOT NULL CHECK (btrim(event_type) <> ''),
+    aggregate_id    text NOT NULL,
+    payload_minimal jsonb NOT NULL CHECK (jsonb_typeof(payload_minimal) = 'object'),
+    occurred_at     timestamptz NOT NULL,
+    published_at    timestamptz,
+    attempts        integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
+);
+CREATE INDEX outbox_events_pendientes_index ON outbox_events (occurred_at) WHERE published_at IS NULL;
+
 -- R-07: una nota firmada no cambia. R-08: notas, diagnósticos y eventos no se borran.
 CREATE FUNCTION notas_soap_proteger() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN

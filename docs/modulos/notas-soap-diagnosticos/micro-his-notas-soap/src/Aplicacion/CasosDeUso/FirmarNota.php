@@ -11,6 +11,7 @@ use NotasSoap\Aplicacion\Resultados\NotaResultado;
 use NotasSoap\Dominio\Excepciones\AccesoDenegado;
 use NotasSoap\Dominio\Excepciones\NotaNoEncontrada;
 use NotasSoap\Dominio\Puertos\RegistroAuditoria;
+use NotasSoap\Dominio\Puertos\RepositorioDiagnosticos;
 use NotasSoap\Dominio\Puertos\RepositorioNotas;
 
 /** CU-03: solo el autor firma; una nota firmada no cambia (la regla vive en NotaSoap). */
@@ -18,6 +19,7 @@ final class FirmarNota
 {
     public function __construct(
         private readonly RepositorioNotas $notas,
+        private readonly RepositorioDiagnosticos $diagnosticos,
         private readonly RegistroAuditoria $auditoria,
         private readonly Transaccion $transaccion,
         private readonly Reloj $reloj,
@@ -40,6 +42,6 @@ final class FirmarNota
             $this->auditoria->registrar('NOTA_FIRMADA', ['nota_id' => $firmada->id, 'autor_id' => $c->usuarioId]);
         });
 
-        return new NotaResultado($firmada->id, $firmada->autorId, $firmada->estado, $firmada->version, $firmada->firmadaEn?->format(DATE_ATOM), []);
+        return NotaResultado::desde($firmada, $this->diagnosticos->deNota($firmada->id));
     }
 }

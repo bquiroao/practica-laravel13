@@ -2,18 +2,24 @@
 
 declare(strict_types=1);
 
-namespace NotasSoap\Pruebas\Dobles;
+namespace NotasSoap\Persistencia\EnMemoria;
 
 use NotasSoap\Dominio\Puertos\RegistroAuditoria;
 
 final class RegistroAuditoriaEnMemoria implements RegistroAuditoria, Restaurable
 {
     /** @var list<array{evento: string, datos: array<string, string>}> */
-    public array $eventos = [];
+    private array $eventos = [];
 
     public function registrar(string $evento, array $datos): void
     {
         $this->eventos[] = ['evento' => $evento, 'datos' => $datos];
+    }
+
+    /** @return list<array{evento: string, datos: array<string, string>}> */
+    public function eventos(): array
+    {
+        return $this->eventos;
     }
 
     public function instantanea(): array

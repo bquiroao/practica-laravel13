@@ -41,4 +41,12 @@ final class Solicitud
     {
         return trim($this->cabeceras[strtolower($nombre)] ?? '');
     }
+
+    /** El navegador pide HTML (Accept: text/html); curl, Postman y el frontend piden JSON. */
+    public function aceptaHtml(): bool
+    {
+        $accept = strtolower($this->cabecera('Accept'));
+
+        return str_contains($accept, 'text/html') && !str_contains($accept, 'application/json');
+    }
 }

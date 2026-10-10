@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace NotasSoap\Pruebas\Dobles;
+namespace NotasSoap\Persistencia\EnMemoria;
 
 use NotasSoap\Aplicacion\Puertos\Transaccion;
 
-/** Simula BEGIN/COMMIT/ROLLBACK sobre los dobles en memoria. */
+/** BEGIN / COMMIT / ROLLBACK sobre los almacenes en memoria: si el trabajo falla, todos vuelven a su foto. */
 final class TransaccionEnMemoria implements Transaccion
 {
     /** @param list<Restaurable> $participantes */
@@ -16,12 +16,12 @@ final class TransaccionEnMemoria implements Transaccion
 
     public function ejecutar(callable $trabajo): mixed
     {
-        $estados = array_map(static fn (Restaurable $r): array => $r->instantanea(), $this->participantes);
+        $fotos = array_map(static fn (Restaurable $r): array => $r->instantanea(), $this->participantes);
         try {
             return $trabajo();
         } catch (\Throwable $e) {
-            foreach ($this->participantes as $i => $p) {
-                $p->restaurar($estados[$i]);
+            foreach ($this->participantes as $i => $participante) {
+                $participante->restaurar($fotos[$i]);
             }
             throw $e;
         }

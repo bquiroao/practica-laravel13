@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use NotasSoap\Pruebas\Dobles\Escenario;
+use NotasSoap\Pruebas\Dobles\VerificadorAccesoQueExplota;
 
 prueba('HTTP-01', 'POST /api/v1/notas-soap válido responde 201 con la nota en borrador', function (): void {
     $r = (new Escenario())->kernel->manejar(Escenario::peticion());
@@ -46,8 +47,7 @@ prueba('HTTP-06', 'Ruta inexistente 404, método equivocado 405 y error inespera
     $e = new Escenario();
     igual(404, $e->kernel->manejar(Escenario::peticion([], [], 'GET', '/api/v1/otra'))->estado, 'ruta');
     igual(405, $e->kernel->manejar(Escenario::peticion([], [], 'DELETE'))->estado, 'método');
-    $e->acceso->explotar = true;
-    $r = $e->kernel->manejar(Escenario::peticion());
+    $r = (new Escenario(acceso: new VerificadorAccesoQueExplota()))->kernel->manejar(Escenario::peticion());
     igual([500, 'error_interno'], [$r->estado, $r->cuerpo['error']['code']], 'inesperado');
     afirmar(!str_contains((string) json_encode($r->cuerpo), 'care_assignments'), 'no expone el mensaje interno');
 });
@@ -57,4 +57,34 @@ prueba('HTTP-07', 'El autor sale del token, no del cuerpo: enviar author_user_re
     $r = $e->kernel->manejar(Escenario::peticion(['author_user_ref_id' => 'dr-lopez']));
     igual([201, 'dra-mendez'], [$r->estado, $r->cuerpo['author_user_ref_id']], 'autor en la respuesta');
     igual('dra-mendez', $e->notas->buscar($r->cuerpo['clinical_note_id'])?->autorId, 'autor guardado');
+});
+
+prueba('HTTP-08', 'MVC: la misma acción con Accept: text/html usa la vista HTML (mismo controlador, mismo modelo)', function (): void {
+    $k = (new Escenario())->kernel;
+    $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    $r = $k->manejar(Escenario::peticion([], ['accept' => 'text/html'], 'GET', "/api/v1/notas-soap/$id"));
+    afirmar($r->esHtml(), 'debe ser HTML');
+    igual(200, $r->estado, 'estado');
+    foreach (['<h1>Nota SOAP</h1>', 'Borrador', 'J18.9', 'Probable neumonía adquirida en la comunidad'] as $texto) {
+        afirmar(str_contains((string) $r->html, $texto), "el HTML debe contener: $texto");
+    }
+    $json = $k->manejar(Escenario::peticion([], [], 'GET', "/api/v1/notas-soap/$id"));
+    afirmar(!$json->esHtml() && $json->cuerpo['soap']['plan'] === 'Radiografía de tórax y antibiótico', 'sin Accept sigue siendo JSON');
+});
+
+prueba('HTTP-09', 'La vista HTML escapa lo que escribió el usuario: un <script> en una sección se muestra como texto', function (): void {
+    $k = (new Escenario())->kernel;
+    $id = $k->manejar(Escenario::peticion(['subjetivo' => '<script>alert(1)</script> dolor']))->cuerpo['clinical_note_id'];
+    $html = (string) $k->manejar(Escenario::peticion([], ['accept' => 'text/html'], 'GET', "/api/v1/notas-soap/$id"))->html;
+    afirmar(!str_contains($html, '<script>'), 'no debe haber etiqueta script sin escapar');
+    afirmar(str_contains($html, '&lt;script&gt;alert(1)&lt;/script&gt; dolor'), 'debe aparecer escapado');
+});
+
+prueba('HTTP-10', 'Entrada: un campo que no es texto es error de formato (400); los errores también salen en HTML si se pide', function (): void {
+    $k = (new Escenario())->kernel;
+    $r = $k->manejar(Escenario::peticion(['plan' => ['no', 'es', 'texto']]));
+    igual([400, 'cuerpo_invalido'], [$r->estado, $r->cuerpo['error']['code']], 'formato');
+    afirmar(str_contains($r->cuerpo['error']['message'], '"plan"'), 'el mensaje nombra el campo');
+    $h = $k->manejar(Escenario::peticion([], ['accept' => 'text/html', 'authorization' => 'Bearer token-lopez']));
+    afirmar($h->esHtml() && $h->estado === 403 && str_contains((string) $h->html, 'acceso_denegado'), 'error 403 en HTML');
 });
