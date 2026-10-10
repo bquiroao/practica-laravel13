@@ -1,0 +1,59 @@
+@startuml semana-01-actividad
+title Emisión de orden desde el expediente y seguimiento de estado\nActividad
+skinparam shadowing false
+
+start
+:A-01: Abrir expediente y episodio;
+:A-02: Solicitar pruebas de laboratorio;
+:A-03: Validar identidad, hospital y permiso (R-01);
+if (D-01: ¿Actor autorizado?) then (Sí)
+  :A-04: Verificar paciente y episodio (R-02);
+  if (D-02: ¿Contexto consistente?) then (Sí)
+    :A-05: Consultar pruebas vigentes del catálogo (R-03; no administrar catálogo, R-06);
+    :A-06: Seleccionar una o más pruebas;
+    if (D-03: ¿Selección completa y vigente? (R-03)) then (Sí)
+      :A-07: Preparar orden y partidas;
+      :A-08: Guardar la orden como unidad (R-04);
+      if (D-04: ¿Persistencia confirmada?) then (Sí)
+        :A-09: Mostrar identificador y estado inicial confirmado;
+      else (No)
+        :E-04: Informar falla sin confirmar emisión;
+      endif
+    else (No)
+      :E-03: Solicitar corregir la selección;
+    endif
+  else (No)
+    :E-02: Solicitar corregir el paciente o episodio;
+  endif
+else (No)
+  :E-01: Denegar acceso sin exponer datos;
+endif
+
+if (D-05: ¿Consultar seguimiento? (R-05)) then (Sí)
+  :A-10: Solicitar órdenes del contexto autorizado;
+  if (D-06: ¿Consulta disponible?) then (Sí)
+    if (D-07: ¿Hay órdenes?) then (Sí)
+      :A-11: Mostrar estado más reciente persistido (R-05);
+    else (No)
+      :A-12: Mostrar estado vacío;
+    endif
+  else (No)
+    :E-05: Informar que no se pudo actualizar el seguimiento;
+  endif
+endif
+
+if (D-08: ¿Llega una actualización autorizada del laboratorio?) then (Sí)
+  :A-13: Validar referencia y transición admitida (R-05);
+  if (D-09: ¿Actualización válida?) then (Sí)
+  :A-14: Persistir estado para seguimiento;
+  if (D-10: ¿Persistencia confirmada?) then (Sí)
+    :A-15: Confirmar estado actualizado;
+  else (No)
+    :E-07: Informar que el estado no fue actualizado;
+  endif
+  else (No)
+  :E-06: Rechazar y registrar actualización no válida;
+  endif
+endif
+stop
+@enduml
