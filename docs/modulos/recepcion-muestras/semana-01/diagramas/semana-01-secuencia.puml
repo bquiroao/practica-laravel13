@@ -1,0 +1,71 @@
+@startuml semana-01-secuencia
+title Módulo de laboratorio — Secuencia\n«Recepción, identificación inequívoca y rechazo controlado de muestra»
+autonumber "<b>S-00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Técnico/a de laboratorio\n(recepción)" as Tecnico
+boundary "Interfaz de recepción" as UI
+control "Servicio de recepción" as Servicio
+database "Órdenes y exámenes\n(lab_order / lab_order_item)" as Ordenes
+database "Registro de muestras\n(specimen)" as Muestras
+participant "Servicio de etiquetas" as Etiqueta
+
+== Recepción y validaciones [CU-01] ==
+Tecnico -> UI : S-01 Iniciar recepción e ingresar referencias
+UI -> Servicio : S-02 solicitarRecepción(orden, paciente, examen, muestra)
+Servicio -> Ordenes : S-03 buscarOrdenYExamen(orden, examen) [R-01]
+Ordenes --> Servicio : S-04 orden/examen / sin coincidencia
+
+alt Servicio de órdenes no disponible [D-01, E-01]
+  Servicio --> UI : S-05 error temporal; recepción pendiente
+  UI --> Tecnico : S-06 informar que no se confirmó aceptación
+else Orden o examen no identificables [D-02, E-02]
+  Servicio --> UI : S-07 solicitar corrección; no aceptar la muestra
+  UI --> Tecnico : S-08 informar que la recepción queda pendiente
+else Orden y examen encontrados [R-01]
+  Servicio -> Servicio : S-09 comparar paciente, orden y muestra [D-03, R-02]
+  Servicio --> UI : S-10 solicitar resultado de inspección física [R-03]
+  UI --> Tecnico : S-11 presentar criterios aplicables al examen
+  Tecnico -> UI : S-12 informar identificación e integridad observadas
+  UI -> Servicio : S-13 validar correspondencia y criterios
+
+  alt Discordancia o no conformidad confirmada [CU-02, R-05]
+    Servicio --> UI : S-14 solicitar motivo de rechazo
+    UI --> Tecnico : S-15 presentar captura del motivo
+    Tecnico -> UI : S-16 confirmar motivo y observación
+    UI -> Servicio : S-17 registrarRechazo(muestra, motivo)
+    Servicio -> Muestras : S-18 guardar rechazo y motivo
+    Muestras --> Servicio : S-19 resultado de persistencia [D-07]
+    alt Rechazo guardado
+      Servicio -> Muestras : S-20 conservar actor, fecha/hora y referencia [R-07]
+      Servicio --> UI : S-21 rechazo registrado
+      UI --> Tecnico : S-22 mostrar confirmación; no indicar procesamiento
+    else Error al guardar [E-04]
+      Servicio --> UI : S-23 error; no confirmar éxito [R-08]
+      UI --> Tecnico : S-24 informar que el rechazo no quedó registrado
+    end
+  else Muestra conforme [D-04]
+    Servicio -> Muestras : S-25 generar y reservar código irrepetible [R-04]
+    Muestras --> Servicio : S-26 código reservado / colisión [D-05]
+    alt Código reservado
+      Servicio -> Etiqueta : S-27 emitirEtiqueta(código de muestra)
+      Etiqueta --> Servicio : S-28 etiqueta emitida / error [D-06]
+      alt Etiqueta emitida
+        Servicio -> Muestras : S-29 guardar recepción aceptada [R-06]
+        Muestras --> Servicio : S-30 recepción persistida
+        Servicio -> Muestras : S-31 conservar actor, fecha/hora y referencia [R-07]
+        Servicio --> UI : S-32 recepción aceptada e identificador
+        UI --> Tecnico : S-33 mostrar confirmación y código
+      else Falla de impresión [E-03]
+        Servicio -> Muestras : S-34 dejar recepción pendiente [R-06]
+        Servicio --> UI : S-35 informar fallo y no confirmar aceptación
+        UI --> Tecnico : S-36 indicar resolución antes de reintentar
+      end
+    else Colisión o falla al reservar [E-03]
+      Servicio --> UI : S-37 informar fallo; mantener pendiente [R-06]
+      UI --> Tecnico : S-38 no mostrar confirmación de aceptación
+    end
+  end
+end
+@enduml

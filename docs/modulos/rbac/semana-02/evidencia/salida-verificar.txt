@@ -1,0 +1,22 @@
+RBAC semana 2 - verificacion OCP (PHP 8.4.26)
+------------------------------------------------------------------------------
+[PASA] CA-01   Asignación válida crea membresía activa y registra ROL_ASIGNADO (201)
+[PASA] CA-02   Usuario sin «roles.asignar» recibe 403 y se registra ACCESO_DENEGADO
+[PASA] CA-03   Autoasignación de rol se rechaza (422)
+[PASA] CA-04   Usuario destino inexistente (404) o inactivo (422)
+[PASA] CA-05   Rol que no existe en el catálogo se rechaza (422)
+[PASA] CA-06   Membresía activa duplicada se rechaza (409)
+[PASA] CA-07   Si la bitácora falla, la asignación se revierte (500, sin membresía)
+[PASA] CA-08   Operación permitida por el rol vigente (200) sin registrar denegación
+[PASA] CA-09   Permiso no asignado: 403 + correlation_id + evento con todos los campos
+[PASA] CA-10   Tenant del token distinto al de la solicitud: 403 TENANT_NO_COINCIDE
+[PASA] CA-11   Membresía vencida, revocada, futura o inexistente: MEMBRESIA_NO_VIGENTE
+[PASA] CA-12   Bitácora caída al denegar: sigue 403 y el evento va al respaldo (fail-closed)
+[PASA] CA-13   Fail-closed: sin reglas o con una regla que lanza excepción, se deniega
+[PASA] CA-14   El auditor encuentra la denegación con el correlation_id que vio el usuario
+[PASA] OCP-01  Regla nueva (red hospitalaria) funciona sin modificar el Autorizador
+[PASA] OCP-02  Autorizador y ServicioAsignacionRol no dependen de reglas concretas
+[PASA] OCP-03  Quitar la extensión no exige cambios: con las 3 reglas base se permite desde fuera
+[PASA] PAR-01  Antes y después producen la misma decisión en 7 escenarios
+------------------------------------------------------------------------------
+Total: 18  Pasan: 18  Fallan: 0

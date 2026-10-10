@@ -1,0 +1,64 @@
+@startuml semana-01-secuencia
+title Módulo Notas SOAP y diagnósticos — Secuencia\n«Registro de nota SOAP y asociación de diagnóstico clínico»
+skinparam shadowing false
+autonumber "S-00"
+
+actor "Médico tratante" as Medico
+boundary "SPA Vue\n(formulario)" as UI
+control "API /api/v1\n(TenantMiddleware + JwtAuth)" as API
+control "NotaSoapController" as Ctrl
+control "RegistrarNotaConDiagnostico\n(servicio)" as Svc
+entity "SoapNote / Diagnosis\n(dominio)" as Dom
+entity "Repositorios\nnotas y diagnósticos" as Repo
+database "Base HOSPITAL\n(clinical_notes, diagnoses)" as BD
+
+Medico -> UI : Llena S/O/A/P y diagnóstico [A-03, A-04]
+UI -> API : POST /api/v1/notas-soap\nX-Tenant-ID + Bearer JWT [A-05]
+API -> API : Valida tenant y token [D-01]
+alt tenant o token inválido
+  API --> UI : 400 / 401 [E-01]
+else válidos
+  API -> Ctrl : solicitud autenticada
+  Ctrl -> Ctrl : Verifica rol médico y asignación al episodio [D-02, CU-05]
+  alt sin permiso o sin asignación
+    Ctrl --> UI : 403 acceso_denegado [E-02]
+  else autorizado
+    Ctrl -> Svc : ejecutar(solicitudNota, solicitudDiagnostico)
+    Svc -> Repo : expedienteAbierto(expediente, episodio) [D-03]
+    Repo -> BD : SELECT medical_records / care_episodes
+    alt expediente cerrado o de otro paciente
+      Svc --> Ctrl : ExpedienteNoDisponible
+      Ctrl --> UI : 404 / 409 [E-03]
+    else expediente válido
+      Svc -> Dom : SoapNote::registrar(S, O, A, P, autor) [A-06, D-04]
+      alt falta una sección
+        Dom --> Svc : NotaSoapIncompletaException
+        Svc --> Ctrl : excepción
+        Ctrl --> UI : 422 nota_incompleta [E-04]
+      else nota completa
+        Svc -> Dom : Diagnosis::validar(CIE-10, descripción, tipo) [D-05]
+        alt diagnóstico inválido
+          Dom --> Svc : DiagnosticoInvalidoException
+          Svc --> Ctrl : excepción
+          Ctrl --> UI : 422 diagnostico_invalido [E-05]
+        else diagnóstico válido
+          Svc -> Repo : iniciarTransaccion() [A-07]
+          Repo -> BD : INSERT clinical_notes (draft, version_no = 1) [A-08]
+          Repo -> BD : INSERT diagnoses (clinical_note_id) [A-09]
+          alt la base de datos rechaza un INSERT
+            BD --> Repo : error (trigger o restricción)
+            Svc -> Repo : revertir() [E-06]
+            Svc --> Ctrl : ErrorPersistencia
+            Ctrl --> UI : 500 error_persistencia
+          else ambos INSERT aceptados
+            Svc -> Repo : confirmar() [A-10]
+            Svc --> Ctrl : nota + diagnóstico con sus id
+            Ctrl --> UI : 201 Created [A-11]
+          end
+        end
+      end
+    end
+  end
+end
+UI --> Medico : Muestra el resultado o el campo con error
+@enduml

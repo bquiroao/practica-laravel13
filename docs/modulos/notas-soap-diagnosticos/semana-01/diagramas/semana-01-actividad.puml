@@ -1,0 +1,58 @@
+@startuml semana-01-actividad
+title Módulo Notas SOAP y diagnósticos — Actividad\n«Registro de nota SOAP y asociación de diagnóstico clínico»
+skinparam shadowing false
+
+|Médico tratante|
+start
+:A-01 Abre el expediente del paciente;
+:A-02 Elige «Nueva nota SOAP»;
+
+|Sistema HIS — Notas SOAP|
+if (D-01 ¿Tenant y token válidos?) then (no)
+  :E-01 Solicitud rechazada\n(400 sin tenant / 401 token inválido);
+  stop
+else (sí)
+endif
+if (D-02 ¿Rol médico y asignación activa al episodio?) then (no)
+  :E-02 Acceso denegado (403);
+  stop
+else (sí)
+endif
+if (D-03 ¿Expediente abierto y episodio del mismo paciente?) then (no)
+  :E-03 Expediente no disponible (404 / 409);
+  stop
+else (sí)
+endif
+
+repeat
+  |Médico tratante|
+  :A-03 Escribe Subjetivo, Objetivo, Análisis y Plan;
+  :A-04 Ingresa código CIE-10, descripción y tipo;
+  :A-05 Envía el formulario;
+  |Sistema HIS — Notas SOAP|
+  :A-06 Valida nota y diagnóstico sin guardar;
+  backward :Marca el campo con error y conserva lo escrito\n(E-04 nota incompleta / E-05 diagnóstico inválido, 422);
+repeat while (D-04 ¿Falta una sección SOAP o D-05 el diagnóstico es inválido?) is (sí) not (no)
+
+:A-07 Abre una transacción;
+:A-08 Guarda la nota (borrador, versión 1);
+:A-09 Guarda el diagnóstico ligado a la nota;
+if (D-06 ¿La base de datos aceptó los dos registros?) then (no)
+  :E-06 Revierte la transacción: no queda nada guardado (500);
+  stop
+else (sí)
+  :A-10 Confirma la transacción;
+endif
+:A-11 Muestra la nota en borrador con su diagnóstico (201);
+
+|Médico tratante|
+if (D-07 ¿Firma la nota ahora?) then (sí)
+  |Sistema HIS — Notas SOAP|
+  :A-12 Registra la firma (status = signed, signed_at);
+  :A-13 Resultado: nota firmada e inmutable;
+else (no)
+  |Sistema HIS — Notas SOAP|
+  :A-14 Resultado: nota en borrador, editable por su autor;
+endif
+stop
+@enduml

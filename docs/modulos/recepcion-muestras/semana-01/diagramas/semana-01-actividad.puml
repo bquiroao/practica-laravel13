@@ -1,0 +1,79 @@
+@startuml semana-01-actividad
+title Módulo de laboratorio — Actividad\n«Recepción, identificación inequívoca y rechazo controlado de muestra»
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Técnico/a de laboratorio|
+start
+:A-01 Registrar la muestra recibida [CU-01];
+
+|Sistema HIS — recepción|
+if (D-01 ¿Servicio de órdenes disponible?) then (sí)
+else (no)
+  :E-01 No se puede validar la orden;\nmarcar recepción pendiente;
+  :A-12 Informar que no se confirmó aceptación;
+  stop
+endif
+
+:A-02 Buscar y validar la orden y el examen [R-01];
+if (D-02 ¿Orden y examen identificables?) then (sí)
+else (no)
+  :E-02 No se puede asociar la muestra;\nsolicitar corrección o dejar pendiente;
+  :A-12 Informar que no se confirmó aceptación;
+  stop
+endif
+
+:A-03 Comparar paciente, orden y muestra [R-02];
+if (D-03 ¿La correspondencia es inequívoca?) then (sí)
+else (no)
+  :A-08 Registrar motivo de discordancia [CU-02, R-05];
+  |Técnico/a de laboratorio|
+  :A-09 Confirmar motivo y observación;
+  |Sistema HIS — recepción|
+  if (D-07 ¿Rechazo persistido?) then (sí)
+    :A-10 Conservar actor, fecha/hora y referencia [R-07];
+    :A-11 Confirmar rechazo;
+  else (no)
+    :E-04 Informar que no se guardó;\nno mostrar confirmación de éxito [R-08];
+  endif
+  stop
+endif
+
+|Técnico/a de laboratorio|
+:A-04 Inspeccionar identificación e integridad\nsegún el tipo de muestra y examen [R-03];
+if (D-04 ¿Cumple los criterios aplicables?) then (sí)
+else (no)
+  :A-08 Registrar motivo de no conformidad [CU-02, R-05];
+  :A-09 Confirmar motivo y observación;
+  |Sistema HIS — recepción|
+  if (D-07 ¿Rechazo persistido?) then (sí)
+    :A-10 Conservar actor, fecha/hora y referencia [R-07];
+    :A-11 Confirmar rechazo;
+  else (no)
+    :E-04 Informar que no se guardó;\nno mostrar confirmación de éxito [R-08];
+  endif
+  stop
+endif
+
+|Sistema HIS — recepción|
+:A-05 Generar y reservar código irrepetible [R-04];
+if (D-05 ¿Código reservado sin colisión?) then (sí)
+else (no)
+  :E-03 No se pudo reservar el código;\nmantener recepción pendiente;
+  :A-12 Informar que no se confirmó aceptación [R-06];
+  stop
+endif
+
+:A-06 Emitir etiqueta con el código de muestra;
+if (D-06 ¿Etiqueta emitida correctamente?) then (sí)
+else (no)
+  :E-03 Falla de impresión;\nmantener recepción pendiente;
+  :A-12 Informar que no se confirmó aceptación [R-06];
+  stop
+endif
+
+:A-07 Registrar recepción aceptada,\norden, examen, actor y fecha/hora [CU-01, R-07];
+:A-13 Mostrar confirmación e identificador;
+stop
+@enduml
