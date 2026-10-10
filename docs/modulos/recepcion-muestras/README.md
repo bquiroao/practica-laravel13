@@ -9,6 +9,7 @@ Modela la recepción de muestras de laboratorio, su vinculación con la orden y 
 | Semana | Entrega | Documento | Declaración IA | Defensa oral |
 |---:|---|---|---|---|
 | 1 | UML del proceso «recepción, identificación inequívoca y rechazo controlado de muestra»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-recepcion-muestras.md](semana-01/semana-01-uml-recepcion-muestras.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
+| 2 | Requerimientos RF/RNF, criterios de aceptación y aplicación de LSP al flujo, con diseño antes/después y ejemplo PHP ejecutable | [semana-02-lsp-recepcion-muestras.md](semana-02/semana-02-lsp-recepcion-muestras.md) · [ejemplo LSP](semana-02/ejemplo-lsp/README.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
