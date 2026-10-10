@@ -1,0 +1,41 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo de laboratorio — Casos de uso\n«Recepción, identificación inequívoca y rechazo controlado de muestra»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Técnico/a de laboratorio\n(recepción)" as Tecnico
+
+rectangle "Sistema Hospitalario Integrado — Recepción de muestras" {
+  usecase "CU-01\nRecibir muestra" as CU01
+  usecase "Validar orden, paciente\ny examen" as Validar
+  usecase "Verificar criterios\nde aceptación" as Criterios
+  usecase "Asignar código único\ny emitir etiqueta" as Identificar
+  usecase "CU-02\nRechazar muestra\ncon motivo" as CU02
+}
+
+Tecnico --> CU01
+Tecnico --> CU02
+
+CU01 ..> Validar : <<include>>
+CU01 ..> Criterios : <<include>>
+Identificar ..> CU01 : <<extend>>\n[muestra conforme]
+CU02 ..> CU01 : <<extend>>\n[no conformidad confirmada]
+
+note bottom of Identificar
+  El código identifica la muestra, no al paciente
+  ni a la orden. No se confirma aceptación hasta
+  validar la orden y emitir la etiqueta.
+end note
+
+note bottom of CU02
+  El rechazo conserva motivo, actor y fecha/hora [R-05, R-07].
+  Una falla técnica deja el ingreso pendiente;
+  no se presenta como rechazo clínico.
+end note
+@enduml

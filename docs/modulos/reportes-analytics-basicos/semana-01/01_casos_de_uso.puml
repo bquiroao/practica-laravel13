@@ -1,0 +1,48 @@
+@startuml m23_casos_de_uso
+title M23 · Reportes y analytics básicos\nCálculo y visualización trazable de un indicador hospitalario
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor Administrador as ADM
+actor "Jefe de área" as JEF
+actor "Médico" as MED
+actor "Módulos fuente\n(solo lectura)" as SRC
+
+rectangle "Sistema Hospitalario Integrado · Módulo 23" {
+  usecase "CU-01\nConsultar indicador" as CU01
+  usecase "CU-02\nAplicar filtros\n(período y granularidad)" as CU02
+  usecase "CU-03\nCalcular indicador" as CU03
+  usecase "CU-04\nVer ficha de\ntrazabilidad" as CU04
+  usecase "CU-05\nValidar permiso\ndel rol" as CU05
+  usecase "CU-06\nAnonimizar grupos\npequeños" as CU06
+  usecase "CU-07\nDesglosar indicador\n(sala, médico, estado, día)" as CU07
+  usecase "CU-08\nVer registros\nde origen" as CU08
+}
+
+ADM --> CU01
+JEF --> CU01
+MED --> CU01
+ADM --> CU07
+JEF --> CU07
+MED --> CU07
+CU01 ..> CU05 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU02 ..> CU01 : <<extend>>\n[cambia filtros]
+CU04 ..> CU01 : <<extend>>\n[abre la ficha]
+CU06 ..> CU03 : <<extend>>\n[grupo con menos de 3 casos]
+CU07 ..> CU05 : <<include>>
+CU08 ..> CU07 : <<extend>>\n[abre una parte del desglose]
+CU08 ..> CU05 : <<include>>
+CU03 --> SRC : lee datos
+CU08 --> SRC : lee registros
+
+note right of MED
+  Solo rastrea el indicador
+  de Citas y sus propias citas
+end note
+note bottom of CU07
+  La suma del desglose coincide
+  con el valor del indicador (RN-07)
+end note
+@enduml

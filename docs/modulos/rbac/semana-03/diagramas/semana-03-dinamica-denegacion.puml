@@ -1,0 +1,42 @@
+@startuml semana-03-dinamica-denegacion
+title Vista dinámica — denegación trazable atravesando las cuatro capas
+autonumber "<b>00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Enfermera\n(Ana)" as Ana
+box "Presentación" #F5F9FF
+  participant "Kernel" as K
+  participant "MiddlewareAutorizacion" as MW
+end box
+box "Aplicación" #FFF8E1
+  participant "AutorizarOperacion" as UC
+end box
+box "Dominio" #E8F5E9
+  participant "PoliticaAutorizacion" as POL
+end box
+box "Persistencia" #FDECEC
+  participant "PdoRepositorioMembresias" as REPO
+  participant "PdoRegistroAuditoria" as AUD
+end box
+database "PostgreSQL" as DB
+
+Ana -> K : POST /api/v1/prescripciones\nX-Tenant-ID, Bearer token-ana
+K -> K : ruta → permiso «prescripciones.crear»\ntenant ✓ (400) · token ✓ (401)
+K -> MW : verificar(solicitud, identidad, permiso)
+MW -> UC : ejecutar(ComandoAutorizar)
+UC -> REPO : membresiasDe(ana, hosp-oriente)
+REPO -> DB : SELECT … WHERE usuario_id = :usuario\nAND hospital_id = :hospital
+DB --> REPO : enfermeria (active)
+REPO --> UC : list<Membresia>
+UC -> POL : evaluar(ContextoAutorizacion)
+POL --> UC : "PERMISO_NO_ASIGNADO"
+UC -> AUD : registrar(ACCESO_DENEGADO, motivo, ip, …)
+AUD -> DB : INSERT INTO eventos_auditoria … VALUES (:correlacion, …)
+alt la base falla (ErrorPersistencia)
+  UC -> UC : RegistroAuditoriaArchivo (respaldo)\nla decisión no cambia
+end
+UC --> MW : ResultadoAutorizacion::denegado(correlation_id)\n(sin motivo)
+MW --> K : 403
+K --> Ana : 403 {mensaje: "Acceso denegado.", correlation_id}
+@enduml
