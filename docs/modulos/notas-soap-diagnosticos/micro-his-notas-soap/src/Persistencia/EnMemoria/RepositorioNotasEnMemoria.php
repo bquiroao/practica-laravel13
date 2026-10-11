@@ -41,6 +41,15 @@ final class RepositorioNotasEnMemoria implements RepositorioNotas, Restaurable
         $this->notas[$nota->id] = $nota;
     }
 
+    public function deExpediente(string $expedienteId): array
+    {
+        $lista = array_values(array_filter($this->notas, static fn (NotaSoap $n): bool => $n->expedienteId === $expedienteId));
+        // Mismo orden que el adaptador PDO: ORDER BY created_at, clinical_note_id
+        usort($lista, static fn (NotaSoap $a, NotaSoap $b): int => [$a->creadaEn, $a->id] <=> [$b->creadaEn, $b->id]);
+
+        return $lista;
+    }
+
     /** @return list<NotaSoap> */
     public function todas(): array
     {

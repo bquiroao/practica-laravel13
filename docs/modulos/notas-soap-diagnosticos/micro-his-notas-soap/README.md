@@ -6,25 +6,32 @@ Se inició en la semana 3 y se usa como base en las semanas 4 y 5.
 
 - Semana 3 — capas, PDO y vista C4: [`../semana-03/semana-03-arquitectura-micro-his.md`](../semana-03/semana-03-arquitectura-micro-his.md)
 - Semana 4 — MVC en la entrada, patrón Repository con adaptadores PDO y en memoria, repositorio compartido: [`../semana-04/semana-04-mvc-repository.md`](../semana-04/semana-04-mvc-repository.md)
+- Semana 5 — cliente-servidor, contrato OpenAPI, idempotencia, cliente con circuit breaker y evaluación de la frontera de microservicio: [`../semana-05/semana-05-cliente-servidor-microservicios.md`](../semana-05/semana-05-cliente-servidor-microservicios.md)
 
 ## Capas
 
 ```
 src/
 ├── Presentacion/
-│   ├── Http/           Kernel (front controller), Solicitud, Respuesta, autenticación demo
+│   ├── Http/           Kernel (front controller), Rutas (con permiso), Solicitud, Respuesta, autenticación demo
+│   │   ├── Autorizacion/   PoliticaPermisos ← PermisosPorRol (permiso de cada ruta)
+│   │   └── Observabilidad/ RegistroAcceso (una línea JSON por petición, sin datos clínicos)
 │   ├── Controladores/  NotasSoapController (la C del MVC: sin SQL ni reglas)
-│   ├── Entrada/        FormularioRegistroNota (JSON → comando; solo revisa formato)
+│   ├── Entrada/        FormularioRegistroNota, FiltroNotasExpediente (entrada → comando; solo revisa formato)
 │   └── Vistas/         VistaJson, VistaHtml (+ plantillas), SelectorVista (la V del MVC)
-├── Aplicacion/         Casos de uso, comandos, NotaResultado, puertos técnicos, decorador RepositorioNotasConEventos
+├── Aplicacion/         Casos de uso, comandos, resultados, puertos técnicos (incluye RegistroIdempotencia), decorador RepositorioNotasConEventos
 ├── Dominio/            NotaSoap, SeccionesSoap, Diagnostico, EventoClinico, excepciones e interfaces Repository
 └── Persistencia/
     ├── Pdo/            Adaptadores PDO (sentencias preparadas), transacción y bandeja de salida
     ├── EnMemoria/      Los mismos puertos sobre arreglos de PHP, con transacción en memoria
     └── Sistema/        Reloj y generador de UUID
+
+src/Cliente/            Librería para otros módulos: ClienteNotasSoap, CircuitoInterruptor, TransporteHttpStream, ResultadoCliente
+api/openapi.yaml        Contrato OpenAPI 3.1 (las pruebas API-01 a API-04 lo comparan con el código)
+bin/medir.php           Mide el mismo registro en proceso, por HTTP en proceso y por red
 ```
 
-Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. El único archivo que conoce todas las clases concretas es `bootstrap/contenedor.php`: `crearKernel()` usa PDO y `crearKernelEnMemoria()` usa los adaptadores en memoria, sin cambiar nada más. La regla se comprueba en cada ejecución de las pruebas (grupo `ARQ`).
+Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. El único archivo que conoce todas las clases concretas es `bootstrap/contenedor.php`: `crearKernel()` usa PDO y `crearKernelEnMemoria()` usa los adaptadores en memoria, sin cambiar nada más. La regla se comprueba en cada ejecución de las pruebas (grupo `ARQ`). El `Cliente` no es una capa del servidor: solo conoce el contrato y el servidor no lo importa (ARQ-13).
 
 ## Requisitos
 
@@ -54,7 +61,10 @@ En PowerShell: `$env:NOTASSOAP_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=mic
 | `REP` | Contrato del Repository: las mismas pruebas contra el adaptador en memoria y el PDO |
 | `HTTP` | Rutas, cabeceras, códigos de estado, vista HTML escapada y que los errores no expongan detalles internos |
 | `ARQ` | Regla de dependencias, PDO solo en Persistencia, controlador sin SQL ni reglas, dos adaptadores por puerto, sin framework |
-| `INT` | Adaptadores PDO contra SQLite y PostgreSQL, bandeja de salida y mismo flujo con PDO y en memoria |
+| `INT` | Adaptadores PDO contra SQLite y PostgreSQL, bandeja de salida, idempotencia, mismo flujo con PDO y en memoria, y modo memoria con archivo |
+| `API` | El contrato `api/openapi.yaml` y el código dicen lo mismo: operaciones, permisos, códigos HTTP y códigos de error |
+| `CLI` | Cliente: reintentos, respuesta perdida sin duplicar, firma sin reintento, circuit breaker y red real caída |
+| `OBS` | `X-Request-ID` y registro de acceso sin datos sensibles |
 
 ## Demostración sin base de datos
 
@@ -63,6 +73,28 @@ php bin/demo-en-memoria.php
 ```
 
 Corre el mismo Kernel, controlador y casos de uso con los adaptadores en memoria y muestra lo que quedó guardado, incluida la bandeja de salida.
+
+También se puede levantar la API sin base de datos. Como `php -S` atiende cada petición en un proceso nuevo, para que los datos se conserven entre peticiones hay que indicar un archivo:
+
+```bash
+NOTASSOAP_ALMACEN=memoria NOTASSOAP_MEMORIA_ARCHIVO=/tmp/notas-demo.ser php -S 127.0.0.1:8080 -t public
+```
+
+En PowerShell: `$env:NOTASSOAP_ALMACEN="memoria"` y `$env:NOTASSOAP_MEMORIA_ARCHIVO="$env:TEMP\notas-demo.ser"` antes de `php -S`. Para empezar de cero, se borra el archivo.
+
+## Medir la frontera
+
+```bash
+php bin/medir.php 3000 300
+```
+
+Ejecuta el mismo registro en cuatro escenarios (caso de uso en proceso, Kernel en proceso, servicio por red local y servicio por red con dos vecinos remotos) más un control. Muestra p50, p95 y p99. La interpretación está en la sección 5.2 del documento de la semana 5.
+
+## Validar el contrato
+
+```bash
+npx @redocly/cli@1.34.3 lint api/openapi.yaml
+```
 
 ## Levantar la API
 
@@ -73,13 +105,16 @@ psql -d micro_his_notas_soap -f database/schema.sql -f database/datos-demo.sql
 php -S 127.0.0.1:8080 -t public
 ```
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `POST` | `/api/v1/notas-soap` | Registra la nota con su diagnóstico (201) |
-| `GET` | `/api/v1/notas-soap/{id}` | Consulta la nota y sus diagnósticos (200) |
-| `POST` | `/api/v1/notas-soap/{id}/firma` | Firma la nota; solo el autor (200) |
+| Método | Ruta | Permiso | Descripción |
+|---|---|---|---|
+| `POST` | `/api/v1/notas-soap` | `notas_soap.registrar` | Registra la nota con su diagnóstico (201). Acepta `Idempotency-Key` |
+| `GET` | `/api/v1/notas-soap/{id}` | `notas_soap.consultar` | Consulta la nota y sus diagnósticos (200) |
+| `POST` | `/api/v1/notas-soap/{id}/firma` | `notas_soap.firmar` | Firma la nota; solo el autor (200) |
+| `GET` | `/api/v1/expedientes/{id}/notas-soap?estado=draft\|signed` | `notas_soap.consultar` | Resúmenes de las notas del expediente, sin texto clínico (200) |
 
-Todas las peticiones llevan `X-Tenant-ID: hosp-oriente` y `Authorization: Bearer <token>`. Con `Accept: text/html` la respuesta sale en HTML (por ejemplo, para abrir la nota en el navegador); sin esa cabecera sale en JSON.
+El contrato completo (payloads, cabeceras y errores) está en [`api/openapi.yaml`](api/openapi.yaml).
+
+Todas las peticiones llevan `X-Tenant-ID: hosp-oriente` y `Authorization: Bearer <token>`. `X-Request-ID` es opcional: si no llega o es inválido, el servidor genera uno y lo devuelve. Si el registro se repite con la misma `Idempotency-Key`, la respuesta es la misma nota con `Idempotent-Replayed: true`. Con `Accept: text/html` la respuesta sale en HTML (por ejemplo, para abrir la nota en el navegador); sin esa cabecera sale en JSON.
 
 ```bash
 curl -X POST http://127.0.0.1:8080/api/v1/notas-soap \
@@ -89,21 +124,23 @@ curl -X POST http://127.0.0.1:8080/api/v1/notas-soap \
 
 Tokens de demostración (datos ficticios, definidos en `config/config.php`):
 
-| Token | Usuario | Rol | Asignado a `epi-100` |
-|---|---|---|---|
-| `token-mendez` | `dra-mendez` | médico | Sí |
-| `token-lopez` | `dr-lopez` | médico | No |
-| `token-ana` | `enf-ana` | enfermería | No |
+| Token | Usuario | Rol | Asignado a `epi-100` | Permisos |
+|---|---|---|---|---|
+| `token-mendez` | `dra-mendez` | médico | Sí | registrar, firmar, consultar |
+| `token-lopez` | `dr-lopez` | médico | No | registrar, firmar, consultar |
+| `token-ana` | `enf-ana` | enfermería | No | consultar |
 
 | Error | HTTP |
 |---|---|
-| Falta `X-Tenant-ID` / cuerpo sin `diagnostico` / campo que no es texto | 400 |
+| Falta `X-Tenant-ID` / cuerpo sin `diagnostico` / campo que no es texto / filtro o `Idempotency-Key` inválidos | 400 |
 | Token ausente o desconocido | 401 |
-| Sin rol médico, sin asignación, otro hospital, no es el autor | 403 |
+| El rol no tiene el permiso de la ruta, sin asignación, otro hospital, no es el autor | 403 |
 | Nota o ruta inexistente | 404 |
+| Método equivocado (con cabecera `Allow`) | 405 |
 | Expediente cerrado o episodio de otro paciente / nota ya firmada | 409 |
-| Sección SOAP vacía / diagnóstico CIE-10 inválido | 422 |
+| Sección SOAP vacía / diagnóstico CIE-10 inválido / `Idempotency-Key` reutilizada con otro contenido | 422 |
 | Error de base de datos (mensaje genérico) | 500 |
+| Sin conexión con la base (con cabecera `Retry-After`) | 503 |
 
 ## Límites conocidos
 
@@ -111,5 +148,6 @@ Tokens de demostración (datos ficticios, definidos en `config/config.php`):
 - El catálogo CIE-10 no se consulta: solo se valida el formato del código.
 - No incluye corrección de notas firmadas (versión nueva con `supersedes_id`); queda para una semana posterior.
 - La bandeja de salida (`outbox_events`) se llena al firmar, pero el publicador que la envía a CENTRAL está diseñado, no implementado.
-- Los adaptadores en memoria pierden los datos al terminar el proceso: sirven para pruebas y demostraciones, no para `php -S`.
+- Los adaptadores en memoria pierden los datos al terminar el proceso. Con `php -S` solo se conservan si se usa `NOTASSOAP_MEMORIA_ARCHIVO`, y eso es únicamente para demostraciones.
+- Las claves de idempotencia no caducan; en el HIS conviene borrarlas después de 24 horas.
 - Ninguna credencial está en el repositorio: la conexión se configura con variables de entorno.

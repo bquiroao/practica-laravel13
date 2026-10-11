@@ -27,7 +27,15 @@ final class NotaResultado
         public readonly ?string $firmadaEn,
         public readonly array $soap,
         public readonly array $diagnosticos,
+        public readonly bool $repetida = false,
     ) {
+    }
+
+    /** La misma nota, marcada como respuesta repetida de una Idempotency-Key ya usada. */
+    public function comoRepetida(): self
+    {
+        return new self($this->notaId, $this->expedienteId, $this->episodioId, $this->autorId, $this->estado,
+            $this->version, $this->firmadaEn, $this->soap, $this->diagnosticos, true);
     }
 
     /** @param list<Diagnostico> $diagnosticos */

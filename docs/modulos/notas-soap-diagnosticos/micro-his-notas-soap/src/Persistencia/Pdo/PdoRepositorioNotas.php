@@ -41,10 +41,25 @@ final class PdoRepositorioNotas extends RepositorioPdo implements RepositorioNot
             ['id' => $id],
         )->fetch(\PDO::FETCH_ASSOC);
 
-        if ($fila === false) {
-            return null;
-        }
+        return $fila === false ? null : self::aNota($fila);
+    }
 
+    public function deExpediente(string $expedienteId): array
+    {
+        $filas = $this->ejecutar(
+            "SELECT clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, content, status, version_no, created_at, signed_at
+               FROM clinical_notes
+              WHERE medical_record_id = :expediente AND note_type = 'soap'
+              ORDER BY created_at, clinical_note_id",
+            ['expediente' => $expedienteId],
+        )->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(self::aNota(...), $filas);
+    }
+
+    /** @param array<string, mixed> $fila */
+    private static function aNota(array $fila): NotaSoap
+    {
         return new NotaSoap(
             (string) $fila['clinical_note_id'],
             (string) $fila['medical_record_id'],
