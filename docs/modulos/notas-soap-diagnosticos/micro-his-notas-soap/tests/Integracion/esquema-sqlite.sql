@@ -58,6 +58,16 @@ CREATE TABLE outbox_events (
     attempts        integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
 );
 
+CREATE TABLE idempotency_keys (
+    hospital_id      text NOT NULL,
+    user_ref_id      text NOT NULL,
+    idempotency_key  text NOT NULL,
+    request_hash     text NOT NULL CHECK (length(request_hash) = 64),
+    clinical_note_id text NOT NULL REFERENCES clinical_notes (clinical_note_id),
+    created_at       text NOT NULL,
+    PRIMARY KEY (hospital_id, user_ref_id, idempotency_key)
+);
+
 CREATE TRIGGER clinical_notes_firmada BEFORE UPDATE ON clinical_notes WHEN OLD.status = 'signed'
 BEGIN SELECT RAISE(ABORT, 'clinical_notes_signed_immutable'); END;
 CREATE TRIGGER clinical_notes_borrar BEFORE DELETE ON clinical_notes
