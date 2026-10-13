@@ -12,6 +12,7 @@ use Rbac\Aplicacion\CasosDeUso\AsignarRol;
 use Rbac\Aplicacion\CasosDeUso\AutorizarOperacion;
 use Rbac\Aplicacion\CasosDeUso\ConsultarEventoAuditoria;
 use Rbac\Aplicacion\CasosDeUso\RevocarRol;
+use Rbac\Aplicacion\Servicios\RegistradorDeCambios;
 use Rbac\Dominio\Puertos\RegistroAuditoria;
 use Rbac\Dominio\Reglas\Asignacion\ReglaNoAutoasignacion;
 use Rbac\Dominio\Reglas\Asignacion\ReglaRolEnCatalogo;
@@ -92,19 +93,13 @@ function construirCasosDeUso(
         $reloj,
     );
 
+    // Semana 7: un solo servicio aplica cualquier cambio de membresía con su evidencia (R-07).
+    $cambios = new RegistradorDeCambios($adaptadores->transaccion, $adaptadores->membresias, $adaptadores->auditoria);
+
     return [
         'autorizar' => $autorizar,
-        'asignarRol' => new AsignarRol(
-            $autorizar,
-            $politicaAsignacion,
-            $adaptadores->membresias,
-            $adaptadores->auditoria,
-            $adaptadores->transaccion,
-            $generarCorrelacion,
-            $reloj,
-        ),
+        'asignarRol' => new AsignarRol($autorizar, $politicaAsignacion, $cambios, $generarCorrelacion, $reloj),
         'consultar' => new ConsultarEventoAuditoria($adaptadores->auditoria),
-        // Semana 6 — cambio práctico: mismas piezas reutilizables (autorizar, transacción, auditoría).
         'revocarRol' => new RevocarRol(
             $autorizar,
             new PoliticaRevocacion([
@@ -112,9 +107,7 @@ function construirCasosDeUso(
                 new ReglaMotivoSuficiente(),
                 new ReglaMembresiaRevocable($adaptadores->membresias),
             ]),
-            $adaptadores->membresias,
-            $adaptadores->auditoria,
-            $adaptadores->transaccion,
+            $cambios,
             $generarCorrelacion,
             $reloj,
         ),
