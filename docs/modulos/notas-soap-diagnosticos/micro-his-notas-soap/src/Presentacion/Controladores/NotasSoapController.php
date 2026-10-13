@@ -6,9 +6,11 @@ namespace NotasSoap\Presentacion\Controladores;
 
 use NotasSoap\Aplicacion\CasosDeUso\ConsultarNota;
 use NotasSoap\Aplicacion\CasosDeUso\FirmarNota;
+use NotasSoap\Aplicacion\CasosDeUso\ListarNotasExpediente;
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\ConsultarNotaComando;
 use NotasSoap\Aplicacion\Comandos\FirmarNotaComando;
+use NotasSoap\Presentacion\Entrada\FiltroNotasExpediente;
 use NotasSoap\Presentacion\Entrada\FormularioRegistroNota;
 use NotasSoap\Presentacion\Http\Identidad;
 use NotasSoap\Presentacion\Http\Respuesta;
@@ -28,6 +30,7 @@ final class NotasSoapController
         private readonly RegistrarNotaConDiagnostico $registrar,
         private readonly FirmarNota $firmar,
         private readonly ConsultarNota $consultar,
+        private readonly ListarNotasExpediente $listar,
         private readonly SelectorVista $vistas,
     ) {
     }
@@ -51,5 +54,12 @@ final class NotasSoapController
         $resultado = $this->consultar->ejecutar(new ConsultarNotaComando($quien->hospitalId, $hospital, $notaId));
 
         return $this->vistas->para($s)->nota($resultado, 200);
+    }
+
+    public function listarDeExpediente(Solicitud $s, Identidad $quien, string $hospital, string $expedienteId): Respuesta
+    {
+        $resumenes = $this->listar->ejecutar(FiltroNotasExpediente::comando($s, $quien, $hospital, $expedienteId));
+
+        return $this->vistas->para($s)->lista($expedienteId, $resumenes, 200);
     }
 }

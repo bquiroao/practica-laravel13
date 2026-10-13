@@ -14,4 +14,7 @@ interface RepositorioNotas
     public function buscar(string $id): ?NotaSoap;
 
     public function registrarFirma(NotaSoap $nota): void;
+
+    /** @return list<NotaSoap> notas del expediente ordenadas por fecha de creación y luego por id */
+    public function deExpediente(string $expedienteId): array;
 }

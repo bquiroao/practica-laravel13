@@ -1,0 +1,30 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Semana 5 · Diseño cliente-servidor del módulo Notas SOAP y diagnósticos
+
+Person(medico, "Médico", "Registra, firma y consulta notas.")
+Person(enfermeria, "Enfermería", "Solo consulta (notas_soap.consultar).")
+
+System_Boundary(his, "Sistema Hospitalario Integrado") {
+    Container(spa, "SPA Vue", "Vue 3", "Formulario SOAP. Envía Authorization, X-Tenant-ID, X-Request-ID e Idempotency-Key. No decide permisos.")
+    Container(gw, "API Gateway (ASII-30)", "Intermediario", "TLS, límite de peticiones, propaga X-Request-ID.")
+    Container(srv, "Servidor Notas SOAP (ASII-11)", "PHP · contrato api/openapi.yaml", "Kernel: X-Request-ID → ruta → tenant → token → permiso → caso de uso. Sin estado entre peticiones.")
+    ContainerDb(db, "Base HOSPITAL", "PostgreSQL", "clinical_notes, diagnoses, idempotency_keys, outbox_events, audit_events.")
+    Container(exp, "Módulo Expediente (ASII-10)", "Cliente de servicio", "Muestra la línea de tiempo: GET /expedientes/{id}/notas-soap con ClienteNotasSoap.")
+    Container(rbac, "Módulo RBAC (ASII-02)", "Punto de decisión", "En el HIS reemplaza a PermisosPorRol.")
+}
+System_Ext(central, "CENTRAL", "Recibe NotaSoapFirmada por la bandeja de salida (semana 4).")
+
+Rel(medico, spa, "Usa")
+Rel(enfermeria, spa, "Usa")
+Rel(spa, gw, "HTTPS/JSON")
+Rel(gw, srv, "REST /api/v1")
+Rel(exp, srv, "REST con ClienteNotasSoap", "timeout · reintento · circuit breaker")
+Rel(srv, rbac, "¿permiso?", "en proceso hoy")
+Rel(srv, db, "PDO, sentencias preparadas")
+Rel(db, central, "outbox → inbox", "asíncrono")
+
+SHOW_LEGEND()
+@enduml

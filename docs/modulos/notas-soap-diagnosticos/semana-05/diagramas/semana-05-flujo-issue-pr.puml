@@ -1,0 +1,32 @@
+@startuml semana-05-flujo-issue-pr
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam activity {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+
+title Semana 5 · Plan de issue, rama, worktree y PR para integrar ASII-11 al HIS
+
+start
+:Issue «ASII-11 — Notas SOAP y diagnósticos»\n(plantilla module_task.md, texto en plan/issue-asii-11-notas-soap.md);
+:git fetch origin;
+:git worktree add ../shi-asii-11-notas-soap\n  -b feature/asii-11-notas-soap-jgarciar73-svg origin/develop;
+repeat
+  :Una tarea del issue (T1 … T5);
+  :Commits pequeños: feat(notas-soap) · test(notas-soap) · docs(notas-soap);
+  :Validaciones locales:\nphp tests/ejecutar.php · redocly lint · php artisan test · npm run build;
+repeat while (¿quedan tareas de esta rama?) is (sí)
+-> no;
+:git push -u origin feature/asii-11-notas-soap-jgarciar73-svg;
+:PR hacia develop (base: develop)\nplantilla del grupo + Closes #issue + evidencia;
+if (¿revisión aprobada y PR Guard en verde?) then (sí)
+  :Merge a develop (lo hace el revisor);
+  :git worktree remove ../shi-asii-11-notas-soap\ngit branch -d feature/asii-11-notas-soap-jgarciar73-svg;
+else (no)
+  :Corregir en la misma rama y volver a subir;
+  detach
+endif
+stop
+@enduml

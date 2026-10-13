@@ -16,22 +16,19 @@ use NotasSoap\Persistencia\Pdo\PdoRepositorioNotas;
 use NotasSoap\Persistencia\Pdo\PdoTransaccion;
 use NotasSoap\Persistencia\Pdo\PdoVerificadorAcceso;
 use NotasSoap\Presentacion\Http\AutenticadorTokenDemo;
+use NotasSoap\Presentacion\Http\Autorizacion\PermisosPorRol;
+use NotasSoap\Presentacion\Http\Observabilidad\RegistroAccesoEnMemoria;
 use NotasSoap\Presentacion\Http\Kernel;
 use NotasSoap\Pruebas\Dobles\Escenario;
 use NotasSoap\Pruebas\Dobles\GeneradorSecuencial;
 use NotasSoap\Pruebas\Dobles\RelojFijo;
 
-$kernelSobre = static fn (PDO $pdo): Kernel => construirKernel(
-    new AutenticadorTokenDemo(Escenario::TOKENS),
-    new PdoVerificadorAcceso($pdo),
-    new PdoRepositorioExpedientes($pdo),
-    new PdoRepositorioNotas($pdo),
-    new PdoRepositorioDiagnosticos($pdo),
-    new PdoRegistroAuditoria($pdo),
-    new PdoTransaccion($pdo),
-    new GeneradorSecuencial(),
-    new RelojFijo(),
-);
+$kernelSobre = static function (PDO $pdo): Kernel {
+    $ids = new GeneradorSecuencial();
+
+    return construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), adaptadoresPdo($pdo, $ids), $ids, new RelojFijo(),
+        new PermisosPorRol(Escenario::PERMISOS), new RegistroAccesoEnMemoria());
+};
 
 $sqlite = static function (): PDO {
     if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
@@ -96,7 +93,7 @@ prueba('INT-05', 'La base también protege: no deja modificar una nota firmada n
     igual('signed', $repo->buscar($id)?->estado, 'la nota sigue firmada');
 });
 
-prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, bandeja de salida en jsonb y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
+prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
     $dsn = getenv('NOTASSOAP_DB_DSN');
     if ($dsn === false || $dsn === '') {
         omitir('defina NOTASSOAP_DB_DSN para probar contra PostgreSQL');
@@ -108,30 +105,27 @@ prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, bandeja de salida en
         $pdo->exec("SET search_path TO $esquema");
         $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/schema.sql'));
         $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
-        $ids = new GeneradorSecuencial();
-        $k = construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), new PdoVerificadorAcceso($pdo), new PdoRepositorioExpedientes($pdo),
-            new NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos(new PdoRepositorioNotas($pdo), new NotasSoap\Persistencia\Pdo\PdoBandejaSalida($pdo), $ids),
-            new PdoRepositorioDiagnosticos($pdo), new PdoRegistroAuditoria($pdo), new PdoTransaccion($pdo), $ids, new RelojFijo());
+        $k = $kernelSobre($pdo);
         $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'] ?? null;
         afirmar($id !== null, 'registro en PostgreSQL');
         igual(200, $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"))->estado, 'firma');
+        $r = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']));
+        igual([201, 'true'], [$r->estado, $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']))->cabecera('Idempotent-Replayed')], 'idempotencia en PostgreSQL');
         igual('NotaSoapFirmada', $pdo->query("SELECT payload_minimal->>'clinical_note_id' = '$id' AS ok, event_type FROM outbox_events")->fetch()['event_type'] ?? null, 'outbox en jsonb');
         $pdo->exec("CREATE FUNCTION $esquema.romper() RETURNS trigger LANGUAGE plpgsql AS \$\$ BEGIN RAISE EXCEPTION 'falla simulada'; END; \$\$");
         $pdo->exec("CREATE TRIGGER romper BEFORE INSERT ON diagnoses FOR EACH ROW EXECUTE FUNCTION $esquema.romper()");
+        $antes = $contar($pdo, 'clinical_notes');
         $r = $kernelSobre($pdo)->manejar(Escenario::peticion());
         igual(500, $r->estado, 'error de persistencia');
-        igual(1, $contar($pdo, 'clinical_notes'), 'la segunda nota se revirtió');
+        igual($antes, $contar($pdo, 'clinical_notes'), 'la nota del registro fallido se revirtió');
     } finally {
         $pdo->exec("DROP SCHEMA $esquema CASCADE");
     }
 });
 
-prueba('INT-07', 'Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico', function () use ($sqlite, $contar): void {
+prueba('INT-07', 'Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico', function () use ($sqlite, $kernelSobre, $contar): void {
     $pdo = $sqlite();
-    $ids = new GeneradorSecuencial();
-    $k = construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), new PdoVerificadorAcceso($pdo), new PdoRepositorioExpedientes($pdo),
-        new NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos(new PdoRepositorioNotas($pdo), new NotasSoap\Persistencia\Pdo\PdoBandejaSalida($pdo), $ids),
-        new PdoRepositorioDiagnosticos($pdo), new PdoRegistroAuditoria($pdo), new PdoTransaccion($pdo), $ids, new RelojFijo());
+    $k = $kernelSobre($pdo);
     $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
     igual(0, $contar($pdo, 'outbox_events'), 'el borrador no genera evento');
     $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
@@ -150,7 +144,39 @@ prueba('INT-08', 'Objetos reutilizables: el mismo flujo con adaptadores PDO y en
 
         return [[$r1->estado, $r1->cuerpo], [$r2->estado, $r2->cuerpo], [$r3->estado, $r3->cuerpo], [$r4->estado, $r4->cuerpo]];
     };
-    $enMemoria = crearKernelEnMemoria(['tokens_demo' => Escenario::TOKENS],
+    $enMemoria = crearKernelEnMemoria(Escenario::config(),
         new NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php'), new GeneradorSecuencial(), new RelojFijo());
     igual($flujo($kernelSobre($sqlite())), $flujo($enMemoria), 'PDO vs memoria');
+});
+
+prueba('INT-09', 'Idempotencia con PDO real: el reintento con la misma clave devuelve la misma nota y la base guarda una sola', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $r1 = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-int-0001']));
+    $r2 = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-int-0001']));
+    igual([201, 201, 'true'], [$r1->estado, $r2->estado, $r2->cabecera('Idempotent-Replayed')], 'respuestas');
+    igual($r1->cuerpo['clinical_note_id'], $r2->cuerpo['clinical_note_id'], 'misma nota');
+    igual([1, 1, 1], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'idempotency_keys'), $contar($pdo, 'audit_events')], 'filas');
+});
+
+prueba('INT-10', 'Modo memoria con archivo: lo guardado sobrevive a un proceso nuevo y el reintento con la misma clave no duplica', function (): void {
+    $archivo = tempnam(sys_get_temp_dir(), 'notas-soap-');
+    unlink($archivo);
+    $datos = require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php';
+    $kernel = static fn (\NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria $a): Kernel => crearKernelEnMemoria(Escenario::config(), $a, new GeneradorSecuencial(), new RelojFijo());
+    try {
+        $primero = almacenesDesdeArchivo($archivo, $datos);
+        $r1 = $kernel($primero)->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-mem-0001']));
+        guardarAlmacenes($archivo, $primero);
+
+        $segundo = almacenesDesdeArchivo($archivo, $datos); // simula la siguiente petición de php -S
+        $r2 = $kernel($segundo)->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-mem-0001']));
+        igual([201, 201, 'true'], [$r1->estado, $r2->estado, $r2->cabecera('Idempotent-Replayed')], 'respuestas');
+        igual($r1->cuerpo['clinical_note_id'], $r2->cuerpo['clinical_note_id'], 'misma nota');
+        igual(1, count($segundo->notas->deExpediente('exp-carlos')), 'una sola nota');
+    } finally {
+        if (is_file($archivo)) {
+            unlink($archivo);
+        }
+    }
 });

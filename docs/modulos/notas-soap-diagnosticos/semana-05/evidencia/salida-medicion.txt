@@ -1,0 +1,9 @@
+Micro-HIS Notas SOAP - medición de la frontera (PHP 8.3.6, Linux, adaptadores en memoria)
+Comando: php bin/medir.php 3000 300
+
+Escenario                                                           n     p50 ms     p95 ms     p99 ms  errores    x p50 A
+A) Caso de uso en proceso (monolito modular)                     3000      0.039      0.169      0.225        0       1,0x
+B) API HTTP en proceso (Kernel completo, sin red)                3000      0.054      0.270      0.315        0       1,4x
+C) Servicio separado por red local (php -S + cliente)             300      0.549      0.791      0.960        0      14,2x
+D) C + 2 consultas remotas previas (vecinos también separados)    300      1.417      2.107      4.450        0      36,6x
+C0) Control: petición mínima (404) por la misma red             300      0.367      0.556      0.630        0       9,5x

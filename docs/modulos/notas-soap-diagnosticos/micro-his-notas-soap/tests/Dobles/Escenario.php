@@ -6,6 +6,7 @@ namespace NotasSoap\Pruebas\Dobles;
 
 use NotasSoap\Aplicacion\CasosDeUso\ConsultarNota;
 use NotasSoap\Aplicacion\CasosDeUso\FirmarNota;
+use NotasSoap\Aplicacion\CasosDeUso\ListarNotasExpediente;
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\RegistrarNotaComando;
 use NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos;
@@ -17,13 +18,16 @@ use NotasSoap\Persistencia\EnMemoria\BandejaSalidaEnMemoria;
 use NotasSoap\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
 use NotasSoap\Persistencia\EnMemoria\RepositorioNotasEnMemoria;
 use NotasSoap\Presentacion\Http\AutenticadorTokenDemo;
+use NotasSoap\Presentacion\Http\Autorizacion\PermisosPorRol;
 use NotasSoap\Presentacion\Http\Kernel;
+use NotasSoap\Presentacion\Http\Observabilidad\RegistroAcceso;
+use NotasSoap\Presentacion\Http\Observabilidad\RegistroAccesoEnMemoria;
 use NotasSoap\Presentacion\Http\Solicitud;
 
 /**
  * Sistema completo con los adaptadores EN MEMORIA de src/ (los mismos del modo demostración)
  * y los datos de config/datos-demo-memoria.php. Uno nuevo por prueba.
- * Se le pueden cambiar piezas para provocar fallas (diagnósticos, acceso o bandeja que fallan).
+ * Se le pueden cambiar piezas para provocar fallas (diagnósticos, acceso, bandeja o registro de acceso).
  */
 final class Escenario
 {
@@ -32,35 +36,52 @@ final class Escenario
         'token-lopez' => ['dr-lopez', 'hosp-oriente', ['medico']],
         'token-ana' => ['enf-ana', 'hosp-oriente', ['enfermeria']],
     ];
+    public const PERMISOS = [
+        'medico' => ['notas_soap.registrar', 'notas_soap.firmar', 'notas_soap.consultar'],
+        'enfermeria' => ['notas_soap.consultar'],
+    ];
 
     public readonly AlmacenesEnMemoria $almacenes;
     public readonly RepositorioNotasEnMemoria $notas;
     public readonly RegistroAuditoriaEnMemoria $auditoria;
     public readonly BandejaSalidaEnMemoria $bandeja;
+    public readonly RegistroAcceso $registroAcceso;
     public readonly RegistrarNotaConDiagnostico $registrar;
     public readonly FirmarNota $firmar;
     public readonly ConsultarNota $consultar;
+    public readonly ListarNotasExpediente $listar;
     public readonly Kernel $kernel;
 
     public function __construct(
         ?RepositorioDiagnosticos $diagnosticos = null,
         ?VerificadorAcceso $acceso = null,
         ?BandejaSalida $bandeja = null,
+        ?RegistroAcceso $registroAcceso = null,
     ) {
-        $this->almacenes = $a = new AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php');
-        $this->notas = $a->notas;
-        $this->auditoria = $a->auditoria;
-        $this->bandeja = $a->bandeja;
+        $this->almacenes = $al = new AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php');
+        $this->notas = $al->notas;
+        $this->auditoria = $al->auditoria;
+        $this->bandeja = $al->bandeja;
+        $this->registroAcceso = $registroAcceso ?? new RegistroAccesoEnMemoria();
         $ids = new GeneradorSecuencial();
         $reloj = new RelojFijo();
-        $notas = new RepositorioNotasConEventos($a->notas, $bandeja ?? $a->bandeja, $ids);
-        $diagnosticos ??= $a->diagnosticos;
-        $acceso ??= $a->acceso;
 
-        $this->registrar = new RegistrarNotaConDiagnostico($acceso, $a->expedientes, $notas, $diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj);
-        $this->firmar = new FirmarNota($notas, $diagnosticos, $a->auditoria, $a->transaccion, $reloj);
-        $this->consultar = new ConsultarNota($notas, $diagnosticos);
-        $this->kernel = construirKernel(new AutenticadorTokenDemo(self::TOKENS), $acceso, $a->expedientes, $notas, $diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj);
+        $a = $al->conjunto();
+        $a = $a->conNotas(new RepositorioNotasConEventos($a->notas, $bandeja ?? $al->bandeja, $ids));
+        $a = $diagnosticos === null ? $a : $a->conDiagnosticos($diagnosticos);
+        $a = $acceso === null ? $a : $a->conAcceso($acceso);
+
+        $this->registrar = new RegistrarNotaConDiagnostico($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj, $a->idempotencia);
+        $this->firmar = new FirmarNota($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $reloj);
+        $this->consultar = new ConsultarNota($a->notas, $a->diagnosticos);
+        $this->listar = new ListarNotasExpediente($a->notas, $a->diagnosticos);
+        $this->kernel = construirKernel(new AutenticadorTokenDemo(self::TOKENS), $a, $ids, $reloj, new PermisosPorRol(self::PERMISOS), $this->registroAcceso);
+    }
+
+    /** Configuración mínima para crearKernelEnMemoria(). */
+    public static function config(): array
+    {
+        return ['tokens_demo' => self::TOKENS, 'permisos_por_rol' => self::PERMISOS];
     }
 
     /** Comando válido: la Dra. Méndez registra la nota de Carlos (neumonía). */
@@ -71,15 +92,15 @@ final class Escenario
             'expediente' => 'exp-carlos', 'episodio' => 'epi-100',
             'S' => 'Tos productiva y fiebre de 3 días', 'O' => 'T 38.6 °C, estertores en base derecha',
             'A' => 'Probable neumonía adquirida en la comunidad', 'P' => 'Radiografía de tórax y antibiótico',
-            'codigo' => 'J18.9', 'descripcion' => 'Neumonía no especificada', 'tipo' => 'primary',
+            'codigo' => 'J18.9', 'descripcion' => 'Neumonía no especificada', 'tipo' => 'primary', 'clave' => null,
         ], $cambios);
 
         return new RegistrarNotaComando($d['usuario'], $d['hospitalUsuario'], $d['roles'], $d['hospital'], $d['expediente'], $d['episodio'],
-            $d['S'], $d['O'], $d['A'], $d['P'], $d['codigo'], $d['descripcion'], $d['tipo']);
+            $d['S'], $d['O'], $d['A'], $d['P'], $d['codigo'], $d['descripcion'], $d['tipo'], $d['clave']);
     }
 
     /** Petición HTTP válida para POST /api/v1/notas-soap. */
-    public static function peticion(array $cuerpo = [], array $cabeceras = [], string $metodo = 'POST', string $ruta = '/api/v1/notas-soap'): Solicitud
+    public static function peticion(array $cuerpo = [], array $cabeceras = [], string $metodo = 'POST', string $ruta = '/api/v1/notas-soap', array $consulta = []): Solicitud
     {
         $c = array_replace([
             'medical_record_id' => 'exp-carlos', 'care_episode_id' => 'epi-100',
@@ -88,6 +109,6 @@ final class Escenario
             'diagnostico' => ['code' => 'J18.9', 'description' => 'Neumonía no especificada', 'type' => 'primary'],
         ], $cuerpo);
 
-        return new Solicitud($metodo, $ruta, array_replace(['x-tenant-id' => 'hosp-oriente', 'authorization' => 'Bearer token-mendez'], $cabeceras), $c);
+        return new Solicitud($metodo, $ruta, array_replace(['x-tenant-id' => 'hosp-oriente', 'authorization' => 'Bearer token-mendez'], $cabeceras), $c, $consulta);
     }
 }

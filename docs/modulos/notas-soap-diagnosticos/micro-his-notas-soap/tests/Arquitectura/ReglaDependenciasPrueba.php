@@ -69,8 +69,8 @@ prueba('ARQ-02', 'Aplicación solo depende de Dominio', function () use ($verifi
     $verificarCapa('Aplicacion', ['NotasSoap\\Aplicacion\\', 'NotasSoap\\Dominio\\']);
 });
 
-prueba('ARQ-03', 'Presentación usa casos de uso, comandos, resultados y excepciones de Dominio; nunca Persistencia, puertos ni entidades', function () use ($verificarCapa): void {
-    $verificarCapa('Presentacion', ['NotasSoap\\Presentacion\\', 'NotasSoap\\Aplicacion\\CasosDeUso\\', 'NotasSoap\\Aplicacion\\Comandos\\', 'NotasSoap\\Aplicacion\\Resultados\\', 'NotasSoap\\Dominio\\Excepciones\\']);
+prueba('ARQ-03', 'Presentación usa casos de uso, comandos, resultados y excepciones; nunca Persistencia, puertos ni entidades', function () use ($verificarCapa): void {
+    $verificarCapa('Presentacion', ['NotasSoap\\Presentacion\\', 'NotasSoap\\Aplicacion\\CasosDeUso\\', 'NotasSoap\\Aplicacion\\Comandos\\', 'NotasSoap\\Aplicacion\\Resultados\\', 'NotasSoap\\Aplicacion\\Excepciones\\', 'NotasSoap\\Dominio\\Excepciones\\']);
 });
 
 prueba('ARQ-04', 'Persistencia implementa puertos y no conoce Presentación ni casos de uso', function () use ($verificarCapa): void {
@@ -197,6 +197,7 @@ prueba('ARQ-10', 'Cada puerto de repositorio tiene dos adaptadores: uno PDO y un
     $puertos = array_map(static fn (string $f): string => 'NotasSoap\\Dominio\\Puertos\\' . basename($f, '.php'), glob("$raiz/Dominio/Puertos/*.php") ?: []);
     $puertos[] = 'NotasSoap\\Aplicacion\\Puertos\\BandejaSalida';
     $puertos[] = 'NotasSoap\\Aplicacion\\Puertos\\Transaccion';
+    $puertos[] = 'NotasSoap\\Aplicacion\\Puertos\\RegistroIdempotencia';
     $clases = static function (string $dir, string $ns) use ($raiz): array {
         return array_map(static fn (string $f): string => $ns . basename($f, '.php'), glob("$raiz/Persistencia/$dir/*.php") ?: []);
     };
@@ -209,7 +210,7 @@ prueba('ARQ-10', 'Cada puerto de repositorio tiene dos adaptadores: uno PDO y un
             }
         }
     }
-    afirmar(count($puertos) === 7, 'se esperaban 7 puertos, hay ' . count($puertos));
+    afirmar(count($puertos) === 8, 'se esperaban 8 puertos, hay ' . count($puertos));
     afirmar($faltan === [], implode('; ', $faltan));
 });
 
@@ -240,4 +241,31 @@ prueba('ARQ-12', 'Los casos de uso dependen de las interfaces Repository, nunca 
         }
     }
     afirmar($violaciones === [], implode('; ', $violaciones));
+});
+
+/* ---------- Semana 5: cliente-servidor ---------- */
+
+prueba('ARQ-13', 'La librería Cliente solo conoce el contrato: no importa clases del servidor, y el servidor no importa el Cliente', function () use ($verificarCapa, $dependencias): void {
+    $verificarCapa('Cliente', ['NotasSoap\\Cliente']); // su propio namespace y nada más
+    $violaciones = [];
+    foreach (['Dominio', 'Aplicacion', 'Presentacion', 'Persistencia'] as $capa) {
+        foreach ($dependencias($capa) as $archivo => $nombres) {
+            foreach ($nombres as $n) {
+                if (str_starts_with($n, 'NotasSoap\\Cliente\\')) {
+                    $violaciones[] = "$archivo usa $n";
+                }
+            }
+        }
+    }
+    afirmar($violaciones === [], implode('; ', $violaciones));
+});
+
+prueba('ARQ-14', 'Toda ruta declara un permiso y no hay dos rutas con el mismo método y plantilla', function (): void {
+    $vistas = [];
+    foreach ((new NotasSoap\Pruebas\Dobles\Escenario())->kernel->rutas() as $r) {
+        afirmar(preg_match('/^notas_soap\.[a-z_]+$/', $r->permiso) === 1, "permiso inválido en {$r->metodo} {$r->plantilla}");
+        $vistas[] = $r->metodo . ' ' . $r->plantilla;
+    }
+    igual(count($vistas), count(array_unique($vistas)), 'rutas únicas');
+    afirmar(count($vistas) === 4, 'se esperaban 4 operaciones');
 });

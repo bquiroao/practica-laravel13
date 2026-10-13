@@ -70,6 +70,18 @@ CREATE TABLE outbox_events (
 );
 CREATE INDEX outbox_events_pendientes_index ON outbox_events (occurred_at) WHERE published_at IS NULL;
 
+-- Idempotencia del registro (semana 5): una Idempotency-Key por hospital y usuario apunta a la nota que creó.
+-- Se escribe en la misma transacción que la nota; la llave primaria impide duplicados aunque lleguen dos a la vez.
+CREATE TABLE idempotency_keys (
+    hospital_id      text NOT NULL,
+    user_ref_id      text NOT NULL,
+    idempotency_key  text NOT NULL CHECK (idempotency_key ~ '^[A-Za-z0-9-]{8,64}$'),
+    request_hash     text NOT NULL CHECK (length(request_hash) = 64),
+    clinical_note_id text NOT NULL REFERENCES clinical_notes (clinical_note_id),
+    created_at       timestamptz NOT NULL,
+    PRIMARY KEY (hospital_id, user_ref_id, idempotency_key)
+);
+
 -- R-07: una nota firmada no cambia. R-08: notas, diagnósticos y eventos no se borran.
 CREATE FUNCTION notas_soap_proteger() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
