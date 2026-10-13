@@ -8,6 +8,7 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 | 4 | Entrada con **MVC** (controladores, formularios, vistas); patrón **Repository** con adaptadores **PDO e InMemory**; suite de contrato |
 | 5 | **Cliente-servidor**: contrato **OpenAPI 3.1**, endpoint de decisión (PDP), librería **cliente** con resiliencia, observabilidad (`X-Request-ID`) y medición de la frontera de microservicio |
 | 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
+| 7 | Refactor sin ampliar el módulo: `CambioDeMembresia` + `RegistradorDeCambios` separan auditoría y persistencia de los casos de uso; medidor `bin/acoplamiento.php` |
 
 ## Estructura
 
@@ -17,6 +18,7 @@ micro-his-rbac/
 ├── api/openapi.yaml              ← contrato REST (OpenAPI 3.1), validado contra el código (API-01..03)
 ├── bin/demo.php                  ← flujo completo en un proceso, sin base de datos
 ├── bin/medir.php                 ← latencia de una decisión: en proceso vs. HTTP vs. red
+├── bin/acoplamiento.php          ← Ce / Ca / preocupaciones RBAC por clase
 ├── bootstrap/
 │   ├── autoload.php              ← autoload PSR-4 mínimo
 │   └── contenedor.php            ← raíz de composición: elige PDO o InMemory y conecta las capas
