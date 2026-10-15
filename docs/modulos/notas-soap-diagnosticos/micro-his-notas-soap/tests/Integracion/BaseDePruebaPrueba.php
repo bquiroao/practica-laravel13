@@ -93,7 +93,7 @@ prueba('INT-05', 'La base también protege: no deja modificar una nota firmada n
     igual('signed', $repo->buscar($id)?->estado, 'la nota sigue firmada');
 });
 
-prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
+prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb, corrección y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
     $dsn = getenv('NOTASSOAP_DB_DSN');
     if ($dsn === false || $dsn === '') {
         omitir('defina NOTASSOAP_DB_DSN para probar contra PostgreSQL');
@@ -112,6 +112,10 @@ prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, idempotencia, bandej
         $r = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']));
         igual([201, 'true'], [$r->estado, $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']))->cabecera('Idempotent-Replayed')], 'idempotencia en PostgreSQL');
         igual('NotaSoapFirmada', $pdo->query("SELECT payload_minimal->>'clinical_note_id' = '$id' AS ok, event_type FROM outbox_events")->fetch()['event_type'] ?? null, 'outbox en jsonb');
+        // Semana 6: corrección contra PostgreSQL (UNIQUE supersedes_id y CHECK de la corrección)
+        $c = $k->manejar(Escenario::peticionCorreccion($id));
+        igual([201, 2, $id], [$c->estado, $c->cuerpo['version_no'] ?? null, $c->cuerpo['supersedes_id'] ?? null], 'corrección en PostgreSQL');
+        igual(409, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'Segundo intento sobre la misma versión']))->estado, 'una corrección por versión');
         $pdo->exec("CREATE FUNCTION $esquema.romper() RETURNS trigger LANGUAGE plpgsql AS \$\$ BEGIN RAISE EXCEPTION 'falla simulada'; END; \$\$");
         $pdo->exec("CREATE TRIGGER romper BEFORE INSERT ON diagnoses FOR EACH ROW EXECUTE FUNCTION $esquema.romper()");
         $antes = $contar($pdo, 'clinical_notes');
@@ -180,3 +184,19 @@ prueba('INT-10', 'Modo memoria con archivo: lo guardado sobrevive a un proceso n
         }
     }
 });
+
+prueba('INT-11', 'Semana 6: corrección con PDO real; la base guarda la cadena (supersedes_id) y su UNIQUE impide dos correcciones de la misma versión', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $id = Escenario::notaFirmada($k);
+    $r = $k->manejar(Escenario::peticionCorreccion($id));
+    igual(201, $r->estado, 'corrección');
+    $fila = $pdo->query("SELECT version_no, supersedes_id, correction_reason, status FROM clinical_notes WHERE clinical_note_id = '{$r->cuerpo['clinical_note_id']}'")->fetch(PDO::FETCH_ASSOC);
+    igual(['version_no' => 2, 'supersedes_id' => $id, 'correction_reason' => 'Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C', 'status' => 'draft'], $fila, 'fila de la corrección');
+    igual('signed', $pdo->query("SELECT status FROM clinical_notes WHERE clinical_note_id = '$id'")->fetchColumn(), 'la original sigue firmada');
+    igual(409, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'Segundo intento sobre la misma versión']))->estado, 'segunda corrección');
+    lanza(PDOException::class, fn () => $pdo->exec("INSERT INTO clinical_notes (clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, note_type, content, status, version_no, created_at, supersedes_id, correction_reason)
+        VALUES ('directa', 'exp-carlos', 'epi-100', 'dra-mendez', 'soap', '{}', 'draft', 2, '2026-10-12', '$id', 'Inserción directa saltando la aplicación')"), 'la base también lo impide');
+    igual([2, 2], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'diagnoses')], 'dos versiones, cada una con su diagnóstico');
+});
+

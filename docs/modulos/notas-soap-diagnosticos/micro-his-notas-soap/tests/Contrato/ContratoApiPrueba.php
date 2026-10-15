@@ -100,6 +100,16 @@ function escenariosReales(): array
     $anotar($LISTA, $k->manejar(Escenario::peticion([], [], 'GET', '/api/v1/expedientes/exp-carlos/notas-soap', ['estado' => 'archivada'])));
     $anotar($LISTA, $k->manejar(Escenario::peticion([], ['x-tenant-id' => 'hosp-central'], 'GET', '/api/v1/expedientes/exp-carlos/notas-soap')));
     $anotar($POST, (new Escenario(diagnosticos: new NotasSoap\Pruebas\Dobles\RepositorioDiagnosticosQueFalla()))->kernel->manejar(Escenario::peticion()));
+    // Semana 6: corrección de una nota firmada
+    $CORR = 'POST /api/v1/notas-soap/{notaId}/correcciones';
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'corto'])));
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($id)));
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'Segundo intento sobre la misma versión'])));
+    $borrador = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($borrador)));
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion('no-existe')));
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 5])));
+    $anotar($CORR, $k->manejar(Escenario::peticionCorreccion($id, [], ['authorization' => 'Bearer token-ana'])));
 
     return $vistos;
 }
@@ -126,7 +136,7 @@ prueba('API-02', 'Toda operación documenta 400, 401, 403 y 500, y al menos una 
     afirmar($faltantes === [], implode('; ', $faltantes));
 });
 
-prueba('API-03', 'Cada código HTTP que devuelve el servidor en 24 escenarios reales está documentado en su operación', function (): void {
+prueba('API-03', 'Cada código HTTP que devuelve el servidor en 31 escenarios reales está documentado en su operación', function (): void {
     $contrato = operacionesDelContrato();
     $faltan = [];
     foreach (escenariosReales() as [$op, $estado]) {

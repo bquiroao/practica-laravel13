@@ -21,7 +21,7 @@ return [
     ],
     // Permisos por rol (datos de demostración). En el HIS los decide el módulo RBAC (ASII-02).
     'permisos_por_rol' => [
-        'medico' => ['notas_soap.registrar', 'notas_soap.firmar', 'notas_soap.consultar'],
+        'medico' => ['notas_soap.registrar', 'notas_soap.firmar', 'notas_soap.consultar', 'notas_soap.corregir'],
         'enfermeria' => ['notas_soap.consultar'],
     ],
 ];
