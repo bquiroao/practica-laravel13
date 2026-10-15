@@ -12,6 +12,7 @@ declare(strict_types=1);
  */
 
 use NotasSoap\Aplicacion\CasosDeUso\ConsultarNota;
+use NotasSoap\Aplicacion\CasosDeUso\CorregirNota;
 use NotasSoap\Aplicacion\CasosDeUso\FirmarNota;
 use NotasSoap\Aplicacion\CasosDeUso\ListarNotasExpediente;
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
@@ -62,6 +63,7 @@ function construirKernel(
         new FirmarNota($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $reloj),
         new ConsultarNota($a->notas, $a->diagnosticos),
         new ListarNotasExpediente($a->notas, $a->diagnosticos),
+        new CorregirNota($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj),
         $vistas,
     );
 
