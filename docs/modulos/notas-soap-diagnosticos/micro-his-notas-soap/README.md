@@ -1,11 +1,12 @@
 # Micro-HIS Notas SOAP y diagnósticos (ASII-11)
 
-Versión mínima y separada del módulo 11 del Sistema Hospitalario Integrado, escrita en **PHP 8.2+ vanilla** (sin framework ni Composer). Ejecuta un solo proceso de punta a punta: **registro de nota SOAP y asociación de diagnóstico clínico**, más la firma y la consulta de la nota.
+Versión mínima y separada del módulo 11 del Sistema Hospitalario Integrado, escrita en **PHP 8.2+ vanilla** (sin framework ni Composer). Ejecuta un solo proceso de punta a punta: **registro de nota SOAP y asociación de diagnóstico clínico**, más la firma, la consulta y, desde la semana 6, la corrección de una nota firmada.
 
-Se inició en la semana 3 y se usa como base en las semanas 4 y 5.
+Se inició en la semana 3 y se usa como base en las semanas 4, 5 y 6.
 
 - Semana 3 — capas, PDO y vista C4: [`../semana-03/semana-03-arquitectura-micro-his.md`](../semana-03/semana-03-arquitectura-micro-his.md)
 - Semana 4 — MVC en la entrada, patrón Repository con adaptadores PDO y en memoria, repositorio compartido: [`../semana-04/semana-04-mvc-repository.md`](../semana-04/semana-04-mvc-repository.md)
+- Semana 6 — defensa de la arquitectura y cambio práctico «corregir una nota firmada»: [`../semana-06/semana-06-defensa-arquitectura.md`](../semana-06/semana-06-defensa-arquitectura.md)
 - Semana 5 — cliente-servidor, contrato OpenAPI, idempotencia, cliente con circuit breaker y evaluación de la frontera de microservicio: [`../semana-05/semana-05-cliente-servidor-microservicios.md`](../semana-05/semana-05-cliente-servidor-microservicios.md)
 
 ## Capas
@@ -65,6 +66,7 @@ En PowerShell: `$env:NOTASSOAP_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=mic
 | `API` | El contrato `api/openapi.yaml` y el código dicen lo mismo: operaciones, permisos, códigos HTTP y códigos de error |
 | `CLI` | Cliente: reintentos, respuesta perdida sin duplicar, firma sin reintento, circuit breaker y red real caída |
 | `OBS` | `X-Request-ID` y registro de acceso sin datos sensibles |
+| `COR` | Semana 6: corrección de una nota firmada (versión nueva, una por versión, permisos, reglas, atomicidad, línea de tiempo) |
 
 ## Demostración sin base de datos
 
@@ -110,6 +112,7 @@ php -S 127.0.0.1:8080 -t public
 | `POST` | `/api/v1/notas-soap` | `notas_soap.registrar` | Registra la nota con su diagnóstico (201). Acepta `Idempotency-Key` |
 | `GET` | `/api/v1/notas-soap/{id}` | `notas_soap.consultar` | Consulta la nota y sus diagnósticos (200) |
 | `POST` | `/api/v1/notas-soap/{id}/firma` | `notas_soap.firmar` | Firma la nota; solo el autor (200) |
+| `POST` | `/api/v1/notas-soap/{id}/correcciones` | `notas_soap.corregir` | Corrige una nota firmada: crea la versión siguiente en borrador con `supersedes_id` y `correction_reason`; la original no cambia (201) |
 | `GET` | `/api/v1/expedientes/{id}/notas-soap?estado=draft\|signed` | `notas_soap.consultar` | Resúmenes de las notas del expediente, sin texto clínico (200) |
 
 El contrato completo (payloads, cabeceras y errores) está en [`api/openapi.yaml`](api/openapi.yaml).
@@ -126,8 +129,8 @@ Tokens de demostración (datos ficticios, definidos en `config/config.php`):
 
 | Token | Usuario | Rol | Asignado a `epi-100` | Permisos |
 |---|---|---|---|---|
-| `token-mendez` | `dra-mendez` | médico | Sí | registrar, firmar, consultar |
-| `token-lopez` | `dr-lopez` | médico | No | registrar, firmar, consultar |
+| `token-mendez` | `dra-mendez` | médico | Sí | registrar, firmar, consultar, corregir |
+| `token-lopez` | `dr-lopez` | médico | No | registrar, firmar, consultar, corregir |
 | `token-ana` | `enf-ana` | enfermería | No | consultar |
 
 | Error | HTTP |
@@ -137,8 +140,8 @@ Tokens de demostración (datos ficticios, definidos en `config/config.php`):
 | El rol no tiene el permiso de la ruta, sin asignación, otro hospital, no es el autor | 403 |
 | Nota o ruta inexistente | 404 |
 | Método equivocado (con cabecera `Allow`) | 405 |
-| Expediente cerrado o episodio de otro paciente / nota ya firmada | 409 |
-| Sección SOAP vacía / diagnóstico CIE-10 inválido / `Idempotency-Key` reutilizada con otro contenido | 422 |
+| Expediente cerrado o episodio de otro paciente / nota ya firmada / corregir un borrador / versión ya corregida | 409 |
+| Sección SOAP vacía / diagnóstico CIE-10 inválido / `Idempotency-Key` reutilizada con otro contenido / motivo de corrección de menos de 10 caracteres | 422 |
 | Error de base de datos (mensaje genérico) | 500 |
 | Sin conexión con la base (con cabecera `Retry-After`) | 503 |
 
@@ -146,7 +149,7 @@ Tokens de demostración (datos ficticios, definidos en `config/config.php`):
 
 - La autenticación es de demostración. En el HIS la identidad sale del JWT del módulo 1 (RBAC).
 - El catálogo CIE-10 no se consulta: solo se valida el formato del código.
-- No incluye corrección de notas firmadas (versión nueva con `supersedes_id`); queda para una semana posterior.
+- La corrección (semana 6) todavía no acepta `Idempotency-Key` y no marca el diagnóstico de la versión anterior como `entered_in_error`.
 - La bandeja de salida (`outbox_events`) se llena al firmar, pero el publicador que la envía a CENTRAL está diseñado, no implementado.
 - Los adaptadores en memoria pierden los datos al terminar el proceso. Con `php -S` solo se conservan si se usa `NOTASSOAP_MEMORIA_ARCHIVO`, y eso es únicamente para demostraciones.
 - Las claves de idempotencia no caducan; en el HIS conviene borrarlas después de 24 horas.
