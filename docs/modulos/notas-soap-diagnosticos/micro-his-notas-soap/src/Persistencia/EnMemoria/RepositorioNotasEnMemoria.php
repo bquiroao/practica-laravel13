@@ -23,6 +23,10 @@ final class RepositorioNotasEnMemoria implements RepositorioNotas, Restaurable
         if (isset($this->notas[$nota->id])) {
             throw new ErrorPersistencia('Error de base de datos.', '23505'); // mismo SQLSTATE que una llave duplicada
         }
+        // Semana 6: igual que el UNIQUE (supersedes_id) de la base: una versión se corrige una sola vez.
+        if ($nota->reemplazaA !== null && $this->correccionDe($nota->reemplazaA) !== null) {
+            throw new ErrorPersistencia('Error de base de datos.', '23505');
+        }
         $this->notas[$nota->id] = $nota;
     }
 
@@ -48,6 +52,17 @@ final class RepositorioNotasEnMemoria implements RepositorioNotas, Restaurable
         usort($lista, static fn (NotaSoap $a, NotaSoap $b): int => [$a->creadaEn, $a->id] <=> [$b->creadaEn, $b->id]);
 
         return $lista;
+    }
+
+    public function correccionDe(string $notaId): ?NotaSoap
+    {
+        foreach ($this->notas as $nota) {
+            if ($nota->reemplazaA === $notaId) {
+                return $nota;
+            }
+        }
+
+        return null;
     }
 
     /** @return list<NotaSoap> */

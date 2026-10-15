@@ -116,4 +116,22 @@ foreach ($adaptadores as $nombre => $crear) {
         $e = lanza(ErrorPersistencia::class, fn () => $idem->guardar('hosp-oriente', 'dra-mendez', 'clave-rep-0001', $huella, 'n-1'), 'duplicada');
         afirmar(str_starts_with((string) $e->sqlState, '23'), 'SQLSTATE de integridad');
     });
+
+    prueba("REP-09 $nombre", 'Semana 6: guarda la corrección con supersedes_id y motivo; correccionDe la encuentra; una versión solo se corrige una vez (clase 23)', function () use ($crear, $nota): void {
+        [$notas] = $crear();
+        $original = $nota()->firmar(new DateTimeImmutable('2026-10-12T10:00:00-06:00'));
+        $notas->guardar($original);
+        $nuevas = new SeccionesSoap('Tos y fiebre', 'T 37.6 °C', 'Probable neumonía', 'Radiografía');
+        $v2 = NotaSoap::corregir($original, 'n-2', $nuevas, 'Temperatura mal anotada', new DateTimeImmutable('2026-10-12T11:00:00-06:00'));
+        igual(null, $notas->correccionDe('n-1'), 'sin corrección todavía');
+        $notas->guardar($v2);
+        $leida = $notas->buscar('n-2');
+        igual([2, 'n-1', 'Temperatura mal anotada', 'T 37.6 °C'], [$leida?->version, $leida?->reemplazaA, $leida?->motivoCorreccion, $leida?->secciones->objetivo], 'leída de vuelta');
+        igual('n-2', $notas->correccionDe('n-1')?->id, 'correccionDe');
+        igual(null, $notas->correccionDe('n-2'), 'la v2 aún no tiene corrección');
+        igual([null, null], [$notas->buscar('n-1')?->reemplazaA, $notas->buscar('n-1')?->motivoCorreccion], 'la original no apunta a nada');
+        $otra = NotaSoap::corregir($original, 'n-3', $nuevas, 'Otro intento sobre la misma versión', new DateTimeImmutable('2026-10-12T11:05:00-06:00'));
+        $e = lanza(ErrorPersistencia::class, fn () => $notas->guardar($otra), 'segunda corrección de n-1');
+        afirmar(str_starts_with((string) $e->sqlState, '23'), 'SQLSTATE de integridad');
+    });
 }

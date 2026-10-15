@@ -37,7 +37,7 @@ final class Escenario
         'token-ana' => ['enf-ana', 'hosp-oriente', ['enfermeria']],
     ];
     public const PERMISOS = [
-        'medico' => ['notas_soap.registrar', 'notas_soap.firmar', 'notas_soap.consultar'],
+        'medico' => ['notas_soap.registrar', 'notas_soap.firmar', 'notas_soap.consultar', 'notas_soap.corregir'],
         'enfermeria' => ['notas_soap.consultar'],
     ];
 
@@ -110,5 +110,31 @@ final class Escenario
         ], $cuerpo);
 
         return new Solicitud($metodo, $ruta, array_replace(['x-tenant-id' => 'hosp-oriente', 'authorization' => 'Bearer token-mendez'], $cabeceras), $c, $consulta);
+    }
+
+    /**
+     * Semana 6: petición válida para POST /api/v1/notas-soap/{id}/correcciones.
+     * El expediente y el episodio NO van en el cuerpo: se heredan de la nota que se corrige.
+     */
+    public static function peticionCorreccion(string $notaId, array $cuerpo = [], array $cabeceras = []): Solicitud
+    {
+        $c = array_replace([
+            'correction_reason' => 'Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C',
+            'subjetivo' => 'Tos productiva y fiebre de 3 días', 'objetivo' => 'T 37.6 °C, estertores en base derecha',
+            'analisis' => 'Probable neumonía adquirida en la comunidad', 'plan' => 'Radiografía de tórax y antibiótico',
+            'diagnostico' => ['code' => 'J18.9', 'description' => 'Neumonía no especificada', 'type' => 'primary'],
+        ], $cuerpo);
+
+        return new Solicitud('POST', "/api/v1/notas-soap/$notaId/correcciones",
+            array_replace(['x-tenant-id' => 'hosp-oriente', 'authorization' => 'Bearer token-mendez'], $cabeceras), $c, []);
+    }
+
+    /** Registra y firma una nota de la Dra. Méndez por HTTP; devuelve su id. */
+    public static function notaFirmada(Kernel $k): string
+    {
+        $id = $k->manejar(self::peticion())->cuerpo['clinical_note_id'];
+        $k->manejar(self::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+
+        return $id;
     }
 }
