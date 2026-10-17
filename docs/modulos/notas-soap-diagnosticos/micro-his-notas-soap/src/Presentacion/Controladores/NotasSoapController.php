@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace NotasSoap\Presentacion\Controladores;
 
 use NotasSoap\Aplicacion\CasosDeUso\ConsultarNota;
+use NotasSoap\Aplicacion\CasosDeUso\CorregirNota;
 use NotasSoap\Aplicacion\CasosDeUso\FirmarNota;
 use NotasSoap\Aplicacion\CasosDeUso\ListarNotasExpediente;
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\ConsultarNotaComando;
 use NotasSoap\Aplicacion\Comandos\FirmarNotaComando;
 use NotasSoap\Presentacion\Entrada\FiltroNotasExpediente;
+use NotasSoap\Presentacion\Entrada\FormularioCorreccionNota;
 use NotasSoap\Presentacion\Entrada\FormularioRegistroNota;
 use NotasSoap\Presentacion\Http\Identidad;
 use NotasSoap\Presentacion\Http\Respuesta;
@@ -31,6 +33,7 @@ final class NotasSoapController
         private readonly FirmarNota $firmar,
         private readonly ConsultarNota $consultar,
         private readonly ListarNotasExpediente $listar,
+        private readonly CorregirNota $corregir,
         private readonly SelectorVista $vistas,
     ) {
     }
@@ -47,6 +50,14 @@ final class NotasSoapController
         $resultado = $this->firmar->ejecutar(new FirmarNotaComando($quien->usuarioId, $quien->hospitalId, $hospital, $notaId));
 
         return $this->vistas->para($s)->nota($resultado, 200);
+    }
+
+    /** Semana 6: la corrección es una nota nueva (201) que reemplaza a la firmada. */
+    public function corregir(Solicitud $s, Identidad $quien, string $hospital, string $notaId): Respuesta
+    {
+        $resultado = $this->corregir->ejecutar(FormularioCorreccionNota::comando($s, $quien, $hospital, $notaId));
+
+        return $this->vistas->para($s)->nota($resultado, 201);
     }
 
     public function consultar(Solicitud $s, Identidad $quien, string $hospital, string $notaId): Respuesta

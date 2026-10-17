@@ -9,9 +9,12 @@ use NotasSoap\Dominio\Excepciones\AccesoDenegado;
 use NotasSoap\Dominio\Excepciones\DiagnosticoInvalido;
 use NotasSoap\Dominio\Excepciones\ErrorPersistencia;
 use NotasSoap\Dominio\Excepciones\ExpedienteNoDisponible;
+use NotasSoap\Dominio\Excepciones\MotivoCorreccionInsuficiente;
 use NotasSoap\Dominio\Excepciones\NotaFirmada;
 use NotasSoap\Dominio\Excepciones\NotaIncompleta;
 use NotasSoap\Dominio\Excepciones\NotaNoEncontrada;
+use NotasSoap\Dominio\Excepciones\NotaNoFirmada;
+use NotasSoap\Dominio\Excepciones\NotaYaCorregida;
 use NotasSoap\Presentacion\Entrada\CuerpoInvalido;
 use NotasSoap\Presentacion\Http\Autorizacion\PoliticaPermisos;
 use NotasSoap\Presentacion\Http\Observabilidad\RegistroAcceso;
@@ -99,6 +102,12 @@ final class Kernel
             return $vista->error(409, 'expediente_no_disponible', $e->getMessage());
         } catch (NotaFirmada $e) {
             return $vista->error(409, 'nota_firmada', $e->getMessage());
+        } catch (NotaNoFirmada $e) {
+            return $vista->error(409, 'nota_no_firmada', $e->getMessage());
+        } catch (NotaYaCorregida $e) {
+            return $vista->error(409, 'nota_ya_corregida', $e->getMessage());
+        } catch (MotivoCorreccionInsuficiente $e) {
+            return $vista->error(422, 'motivo_insuficiente', $e->getMessage());
         } catch (NotaIncompleta $e) {
             return $vista->error(422, 'nota_incompleta', $e->getMessage());
         } catch (DiagnosticoInvalido $e) {
