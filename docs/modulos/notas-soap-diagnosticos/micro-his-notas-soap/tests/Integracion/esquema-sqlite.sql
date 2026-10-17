@@ -28,7 +28,11 @@ CREATE TABLE clinical_notes (
     signed_at          text,
     version_no         integer NOT NULL CHECK (version_no > 0),
     created_at         text NOT NULL,
-    CHECK ((status = 'draft' AND signed_at IS NULL) OR (status = 'signed' AND signed_at IS NOT NULL))
+    supersedes_id      text UNIQUE REFERENCES clinical_notes (clinical_note_id),
+    correction_reason  text,
+    CHECK ((status = 'draft' AND signed_at IS NULL) OR (status = 'signed' AND signed_at IS NOT NULL)),
+    CHECK ((supersedes_id IS NULL AND correction_reason IS NULL)
+        OR (supersedes_id IS NOT NULL AND trim(correction_reason) <> '' AND version_no > 1))
 );
 CREATE TABLE diagnoses (
     diagnosis_id       text PRIMARY KEY,

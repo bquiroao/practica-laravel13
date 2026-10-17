@@ -31,8 +31,16 @@ CREATE TABLE clinical_notes (
     signed_at          timestamptz,
     version_no         integer NOT NULL CHECK (version_no > 0),
     created_at         timestamptz NOT NULL DEFAULT now(),
+    -- Semana 6: una corrección es una versión nueva que apunta a la anterior (como en la migración 000400 del HIS).
+    -- UNIQUE: cada versión se corrige una sola vez, aunque lleguen dos peticiones a la vez.
+    supersedes_id      text UNIQUE REFERENCES clinical_notes (clinical_note_id) ON DELETE RESTRICT,
+    correction_reason  text,
     CONSTRAINT clinical_notes_signature_check CHECK (
         (status = 'draft' AND signed_at IS NULL) OR (status = 'signed' AND signed_at IS NOT NULL)
+    ),
+    CONSTRAINT clinical_notes_correction_check CHECK (
+        (supersedes_id IS NULL AND correction_reason IS NULL)
+        OR (supersedes_id IS NOT NULL AND btrim(correction_reason) <> '' AND version_no > 1)
     )
 );
 

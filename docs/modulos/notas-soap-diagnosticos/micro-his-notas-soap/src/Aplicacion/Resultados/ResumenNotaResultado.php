@@ -23,6 +23,7 @@ final class ResumenNotaResultado
         public readonly string $creadaEn,
         public readonly ?string $firmadaEn,
         public readonly array $codigosCie10,
+        public readonly ?string $reemplazaA = null,
     ) {
     }
 
@@ -38,6 +39,7 @@ final class ResumenNotaResultado
             $nota->creadaEn->format(DATE_ATOM),
             $nota->firmadaEn?->format(DATE_ATOM),
             array_map(static fn (Diagnostico $d): string => $d->codigo, $diagnosticos),
+            $nota->reemplazaA,
         );
     }
 
@@ -50,6 +52,7 @@ final class ResumenNotaResultado
             'author_user_ref_id' => $this->autorId,
             'status' => $this->estado,
             'version_no' => $this->version,
+            'supersedes_id' => $this->reemplazaA,
             'created_at' => $this->creadaEn,
             'signed_at' => $this->firmadaEn,
             'diagnosis_codes' => $this->codigosCie10,

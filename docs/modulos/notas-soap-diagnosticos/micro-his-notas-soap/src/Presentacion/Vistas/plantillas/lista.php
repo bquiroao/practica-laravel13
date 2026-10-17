@@ -18,10 +18,10 @@
     <p>No hay notas para mostrar.</p>
   <?php else: ?>
   <table>
-    <thead><tr><th>Creada</th><th>Estado</th><th>Autor</th><th>CIE-10</th></tr></thead>
+    <thead><tr><th>Creada</th><th>Versión</th><th>Estado</th><th>Autor</th><th>CIE-10</th></tr></thead>
     <tbody>
     <?php foreach ($resumenes as $r): ?>
-      <tr><td><?= $e($r->creadaEn) ?></td><td><?= $e($etiquetas[$r->estado] ?? $r->estado) ?></td><td><?= $e($r->autorId) ?></td><td><?= $e(implode(', ', $r->codigosCie10)) ?></td></tr>
+      <tr><td><?= $e($r->creadaEn) ?></td><td><?= $e($r->version) ?><?= $r->reemplazaA === null ? '' : ' (corrige ' . $e($r->reemplazaA) . ')' ?></td><td><?= $e($etiquetas[$r->estado] ?? $r->estado) ?></td><td><?= $e($r->autorId) ?></td><td><?= $e(implode(', ', $r->codigosCie10)) ?></td></tr>
     <?php endforeach; ?>
     </tbody>
   </table>
