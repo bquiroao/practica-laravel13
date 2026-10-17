@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS Notas SOAP y diagnósticos — API
-  version: 1.0.0
-  summary: Registro de nota SOAP con diagnóstico CIE-10, firma, consulta y listado por expediente.
+  version: 1.1.0
+  summary: Registro de nota SOAP con diagnóstico CIE-10, firma, corrección, consulta y listado por expediente.
   description: |
     Contrato del módulo ASII-11 Notas SOAP y diagnósticos del Sistema Hospitalario Integrado (HIS).
 
@@ -16,6 +16,10 @@ info:
       un 500 nunca incluye SQL, SQLSTATE ni detalles internos.
     - El texto clínico (secciones SOAP) solo viaja en la consulta de una nota por su id;
       el listado por expediente devuelve resúmenes sin texto.
+
+    Corrección (desde 1.1.0): una nota firmada no se edita ni se borra. Se corrige con una versión
+    nueva que apunta a la anterior (`supersedes_id`) y explica el motivo (`correction_reason`).
+    Cada versión se corrige una sola vez; para seguir corrigiendo se corrige la versión más reciente.
 
     Versionado: la versión mayor va en la ruta (`/api/v1`). Agregar campos opcionales no cambia
     la versión; un cambio incompatible crea `/api/v2` y `/api/v1` se mantiene al menos un semestre
@@ -32,7 +36,7 @@ security:
   - tokenPortador: []
 tags:
   - name: Notas SOAP
-    description: Registro (CU-01 + CU-02), firma (CU-03) y consulta (CU-04) de notas.
+    description: Registro (CU-01 + CU-02), firma (CU-03), consulta (CU-04) y corrección (CU-06) de notas.
   - name: Expediente
     description: Consulta de notas por expediente para otros módulos (línea de tiempo del expediente).
 paths:
@@ -159,6 +163,63 @@ paths:
           $ref: '#/components/responses/NoEncontrado'
         '409':
           $ref: '#/components/responses/Conflicto'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/notas-soap/{notaId}/correcciones:
+    post:
+      operationId: corregirNota
+      tags: [Notas SOAP]
+      summary: Corrige una nota firmada creando la versión siguiente (desde 1.1.0).
+      description: |
+        La nota original no cambia: queda firmada como evidencia. La corrección hereda expediente,
+        episodio y autor, nace en borrador con `version_no` + 1, `supersedes_id` = la nota corregida
+        y `correction_reason` = el motivo, y se firma con `POST /api/v1/notas-soap/{id}/firma`.
+        Solo el autor, todavía asignado al episodio y con el expediente abierto, puede corregir.
+      x-permiso: notas_soap.corregir
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/NotaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorreccionNota'
+            example:
+              correction_reason: 'Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C'
+              subjetivo: Tos productiva y fiebre de 3 días
+              objetivo: T 37.6 °C, estertores en base derecha
+              analisis: Probable neumonía adquirida en la comunidad
+              plan: Radiografía de tórax y antibiótico
+              diagnostico:
+                code: J18.9
+                description: Neumonía no especificada
+                type: primary
+      responses:
+        '201':
+          description: Corrección creada (versión nueva en borrador).
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
         '500':
           $ref: '#/components/responses/ErrorInterno'
         '503':
@@ -315,7 +376,7 @@ components:
               code: nota_no_encontrada
               message: La nota no existe.
     Conflicto:
-      description: Expediente cerrado o episodio de otro paciente (registro), o nota ya firmada (firma).
+      description: Expediente cerrado o episodio de otro paciente (registro y corrección), nota ya firmada (firma), nota en borrador o versión ya corregida (corrección).
       headers:
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
@@ -328,7 +389,7 @@ components:
               code: nota_firmada
               message: La nota ya está firmada y no se puede modificar.
     ReglaIncumplida:
-      description: Sección SOAP vacía, diagnóstico CIE-10 inválido o Idempotency-Key reutilizada con otro contenido.
+      description: Sección SOAP vacía, diagnóstico CIE-10 inválido, Idempotency-Key reutilizada con otro contenido o motivo de corrección insuficiente.
       headers:
         X-Request-ID:
           $ref: '#/components/headers/RequestId'
@@ -388,6 +449,23 @@ components:
           type: string
         diagnostico:
           $ref: '#/components/schemas/DiagnosticoEntrada'
+    CorreccionNota:
+      type: object
+      required: [correction_reason, subjetivo, objetivo, analisis, plan, diagnostico]
+      properties:
+        correction_reason:
+          type: string
+          description: Por qué se corrige. Al menos 10 caracteres (422 motivo_insuficiente).
+        subjetivo:
+          type: string
+        objetivo:
+          type: string
+        analisis:
+          type: string
+        plan:
+          type: string
+        diagnostico:
+          $ref: '#/components/schemas/DiagnosticoEntrada'
     DiagnosticoEntrada:
       type: object
       required: [code, description, type]
@@ -417,7 +495,7 @@ components:
           $ref: '#/components/schemas/TipoDiagnostico'
     Nota:
       type: object
-      required: [clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, status, version_no, signed_at, soap, diagnoses]
+      required: [clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, status, version_no, signed_at, supersedes_id, correction_reason, soap, diagnoses]
       properties:
         clinical_note_id:
           type: string
@@ -436,6 +514,12 @@ components:
         signed_at:
           type: [string, 'null']
           format: date-time
+        supersedes_id:
+          type: [string, 'null']
+          description: Nota que esta versión corrige; null en una nota original (desde 1.1.0).
+        correction_reason:
+          type: [string, 'null']
+          description: Motivo de la corrección; null en una nota original (desde 1.1.0).
         soap:
           type: object
           required: [subjetivo, objetivo, analisis, plan]
@@ -454,7 +538,7 @@ components:
             $ref: '#/components/schemas/Diagnostico'
     ResumenNota:
       type: object
-      required: [clinical_note_id, care_episode_id, author_user_ref_id, status, version_no, created_at, signed_at, diagnosis_codes]
+      required: [clinical_note_id, care_episode_id, author_user_ref_id, status, version_no, supersedes_id, created_at, signed_at, diagnosis_codes]
       properties:
         clinical_note_id:
           type: string
@@ -467,6 +551,9 @@ components:
           enum: [draft, signed]
         version_no:
           type: integer
+        supersedes_id:
+          type: [string, 'null']
+          description: Nota que esta versión corrige (desde 1.1.0).
         created_at:
           type: string
           format: date-time
@@ -510,6 +597,9 @@ components:
                 - nota_incompleta
                 - diagnostico_invalido
                 - idempotency_key_reutilizada
+                - nota_no_firmada
+                - nota_ya_corregida
+                - motivo_insuficiente
                 - error_persistencia
                 - error_interno
                 - servicio_no_disponible

@@ -267,5 +267,5 @@ prueba('ARQ-14', 'Toda ruta declara un permiso y no hay dos rutas con el mismo m
         $vistas[] = $r->metodo . ' ' . $r->plantilla;
     }
     igual(count($vistas), count(array_unique($vistas)), 'rutas únicas');
-    afirmar(count($vistas) === 4, 'se esperaban 4 operaciones');
+    afirmar(count($vistas) === 5, 'se esperaban 5 operaciones (semana 6: + correcciones)');
 });
