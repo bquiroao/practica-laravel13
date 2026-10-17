@@ -229,17 +229,41 @@ prueba('ARQ-11', 'Las vistas solo pintan: no llaman casos de uso ni conocen Pers
     afirmar($violaciones === [], implode('; ', $violaciones));
 });
 
-prueba('ARQ-12', 'Los casos de uso dependen de las interfaces Repository, nunca de un adaptador concreto', function (): void {
+prueba('ARQ-12', 'Los casos de uso dependen de las interfaces Repository, nunca de un adaptador concreto', function () use ($raiz): void {
+    // Semana 7: se revisan TODOS los casos de uso (antes la lista era fija y CorregirNota quedaba fuera).
+    // Además de interfaces, un caso de uso puede recibir un servicio de Dominio\Servicios o de
+    // Aplicacion\Servicios: no son adaptadores, y ARQ-15 exige que ellos mismos solo reciban interfaces.
     $violaciones = [];
-    foreach (['RegistrarNotaConDiagnostico', 'FirmarNota', 'ConsultarNota'] as $caso) {
+    foreach (glob($raiz . '/Aplicacion/CasosDeUso/*.php') ?: [] as $archivo) {
+        $caso = basename($archivo, '.php');
         $ctor = (new ReflectionClass('NotasSoap\\Aplicacion\\CasosDeUso\\' . $caso))->getConstructor();
         foreach ($ctor?->getParameters() ?? [] as $p) {
             $tipo = (string) $p->getType();
-            if (!interface_exists($tipo)) {
+            $esServicio = str_starts_with($tipo, 'NotasSoap\\Dominio\\Servicios\\') || str_starts_with($tipo, 'NotasSoap\\Aplicacion\\Servicios\\');
+            if (!interface_exists($tipo) && !$esServicio) {
                 $violaciones[] = "$caso recibe \$" . $p->getName() . " de tipo concreto $tipo";
             }
         }
     }
+    afirmar(count(glob($raiz . '/Aplicacion/CasosDeUso/*.php') ?: []) >= 5, 'no se encontraron los casos de uso');
+    afirmar($violaciones === [], implode('; ', $violaciones));
+});
+
+prueba('ARQ-15', 'Semana 7: los servicios de Dominio y de Aplicación solo reciben interfaces (puertos), nunca adaptadores ni otros servicios', function () use ($raiz): void {
+    $violaciones = [];
+    $servicios = 0;
+    foreach (['Dominio', 'Aplicacion'] as $capa) {
+        foreach (glob($raiz . "/$capa/Servicios/*.php") ?: [] as $archivo) {
+            $servicios++;
+            $clase = "NotasSoap\\$capa\\Servicios\\" . basename($archivo, '.php');
+            foreach ((new ReflectionClass($clase))->getConstructor()?->getParameters() ?? [] as $p) {
+                if (!interface_exists((string) $p->getType())) {
+                    $violaciones[] = "$clase recibe \$" . $p->getName() . ' de tipo ' . $p->getType();
+                }
+            }
+        }
+    }
+    afirmar($servicios >= 2, 'se esperaban al menos 2 servicios');
     afirmar($violaciones === [], implode('; ', $violaciones));
 });
 
