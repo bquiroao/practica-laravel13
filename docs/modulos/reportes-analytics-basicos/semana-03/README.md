@@ -15,7 +15,7 @@ El Micro-HIS ejecuta el proceso completo para un reporte de ejemplo, **Ocupació
 | 2. Desglose | ¿Dónde? | Medicina 18, Cirugía 14, Pediatría 7 (suma 39) | RN-07 |
 | 3. Registros de origen | ¿Qué registros lo forman? | Las 18 camas de Medicina con su estancia y el código del paciente | RN-07, RN-09 |
 
-A diferencia de la semana 2, los datos ya no son constantes en el código. Salen de una base SQLite de prueba con versiones simplificadas de `ward`, `bed` y `bed_stay`, leída con PDO. En el SHI esas tablas están en la base HOSPITAL de PostgreSQL; el Micro-HIS solo cambia el DSN.
+A diferencia de la semana 2, los datos ya no son constantes en el código. Salen de **PostgreSQL 16 en Docker** (puerto 55440), con tablas que usan los mismos nombres que la base HOSPITAL del SHI (`ward`, `bed`, `bed_stay` y `appointment`), claves UUID, fechas `timestamptz` y datos ficticios (pacientes solo con código, por ejemplo `PAC-00451`). Hay dos bases: `micro_his` para ejecutar y `micro_his_test` para las pruebas. Se eligió PostgreSQL por coherencia con el proyecto: el SHI usa PostgreSQL federado y las pruebas de aceptación del repositorio se hacen en PostgreSQL.
 
 ## Las 4 capas
 
@@ -65,22 +65,22 @@ La nueva postcondición lleva RN-07 hasta el nivel 3: en cada nivel se puede com
 ## Por qué PDO
 
 - **Seguridad:** las sentencias preparadas evitan la inyección SQL.
-- **Configuración fuera del código:** el DSN está en `config/app.ini`; SQLite en el Micro-HIS y PostgreSQL en el SHI, sin tocar las capas superiores.
+- **Configuración fuera del código:** el DSN (`pgsql:host=127.0.0.1;port=55440;dbname=micro_his`) está en `config/app.ini`; cambiar de base o de servidor no toca las capas superiores.
 - **Errores controlados:** con `PDO::ERRMODE_EXCEPTION`, una falla de la base se convierte en un error de la aplicación que el usuario ve como un mensaje claro, sin detalles técnicos.
 
 ## Vista C4 (PlantUML)
 
 | Diagrama | Nivel C4 | Qué muestra |
 |---|---|---|
-| `diagramas/c4-contexto.puml` | 1. Contexto | Administrador, Jefe de área y Médico consultan el módulo; los datos vienen de los módulos fuente, solo en lectura (RNF-04) |
-| `diagramas/c4-contenedores.puml` | 2. Contenedores | Navegador, aplicación PHP del Micro-HIS y base de datos |
+| `diagramas/c4-contexto.puml` | 1. Contexto | Administrador, Jefe de área y Médico consultan el módulo; los datos de los 10 reportes vienen de los módulos fuente, solo en lectura (RNF-04) |
+| `diagramas/c4-contenedores.puml` | 2. Contenedores | Navegador, aplicación PHP del Micro-HIS y las bases PostgreSQL `micro_his` y `micro_his_test` |
 | `diagramas/c4-componentes.puml` | 3. Componentes | Los componentes de cada capa y sus dependencias hacia el dominio |
 
 ## Pruebas automatizadas
 
 | Prueba | Tipo | Qué demuestra |
 |---|---|---|
-| Camino feliz | Base SQLite de prueba | La ocupación da 78 %, el desglose suma 39 y Medicina devuelve 18 registros |
+| Camino feliz | Base de prueba `micro_his_test` | La ocupación da 78 %, el desglose suma 39 y Medicina devuelve 18 registros |
 | Regla de dominio | Dominio puro | Un período invertido se rechaza (RN-02) |
 | Error de persistencia | Doble `LectorQueFalla` | La aplicación responde un error controlado, sin exponer detalles técnicos |
 
@@ -93,6 +93,7 @@ La nueva postcondición lleva RN-07 hasta el nivel 3: en cada nivel se puede com
 
 ```bash
 cd docs/modulos/reportes-analytics-basicos/semana-03/micro-his
+docker compose up -d
 php database/crear.php
 php pruebas/ejecutar.php
 php -S localhost:8000 -t public
@@ -107,3 +108,4 @@ php -S localhost:8000 -t public
 - Brown, S. *The C4 model for visualising software architecture*. https://c4model.com/
 - The PHP Group. *PHP Data Objects (PDO)*. https://www.php.net/manual/es/book.pdo.php
 - The PHP Group. *Supported Versions*. https://www.php.net/supported-versions.php
+- The PostgreSQL Global Development Group. *PostgreSQL 16 Documentation*. https://www.postgresql.org/docs/16/
