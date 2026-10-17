@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nueva nota SOAP · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="volver" href="m1-notas.html" aria-label="Volver a las notas">←</a>
+  <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span> ▾</span>
+  <span class="usuario">dra-mendez <span class="rol">· Médico</span></span>
+</header>
+<div class="paciente">Carlos R. · <span>Expediente exp-carlos · Episodio epi-100 (abierto)</span></div>
+<div class="red lenta" role="status" data-estado="guardando" hidden>Conexión lenta. Seguimos intentando.</div>
+<main>
+  <h1>Nueva nota SOAP</h1>
+
+  <section data-estado="paso1">
+    <p class="pasos">Paso 1 de 4 · Subjetivo y objetivo</p>
+    <div class="progreso"><div style="width:25%"></div></div>
+    <label for="s">S · Subjetivo *</label>
+    <textarea id="s">Tos productiva y fiebre de 3 días</textarea>
+    <label for="o">O · Objetivo *</label>
+    <textarea id="o">T 38.6 °C, estertores en base derecha</textarea>
+    <p class="ayuda">* obligatorio. Lo escrito no se guarda en el teléfono: no cierre esta pantalla.</p>
+  </section>
+
+  <section data-estado="paso2" hidden>
+    <p class="pasos">Paso 2 de 4 · Análisis y plan</p>
+    <div class="progreso"><div style="width:50%"></div></div>
+    <label for="a">A · Análisis *</label>
+    <textarea id="a">Probable neumonía adquirida en la comunidad</textarea>
+    <label for="p">P · Plan *</label>
+    <textarea id="p">Radiografía de tórax y antibiótico</textarea>
+  </section>
+
+  <section data-estado="paso3" hidden>
+    <p class="pasos">Paso 3 de 4 · Diagnóstico</p>
+    <div class="progreso"><div style="width:75%"></div></div>
+    <label for="buscar">Buscar diagnóstico CIE-10 *</label>
+    <input id="buscar" type="search" value="neumon" role="combobox" aria-expanded="true" aria-controls="lista-cie" autocomplete="off">
+    <p class="ayuda">Escriba el código o el nombre. Se elige de la lista: código y descripción van juntos.</p>
+    <ul class="opciones" id="lista-cie" role="listbox" aria-label="Diagnósticos CIE-10">
+      <li role="option" aria-selected="true">J18.9 · Neumonía no especificada ✓</li>
+      <li role="option" aria-selected="false">J18.0 · Bronconeumonía no especificada</li>
+      <li role="option" aria-selected="false">J15.9 · Neumonía bacteriana no especificada</li>
+    </ul>
+    <label for="tipo">Tipo *</label>
+    <select id="tipo"><option>Principal</option><option>Secundario</option><option>Diferencial</option></select>
+  </section>
+
+  <section data-estado="paso4 errores guardando incierto guardada" hidden>
+    <p class="pasos">Paso 4 de 4 · Revisar y guardar</p>
+    <div class="progreso"><div style="width:100%"></div></div>
+    <div class="aviso error" role="alert" tabindex="-1" data-estado="errores" hidden>
+      Falta 1 dato para guardar:
+      <p><a href="m2-nueva-nota.html?estado=paso2">P · Plan: complete esta sección</a></p>
+    </div>
+    <div class="aviso incierto" role="alert" tabindex="-1" data-estado="incierto" hidden>
+      No sabemos si la nota se guardó: se cortó la conexión.
+      <p>Puede reintentar sin miedo: la solicitud lleva la misma clave y el servidor no duplica la nota.</p>
+    </div>
+    <div class="aviso exito" role="status" data-estado="guardada" hidden>
+      <button type="button" class="cerrar" aria-label="Cerrar aviso">×</button>
+      ✓ Nota guardada como borrador.
+      <p>Aparece en las notas del expediente. Puede firmarla ahora o después.</p>
+    </div>
+    <dl class="resumen">
+      <dt>Paciente</dt><dd>Carlos R. · exp-carlos · epi-100</dd>
+      <dt>S · Subjetivo</dt><dd>Tos productiva y fiebre de 3 días</dd>
+      <dt>O · Objetivo</dt><dd>T 38.6 °C, estertores en base derecha</dd>
+      <dt>A · Análisis</dt><dd>Probable neumonía adquirida en la comunidad</dd>
+      <dt>P · Plan</dt><dd data-estado="paso4 guardando incierto guardada">Radiografía de tórax y antibiótico</dd><dd class="error-campo" data-estado="errores" hidden>Vacío</dd>
+      <dt>Diagnóstico</dt><dd>J18.9 · Neumonía no especificada · principal</dd>
+    </dl>
+  </section>
+</main>
+<div class="accion-fija" data-estado="paso1 paso2 paso3">
+  <a class="boton" href="m2-nueva-nota.html?estado=paso1">Atrás</a>
+  <a class="boton primario" href="m2-nueva-nota.html?estado=paso2">Siguiente</a>
+</div>
+<div class="accion-fija" data-estado="paso4 errores" hidden>
+  <a class="boton" href="m2-nueva-nota.html?estado=paso3">Atrás</a>
+  <button type="button" class="boton primario">Guardar borrador</button>
+</div>
+<div class="accion-fija" data-estado="guardando" hidden>
+  <button type="button" class="boton primario" aria-disabled="true" aria-busy="true" style="background:var(--primario);color:#fff"><span class="girando" aria-hidden="true"></span>Guardando nota…</button>
+</div>
+<div class="accion-fija" data-estado="incierto" hidden>
+  <a class="boton" href="m1-notas.html">Ver notas</a>
+  <button type="button" class="boton primario">Reintentar</button>
+</div>
+<div class="accion-fija" data-estado="guardada" hidden>
+  <a class="boton" href="m1-notas.html">Seguir después</a>
+  <a class="boton primario" href="m3-detalle.html?estado=hoja-firma">Firmar ahora</a>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>
