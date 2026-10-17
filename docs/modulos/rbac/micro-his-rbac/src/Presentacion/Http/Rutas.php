@@ -31,6 +31,8 @@ final class Rutas
             new Ruta('GET', '#^/api/v1/auditoria/eventos/(?<correlationId>[A-Za-z0-9-]{1,64})$#', 'auditoria.consultar', $auditoria->mostrar(...)),
             // Sin permiso propio: este endpoint ES la autorización (protegerlo con otro permiso sería circular).
             new Ruta('POST', '#^/api/v1/autorizaciones/decisiones$#', null, $autorizaciones->decidir(...)),
+            // Semana 12 — cambio solicitado (B-6): consulta pasiva para la interfaz, sin permiso propio ni auditoría.
+            new Ruta('POST', '#^/api/v1/autorizaciones/permisos-efectivos$#', null, $autorizaciones->permisosEfectivos(...)),
             new Ruta('POST', '#^/api/v1/prescripciones$#', 'prescripciones.crear', $operaciones->prescribir(...)),
             new Ruta('POST', '#^/api/v1/signos-vitales$#', 'signos_vitales.registrar', $operaciones->registrarSignosVitales(...)),
         ];

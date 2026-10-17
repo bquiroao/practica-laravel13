@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Rbac\Aplicacion\CasosDeUso\AsignarRol;
 use Rbac\Aplicacion\CasosDeUso\AutorizarOperacion;
 use Rbac\Aplicacion\CasosDeUso\ConsultarEventoAuditoria;
+use Rbac\Aplicacion\CasosDeUso\ConsultarPermisosEfectivos;
 use Rbac\Aplicacion\CasosDeUso\RevocarRol;
 use Rbac\Aplicacion\Servicios\RegistradorDeCambios;
 use Rbac\Dominio\Puertos\RegistroAuditoria;
@@ -63,7 +64,7 @@ function crearAdaptadores(array $config): ConjuntoAdaptadores
 /**
  * Dominio + Aplicación (el «Modelo» de MVC) sobre cualquier conjunto de adaptadores.
  *
- * @return array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria, revocarRol: RevocarRol}
+ * @return array{autorizar: AutorizarOperacion, permisosEfectivos: ConsultarPermisosEfectivos, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria, revocarRol: RevocarRol}
  */
 function construirCasosDeUso(
     ConjuntoAdaptadores $adaptadores,
@@ -98,6 +99,8 @@ function construirCasosDeUso(
 
     return [
         'autorizar' => $autorizar,
+        // Semana 12 (B-6): misma política que el PDP, sin auditoría, para lo que la interfaz muestra.
+        'permisosEfectivos' => new ConsultarPermisosEfectivos($politicaAutorizacion, $adaptadores->membresias, $reloj),
         'asignarRol' => new AsignarRol($autorizar, $politicaAsignacion, $cambios, $generarCorrelacion, $reloj),
         'consultar' => new ConsultarEventoAuditoria($adaptadores->auditoria),
         'revocarRol' => new RevocarRol(
@@ -142,7 +145,7 @@ function construirRutas(array $casos): array
         new AsignacionRolControlador($casos['asignarRol']),
         new AuditoriaControlador($casos['consultar']),
         new OperacionClinicaControlador(),
-        new AutorizacionControlador($casos['autorizar']),
+        new AutorizacionControlador($casos['autorizar'], $casos['permisosEfectivos']),
         new RevocacionRolControlador($casos['revocarRol']),
     );
 }
