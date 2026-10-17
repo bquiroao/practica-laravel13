@@ -14,10 +14,11 @@ Registro de notas clínicas en formato SOAP (Subjetivo, Objetivo, Análisis y Pl
 | 4 | MVC en la entrada, interfaz Repository con adaptadores PDO y en memoria, análisis y diagramas del repositorio de datos compartido | [semana-04-mvc-repository.md](semana-04/semana-04-mvc-repository.md) | [DECLARACION_IA.md](semana-04/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-04/GUIA_DEFENSA_ORAL.md) |
 | 5 | Diseño cliente-servidor y evaluación de una frontera de microservicio: contrato API OpenAPI, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad, consistencia, migración razonada y plan de issue, rama, worktree y PR | [semana-05-cliente-servidor-microservicios.md](semana-05/semana-05-cliente-servidor-microservicios.md) | [DECLARACION_IA.md](semana-05/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-05/GUIA_DEFENSA_ORAL.md) |
 | 6 | Primera evaluación parcial: defensa de la arquitectura (actores, UML, RF/RNF, SRP, capas, Repository y contrato API) con presentación, diagrama trazable, matriz decisión → evidencia y cambio práctico «corregir una nota firmada» | [semana-06-defensa-arquitectura.md](semana-06/semana-06-defensa-arquitectura.md) | [DECLARACION_IA.md](semana-06/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-06/GUIA_DEFENSA_ORAL.md) |
+| 7 | Diseño de componentes backend y frontend (Vue 3 + Pinia) con contratos de entrada/salida, y refactor medido del punto de mayor acoplamiento (los casos de uso que escriben notas) sin ampliar el módulo | [semana-07-componentes-refactor.md](semana-07/semana-07-componentes-refactor.md) | — | [GUIA_DEFENSA_ORAL.md](semana-07/GUIA_DEFENSA_ORAL.md) |
 
 ## Micro-HIS
 
-El código ejecutable del módulo está en [`micro-his-notas-soap/`](micro-his-notas-soap/). Se inició en la semana 3 y se sigue usando en las semanas 4, 5 y 6. Desde la semana 5 tiene un contrato OpenAPI en [`micro-his-notas-soap/api/openapi.yaml`](micro-his-notas-soap/api/openapi.yaml). Para correr sus pruebas o la demostración sin base de datos:
+El código ejecutable del módulo está en [`micro-his-notas-soap/`](micro-his-notas-soap/). Se inició en la semana 3 y se sigue usando en las semanas 4 a 7. Desde la semana 5 tiene un contrato OpenAPI en [`micro-his-notas-soap/api/openapi.yaml`](micro-his-notas-soap/api/openapi.yaml). Para correr sus pruebas o la demostración sin base de datos:
 
 ```bash
 cd docs/modulos/notas-soap-diagnosticos/micro-his-notas-soap

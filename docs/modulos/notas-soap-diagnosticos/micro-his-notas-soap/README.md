@@ -2,12 +2,13 @@
 
 Versión mínima y separada del módulo 11 del Sistema Hospitalario Integrado, escrita en **PHP 8.2+ vanilla** (sin framework ni Composer). Ejecuta un solo proceso de punta a punta: **registro de nota SOAP y asociación de diagnóstico clínico**, más la firma, la consulta y, desde la semana 6, la corrección de una nota firmada.
 
-Se inició en la semana 3 y se usa como base en las semanas 4, 5 y 6.
+Se inició en la semana 3 y se usa como base en las semanas 4 a 7.
 
 - Semana 3 — capas, PDO y vista C4: [`../semana-03/semana-03-arquitectura-micro-his.md`](../semana-03/semana-03-arquitectura-micro-his.md)
 - Semana 4 — MVC en la entrada, patrón Repository con adaptadores PDO y en memoria, repositorio compartido: [`../semana-04/semana-04-mvc-repository.md`](../semana-04/semana-04-mvc-repository.md)
-- Semana 6 — defensa de la arquitectura y cambio práctico «corregir una nota firmada»: [`../semana-06/semana-06-defensa-arquitectura.md`](../semana-06/semana-06-defensa-arquitectura.md)
 - Semana 5 — cliente-servidor, contrato OpenAPI, idempotencia, cliente con circuit breaker y evaluación de la frontera de microservicio: [`../semana-05/semana-05-cliente-servidor-microservicios.md`](../semana-05/semana-05-cliente-servidor-microservicios.md)
+- Semana 6 — defensa de la arquitectura y cambio práctico «corregir una nota firmada»: [`../semana-06/semana-06-defensa-arquitectura.md`](../semana-06/semana-06-defensa-arquitectura.md)
+- Semana 7 — diseño de componentes backend y frontend y refactor del punto de mayor acoplamiento: [`../semana-07/semana-07-componentes-refactor.md`](../semana-07/semana-07-componentes-refactor.md)
 
 ## Capas
 
@@ -18,10 +19,14 @@ src/
 │   │   ├── Autorizacion/   PoliticaPermisos ← PermisosPorRol (permiso de cada ruta)
 │   │   └── Observabilidad/ RegistroAcceso (una línea JSON por petición, sin datos clínicos)
 │   ├── Controladores/  NotasSoapController (la C del MVC: sin SQL ni reglas)
-│   ├── Entrada/        FormularioRegistroNota, FiltroNotasExpediente (entrada → comando; solo revisa formato)
+│   ├── Entrada/        FormularioRegistroNota, FormularioCorreccionNota, FiltroNotasExpediente (entrada → comando; solo revisa formato)
 │   └── Vistas/         VistaJson, VistaHtml (+ plantillas), SelectorVista (la V del MVC)
 ├── Aplicacion/         Casos de uso, comandos, resultados, puertos técnicos (incluye RegistroIdempotencia), decorador RepositorioNotasConEventos
+│   └── Servicios/      RegistradorClinico (semana 7): la única transacción de escritura con su evento
 ├── Dominio/            NotaSoap, SeccionesSoap, Diagnostico, EventoClinico, excepciones e interfaces Repository
+│   ├── Servicios/      ReglasDeEscritura (semana 7): R-01, R-02 y R-03 en un solo lugar
+│   ├── Cambios/        CambioClinico, NotaConDiagnostico, FirmaDeNota (semana 7): qué se guarda en cada cambio
+│   └── Eventos/        EntradaBitacora (semana 7): nombre y campos de cada evento de bitácora
 └── Persistencia/
     ├── Pdo/            Adaptadores PDO (sentencias preparadas), transacción y bandeja de salida
     ├── EnMemoria/      Los mismos puertos sobre arreglos de PHP, con transacción en memoria
@@ -30,6 +35,7 @@ src/
 src/Cliente/            Librería para otros módulos: ClienteNotasSoap, CircuitoInterruptor, TransporteHttpStream, ResultadoCliente
 api/openapi.yaml        Contrato OpenAPI 3.1 (las pruebas API-01 a API-04 lo comparan con el código)
 bin/medir.php           Mide el mismo registro en proceso, por HTTP en proceso y por red
+bin/acoplamiento.php    Semana 7: Ce, Ca y preocupaciones mezcladas por clase, y líneas repetidas entre casos de uso
 ```
 
 Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. El único archivo que conoce todas las clases concretas es `bootstrap/contenedor.php`: `crearKernel()` usa PDO y `crearKernelEnMemoria()` usa los adaptadores en memoria, sin cambiar nada más. La regla se comprueba en cada ejecución de las pruebas (grupo `ARQ`). El `Cliente` no es una capa del servidor: solo conoce el contrato y el servidor no lo importa (ARQ-13).
@@ -61,12 +67,13 @@ En PowerShell: `$env:NOTASSOAP_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=mic
 | `PER` | Errores de persistencia con dobles de PDO (`PdoQueFalla`, `PdoEspia`) y reversión de la transacción |
 | `REP` | Contrato del Repository: las mismas pruebas contra el adaptador en memoria y el PDO |
 | `HTTP` | Rutas, cabeceras, códigos de estado, vista HTML escapada y que los errores no expongan detalles internos |
-| `ARQ` | Regla de dependencias, PDO solo en Persistencia, controlador sin SQL ni reglas, dos adaptadores por puerto, sin framework |
+| `ARQ` | Regla de dependencias, PDO solo en Persistencia, controlador sin SQL ni reglas, dos adaptadores por puerto, sin framework; desde la semana 7, los servicios del módulo solo reciben interfaces (ARQ-15) |
 | `INT` | Adaptadores PDO contra SQLite y PostgreSQL, bandeja de salida, idempotencia, mismo flujo con PDO y en memoria, y modo memoria con archivo |
 | `API` | El contrato `api/openapi.yaml` y el código dicen lo mismo: operaciones, permisos, códigos HTTP y códigos de error |
 | `CLI` | Cliente: reintentos, respuesta perdida sin duplicar, firma sin reintento, circuit breaker y red real caída |
 | `OBS` | `X-Request-ID` y registro de acceso sin datos sensibles |
 | `COR` | Semana 6: corrección de una nota firmada (versión nueva, una por versión, permisos, reglas, atomicidad, línea de tiempo) |
+| `REF` | Semana 7: caracterización del refactor (formato exacto de la bitácora, orden de las verificaciones y manejo de fallas en registro y corrección) |
 
 ## Demostración sin base de datos
 
@@ -91,6 +98,14 @@ php bin/medir.php 3000 300
 ```
 
 Ejecuta el mismo registro en cuatro escenarios (caso de uso en proceso, Kernel en proceso, servicio por red local y servicio por red con dos vecinos remotos) más un control. Muestra p50, p95 y p99. La interpretación está en la sección 5.2 del documento de la semana 5.
+
+## Medir el acoplamiento
+
+```bash
+php bin/acoplamiento.php 14
+```
+
+Lee `src/` con el tokenizador de PHP (no ejecuta nada) y muestra, por clase, cuántas clases usa (Ce), cuántas la usan (Ca) y cuántas de las 6 preocupaciones del módulo mezcla. Con esto se eligió el refactor de la semana 7.
 
 ## Validar el contrato
 
