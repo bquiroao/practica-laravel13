@@ -10,6 +10,7 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 | 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
 | 7 | Refactor sin ampliar el módulo: `CambioDeMembresia` + `RegistradorDeCambios` separan auditoría y persistencia de los casos de uso; medidor `bin/acoplamiento.php` |
 | 12 | Cambio solicitado (B-6): **permisos efectivos** (`ConsultarPermisosEfectivos`, contrato v1.2.0). La interfaz consulta qué mostrar sin dejar eventos; los intentos siguen auditados. Pruebas PEF-01..10, escritas antes |
+| 15 | Pruebas unitarias (UNI-01..09), de caja blanca (CB-01..04, cobertura de líneas con phpdbg) y de caja negra (CN-01..06), trazadas a RF/RNF; defectos abiertos reproducibles (DEF-01..05) |
 
 ## Estructura
 
@@ -44,6 +45,8 @@ Regla de dependencias: **Presentación → Aplicación → Dominio ← Persisten
 ```bash
 cd docs/modulos/rbac/micro-his-rbac
 php tests/ejecutar.php
+php tests/ejecutar.php --solo=UNI,CB,CN   # solo unitarias, caja blanca y caja negra (semana 15)
+php tests/ejecutar.php --defectos         # agrega las pruebas de defectos ABIERTOS (DEF-xx), que fallan hasta corregirse
 ```
 
 No necesitan base de datos. Para correr también la suite de contrato contra PDO y las pruebas de integración, que crean y eliminan un esquema temporal:
