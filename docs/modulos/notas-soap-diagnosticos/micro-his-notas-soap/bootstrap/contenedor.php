@@ -21,6 +21,8 @@ use NotasSoap\Aplicacion\Puertos\BandejaSalida;
 use NotasSoap\Aplicacion\Puertos\ConjuntoAdaptadores;
 use NotasSoap\Aplicacion\Puertos\GeneradorId;
 use NotasSoap\Aplicacion\Puertos\Reloj;
+use NotasSoap\Aplicacion\Servicios\RegistradorClinico;
+use NotasSoap\Dominio\Servicios\ReglasDeEscritura;
 use NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria;
 use NotasSoap\Persistencia\Pdo\FabricaConexion;
 use NotasSoap\Persistencia\Pdo\PdoBandejaSalida;
@@ -58,12 +60,15 @@ function construirKernel(
     RegistroAcceso $registroAcceso,
 ): Kernel {
     $vistas = new SelectorVista(new VistaJson(), new VistaHtml());
+    // Semana 7: las reglas de escritura y el guardado atómico con su evento tienen un solo dueño cada uno.
+    $reglas = new ReglasDeEscritura($a->acceso, $a->expedientes);
+    $registrador = new RegistradorClinico($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion);
     $controlador = new NotasSoapController(
-        new RegistrarNotaConDiagnostico($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj, $a->idempotencia),
-        new FirmarNota($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $reloj),
+        new RegistrarNotaConDiagnostico($reglas, $registrador, $a->notas, $a->diagnosticos, $ids, $reloj, $a->idempotencia),
+        new FirmarNota($a->notas, $a->diagnosticos, $registrador, $reloj),
         new ConsultarNota($a->notas, $a->diagnosticos),
         new ListarNotasExpediente($a->notas, $a->diagnosticos),
-        new CorregirNota($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj),
+        new CorregirNota($reglas, $registrador, $a->notas, $ids, $reloj),
         $vistas,
     );
 

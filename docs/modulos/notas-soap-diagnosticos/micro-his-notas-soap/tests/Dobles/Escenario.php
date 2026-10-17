@@ -11,6 +11,8 @@ use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\RegistrarNotaComando;
 use NotasSoap\Aplicacion\Integracion\RepositorioNotasConEventos;
 use NotasSoap\Aplicacion\Puertos\BandejaSalida;
+use NotasSoap\Aplicacion\Servicios\RegistradorClinico;
+use NotasSoap\Dominio\Servicios\ReglasDeEscritura;
 use NotasSoap\Dominio\Puertos\RepositorioDiagnosticos;
 use NotasSoap\Dominio\Puertos\VerificadorAcceso;
 use NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria;
@@ -71,8 +73,10 @@ final class Escenario
         $a = $diagnosticos === null ? $a : $a->conDiagnosticos($diagnosticos);
         $a = $acceso === null ? $a : $a->conAcceso($acceso);
 
-        $this->registrar = new RegistrarNotaConDiagnostico($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $ids, $reloj, $a->idempotencia);
-        $this->firmar = new FirmarNota($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, $reloj);
+        $reglas = new ReglasDeEscritura($a->acceso, $a->expedientes);
+        $registrador = new RegistradorClinico($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion);
+        $this->registrar = new RegistrarNotaConDiagnostico($reglas, $registrador, $a->notas, $a->diagnosticos, $ids, $reloj, $a->idempotencia);
+        $this->firmar = new FirmarNota($a->notas, $a->diagnosticos, $registrador, $reloj);
         $this->consultar = new ConsultarNota($a->notas, $a->diagnosticos);
         $this->listar = new ListarNotasExpediente($a->notas, $a->diagnosticos);
         $this->kernel = construirKernel(new AutenticadorTokenDemo(self::TOKENS), $a, $ids, $reloj, new PermisosPorRol(self::PERMISOS), $this->registroAcceso);

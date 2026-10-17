@@ -15,9 +15,11 @@ declare(strict_types=1);
 
 use NotasSoap\Aplicacion\CasosDeUso\RegistrarNotaConDiagnostico;
 use NotasSoap\Aplicacion\Comandos\RegistrarNotaComando;
+use NotasSoap\Aplicacion\Servicios\RegistradorClinico;
 use NotasSoap\Cliente\CircuitoInterruptor;
 use NotasSoap\Cliente\ClienteNotasSoap;
 use NotasSoap\Cliente\TransporteHttpStream;
+use NotasSoap\Dominio\Servicios\ReglasDeEscritura;
 use NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria;
 use NotasSoap\Persistencia\Sistema\GeneradorUuid;
 use NotasSoap\Persistencia\Sistema\RelojSistema;
@@ -56,7 +58,9 @@ $filas = [];
 // A) caso de uso en proceso
 $al = new AlmacenesEnMemoria($datos);
 $a = $al->conjunto();
-$uc = new RegistrarNotaConDiagnostico($a->acceso, $a->expedientes, $a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion, new GeneradorUuid(), new RelojSistema(), $a->idempotencia);
+$uc = new RegistrarNotaConDiagnostico(new ReglasDeEscritura($a->acceso, $a->expedientes),
+    new RegistradorClinico($a->notas, $a->diagnosticos, $a->auditoria, $a->transaccion),
+    $a->notas, $a->diagnosticos, new GeneradorUuid(), new RelojSistema(), $a->idempotencia);
 $cmd = new RegistrarNotaComando('dra-mendez', 'hosp-oriente', ['medico'], 'hosp-oriente', 'exp-carlos', 'epi-100',
     $nota['subjetivo'], $nota['objetivo'], $nota['analisis'], $nota['plan'], 'J18.9', 'Neumonía no especificada', 'primary');
 [$ms, $err] = $cronometrar($nProceso, static fn (): bool => $uc->ejecutar($cmd)->notaId !== '');
