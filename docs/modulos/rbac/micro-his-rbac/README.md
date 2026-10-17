@@ -9,6 +9,7 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 | 5 | **Cliente-servidor**: contrato **OpenAPI 3.1**, endpoint de decisión (PDP), librería **cliente** con resiliencia, observabilidad (`X-Request-ID`) y medición de la frontera de microservicio |
 | 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
 | 7 | Refactor sin ampliar el módulo: `CambioDeMembresia` + `RegistradorDeCambios` separan auditoría y persistencia de los casos de uso; medidor `bin/acoplamiento.php` |
+| 12 | Cambio solicitado (B-6): **permisos efectivos** (`ConsultarPermisosEfectivos`, contrato v1.2.0). La interfaz consulta qué mostrar sin dejar eventos; los intentos siguen auditados. Pruebas PEF-01..10, escritas antes |
 
 ## Estructura
 
@@ -103,5 +104,6 @@ Contrato completo en [`api/openapi.yaml`](api/openapi.yaml). Toda respuesta incl
 | POST | `/api/v1/roles/revocaciones` | `roles.revocar` | `RevocacionRolControlador::crear` |
 | GET | `/api/v1/auditoria/eventos/{correlationId}` | `auditoria.consultar` | `AuditoriaControlador::mostrar` |
 | POST | `/api/v1/autorizaciones/decisiones` | — (solo autenticación) | `AutorizacionControlador::decidir` (PDP) |
+| POST | `/api/v1/autorizaciones/permisos-efectivos` | — (solo autenticación) | `AutorizacionControlador::permisosEfectivos` (sin auditoría, semana 12) |
 | POST | `/api/v1/prescripciones` | `prescripciones.crear` | `OperacionClinicaControlador::prescribir` (demo) |
 | POST | `/api/v1/signos-vitales` | `signos_vitales.registrar` | `OperacionClinicaControlador::registrarSignosVitales` (demo) |
