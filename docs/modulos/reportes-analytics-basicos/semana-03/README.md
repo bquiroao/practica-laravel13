@@ -87,15 +87,19 @@ La nueva postcondición lleva RN-07 hasta el nivel 3: en cada nivel se puede com
 ## Organización de la entrega
 
 - **Parte A:** este README y los tres diagramas C4.
-- **Parte B:** código en `micro-his/`, pruebas y evidencia de ejecución en `evidencia/`.
+- **Parte B:** capa Domain del Micro-HIS (contrato, objetos de valor, reporte de Ocupación y puerto `LectorOcupacion`).
+- **Parte C:** PostgreSQL en Docker, esquema y datos ficticios, y capa Persistence con PDO.
+- **Parte D:** capas Application y Presentation, `bootstrap.php`, pruebas y evidencia de ejecución en `evidencia/`.
 
-## Cómo ejecutarlo (parte B)
+El código vive en `docs/modulos/reportes-analytics-basicos/micro-his/`, fuera de la carpeta de la semana, porque es el **mismo** Micro-HIS que continúan las semanas 4 y 5.
+
+## Cómo ejecutarlo
 
 ```bash
-cd docs/modulos/reportes-analytics-basicos/semana-03/micro-his
+cd docs/modulos/reportes-analytics-basicos/micro-his
 docker compose up -d
 php database/crear.php
-php pruebas/ejecutar.php
+php pruebas/ejecutar.php --evidencia=../semana-03/evidencia/salida-pruebas.txt
 php -S localhost:8000 -t public
 ```
 
