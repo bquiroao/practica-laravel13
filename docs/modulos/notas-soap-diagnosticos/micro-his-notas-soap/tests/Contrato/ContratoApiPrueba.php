@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 use NotasSoap\Pruebas\Dobles\Escenario;
 
-/** @return array<string, array{permiso: ?string, respuestas: list<string>}> clave "METODO /ruta" */
+/** @return array<string, array{permiso: ?string, respuestas: list<string>, parametros: list<string>}> clave "METODO /ruta" */
 function operacionesDelContrato(): array
 {
     $operaciones = [];
@@ -25,10 +25,12 @@ function operacionesDelContrato(): array
             $ruta = $m[1];
         } elseif ($ruta !== null && preg_match('/^    (get|post|put|patch|delete):$/', $linea, $m) === 1) {
             $clave = strtoupper($m[1]) . ' ' . $ruta;
-            $operaciones[$clave] = ['permiso' => null, 'respuestas' => []];
+            $operaciones[$clave] = ['permiso' => null, 'respuestas' => [], 'parametros' => []];
             $enRespuestas = false;
         } elseif ($clave !== null && preg_match('/^      x-permiso: (\S+)$/', $linea, $m) === 1) {
             $operaciones[$clave]['permiso'] = $m[1];
+        } elseif ($clave !== null && preg_match('#^        - \\$ref: \'\\#/components/parameters/(\\w+)\'$#', $linea, $m) === 1) {
+            $operaciones[$clave]['parametros'][] = $m[1];
         } elseif ($clave !== null && preg_match('/^      (\S+):/', $linea, $m) === 1) {
             $enRespuestas = $m[1] === 'responses';
         } elseif ($clave !== null && $enRespuestas && preg_match("/^        '(\d{3})':$/", $linea, $m) === 1) {
@@ -154,4 +156,20 @@ prueba('API-04', 'Cada código de error que devuelve el servidor está en el enu
     $faltan = array_diff($devueltos, $enum);
     afirmar($faltan === [], 'códigos no documentados: ' . implode(', ', $faltan));
     afirmar(count($devueltos) >= 9, 'los escenarios deben cubrir al menos 9 códigos de error distintos; cubren ' . count($devueltos));
+});
+
+prueba('API-05', 'Semana 12: las operaciones que leen Idempotency-Key en el código la declaran en el contrato, y solo ellas', function (): void {
+    $k = (new Escenario())->kernel;
+    $id = Escenario::notaFirmada($k);
+    $clave = ['idempotency-key' => 'x'];
+    $sondas = [
+        'POST /api/v1/notas-soap' => Escenario::peticion([], $clave),
+        'POST /api/v1/notas-soap/{notaId}/firma' => Escenario::peticion([], $clave, 'POST', "/api/v1/notas-soap/$id/firma"),
+        'POST /api/v1/notas-soap/{notaId}/correcciones' => Escenario::peticionCorreccion($id, [], $clave),
+    ];
+    $contrato = operacionesDelContrato();
+    foreach ($sondas as $op => $solicitud) {
+        $leeClave = str_contains($k->manejar($solicitud)->cuerpo['error']['message'] ?? '', 'Idempotency-Key');
+        igual($leeClave, in_array('IdempotencyKey', $contrato[$op]['parametros'], true), "$op: código lee la clave / contrato la declara");
+    }
 });

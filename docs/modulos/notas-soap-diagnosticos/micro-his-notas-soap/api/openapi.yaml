@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS Notas SOAP y diagnósticos — API
-  version: 1.1.0
+  version: 1.2.0
   summary: Registro de nota SOAP con diagnóstico CIE-10, firma, corrección, consulta y listado por expediente.
   description: |
     Contrato del módulo ASII-11 Notas SOAP y diagnósticos del Sistema Hospitalario Integrado (HIS).
@@ -20,6 +20,7 @@ info:
     Corrección (desde 1.1.0): una nota firmada no se edita ni se borra. Se corrige con una versión
     nueva que apunta a la anterior (`supersedes_id`) y explica el motivo (`correction_reason`).
     Cada versión se corrige una sola vez; para seguir corrigiendo se corrige la versión más reciente.
+    Desde 1.2.0 la corrección también acepta `Idempotency-Key`: el reintento devuelve la misma versión nueva.
 
     Versionado: la versión mayor va en la ruta (`/api/v1`). Agregar campos opcionales no cambia
     la versión; un cambio incompatible crea `/api/v2` y `/api/v1` se mantiene al menos un semestre
@@ -177,11 +178,14 @@ paths:
         episodio y autor, nace en borrador con `version_no` + 1, `supersedes_id` = la nota corregida
         y `correction_reason` = el motivo, y se firma con `POST /api/v1/notas-soap/{id}/firma`.
         Solo el autor, todavía asignado al episodio y con el expediente abierto, puede corregir.
+        Desde 1.2.0: con `Idempotency-Key`, repetir la misma corrección devuelve la versión ya creada
+        con `Idempotent-Replayed: true`; sin clave, el segundo envío sigue respondiendo 409 `nota_ya_corregida`.
       x-permiso: notas_soap.corregir
       parameters:
         - $ref: '#/components/parameters/TenantId'
         - $ref: '#/components/parameters/RequestId'
         - $ref: '#/components/parameters/NotaId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -200,10 +204,12 @@ paths:
                 type: primary
       responses:
         '201':
-          description: Corrección creada (versión nueva en borrador).
+          description: Corrección creada (versión nueva en borrador), o devuelta de nuevo si la Idempotency-Key ya se usó con el mismo contenido.
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestId'
+            Idempotent-Replayed:
+              $ref: '#/components/headers/IdempotentReplayed'
           content:
             application/json:
               schema:
@@ -285,7 +291,7 @@ components:
       name: Idempotency-Key
       in: header
       required: false
-      description: Clave única por intento de registro. Reutilizarla con otro contenido responde 422.
+      description: Clave única por intento de registro o de corrección. Reutilizarla con otro contenido responde 422.
       schema:
         type: string
         pattern: '^[A-Za-z0-9-]{8,64}$'

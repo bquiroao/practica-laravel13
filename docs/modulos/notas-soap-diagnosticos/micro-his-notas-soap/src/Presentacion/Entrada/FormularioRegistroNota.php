@@ -28,10 +28,7 @@ final class FormularioRegistroNota
         if (!is_array($dx)) {
             throw new CuerpoInvalido('Falta el objeto "diagnostico" con code, description y type.');
         }
-        $clave = $s->cabecera('Idempotency-Key');
-        if ($clave !== '' && preg_match(self::FORMATO_CLAVE, $clave) !== 1) {
-            throw new CuerpoInvalido('Idempotency-Key debe tener de 8 a 64 caracteres: letras, números o guiones.');
-        }
+        $clave = self::claveIdempotencia($s);
         $v = self::textos($b, self::CAMPOS, '');
         $d = self::textos($dx, self::CAMPOS_DIAGNOSTICO, 'diagnostico.');
 
@@ -49,8 +46,19 @@ final class FormularioRegistroNota
             $d['code'],
             $d['description'],
             $d['type'],
-            $clave === '' ? null : $clave,
+            $clave,
         );
+    }
+
+    /** Semana 12: la usan el registro y la corrección. Sin cabecera → null; con formato inválido → 400. */
+    public static function claveIdempotencia(Solicitud $s): ?string
+    {
+        $clave = $s->cabecera('Idempotency-Key');
+        if ($clave !== '' && preg_match(self::FORMATO_CLAVE, $clave) !== 1) {
+            throw new CuerpoInvalido('Idempotency-Key debe tener de 8 a 64 caracteres: letras, números o guiones.');
+        }
+
+        return $clave === '' ? null : $clave;
     }
 
     /**
