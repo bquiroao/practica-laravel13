@@ -68,7 +68,7 @@ try {
     prueba('INT-04', 'PostgreSQL: si la bitácora falla dentro de la transacción, el paciente se revierte (ROLLBACK real)', function () use ($adaptadores, $casosCon, $contar): void {
         $bitacora = new RegistroAuditoriaConFallas();
         $bitacora->fallar = true;
-        $conFalla = new ConjuntoAdaptadores($adaptadores->consulta, $adaptadores->repositorio, $adaptadores->indice, $bitacora, $adaptadores->transaccion);
+        $conFalla = new ConjuntoAdaptadores($adaptadores->consulta, $adaptadores->repositorio, $adaptadores->indice, $bitacora, $adaptadores->transaccion, $adaptadores->idempotencia);
         $r = Escenario::registrar((object) ['casos' => $casosCon($conFalla)], Escenario::datosLuis());
         igual('no_disponible', $r->estado, 'resultado');
         igual(0, $contar("SELECT count(*) FROM pacientes WHERE given_name = 'Luis Fernando'"), 'paciente revertido');

@@ -9,6 +9,7 @@ use Pacientes\Aplicacion\Comandos\ComandoRegistrar;
 use Pacientes\Aplicacion\Resultados\Resultado;
 use Pacientes\Persistencia\ConjuntoAdaptadores;
 use Pacientes\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Pacientes\Persistencia\EnMemoria\AlmacenIdempotenciaEnMemoria;
 use Pacientes\Persistencia\EnMemoria\IndiceDuplicadosEnMemoria;
 use Pacientes\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
 use Pacientes\Persistencia\EnMemoria\RepositorioPacientesEnMemoria;
@@ -32,14 +33,15 @@ final class Escenario
     public const DPI_LUIS = '1876543210901';
     public const DPI_NUEVO = '4455667780105';
 
-    public static function crear(): object
+    public static function crear(?RegistroAccesoEnMemoria $registroAcceso = null): object
     {
         $almacen = new RepositorioPacientesEnMemoria();
         $eventos = new RegistroAuditoriaEnMemoria();
         $repositorio = new RepositorioPacientesConFallas($almacen);
         $bitacora = new RegistroAuditoriaConFallas($eventos);
+        $idempotencia = new AlmacenIdempotenciaEnMemoria();
         $adaptadores = new ConjuntoAdaptadores($repositorio, $repositorio, new IndiceDuplicadosEnMemoria($almacen), $bitacora,
-            new TransaccionEnMemoria([$almacen, $eventos]));
+            new TransaccionEnMemoria([$almacen, $eventos, $idempotencia]), $idempotencia);
         $config = self::config();
         $casos = \construirCasosDeUso($adaptadores, new PoliticaAccesoEstatica($config['permisos']), new RelojFijo());
 
@@ -47,7 +49,8 @@ final class Escenario
             'casos' => $casos,
             'repositorio' => $repositorio,
             'bitacora' => $bitacora,
-            'kernel' => \construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo'])),
+            'idempotencia' => $idempotencia,
+            'kernel' => \construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']), $registroAcceso),
         ];
     }
 

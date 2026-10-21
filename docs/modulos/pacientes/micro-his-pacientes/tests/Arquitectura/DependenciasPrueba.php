@@ -63,7 +63,7 @@ function sqlInseguro(string $codigo): array
 /** @return list<string> capas de Pacientes\ referenciadas por el código */
 function capasReferenciadas(string $codigo): array
 {
-    preg_match_all('/\\\\?Pacientes\\\\(Dominio|Aplicacion|Persistencia|Presentacion)\\\\/', $codigo, $m);
+    preg_match_all('/\\\\?Pacientes\\\\(Dominio|Aplicacion|Persistencia|Presentacion|Cliente)\\\\/', $codigo, $m);
 
     return array_values(array_unique($m[1]));
 }
@@ -73,9 +73,11 @@ const PERMITIDAS = [
     'Aplicacion' => ['Aplicacion', 'Dominio'],
     'Persistencia' => ['Persistencia', 'Aplicacion', 'Dominio'],
     'Presentacion' => ['Presentacion', 'Aplicacion'],
+    // Semana 5: el cliente de otros módulos solo conoce el CONTRATO HTTP, ninguna clase del servidor.
+    'Cliente' => ['Cliente'],
 ];
 
-prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia', function (): void {
+prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado', function (): void {
     $violaciones = [];
     foreach (PERMITIDAS as $capa => $permitidas) {
         foreach (fuentesDeCapa($capa) as $archivo => $codigo) {
@@ -156,6 +158,7 @@ prueba('ARQ-06', 'Repository: cada puerto de persistencia tiene un adaptador PDO
         \Pacientes\Dominio\Puertos\IndiceDuplicados::class,
         \Pacientes\Dominio\Puertos\RegistroAuditoria::class,
         \Pacientes\Aplicacion\Puertos\Transaccion::class,
+        \Pacientes\Aplicacion\Puertos\AlmacenIdempotencia::class,
     ];
     $faltan = [];
     foreach ($puertos as $puerto) {

@@ -30,7 +30,13 @@ final class FormularioPaciente
             throw new EntradaInvalida(EntradaInvalida::FORMATO, ['confirmar_coincidencia' => 'Debe ser true o false.']);
         }
 
-        return new ComandoRegistrar($identidad->actor, $identidad->hospital, self::datos($cuerpo), $confirma, $cuerpo['motivo'] ?? null);
+        $clave = $solicitud->cabecera('Idempotency-Key');
+        if ($clave !== '' && preg_match('/^[A-Za-z0-9-]{8,64}$/', $clave) !== 1) {
+            throw new EntradaInvalida(EntradaInvalida::FORMATO, ['Idempotency-Key' => 'De 8 a 64 letras, dígitos o guiones.']);
+        }
+
+        return new ComandoRegistrar($identidad->actor, $identidad->hospital, self::datos($cuerpo), $confirma, $cuerpo['motivo'] ?? null,
+            $clave === '' ? null : $clave);
     }
 
     /** @throws EntradaInvalida */

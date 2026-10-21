@@ -6,6 +6,7 @@ namespace Pacientes\Aplicacion\CasosDeUso;
 
 use Pacientes\Aplicacion\Comandos\ComandoRegistrar;
 use Pacientes\Aplicacion\Comandos\FormularioPaciente;
+use Pacientes\Aplicacion\Puertos\AlmacenIdempotencia;
 use Pacientes\Aplicacion\Puertos\Reloj;
 use Pacientes\Aplicacion\Puertos\Transaccion;
 use Pacientes\Aplicacion\Resultados\Resultado;
@@ -18,7 +19,7 @@ use Pacientes\Dominio\Puertos\RegistroAuditoria;
 use Pacientes\Dominio\Puertos\RepositorioPacientes;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 
-/** CU-01, CU-05 y CU-06: registrar un paciente sin crear duplicados. */
+/** CU-01, CU-05 y CU-06: registrar un paciente sin crear duplicados, ni siquiera al reintentar. */
 final class RegistrarPaciente
 {
     public function __construct(
@@ -28,6 +29,7 @@ final class RegistrarPaciente
         private readonly Transaccion $transaccion,
         private readonly ControlAcceso $acceso,
         private readonly Reloj $reloj,
+        private readonly AlmacenIdempotencia $idempotencia,
     ) {
     }
 
@@ -35,6 +37,21 @@ final class RegistrarPaciente
     {
         try {
             $this->acceso->exigir($comando->actor, $comando->hospital, ControlAcceso::REGISTRAR);
+
+            // Semana 5: un reintento con la misma Idempotency-Key devuelve la respuesta original.
+            $huella = null;
+            if ($comando->claveIdempotencia !== null) {
+                $huella = hash('sha256', (string) json_encode([$comando->datos, $comando->confirmaPeseACoincidencia, $comando->motivo]));
+                $previa = $this->idempotencia->buscar($comando->hospital, $comando->actor, $comando->claveIdempotencia);
+                if ($previa !== null) {
+                    if (!hash_equals($previa['huella'], $huella)) {
+                        throw new ErrorDominio(ErrorDominio::INVALIDO, 'IDEMPOTENCY_KEY_REUTILIZADA');
+                    }
+
+                    return Resultado::creado($previa['datos'] + ['repetida' => true]);
+                }
+            }
+
             $paciente = Paciente::desdeDatos($comando->hospital, FormularioPaciente::aDatos($comando->datos), $this->reloj->hoy());
             $confirmadas = $this->duplicados->verificarRegistro(
                 $paciente,
@@ -43,8 +60,8 @@ final class RegistrarPaciente
                 (string) $comando->motivo,
             );
 
-            // A-07: el paciente y su evento se guardan juntos o no se guarda nada (R-09).
-            $registrado = $this->transaccion->ejecutar(function () use ($comando, $paciente, $confirmadas): Paciente {
+            // A-07: paciente, evento y clave de idempotencia se guardan juntos o no se guarda nada (R-09).
+            $datos = $this->transaccion->ejecutar(function () use ($comando, $paciente, $confirmadas, $huella): array {
                 $registrado = $this->repositorio->registrar($paciente);
                 $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::REGISTRADO, $comando->actor, $comando->hospital,
                     $registrado->codigo, [
@@ -52,15 +69,19 @@ final class RegistrarPaciente
                         'coincidencias_confirmadas' => $confirmadas,
                         'motivo' => $confirmadas === [] ? null : trim((string) $comando->motivo),
                     ]));
+                $datos = [
+                    'codigo' => $registrado->codigo,
+                    'version' => $registrado->version,
+                    'identidad_provisional' => $registrado->identidadProvisional(),
+                ];
+                if ($comando->claveIdempotencia !== null) {
+                    $this->idempotencia->guardar($comando->hospital, $comando->actor, $comando->claveIdempotencia, (string) $huella, $datos);
+                }
 
-                return $registrado;
+                return $datos;
             });
 
-            return Resultado::creado([
-                'codigo' => $registrado->codigo,
-                'version' => $registrado->version,
-                'identidad_provisional' => $registrado->identidadProvisional(),
-            ]);
+            return Resultado::creado($datos);
         } catch (ErrorDominio $e) {
             return Resultado::desdeError($e);
         } catch (ErrorPersistencia) {

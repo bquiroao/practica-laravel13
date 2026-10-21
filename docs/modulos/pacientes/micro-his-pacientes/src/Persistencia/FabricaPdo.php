@@ -6,6 +6,7 @@ namespace Pacientes\Persistencia;
 
 use Pacientes\Dominio\Excepciones\ErrorPersistencia;
 use Pacientes\Persistencia\Pdo\FabricaConexion;
+use Pacientes\Persistencia\Pdo\PdoAlmacenIdempotencia;
 use Pacientes\Persistencia\Pdo\PdoIndiceDuplicados;
 use Pacientes\Persistencia\Pdo\PdoRegistroAuditoria;
 use Pacientes\Persistencia\Pdo\PdoRepositorioPacientes;
@@ -35,6 +36,7 @@ final class FabricaPdo
             new PdoIndiceDuplicados($pdo, $proteccion),
             new PdoRegistroAuditoria($pdo),
             new PdoTransaccion($pdo),
+            new PdoAlmacenIdempotencia($pdo),
         );
     }
 }

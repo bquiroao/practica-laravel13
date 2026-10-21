@@ -18,7 +18,8 @@ prueba('HTTP-01', 'POST /api/v1/pacientes → 201 con Location, ETag y el códig
     $r = $post($e, Escenario::datosAna());
     igual(201, $r->estado, 'HTTP');
     igual(['codigo' => 'P-000001', 'version' => 1, 'identidad_provisional' => false], $r->cuerpo, 'cuerpo');
-    igual(['Location' => '/api/v1/pacientes/P-000001', 'ETag' => '"1"'], $r->cabeceras, 'cabeceras');
+    igual(['/api/v1/pacientes/P-000001', '"1"'], [$r->cabeceras['Location'] ?? null, $r->cabeceras['ETag'] ?? null], 'Location y ETag');
+    afirmar(isset($r->cabeceras['X-Request-ID']), 'falta X-Request-ID (semana 5)');
 });
 
 prueba('HTTP-02', 'Sin X-Tenant-ID → 400; sin token → 401; token de otro hospital → 403', function (): void {
