@@ -8,6 +8,7 @@ declare(strict_types=1);
  * credenciales). Si los dos pasan lo mismo, son sustituibles (LSP, semana 2).
  */
 
+use Pacientes\Aplicacion\Excepciones\ClaveIdempotenciaEnUso;
 use Pacientes\Dominio\Excepciones\ConflictoVersion;
 use Pacientes\Dominio\Excepciones\DocumentoDuplicado;
 use Pacientes\Dominio\Excepciones\PacienteNoEncontrado;
@@ -117,6 +118,21 @@ function contratoRepositorios(string $prefijo, Closure $fabrica): void
         igual([], $a->consulta->buscar(Escenario::H_ORIENTE, CriterioBusqueda::desde(tipoDocumento: 'DPI', numeroDocumento: Escenario::DPI_LUIS)), 'paciente revertido');
         igual(1, $contarEventos(), 'evento revertido');
     });
+
+    prueba("$prefijo-07", 'Contrato: el almacén de idempotencia recuerda la respuesta, rechaza la clave repetida y participa del ROLLBACK', function () use ($fabrica): void {
+        [$a] = $fabrica();
+        $huella = str_repeat('a', 64);
+        igual(null, $a->idempotencia->buscar(Escenario::H_ORIENTE, 'admision-01', 'clave-000001'), 'vacío');
+        $a->idempotencia->guardar(Escenario::H_ORIENTE, 'admision-01', 'clave-000001', $huella, ['codigo' => 'P-000001', 'version' => 1]);
+        igual(['huella' => $huella, 'datos' => ['codigo' => 'P-000001', 'version' => 1]], $a->idempotencia->buscar(Escenario::H_ORIENTE, 'admision-01', 'clave-000001'), 'ida y vuelta');
+        igual(null, $a->idempotencia->buscar(Escenario::H_ORIENTE, 'admision-02', 'clave-000001'), 'otra clave por actor');
+        lanza(ClaveIdempotenciaEnUso::class, fn () => $a->idempotencia->guardar(Escenario::H_ORIENTE, 'admision-01', 'clave-000001', $huella, []), 'repetida');
+        lanza(RuntimeException::class, fn () => $a->transaccion->ejecutar(function () use ($a, $huella): void {
+            $a->idempotencia->guardar(Escenario::H_ORIENTE, 'admision-01', 'clave-000002', $huella, ['x' => 1]);
+            throw new RuntimeException('falla después de guardar');
+        }), 'rollback');
+        igual(null, $a->idempotencia->buscar(Escenario::H_ORIENTE, 'admision-01', 'clave-000002'), 'revertida');
+    });
 }
 
 // InMemory: siempre.
@@ -130,7 +146,7 @@ contratoRepositorios('CON-MEM', static function (): array {
 // PDO: solo con PostgreSQL disponible; esquema temporal que se elimina al terminar.
 $dsn = getenv('PACIENTES_DB_DSN');
 if ($dsn === false || $dsn === '') {
-    prueba('CON-PDO', 'Contrato contra PostgreSQL (las mismas 6 verificaciones)', static fn () => omitir('defina PACIENTES_DB_DSN para ejecutarla'));
+    prueba('CON-PDO', 'Contrato contra PostgreSQL (las mismas 7 verificaciones)', static fn () => omitir('defina PACIENTES_DB_DSN para ejecutarla'));
 
     return;
 }
@@ -144,7 +160,7 @@ $proteccionContrato = new ProteccionDocumentos(random_bytes(32), random_bytes(32
 
 try {
     contratoRepositorios('CON-PDO', static function () use ($pdoContrato, $proteccionContrato): array {
-        $pdoContrato->exec('TRUNCATE pacientes, eventos_auditoria RESTART IDENTITY');
+        $pdoContrato->exec('TRUNCATE pacientes, eventos_auditoria, idempotencia_registros RESTART IDENTITY');
         $pdoContrato->exec('ALTER SEQUENCE pacientes_codigo_seq RESTART');
 
         return [FabricaPdo::sobre($pdoContrato, $proteccionContrato),

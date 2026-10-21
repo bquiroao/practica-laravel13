@@ -28,6 +28,8 @@ use Pacientes\Presentacion\Http\Autenticacion\Autenticador;
 use Pacientes\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Pacientes\Presentacion\Http\Controladores\PacientesControlador;
 use Pacientes\Presentacion\Http\Kernel;
+use Pacientes\Presentacion\Http\Observabilidad\RegistroAcceso;
+use Pacientes\Presentacion\Http\Observabilidad\RegistroAccesoJson;
 use Pacientes\Presentacion\Http\Rutas;
 
 require_once __DIR__ . '/autoload.php';
@@ -43,7 +45,7 @@ function construirCasosDeUso(ConjuntoAdaptadores $a, PoliticaAcceso $politica, R
     $duplicados = new PoliticaDuplicados($a->indice);
 
     return [
-        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj),
+        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $a->idempotencia),
         'buscar' => new BuscarPacientes($a->consulta, $a->auditoria, $acceso),
         'consultar' => new ConsultarPaciente($a->consulta, $a->auditoria, $acceso),
         'actualizar' => new ActualizarPaciente($a->repositorio, new PoliticaEdicion(), $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj),
@@ -51,11 +53,11 @@ function construirCasosDeUso(ConjuntoAdaptadores $a, PoliticaAcceso $politica, R
 }
 
 /** Vista + Controlador de MVC sobre el Modelo. */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+function construirKernel(array $casos, Autenticador $autenticador, ?RegistroAcceso $registroAcceso = null): Kernel
 {
     $controlador = new PacientesControlador($casos['registrar'], $casos['buscar'], $casos['consultar'], $casos['actualizar']);
 
-    return new Kernel(Rutas::definir($controlador), $autenticador);
+    return new Kernel(Rutas::definir($controlador), $autenticador, $registroAcceso);
 }
 
 /**
@@ -88,7 +90,7 @@ function crearCasosDeUso(array $config): array
 /** @param array<string, mixed> $config */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(crearCasosDeUso($config), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(crearCasosDeUso($config), new AutenticadorTokenDemo($config['tokens_demo']), new RegistroAccesoJson());
 }
 
 /** Registra los pacientes de database/datos-demo.php a través del caso de uso. */

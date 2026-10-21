@@ -14,6 +14,7 @@ final class ComandoRegistrar
         public readonly array $datos,
         public readonly bool $confirmaPeseACoincidencia = false,
         public readonly ?string $motivo = null,
+        public readonly ?string $claveIdempotencia = null,
     ) {
     }
 }

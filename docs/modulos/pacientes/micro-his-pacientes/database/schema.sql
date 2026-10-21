@@ -52,6 +52,18 @@ CREATE TABLE eventos_auditoria (
 );
 CREATE INDEX eventos_auditoria_paciente ON eventos_auditoria (paciente_codigo, registrado_en);
 
+-- Semana 5: Idempotency-Key de POST /api/v1/pacientes. Se escribe en la misma transacción que el paciente.
+-- Una tarea de mantenimiento puede borrar claves con más de 24 h (no es evidencia clínica).
+CREATE TABLE idempotencia_registros (
+    hospital_id text NOT NULL,
+    actor_id text NOT NULL,
+    clave text NOT NULL CHECK (clave ~ '^[A-Za-z0-9-]{8,64}$'),
+    huella text NOT NULL CHECK (huella ~ '^[0-9a-f]{64}$'),
+    respuesta jsonb NOT NULL CHECK (jsonb_typeof(respuesta) = 'object'),
+    creado_en timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (hospital_id, actor_id, clave)
+);
+
 -- Bitácora append-only (R-09): ni UPDATE ni DELETE.
 CREATE FUNCTION eventos_auditoria_inmutable() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN

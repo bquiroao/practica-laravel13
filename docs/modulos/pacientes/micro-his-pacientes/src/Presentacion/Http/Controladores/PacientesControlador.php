@@ -51,7 +51,8 @@ final class PacientesControlador
     /** GET /api/v1/pacientes/{codigo} */
     public function consultar(Solicitud $solicitud, Identidad $identidad, array $parametros): Respuesta
     {
-        return PacienteVista::detalle($this->consultarPaciente->ejecutar(FormularioPaciente::consulta($identidad, $parametros['codigo'])));
+        return PacienteVista::detalle($this->consultarPaciente->ejecutar(FormularioPaciente::consulta($identidad, $parametros['codigo'])),
+            $solicitud->cabecera('If-None-Match'));
     }
 
     /** PUT /api/v1/pacientes/{codigo} con If-Match */

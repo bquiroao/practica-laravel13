@@ -6,6 +6,7 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 
 ```
 micro-his-pacientes/
+├── api/openapi.yaml              ← contrato REST (OpenAPI 3.1), validado con Redocly
 ├── public/index.php              ← front controller (único punto de entrada HTTP)
 ├── bootstrap/
 │   ├── autoload.php              ← autoload PSR-4 mínimo
@@ -16,22 +17,25 @@ micro-his-pacientes/
 │   └── datos-demo.php            ← pacientes ficticios de demostración
 ├── bin/
 │   ├── demo.php                  ← recorrido completo de la API sin base de datos (InMemory)
+│   ├── medir.php                 ← latencia en proceso frente a por red (decisión de frontera)
 │   ├── generar-claves.php        ← claves de hash y cifrado del documento
 │   └── cargar-demo.php           ← carga los pacientes ficticios en PostgreSQL a través de los casos de uso
 ├── src/
 │   ├── Presentacion/Http/        ← MVC: Kernel + Rutas, Controladores/, Formularios/, Vistas/, autenticación
 │   ├── Aplicacion/               ← casos de uso, comandos, Resultado, ControlAcceso, puertos
 │   ├── Dominio/                  ← modelo, políticas, puertos Repository, excepciones
-│   └── Persistencia/             ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), fábricas, protección del documento
+│   ├── Persistencia/             ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), fábricas, protección del documento
+│   └── Cliente/                  ← librería para otros módulos: timeout, reintento seguro, circuit breaker, caché ETag
 └── tests/                        ← pruebas por capa, MVC, suite de contrato, arquitectura, integración opcional, mutaciones
 ```
 
-Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. La verifican automáticamente las pruebas `ARQ-01` a `ARQ-08` (incluidas las reglas del controlador MVC y de los dos adaptadores por puerto).
+Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. La verifican automáticamente las pruebas `ARQ-01` a `ARQ-08` (incluidas las reglas del controlador MVC, los dos adaptadores por puerto y el aislamiento de la capa `Cliente`).
 
 | Semana | Qué agregó |
 |---|---|
 | 3 | Cuatro capas, PDO con sentencias preparadas, documento cifrado, versión, pruebas por capa |
 | 4 | Entrada **MVC** (controlador, formulario, vistas), adaptadores **InMemory** de producción junto a los PDO, suite de contrato común, modo `PACIENTES_PERSISTENCIA=memoria` y demo sin base de datos |
+| 5 | Contrato **OpenAPI 3.1** con conformidad probada, `Idempotency-Key` en el registro, GET condicional (304), `X-Request-ID` y registro de acceso, capa **Cliente** aislada y medición de la frontera |
 
 ## Ejecutar las pruebas
 
@@ -39,9 +43,11 @@ No necesitan base de datos: usan los adaptadores InMemory (con decoradores que s
 
 ```bash
 cd docs/modulos/pacientes/micro-his-pacientes
-php tests/ejecutar.php      # 52 pruebas (2 omitidas si no hay PostgreSQL)
-php tests/mutaciones.php    # 12 defectos introducidos a propósito; todos deben detectarse
+php tests/ejecutar.php      # 72 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/mutaciones.php    # 18 defectos introducidos a propósito; todos deben detectarse
 php bin/demo.php            # la API completa con adaptadores InMemory, sin base de datos
+php bin/medir.php           # costo de consultar en proceso frente a por red
+npx @redocly/cli lint api/openapi.yaml
 ```
 
 ### Pruebas de integración con PostgreSQL (opcional)
@@ -111,9 +117,9 @@ Si faltan las claves, la API responde `503 CONFIGURACION_INCOMPLETA`. Si la base
 
 | Método | Ruta | Permiso | Caso de uso | Respuestas |
 |---|---|---|---|---|
-| POST | `/api/v1/pacientes` | `pacientes.registrar` (+ `.confirmar_duplicado`) | CU-01, CU-05, CU-06 | 201 · 400 · 403 · 409 · 422 · 503 |
+| POST | `/api/v1/pacientes` (+ `Idempotency-Key` opcional) | `pacientes.registrar` (+ `.confirmar_duplicado`) | CU-01, CU-05, CU-06 | 201 · 400 · 403 · 409 · 422 · 503 |
 | GET | `/api/v1/pacientes?nombre=&nacimiento=&codigo=&tipo_documento=&numero_documento=&pais_documento=` | `pacientes.buscar` | CU-02 | 200 · 403 · 422 · 503 |
-| GET | `/api/v1/pacientes/{codigo}` | `pacientes.leer` | CU-03 | 200 (ETag) · 403 · 404 · 503 |
+| GET | `/api/v1/pacientes/{codigo}` (+ `If-None-Match`) | `pacientes.leer` | CU-03 | 200 (ETag) · 304 · 403 · 404 · 503 |
 | PUT | `/api/v1/pacientes/{codigo}` con `If-Match` | `pacientes.editar` (+ `.editar_restringido`) | CU-04 | 200 (ETag) · 400 · 403 · 404 · 409 · 422 · 428 · 503 |
 
-Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401), y el token debe ser del mismo hospital (403).
+Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401), y el token debe ser del mismo hospital (403). Todas devuelven `X-Request-ID`. Contrato completo: [`api/openapi.yaml`](api/openapi.yaml).

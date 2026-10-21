@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pacientes\Persistencia;
 
+use Pacientes\Persistencia\EnMemoria\AlmacenIdempotenciaEnMemoria;
 use Pacientes\Persistencia\EnMemoria\IndiceDuplicadosEnMemoria;
 use Pacientes\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
 use Pacientes\Persistencia\EnMemoria\RepositorioPacientesEnMemoria;
@@ -16,13 +17,15 @@ final class FabricaEnMemoria
     {
         $repositorio = new RepositorioPacientesEnMemoria();
         $auditoria = new RegistroAuditoriaEnMemoria();
+        $idempotencia = new AlmacenIdempotenciaEnMemoria();
 
         return new ConjuntoAdaptadores(
             $repositorio,
             $repositorio,
             new IndiceDuplicadosEnMemoria($repositorio),
             $auditoria,
-            new TransaccionEnMemoria([$repositorio, $auditoria]),
+            new TransaccionEnMemoria([$repositorio, $auditoria, $idempotencia]),
+            $idempotencia,
         );
     }
 }

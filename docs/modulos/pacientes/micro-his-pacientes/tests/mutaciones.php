@@ -39,6 +39,19 @@ $mutaciones = [
         'return ErrorVista::hospitalRequerido();', "return Respuesta::json(400, ['error' => 'HOSPITAL_REQUERIDO']);"],
     'M12' => ['El adaptador InMemory deja de exigir el documento único', 'src/Persistencia/EnMemoria/RepositorioPacientesEnMemoria.php',
         'if ($canonico === null) {', 'if (true) {'],
+    // Semana 5: cliente-servidor, contrato, observabilidad e idempotencia.
+    'M13' => ['El cliente reintenta los PUT (puede pisar datos o dar 409 engañoso)', 'src/Cliente/ClientePacientes.php',
+        '$r = $this->llamar($peticion, $requestId ?? $this->nuevoId(), false);', '$r = $this->llamar($peticion, $requestId ?? $this->nuevoId(), true);'],
+    'M14' => ['El cliente importa una clase del servidor', 'src/Cliente/ClientePacientes.php',
+        "namespace Pacientes\\Cliente;\n", "namespace Pacientes\\Cliente;\n\nuse Pacientes\\Presentacion\\Http\\Kernel;\n"],
+    'M15' => ['El contrato declara otro permiso para la búsqueda', 'api/openapi.yaml',
+        'x-permiso: pacientes.buscar', 'x-permiso: pacientes.leer'],
+    'M16' => ['El contrato deja de documentar el 428 del PUT', 'api/openapi.yaml',
+        "        '428':\n          \$ref: '#/components/responses/VersionRequerida'\n", ''],
+    'M17' => ['El registro de acceso incluye la query (nombres de pacientes)', 'src/Presentacion/Http/Kernel.php',
+        "'ruta' => \$solicitud->ruta,", "'ruta' => \$solicitud->ruta . '?' . http_build_query(\$solicitud->consulta),"],
+    'M18' => ['El registro deja de consultar la Idempotency-Key', 'src/Aplicacion/CasosDeUso/RegistrarPaciente.php',
+        '$previa = $this->idempotencia->buscar($comando->hospital, $comando->actor, $comando->claveIdempotencia);', '$previa = null;'],
 ];
 // M8: sin la transacción, el closure se invoca directamente.
 $ajustes = ['M8' => ['            });' . "\n\n" . "            return Resultado::ok(['codigo'", '            })();' . "\n\n" . "            return Resultado::ok(['codigo'"]];
