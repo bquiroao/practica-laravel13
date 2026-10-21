@@ -68,7 +68,7 @@ function construirKernel(
         new FirmarNota($a->notas, $a->diagnosticos, $registrador, $reloj),
         new ConsultarNota($a->notas, $a->diagnosticos),
         new ListarNotasExpediente($a->notas, $a->diagnosticos),
-        new CorregirNota($reglas, $registrador, $a->notas, $ids, $reloj),
+        new CorregirNota($reglas, $registrador, $a->notas, $a->diagnosticos, $ids, $reloj, $a->idempotencia),
         $vistas,
     );
 

@@ -12,6 +12,7 @@ use NotasSoap\Presentacion\Http\Solicitud;
  * Semana 6: modelo de entrada de POST /api/v1/notas-soap/{id}/correcciones.
  * Igual que FormularioRegistroNota, solo revisa la FORMA (objeto, campos de texto).
  * Si el motivo alcanza, si la nota está firmada o si el CIE-10 es válido lo decide el Dominio.
+ * Semana 12: lee la Idempotency-Key opcional, igual que el registro (brecha B-3).
  */
 final class FormularioCorreccionNota
 {
@@ -42,6 +43,7 @@ final class FormularioCorreccionNota
             $d['code'],
             $d['description'],
             $d['type'],
+            FormularioRegistroNota::claveIdempotencia($s),
         );
     }
 
