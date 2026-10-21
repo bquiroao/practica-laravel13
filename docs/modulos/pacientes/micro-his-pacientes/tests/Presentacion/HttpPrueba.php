@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Pacientes\Presentacion\Http\Accion;
 use Pacientes\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Pacientes\Presentacion\Http\Identidad;
 use Pacientes\Presentacion\Http\Kernel;
@@ -83,12 +82,7 @@ prueba('HTTP-07', 'Base de datos caída → 503 genérico, sin SQLSTATE ni detal
 });
 
 prueba('HTTP-08', 'Error inesperado → 500 genérico; ruta inexistente 404; método no permitido 405', function (): void {
-    $explota = new class implements Accion {
-        public function ejecutar(Solicitud $solicitud, Identidad $identidad, array $parametros): Respuesta
-        {
-            throw new LogicException('detalle interno que no debe salir');
-        }
-    };
+    $explota = static fn (Solicitud $s, Identidad $i, array $p): Respuesta => throw new LogicException('detalle interno que no debe salir');
     $kernel = new Kernel([new Ruta('GET', '#^/explota$#', $explota)], new AutenticadorTokenDemo(['t' => ['a', Escenario::H_ORIENTE]]));
     $r = $kernel->manejar(Escenario::http('GET', '/explota', 't'));
     igual([500, ['error' => 'ERROR_INTERNO']], [$r->estado, $r->cuerpo], '500');

@@ -7,11 +7,19 @@ namespace Pacientes\Pruebas\Dobles;
 use Pacientes\Aplicacion\Comandos\ComandoActualizar;
 use Pacientes\Aplicacion\Comandos\ComandoRegistrar;
 use Pacientes\Aplicacion\Resultados\Resultado;
+use Pacientes\Persistencia\ConjuntoAdaptadores;
 use Pacientes\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Pacientes\Persistencia\EnMemoria\IndiceDuplicadosEnMemoria;
+use Pacientes\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use Pacientes\Persistencia\EnMemoria\RepositorioPacientesEnMemoria;
+use Pacientes\Persistencia\EnMemoria\TransaccionEnMemoria;
 use Pacientes\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Pacientes\Presentacion\Http\Solicitud;
 
-/** Arma el módulo completo con dobles en memoria y ofrece datos de prueba (ficticios). */
+/**
+ * Arma el módulo completo con los adaptadores InMemory de producción, envueltos en
+ * decoradores que permiten simular fallas. Datos de prueba ficticios.
+ */
 final class Escenario
 {
     public const H_ORIENTE = 'hosp-oriente';
@@ -24,20 +32,20 @@ final class Escenario
     public const DPI_LUIS = '1876543210901';
     public const DPI_NUEVO = '4455667780105';
 
-    /** @return object{casos: array, repositorio: RepositorioPacientesEnMemoria, indice: IndiceDuplicadosEnMemoria, bitacora: RegistroAuditoriaEnMemoria, kernel: \Pacientes\Presentacion\Http\Kernel} */
     public static function crear(): object
     {
-        $repositorio = new RepositorioPacientesEnMemoria();
-        $indice = new IndiceDuplicadosEnMemoria($repositorio);
-        $bitacora = new RegistroAuditoriaEnMemoria();
+        $almacen = new RepositorioPacientesEnMemoria();
+        $eventos = new RegistroAuditoriaEnMemoria();
+        $repositorio = new RepositorioPacientesConFallas($almacen);
+        $bitacora = new RegistroAuditoriaConFallas($eventos);
+        $adaptadores = new ConjuntoAdaptadores($repositorio, $repositorio, new IndiceDuplicadosEnMemoria($almacen), $bitacora,
+            new TransaccionEnMemoria([$almacen, $eventos]));
         $config = self::config();
-        $casos = \construirCasosDeUso($repositorio, $repositorio, $indice, $bitacora,
-            new TransaccionEnMemoria([$repositorio, $bitacora]), new PoliticaAccesoEstatica($config['permisos']), new RelojFijo());
+        $casos = \construirCasosDeUso($adaptadores, new PoliticaAccesoEstatica($config['permisos']), new RelojFijo());
 
         return (object) [
             'casos' => $casos,
             'repositorio' => $repositorio,
-            'indice' => $indice,
             'bitacora' => $bitacora,
             'kernel' => \construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo'])),
         ];

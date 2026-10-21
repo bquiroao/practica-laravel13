@@ -6,6 +6,8 @@ declare(strict_types=1);
 $basicos = ['pacientes.registrar', 'pacientes.buscar', 'pacientes.leer', 'pacientes.editar'];
 
 return [
+    // 'pdo' = PostgreSQL; 'memoria' = adaptadores InMemory con los pacientes de database/datos-demo.php.
+    'persistencia' => getenv('PACIENTES_PERSISTENCIA') ?: 'pdo',
     'db' => [
         'dsn' => getenv('PACIENTES_DB_DSN') ?: 'pgsql:host=127.0.0.1;port=5432;dbname=micro_his_pacientes',
         'usuario' => getenv('PACIENTES_DB_USUARIO') ?: 'postgres',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pacientes\Pruebas\Dobles;
+namespace Pacientes\Persistencia\EnMemoria;
 
 use Pacientes\Dominio\Modelo\Identificador;
 use Pacientes\Dominio\Puertos\IndiceDuplicados;
@@ -29,10 +29,11 @@ final class IndiceDuplicadosEnMemoria implements IndiceDuplicados
     {
         $codigos = [];
         foreach ($this->repositorio->todos() as $paciente) {
-            if ($paciente->nombreNormalizado() === $nombreNormalizado && $paciente->nacimiento == $nacimiento) {
+            if ($paciente->nombreNormalizado() === $nombreNormalizado && $paciente->nacimiento->format('Y-m-d') === $nacimiento->format('Y-m-d')) {
                 $codigos[] = (string) $paciente->codigo;
             }
         }
+        sort($codigos);
 
         return $codigos;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pacientes\Presentacion\Http;
 
+/** Respuesta HTTP. Su contenido lo deciden las Vistas (ARQ-08). */
 final class Respuesta
 {
     /**
@@ -24,11 +25,6 @@ final class Respuesta
     public static function json(int $estado, array $cuerpo, array $cabeceras = []): self
     {
         return new self($estado, $cuerpo, $cabeceras);
-    }
-
-    public static function error(int $estado, string $codigo): self
-    {
-        return new self($estado, ['error' => $codigo]);
     }
 
     public function enviar(): void

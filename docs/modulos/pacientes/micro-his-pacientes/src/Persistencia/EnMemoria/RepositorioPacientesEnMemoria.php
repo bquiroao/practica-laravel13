@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Pacientes\Pruebas\Dobles;
+namespace Pacientes\Persistencia\EnMemoria;
 
 use Pacientes\Dominio\Excepciones\ConflictoVersion;
-use Pacientes\Dominio\Excepciones\ErrorPersistencia;
+use Pacientes\Dominio\Excepciones\DocumentoDuplicado;
 use Pacientes\Dominio\Excepciones\PacienteNoEncontrado;
 use Pacientes\Dominio\Modelo\CriterioBusqueda;
 use Pacientes\Dominio\Modelo\Paciente;
 use Pacientes\Dominio\Puertos\RepositorioPacientes;
 
-/** Doble en memoria que cumple el contrato y puede simular la base caída en una operación. */
+/**
+ * Adaptador InMemory de RepositorioPacientes. Cumple el MISMO contrato que el adaptador
+ * PDO (tests/Contratos): versión atómica, documento único, búsqueda acotada al hospital.
+ */
 final class RepositorioPacientesEnMemoria implements RepositorioPacientes, Restaurable
 {
-    /** @var array<string, Paciente> */
+    /** @var array<string, Paciente> código => paciente, de todos los hospitales */
     private array $pacientes = [];
     private int $secuencia = 0;
-    /** @var list<string> operaciones que lanzan ErrorPersistencia */
-    public array $fallarEn = [];
 
     public function porCodigo(string $hospital, string $codigo): ?Paciente
     {
-        $this->quizasFallar('porCodigo');
         $paciente = $this->pacientes[$codigo] ?? null;
 
         return $paciente !== null && $paciente->hospital === $hospital ? $paciente : null;
@@ -30,7 +30,6 @@ final class RepositorioPacientesEnMemoria implements RepositorioPacientes, Resta
 
     public function buscar(string $hospital, CriterioBusqueda $criterio): array
     {
-        $this->quizasFallar('buscar');
         $encontrados = array_values(array_filter(
             $this->pacientes,
             static fn (Paciente $p): bool => $p->hospital === $hospital && $criterio->coincideCon($p),
@@ -42,7 +41,7 @@ final class RepositorioPacientesEnMemoria implements RepositorioPacientes, Resta
 
     public function registrar(Paciente $paciente): Paciente
     {
-        $this->quizasFallar('registrar');
+        $this->exigirDocumentoLibre($paciente, null);
         $codigo = sprintf('P-%06d', ++$this->secuencia);
 
         return $this->pacientes[$codigo] = $paciente->conCodigo($codigo, 1);
@@ -50,19 +49,19 @@ final class RepositorioPacientesEnMemoria implements RepositorioPacientes, Resta
 
     public function actualizar(Paciente $cambios, int $versionEsperada): Paciente
     {
-        $this->quizasFallar('actualizar');
-        $actual = $this->pacientes[(string) $cambios->codigo] ?? null;
-        if ($actual === null || $actual->hospital !== $cambios->hospital) {
+        $actual = $this->porCodigo($cambios->hospital, (string) $cambios->codigo);
+        if ($actual === null) {
             throw new PacienteNoEncontrado();
         }
         if ($actual->version !== $versionEsperada) {
             throw new ConflictoVersion($actual->version);
         }
+        $this->exigirDocumentoLibre($cambios, $actual->codigo);
 
         return $this->pacientes[(string) $actual->codigo] = $cambios->conVersion($versionEsperada + 1);
     }
 
-    /** @return list<Paciente> todos, de todos los hospitales (lo usa el índice de duplicados) */
+    /** @return list<Paciente> todos los pacientes de todos los hospitales (para el índice de duplicados) */
     public function todos(): array
     {
         return array_values($this->pacientes);
@@ -78,10 +77,17 @@ final class RepositorioPacientesEnMemoria implements RepositorioPacientes, Resta
         [$this->pacientes, $this->secuencia] = $instantanea;
     }
 
-    private function quizasFallar(string $operacion): void
+    /** Equivalente del índice único pacientes_documento_unico de PostgreSQL. */
+    private function exigirDocumentoLibre(Paciente $paciente, ?string $excepto): void
     {
-        if (in_array($operacion, $this->fallarEn, true)) {
-            throw new ErrorPersistencia("Simulado: base no disponible en $operacion", '08006');
+        $canonico = $paciente->identificador?->canonico();
+        if ($canonico === null) {
+            return;
+        }
+        foreach ($this->pacientes as $codigo => $otro) {
+            if ($codigo !== $excepto && $otro->identificador?->canonico() === $canonico) {
+                throw new DocumentoDuplicado();
+            }
         }
     }
 }

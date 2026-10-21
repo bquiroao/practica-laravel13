@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Pacientes\Presentacion\Http;
 
+/** Una ruta: método, patrón y el método del controlador que la atiende. */
 final class Ruta
 {
+    /** @param \Closure(Solicitud, Identidad, array<string, string>): Respuesta $manejador */
     public function __construct(
         public readonly string $metodo,
         public readonly string $patron,
-        public readonly Accion $accion,
+        public readonly \Closure $manejador,
     ) {
     }
 

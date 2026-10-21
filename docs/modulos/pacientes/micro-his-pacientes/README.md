@@ -11,33 +11,42 @@ micro-his-pacientes/
 │   ├── autoload.php              ← autoload PSR-4 mínimo
 │   └── contenedor.php            ← raíz de composición: conecta las capas
 ├── config/config.php             ← configuración desde variables de entorno
-├── database/schema.sql           ← pacientes (documento cifrado + hash, versión) y bitácora append-only
+├── database/
+│   ├── schema.sql                ← pacientes (documento cifrado + hash, versión) y bitácora append-only
+│   └── datos-demo.php            ← pacientes ficticios de demostración
 ├── bin/
+│   ├── demo.php                  ← recorrido completo de la API sin base de datos (InMemory)
 │   ├── generar-claves.php        ← claves de hash y cifrado del documento
-│   └── cargar-demo.php           ← pacientes ficticios cargados a través de los casos de uso
+│   └── cargar-demo.php           ← carga los pacientes ficticios en PostgreSQL a través de los casos de uso
 ├── src/
-│   ├── Presentacion/Http/        ← Kernel, rutas, acciones, traductor de resultados, autenticación
+│   ├── Presentacion/Http/        ← MVC: Kernel + Rutas, Controladores/, Formularios/, Vistas/, autenticación
 │   ├── Aplicacion/               ← casos de uso, comandos, Resultado, ControlAcceso, puertos
-│   ├── Dominio/                  ← modelo, políticas, puertos de repositorio, excepciones
-│   └── Persistencia/             ← adaptadores PDO, protección del documento, configuración
-└── tests/                        ← pruebas por capa + arquitectura + integración opcional + mutaciones
+│   ├── Dominio/                  ← modelo, políticas, puertos Repository, excepciones
+│   └── Persistencia/             ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), fábricas, protección del documento
+└── tests/                        ← pruebas por capa, MVC, suite de contrato, arquitectura, integración opcional, mutaciones
 ```
 
-Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. La verifican automáticamente las pruebas `ARQ-01` a `ARQ-05`.
+Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. La verifican automáticamente las pruebas `ARQ-01` a `ARQ-08` (incluidas las reglas del controlador MVC y de los dos adaptadores por puerto).
+
+| Semana | Qué agregó |
+|---|---|
+| 3 | Cuatro capas, PDO con sentencias preparadas, documento cifrado, versión, pruebas por capa |
+| 4 | Entrada **MVC** (controlador, formulario, vistas), adaptadores **InMemory** de producción junto a los PDO, suite de contrato común, modo `PACIENTES_PERSISTENCIA=memoria` y demo sin base de datos |
 
 ## Ejecutar las pruebas
 
-No necesitan base de datos: usan dobles en memoria y dobles de PDO.
+No necesitan base de datos: usan los adaptadores InMemory (con decoradores que simulan fallas) y dobles de PDO.
 
 ```bash
 cd docs/modulos/pacientes/micro-his-pacientes
-php tests/ejecutar.php      # 38 pruebas (1 omitida si no hay PostgreSQL)
-php tests/mutaciones.php    # 8 defectos introducidos a propósito; todos deben detectarse
+php tests/ejecutar.php      # 52 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/mutaciones.php    # 12 defectos introducidos a propósito; todos deben detectarse
+php bin/demo.php            # la API completa con adaptadores InMemory, sin base de datos
 ```
 
 ### Pruebas de integración con PostgreSQL (opcional)
 
-Crean un esquema temporal, aplican `schema.sql`, ejecutan las pruebas y eliminan el esquema.
+Crean un esquema temporal, aplican `schema.sql`, ejecutan la suite de contrato contra PDO (`CON-PDO-*`) y las pruebas de integración (`INT-*`), y eliminan el esquema.
 
 ```powershell
 $env:PACIENTES_DB_DSN = "pgsql:host=127.0.0.1;port=5432;dbname=postgres"
@@ -47,6 +56,15 @@ php tests/ejecutar.php
 ```
 
 ## Ejecutar la API
+
+**Sin base de datos** (adaptadores InMemory con los pacientes de `database/datos-demo.php`; cada petición empieza desde esos datos):
+
+```powershell
+$env:PACIENTES_PERSISTENCIA = "memoria"
+php -S 127.0.0.1:8081 -t public
+```
+
+**Con PostgreSQL:**
 
 1. Crear la base y cargar el esquema:
 

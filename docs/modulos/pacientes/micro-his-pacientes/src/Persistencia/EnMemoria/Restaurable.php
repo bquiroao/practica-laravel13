@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pacientes\Pruebas\Dobles;
+namespace Pacientes\Persistencia\EnMemoria;
 
-/** Lo que TransaccionEnMemoria puede deshacer (simula ROLLBACK). */
+/** Almacén en memoria que TransaccionEnMemoria puede deshacer (simula ROLLBACK). */
 interface Restaurable
 {
     public function instantanea(): mixed;
