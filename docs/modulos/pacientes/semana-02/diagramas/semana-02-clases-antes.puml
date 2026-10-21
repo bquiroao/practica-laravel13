@@ -1,0 +1,83 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title Diseño ANTES de LSP — subtipos que no se pueden sustituir
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+class ServicioPacientes <<un solo servicio>> {
+  + registrar(SolicitudRegistro) : Respuesta
+  + buscar(actor, hospital, criterios) : Respuesta
+  + actualizar(SolicitudActualizacion) : Respuesta
+}
+
+class Paciente {
+  + identificador : Identificador
+}
+
+interface Identificador {
+  + claveBusqueda() : string
+  + enmascarado() : string
+}
+class Dpi
+class Pasaporte
+class IdentificadorTemporal #FDECEC {
+  + claveBusqueda() : string = ""
+}
+
+class RepositorioPacientes <<concreto: lee y escribe>> {
+  + porCodigo(hospital, codigo) : ?Paciente
+  + buscar(hospital, criterio) : list<Paciente>
+  + registrar(Paciente) : Paciente
+  + actualizar(Paciente, versionEsperada) : Paciente
+}
+class ReplicaPacientes #FDECEC {
+  + registrar() : lanza LogicException
+  + actualizar() : lanza LogicException
+}
+class "RepositorioPacientesConCache" as CacheAntes #FDECEC {
+  + actualizar() : escribe sin comparar versión
+}
+
+Identificador <|.. Dpi
+Identificador <|.. Pasaporte
+Identificador <|.. IdentificadorTemporal
+Paciente o--> "1" Identificador
+RepositorioPacientes <|-- ReplicaPacientes
+RepositorioPacientes <|-- CacheAntes
+
+ServicioPacientes --> RepositorioPacientes
+ServicioPacientes ..> ReplicaPacientes : <<instanceof>> ×2
+ServicioPacientes ..> IdentificadorTemporal : <<instanceof>> ×1
+
+note right of IdentificadorTemporal
+  **V1 · invariante**
+  Clave vacía e igual para todos
+  los pacientes sin documento:
+  dos desconocidos «son» el mismo.
+end note
+note bottom of ReplicaPacientes
+  **V2 · precondición reforzada**
+  Lanza una excepción que la base
+  no anuncia: quien recibe un
+  RepositorioPacientes ya no puede
+  confiar en registrar().
+end note
+note bottom of CacheAntes
+  **V3 · postcondición debilitada**
+  No lanza ConflictoVersion:
+  la segunda edición concurrente
+  borra la primera en silencio.
+end note
+note left of ServicioPacientes
+  Síntoma: el cliente pregunta
+  qué subtipo recibió y aplica
+  parches (3 instanceof). En
+  actualizar() falta uno → 409 falso.
+end note
+@enduml
