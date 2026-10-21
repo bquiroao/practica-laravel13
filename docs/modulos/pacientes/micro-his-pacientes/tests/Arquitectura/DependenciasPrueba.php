@@ -134,3 +134,68 @@ prueba('ARQ-05', 'Las claves de cifrado y hash solo existen en Persistencia (el 
     }
     afirmar($violaciones === [], 'criptografía fuera de Persistencia: ' . implode(', ', $violaciones));
 });
+
+/** @return list<class-string> clases declaradas en una carpeta de src/ */
+function clasesEn(string $carpeta): array
+{
+    $clases = [];
+    foreach (glob(dirname(__DIR__, 2) . '/src/' . $carpeta . '/*.php') ?: [] as $archivo) {
+        $clase = 'Pacientes\\' . str_replace('/', '\\', $carpeta) . '\\' . basename($archivo, '.php');
+        if (class_exists($clase)) {
+            $clases[] = $clase;
+        }
+    }
+
+    return $clases;
+}
+
+prueba('ARQ-06', 'Repository: cada puerto de persistencia tiene un adaptador PDO y uno InMemory', function (): void {
+    $puertos = [
+        \Pacientes\Dominio\Puertos\ConsultaPacientes::class,
+        \Pacientes\Dominio\Puertos\RepositorioPacientes::class,
+        \Pacientes\Dominio\Puertos\IndiceDuplicados::class,
+        \Pacientes\Dominio\Puertos\RegistroAuditoria::class,
+        \Pacientes\Aplicacion\Puertos\Transaccion::class,
+    ];
+    $faltan = [];
+    foreach ($puertos as $puerto) {
+        foreach (['Persistencia/Pdo', 'Persistencia/EnMemoria'] as $carpeta) {
+            $implementan = array_filter(clasesEn($carpeta), static fn (string $c): bool => is_subclass_of($c, $puerto));
+            if ($implementan === []) {
+                $faltan[] = (new ReflectionClass($puerto))->getShortName() . " sin adaptador en $carpeta";
+            }
+        }
+        afirmar(str_contains($puerto, '\\Puertos\\'), "$puerto no está en una carpeta de puertos");
+    }
+    afirmar($faltan === [], implode(', ', $faltan));
+});
+
+prueba('ARQ-07', 'Controlador: solo recibe casos de uso; sin SQL, sin new, sin códigos de negocio y sin armar respuestas', function (): void {
+    $clase = \Pacientes\Presentacion\Http\Controladores\PacientesControlador::class;
+    foreach ((new ReflectionClass($clase))->getConstructor()->getParameters() as $parametro) {
+        afirmar(str_starts_with((string) $parametro->getType(), 'Pacientes\\Aplicacion\\CasosDeUso\\'), 'recibe ' . $parametro->getType());
+    }
+    $codigo = sinComentarios((string) file_get_contents((new ReflectionClass($clase))->getFileName()));
+    $prohibidos = [
+        'new ' => '/\bnew\s+[A-Z\\\\]/',
+        'SQL' => '/\b(SELECT|INSERT|UPDATE|DELETE)\b/',
+        'código de negocio' => "/'(pacientes\\.[a-z_]+|PACIENTE_[A-Z_]+|VERSION_[A-Z_]+|DOCUMENTO_[A-Z_]+|active|inactive|deceased|DPI|PASAPORTE)'/",
+        'formato de respuesta' => '/Respuesta::json|new Respuesta|json_encode|http_response_code/',
+    ];
+    foreach ($prohibidos as $que => $patron) {
+        afirmar(preg_match($patron, $codigo) !== 1, "el controlador contiene $que");
+    }
+});
+
+prueba('ARQ-08', 'Vistas: Respuesta::json y new Respuesta solo aparecen en Presentacion/Http/Vistas', function (): void {
+    $violaciones = [];
+    foreach (fuentesDeCapa('Presentacion') as $archivo => $codigo) {
+        if (str_contains($archivo, '/Vistas/') || str_ends_with($archivo, '/Respuesta.php')) {
+            continue;
+        }
+        if (preg_match('/Respuesta::json\s*\(|new\s+Respuesta\s*\(/', sinComentarios($codigo)) === 1) {
+            $violaciones[] = $archivo;
+        }
+    }
+    afirmar($violaciones === [], 'respuestas armadas fuera de las Vistas: ' . implode(', ', $violaciones));
+});

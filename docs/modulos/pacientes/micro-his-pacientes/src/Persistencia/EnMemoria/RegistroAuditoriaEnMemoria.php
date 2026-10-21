@@ -2,23 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Pacientes\Pruebas\Dobles;
+namespace Pacientes\Persistencia\EnMemoria;
 
-use Pacientes\Dominio\Excepciones\ErrorPersistencia;
 use Pacientes\Dominio\Modelo\EventoAuditoria;
 use Pacientes\Dominio\Puertos\RegistroAuditoria;
 
+/** Bitácora en memoria: igual que la de PostgreSQL, solo permite agregar. */
 final class RegistroAuditoriaEnMemoria implements RegistroAuditoria, Restaurable
 {
     /** @var list<EventoAuditoria> */
     private array $eventos = [];
-    public bool $fallar = false;
 
     public function registrar(EventoAuditoria $evento): void
     {
-        if ($this->fallar) {
-            throw new ErrorPersistencia('Simulado: bitácora no disponible', '08006');
-        }
         $this->eventos[] = $evento;
     }
 

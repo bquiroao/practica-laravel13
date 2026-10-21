@@ -11,9 +11,9 @@ use Pacientes\Dominio\Modelo\Paciente;
 use Pacientes\Dominio\Modelo\Pasaporte;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 use Pacientes\Dominio\Servicios\PoliticaEdicion;
+use Pacientes\Persistencia\EnMemoria\IndiceDuplicadosEnMemoria;
+use Pacientes\Persistencia\EnMemoria\RepositorioPacientesEnMemoria;
 use Pacientes\Pruebas\Dobles\Escenario;
-use Pacientes\Pruebas\Dobles\IndiceDuplicadosEnMemoria;
-use Pacientes\Pruebas\Dobles\RepositorioPacientesEnMemoria;
 
 $hoy = new DateTimeImmutable('2026-10-21');
 $paciente = static fn (string $nombres = 'Ana Lucía', ?string $dpi = Escenario::DPI_ANA, string $nacimiento = '1985-03-14'): Paciente =>

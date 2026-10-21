@@ -1,0 +1,14 @@
+Prueba de humo: php -S con PACIENTES_PERSISTENCIA=memoria (sin PostgreSQL ni claves)
+
+$ curl -i "http://127.0.0.1:8097/api/v1/pacientes?nombre=perez" -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-clinico-oriente"
+HTTP/1.1 200 OK
+{"resultados":[{"codigo":"P-000001","nombre":"Ana Lucía López Pérez","nacimiento":"1985-03-14","identificador":"*********0101"}],"total":1}
+
+$ curl -i http://127.0.0.1:8097/api/v1/pacientes/P-000001 -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-admision-oriente"
+HTTP/1.1 200 OK
+ETag: "1"
+{"paciente":{"codigo":"P-000001","nombre":"Ana Lucía López Pérez","nacimiento":"1985-03-14","identificador":"*********0101","sexo":"female","telefono":"+502 5555 1234","tipo_documento":"DPI","estado":"active","identidad_provisional":false,"version":1}}
+
+$ curl -i -X PUT http://127.0.0.1:8097/api/v1/pacientes/P-000001 ... (sin If-Match)
+HTTP/1.1 428 Precondition Required
+{"error":"VERSION_REQUERIDA"}

@@ -4,96 +4,100 @@ declare(strict_types=1);
 
 /*
  * Raíz de composición: el único lugar que conoce las clases concretas de todas las capas
- * y las conecta. Las pruebas usan construirCasosDeUso() con dobles; la aplicación real
- * usa crearKernel() con PDO.
+ * y las conecta. Elige los adaptadores (PDO o InMemory) con PACIENTES_PERSISTENCIA; el resto
+ * del sistema no sabe cuál se eligió.
  */
 
 use Pacientes\Aplicacion\CasosDeUso\ActualizarPaciente;
 use Pacientes\Aplicacion\CasosDeUso\BuscarPacientes;
 use Pacientes\Aplicacion\CasosDeUso\ConsultarPaciente;
 use Pacientes\Aplicacion\CasosDeUso\RegistrarPaciente;
+use Pacientes\Aplicacion\Comandos\ComandoRegistrar;
 use Pacientes\Aplicacion\Puertos\PoliticaAcceso;
 use Pacientes\Aplicacion\Puertos\Reloj;
-use Pacientes\Aplicacion\Puertos\Transaccion;
 use Pacientes\Aplicacion\Servicios\ControlAcceso;
-use Pacientes\Dominio\Puertos\ConsultaPacientes;
-use Pacientes\Dominio\Puertos\IndiceDuplicados;
-use Pacientes\Dominio\Puertos\RegistroAuditoria;
-use Pacientes\Dominio\Puertos\RepositorioPacientes;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 use Pacientes\Dominio\Servicios\PoliticaEdicion;
 use Pacientes\Persistencia\Configuracion\PoliticaAccesoEstatica;
 use Pacientes\Persistencia\Configuracion\RelojSistema;
-use Pacientes\Persistencia\Pdo\FabricaConexion;
-use Pacientes\Persistencia\Pdo\PdoIndiceDuplicados;
-use Pacientes\Persistencia\Pdo\PdoRegistroAuditoria;
-use Pacientes\Persistencia\Pdo\PdoRepositorioPacientes;
-use Pacientes\Persistencia\Pdo\PdoTransaccion;
+use Pacientes\Persistencia\ConjuntoAdaptadores;
+use Pacientes\Persistencia\FabricaEnMemoria;
+use Pacientes\Persistencia\FabricaPdo;
 use Pacientes\Persistencia\Seguridad\ProteccionDocumentos;
 use Pacientes\Presentacion\Http\Autenticacion\Autenticador;
 use Pacientes\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
+use Pacientes\Presentacion\Http\Controladores\PacientesControlador;
 use Pacientes\Presentacion\Http\Kernel;
-use Pacientes\Presentacion\Http\TablaRutas;
+use Pacientes\Presentacion\Http\Rutas;
 
 require_once __DIR__ . '/autoload.php';
 
 /**
- * Dominio + Aplicación a partir de implementaciones de los puertos.
- * La búsqueda recibe ConsultaPacientes: puede ser el repositorio o una réplica de lectura.
+ * Dominio + Aplicación (el Modelo de MVC) sobre un juego de adaptadores.
  *
  * @return array{registrar: RegistrarPaciente, buscar: BuscarPacientes, consultar: ConsultarPaciente, actualizar: ActualizarPaciente}
  */
-function construirCasosDeUso(
-    ConsultaPacientes $lectura,
-    RepositorioPacientes $repositorio,
-    IndiceDuplicados $indice,
-    RegistroAuditoria $auditoria,
-    Transaccion $transaccion,
-    PoliticaAcceso $politica,
-    Reloj $reloj,
-): array {
+function construirCasosDeUso(ConjuntoAdaptadores $a, PoliticaAcceso $politica, Reloj $reloj): array
+{
     $acceso = new ControlAcceso($politica);
-    $duplicados = new PoliticaDuplicados($indice);
+    $duplicados = new PoliticaDuplicados($a->indice);
 
     return [
-        'registrar' => new RegistrarPaciente($repositorio, $duplicados, $auditoria, $transaccion, $acceso, $reloj),
-        'buscar' => new BuscarPacientes($lectura, $auditoria, $acceso),
-        'consultar' => new ConsultarPaciente($lectura, $auditoria, $acceso),
-        'actualizar' => new ActualizarPaciente($repositorio, new PoliticaEdicion(), $duplicados, $auditoria, $transaccion, $acceso, $reloj),
+        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj),
+        'buscar' => new BuscarPacientes($a->consulta, $a->auditoria, $acceso),
+        'consultar' => new ConsultarPaciente($a->consulta, $a->auditoria, $acceso),
+        'actualizar' => new ActualizarPaciente($a->repositorio, new PoliticaEdicion(), $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj),
     ];
 }
 
-/** @param array{registrar: RegistrarPaciente, buscar: BuscarPacientes, consultar: ConsultarPaciente, actualizar: ActualizarPaciente} $casos */
+/** Vista + Controlador de MVC sobre el Modelo. */
 function construirKernel(array $casos, Autenticador $autenticador): Kernel
 {
-    return new Kernel(TablaRutas::crear($casos['registrar'], $casos['buscar'], $casos['consultar'], $casos['actualizar']), $autenticador);
+    $controlador = new PacientesControlador($casos['registrar'], $casos['buscar'], $casos['consultar'], $casos['actualizar']);
+
+    return new Kernel(Rutas::definir($controlador), $autenticador);
 }
 
 /**
- * Casos de uso sobre PostgreSQL.
- *
- * @param array{db: array{dsn: string, usuario: string, clave: string}, claves: array{hash: string, cifrado: string}, permisos: array<string, list<string>>} $config
- * @return array{registrar: RegistrarPaciente, buscar: BuscarPacientes, consultar: ConsultarPaciente, actualizar: ActualizarPaciente}
+ * @param array<string, mixed> $config
+ * @throws \Pacientes\Dominio\Excepciones\ErrorPersistencia sin conexión
+ * @throws InvalidArgumentException si faltan las claves del documento (modo pdo)
  */
-function crearCasosDeUsoPdo(array $config): array
+function crearAdaptadores(array $config): ConjuntoAdaptadores
 {
-    $proteccion = ProteccionDocumentos::desdeBase64($config['claves']['hash'], $config['claves']['cifrado']);
-    $pdo = FabricaConexion::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave']);
-    $repositorio = new PdoRepositorioPacientes($pdo, $proteccion);
+    return match ($config['persistencia']) {
+        'memoria' => FabricaEnMemoria::crear(),
+        'pdo' => FabricaPdo::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave'],
+            ProteccionDocumentos::desdeBase64($config['claves']['hash'], $config['claves']['cifrado'])),
+        default => throw new InvalidArgumentException('PACIENTES_PERSISTENCIA debe ser pdo o memoria.'),
+    };
+}
 
-    return construirCasosDeUso(
-        $repositorio,
-        $repositorio,
-        new PdoIndiceDuplicados($pdo, $proteccion),
-        new PdoRegistroAuditoria($pdo),
-        new PdoTransaccion($pdo),
-        new PoliticaAccesoEstatica($config['permisos']),
-        new RelojSistema(),
-    );
+/** @param array<string, mixed> $config */
+function crearCasosDeUso(array $config): array
+{
+    $casos = construirCasosDeUso(crearAdaptadores($config), new PoliticaAccesoEstatica($config['permisos']), new RelojSistema());
+    if ($config['persistencia'] === 'memoria') {
+        // En memoria cada proceso empieza vacío: se cargan los pacientes ficticios de demostración.
+        sembrarDemo($casos);
+    }
+
+    return $casos;
 }
 
 /** @param array<string, mixed> $config */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(crearCasosDeUsoPdo($config), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(crearCasosDeUso($config), new AutenticadorTokenDemo($config['tokens_demo']));
+}
+
+/** Registra los pacientes de database/datos-demo.php a través del caso de uso. */
+function sembrarDemo(array $casos): array
+{
+    $resultados = [];
+    foreach (require dirname(__DIR__) . '/database/datos-demo.php' as [$actor, $hospital, $datos]) {
+        $resultados[] = [$hospital, $datos, $casos['registrar']->ejecutar(new ComandoRegistrar($actor, $hospital, $datos))];
+    }
+
+    return $resultados;
 }

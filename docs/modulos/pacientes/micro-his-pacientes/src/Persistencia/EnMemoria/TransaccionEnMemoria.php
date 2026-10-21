@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pacientes\Pruebas\Dobles;
+namespace Pacientes\Persistencia\EnMemoria;
 
 use Pacientes\Aplicacion\Puertos\Transaccion;
 

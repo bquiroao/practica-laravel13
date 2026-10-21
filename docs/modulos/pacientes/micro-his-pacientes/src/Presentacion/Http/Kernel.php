@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Pacientes\Presentacion\Http;
 
 use Pacientes\Presentacion\Http\Autenticacion\Autenticador;
+use Pacientes\Presentacion\Http\Vistas\ErrorVista;
 
 /**
  * Front controller: resuelve la ruta y aplica la cadena
- * hospital (400) → identidad (401) → token del mismo hospital (403) → acción.
+ * hospital (400) → identidad (401) → token del mismo hospital (403) → controlador.
  * Los permisos por operación los decide la Aplicación (R-05).
  */
 final class Kernel
@@ -32,21 +33,20 @@ final class Kernel
             // D-01 / E-01: sin hospital no se continúa.
             $hospital = $solicitud->cabecera('X-Tenant-ID');
             if ($hospital === '') {
-                return Respuesta::error(400, 'HOSPITAL_REQUERIDO');
+                return ErrorVista::hospitalRequerido();
             }
 
             $identidad = $this->autenticador->autenticar($solicitud);
             if ($identidad === null) {
-                return Respuesta::error(401, 'NO_AUTENTICADO');
+                return ErrorVista::noAutenticado();
             }
             if ($identidad->hospital !== $hospital) {
-                return Respuesta::error(403, 'TENANT_NO_COINCIDE');
+                return ErrorVista::tenantNoCoincide();
             }
 
-            return $ruta->accion->ejecutar($solicitud, $identidad, $parametros);
+            return ($ruta->manejador)($solicitud, $identidad, $parametros);
         } catch (\Throwable) {
-            // Nada de trazas ni mensajes internos hacia el cliente.
-            return Respuesta::error(500, 'ERROR_INTERNO');
+            return ErrorVista::errorInterno();
         }
     }
 
@@ -65,6 +65,6 @@ final class Kernel
             $metodoNoPermitido = true;
         }
 
-        return $metodoNoPermitido ? Respuesta::error(405, 'METODO_NO_PERMITIDO') : Respuesta::error(404, 'RUTA_NO_ENCONTRADA');
+        return $metodoNoPermitido ? ErrorVista::metodoNoPermitido() : ErrorVista::rutaNoEncontrada();
     }
 }
