@@ -16,6 +16,7 @@ use Pacientes\Aplicacion\Comandos\ComandoRegistrar;
 use Pacientes\Aplicacion\Puertos\PoliticaAcceso;
 use Pacientes\Aplicacion\Puertos\Reloj;
 use Pacientes\Aplicacion\Servicios\ControlAcceso;
+use Pacientes\Dominio\Servicios\PoliticaConfidencialidad;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 use Pacientes\Dominio\Servicios\PoliticaEdicion;
 use Pacientes\Persistencia\Configuracion\PoliticaAccesoEstatica;
@@ -43,12 +44,13 @@ function construirCasosDeUso(ConjuntoAdaptadores $a, PoliticaAcceso $politica, R
 {
     $acceso = new ControlAcceso($politica);
     $duplicados = new PoliticaDuplicados($a->indice);
+    $confidencialidad = new PoliticaConfidencialidad();
 
     return [
-        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $a->idempotencia),
+        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $a->idempotencia, $confidencialidad),
         'buscar' => new BuscarPacientes($a->consulta, $a->auditoria, $acceso),
         'consultar' => new ConsultarPaciente($a->consulta, $a->auditoria, $acceso),
-        'actualizar' => new ActualizarPaciente($a->repositorio, new PoliticaEdicion(), $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj),
+        'actualizar' => new ActualizarPaciente($a->repositorio, new PoliticaEdicion(), $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $confidencialidad),
     ];
 }
 

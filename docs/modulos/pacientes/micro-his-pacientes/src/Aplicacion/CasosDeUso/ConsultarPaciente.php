@@ -30,9 +30,13 @@ final class ConsultarPaciente
             $this->acceso->exigir($comando->actor, $comando->hospital, ControlAcceso::LEER);
             $paciente = $this->consulta->porCodigo($comando->hospital, strtoupper($comando->codigo))
                 ?? throw new PacienteNoEncontrado();
-            $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::CONSULTADO, $comando->actor, $comando->hospital, $paciente->codigo, []));
+            // R-11: un protegido se muestra sin demografía a quien no tiene pacientes.leer_protegido,
+            // y la auditoría distingue ese acceso limitado.
+            $verProtegidos = $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO);
+            $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::CONSULTADO, $comando->actor, $comando->hospital, $paciente->codigo,
+                ['acceso_limitado' => $paciente->seMuestraReducidoPara($verProtegidos)]));
 
-            return Resultado::ok(['paciente' => $paciente->detalle()]);
+            return Resultado::ok(['paciente' => $paciente->detalle($verProtegidos)]);
         } catch (ErrorDominio $e) {
             return Resultado::desdeError($e);
         } catch (ErrorPersistencia) {

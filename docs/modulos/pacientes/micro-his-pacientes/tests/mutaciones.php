@@ -17,8 +17,8 @@ $mutaciones = [
     'M2' => ['El hash del documento pasa a ser el número en claro (R-04)', 'src/Persistencia/Seguridad/ProteccionDocumentos.php',
         "return hash_hmac('sha256', \$documento->canonico(), \$this->claveHash);", 'return $documento->numero();'],
     'M3' => ['La política deja de bloquear el documento repetido (R-02)', 'src/Dominio/Servicios/PoliticaDuplicados.php',
-        "            if (\$titular !== null) {\n                throw new ErrorDominio(ErrorDominio::CONFLICTO, 'PACIENTE_EXISTENTE'",
-        "            if (false) {\n                throw new ErrorDominio(ErrorDominio::CONFLICTO, 'PACIENTE_EXISTENTE'"],
+        "            if (\$titular !== null) {\n                \$codigo = \$this->visibles(",
+        "            if (false) {\n                \$codigo = \$this->visibles("],
     'M4' => ['Registrar responde «creado» aunque la base falle', 'src/Aplicacion/CasosDeUso/RegistrarPaciente.php',
         "        } catch (ErrorPersistencia) {\n            return Resultado::noDisponible();",
         "        } catch (ErrorPersistencia) {\n            return Resultado::creado([]);"],
@@ -52,6 +52,15 @@ $mutaciones = [
         "'ruta' => \$solicitud->ruta,", "'ruta' => \$solicitud->ruta . '?' . http_build_query(\$solicitud->consulta),"],
     'M18' => ['El registro deja de consultar la Idempotency-Key', 'src/Aplicacion/CasosDeUso/RegistrarPaciente.php',
         '$previa = $this->idempotencia->buscar($comando->hospital, $comando->actor, $comando->claveIdempotencia);', '$previa = null;'],
+    // Semana 6: cambio práctico «identidad protegida» (R-11).
+    'M19' => ['La búsqueda por nombre incluye a los protegidos por defecto', 'src/Dominio/Modelo/CriterioBusqueda.php',
+        'public readonly bool $incluirProtegidos = false,', 'public readonly bool $incluirProtegidos = true,'],
+    'M20' => ['El detalle deja de ocultar la demografía del protegido', 'src/Dominio/Modelo/Paciente.php',
+        'return $this->identidadProtegida && !$puedeVerProtegidos;', 'return false;'],
+    'M21' => ['Se puede editar a un protegido sin poder verlo', 'src/Aplicacion/CasosDeUso/ActualizarPaciente.php',
+        "            \$this->confidencialidad->exigirVisibilidad(\$actual,\n", "            if (false) \$this->confidencialidad->exigirVisibilidad(\$actual,\n"],
+    'M22' => ['El 409 de duplicados vuelve a mostrar el código del protegido', 'src/Dominio/Servicios/PoliticaDuplicados.php',
+        'if ($puedeVerProtegidos) {', 'if (true) {'],
 ];
 // M8: sin la transacción, el closure se invoca directamente.
 $ajustes = ['M8' => ['            });' . "\n\n" . "            return Resultado::ok(['codigo'", '            })();' . "\n\n" . "            return Resultado::ok(['codigo'"]];

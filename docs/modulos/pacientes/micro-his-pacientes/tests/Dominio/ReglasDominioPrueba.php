@@ -70,14 +70,14 @@ prueba('DOM-06', 'R-02/R-03: documento existente bloquea; coincidencia exige con
     $repo->registrar($paciente());
     $politica = new PoliticaDuplicados(new IndiceDuplicadosEnMemoria($repo));
 
-    $e = lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($paciente('Otra'), false, false, ''), 'mismo DPI');
+    $e = lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($paciente('Otra'), false, false, '', true), 'mismo DPI');
     igual(['PACIENTE_EXISTENTE', 'P-000001', '*********0101'], [$e->codigo, $e->detalle['codigo'], $e->detalle['identificador']], 'bloqueo');
 
     $parecida = $paciente('ANA  lucia', null);
-    igual('POSIBLE_DUPLICADO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, false, true, 'x'), 'sin confirmar')->codigo, 'advertencia');
-    igual('ACCESO_DENEGADO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, true, false, 'x'), 'sin permiso')->codigo, 'permiso');
-    igual('MOTIVO_REQUERIDO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, true, true, ' '), 'sin motivo')->codigo, 'motivo');
-    igual(['P-000001'], $politica->verificarRegistro($parecida, true, true, 'Homónima'), 'confirmado');
+    igual('POSIBLE_DUPLICADO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, false, true, 'x', true), 'sin confirmar')->codigo, 'advertencia');
+    igual('ACCESO_DENEGADO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, true, false, 'x', true), 'sin permiso')->codigo, 'permiso');
+    igual('MOTIVO_REQUERIDO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($parecida, true, true, ' ', true), 'sin motivo')->codigo, 'motivo');
+    igual(['P-000001'], $politica->verificarRegistro($parecida, true, true, 'Homónima', true), 'confirmado');
 });
 
 prueba('DOM-07', 'R-08/R-07: fallecido solo con supervisor; cambiar identidad exige motivo; el teléfono no', function () use ($paciente, $hoy): void {
@@ -98,4 +98,20 @@ prueba('DOM-08', 'Cambio de identidad: tildes y mayúsculas no cuentan; fecha y 
     igual(true, $paciente(nacimiento: '1985-03-15')->cambiaIdentidadRespectoDe($base), 'fecha');
     igual(true, $paciente(dpi: Escenario::DPI_NUEVO)->cambiaIdentidadRespectoDe($base), 'documento');
     igual(true, $paciente(dpi: null)->cambiaIdentidadRespectoDe($base), 'quitar el documento');
+});
+
+prueba('DOM-09', 'R-11 PoliticaConfidencialidad: proteger exige permiso y motivo; no se edita lo que no se ve', function () use ($paciente): void {
+    $politica = new Pacientes\Dominio\Servicios\PoliticaConfidencialidad();
+    $normal = $paciente()->conCodigo('P-000001', 1);
+    $protegido = $normal->conProteccion(true);
+    $politica->verificarRegistro($normal, false, ''); // un paciente normal no exige nada
+    igual('ACCESO_DENEGADO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($protegido, false, 'motivo'), 'sin permiso')->codigo, 'registro sin permiso');
+    igual('MOTIVO_REQUERIDO', lanza(ErrorDominio::class, fn () => $politica->verificarRegistro($protegido, true, ' '), 'sin motivo')->codigo, 'registro sin motivo');
+    $politica->verificarRegistro($protegido, true, 'Orden judicial'); // no lanza
+    igual('ACCESO_DENEGADO', lanza(ErrorDominio::class, fn () => $politica->exigirVisibilidad($protegido, false), 'no ve')->codigo, 'visibilidad');
+    $politica->exigirVisibilidad($protegido, true);
+    $politica->exigirVisibilidad($normal, false);
+    igual('ACCESO_DENEGADO', lanza(ErrorDominio::class, fn () => $politica->verificarCambio($protegido, $normal, false, 'x'), 'quitar sin permiso')->codigo, 'cambio sin permiso');
+    $politica->verificarCambio($protegido, $protegido, false, ''); // sin cambio de marca: nada que exigir
+    igual([Paciente::NOMBRE_PROTEGIDO, null], [$protegido->resumen()['nombre'], $protegido->detalle()['telefono']], 'por defecto se muestra reducido');
 });

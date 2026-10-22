@@ -32,6 +32,8 @@ final class BuscarPacientes
             $c = $comando->criterios;
             $criterio = CriterioBusqueda::desde($c['codigo'] ?? null, $c['tipo_documento'] ?? null, $c['numero_documento'] ?? null,
                 $c['pais_documento'] ?? null, $c['nombre'] ?? null, $c['nacimiento'] ?? null);
+            $verProtegidos = $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO);
+            $criterio = $criterio->incluyendoProtegidos($verProtegidos); // R-11
 
             $encontrados = $this->consulta->buscar($comando->hospital, $criterio);
             $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::BUSCADO, $comando->actor, $comando->hospital, null, [
@@ -40,7 +42,7 @@ final class BuscarPacientes
             ]));
 
             return Resultado::ok([
-                'resultados' => array_map(static fn (Paciente $p): array => $p->resumen(), $encontrados),
+                'resultados' => array_map(static fn (Paciente $p): array => $p->resumen($verProtegidos), $encontrados),
                 'total' => count($encontrados),
             ]);
         } catch (ErrorDominio $e) {

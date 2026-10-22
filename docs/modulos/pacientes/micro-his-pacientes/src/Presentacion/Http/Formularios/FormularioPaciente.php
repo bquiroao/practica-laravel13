@@ -80,6 +80,10 @@ final class FormularioPaciente
                 $errores[$campo] = 'Debe ser texto.';
             }
         }
+        $protegida = $solicitud->cuerpo['identidad_protegida'] ?? null;
+        if ($protegida !== null && !is_bool($protegida)) {
+            $errores['identidad_protegida'] = 'Debe ser true o false.';
+        }
         $documento = $solicitud->cuerpo['documento'] ?? null;
         if ($documento !== null && !is_array($documento)) {
             $errores['documento'] = 'Debe ser un objeto {tipo, numero, pais} o null.';
@@ -114,6 +118,7 @@ final class FormularioPaciente
             'tipo_documento' => $documento['tipo'] ?? null,
             'numero_documento' => $documento['numero'] ?? null,
             'pais_documento' => $documento['pais'] ?? null,
+            'identidad_protegida' => $cuerpo['identidad_protegida'] ?? null, // ausente = sin cambio al editar
         ];
     }
 }

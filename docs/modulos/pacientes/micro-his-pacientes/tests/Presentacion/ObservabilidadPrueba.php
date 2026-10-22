@@ -29,7 +29,7 @@ prueba('OBS-02', 'Registro de acceso: una línea por petición, sin token, sin q
     igual([401, null], [$registro->lineas[2]['estado'], $registro->lineas[2]['actor']], 'petición sin identidad');
     $todo = (string) json_encode($registro->lineas);
     foreach (['token-', 'lopez', Escenario::DPI_ANA, 'Ana'] as $prohibido) {
-        afirmar(!str_contains($todo, $prohibido), "el registro de acceso contiene «$prohibido»");
+        afirmar(!str_contains($todo, $prohibido), "el registro de acceso contiene «{$prohibido}»");
     }
 });
 

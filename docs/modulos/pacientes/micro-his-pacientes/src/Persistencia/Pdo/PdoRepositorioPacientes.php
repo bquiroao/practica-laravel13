@@ -16,26 +16,28 @@ use Pacientes\Persistencia\Seguridad\ProteccionDocumentos;
 /** Adaptador PostgreSQL de RepositorioPacientes. Solo sentencias preparadas con parámetros con nombre. */
 final class PdoRepositorioPacientes extends RepositorioPdo implements RepositorioPacientes
 {
-    private const SQL_POR_CODIGO = 'SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version
+    private const SQL_POR_CODIGO = 'SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version, identidad_protegida
         FROM pacientes WHERE hospital_id = :hospital AND code = :codigo';
 
-    private const SQL_POR_DOCUMENTO = 'SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version
+    private const SQL_POR_DOCUMENTO = 'SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version, identidad_protegida
         FROM pacientes WHERE hospital_id = :hospital AND documento_hash = :hash
         ORDER BY apellidos_normalizados, nombre_normalizado, code LIMIT :limite';
 
-    private const SQL_POR_NOMBRE = "SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version
+    private const SQL_POR_NOMBRE = "SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version, identidad_protegida
         FROM pacientes WHERE hospital_id = :hospital AND nombre_normalizado LIKE :patron ESCAPE '!'
+          AND (identidad_protegida = false OR identidad_protegida = :ver_protegidos)
         ORDER BY apellidos_normalizados, nombre_normalizado, code LIMIT :limite";
 
-    private const SQL_POR_NOMBRE_Y_FECHA = "SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version
+    private const SQL_POR_NOMBRE_Y_FECHA = "SELECT code, hospital_id, given_name, family_name, birth_date, sex, contact, status, documento_cifrado, version, identidad_protegida
         FROM pacientes WHERE hospital_id = :hospital AND nombre_normalizado LIKE :patron ESCAPE '!'
+          AND (identidad_protegida = false OR identidad_protegida = :ver_protegidos)
           AND to_char(birth_date, 'YYYY-MM-DD') LIKE :fecha
         ORDER BY apellidos_normalizados, nombre_normalizado, code LIMIT :limite";
 
     private const SQL_INSERTAR = 'INSERT INTO pacientes (hospital_id, given_name, family_name, nombre_normalizado, apellidos_normalizados,
-            birth_date, sex, contact, status, documento_tipo, documento_hash, documento_cifrado, documento_enmascarado)
+            birth_date, sex, contact, status, documento_tipo, documento_hash, documento_cifrado, documento_enmascarado, identidad_protegida)
         VALUES (:hospital, :nombres, :apellidos, :nombre_normalizado, :apellidos_normalizados,
-            :nacimiento, :sexo, :telefono, :estado, :documento_tipo, :documento_hash, :documento_cifrado, :documento_enmascarado)
+            :nacimiento, :sexo, :telefono, :estado, :documento_tipo, :documento_hash, :documento_cifrado, :documento_enmascarado, :identidad_protegida)
         RETURNING code, version';
 
     // R-06: comparar la versión y escribir en la MISMA sentencia; si no coincide, no se toca ninguna fila.
@@ -43,7 +45,7 @@ final class PdoRepositorioPacientes extends RepositorioPdo implements Repositori
             nombre_normalizado = :nombre_normalizado, apellidos_normalizados = :apellidos_normalizados,
             birth_date = :nacimiento, sex = :sexo, contact = :telefono, status = :estado,
             documento_tipo = :documento_tipo, documento_hash = :documento_hash, documento_cifrado = :documento_cifrado,
-            documento_enmascarado = :documento_enmascarado, version = version + 1, updated_at = now()
+            documento_enmascarado = :documento_enmascarado, identidad_protegida = :identidad_protegida, version = version + 1, updated_at = now()
         WHERE hospital_id = :hospital AND code = :codigo AND version = :version
         RETURNING version';
 
@@ -76,6 +78,7 @@ final class PdoRepositorioPacientes extends RepositorioPdo implements Repositori
         } else {
             // El texto del usuario es un DATO del LIKE: se escapan sus comodines.
             $parametros['patron'] = '%' . strtr((string) $criterio->nombre, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
+            $parametros['ver_protegidos'] = $criterio->incluirProtegidos ? 'true' : 'false'; // R-11
             $sql = self::SQL_POR_NOMBRE;
             if ($criterio->nacimiento !== null) {
                 $sql = self::SQL_POR_NOMBRE_Y_FECHA;
@@ -143,6 +146,7 @@ final class PdoRepositorioPacientes extends RepositorioPdo implements Repositori
             'documento_hash' => $documento === null ? null : $this->proteccion->hash($documento),
             'documento_cifrado' => $documento === null ? null : $this->proteccion->cifrar($documento),
             'documento_enmascarado' => $documento?->enmascarado(),
+            'identidad_protegida' => $paciente->identidadProtegida ? 'true' : 'false',
         ];
     }
 
@@ -165,6 +169,7 @@ final class PdoRepositorioPacientes extends RepositorioPdo implements Repositori
             $fila['documento_cifrado'] === null ? null : $this->proteccion->descifrar((string) $fila['documento_cifrado']),
             (string) $fila['status'],
             (int) $fila['version'],
+            in_array($fila['identidad_protegida'] ?? false, [true, 't', 'true', 1, '1'], true),
         );
     }
 }

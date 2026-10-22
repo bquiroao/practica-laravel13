@@ -17,6 +17,7 @@ use Pacientes\Dominio\Modelo\EventoAuditoria;
 use Pacientes\Dominio\Modelo\Paciente;
 use Pacientes\Dominio\Puertos\RegistroAuditoria;
 use Pacientes\Dominio\Puertos\RepositorioPacientes;
+use Pacientes\Dominio\Servicios\PoliticaConfidencialidad;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 use Pacientes\Dominio\Servicios\PoliticaEdicion;
 
@@ -31,6 +32,7 @@ final class ActualizarPaciente
         private readonly Transaccion $transaccion,
         private readonly ControlAcceso $acceso,
         private readonly Reloj $reloj,
+        private readonly PoliticaConfidencialidad $confidencialidad,
     ) {
     }
 
@@ -41,10 +43,20 @@ final class ActualizarPaciente
             $actual = $this->repositorio->porCodigo($comando->hospital, strtoupper($comando->codigo))
                 ?? throw new PacienteNoEncontrado();
 
-            $nuevo = $actual->conDatosDe(Paciente::desdeDatos($comando->hospital, FormularioPaciente::aDatos($comando->datos), $this->reloj->hoy()));
+            // R-11: no se edita lo que no se ve (antes de validar, para no revelar nada).
+            $this->confidencialidad->exigirVisibilidad($actual,
+                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO));
+
+            $datos = FormularioPaciente::aDatos($comando->datos);
+            $nuevo = $actual->conDatosDe(Paciente::desdeDatos($comando->hospital, $datos, $this->reloj->hoy()));
+            if ($datos->identidadProtegida === null) {
+                $nuevo = $nuevo->conProteccion($actual->identidadProtegida); // campo ausente = sin cambio
+            }
             $motivo = trim((string) $comando->motivo);
             $this->edicion->verificar($actual, $nuevo,
                 $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::EDITAR_RESTRINGIDO), $motivo);
+            $this->confidencialidad->verificarCambio($actual, $nuevo,
+                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::PROTEGER), $motivo);
             if ($nuevo->cambiaIdentidadRespectoDe($actual)) {
                 $this->duplicados->verificarDocumentoNuevo($actual, $nuevo);
             }

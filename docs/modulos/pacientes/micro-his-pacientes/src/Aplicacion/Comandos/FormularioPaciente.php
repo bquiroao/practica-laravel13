@@ -24,6 +24,7 @@ final class FormularioPaciente
             $opcional('tipo_documento'),
             $opcional('numero_documento'),
             $opcional('pais_documento'),
+            is_bool($datos['identidad_protegida'] ?? null) ? $datos['identidad_protegida'] : null,
         );
     }
 }

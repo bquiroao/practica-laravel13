@@ -16,6 +16,8 @@ final class DatosPaciente
         public readonly ?string $tipoDocumento = null,
         public readonly ?string $numeroDocumento = null,
         public readonly ?string $paisDocumento = null,
+        /** null = «no se envió»: al registrar equivale a false; al editar, conserva el valor actual. */
+        public readonly ?bool $identidadProtegida = null,
     ) {
     }
 }

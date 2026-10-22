@@ -45,7 +45,7 @@ prueba('HTTP-04', 'GET /api/v1/pacientes?nombre=…: 200 con datos mínimos; cri
     $post($e, Escenario::datosAna());
     $r = $e->kernel->manejar(Escenario::http('GET', '/api/v1/pacientes', 'token-clinico-oriente', consulta: ['nombre' => 'lópez', 'nacimiento' => '1985', 'otro' => 'x']));
     igual(200, $r->estado, 'HTTP');
-    igual([['codigo' => 'P-000001', 'nombre' => 'Ana Lucía López Pérez', 'nacimiento' => '1985-03-14', 'identificador' => '*********0101']],
+    igual([['codigo' => 'P-000001', 'nombre' => 'Ana Lucía López Pérez', 'nacimiento' => '1985-03-14', 'identificador' => '*********0101', 'identidad_protegida' => false]],
         $r->cuerpo['resultados'], 'resultados');
     $corto = $e->kernel->manejar(Escenario::http('GET', '/api/v1/pacientes', 'token-clinico-oriente', consulta: ['nombre' => 'lo']));
     igual([422, 'CRITERIO_INSUFICIENTE'], [$corto->estado, $corto->cuerpo['error']], 'criterio');

@@ -9,6 +9,8 @@ use Pacientes\Dominio\Excepciones\DatosInvalidos;
 /**
  * Ficha del paciente en un hospital (local_patients). Inmutable: cada cambio devuelve
  * otra instancia. El estado (activo, inactivo, fallecido) es un dato, no una subclase.
+ * Semana 6: «identidad protegida» también es un dato; quién puede verla lo decide
+ * PoliticaConfidencialidad, y qué se muestra lo deciden resumen()/detalle().
  */
 final class Paciente
 {
@@ -16,6 +18,8 @@ final class Paciente
     public const INACTIVO = 'inactive';
     public const FALLECIDO = 'deceased';
     public const SEXOS = ['female', 'male', 'other', 'unknown'];
+    /** Lo único que ve de un paciente protegido quien no tiene pacientes.leer_protegido. */
+    public const NOMBRE_PROTEGIDO = 'Identidad protegida';
 
     private function __construct(
         public readonly ?string $codigo,
@@ -28,6 +32,7 @@ final class Paciente
         public readonly ?Identificador $identificador,
         public readonly string $estado,
         public readonly int $version,
+        public readonly bool $identidadProtegida = false,
     ) {
     }
 
@@ -76,15 +81,15 @@ final class Paciente
         }
 
         return new self(null, $hospital, $nombres, $apellidos, $nacimiento, $datos->sexo,
-            $telefono === '' ? null : $telefono, $identificador, self::ACTIVO, 0);
+            $telefono === '' ? null : $telefono, $identificador, self::ACTIVO, 0, $datos->identidadProtegida ?? false);
     }
 
     /** Reconstruye un paciente ya guardado (lo usa Persistencia al leer). */
     public static function reconstituir(string $codigo, string $hospital, string $nombres, string $apellidos,
         \DateTimeImmutable $nacimiento, string $sexo, ?string $telefono, ?Identificador $identificador,
-        string $estado, int $version): self
+        string $estado, int $version, bool $identidadProtegida = false): self
     {
-        return new self($codigo, $hospital, $nombres, $apellidos, $nacimiento, $sexo, $telefono, $identificador, $estado, $version);
+        return new self($codigo, $hospital, $nombres, $apellidos, $nacimiento, $sexo, $telefono, $identificador, $estado, $version, $identidadProtegida);
     }
 
     /** Sin documento: identidad provisional (por ejemplo, ingreso por emergencia). */
@@ -111,27 +116,29 @@ final class Paciente
 
     public function conCodigo(string $codigo, int $version): self
     {
-        return new self($codigo, $this->hospital, $this->nombres, $this->apellidos, $this->nacimiento,
-            $this->sexo, $this->telefono, $this->identificador, $this->estado, $version);
+        return $this->copiar(codigo: $codigo, version: $version);
     }
 
     public function conVersion(int $version): self
     {
-        return new self($this->codigo, $this->hospital, $this->nombres, $this->apellidos, $this->nacimiento,
-            $this->sexo, $this->telefono, $this->identificador, $this->estado, $version);
+        return $this->copiar(version: $version);
     }
 
     public function conEstado(string $estado): self
     {
-        return new self($this->codigo, $this->hospital, $this->nombres, $this->apellidos, $this->nacimiento,
-            $this->sexo, $this->telefono, $this->identificador, $estado, $this->version);
+        return $this->copiar(estado: $estado);
+    }
+
+    public function conProteccion(bool $protegida): self
+    {
+        return $this->copiar(protegida: $protegida);
     }
 
     /** Los datos de $nuevo sobre esta ficha: conserva código, hospital, estado y versión. */
     public function conDatosDe(self $nuevo): self
     {
         return new self($this->codigo, $this->hospital, $nuevo->nombres, $nuevo->apellidos, $nuevo->nacimiento,
-            $nuevo->sexo, $nuevo->telefono, $nuevo->identificador, $this->estado, $this->version);
+            $nuevo->sexo, $nuevo->telefono, $nuevo->identificador, $this->estado, $this->version, $nuevo->identidadProtegida);
     }
 
     /** ¿Cambia un dato de identidad (R-07)? Nombres, apellidos, fecha de nacimiento o documento. */
@@ -142,24 +149,38 @@ final class Paciente
             || $this->identificador?->canonico() !== $otro->identificador?->canonico();
     }
 
-    /** Datos mínimos para listas de búsqueda (R-10, R-04). */
-    public function resumen(): array
+    /** ¿Debe mostrarse reducido a quien tiene (o no) pacientes.leer_protegido? */
+    public function seMuestraReducidoPara(bool $puedeVerProtegidos): bool
     {
+        return $this->identidadProtegida && !$puedeVerProtegidos;
+    }
+
+    /** Datos mínimos para listas de búsqueda (R-10, R-04); reducidos si es protegido (R-11). */
+    public function resumen(bool $puedeVerProtegidos = false): array
+    {
+        if ($this->seMuestraReducidoPara($puedeVerProtegidos)) {
+            return ['codigo' => $this->codigo, 'nombre' => self::NOMBRE_PROTEGIDO, 'nacimiento' => null,
+                'identificador' => null, 'identidad_protegida' => true];
+        }
+
         return [
             'codigo' => $this->codigo,
             'nombre' => $this->nombreCompleto(),
             'nacimiento' => $this->nacimiento->format('Y-m-d'),
             'identificador' => $this->identificador?->enmascarado(),
+            'identidad_protegida' => $this->identidadProtegida,
         ];
     }
 
-    /** Detalle completo, con el documento enmascarado. */
-    public function detalle(): array
+    /** Detalle con el documento enmascarado; sin demografía si es protegido y no hay permiso. */
+    public function detalle(bool $puedeVerProtegidos = false): array
     {
-        return $this->resumen() + [
+        $reducido = $this->seMuestraReducidoPara($puedeVerProtegidos);
+
+        return $this->resumen($puedeVerProtegidos) + [
             'sexo' => $this->sexo,
-            'telefono' => $this->telefono,
-            'tipo_documento' => $this->identificador?->tipo(),
+            'telefono' => $reducido ? null : $this->telefono,
+            'tipo_documento' => $reducido ? null : $this->identificador?->tipo(),
             'estado' => $this->estado,
             'identidad_provisional' => $this->identidadProvisional(),
             'version' => $this->version,
@@ -177,6 +198,7 @@ final class Paciente
             'telefono' => $this->telefono,
             'identificador' => $this->identificador?->enmascarado(),
             'estado' => $this->estado,
+            'identidad_protegida' => $this->identidadProtegida,
         ];
     }
 
@@ -184,5 +206,12 @@ final class Paciente
     {
         return [$a->apellidosNormalizados(), $a->nombreNormalizado(), $a->codigo]
             <=> [$b->apellidosNormalizados(), $b->nombreNormalizado(), $b->codigo];
+    }
+
+    private function copiar(?string $codigo = null, ?int $version = null, ?string $estado = null, ?bool $protegida = null): self
+    {
+        return new self($codigo ?? $this->codigo, $this->hospital, $this->nombres, $this->apellidos, $this->nacimiento,
+            $this->sexo, $this->telefono, $this->identificador, $estado ?? $this->estado, $version ?? $this->version,
+            $protegida ?? $this->identidadProtegida);
     }
 }
