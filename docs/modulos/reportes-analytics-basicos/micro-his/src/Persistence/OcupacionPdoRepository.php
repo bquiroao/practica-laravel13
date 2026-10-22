@@ -5,11 +5,11 @@ namespace MicroHis\Persistence;
 
 use MicroHis\Domain\DatosNoDisponibles;
 use MicroHis\Domain\Filtros;
-use MicroHis\Domain\LectorOcupacion;
+use MicroHis\Domain\OcupacionRepository;
 use MicroHis\Domain\RegistroOrigen;
 
-/** Adaptador PDO del puerto LectorOcupacion. Siempre prepare() + execute(); solo lectura (RNF-04). */
-final class OcupacionPdo implements LectorOcupacion
+/** Adaptador PDO del Repository de ocupación. Siempre prepare() + execute(); solo lectura (RNF-04). */
+final class OcupacionPdoRepository implements OcupacionRepository
 {
     // Una estancia cuenta si se cruza con el período: empezó antes del día siguiente a «hasta» y no terminó antes de «desde».
     private const EN_PERIODO = 'b.enabled AND s.started_at < CAST(:hasta AS date) + 1 '
