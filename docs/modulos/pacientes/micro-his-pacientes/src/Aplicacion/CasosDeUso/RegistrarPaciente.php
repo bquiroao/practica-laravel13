@@ -14,24 +14,25 @@ use Pacientes\Aplicacion\Servicios\ControlAcceso;
 use Pacientes\Dominio\Excepciones\ErrorDominio;
 use Pacientes\Dominio\Excepciones\ErrorPersistencia;
 use Pacientes\Dominio\Modelo\EventoAuditoria;
-use Pacientes\Dominio\Modelo\Paciente;
 use Pacientes\Dominio\Puertos\RegistroAuditoria;
 use Pacientes\Dominio\Puertos\RepositorioPacientes;
-use Pacientes\Dominio\Servicios\PoliticaConfidencialidad;
-use Pacientes\Dominio\Servicios\PoliticaDuplicados;
+use Pacientes\Dominio\Servicios\RevisionDeFicha;
 
-/** CU-01, CU-05 y CU-06: registrar un paciente sin crear duplicados, ni siquiera al reintentar. */
+/**
+ * CU-01, CU-05 y CU-06: registrar un paciente sin crear duplicados, ni siquiera al reintentar.
+ * Semana 7: solo orquesta (permiso → idempotencia → revisión de la ficha → guardar con evidencia);
+ * las reglas de la ficha y su orden viven en RevisionDeFicha.
+ */
 final class RegistrarPaciente
 {
     public function __construct(
         private readonly RepositorioPacientes $repositorio,
-        private readonly PoliticaDuplicados $duplicados,
+        private readonly RevisionDeFicha $revision,
         private readonly RegistroAuditoria $auditoria,
         private readonly Transaccion $transaccion,
         private readonly ControlAcceso $acceso,
         private readonly Reloj $reloj,
         private readonly AlmacenIdempotencia $idempotencia,
-        private readonly PoliticaConfidencialidad $confidencialidad,
     ) {
     }
 
@@ -54,28 +55,14 @@ final class RegistrarPaciente
                 }
             }
 
-            $paciente = Paciente::desdeDatos($comando->hospital, FormularioPaciente::aDatos($comando->datos), $this->reloj->hoy());
-            // Semana 6 (R-11): proteger la identidad exige pacientes.proteger y motivo.
-            $this->confidencialidad->verificarRegistro($paciente,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::PROTEGER), (string) $comando->motivo);
-            $confirmadas = $this->duplicados->verificarRegistro(
-                $paciente,
-                $comando->confirmaPeseACoincidencia,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::CONFIRMAR_DUPLICADO),
-                (string) $comando->motivo,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO),
-            );
+            $motivo = (string) $comando->motivo;
+            $revisada = $this->revision->paraAlta($comando->hospital, FormularioPaciente::aDatos($comando->datos), $this->reloj->hoy(),
+                $this->acceso->capacidades($comando->actor, $comando->hospital), $comando->confirmaPeseACoincidencia, $motivo);
 
             // A-07: paciente, evento y clave de idempotencia se guardan juntos o no se guarda nada (R-09).
-            $datos = $this->transaccion->ejecutar(function () use ($comando, $paciente, $confirmadas, $huella): array {
-                $registrado = $this->repositorio->registrar($paciente);
-                $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::REGISTRADO, $comando->actor, $comando->hospital,
-                    $registrado->codigo, [
-                        'datos' => $registrado->instantanea(),
-                        'coincidencias_confirmadas' => $confirmadas,
-                        'motivo' => $confirmadas === [] ? null : trim((string) $comando->motivo),
-                        'motivo_proteccion' => $registrado->identidadProtegida ? trim((string) $comando->motivo) : null,
-                    ]));
+            $datos = $this->transaccion->ejecutar(function () use ($comando, $revisada, $motivo, $huella): array {
+                $registrado = $this->repositorio->registrar($revisada['paciente']);
+                $this->auditoria->registrar(EventoAuditoria::registrado($comando->actor, $registrado, $revisada['confirmadas'], $motivo));
                 $datos = [
                     'codigo' => $registrado->codigo,
                     'version' => $registrado->version,

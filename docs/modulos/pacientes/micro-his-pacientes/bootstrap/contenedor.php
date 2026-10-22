@@ -19,6 +19,7 @@ use Pacientes\Aplicacion\Servicios\ControlAcceso;
 use Pacientes\Dominio\Servicios\PoliticaConfidencialidad;
 use Pacientes\Dominio\Servicios\PoliticaDuplicados;
 use Pacientes\Dominio\Servicios\PoliticaEdicion;
+use Pacientes\Dominio\Servicios\RevisionDeFicha;
 use Pacientes\Persistencia\Configuracion\PoliticaAccesoEstatica;
 use Pacientes\Persistencia\Configuracion\RelojSistema;
 use Pacientes\Persistencia\ConjuntoAdaptadores;
@@ -43,14 +44,14 @@ require_once __DIR__ . '/autoload.php';
 function construirCasosDeUso(ConjuntoAdaptadores $a, PoliticaAcceso $politica, Reloj $reloj): array
 {
     $acceso = new ControlAcceso($politica);
-    $duplicados = new PoliticaDuplicados($a->indice);
-    $confidencialidad = new PoliticaConfidencialidad();
+    // Semana 7: las tres políticas de la ficha se componen en un solo servicio de Dominio.
+    $revision = new RevisionDeFicha(new PoliticaEdicion(), new PoliticaDuplicados($a->indice), new PoliticaConfidencialidad());
 
     return [
-        'registrar' => new RegistrarPaciente($a->repositorio, $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $a->idempotencia, $confidencialidad),
+        'registrar' => new RegistrarPaciente($a->repositorio, $revision, $a->auditoria, $a->transaccion, $acceso, $reloj, $a->idempotencia),
         'buscar' => new BuscarPacientes($a->consulta, $a->auditoria, $acceso),
         'consultar' => new ConsultarPaciente($a->consulta, $a->auditoria, $acceso),
-        'actualizar' => new ActualizarPaciente($a->repositorio, new PoliticaEdicion(), $duplicados, $a->auditoria, $a->transaccion, $acceso, $reloj, $confidencialidad),
+        'actualizar' => new ActualizarPaciente($a->repositorio, $revision, $a->auditoria, $a->transaccion, $acceso, $reloj),
     ];
 }
 

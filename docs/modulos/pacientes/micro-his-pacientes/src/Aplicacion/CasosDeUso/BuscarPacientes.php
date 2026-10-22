@@ -32,7 +32,7 @@ final class BuscarPacientes
             $c = $comando->criterios;
             $criterio = CriterioBusqueda::desde($c['codigo'] ?? null, $c['tipo_documento'] ?? null, $c['numero_documento'] ?? null,
                 $c['pais_documento'] ?? null, $c['nombre'] ?? null, $c['nacimiento'] ?? null);
-            $verProtegidos = $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO);
+            $verProtegidos = $this->acceso->capacidades($comando->actor, $comando->hospital)->verProtegidos;
             $criterio = $criterio->incluyendoProtegidos($verProtegidos); // R-11
 
             $encontrados = $this->consulta->buscar($comando->hospital, $criterio);

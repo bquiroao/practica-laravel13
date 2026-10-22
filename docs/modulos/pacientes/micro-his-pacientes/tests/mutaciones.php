@@ -57,10 +57,15 @@ $mutaciones = [
         'public readonly bool $incluirProtegidos = false,', 'public readonly bool $incluirProtegidos = true,'],
     'M20' => ['El detalle deja de ocultar la demografía del protegido', 'src/Dominio/Modelo/Paciente.php',
         'return $this->identidadProtegida && !$puedeVerProtegidos;', 'return false;'],
-    'M21' => ['Se puede editar a un protegido sin poder verlo', 'src/Aplicacion/CasosDeUso/ActualizarPaciente.php',
-        "            \$this->confidencialidad->exigirVisibilidad(\$actual,\n", "            if (false) \$this->confidencialidad->exigirVisibilidad(\$actual,\n"],
+    'M21' => ['Se puede editar a un protegido sin poder verlo', 'src/Dominio/Servicios/RevisionDeFicha.php',
+        '$this->confidencialidad->exigirVisibilidad($actual, $puede->verProtegidos);', '// sin verificar visibilidad'],
     'M22' => ['El 409 de duplicados vuelve a mostrar el código del protegido', 'src/Dominio/Servicios/PoliticaDuplicados.php',
         'if ($puedeVerProtegidos) {', 'if (true) {'],
+    // Semana 7 — piezas nuevas del refactor
+    'M23' => ['El evento de registro deja de guardar el motivo de la protección', 'src/Dominio/Modelo/EventoAuditoria.php',
+        "'motivo_proteccion' => \$registrado->identidadProtegida ? \$motivo : null,", "'motivo_proteccion' => null,"],
+    'M24' => ['Cualquier actor obtiene la capacidad de ver protegidos', 'src/Aplicacion/Servicios/ControlAcceso.php',
+        'verProtegidos: $this->tiene($actor, $hospital, self::LEER_PROTEGIDO),', 'verProtegidos: true,'],
 ];
 // M8: sin la transacción, el closure se invoca directamente.
 $ajustes = ['M8' => ['            });' . "\n\n" . "            return Resultado::ok(['codigo'", '            })();' . "\n\n" . "            return Resultado::ok(['codigo'"]];
