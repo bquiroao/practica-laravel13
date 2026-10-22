@@ -24,4 +24,13 @@ interface IndiceDuplicados
      * @throws ErrorPersistencia
      */
     public function coincidenciasProbables(string $nombreNormalizado, \DateTimeImmutable $nacimiento): array;
+
+    /**
+     * Semana 6: cuáles de estos códigos son de pacientes con identidad protegida (R-11).
+     *
+     * @param list<string> $codigos
+     * @return list<string>
+     * @throws ErrorPersistencia
+     */
+    public function protegidos(array $codigos): array;
 }

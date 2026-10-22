@@ -16,6 +16,9 @@ final class ControlAcceso
     public const EDITAR = 'pacientes.editar';
     public const CONFIRMAR_DUPLICADO = 'pacientes.confirmar_duplicado';
     public const EDITAR_RESTRINGIDO = 'pacientes.editar_restringido';
+    // Semana 6 — identidad protegida (R-11)
+    public const PROTEGER = 'pacientes.proteger';
+    public const LEER_PROTEGIDO = 'pacientes.leer_protegido';
 
     public function __construct(private readonly PoliticaAcceso $politica)
     {

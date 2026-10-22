@@ -49,7 +49,7 @@ prueba('PER-02', 'Búsqueda por nombre: comodines del usuario escapados, límite
     $pdo = new PdoGuionado([['patron' => "/LIKE :patron ESCAPE '!'.*to_char\\(birth_date/s", 'filas' => [$filaAna()]]]);
     $lista = (new PdoRepositorioPacientes($pdo, $proteccion))->buscar(Escenario::H_ORIENTE, CriterioBusqueda::desde(nombre: 'PÉR%_ez', nacimiento: '1985'));
 
-    igual(['hospital' => Escenario::H_ORIENTE, 'limite' => 20, 'patron' => '%per!%!_ez%', 'fecha' => '1985%'], $pdo->ejecutadas[0]['parametros'], 'parámetros');
+    igual(['hospital' => Escenario::H_ORIENTE, 'limite' => 20, 'patron' => '%per!%!_ez%', 'ver_protegidos' => 'false', 'fecha' => '1985%'], $pdo->ejecutadas[0]['parametros'], 'parámetros (R-11: por defecto sin protegidos)');
     igual(1, count($lista), 'resultados');
     igual(['P-000001', '1985-03-14', '*********0101', 1], [$lista[0]->codigo, $lista[0]->nacimiento->format('Y-m-d'),
         $lista[0]->identificador?->enmascarado(), $lista[0]->version], 'paciente hidratado');

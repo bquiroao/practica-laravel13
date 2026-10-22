@@ -133,6 +133,19 @@ function contratoRepositorios(string $prefijo, Closure $fabrica): void
         }), 'rollback');
         igual(null, $a->idempotencia->buscar(Escenario::H_ORIENTE, 'admision-01', 'clave-000002'), 'revertida');
     });
+    prueba("$prefijo-08", 'Contrato (semana 6, R-11): la marca de protección se guarda y se lee; la búsqueda por nombre la respeta; el índice sabe quién es protegido', function () use ($fabrica): void {
+        [$a] = $fabrica();
+        $ana = $a->repositorio->registrar(pacienteContrato('Ana', dpi: Escenario::DPI_ANA)->conProteccion(true));
+        $beto = $a->repositorio->registrar(pacienteContrato('Beto'));
+        igual(true, $a->consulta->porCodigo(Escenario::H_ORIENTE, (string) $ana->codigo)?->identidadProtegida, 'ida y vuelta');
+        igual([(string) $beto->codigo], array_map(static fn ($p) => $p->codigo, $a->consulta->buscar(Escenario::H_ORIENTE, CriterioBusqueda::desde(nombre: 'perez'))), 'sin permiso: solo Beto');
+        igual(2, count($a->consulta->buscar(Escenario::H_ORIENTE, CriterioBusqueda::desde(nombre: 'perez')->incluyendoProtegidos(true))), 'con permiso: ambos');
+        igual(1, count($a->consulta->buscar(Escenario::H_ORIENTE, CriterioBusqueda::desde(tipoDocumento: 'DPI', numeroDocumento: Escenario::DPI_ANA))), 'por documento sí aparece');
+        igual([(string) $ana->codigo], $a->indice->protegidos([(string) $ana->codigo, (string) $beto->codigo, 'P-999999']), 'índice');
+        igual([], $a->indice->protegidos([]), 'lista vacía');
+        $a->repositorio->actualizar($a->consulta->porCodigo(Escenario::H_ORIENTE, (string) $ana->codigo)->conProteccion(false), 1);
+        igual([], $a->indice->protegidos([(string) $ana->codigo]), 'quitar la marca');
+    });
 }
 
 // InMemory: siempre.
@@ -146,7 +159,7 @@ contratoRepositorios('CON-MEM', static function (): array {
 // PDO: solo con PostgreSQL disponible; esquema temporal que se elimina al terminar.
 $dsn = getenv('PACIENTES_DB_DSN');
 if ($dsn === false || $dsn === '') {
-    prueba('CON-PDO', 'Contrato contra PostgreSQL (las mismas 7 verificaciones)', static fn () => omitir('defina PACIENTES_DB_DSN para ejecutarla'));
+    prueba('CON-PDO', 'Contrato contra PostgreSQL (las mismas 8 verificaciones)', static fn () => omitir('defina PACIENTES_DB_DSN para ejecutarla'));
 
     return;
 }

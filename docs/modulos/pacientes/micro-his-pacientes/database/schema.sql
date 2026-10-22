@@ -24,6 +24,8 @@ CREATE TABLE pacientes (
     documento_cifrado text,
     documento_enmascarado text,
     version integer NOT NULL DEFAULT 1 CHECK (version >= 1),
+    -- Semana 6 (R-11): identidad protegida; quien no tiene pacientes.leer_protegido no ve su demografía.
+    identidad_protegida boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT pacientes_code_unique UNIQUE (code),

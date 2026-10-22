@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS Pacientes — API
-  version: 1.0.0
+  version: 1.1.0
   summary: Registro, búsqueda, detalle y actualización segura de pacientes por hospital.
   description: |
     Contrato del módulo ASII-03 «Pacientes: registro, edición, búsqueda y detalle».
@@ -15,6 +15,10 @@ info:
     - Concurrencia optimista: la versión viaja en `ETag`; `PUT` exige `If-Match` (428 sin él, 409 si cambió).
     - Errores: siempre `{"error": "<CODIGO>", ...detalle}`; nunca trazas ni SQLSTATE.
     - Versionado: versión mayor en la ruta (`/api/v1`); campos opcionales nuevos no cambian la versión.
+    - 1.1.0 (semana 6, compatible): «identidad protegida» (R-11). Proteger o quitar la protección exige
+      `pacientes.proteger` y `motivo`. Sin `pacientes.leer_protegido`, un protegido no aparece en la búsqueda
+      por nombre, se muestra sin demografía (nombre «Identidad protegida», sin nacimiento, teléfono ni documento),
+      no se puede editar (403) y en los 409 de duplicados su código se reemplaza por `RESERVADO`.
   contact:
     name: Boris Alexander Quiroa Orellana (@bquiroao)
   license:
@@ -348,6 +352,11 @@ components:
           pattern: '^\+?[0-9 ]{8,15}$'
         documento:
           $ref: '#/components/schemas/Documento'
+        identidad_protegida:
+          type: [boolean, 'null']
+          description: |
+            R-11. Exige pacientes.proteger y motivo para pasar a true o a false.
+            Ausente en un PUT = sin cambio (no se quita la protección por omisión).
     RegistroPaciente:
       allOf:
         - $ref: '#/components/schemas/DatosPaciente'
@@ -379,18 +388,22 @@ components:
           type: boolean
     ResumenPaciente:
       type: object
-      required: [codigo, nombre, nacimiento, identificador]
+      required: [codigo, nombre, nacimiento, identificador, identidad_protegida]
       properties:
         codigo:
           type: string
         nombre:
           type: string
+          description: «Identidad protegida» si el paciente es protegido y el actor no tiene pacientes.leer_protegido.
         nacimiento:
-          type: string
+          type: [string, 'null']
           format: date
+          description: null si se muestra reducido.
         identificador:
           type: [string, 'null']
-          description: Enmascarado.
+          description: Enmascarado; null si no hay documento o se muestra reducido.
+        identidad_protegida:
+          type: boolean
     ListaPacientes:
       type: object
       required: [resultados, total]
@@ -416,8 +429,10 @@ components:
                   type: string
                 telefono:
                   type: [string, 'null']
+                  description: null si se muestra reducido.
                 tipo_documento:
                   type: [string, 'null']
+                  description: null si se muestra reducido.
                 estado:
                   type: string
                   enum: [active, inactive, deceased]
@@ -459,7 +474,9 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     Prohibido:
-      description: ACCESO_DENEGADO, TENANT_NO_COINCIDE o REQUIERE_SUPERVISOR. Sin detalles del motivo.
+      description: |
+        ACCESO_DENEGADO, TENANT_NO_COINCIDE o REQUIERE_SUPERVISOR. Sin detalles del motivo. Desde 1.1.0 también
+        al proteger sin pacientes.proteger o al editar un protegido sin pacientes.leer_protegido.
       content:
         application/json:
           schema:
@@ -471,7 +488,9 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     ConflictoRegistro:
-      description: PACIENTE_EXISTENTE, POSIBLE_DUPLICADO, DOCUMENTO_EN_USO o SOLICITUD_EN_CURSO.
+      description: |
+        PACIENTE_EXISTENTE, POSIBLE_DUPLICADO, DOCUMENTO_EN_USO o SOLICITUD_EN_CURSO. Si el titular o un
+        candidato es protegido y el actor no tiene pacientes.leer_protegido, su código es RESERVADO (1.1.0).
       content:
         application/json:
           schema:

@@ -13,11 +13,12 @@ micro-his-pacientes/
 │   └── contenedor.php            ← raíz de composición: conecta las capas
 ├── config/config.php             ← configuración desde variables de entorno
 ├── database/
-│   ├── schema.sql                ← pacientes (documento cifrado + hash, versión) y bitácora append-only
+│   ├── schema.sql                ← pacientes (documento cifrado + hash, versión, identidad protegida) y bitácora append-only
 │   └── datos-demo.php            ← pacientes ficticios de demostración
 ├── bin/
 │   ├── demo.php                  ← recorrido completo de la API sin base de datos (InMemory)
 │   ├── medir.php                 ← latencia en proceso frente a por red (decisión de frontera)
+│   ├── demo-proteccion.php       ← cambio práctico de la semana 6: identidad protegida en 8 pasos
 │   ├── generar-claves.php        ← claves de hash y cifrado del documento
 │   └── cargar-demo.php           ← carga los pacientes ficticios en PostgreSQL a través de los casos de uso
 ├── src/
@@ -36,6 +37,7 @@ Regla de dependencias: **Presentación → Aplicación → Dominio ← Persisten
 | 3 | Cuatro capas, PDO con sentencias preparadas, documento cifrado, versión, pruebas por capa |
 | 4 | Entrada **MVC** (controlador, formulario, vistas), adaptadores **InMemory** de producción junto a los PDO, suite de contrato común, modo `PACIENTES_PERSISTENCIA=memoria` y demo sin base de datos |
 | 5 | Contrato **OpenAPI 3.1** con conformidad probada, `Idempotency-Key` en el registro, GET condicional (304), `X-Request-ID` y registro de acceso, capa **Cliente** aislada y medición de la frontera |
+| 6 | Cambio práctico **identidad protegida** (R-11): `PoliticaConfidencialidad`, vista reducida por defecto, búsqueda por nombre sin protegidos, código `RESERVADO` en los duplicados, permisos `pacientes.proteger` y `pacientes.leer_protegido`; contrato 1.1.0 compatible |
 
 ## Ejecutar las pruebas
 
@@ -43,10 +45,11 @@ No necesitan base de datos: usan los adaptadores InMemory (con decoradores que s
 
 ```bash
 cd docs/modulos/pacientes/micro-his-pacientes
-php tests/ejecutar.php      # 72 pruebas (2 omitidas si no hay PostgreSQL)
-php tests/mutaciones.php    # 18 defectos introducidos a propósito; todos deben detectarse
+php tests/ejecutar.php      # 80 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/mutaciones.php    # 22 defectos introducidos a propósito; todos deben detectarse
 php bin/demo.php            # la API completa con adaptadores InMemory, sin base de datos
 php bin/medir.php           # costo de consultar en proceso frente a por red
+php bin/demo-proteccion.php # identidad protegida: lo que ve cada rol
 npx @redocly/cli lint api/openapi.yaml
 ```
 
@@ -117,9 +120,9 @@ Si faltan las claves, la API responde `503 CONFIGURACION_INCOMPLETA`. Si la base
 
 | Método | Ruta | Permiso | Caso de uso | Respuestas |
 |---|---|---|---|---|
-| POST | `/api/v1/pacientes` (+ `Idempotency-Key` opcional) | `pacientes.registrar` (+ `.confirmar_duplicado`) | CU-01, CU-05, CU-06 | 201 · 400 · 403 · 409 · 422 · 503 |
+| POST | `/api/v1/pacientes` (+ `Idempotency-Key` opcional) | `pacientes.registrar` (+ `.confirmar_duplicado`, `.proteger`) | CU-01, CU-05, CU-06 | 201 · 400 · 403 · 409 · 422 · 503 |
 | GET | `/api/v1/pacientes?nombre=&nacimiento=&codigo=&tipo_documento=&numero_documento=&pais_documento=` | `pacientes.buscar` | CU-02 | 200 · 403 · 422 · 503 |
 | GET | `/api/v1/pacientes/{codigo}` (+ `If-None-Match`) | `pacientes.leer` | CU-03 | 200 (ETag) · 304 · 403 · 404 · 503 |
-| PUT | `/api/v1/pacientes/{codigo}` con `If-Match` | `pacientes.editar` (+ `.editar_restringido`) | CU-04 | 200 (ETag) · 400 · 403 · 404 · 409 · 422 · 428 · 503 |
+| PUT | `/api/v1/pacientes/{codigo}` con `If-Match` | `pacientes.editar` (+ `.editar_restringido`, `.proteger`) | CU-04 | 200 (ETag) · 400 · 403 · 404 · 409 · 422 · 428 · 503 |
 
-Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401), y el token debe ser del mismo hospital (403). Todas devuelven `X-Request-ID`. Contrato completo: [`api/openapi.yaml`](api/openapi.yaml).
+Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401), y el token debe ser del mismo hospital (403). Todas devuelven `X-Request-ID`. Los pacientes con identidad protegida se muestran reducidos a quien no tiene `pacientes.leer_protegido`, que además no los encuentra por nombre ni los puede editar. Contrato completo (v1.1.0): [`api/openapi.yaml`](api/openapi.yaml).

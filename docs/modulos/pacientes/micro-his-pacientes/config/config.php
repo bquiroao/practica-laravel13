@@ -29,7 +29,8 @@ return [
     'permisos' => [
         'admision-01|hosp-oriente' => $basicos,
         'clinico-01|hosp-oriente' => ['pacientes.buscar', 'pacientes.leer'],
-        'supervisor-01|hosp-oriente' => [...$basicos, 'pacientes.confirmar_duplicado', 'pacientes.editar_restringido'],
+        'supervisor-01|hosp-oriente' => [...$basicos, 'pacientes.confirmar_duplicado', 'pacientes.editar_restringido',
+            'pacientes.proteger', 'pacientes.leer_protegido'],
         'admision-02|hosp-norte' => $basicos,
     ],
 ];

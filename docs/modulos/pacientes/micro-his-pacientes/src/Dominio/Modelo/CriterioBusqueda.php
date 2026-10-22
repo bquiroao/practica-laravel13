@@ -24,7 +24,15 @@ final class CriterioBusqueda
         public readonly ?Identificador $documento = null,
         public readonly ?string $nombre = null,
         public readonly ?string $nacimiento = null,
+        /** R-11: por defecto, la búsqueda por NOMBRE no devuelve pacientes protegidos. */
+        public readonly bool $incluirProtegidos = false,
     ) {
+    }
+
+    /** Copia del criterio que incluye (o no) a los protegidos en la búsqueda por nombre. */
+    public function incluyendoProtegidos(bool $incluir): self
+    {
+        return new self($this->tipo, $this->codigo, $this->documento, $this->nombre, $this->nacimiento, $incluir);
     }
 
     /** @throws ErrorDominio CRITERIO_INSUFICIENTE o DatosInvalidos */
@@ -64,7 +72,8 @@ final class CriterioBusqueda
         return match ($this->tipo) {
             self::POR_CODIGO => $paciente->codigo === $this->codigo,
             self::POR_DOCUMENTO => $paciente->identificador?->canonico() === $this->documento?->canonico(),
-            default => str_contains($paciente->nombreNormalizado(), (string) $this->nombre)
+            default => ($this->incluirProtegidos || !$paciente->identidadProtegida)
+                && str_contains($paciente->nombreNormalizado(), (string) $this->nombre)
                 && ($this->nacimiento === null || str_starts_with($paciente->nacimiento->format('Y-m-d'), $this->nacimiento)),
         };
     }

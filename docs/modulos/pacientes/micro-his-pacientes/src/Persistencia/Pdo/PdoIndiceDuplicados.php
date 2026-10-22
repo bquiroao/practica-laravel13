@@ -16,6 +16,9 @@ final class PdoIndiceDuplicados extends RepositorioPdo implements IndiceDuplicad
 {
     private const SQL_TITULAR = 'SELECT code FROM pacientes WHERE documento_hash = :hash LIMIT 1';
 
+    private const SQL_PROTEGIDOS = "SELECT code FROM pacientes
+        WHERE identidad_protegida AND code = ANY(string_to_array(:codigos, ',')) ORDER BY code";
+
     private const SQL_COINCIDENCIAS = 'SELECT code FROM pacientes
         WHERE nombre_normalizado = :nombre AND birth_date = :nacimiento ORDER BY code';
 
@@ -35,6 +38,16 @@ final class PdoIndiceDuplicados extends RepositorioPdo implements IndiceDuplicad
     {
         $filas = $this->ejecutar(self::SQL_COINCIDENCIAS, ['nombre' => $nombreNormalizado, 'nacimiento' => $nacimiento->format('Y-m-d')])
             ->fetchAll(\PDO::FETCH_COLUMN);
+
+        return array_map('strval', $filas);
+    }
+
+    public function protegidos(array $codigos): array
+    {
+        if ($codigos === []) {
+            return [];
+        }
+        $filas = $this->ejecutar(self::SQL_PROTEGIDOS, ['codigos' => implode(',', $codigos)])->fetchAll(\PDO::FETCH_COLUMN);
 
         return array_map('strval', $filas);
     }

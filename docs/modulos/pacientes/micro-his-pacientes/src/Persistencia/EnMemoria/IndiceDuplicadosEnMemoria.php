@@ -37,4 +37,17 @@ final class IndiceDuplicadosEnMemoria implements IndiceDuplicados
 
         return $codigos;
     }
+
+    public function protegidos(array $codigos): array
+    {
+        $protegidos = [];
+        foreach ($this->repositorio->todos() as $paciente) {
+            if ($paciente->identidadProtegida && in_array($paciente->codigo, $codigos, true)) {
+                $protegidos[] = (string) $paciente->codigo;
+            }
+        }
+        sort($protegidos);
+
+        return $protegidos;
+    }
 }
