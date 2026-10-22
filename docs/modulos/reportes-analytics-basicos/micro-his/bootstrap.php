@@ -6,17 +6,28 @@ require __DIR__ . '/src/autoload.php';
 
 use MicroHis\Application\CalcularIndicador;
 use MicroHis\Application\PoliticaPermisos;
-use MicroHis\Domain\LectorOcupacion;
+use MicroHis\Domain\OcupacionRepository;
 use MicroHis\Domain\ReportRegistry;
 use MicroHis\Domain\ReporteOcupacion;
 use MicroHis\Persistence\ConexionPdo;
-use MicroHis\Persistence\OcupacionPdo;
+use MicroHis\Persistence\OcupacionPdoRepository;
+use MicroHis\Presentation\Controller\ReporteController;
+use MicroHis\Presentation\Http\Enrutador;
+use MicroHis\Presentation\View\VistaIndicador;
 
-/** @param string $base «principal» (micro_his) o «prueba» (micro_his_test); $lector permite inyectar un doble. */
-function crearCasoDeUso(string $base = 'principal', ?LectorOcupacion $lector = null): CalcularIndicador
+/** @param string $base «principal» (micro_his) o «prueba» (micro_his_test); $repositorio permite usar InMemory o un doble. */
+function crearCasoDeUso(string $base = 'principal', ?OcupacionRepository $repositorio = null): CalcularIndicador
 {
-    $lector ??= new OcupacionPdo(new ConexionPdo(__DIR__ . '/config/app.ini', $base));
+    $repositorio ??= new OcupacionPdoRepository(new ConexionPdo(__DIR__ . '/config/app.ini', $base));
     $registro = new ReportRegistry();
-    $registro->registrar(new ReporteOcupacion($lector));
+    $registro->registrar(new ReporteOcupacion($repositorio));
     return new CalcularIndicador($registro, new PoliticaPermisos());
+}
+
+function crearEnrutador(CalcularIndicador $casoDeUso): Enrutador
+{
+    $controlador = new ReporteController($casoDeUso, new VistaIndicador());
+    $enrutador = new Enrutador();
+    $enrutador->agregar('GET', '/', [$controlador, 'mostrar']);
+    return $enrutador;
 }
