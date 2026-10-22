@@ -17,22 +17,22 @@ use Pacientes\Dominio\Modelo\EventoAuditoria;
 use Pacientes\Dominio\Modelo\Paciente;
 use Pacientes\Dominio\Puertos\RegistroAuditoria;
 use Pacientes\Dominio\Puertos\RepositorioPacientes;
-use Pacientes\Dominio\Servicios\PoliticaConfidencialidad;
-use Pacientes\Dominio\Servicios\PoliticaDuplicados;
-use Pacientes\Dominio\Servicios\PoliticaEdicion;
+use Pacientes\Dominio\Servicios\RevisionDeFicha;
 
-/** CU-04: actualización segura (estado, motivo, unicidad, versión y auditoría antes/después). */
+/**
+ * CU-04: actualización segura (estado, motivo, unicidad, versión y auditoría antes/después).
+ * Semana 7: solo orquesta (permiso → cargar → revisión de la ficha → guardar con evidencia);
+ * las reglas de la ficha y su orden viven en RevisionDeFicha.
+ */
 final class ActualizarPaciente
 {
     public function __construct(
         private readonly RepositorioPacientes $repositorio,
-        private readonly PoliticaEdicion $edicion,
-        private readonly PoliticaDuplicados $duplicados,
+        private readonly RevisionDeFicha $revision,
         private readonly RegistroAuditoria $auditoria,
         private readonly Transaccion $transaccion,
         private readonly ControlAcceso $acceso,
         private readonly Reloj $reloj,
-        private readonly PoliticaConfidencialidad $confidencialidad,
     ) {
     }
 
@@ -43,33 +43,14 @@ final class ActualizarPaciente
             $actual = $this->repositorio->porCodigo($comando->hospital, strtoupper($comando->codigo))
                 ?? throw new PacienteNoEncontrado();
 
-            // R-11: no se edita lo que no se ve (antes de validar, para no revelar nada).
-            $this->confidencialidad->exigirVisibilidad($actual,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO));
-
-            $datos = FormularioPaciente::aDatos($comando->datos);
-            $nuevo = $actual->conDatosDe(Paciente::desdeDatos($comando->hospital, $datos, $this->reloj->hoy()));
-            if ($datos->identidadProtegida === null) {
-                $nuevo = $nuevo->conProteccion($actual->identidadProtegida); // campo ausente = sin cambio
-            }
-            $motivo = trim((string) $comando->motivo);
-            $this->edicion->verificar($actual, $nuevo,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::EDITAR_RESTRINGIDO), $motivo);
-            $this->confidencialidad->verificarCambio($actual, $nuevo,
-                $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::PROTEGER), $motivo);
-            if ($nuevo->cambiaIdentidadRespectoDe($actual)) {
-                $this->duplicados->verificarDocumentoNuevo($actual, $nuevo);
-            }
+            $motivo = (string) $comando->motivo;
+            $nuevo = $this->revision->paraEdicion($actual, FormularioPaciente::aDatos($comando->datos), $this->reloj->hoy(),
+                $this->acceso->capacidades($comando->actor, $comando->hospital), $motivo);
 
             // R-06: la versión la compara el repositorio al escribir (atómico); R-09: misma transacción.
             $guardado = $this->transaccion->ejecutar(function () use ($comando, $actual, $nuevo, $motivo): Paciente {
                 $guardado = $this->repositorio->actualizar($nuevo, $comando->versionLeida);
-                $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::ACTUALIZADO, $comando->actor, $comando->hospital,
-                    $guardado->codigo, [
-                        'antes' => $actual->instantanea(),
-                        'despues' => $guardado->instantanea(),
-                        'motivo' => $motivo === '' ? null : $motivo,
-                    ]));
+                $this->auditoria->registrar(EventoAuditoria::actualizado($comando->actor, $actual, $guardado, $motivo));
 
                 return $guardado;
             });

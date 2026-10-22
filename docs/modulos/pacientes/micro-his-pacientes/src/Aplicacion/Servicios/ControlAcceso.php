@@ -6,6 +6,7 @@ namespace Pacientes\Aplicacion\Servicios;
 
 use Pacientes\Aplicacion\Puertos\PoliticaAcceso;
 use Pacientes\Dominio\Excepciones\ErrorDominio;
+use Pacientes\Dominio\Modelo\Capacidades;
 
 /** Permiso por operación (R-05), común a los cuatro casos de uso. */
 final class ControlAcceso
@@ -35,5 +36,16 @@ final class ControlAcceso
     public function tiene(string $actor, string $hospital, string $permiso): bool
     {
         return $this->politica->permite($actor, $hospital, $permiso);
+    }
+
+    /** Semana 7: el único lugar que traduce permisos a lo que el Dominio necesita saber. */
+    public function capacidades(string $actor, string $hospital): Capacidades
+    {
+        return new Capacidades(
+            verProtegidos: $this->tiene($actor, $hospital, self::LEER_PROTEGIDO),
+            proteger: $this->tiene($actor, $hospital, self::PROTEGER),
+            confirmarDuplicado: $this->tiene($actor, $hospital, self::CONFIRMAR_DUPLICADO),
+            editarRestringido: $this->tiene($actor, $hospital, self::EDITAR_RESTRINGIDO),
+        );
     }
 }

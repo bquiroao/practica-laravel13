@@ -19,6 +19,7 @@ micro-his-pacientes/
 │   ├── demo.php                  ← recorrido completo de la API sin base de datos (InMemory)
 │   ├── medir.php                 ← latencia en proceso frente a por red (decisión de frontera)
 │   ├── demo-proteccion.php       ← cambio práctico de la semana 6: identidad protegida en 8 pasos
+│   ├── acoplamiento.php          ← Ce, Ca y preocupaciones mezcladas por clase (semana 7)
 │   ├── generar-claves.php        ← claves de hash y cifrado del documento
 │   └── cargar-demo.php           ← carga los pacientes ficticios en PostgreSQL a través de los casos de uso
 ├── src/
@@ -38,6 +39,7 @@ Regla de dependencias: **Presentación → Aplicación → Dominio ← Persisten
 | 4 | Entrada **MVC** (controlador, formulario, vistas), adaptadores **InMemory** de producción junto a los PDO, suite de contrato común, modo `PACIENTES_PERSISTENCIA=memoria` y demo sin base de datos |
 | 5 | Contrato **OpenAPI 3.1** con conformidad probada, `Idempotency-Key` en el registro, GET condicional (304), `X-Request-ID` y registro de acceso, capa **Cliente** aislada y medición de la frontera |
 | 6 | Cambio práctico **identidad protegida** (R-11): `PoliticaConfidencialidad`, vista reducida por defecto, búsqueda por nombre sin protegidos, código `RESERVADO` en los duplicados, permisos `pacientes.proteger` y `pacientes.leer_protegido`; contrato 1.1.0 compatible |
+| 7 | Refactor medido de los casos de uso de escritura: `RevisionDeFicha` (orden de las reglas de la ficha en el Dominio), `Capacidades` (en lugar de booleanos de permiso) y formato de eventos en `EventoAuditoria`; `bin/acoplamiento.php` y pruebas de caracterización REF-01..03; sin funcionalidad nueva |
 
 ## Ejecutar las pruebas
 
@@ -45,11 +47,12 @@ No necesitan base de datos: usan los adaptadores InMemory (con decoradores que s
 
 ```bash
 cd docs/modulos/pacientes/micro-his-pacientes
-php tests/ejecutar.php      # 80 pruebas (2 omitidas si no hay PostgreSQL)
-php tests/mutaciones.php    # 22 defectos introducidos a propósito; todos deben detectarse
+php tests/ejecutar.php      # 83 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/mutaciones.php    # 24 defectos introducidos a propósito; todos deben detectarse
 php bin/demo.php            # la API completa con adaptadores InMemory, sin base de datos
 php bin/medir.php           # costo de consultar en proceso frente a por red
 php bin/demo-proteccion.php # identidad protegida: lo que ve cada rol
+php bin/acoplamiento.php    # acoplamiento por clase (Ce, Ca, preocupaciones)
 npx @redocly/cli lint api/openapi.yaml
 ```
 

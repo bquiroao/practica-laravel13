@@ -32,7 +32,7 @@ final class ConsultarPaciente
                 ?? throw new PacienteNoEncontrado();
             // R-11: un protegido se muestra sin demografía a quien no tiene pacientes.leer_protegido,
             // y la auditoría distingue ese acceso limitado.
-            $verProtegidos = $this->acceso->tiene($comando->actor, $comando->hospital, ControlAcceso::LEER_PROTEGIDO);
+            $verProtegidos = $this->acceso->capacidades($comando->actor, $comando->hospital)->verProtegidos;
             $this->auditoria->registrar(new EventoAuditoria(EventoAuditoria::CONSULTADO, $comando->actor, $comando->hospital, $paciente->codigo,
                 ['acceso_limitado' => $paciente->seMuestraReducidoPara($verProtegidos)]));
 
