@@ -6,7 +6,7 @@ namespace MicroHis\Domain;
 /** Strategy: la ocupación de camas cumple el mismo contrato que cualquier otro reporte. */
 final class ReporteOcupacion implements ContratoReporte
 {
-    public function __construct(private readonly LectorOcupacion $lector)
+    public function __construct(private readonly OcupacionRepository $repositorio)
     {
     }
 
@@ -22,8 +22,8 @@ final class ReporteOcupacion implements ContratoReporte
 
     public function calcular(Filtros $f): Indicador
     {
-        $habilitadas = $this->lector->camasHabilitadas();
-        $ocupadas = array_sum($this->lector->ocupadasPorSala($f));
+        $habilitadas = $this->repositorio->camasHabilitadas();
+        $ocupadas = array_sum($this->repositorio->ocupadasPorSala($f));
         if ($habilitadas === 0 || $ocupadas === 0) {
             throw new SinDatos("Sin datos de ocupación del {$f->periodo()} (RN-06)");
         }
@@ -41,13 +41,13 @@ final class ReporteOcupacion implements ContratoReporte
     public function desglosar(Filtros $f, string $dimension): Desglose
     {
         $this->exigirDimension($dimension);
-        return new Desglose($dimension, $this->lector->ocupadasPorSala($f));
+        return new Desglose($dimension, $this->repositorio->ocupadasPorSala($f));
     }
 
     public function registros(Filtros $f, string $dimension, string $parte): array
     {
         $this->exigirDimension($dimension);
-        return $this->lector->registrosDeSala($f, $parte);
+        return $this->repositorio->registrosDeSala($f, $parte);
     }
 
     private function exigirDimension(string $dimension): void

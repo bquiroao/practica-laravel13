@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace MicroHis\Domain;
 
 /**
- * Puerto del dominio: qué datos necesita la ocupación, sin decir de dónde salen.
- * Persistence lo implementa con PDO (inversión de dependencias).
+ * Repository (semana 4): colección de solo lectura de los datos de ocupación, vista desde el dominio.
+ * Vive en Domain porque es el límite que el dominio necesita; los adaptadores PDO e InMemory lo implementan.
  * Toda falla de lectura se informa como DatosNoDisponibles.
  */
-interface LectorOcupacion
+interface OcupacionRepository
 {
     public function camasHabilitadas(): int;
 
