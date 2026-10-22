@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace MicroHis\Presentation;
+namespace MicroHis\Presentation\View;
 
 use MicroHis\Application\ResultadoConsulta;
 
-/** Muestra el resultado en HTML. No calcula ni consulta datos: solo presenta. */
+/** Vista (MVC): muestra el resultado en HTML. No calcula ni consulta datos: solo presenta. */
 final class VistaIndicador
 {
     /** @param array<string,string> $consulta parámetros recibidos, para armar los enlaces al siguiente nivel */
