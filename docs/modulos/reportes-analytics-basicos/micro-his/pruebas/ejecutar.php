@@ -64,6 +64,20 @@ $verificar('[mvc] ruta desconocida responde 404', $enrutador->despachar('GET', '
 $controladores = implode('', array_map('file_get_contents', glob(__DIR__ . '/../src/Presentation/Controller/*.php')));
 $verificar('[mvc] los controladores no contienen SQL ni PDO', preg_match('/\b(SELECT|INSERT|UPDATE|DELETE|PDO)\b/', $controladores) === 0);
 
+$lineas[] = '== 6. API REST v1 (cliente-servidor) ==';
+$api = static fn (string $ruta, array $p) => crearEnrutador($caso)->despachar('GET', $ruta, $p + ['correlacion' => 'prueba-123']);
+$base = ['desde' => '2026-10-01', 'hasta' => '2026-10-31', 'rol' => 'administrador'];
+$json = json_decode($api('/api/v1/reportes/ocupacion/desglose', $base)->cuerpo, true);
+$verificar('[api] GET /api/v1/reportes/ocupacion/desglose: 78 % y total 39', ($json['datos']['indicador']['valor'] ?? null) == 78 && ($json['datos']['desglose']['total'] ?? null) === 39);
+$respuesta = $api('/api/v1/reportes/ocupacion/registros', $base + ['parte' => 'Pediatría']);
+$verificar('[api] /registros de Pediatría devuelve 7 registros', count(json_decode($respuesta->cuerpo, true)['datos']['registros'] ?? []) === 7);
+$verificar('[api] devuelve JSON y repite el X-Correlation-Id', str_starts_with($respuesta->cabeceras['Content-Type'], 'application/json') && $respuesta->cabeceras['X-Correlation-Id'] === 'prueba-123');
+$respuesta = $api('/api/v1/reportes/ocupacion', ['rol' => 'medico'] + $base);
+$verificar('[api] rol sin permiso: 403 con código SIN_PERMISO', $respuesta->codigo === 403 && json_decode($respuesta->cuerpo, true)['error']['codigo'] === 'SIN_PERMISO');
+$verificar('[api] período inválido: 422 con código VALIDACION', $api('/api/v1/reportes/ocupacion', ['hasta' => '2026-09-01'] + $base)->codigo === 422);
+$conFalla = crearEnrutador(crearCasoDeUso(repositorio: new RepositorioQueFalla()))->despachar('GET', '/api/v1/reportes/ocupacion', $base);
+$verificar('[api] base caída: 503 con código DATOS_NO_DISPONIBLES', $conFalla->codigo === 503 && str_contains($conFalla->cuerpo, 'DATOS_NO_DISPONIBLES'));
+
 $total = count(array_filter($lineas, static fn ($l) => !str_starts_with($l, '==')));
 $lineas[] = '';
 $lineas[] = $fallas === 0 ? "RESULTADO: {$total} pruebas, todas correctas" : "RESULTADO: {$fallas} de {$total} pruebas fallaron";
