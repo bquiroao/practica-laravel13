@@ -119,6 +119,7 @@ final class FormularioPaciente
             'numero_documento' => $documento['numero'] ?? null,
             'pais_documento' => $documento['pais'] ?? null,
             'identidad_protegida' => $cuerpo['identidad_protegida'] ?? null, // ausente = sin cambio al editar
+            'documento_enviado' => array_key_exists('documento', $cuerpo),   // semana 12 (B-4): ausente = sin cambio al editar
         ];
     }
 }

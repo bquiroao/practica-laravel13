@@ -18,6 +18,8 @@ final class DatosPaciente
         public readonly ?string $paisDocumento = null,
         /** null = «no se envió»: al registrar equivale a false; al editar, conserva el valor actual. */
         public readonly ?bool $identidadProtegida = null,
+        /** Semana 12 (B-4): false = el campo «documento» no se envió; al editar, conserva el documento actual. */
+        public readonly bool $documentoEnviado = true,
     ) {
     }
 }

@@ -56,6 +56,9 @@ final class RevisionDeFicha
         if ($datos->identidadProtegida === null) {
             $nuevo = $nuevo->conProteccion($actual->identidadProtegida); // campo ausente = sin cambio
         }
+        if (!$datos->documentoEnviado) {
+            $nuevo = $nuevo->conIdentificador($actual->identificador);   // semana 12 (B-4): ídem para el documento
+        }
         $this->edicion->verificar($actual, $nuevo, $puede->editarRestringido, $motivo);
         $this->confidencialidad->verificarCambio($actual, $nuevo, $puede->proteger, $motivo);
         if ($nuevo->cambiaIdentidadRespectoDe($actual)) {

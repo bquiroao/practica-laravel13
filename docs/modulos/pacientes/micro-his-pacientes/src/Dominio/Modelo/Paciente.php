@@ -134,6 +134,13 @@ final class Paciente
         return $this->copiar(protegida: $protegida);
     }
 
+    /** Semana 12 (B-4): conserva el documento cuando un PUT no envía el campo. */
+    public function conIdentificador(?Identificador $identificador): self
+    {
+        return new self($this->codigo, $this->hospital, $this->nombres, $this->apellidos, $this->nacimiento, $this->sexo,
+            $this->telefono, $identificador, $this->estado, $this->version, $this->identidadProtegida);
+    }
+
     /** Los datos de $nuevo sobre esta ficha: conserva código, hospital, estado y versión. */
     public function conDatosDe(self $nuevo): self
     {
@@ -181,6 +188,9 @@ final class Paciente
             'sexo' => $this->sexo,
             'telefono' => $reducido ? null : $this->telefono,
             'tipo_documento' => $reducido ? null : $this->identificador?->tipo(),
+            // Semana 12 (B-4): por separado, para que una interfaz pueda editar sin adivinar dónde empiezan los apellidos
+            'nombres' => $reducido ? null : $this->nombres,
+            'apellidos' => $reducido ? null : $this->apellidos,
             'estado' => $this->estado,
             'identidad_provisional' => $this->identidadProvisional(),
             'version' => $this->version,
