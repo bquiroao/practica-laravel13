@@ -41,6 +41,7 @@ Regla de dependencias: **Presentación → Aplicación → Dominio ← Persisten
 | 6 | Cambio práctico **identidad protegida** (R-11): `PoliticaConfidencialidad`, vista reducida por defecto, búsqueda por nombre sin protegidos, código `RESERVADO` en los duplicados, permisos `pacientes.proteger` y `pacientes.leer_protegido`; contrato 1.1.0 compatible |
 | 7 | Refactor medido de los casos de uso de escritura: `RevisionDeFicha` (orden de las reglas de la ficha en el Dominio), `Capacidades` (en lugar de booleanos de permiso) y formato de eventos en `EventoAuditoria`; `bin/acoplamiento.php` y pruebas de caracterización REF-01..03; sin funcionalidad nueva |
 | 12 | Cambio solicitado B-4 (contrato 1.2.0): en un `PUT`, si `documento` no se envía, el documento no cambia (`null` explícito lo quita, con motivo); el detalle devuelve `nombres` y `apellidos` por separado (null si se muestra reducido). Pruebas B4-01..04, mutaciones M25 y M26 |
+| 15 | Pruebas diseñadas por técnica: unitarias UNI-01..10, caja blanca CB-01..04 (caminos básicos, ramas y MC/DC), caja negra CN-01..07 (equivalencia, límites, permisos, errores, escenario) y defectos abiertos DEF-01..06 en `tests/Defectos/` (fallan hasta corregirse); el ejecutor acepta `--solo=` y `--defectos`. Sin cambios en `src/` |
 
 ## Ejecutar las pruebas
 
@@ -48,7 +49,9 @@ No necesitan base de datos: usan los adaptadores InMemory (con decoradores que s
 
 ```bash
 cd docs/modulos/pacientes/micro-his-pacientes
-php tests/ejecutar.php      # 87 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/ejecutar.php      # 108 pruebas (2 omitidas si no hay PostgreSQL)
+php tests/ejecutar.php --solo=UNI,CB,CN      # solo las pruebas por técnica de la semana 15
+php tests/ejecutar.php --defectos --solo=DEF # defectos abiertos: fallan a propósito hasta corregirse
 php tests/mutaciones.php    # 26 defectos introducidos a propósito; todos deben detectarse
 php bin/demo.php            # la API completa con adaptadores InMemory, sin base de datos
 php bin/medir.php           # costo de consultar en proceso frente a por red
