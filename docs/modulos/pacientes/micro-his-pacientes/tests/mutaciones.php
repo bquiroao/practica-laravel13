@@ -66,6 +66,11 @@ $mutaciones = [
         "'motivo_proteccion' => \$registrado->identidadProtegida ? \$motivo : null,", "'motivo_proteccion' => null,"],
     'M24' => ['Cualquier actor obtiene la capacidad de ver protegidos', 'src/Aplicacion/Servicios/ControlAcceso.php',
         'verProtegidos: $this->tiene($actor, $hospital, self::LEER_PROTEGIDO),', 'verProtegidos: true,'],
+    // Semana 12 — cambio solicitado B-4
+    'M25' => ['Un PUT sin «documento» vuelve a quitar el documento', 'src/Presentacion/Http/Formularios/FormularioPaciente.php',
+        "'documento_enviado' => array_key_exists('documento', \$cuerpo),", "'documento_enviado' => true,"],
+    'M26' => ['El detalle de un protegido deja ver nombres y apellidos', 'src/Dominio/Modelo/Paciente.php',
+        "'nombres' => \$reducido ? null : \$this->nombres,", "'nombres' => \$this->nombres,"],
 ];
 // M8: sin la transacción, el closure se invoca directamente.
 $ajustes = ['M8' => ['            });' . "\n\n" . "            return Resultado::ok(['codigo'", '            })();' . "\n\n" . "            return Resultado::ok(['codigo'"]];

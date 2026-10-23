@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS Pacientes — API
-  version: 1.1.0
+  version: 1.2.0
   summary: Registro, búsqueda, detalle y actualización segura de pacientes por hospital.
   description: |
     Contrato del módulo ASII-03 «Pacientes: registro, edición, búsqueda y detalle».
@@ -19,6 +19,10 @@ info:
       `pacientes.proteger` y `motivo`. Sin `pacientes.leer_protegido`, un protegido no aparece en la búsqueda
       por nombre, se muestra sin demografía (nombre «Identidad protegida», sin nacimiento, teléfono ni documento),
       no se puede editar (403) y en los 409 de duplicados su código se reemplaza por `RESERVADO`.
+    - 1.2.0 (semana 12, cambio solicitado B-4): en un `PUT`, si el campo `documento` no se envía, el documento
+      no cambia (como `identidad_protegida`); `documento: null` explícito lo quita (cambio de identidad: exige
+      `motivo`). El detalle agrega `nombres` y `apellidos` por separado (null si se muestra reducido), para que
+      una interfaz pueda editar sin conocer el documento completo ni adivinar dónde empiezan los apellidos.
   contact:
     name: Boris Alexander Quiroa Orellana (@bquiroao)
   license:
@@ -319,7 +323,9 @@ components:
   schemas:
     Documento:
       type: [object, 'null']
-      description: Sin documento = identidad provisional (no se compara por documento).
+      description: |
+        Sin documento = identidad provisional (no se compara por documento).
+        En un PUT: ausente = sin cambio; null = quitar el documento (exige motivo).
       properties:
         tipo:
           type: string
@@ -433,6 +439,12 @@ components:
                 tipo_documento:
                   type: [string, 'null']
                   description: null si se muestra reducido.
+                nombres:
+                  type: [string, 'null']
+                  description: Desde 1.2.0. null si se muestra reducido.
+                apellidos:
+                  type: [string, 'null']
+                  description: Desde 1.2.0. null si se muestra reducido.
                 estado:
                   type: string
                   enum: [active, inactive, deceased]
