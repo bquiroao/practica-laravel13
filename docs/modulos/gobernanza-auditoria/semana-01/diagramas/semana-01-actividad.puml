@@ -1,0 +1,113 @@
+@startuml semana-01-actividad
+!pragma layout smetana
+title Módulo Gobernanza y auditoría — Actividad\n«Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas»
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:A-01 Recibir la solicitud con token y hospital (X-Tenant-ID);
+if (D-01 ¿Token válido?) then (no)
+  #FDECEC:E-01 401 «sesión no válida»;
+  stop
+else (sí)
+endif
+:A-02 Pedir autorización al Servicio RBAC
+(auditoria.registrar | consultar | consultar_red | verificar);
+if (D-02 ¿Permiso concedido para ese alcance?) then (no)
+  #FDECEC:E-02 403 genérico + referencia
+(la denegación la audita RBAC);
+  stop
+else (sí)
+endif
+
+switch (D-03 ¿Qué operación?)
+case (Registrar movimiento)
+  if (D-04 ¿El hospital del movimiento es el del token?) then (no)
+    #FDECEC:E-03 403 TENANT_NO_COINCIDE
+(un emisor no escribe en otro hospital);
+    stop
+  else (sí)
+  endif
+  :A-03 Validar el movimiento: usuario, módulo y acción
+del catálogo, fecha, resultado, referencia;
+  if (D-05 ¿Movimiento válido y sin datos prohibidos?) then (no)
+    #FDECEC:E-04 422 con los campos inválidos
+(contraseñas, tokens o datos clínicos se rechazan);
+    stop
+  else (sí)
+  endif
+  if (D-06 ¿Ya existe ese event_id?) then (sí)
+    if (D-07 ¿Mismo contenido?) then (sí)
+      #E8F5E9:F-01b 200 «ya registrado»
+(reintento idempotente, sin duplicar);
+      stop
+    else (no)
+      #FDECEC:E-05 409 EVENTO_EN_CONFLICTO;
+      stop
+    endif
+  else (no)
+  endif
+  :A-04 Calcular el sello: hash(sello anterior + contenido);
+  :A-05 INSERT en audit_logs (solo inserción);
+  if (D-08 ¿La base confirmó?) then (no)
+    #FDECEC:E-06 503 «no disponible, reintente»
+(nada queda a medias; el emisor reintenta con el mismo event_id);
+    stop
+  else (sí)
+  endif
+  #E8F5E9:F-01 201 registrado (secuencia y sello);
+  stop
+
+case (Consultar movimientos)
+  :A-06 Leer filtros: desde, hasta (obligatorios),
+usuario, módulo, acción (opcionales), alcance;
+  if (D-09 ¿Rango completo y desde ≤ hasta?) then (no)
+    #FDECEC:E-07 422 «indique el rango de fechas»
+(se conservan los filtros);
+    stop
+  else (sí)
+  endif
+  if (D-10 ¿Alcance = red?) then (sí)
+    if (D-11 ¿Es super administrador?) then (no)
+      #FDECEC:E-08 403 (un auditor solo ve su hospital);
+      stop
+    else (sí)
+    endif
+  else (no)
+  endif
+  :A-07 Buscar en audit_logs con el filtro de tenant
+y sentencias preparadas, página de 50, orden descendente;
+  :A-08 Registrar AUDITORIA_CONSULTADA
+(quién consultó y con qué filtros);
+  if (D-12 ¿Hay resultados?) then (no)
+    #E8F5E9:F-02b 200 lista vacía
+(«no hay movimientos con estos filtros»);
+  else (sí)
+    #E8F5E9:F-02 200 página de movimientos + cursor siguiente;
+  endif
+  stop
+
+case (Ver detalle)
+  :A-09 Cargar el movimiento por id, dentro del alcance;
+  if (D-13 ¿Existe en el alcance permitido?) then (no)
+    #FDECEC:E-09 404 (igual si es de otro hospital);
+    stop
+  else (sí)
+  endif
+  :A-10 Registrar AUDITORIA_CONSULTADA (detalle);
+  #E8F5E9:F-03 200 detalle con sello y referencia a la corrección, si la hay;
+  stop
+
+case (Verificar integridad)
+  :A-11 Recalcular los sellos del hospital y rango pedidos;
+  if (D-14 ¿Todos los sellos coinciden?) then (no)
+    #FDECEC:E-10 200 ALTERADA + primera secuencia rota
+(alerta a gobernanza);
+  else (sí)
+    #E8F5E9:F-04 200 ÍNTEGRA (n movimientos verificados);
+  endif
+  stop
+endswitch
+@enduml
