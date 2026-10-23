@@ -1,0 +1,49 @@
+$ php tests/ejecutar.php --defectos --solo=DEF
+Micro-HIS Pacientes - pruebas (PHP 8.4.26)
+
+== Defectos abiertos (fallan hasta que se corrijan) ==
+[FALLA] DEF-01   [Crítico · AR-02] El 409 por un DPI registrado en OTRO hospital no debe revelar su código ni su documento; hoy devuelve P-000001 y *********0101
+         -> respuesta a hosp-norte: esperado array (
+  0 => 409,
+  1 => 
+  array (
+    'error' => 'PACIENTE_EXISTENTE',
+    'codigo' => 'EN_OTRO_HOSPITAL',
+  ),
+), obtenido array (
+  0 => 409,
+  1 => 
+  array (
+    'error' => 'PACIENTE_EXISTENTE',
+    'codigo' => 'P-000001',
+    'identificador' => '*********0101',
+  ),
+) (Arnes.php:41)
+[FALLA] DEF-02   [Mayor · AR-03] Una homónima de OTRO hospital no es candidata de POSIBLE_DUPLICADO; hoy hosp-norte recibe 409 con el código de hosp-oriente
+         -> registro en hosp-norte y fuga del código: esperado array (
+  0 => 201,
+  1 => false,
+), obtenido array (
+  0 => 409,
+  1 => true,
+) (Arnes.php:41)
+[FALLA] DEF-03   [Mayor · AR-01] Fuera de desarrollo, el punto de entrada real NO debe aceptar tokens de demostración (401); hoy los acepta
+         -> token de demostración en un arranque sin MICROHIS_ENTORNO=desarrollo: esperado 401, obtenido 200 (Arnes.php:41)
+[FALLA] DEF-04   [Mayor · AR-04 · requiere decisión] Sin leer_protegido, buscar el DPI de una protegida no debe distinguirse de un DPI inexistente; hoy da 1 frente a 0
+         -> total para el DPI de la protegida frente a un DPI que no existe: esperado 0, obtenido 1 (Arnes.php:41)
+[FALLA] DEF-05   [Menor · AR-07] Un DPI con dígito verificador incorrecto o municipio inexistente debe dar 422; hoy se acepta y esquiva el bloqueo por documento
+         -> DPI inválidos aceptados: esperado array (
+), obtenido array (
+  0 => '1234567800101 (verificador)',
+  1 => '1234567890199 (municipio 99)',
+) (Arnes.php:41)
+[FALLA] DEF-06   [Menor · nuevo S15] El teléfono debe tener de 8 a 15 DÍGITOS; hoy «1      2» (2 dígitos y 6 espacios) se acepta
+         -> teléfonos con menos de 8 dígitos aceptados: esperado array (
+), obtenido array (
+  0 => '1      2',
+  1 => '+5       0',
+  2 => '12 34 56 7',
+) (Arnes.php:41)
+
+Total: 6  Pasan: 0  Fallan: 6  Omitidas: 0
+(código de salida: 1)
