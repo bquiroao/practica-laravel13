@@ -1,0 +1,8 @@
+﻿semana,metrica,valor,umbral,estado,responsable,accion,fecha_limite,verificado_por
+S14,M1 Pruebas en verde,100 % (85/85; 2 omitidas),100 % y omitidas ≤ 2,VERDE,RM,—,—,
+S14,M2 Cobertura de códigos de error,100 % (13/13),100 %,VERDE,RM,—,—,
+S14,M3 Trazabilidad,100 % (5/5),100 %,VERDE,RM,—,—,
+S14,M4 Integridad de la identidad,100 % (8/8),100 %,VERDE,RM,—,—,
+S14,M5 Confidencialidad y tenant,75 % (6/8),100 %,ROJO,RM,Retrabajo AR-02 y AR-03 (409 sin datos de otro hospital),S15,
+S14,M6 Confiabilidad ante fallas,100 % (6/6),100 %,VERDE,RM,—,—,
+S14,M7 Hallazgos Crítico/Mayor abiertos,4 (Crítico 1: AR-02; Mayor 3: AR-01; AR-03; AR-04),0 Crítico; 0 Mayor para liberar,ROJO,RSQA,Retrabajo de la revisión S13,S15,
