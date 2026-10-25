@@ -1,0 +1,46 @@
+@startuml semana-01-actividad
+' Semana 1 — Dashboard de ocupación hospitalaria (tarea Odoo 2488)
+title Actividad — consolidación y consulta de ocupación por sala y estado de cama
+
+start
+switch (D1 ¿Quién inicia?)
+case (Temporizador: consolidar)
+  :Lee salas activas, camas y estancias abiertas (R-03);
+  if (D2 ¿Lectura correcta?) then (no)
+    :E2 Falla la lectura: se conserva el corte anterior (R-09);
+    stop
+  endif
+  if (D3 ¿Hay salas activas?) then (no)
+    :F2 Corte vacío con su hora;
+    stop
+  endif
+  repeat :Toma la siguiente sala;
+    if (D4 ¿Tiene camas operativas?) then (sí)
+      :Calcula ocupadas ÷ (disponibles + ocupadas) (R-01);
+    else (no)
+      :Ocupación «no aplica» (R-02);
+    endif
+    if (D5 ¿Camas «ocupadas» y estancias\nabiertas coinciden? (R-04)) then (no)
+      :E1 Marca inconsistencia (el corte sigue);
+    endif
+  repeat while (¿Quedan salas?) is (sí) not (no)
+  :Guarda el corte con su fecha y hora (R-05);
+  :F1 Corte guardado;
+case (Usuario: consultar)
+  if (D6 ¿Permiso de ocupación\nen este hospital? (R-08)) then (no)
+    :E3 Operación rechazada (403);
+    :F4 Rechazo con mensaje claro;
+    stop
+  endif
+  if (D7 ¿Existe al menos un corte?) then (no)
+    :E4 Aún no hay datos: estado vacío;
+    stop
+  endif
+  if (D8 ¿Corte con más de 15 min? (R-06)) then (sí)
+    :Agrega aviso de datos desactualizados;
+  endif
+  :Aplica el filtro por estado si lo pidió (CU-03);
+  :F3 Tablero por sala, solo cifras (R-07);
+endswitch
+stop
+@enduml
