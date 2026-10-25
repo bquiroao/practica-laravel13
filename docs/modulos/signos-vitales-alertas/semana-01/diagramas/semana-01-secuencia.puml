@@ -1,0 +1,64 @@
+@startuml semana-01-secuencia
+title Secuencia — CU-01 Registrar toma de signos vitales (con CU-02, CU-03 y CU-04)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber "S00"
+
+actor "Enfermero(a)" as Enf
+participant "Pantalla de\ncaptura" as UI
+participant "Controlador\nSignosVitales" as Ctl
+participant "Identidad y\npermisos (RBAC)" as Rbac
+participant "Caso de uso\nRegistrarToma" as CU
+participant "Episodios y\npacientes" as Epi
+participant "Evaluador\nde umbrales" as Ev
+database "Rangos y tomas\n(BD del hospital)" as BD
+participant "Alertas\ncríticas (M21)" as M21
+
+Enf -> UI : escribe signos y confirma
+UI -> UI : valida formato y campos vacíos (ayuda inmediata)
+UI -> Ctl : POST /api/v1/signos-vitales/tomas\n{paciente, episodio, mediciones[]} + token
+Ctl -> Rbac : verificar(token, rol, hospital)
+alt D1 sin sesión o sin permiso
+  Rbac --> Ctl : denegado
+  Ctl --> UI : E1 401 / 403 {codigo}
+else autorizado
+  Rbac --> Ctl : usuario, hospital
+  Ctl -> CU : ejecutar(peticion, autor = usuario del token)
+  CU -> Epi : episodioActivo(paciente, episodio)
+  alt D2 sin episodio activo
+    CU --> Ctl : E2 episodio_no_disponible
+    Ctl --> UI : 409
+  else episodio activo
+    Epi --> CU : fecha de nacimiento
+    CU -> CU : D3 validar valor, unidad y límite físico [CU-02]
+    alt alguna medición imposible
+      CU --> Ctl : E3 medicion_invalida {campo}
+      Ctl --> UI : 422
+    else todas posibles
+      CU -> BD : rangos(signos, edad)
+      BD --> CU : rangos (o vacío = E4 «sin rango»)
+      CU -> Ev : clasificar(mediciones, rangos) [CU-03]
+      Ev --> CU : normal / anormal / crítica / sin rango
+      CU -> BD : BEGIN; toma + mediciones + alertas [CU-04]; COMMIT
+      alt D7 falla al guardar
+        BD --> CU : error (ROLLBACK)
+        CU --> Ctl : E5 error_persistencia
+        Ctl --> UI : 500
+      else guardado
+        BD --> CU : id de toma y alertas
+        opt D8 hay alerta crítica
+          CU -> M21 : publicar(alerta crítica, paciente, servicio)
+          alt M21 no responde
+            CU -> BD : E6 alerta «pendiente de envío» (reintento)
+          end
+        end
+        CU --> Ctl : resultado
+        Ctl --> UI : R 201 {toma, clasificaciones, alertas}
+      end
+    end
+  end
+end
+UI --> Enf : muestra resultado o el error en el campo
+@enduml
