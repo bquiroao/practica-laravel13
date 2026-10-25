@@ -31,5 +31,6 @@ docs/
 |---|---|
 | RBAC: roles, permisos y protección de rutas | [`modulos/rbac`](modulos/rbac/README.md) |
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
+| Contratos API: centro de documentación y manuales por rol | [`modulos/contratos-api`](modulos/contratos-api/README.md) |
 | Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
 | Pacientes: registro, edición, búsqueda y detalle | [`modulos/pacientes`](modulos/pacientes/README.md) |
