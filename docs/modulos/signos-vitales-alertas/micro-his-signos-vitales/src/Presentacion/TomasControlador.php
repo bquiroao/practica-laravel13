@@ -14,7 +14,10 @@ final class TomasControlador {
     public function registrar(Peticion $p): array {
         return $this->conUsuario($p, function (Usuario $u) use ($p) {
             $entrada = json_decode($p->cuerpo, true);
-            return is_array($entrada) ? VistaJson::creada($this->registrar->ejecutar($entrada, $u)) : VistaJson::error('json_invalido');
+            if (!is_array($entrada)) { return VistaJson::error('json_invalido'); }
+            if ($p->claveIdempotencia !== null && !preg_match('/^[A-Za-z0-9-]{8,64}$/', $p->claveIdempotencia)) { return VistaJson::error('idempotency_key_invalida'); }
+            $r = $this->registrar->ejecutar($entrada, $u, $p->claveIdempotencia);
+            return isset($r['repetida']) ? [200, $r] : VistaJson::creada($r);
         });
     }
 
