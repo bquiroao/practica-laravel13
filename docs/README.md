@@ -32,4 +32,5 @@ docs/
 | RBAC: roles, permisos y protección de rutas | [`modulos/rbac`](modulos/rbac/README.md) |
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
 | Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
+| Dashboard base UI/UX e implementación transversal | [`modulos/dashboard-base`](modulos/dashboard-base/README.md) |
 | Pacientes: registro, edición, búsqueda y detalle | [`modulos/pacientes`](modulos/pacientes/README.md) |
