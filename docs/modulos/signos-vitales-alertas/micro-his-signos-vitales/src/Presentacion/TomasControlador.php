@@ -1,32 +1,33 @@
 <?php
 declare(strict_types=1);
 
-// Presentación: traduce HTTP ↔ caso de uso. No tiene SQL ni reglas clínicas.
+// Controlador: lee la petición, llama al caso de uso y elige la vista. Sin SQL ni reglas clínicas.
 namespace SignosVitales\Presentacion;
 
-use SignosVitales\Aplicacion\{ErrorPersistencia, RegistrarToma, Usuario};
+use SignosVitales\Aplicacion\{ConsultarTomas, ErrorPersistencia, RegistrarToma, Usuario};
 use SignosVitales\Dominio\ErrorDominio;
 
 final class TomasControlador {
-    private const ESTADOS = ['acceso_denegado' => 403, 'episodio_no_disponible' => 409, 'medicion_invalida' => 422, 'toma_vacia' => 422, 'signo_repetido' => 422];
-
     /** @param array<string, Usuario> $usuarios identidades de demostración mientras no se integre RBAC (no son credenciales) */
-    public function __construct(private RegistrarToma $registrar, private array $usuarios) {}
+    public function __construct(private RegistrarToma $registrar, private ConsultarTomas $consultar, private array $usuarios) {}
 
-    /** @return array{0: int, 1: array<string, mixed>} estado HTTP y cuerpo JSON */
-    public function atender(string $metodo, string $ruta, string $usuarioDemo, string $cuerpo): array {
-        if ($ruta !== '/api/v1/signos-vitales/tomas') { return [404, ['codigo' => 'ruta_no_encontrada']]; }
-        if ($metodo !== 'POST') { return [405, ['codigo' => 'metodo_no_permitido']]; }
-        $usuario = $this->usuarios[$usuarioDemo] ?? null;
-        if ($usuario === null) { return [401, ['codigo' => 'sin_sesion']]; }
-        $entrada = json_decode($cuerpo, true);
-        if (!is_array($entrada)) { return [400, ['codigo' => 'json_invalido']]; }
-        try {
-            return [201, $this->registrar->ejecutar($entrada, $usuario)];
-        } catch (ErrorDominio $e) {
-            return [self::ESTADOS[$e->codigo] ?? 422, ['codigo' => $e->codigo, 'mensaje' => $e->getMessage(), 'campos' => $e->campos]];
-        } catch (ErrorPersistencia) {
-            return [500, ['codigo' => 'error_persistencia', 'mensaje' => 'No se pudo guardar la toma; intente de nuevo']];
-        }
+    public function registrar(Peticion $p): array {
+        return $this->conUsuario($p, function (Usuario $u) use ($p) {
+            $entrada = json_decode($p->cuerpo, true);
+            return is_array($entrada) ? VistaJson::creada($this->registrar->ejecutar($entrada, $u)) : VistaJson::error('json_invalido');
+        });
+    }
+
+    public function listar(Peticion $p): array {
+        return $this->conUsuario($p, fn (Usuario $u) => VistaJson::lista(
+            $this->consultar->ejecutar((string) ($p->consulta['paciente_id'] ?? ''), (string) ($p->consulta['episodio_id'] ?? ''), $u)));
+    }
+
+    private function conUsuario(Peticion $p, callable $accion): array {
+        $usuario = $this->usuarios[$p->usuarioDemo] ?? null;
+        if ($usuario === null) { return VistaJson::error('sin_sesion'); }
+        try { return $accion($usuario); }
+        catch (ErrorDominio $e) { return VistaJson::error($e->codigo, $e->getMessage(), $e->campos); }
+        catch (ErrorPersistencia) { return VistaJson::error('error_persistencia', 'No se pudo completar; intente de nuevo'); }
     }
 }
