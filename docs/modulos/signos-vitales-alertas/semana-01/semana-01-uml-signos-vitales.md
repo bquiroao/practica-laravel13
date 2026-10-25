@@ -1,6 +1,6 @@
 # Semana 1 — UML del proceso de signos vitales y alertas
 
-**Estudiante:** Joshua Eduardo García Reyes (`jgarciar73@miumg.edu.gt`, `jgarciar73-svg`) · **Módulo:** Signos vitales y alertas por valores anormales (asignado por el docente) · **Proceso:** «captura de signos vitales, evaluación de umbrales y generación de alerta»
+**Estudiante:** Joshua Eduardo García Reyes (`jgarciar73@miumg.edu.gt`, `jgarciar73-svg`) · **Módulo:** Signos vitales y alertas por valores anormales (módulo 13, reasignado dentro del grupo G1) · **Proceso:** «captura de signos vitales, evaluación de umbrales y generación de alerta»
 
 | Pedido | Dónde |
 |---|---|

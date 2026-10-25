@@ -2,7 +2,7 @@
 
 Captura de signos vitales del paciente, evaluación de cada valor contra los rangos de su edad y generación de alertas anormales o críticas; las críticas se envían al módulo Alertas críticas (M21).
 
-**Estudiante:** Joshua Eduardo García Reyes (`jgarciar73-svg`) · asignado por el docente
+**Estudiante:** Joshua Eduardo García Reyes (`jgarciar73-svg`) · reasignado dentro del grupo G1
 
 ## Entregas por semana
 
