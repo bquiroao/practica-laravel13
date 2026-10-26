@@ -1,0 +1,55 @@
+@startuml semana-02-clases-despues
+title Después de SRP — casos de uso y contratos
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class IssueLabOrder {
+  +execute(solicitud): ResultadoEmision
+}
+class FindLabOrders {
+  +execute(paciente, episodio): ResultadoConsulta
+}
+class ApplyLabOrderStatus {
+  +execute(origen, orden, nuevoEstado): ResultadoActualizacion
+}
+
+interface ClinicalAuthorization {
+  +authorize(actor, paciente, episodio): Decision
+}
+interface ClinicalContextValidator {
+  +validateContext(paciente, episodio): Decision
+}
+interface LabCatalog {
+  +validateTests(testCodes): Decision
+}
+interface LabOrderRepository {
+  +createAtomically(orden): ResultadoEscritura
+  +findByPatientEncounter(paciente, episodio): ResultadoBusqueda
+  +findById(orden): Orden
+  +updateStatus(orden, estadoEsperado, nuevoEstado): ResultadoEscritura
+}
+interface OrderLifecyclePolicy {
+  +initialStatus(): string
+  +allowsTransition(actual, nuevo): bool
+}
+interface StatusUpdateSourceAuthorization {
+  +isTrusted(source): bool
+}
+
+IssueLabOrder --> ClinicalAuthorization
+IssueLabOrder --> ClinicalContextValidator
+IssueLabOrder --> LabCatalog
+IssueLabOrder --> OrderLifecyclePolicy
+IssueLabOrder --> LabOrderRepository
+FindLabOrders --> ClinicalAuthorization
+FindLabOrders --> LabOrderRepository
+ApplyLabOrderStatus --> StatusUpdateSourceAuthorization
+ApplyLabOrderStatus --> OrderLifecyclePolicy
+ApplyLabOrderStatus --> LabOrderRepository
+
+note bottom of OrderLifecyclePolicy
+Los estados y transiciones productivos
+deben acordarse con los módulos de laboratorio.
+El fixture solo usa códigos sintéticos TEST_*.
+end note
+@enduml
