@@ -1,0 +1,22 @@
+Impacto del cambio B-4 en el Micro-HIS (git diff --stat sobre src/, api/ y tests/ antes del commit)
+
+ .../pacientes/micro-his-pacientes/api/openapi.yaml       | 16 ++++++++++++++--
+ .../src/Aplicacion/Comandos/FormularioPaciente.php       |  1 +
+ .../src/Dominio/Modelo/DatosPaciente.php                 |  2 ++
+ .../micro-his-pacientes/src/Dominio/Modelo/Paciente.php  | 10 ++++++++++
+ .../src/Dominio/Servicios/RevisionDeFicha.php            |  3 +++
+ .../Presentacion/Http/Formularios/FormularioPaciente.php |  1 +
+ .../pacientes/micro-his-pacientes/tests/mutaciones.php   |  5 +++++
+ 7 files changed, 36 insertions(+), 2 deletions(-)
+
+Archivos de src/ SIN cambios en capas que no debían tocarse:
+  sin cambios: src/Presentacion/Http/Controladores/PacientesControlador.php
+  sin cambios: src/Presentacion/Http/Rutas.php
+  sin cambios: src/Presentacion/Http/Vistas/PacienteVista.php
+  sin cambios: src/Aplicacion/CasosDeUso/ActualizarPaciente.php
+  sin cambios: src/Aplicacion/CasosDeUso/RegistrarPaciente.php
+  sin cambios: src/Dominio/Servicios/PoliticaEdicion.php
+  sin cambios: src/Dominio/Servicios/PoliticaDuplicados.php
+  sin cambios: src/Dominio/Servicios/PoliticaConfidencialidad.php
+  sin cambios: src/Persistencia
+  sin cambios: src/Cliente

@@ -1,0 +1,12 @@
+$ php tests/ejecutar.php --solo=CN
+Micro-HIS RBAC - pruebas (PHP 8.4.26)
+
+== Presentación MVC, HTTP y observabilidad ==
+[PASA ] CN-01    Equivalencia · asignar rol: 1 clase válida y 6 inválidas, cada una con su código del contrato
+[PASA ] CN-02    Límites · motivo de revocación: 9 → 422 MOTIVO_INSUFICIENTE · 10 → 200 · 500 → 200 · 501 → 422 DATOS_INVALIDOS
+[PASA ] CN-03    Límites · vigencia, referencia de auditoría (1–64) y lista de permisos efectivos (1–20)
+[PASA ] CN-04    Permisos · matriz 7 identidades × 5 rutas protegidas: solo pasa quien tiene el permiso; el 403 es genérico y queda auditado con su motivo
+[PASA ] CN-05    Errores · 400 sin hospital, 401 sin token o con token inválido, 404 ruta, 405 método, 422 cuerpo ausente, 404 de auditoría para otro hospital
+[PASA ] CN-06    Denegación trazable de punta a punta: 403 → el auditor encuentra el evento con persona, permiso y motivo; la persona denegada no puede verlo
+
+Total: 6  Pasan: 6  Fallan: 0  Omitidas: 0

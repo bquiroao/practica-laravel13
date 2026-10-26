@@ -1,0 +1,15 @@
+== ANTES: prototipo de la semana 11 (consulta al PDP permiso por permiso) ==
+admin-01  secciones abiertas: 2  ACCESO_DENEGADO generados sin intentar nada: 1
+nuevo-01  secciones abiertas: 0  ACCESO_DENEGADO generados sin intentar nada: 3
+ana       secciones abiertas: 1  ACCESO_DENEGADO generados sin intentar nada: 3
+marta     secciones abiertas: 1  ACCESO_DENEGADO generados sin intentar nada: 2
+
+Prototipo: semana-11/prototipo  Total de denegaciones «fantasma»: 9
+
+== DESPUÉS: prototipo de la semana 12 (permisos efectivos, B-6) ==
+admin-01  secciones abiertas: 2  ACCESO_DENEGADO generados sin intentar nada: 0
+nuevo-01  secciones abiertas: 0  ACCESO_DENEGADO generados sin intentar nada: 0
+ana       secciones abiertas: 1  ACCESO_DENEGADO generados sin intentar nada: 0
+marta     secciones abiertas: 1  ACCESO_DENEGADO generados sin intentar nada: 0
+
+Prototipo: semana-12/prototipo  Total de denegaciones «fantasma»: 0

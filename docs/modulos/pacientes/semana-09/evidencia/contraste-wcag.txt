@@ -1,0 +1,25 @@
+ID    Uso                                                 Actual  Mín. Estado   Propuesto  Nuevo Estado  
+------------------------------------------------------------------------------------------------------------
+C-01  Etiquetas de campo (10 pt negrita)                    3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-02  Encabezados de tabla (10 pt negrita)                  2.93   4.5 FALLA      #5F6670   5.22 CUMPLE  
+C-03  Pistas y texto secundario (10-10.5 pt)                3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-04  «Reservado» y candidato protegido (11 pt)             3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-05  Títulos de estado VACÍO/CARGA (10 pt negrita)         2.93   4.5 FALLA      #5F6670   5.22 CUMPLE  
+C-06  Ícono de ayuda «?» (11 pt negrita)                    3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-07  «Registrando…» / «Foco inicial» (9-10.5 pt)           3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-08  Borde de campo de texto                               2.64   3.0 FALLA      #7D838A   3.83 CUMPLE  
+C-09  Borde de casilla de verificación                      2.64   3.0 FALLA      #7D838A   3.83 CUMPLE  
+C-10  Texto general (11 pt)                                13.49   4.5 CUMPLE           —                
+C-11  Cabecera: hospital activo (12 pt negrita)             8.30   4.5 CUMPLE           —                
+C-12  Botón primario (11 pt negrita)                        8.30   4.5 CUMPLE           —                
+C-13  Mensaje de error junto al campo (10 pt)               6.51   4.5 CUMPLE           —                
+C-14  Borde de campo con error                              6.51   3.0 CUMPLE           —                
+C-15  Título del bloqueo 409 (12.5 pt negrita)              5.70   4.5 CUMPLE           —                
+C-16  Aviso de éxito (11.5 pt negrita)                      5.76   4.5 CUMPLE           —                
+C-17  Etiqueta ACTIVO (9 pt negrita)                        5.76   4.5 CUMPLE           —                
+C-18  Etiqueta PROTEGIDA (9 pt negrita)                     6.80   4.5 CUMPLE           —                
+C-19  Texto de avisos: conflicto, consecuencias (11 pt)    12.41   4.5 CUMPLE           —                
+C-20  Anillo de foco (2 pt)                                 8.30   3.0 CUMPLE           —                
+C-21  Botón deshabilitado («Registrar», «Proteger»)         2.11   0.0 EXENTO           —                
+------------------------------------------------------------------------------------------------------------
+Propuestas que no cumplen: 0

@@ -1,0 +1,105 @@
+@startuml semana-01-secuencia
+title Módulo Pacientes — Secuencia\n«Registro, búsqueda y actualización segura de un paciente»
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+skinparam DatabaseBackgroundColor #F5F9FF
+autonumber "S-00"
+
+actor "Usuario autorizado\n(admisión / clínico)" as U
+participant "Interfaz\n(Vue)" as UI
+participant "API Pacientes\n(controlador)" as API
+participant "Servicio RBAC\n(PDP)" as RBAC
+participant "Caso de uso\nPacientes" as CU
+participant "Índice maestro\n(MPI central)" as MPI
+database "Repositorio de\npacientes (hospital)" as REPO
+database "Bitácora de\nauditoría" as AUD
+
+== 1 · Registro (CU-01, CU-05, CU-06) ==
+U -> UI : completa nombres, apellidos, nacimiento, sexo, identificador
+UI -> UI : valida formato (obligatorios, fecha ≤ hoy) [R-01]
+UI -> API : POST /api/v1/pacientes\nBearer + X-Tenant-ID + datos
+API -> API : ¿X-Tenant-ID presente? (si no: 400) [R-05]
+API -> RBAC : decidir(pacientes.registrar, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : registrar(datos, actor, hospital)
+CU -> CU : valida reglas de dominio y normaliza nombre;\ncalcula hash del identificador [R-01, R-04]
+CU -> MPI : buscarCoincidencias(hash, nombre, nacimiento)
+MPI --> CU : candidatos con puntaje
+alt identificador idéntico ya registrado [R-02]
+  CU --> API : 409 PACIENTE_EXISTENTE (código, identificador enmascarado)
+  API --> UI : 409
+  UI --> U : «Ya está registrado como P-000123»
+else coincidencia probable, sin confirmación [R-03]
+  CU --> API : 409 POSIBLE_DUPLICADO (candidatos con datos mínimos)
+  API --> UI : 409
+  UI --> U : muestra candidatos; el supervisor puede\nconfirmar «es otra persona» con motivo (CU-06)
+else sin coincidencias, o confirmado con motivo
+  CU -> REPO : BEGIN · guardar paciente (activo, vínculo MPI pendiente,\nidentificador cifrado, versión 1)
+  CU -> AUD : registrar PACIENTE_REGISTRADO (misma transacción) [R-09]
+  CU -> REPO : COMMIT
+  CU ->> MPI : solicitarVínculo(paciente) (asíncrono)
+  CU --> API : 201 + código del paciente
+  API --> UI : 201
+  UI --> U : «Paciente registrado: P-000124»
+end
+
+== 2 · Búsqueda y detalle (CU-02, CU-03) ==
+U -> UI : busca «Pérez», nacido en 1980
+UI -> API : GET /api/v1/pacientes?nombre=Pérez&nacimiento=1980
+API -> RBAC : decidir(pacientes.buscar, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : buscar(criterios, hospital)
+CU -> CU : ¿criterio suficiente? (≥ 3 letras, código o\nidentificador completo; si no: 422) [R-10]
+CU -> REPO : buscar(hospital, criterios, límite 20)
+REPO --> CU : coincidencias del hospital activo
+CU -> AUD : registrar PACIENTE_BUSCADO (criterios resumidos) [R-09]
+CU --> API : resultados con datos mínimos (identificador enmascarado) [R-04]
+API --> UI : 200 lista
+U -> UI : elige P-000123
+UI -> API : GET /api/v1/pacientes/P-000123
+API -> RBAC : decidir(pacientes.leer, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : detalle(P-000123, hospital)
+CU -> REPO : cargar(hospital, P-000123)
+REPO --> CU : paciente (versión 7)
+CU -> AUD : registrar PACIENTE_CONSULTADO [R-09]
+CU --> API : detalle + versión 7
+API --> UI : 200
+UI --> U : muestra el detalle
+
+== 3 · Actualización segura (CU-04) ==
+U -> UI : corrige el identificador e indica el motivo
+UI -> API : PUT /api/v1/pacientes/P-000123\nIf-Match: 7 · cambios · motivo
+API -> RBAC : decidir(pacientes.editar, hospital)
+alt permiso denegado [R-05]
+  RBAC --> API : DENEGADO + correlation_id (evento registrado por RBAC)
+  API --> UI : 403 {mensaje genérico, correlation_id}
+  UI --> U : «Acceso denegado» + referencia
+else permitido
+  RBAC --> API : PERMITIDO
+  API -> CU : actualizar(P-000123, versión 7, cambios, motivo, actor)
+  CU -> REPO : cargar(hospital, P-000123)
+  REPO --> CU : paciente (versión 8: otro usuario ya lo modificó)
+  CU -> CU : valida: estado editable [R-08], versión [R-06],\ncambios [R-01], motivo en datos de identidad [R-07]
+  alt la versión enviada (7) no es la vigente (8)
+    CU --> API : 409 VERSION_DESACTUALIZADA
+    API --> UI : 409
+    UI --> U : «Otro usuario lo modificó: recargue y vuelva a aplicar»
+  else el nuevo identificador ya pertenece a otro paciente
+    CU -> MPI : existeIdentificador(hash)
+    MPI --> CU : sí, de otro paciente
+    CU --> API : 409 IDENTIFICADOR_EN_USO
+    API --> UI : 409
+  else todo válido (con la versión vigente)
+    CU -> REPO : BEGIN · UPDATE … WHERE versión = vigente\n(versión + 1)
+    CU -> AUD : registrar PACIENTE_ACTUALIZADO\n(antes/después, identificador enmascarado, motivo)
+    CU -> REPO : COMMIT
+    CU ->> MPI : notificarCambioDeIdentidad(paciente) (asíncrono)
+    CU --> API : 200 + nueva versión
+    API --> UI : 200
+    UI --> U : «Cambios guardados»
+  end
+end
+@enduml

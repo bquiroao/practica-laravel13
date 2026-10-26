@@ -1,0 +1,25 @@
+Comprobacion por mutacion: se introduce un defecto en una COPIA del ejemplo y se verifica que alguna prueba falle.
+El codigo original no se modifica. PHP 8.4.26
+
+M1 - RepositorioPacientesEnMemoria::actualizar() deja de comparar la version
+[FALLA] CA-08   Edición concurrente: la primera guarda (versión 2); la segunda recibe 409 y no borra la primera
+[FALLA] LSP-03  Contrato RepositorioPacientes: repositorio y caché cumplen las 8 cláusulas de escritura
+[FALLA] LSP-06  Sustitución en contexto: el mismo escenario da respuestas idénticas con cada implementación
+[FALLA] PAR-01  Antes (repositorio base, pacientes con documento) y después responden igual en 8 escenarios
+Total: 25  Pasan: 21  Fallan: 4
+
+M2 - RepositorioPacientesEnMemoria::buscar() deja de aplicar el limite de 20
+[FALLA] CA-06   Búsqueda: criterio corto 422; solo el hospital activo, máx. 20, datos mínimos y auditoría sin datos
+[FALLA] LSP-02  Contrato ConsultaPacientes: repositorio, réplica y caché cumplen las 8 cláusulas
+Total: 25  Pasan: 23  Fallan: 2
+
+M3 - RepositorioPacientesEnMemoria::porCodigo() deja de filtrar por hospital
+[FALLA] CA-07   Detalle con versión; de otro hospital da el mismo 404 que uno inexistente
+[FALLA] LSP-02  Contrato ConsultaPacientes: repositorio, réplica y caché cumplen las 8 cláusulas
+[FALLA] LSP-03  Contrato RepositorioPacientes: repositorio y caché cumplen las 8 cláusulas de escritura
+Total: 25  Pasan: 22  Fallan: 3
+
+M4 - RepositorioPacientesConCache::actualizar() deja de invalidar la cache
+[FALLA] LSP-03  Contrato RepositorioPacientes: repositorio y caché cumplen las 8 cláusulas de escritura
+Total: 25  Pasan: 24  Fallan: 1
+    (En la primera version del contrato esta mutacion SOBREVIVIO: 25/25. Se agrego la clausula R8.)
