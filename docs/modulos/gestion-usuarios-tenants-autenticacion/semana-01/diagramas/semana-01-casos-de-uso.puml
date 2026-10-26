@@ -1,0 +1,49 @@
+@startuml semana-01-casos-de-uso
+title Módulo de identidad — Casos de uso\n«Alta por tenant, autenticación segura y revocación de sesión»
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Administrador autorizado\ndel tenant" as Admin
+actor "Usuario del HIS" as Usuario
+
+rectangle "Sistema Hospitalario Integrado — Identidad y autenticación" {
+  usecase "CU-01\nDar de alta usuario\nen un tenant" as CU01
+  usecase "CU-02\nAutenticarse en\ntenant" as CU02
+  usecase "CU-03\nRevocar sesión\nactual" as CU03
+  usecase "Resolver y validar\ntenant activo\n[R-01]" as UC04
+  usecase "Validar identidad,\ncredenciales y membresía\n[R-02, R-04, R-05]" as UC05
+  usecase "Emitir JWT limitado\na sujeto y tenant\n[R-06]" as UC06
+  usecase "Persistir revocación\ndel jti\n[R-07]" as UC07
+  usecase "Rechazar JWT revocado\nen rutas protegidas\n[R-08]" as UC08
+}
+
+Admin --> CU01
+Usuario --> CU02
+Usuario --> CU03
+
+CU01 ..> UC04 : <<include>>
+CU02 ..> UC04 : <<include>>
+CU02 ..> UC05 : <<include>>
+CU02 ..> UC06 : <<include>>
+CU03 ..> UC07 : <<include>>
+CU03 ..> UC08 : <<include>>
+
+note bottom of CU01
+  La identidad global y la membresía por hospital
+  son distintas. El proveedor de credenciales
+  y la activación requieren decisión institucional.
+end note
+
+note bottom of CU02
+  Credenciales incorrectas, identidad inactiva
+  y membresía no vigente producen errores
+  genéricos; no se emite un JWT.
+end note
+
+note bottom of CU03
+  El logout solo se confirma tras persistir jti
+  en el almacén de revocación. Las rutas protegidas
+  deben consultar el estado revocado.
+end note
+@enduml

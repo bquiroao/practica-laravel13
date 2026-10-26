@@ -1,0 +1,47 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo de laboratorio — Casos de uso\n«Captura y corrección controlada de resultados pendientes»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Personal de laboratorio\nautorizado para captura" as Capturista
+actor "Bioquímico/a validador/a\n(proceso posterior)" as Bioquimico
+
+rectangle "Sistema Hospitalario Integrado — Ingreso de resultados" {
+  usecase "CU-01\nCapturar resultado\npendiente" as CU01
+  usecase "Verificar orden e\nítem de prueba" as Verificar
+  usecase "Validar campos según\nel tipo de prueba" as Campos
+  usecase "Registrar versión\npendiente con autoría" as Pendiente
+  usecase "CU-02\nCorregir resultado\npendiente" as CU02
+  usecase "Comprobar estado y\nversión vigente" as Estado
+  usecase "Crear versión enlazada\ncon motivo" as Version
+  usecase "Recibir elemento en\ncola de validación" as Cola
+}
+
+Capturista --> CU01
+Capturista --> CU02
+Bioquimico --> Cola
+
+CU01 ..> Verificar : <<include>>
+CU01 ..> Campos : <<include>>
+CU01 ..> Pendiente : <<include>>
+CU02 ..> Estado : <<include>>
+CU02 ..> Version : <<include>>
+CU01 ..> Cola : <<include>>\n[tras guardar pendiente]
+CU02 ..> Cola : <<include>>\n[versión corregida pendiente]
+
+note bottom of CU02
+  Solo aplica mientras la versión vigente esté pendiente.
+  Una versión validada no se modifica en este proceso.
+end note
+
+note bottom of Version
+  La versión previa se conserva;
+  toda corrección tiene motivo y autoría.
+end note
+@enduml

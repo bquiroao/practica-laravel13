@@ -1,0 +1,41 @@
+@startuml semana-01-actividad
+title Módulo de identidad — Actividad de alta por tenant
+skinparam shadowing false
+
+start
+:A-01 Administrador solicita el alta\nde una persona para un tenant;
+:A-02 HIS resuelve tenant y verifica\nestado activo [R-01];
+if (¿Tenant activo? [D-01]) then (sí)
+  :A-03 HIS valida sesión y permiso\ndel administrador [R-11];
+  if (¿Autorizado para este tenant? [D-02]) then (sí)
+    :A-04 Validar identidad, campos\ny rol inicial permitido [R-03];
+    if (¿Datos válidos? [D-03]) then (sí)
+      :A-05 Buscar o crear identidad global;\nvalidar duplicados [D-04, R-03];
+      if (¿Identidad y membresía válidas? [D-04]) then (sí)
+        :A-06 Crear o vincular identidad,\nmembresía y vigencia de tenant [R-02];
+        :A-07 Mantener credenciales fuera del alta;\nproveedor institucional pendiente [R-04];
+        if (¿Alta guardada completamente? [D-08]) then (sí)
+          :A-08 Confirmar identidad y membresía\nsin exponer secretos;
+          stop
+        else (no)
+          :E-08 No confirmar;\nrevertir cambios parciales;
+          stop
+        endif
+      else (no)
+        :E-04 No duplicar ni revelar\ndatos ajenos al tenant;
+        stop
+      endif
+    else (no)
+      :E-03 Solicitar corrección;\nno guardar;
+      stop
+    endif
+  else (no)
+    :E-02 Denegar alta;\nno modificar identidad;
+    stop
+  endif
+else (no)
+  :E-01 Denegar tenant inválido o inactivo;
+  stop
+endif
+
+@enduml
