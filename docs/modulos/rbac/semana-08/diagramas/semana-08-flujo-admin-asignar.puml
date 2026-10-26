@@ -1,0 +1,57 @@
+@startuml semana-08-flujo-admin-asignar
+title User flow · Administrador — asignar rol (roles.asignar)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Administrador|
+start
+:Inicia sesión y elige hospital
+(el hospital activo se ve siempre en la cabecera);
+:Abre «Roles del hospital» · W1;
+|Interfaz|
+if (¿permisoGuard: roles.asignar?) then (DENEGADO)
+  :Página «Acceso denegado» · W5 · M-10;
+  stop
+else (PERMITIDO)
+endif
+:VACÍO «Busca un usuario para ver sus roles»
+→ CARGA (filas esqueleto) → tabla o VACÍO
+(error de red: M-12 [Reintentar]) · W1;
+|Administrador|
+:Pulsa «+ Asignar rol» · W1;
+:Completa el formulario · W2
+usuario · rol (catálogo) · desde · hasta (opcional);
+|Interfaz|
+if (¿Formato válido? (cliente, mismas reglas que el servidor)) then (no)
+  :Errores junto a cada campo · M-01 / M-04
+  conserva lo escrito;
+  detach
+else (sí)
+endif
+:CONFIRMACIÓN · W2
+resumen + permisos que obtendrá el usuario;
+|Administrador|
+if (¿Confirma?) then (Volver)
+  :Regresa al formulario sin perder datos;
+  detach
+else (Asignar rol)
+endif
+|Servidor RBAC|
+:POST /api/v1/roles/asignaciones
+(botón deshabilitado mientras envía);
+|Interfaz|
+if (¿Resultado?) then (201)
+  :ÉXITO «Rol asignado» + referencia · M-20
+  la tabla se actualiza;
+  stop
+elseif (409 · 404 · 422) then (recuperable)
+  :Mensaje junto al campo · M-02 / M-03 / M-05
+  conserva lo escrito;
+  detach
+else (403 · 500)
+  :M-10 (sin motivo) o M-12 [Reintentar];
+  detach
+endif
+@enduml

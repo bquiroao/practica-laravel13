@@ -63,7 +63,7 @@ function sqlInseguro(string $codigo): array
 /** @return list<string> capas de Rbac\ referenciadas por el código */
 function capasReferenciadas(string $codigo): array
 {
-    preg_match_all('/\\\\?Rbac\\\\(Dominio|Aplicacion|Persistencia|Presentacion)\\\\/', $codigo, $m);
+    preg_match_all('/\\\\?Rbac\\\\(Dominio|Aplicacion|Persistencia|Presentacion|Cliente)\\\\/', $codigo, $m);
 
     return array_values(array_unique($m[1]));
 }
@@ -73,9 +73,11 @@ const PERMITIDAS = [
     'Aplicacion' => ['Aplicacion', 'Dominio'],
     'Persistencia' => ['Persistencia', 'Aplicacion', 'Dominio'],
     'Presentacion' => ['Presentacion', 'Aplicacion'],
+    // La librería cliente solo conoce el contrato HTTP, nunca las clases del servidor.
+    'Cliente' => ['Cliente'],
 ];
 
-prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia', function (): void {
+prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado del servidor', function (): void {
     $violaciones = [];
     foreach (PERMITIDAS as $capa => $permitidas) {
         foreach (fuentesDeCapa($capa) as $archivo => $codigo) {
@@ -89,7 +91,7 @@ prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio�
 
 prueba('ARQ-02', 'PDO y SQL solo existen en la capa de Persistencia', function (): void {
     $violaciones = [];
-    foreach (['Dominio', 'Aplicacion', 'Presentacion'] as $capa) {
+    foreach (['Dominio', 'Aplicacion', 'Presentacion', 'Cliente'] as $capa) {
         foreach (fuentesDeCapa($capa) as $archivo => $codigo) {
             if (preg_match('/\bPDO\b|\bSELECT\s|\bINSERT\s+INTO\b|\bUPDATE\s+\w+\s+SET\b|\bDELETE\s+FROM\b/i', sinComentarios($codigo)) === 1) {
                 $violaciones[] = $archivo;
@@ -191,4 +193,18 @@ prueba('ARQ-07', 'MVC: solo las Vistas dan formato a la respuesta (Respuesta::js
         }
     }
     afirmar($violaciones === [], 'formato de respuesta fuera de las vistas: ' . implode(', ', $violaciones));
+});
+
+// Semana 12 (B-6): la excepción se amplía a propósito y por nombre. permisos-efectivos tampoco puede
+// exigir un permiso propio: responde solo por la sesión que pregunta y es parte de la autorización.
+prueba('ARQ-08', 'Toda ruta exige un permiso, salvo las dos consultas de autorización (decisiones y permisos efectivos)', function (): void {
+    $rutas = (new \Rbac\Pruebas\Dobles\Escenario())->rutas();
+    $sinPermiso = array_values(array_map(
+        static fn (\Rbac\Presentacion\Http\Ruta $r): string => $r->metodo . ' ' . $r->patron,
+        array_filter($rutas, static fn (\Rbac\Presentacion\Http\Ruta $r): bool => $r->permiso === null),
+    ));
+    igual([
+        'POST #^/api/v1/autorizaciones/decisiones$#',
+        'POST #^/api/v1/autorizaciones/permisos-efectivos$#',
+    ], $sinPermiso, 'rutas sin permiso');
 });

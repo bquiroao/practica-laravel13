@@ -1,0 +1,43 @@
+@startuml semana-05-flujo-issue-pr
+title Plan de trabajo: issue → worktree → rama → PR → develop
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Estudiante|
+start
+:Crear issue «ASII-02 — RBAC» con la plantilla
+module_task.md y la lista de tareas de integración;
+:git fetch origin;
+:git worktree add ../shi-asii-02-rbac
+  -b feature/asii-02-rbac-bquiroao origin/develop;
+:Implementar en el worktree
+(commits pequeños, convencionales);
+:Validaciones locales:
+php tests/ejecutar.php · lint OpenAPI ·
+php artisan test · npm run build;
+:git push -u origin feature/asii-02-rbac-bquiroao;
+:Abrir PR → develop con la plantilla
+(Closes #issue, evidencia, contrato API);
+|CI (ASII PR Guard)|
+if (¿Descripción ≥ 80 caracteres y\nnombre de rama válido?) then (no)
+  |Estudiante|
+  :Completar plantilla / renombrar rama;
+  stop
+else (sí)
+endif
+|Revisor del grupo|
+if (¿1 aprobación?\n¿Checklist completo?) then (no)
+  |Estudiante|
+  :Atender comentarios en la misma rama;
+  stop
+else (sí)
+endif
+:Merge a develop (sin force push);
+|Estudiante|
+:git worktree remove ../shi-asii-02-rbac
+git branch -d feature/asii-02-rbac-bquiroao;
+|Integrador (bquiroao / docente)|
+:PR develop → main al cierre de la entrega;
+stop
+@enduml

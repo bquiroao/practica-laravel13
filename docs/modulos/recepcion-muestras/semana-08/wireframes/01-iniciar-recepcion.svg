@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">WF-01 — Iniciar recepción por orden e ítem</title>
+  <desc id="desc">Wireframe conceptual para buscar una orden, seleccionar el ítem que se recibe y distinguir resultados vacíos de errores del servicio.</desc>
+  <rect width="1280" height="820" fill="#f3f6fa"/>
+  <rect x="0" y="0" width="1280" height="74" fill="#12304a"/>
+  <text x="34" y="46" fill="#fff" font-family="Arial,sans-serif" font-size="24" font-weight="700">Sistema Hospitalario Integrado</text>
+  <text x="1040" y="44" fill="#d8e6f1" font-family="Arial,sans-serif" font-size="15">Hospital activo: Central</text>
+  <rect x="0" y="74" width="222" height="746" fill="#e8eef4"/>
+  <text x="26" y="126" fill="#25445e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Recepción</text>
+  <rect x="12" y="145" width="198" height="44" rx="7" fill="#d2e5f4"/>
+  <text x="30" y="173" fill="#123b59" font-family="Arial,sans-serif" font-size="15" font-weight="700">Nueva recepción</text>
+  <text x="30" y="226" fill="#425b70" font-family="Arial,sans-serif" font-size="15">Historial de recepción</text>
+  <text x="250" y="120" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">Iniciar recepción</text>
+  <text x="250" y="151" fill="#50677b" font-family="Arial,sans-serif" font-size="16">Busca la orden y el ítem que corresponde al recipiente físico.</text>
+  <rect x="250" y="177" width="980" height="69" rx="10" fill="#fff" stroke="#cbd7e1"/>
+  <circle cx="280" cy="211" r="15" fill="none" stroke="#557187" stroke-width="3"/>
+  <line x1="291" y1="222" x2="302" y2="233" stroke="#557187" stroke-width="3"/>
+  <text x="320" y="207" fill="#526a7f" font-family="Arial,sans-serif" font-size="13">Número de orden o referencia autorizada</text>
+  <text x="320" y="230" fill="#8193a2" font-family="Arial,sans-serif" font-size="15">Ej.: ORD-00482</text>
+  <rect x="1085" y="191" width="122" height="42" rx="7" fill="#12608a"/>
+  <text x="1113" y="218" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">Buscar</text>
+  <rect x="250" y="269" width="980" height="72" rx="9" fill="#eaf5fb" stroke="#a9cee2"/>
+  <text x="272" y="297" fill="#1d536e" font-family="Arial,sans-serif" font-size="15" font-weight="700">Resultados de búsqueda</text>
+  <text x="272" y="322" fill="#385d72" font-family="Arial,sans-serif" font-size="14">1 orden coincidente · verifica orden e ítem antes de continuar.</text>
+  <rect x="250" y="361" width="980" height="250" rx="10" fill="#fff" stroke="#cbd7e1"/>
+  <text x="276" y="397" fill="#536a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">ORDEN</text>
+  <text x="475" y="397" fill="#536a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">PACIENTE</text>
+  <text x="715" y="397" fill="#536a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">ÍTEM / EXAMEN</text>
+  <text x="1002" y="397" fill="#536a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">ACCIÓN</text>
+  <line x1="273" y1="413" x2="1207" y2="413" stroke="#dce4ea"/>
+  <text x="276" y="447" fill="#213d53" font-family="Arial,sans-serif" font-size="15" font-weight="700">ORD-00482</text>
+  <text x="475" y="447" fill="#213d53" font-family="Arial,sans-serif" font-size="15">Paciente de ejemplo</text>
+  <text x="715" y="447" fill="#213d53" font-family="Arial,sans-serif" font-size="15">Química · ítem 01</text>
+  <rect x="1000" y="426" width="183" height="40" rx="7" fill="#12608a"/>
+  <text x="1020" y="452" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="700">Seleccionar ítem</text>
+  <line x1="273" y1="478" x2="1207" y2="478" stroke="#e2e8ed"/>
+  <text x="276" y="514" fill="#6a7e8d" font-family="Arial,sans-serif" font-size="14">El código interno de muestra se asignará al confirmar; no es el número de orden.</text>
+  <rect x="250" y="635" width="980" height="106" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="275" y="669" fill="#29475f" font-family="Arial,sans-serif" font-size="16" font-weight="700">Ayuda para la búsqueda</text>
+  <text x="275" y="697" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Usa solo la referencia autorizada. Si el servicio no responde, conserva lo ingresado y reintenta.</text>
+  <text x="275" y="720" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Una búsqueda sin resultados no confirma que la orden no exista.</text>
+  <rect x="250" y="762" width="980" height="38" rx="6" fill="#fff5df" stroke="#edcc80"/>
+  <text x="270" y="787" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Anotación: en carga, deshabilitar Buscar y mostrar progreso; en vacío, permitir corregir referencia; en error, no mostrarlo como vacío.</text>
+</svg>

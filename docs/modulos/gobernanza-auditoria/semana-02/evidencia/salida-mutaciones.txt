@@ -1,0 +1,11 @@
+$ php docs/modulos/gobernanza-auditoria/semana-02/ejemplo-ocp/mutaciones.php
+[DETECTA] M1 «hasta» deja de incluir el día completo                 falla: CA-13, CA-14, CA-15, CA-16, OCP-01, PAR-01
+[DETECTA] M2 sin idempotencia: el reintento se registra otra vez     falla: CA-08, PAR-01
+[DETECTA] M3 el sello no depende del anterior (sin cadena)           falla: CA-11, PAR-01
+[DETECTA] M4 la consulta ignora el hospital (fuga entre tenants)     falla: CA-14, PAR-01
+[DETECTA] M5 la consulta no se audita                                falla: CA-16, PAR-01
+[DETECTA] M6 la regla de tenant se evalúa después de los campos      falla: CA-03
+[DETECTA] M7 los datos prohibidos solo se buscan en el primer nivel  falla: CA-07
+[DETECTA] M8 el registro no pide el permiso auditoria.registrar      falla: CA-02, PAR-01
+------------------------------------------------------------------------------
+Mutaciones: 8  Detectadas: 8  Sobreviven: 0

@@ -1,0 +1,47 @@
+@startuml semana-05-secuencia-resiliencia
+title Decisión remota con resiliencia: ClienteRbac → API RBAC
+autonumber "<b>00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Médica" as U
+participant "Módulo de\nprescripciones" as M
+participant "ClienteRbac" as C
+participant "Circuito\nInterruptor" as CB
+participant "API RBAC\n(Kernel)" as K
+participant "AutorizarOperacion" as UC
+database "Bitácora" as AUD
+
+U -> M : Crear prescripción (Bearer, X-Tenant-ID)
+M -> C : verificar(token, tenant, «prescripciones.crear», recurso, X-Request-ID)
+C -> CB : permiteIntento()
+alt circuito ABIERTO
+  CB --> C : no
+  C --> M : DENEGADO (CIRCUITO_ABIERTO) — fail-closed, sin llamar
+else CERRADO / SEMIABIERTO
+  CB --> C : sí
+  C -> K : POST /api/v1/autorizaciones/decisiones\ntimeout 0,5 s · X-Request-ID
+  alt respuesta 200
+    K -> UC : ejecutar(ComandoAutorizar)
+    UC -> AUD : (si deniega) ACCESO_DENEGADO
+    UC --> K : ResultadoAutorizacion
+    K --> C : 200 {decision, correlation_id?} + X-Request-ID
+    C -> CB : registrarExito()
+    C --> M : PERMITIDO / DENEGADO (SERVICIO)
+  else 4xx (token inválido, datos)
+    K --> C : 401 / 422
+    C -> CB : registrarExito() (el servicio respondió)
+    C --> M : DENEGADO (SERVICIO), sin reintento
+  else red caída / timeout / 5xx
+    C -> C : esperar 100 ms y reintentar 1 vez
+    C -> CB : registrarFalla() (N fallas → ABIERTO 30 s)
+    C --> M : DENEGADO (FALLA_SERVICIO) — fail-closed
+  end
+end
+M --> U : 201 o 403 con correlation_id
+
+note over C
+  Nunca lanza excepción ni permite por defecto.
+  Probado: CLI-01 a CLI-06.
+end note
+@enduml

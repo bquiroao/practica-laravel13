@@ -1,0 +1,6 @@
+﻿revisor,rol,sesion,items_asignados,lineas_revisadas,minutos_preparacion,hallazgos_preliminares,fecha
+Autor,autor (autorrevisión),S1+S2+S3,RT-01..RT-15,3106,,7,
+R1,"revisor · permisos, tenant y confidencialidad",S1+S2+S3,"RT-09, RT-10, RT-11, RT-12, RT-13",,,,
+R2,revisor · contrato y frontera,S3,"RT-06, RT-07, RT-08",,,,
+R3,revisor · dominio e integridad,S1+S2,"RT-01, RT-02, RT-03, RT-04, RT-05, RT-14, RT-15",,,,
+Moderador,moderador,S1+S2+S3,"RT-14, RT-15 (con R3)",,,,
