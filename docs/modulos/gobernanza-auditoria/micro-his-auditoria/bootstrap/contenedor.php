@@ -24,6 +24,7 @@ use Auditoria\Dominio\Filtros\FiltroAccion;
 use Auditoria\Dominio\Filtros\FiltroModulo;
 use Auditoria\Dominio\Filtros\FiltroMovimiento;
 use Auditoria\Dominio\Filtros\FiltroRangoFechas;
+use Auditoria\Dominio\Filtros\FiltroRecurso;
 use Auditoria\Dominio\Filtros\FiltroResultado;
 use Auditoria\Dominio\Filtros\FiltroUsuario;
 use Auditoria\Dominio\Modelo\CatalogoAcciones;
@@ -70,7 +71,8 @@ function reglasDeRegistro(array $config, Reloj $reloj): array
 /** @return list<FiltroMovimiento> */
 function filtrosDeConsulta(array $config): array
 {
-    return [new FiltroRangoFechas($config['zona_horaria']), new FiltroUsuario(), new FiltroModulo(), new FiltroAccion(), new FiltroResultado()];
+    return [new FiltroRangoFechas($config['zona_horaria']), new FiltroUsuario(), new FiltroModulo(), new FiltroAccion(), new FiltroResultado(),
+        new FiltroRecurso()];  // semana 12: cambio solicitado
 }
 
 /**

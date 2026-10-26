@@ -34,6 +34,8 @@ CREATE UNIQUE INDEX audit_logs_una_correccion ON audit_logs (corrige_a) WHERE co
 CREATE INDEX audit_logs_hospital_fecha ON audit_logs (hospital_id, ocurrido_en DESC, id DESC);
 CREATE INDEX audit_logs_usuario_fecha  ON audit_logs (usuario_id, ocurrido_en DESC);
 CREATE INDEX audit_logs_modulo_fecha   ON audit_logs (modulo, ocurrido_en DESC);
+-- Semana 12: «¿quién vio la ficha de este paciente?» (filtro por recurso)
+CREATE INDEX audit_logs_recurso_fecha  ON audit_logs (recurso, ocurrido_en DESC);
 
 -- Solo inserción (R-02): mismo patrón que cross_hospital_access_audits en la base central del HIS.
 CREATE FUNCTION audit_logs_solo_insercion() RETURNS trigger LANGUAGE plpgsql AS $$
