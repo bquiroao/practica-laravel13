@@ -10,6 +10,7 @@ Modela la recepción de muestras de laboratorio, su vinculación con la orden y 
 |---:|---|---|---|---|
 | 1 | UML del proceso «recepción, identificación inequívoca y rechazo controlado de muestra»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-recepcion-muestras.md](semana-01/semana-01-uml-recepcion-muestras.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
 | 2 | Requerimientos RF/RNF, criterios de aceptación y aplicación de LSP al flujo, con diseño antes/después y ejemplo PHP ejecutable | [semana-02-lsp-recepcion-muestras.md](semana-02/semana-02-lsp-recepcion-muestras.md) · [ejemplo LSP](semana-02/ejemplo-lsp/README.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
+| 3 | Micro-HIS PHP CLI por capas, persistencia PDO preparada y vistas C4/UML del módulo y dependencias | [semana-03-arquitectura-recepcion-muestras.md](semana-03/semana-03-arquitectura-recepcion-muestras.md) · [ejemplo CLI](semana-03/ejemplo/README.md) | [DECLARACION_IA.md](semana-03/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-03/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
@@ -17,4 +18,5 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 
 ```bash
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/semana-01/diagramas/*.puml
+java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/semana-03/diagramas/*.puml
 ```
