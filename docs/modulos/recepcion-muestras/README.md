@@ -13,6 +13,7 @@ Modela la recepción de muestras de laboratorio, su vinculación con la orden y 
 | 3 | Micro-HIS PHP CLI por capas, persistencia PDO preparada y vistas C4/UML del módulo y dependencias | [semana-03-arquitectura-recepcion-muestras.md](semana-03/semana-03-arquitectura-recepcion-muestras.md) · [ejemplo CLI](semana-03/ejemplo/README.md) | [DECLARACION_IA.md](semana-03/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-03/GUIA_DEFENSA_ORAL.md) |
 | 6 | Defensa de arquitectura: actores, UML, RF/RNF, SOLID, capas, Repository y contrato API; cambio práctico, matriz decisión→evidencia y registro de defensa | [presentación (8 diapositivas)](semana-06/presentacion-semana-06.md) · [registro del cambio](semana-06/registro-cambio-practico.md) | [DECLARACION_IA.md](semana-06/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-06/GUIA_DEFENSA_ORAL.md) |
 | 8 | Diseño UX de recepción, identificación inequívoca, aceptación/rechazo, cadena de custodia y errores con seis wireframes anotados | [semana-08-ux-recepcion-muestras.md](semana-08/semana-08-ux-recepcion-muestras.md) | [DECLARACION_IA.md](semana-08/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-08/GUIA_DEFENSA_ORAL.md) |
+| 9 | Evaluación de usabilidad y accesibilidad del flujo de recepción, con checklist, hallazgos y mejoras propuestas | [semana-09-usabilidad-accesibilidad-recepcion-muestras.md](semana-09/semana-09-usabilidad-accesibilidad-recepcion-muestras.md) | [DECLARACION_IA.md](semana-09/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-09/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
