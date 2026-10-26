@@ -1,0 +1,56 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+title Integración de Pacientes con el repositorio de datos compartido del HIS (PostgreSQL federado)
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+left to right direction
+skinparam database {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Módulos del HIS (componentes independientes)" {
+  [Módulo Pacientes\n(adaptadores de persistencia)] as PAC #E8F5E9
+  [Admisión · Citas · Camas] as ADM
+  [Expediente · Laboratorio] as EXP
+  [Gobernanza / Auditoría] as GOB
+  [Sincronización\n(outbox → inbox)] as SYNC
+}
+
+node "CENTRAL (una por red)" {
+  database "mpi_patients\n(normalized_name, birth_date, sex,\nstatus active|inactive|merged)" as MPI
+  database "mpi_identifiers\n(type, issuer, value_encrypted, search_hash)\nUNIQUE (issuer,type,search_hash) WHERE active" as IDS
+  database "patient_hospital_links\n(hospital_id, local_patient_global_id,\nstatus pending|linked|unlinked, confidence)" as LNK
+  database "identity_match_candidates\n(score, rules, pending|approved|rejected)" as CAND
+  database "central_inbox_messages\nsync_checkpoints (lag_seconds)" as INBOX
+}
+
+node "HOSPITAL (una por hospital)" {
+  database "local_patients\n(global_id, code UNIQUE, given/family_name,\nbirth_date, sex, contact, status,\nmpi_link_status)" as LP
+  database "local_access_audit  (H8: pendiente)" as AUD #FFF3E0
+  database "outbox_event  (pendiente)" as OUT #FFF3E0
+  database "care_episodes · appointments ·\nmedical_records … (FK → local_patients,\nON DELETE RESTRICT)" as CLIN
+}
+
+PAC --> LP : escribe y lee\n(RepositorioPacientes)
+PAC --> AUD : escribe\n(RegistroAuditoria)
+PAC --> OUT : PACIENTE_REGISTRADO /\nPACIENTE_ACTUALIZADO (misma transacción)
+PAC ..> IDS : lee search_hash\n(IndiceDuplicados: titularDe)
+PAC ..> MPI : lee coincidencias\n(IndiceDuplicados)
+SYNC --> OUT : lee
+SYNC --> INBOX : entrega (idempotente)
+SYNC --> MPI : crea / actualiza
+SYNC --> IDS : escribe cifrado + hash
+SYNC --> LNK : vincula (pending → linked)
+SYNC --> CAND : propone candidatos
+ADM --> CLIN
+EXP --> CLIN
+CLIN ..> LP : referencia por FK
+GOB ..> AUD : lee
+
+note bottom of PAC
+  Pacientes NO escribe en CENTRAL: publica un evento en su
+  outbox local y el módulo de sincronización actualiza el MPI.
+  Solo cambian los adaptadores y bootstrap/contenedor.php.
+end note
+@enduml

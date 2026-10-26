@@ -63,7 +63,7 @@ function sqlInseguro(string $codigo): array
 /** @return list<string> capas de Rbac\ referenciadas por el código */
 function capasReferenciadas(string $codigo): array
 {
-    preg_match_all('/\\\\?Rbac\\\\(Dominio|Aplicacion|Persistencia|Presentacion)\\\\/', $codigo, $m);
+    preg_match_all('/\\\\?Rbac\\\\(Dominio|Aplicacion|Persistencia|Presentacion|Cliente)\\\\/', $codigo, $m);
 
     return array_values(array_unique($m[1]));
 }
@@ -73,9 +73,11 @@ const PERMITIDAS = [
     'Aplicacion' => ['Aplicacion', 'Dominio'],
     'Persistencia' => ['Persistencia', 'Aplicacion', 'Dominio'],
     'Presentacion' => ['Presentacion', 'Aplicacion'],
+    // La librería cliente solo conoce el contrato HTTP, nunca las clases del servidor.
+    'Cliente' => ['Cliente'],
 ];
 
-prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia', function (): void {
+prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado del servidor', function (): void {
     $violaciones = [];
     foreach (PERMITIDAS as $capa => $permitidas) {
         foreach (fuentesDeCapa($capa) as $archivo => $codigo) {
@@ -89,7 +91,7 @@ prueba('ARQ-01', 'Regla de dependencias: Presentación→Aplicación→Dominio�
 
 prueba('ARQ-02', 'PDO y SQL solo existen en la capa de Persistencia', function (): void {
     $violaciones = [];
-    foreach (['Dominio', 'Aplicacion', 'Presentacion'] as $capa) {
+    foreach (['Dominio', 'Aplicacion', 'Presentacion', 'Cliente'] as $capa) {
         foreach (fuentesDeCapa($capa) as $archivo => $codigo) {
             if (preg_match('/\bPDO\b|\bSELECT\s|\bINSERT\s+INTO\b|\bUPDATE\s+\w+\s+SET\b|\bDELETE\s+FROM\b/i', sinComentarios($codigo)) === 1) {
                 $violaciones[] = $archivo;
@@ -112,7 +114,7 @@ prueba('ARQ-03', 'Persistencia usa solo sentencias preparadas: sin query()/exec(
     afirmar($violaciones === [], implode(', ', $violaciones));
 });
 
-prueba('ARQ-04', 'El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP', function (): void {
+prueba('ARQ-04','El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP', function (): void {
     $violaciones = [];
     foreach (fuentesDeCapa('Dominio') as $archivo => $codigo) {
         if (preg_match('/\$_(SERVER|GET|POST|REQUEST)|file_(put|get)_contents|\bheader\s*\(|\becho\b|http_response_code/', sinComentarios($codigo)) === 1) {
@@ -120,4 +122,89 @@ prueba('ARQ-04', 'El Dominio no hace E/S: ni superglobales, ni archivos, ni sali
         }
     }
     afirmar($violaciones === [], 'E/S en el dominio: ' . implode(', ', $violaciones));
+});
+
+/** @return list<class-string> clases e interfaces definidas en src/, cargadas por el autoload */
+function clasesDelProyecto(): array
+{
+    $clases = [];
+    foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
+        foreach (array_keys(fuentesDeCapa($capa)) as $archivo) {
+            $clase = 'Rbac\\' . str_replace('/', '\\', substr($archivo, 0, -4));
+            if (class_exists($clase) || interface_exists($clase)) {
+                $clases[] = $clase;
+            }
+        }
+    }
+
+    return $clases;
+}
+
+prueba('ARQ-05', 'Controladores MVC: solo reciben casos de uso, no crean objetos, sin SQL ni códigos de reglas de negocio', function (): void {
+    $violaciones = [];
+    foreach (fuentesDeCapa('Presentacion') as $archivo => $codigo) {
+        if (!str_contains($archivo, '/Controladores/')) {
+            continue;
+        }
+        $limpio = sinComentarios($codigo);
+        if (preg_match('/\bnew\s+[\\\\A-Za-z]/', $limpio) === 1) {
+            $violaciones[] = "$archivo crea objetos con new";
+        }
+        if (preg_match("/'(active|inactive|revoked|admin_hospital|medico|enfermeria|laboratorio|roles\\.asignar|PERMISO_NO_ASIGNADO|ASIGNACION_DUPLICADA|AUTOASIGNACION)'/", $limpio) === 1) {
+            $violaciones[] = "$archivo contiene códigos de reglas de negocio";
+        }
+        $clase = 'Rbac\\' . str_replace('/', '\\', substr($archivo, 0, -4));
+        foreach ((new ReflectionClass($clase))->getConstructor()?->getParameters() ?? [] as $parametro) {
+            $tipo = (string) $parametro->getType();
+            if (!str_starts_with($tipo, 'Rbac\\Aplicacion\\CasosDeUso\\')) {
+                $violaciones[] = "$archivo recibe $tipo (solo se admiten casos de uso)";
+            }
+        }
+    }
+    afirmar($violaciones === [], implode('; ', $violaciones));
+});
+
+prueba('ARQ-06', 'Patrón Repository: cada puerto tiene un adaptador PDO y uno InMemory en Persistencia', function (): void {
+    $clases = clasesDelProyecto();
+    $puertos = array_filter($clases, static fn (string $c): bool => interface_exists($c)
+        && (str_starts_with($c, 'Rbac\\Dominio\\Puertos\\') || str_starts_with($c, 'Rbac\\Aplicacion\\Puertos\\')));
+    afirmar(count($puertos) === 5, 'se esperaban 5 puertos, hay ' . count($puertos));
+
+    $faltantes = [];
+    foreach ($puertos as $puerto) {
+        $adaptadores = array_filter($clases, static fn (string $c): bool => class_exists($c) && is_subclass_of($c, $puerto)
+            && str_starts_with($c, 'Rbac\\Persistencia\\'));
+        foreach (['Pdo', 'EnMemoria'] as $tecnologia) {
+            $hay = array_filter($adaptadores, static fn (string $c): bool => str_starts_with($c, "Rbac\\Persistencia\\$tecnologia\\"));
+            if ($hay === []) {
+                $faltantes[] = "$puerto sin adaptador $tecnologia";
+            }
+        }
+    }
+    afirmar($faltantes === [], implode('; ', $faltantes));
+});
+
+prueba('ARQ-07', 'MVC: solo las Vistas dan formato a la respuesta (Respuesta::json fuera de Vistas está prohibido)', function (): void {
+    $violaciones = [];
+    foreach (fuentesDeCapa('Presentacion') as $archivo => $codigo) {
+        if (!str_contains($archivo, '/Vistas/') && !str_ends_with($archivo, '/Respuesta.php')
+            && str_contains(sinComentarios($codigo), 'Respuesta::json(')) {
+            $violaciones[] = $archivo;
+        }
+    }
+    afirmar($violaciones === [], 'formato de respuesta fuera de las vistas: ' . implode(', ', $violaciones));
+});
+
+// Semana 12 (B-6): la excepción se amplía a propósito y por nombre. permisos-efectivos tampoco puede
+// exigir un permiso propio: responde solo por la sesión que pregunta y es parte de la autorización.
+prueba('ARQ-08', 'Toda ruta exige un permiso, salvo las dos consultas de autorización (decisiones y permisos efectivos)', function (): void {
+    $rutas = (new \Rbac\Pruebas\Dobles\Escenario())->rutas();
+    $sinPermiso = array_values(array_map(
+        static fn (\Rbac\Presentacion\Http\Ruta $r): string => $r->metodo . ' ' . $r->patron,
+        array_filter($rutas, static fn (\Rbac\Presentacion\Http\Ruta $r): bool => $r->permiso === null),
+    ));
+    igual([
+        'POST #^/api/v1/autorizaciones/decisiones$#',
+        'POST #^/api/v1/autorizaciones/permisos-efectivos$#',
+    ], $sinPermiso, 'rutas sin permiso');
 });

@@ -17,8 +17,8 @@ use Rbac\Dominio\Reglas\Autorizacion\ReglaRolConcedePermiso;
 use Rbac\Dominio\Reglas\Autorizacion\ReglaTenantCoincide;
 use Rbac\Dominio\Reglas\ReglaAutorizacion;
 use Rbac\Dominio\Servicios\PoliticaAutorizacion;
-use Rbac\Pruebas\Dobles\CatalogoPermisosEnMemoria;
-use Rbac\Pruebas\Dobles\DirectorioUsuariosEnMemoria;
+use Rbac\Persistencia\EnMemoria\CatalogoPermisosEnMemoria;
+use Rbac\Persistencia\EnMemoria\DirectorioUsuariosEnMemoria;
 
 $ahora = new DateTimeImmutable('2026-11-15T10:00:00-06:00');
 $catalogo = new CatalogoPermisosEnMemoria(['enfermeria' => ['signos_vitales.registrar'], 'medico' => ['prescripciones.crear']]);

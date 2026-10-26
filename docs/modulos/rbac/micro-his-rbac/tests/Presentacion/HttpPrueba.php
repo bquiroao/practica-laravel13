@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 // Capa de presentación: el Kernel recibe una Solicitud construida en memoria (sin servidor web).
 
-use Rbac\Presentacion\Http\Accion;
 use Rbac\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
-use Rbac\Presentacion\Http\Identidad;
 use Rbac\Presentacion\Http\Kernel;
 use Rbac\Presentacion\Http\MiddlewareAutorizacion;
+use Rbac\Presentacion\Http\Peticion;
 use Rbac\Presentacion\Http\Respuesta;
 use Rbac\Presentacion\Http\Ruta;
-use Rbac\Presentacion\Http\Solicitud;
 use Rbac\Pruebas\Dobles\Escenario;
 
 const ASIGNACIONES = '/api/v1/roles/asignaciones';
@@ -49,7 +47,7 @@ prueba('HTTP-04', 'Ruta protegida permitida: la médica crea una prescripción (
     igual(201, (new Escenario())->kernel->manejar(Escenario::http('POST', '/api/v1/prescripciones', 'token-marta'))->estado, 'HTTP');
 });
 
-prueba('HTTP-05', 'Validación de entrada en la acción: datos faltantes o fechas inválidas → 422 DATOS_INVALIDOS', function (): void {
+prueba('HTTP-05', 'Validación de formato en el formulario: datos faltantes o fechas inválidas → 422 DATOS_INVALIDOS', function (): void {
     $r = (new Escenario())->kernel->manejar(Escenario::http('POST', ASIGNACIONES, 'token-admin-oriente', cuerpo: [
         'rol' => 'medico', 'valido_desde' => 'no-es-fecha',
     ]));
@@ -75,14 +73,11 @@ prueba('HTTP-07', 'Token de un hospital con X-Tenant-ID de otro → 403', functi
 
 prueba('HTTP-08', 'Error inesperado en una acción → 500 genérico, sin traza ni detalles', function (): void {
     $e = new Escenario();
-    $rota = new class () implements Accion {
-        public function ejecutar(Solicitud $solicitud, Identidad $identidad, array $parametros): Respuesta
-        {
-            throw new RuntimeException('SQLSTATE[XX000] detalle interno');
-        }
+    $controladorRoto = static function (Peticion $peticion): Respuesta {
+        throw new RuntimeException('SQLSTATE[XX000] detalle interno');
     };
     $kernel = new Kernel(
-        [new Ruta('POST', '#^/api/v1/signos-vitales$#', 'signos_vitales.registrar', $rota)],
+        [new Ruta('POST', '#^/api/v1/signos-vitales$#', 'signos_vitales.registrar', $controladorRoto)],
         new AutenticadorTokenDemo(['token-ana' => ['ana', Escenario::H_ORIENTE]]),
         new MiddlewareAutorizacion($e->autorizar),
     );

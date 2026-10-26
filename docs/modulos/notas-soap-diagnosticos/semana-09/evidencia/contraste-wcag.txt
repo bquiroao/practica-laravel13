@@ -1,0 +1,26 @@
+$ python herramientas/contraste.py
+ID    Uso                                                       Actual  Mín. Estado  Propuesto  Nuevo Estado 
+--------------------------------------------------------------------------------------------------------------
+C-01  Encabezados de tabla (10.5 pt negrita)                      4.21   4.5 FALLA     #5A6472   5.54 CUMPLE 
+C-02  Fila de versión corregida (10.5 pt)                         4.26   4.5 FALLA     #5A6472   5.60 CUMPLE 
+C-03  Etiqueta «Borrador» (10 pt negrita)                         2.71   4.5 FALLA     #8A6100   5.10 CUMPLE 
+C-04  Borde de campo de texto                                     2.13   3.0 FALLA     #767F8A   4.06 CUMPLE 
+C-05  Botón ocupado «Guardando…» (inactivo)                       2.58   0.0 EXENTO          —
+C-06  Indicador de foco (borde gris 2.5 pt)                       3.01   3.0 CUMPLE    #1F6F6B   5.92 CUMPLE 
+C-07  Etiquetas y pistas sobre blanco (10-10.5 pt)                4.56   4.5 CUMPLE    #5A6472   6.00 CUMPLE 
+C-08  Aviso de éxito (11.5 pt negrita)                            4.56   4.5 CUMPLE    #1B5E20   7.00 CUMPLE 
+C-09  Texto general (11 pt)                                      13.10   4.5 CUMPLE          —
+C-10  Cabecera: hospital activo (12.5 pt negrita)                 5.92   4.5 CUMPLE          —
+C-11  Botón primario (11.5 pt negrita)                            5.92   4.5 CUMPLE          —
+C-12  Enlace «Ver» (10.5 pt negrita)                              5.92   4.5 CUMPLE          —
+C-13  Error junto al campo (9.5 pt)                               6.54   4.5 CUMPLE          —
+C-14  Borde de campo con error                                    6.54   3.0 CUMPLE          —
+C-15  Aviso de error (10-11.5 pt negrita)                         5.62   4.5 CUMPLE          —
+C-16  Aviso de servicio no disponible (10 pt negrita)             5.45   4.5 CUMPLE          —
+C-17  Aviso de versión más reciente (10.5 pt negrita)             6.17   4.5 CUMPLE          —
+C-18  Filtro activo: borde (indicador de estado)                  5.92   3.0 CUMPLE          —
+C-19  Letras S, O, A, P del detalle (13 pt negrita)               5.47   4.5 CUMPLE          —
+C-20  Texto sobre fondo gris claro (11 pt)                       12.09   4.5 CUMPLE          —
+--------------------------------------------------------------------------------------------------------------
+Pares medidos: 20 · Fallan hoy: 4 · Propuestas que no cumplen: 0
+(código de salida: 0)

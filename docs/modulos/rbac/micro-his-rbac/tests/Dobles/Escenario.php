@@ -9,14 +9,18 @@ use Rbac\Aplicacion\CasosDeUso\AutorizarOperacion;
 use Rbac\Aplicacion\CasosDeUso\ConsultarEventoAuditoria;
 use Rbac\Aplicacion\Comandos\ComandoAsignarRol;
 use Rbac\Aplicacion\Comandos\ComandoAutorizar;
-use Rbac\Dominio\Modelo\Membresia;
+use Rbac\Persistencia\ConjuntoAdaptadores;
+use Rbac\Persistencia\EnMemoria\FabricaEnMemoria;
+use Rbac\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use Rbac\Persistencia\EnMemoria\RepositorioMembresiasEnMemoria;
 use Rbac\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Rbac\Presentacion\Http\Kernel;
 use Rbac\Presentacion\Http\Solicitud;
 
 /**
- * Datos ficticios + el sistema completo armado con dobles en memoria
- * a través de la misma raíz de composición que usa la aplicación real.
+ * El sistema completo armado con los adaptadores InMemory de producción (datos de
+ * database/datos-demo.php) más decoradores que permiten simular fallas, a través
+ * de la misma raíz de composición que usa la aplicación real.
  */
 final class Escenario
 {
@@ -24,60 +28,79 @@ final class Escenario
     public const H_NORTE = 'hosp-norte';
     public const AHORA = '2026-11-15T10:00:00-06:00';
 
-    public RepositorioMembresiasEnMemoria $membresias;
-    public RegistroAuditoriaEnMemoria $auditoria;
+    public RepositorioMembresiasConFallas $membresias;
+    public RegistroAuditoriaConFallas $auditoria;
     public RegistroAuditoriaEnMemoria $respaldo;
     public AutorizarOperacion $autorizar;
     public AsignarRol $asignarRol;
     public ConsultarEventoAuditoria $consultar;
     public Kernel $kernel;
+    /** @var list<array<string, mixed>> registros de acceso que emite el Kernel (observabilidad) */
+    public array $accesos = [];
+    /** @var array<string, object> */
+    private array $casosDeUso = [];
     private int $contador = 0;
 
     public function __construct()
     {
-        $f = static fn (string $fecha): \DateTimeImmutable => new \DateTimeImmutable($fecha);
+        $base = FabricaEnMemoria::crear(self::datosDemo());
+        $membresiasReales = $base->membresias;
+        $auditoriaReal = $base->auditoria;
+        assert($membresiasReales instanceof RepositorioMembresiasEnMemoria && $auditoriaReal instanceof RegistroAuditoriaEnMemoria);
 
-        $this->membresias = new RepositorioMembresiasEnMemoria([
-            new Membresia('admin-01', self::H_ORIENTE, 'admin_hospital', 'active', $f('2026-01-01T00:00:00-06:00')),
-            new Membresia('admin-02', self::H_NORTE, 'admin_hospital', 'active', $f('2026-01-01T00:00:00-06:00')),
-            new Membresia('ana', self::H_ORIENTE, 'enfermeria', 'active', $f('2026-01-01T00:00:00-06:00')),
-            new Membresia('marta', self::H_ORIENTE, 'medico', 'active', $f('2026-02-01T00:00:00-06:00')),
-            new Membresia('pedro', self::H_ORIENTE, 'medico', 'active', $f('2026-01-01T00:00:00-06:00'), $f('2026-06-30T00:00:00-06:00')),
-            new Membresia('lucia', self::H_ORIENTE, 'enfermeria', 'revoked', $f('2026-01-01T00:00:00-06:00')),
-        ]);
-        $catalogo = new CatalogoPermisosEnMemoria([
-            'admin_hospital' => ['roles.asignar', 'auditoria.consultar'],
-            'medico' => ['prescripciones.crear', 'signos_vitales.registrar', 'expediente.leer'],
-            'enfermeria' => ['signos_vitales.registrar', 'expediente.leer'],
-            'laboratorio' => ['resultados.registrar'],
-        ]);
-        $usuarios = new DirectorioUsuariosEnMemoria([
-            'admin-01' => 'active', 'admin-02' => 'active', 'ana' => 'active', 'marta' => 'active',
-            'pedro' => 'active', 'lucia' => 'active', 'nuevo-01' => 'active', 'jorge' => 'inactive',
-        ]);
-        $this->auditoria = new RegistroAuditoriaEnMemoria();
+        $this->membresias = new RepositorioMembresiasConFallas($membresiasReales);
+        $this->auditoria = new RegistroAuditoriaConFallas($auditoriaReal);
         $this->respaldo = new RegistroAuditoriaEnMemoria();
 
         $casos = construirCasosDeUso(
-            $this->membresias,
-            $catalogo,
-            $usuarios,
-            $this->auditoria,
+            // La transacción sigue siendo la de la fábrica: hace rollback sobre los almacenes reales.
+            new ConjuntoAdaptadores($this->membresias, $base->catalogo, $base->usuarios, $this->auditoria, $base->transaccion),
             $this->respaldo,
-            new TransaccionEnMemoria($this->membresias),
             fn (): string => sprintf('corr-%04d', ++$this->contador),
             static fn (): \DateTimeImmutable => new \DateTimeImmutable(self::AHORA),
         );
         $this->autorizar = $casos['autorizar'];
         $this->asignarRol = $casos['asignarRol'];
         $this->consultar = $casos['consultar'];
+        $this->casosDeUso = $casos;
 
         $this->kernel = construirKernel($casos, new AutenticadorTokenDemo([
             'token-admin-oriente' => ['admin-01', self::H_ORIENTE],
             'token-admin-norte' => ['admin-02', self::H_NORTE],
             'token-ana' => ['ana', self::H_ORIENTE],
             'token-marta' => ['marta', self::H_ORIENTE],
-        ]));
+        ]), function (array $registro): void {
+            $this->accesos[] = $registro;
+        });
+    }
+
+    /** @return array<string, mixed> casos de uso para armar otros kernels en pruebas */
+    public function casos(): array
+    {
+        return $this->casosDeUso;
+    }
+
+    /** Caso de uso por nombre (p. ej. 'revocarRol'); falla con un mensaje claro si no existe. */
+    public function caso(string $nombre): object
+    {
+        return $this->casosDeUso[$nombre] ?? throw new \LogicException("El caso de uso «{$nombre}» no existe en la composición");
+    }
+
+    /** La tabla de rutas real, construida con los mismos controladores que usa construirKernel(). */
+    public function rutas(): array
+    {
+        return construirRutas($this->casosDeUso);
+    }
+
+    public static function comandoRevocar(string $admin, string $destino, string $rol, string $motivo = 'Cambio de servicio: ya no atiende en esta unidad'): object
+    {
+        return new \Rbac\Aplicacion\Comandos\ComandoRevocarRol($admin, self::H_ORIENTE, self::H_ORIENTE, $destino, $rol, $motivo, '10.20.5.14');
+    }
+
+    /** @return array<string, mixed> */
+    public static function datosDemo(): array
+    {
+        return require dirname(__DIR__, 2) . '/database/datos-demo.php';
     }
 
     public static function comandoAutorizar(string $usuario, string $permiso, string $tenantSolicitud = self::H_ORIENTE): ComandoAutorizar

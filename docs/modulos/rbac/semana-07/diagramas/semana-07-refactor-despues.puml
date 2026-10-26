@@ -1,0 +1,75 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title DESPUÉS: cada preocupación en su componente (casos de uso con Ce 8, 3 preocupaciones)
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Aplicación" #FFF4E8 {
+  class AsignarRol <<65 líneas>> {
+    + ejecutar(ComandoAsignarRol)
+    ..exigir → política → aplicar(cambio) → match(Desenlace)..
+  }
+  class RevocarRol <<64 líneas>> {
+    + ejecutar(ComandoRevocarRol)
+  }
+  class AutorizarOperacion {
+    + ejecutar(ComandoAutorizar)
+    + exigir(usuario, token, hospital, permiso, ip)
+  }
+  class RegistradorDeCambios #FFE3D6 {
+    + aplicar(CambioDeMembresia): Desenlace
+    ..transacción + cambio + evento + fallas → Desenlace..
+  }
+  enum Desenlace #FFE3D6 {
+    APLICADO
+    SIN_EFECTO
+    DUPLICADO
+    FALLA
+  }
+}
+
+package "Dominio" #E3F1F0 {
+  interface CambioDeMembresia #FFE3D6 {
+    + aplicarEn(RepositorioMembresias): int
+    + evento(afectadas): EventoAuditoria
+  }
+  class AsignacionDeRol #FFE3D6
+  class RevocacionDeRol #FFE3D6
+  class EventoAuditoria {
+    + {static} accesoDenegado(…)
+    + {static} rolAsignado(…)
+    + {static} rolRevocado(…)
+  }
+  class "PoliticaAsignacion /\nPoliticaRevocacion" as POL {
+    ..fail-closed: ErrorPersistencia → 500..
+  }
+  interface RepositorioMembresias
+}
+
+AsignarRol --> AutorizarOperacion : exigir()
+AsignarRol --> POL
+AsignarRol --> RegistradorDeCambios
+AsignarRol ..> AsignacionDeRol : crea
+RevocarRol --> AutorizarOperacion : exigir()
+RevocarRol --> POL
+RevocarRol --> RegistradorDeCambios
+RevocarRol ..> RevocacionDeRol : crea
+RegistradorDeCambios --> CambioDeMembresia
+RegistradorDeCambios ..> Desenlace
+RegistradorDeCambios --> RepositorioMembresias
+AsignacionDeRol ..|> CambioDeMembresia
+RevocacionDeRol ..|> CambioDeMembresia
+AsignacionDeRol ..> EventoAuditoria
+RevocacionDeRol ..> EventoAuditoria
+AutorizarOperacion ..> EventoAuditoria
+
+note bottom of RegistradorDeCambios
+  Transaccion y RegistroAuditoria solo aquí.
+  Un cambio nuevo (p. ej. suspender) = una clase
+  CambioDeMembresia más; nada se copia.
+end note
+@enduml

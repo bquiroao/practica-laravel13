@@ -5,6 +5,8 @@ declare(strict_types=1);
 /*
  * Ejecuta todas las pruebas del Micro-HIS RBAC.
  *   php tests/ejecutar.php
+ *   php tests/ejecutar.php --solo=UNI,CB,CN   (muestra y cuenta solo esos prefijos; semana 15)
+ *   php tests/ejecutar.php --defectos         (agrega las pruebas de defectos ABIERTOS, que fallan hasta corregirse)
  * Código de salida: 0 si no hay fallas, 1 si alguna prueba falla.
  */
 
@@ -15,10 +17,22 @@ $grupos = [
     'Dominio' => 'Reglas de dominio',
     'Aplicacion' => 'Casos de uso (camino feliz y denegación)',
     'Persistencia' => 'Errores de persistencia (dobles)',
-    'Presentacion' => 'Presentación HTTP',
+    'Contratos' => 'Contratos: Repository (InMemory y PDO) y API (OpenAPI)',
+    'Presentacion' => 'Presentación MVC, HTTP y observabilidad',
+    'Cliente' => 'Cliente-servidor: librería cliente y resiliencia',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL',
 ];
+$argumentos = array_slice($argv ?? [], 1);
+if (in_array('--defectos', $argumentos, true)) {
+    $grupos['Defectos'] = 'Defectos abiertos (fallan hasta que se corrijan)';
+}
+$prefijos = [];
+foreach ($argumentos as $argumento) {
+    if (str_starts_with($argumento, '--solo=')) {
+        $prefijos = array_filter(explode(',', substr($argumento, 7)));
+    }
+}
 
 foreach ($grupos as $directorio => $titulo) {
     $GLOBALS['grupoActual'] = $titulo;
@@ -31,6 +45,9 @@ $conteo = ['PASA' => 0, 'FALLA' => 0, 'OMITE' => 0];
 $grupo = null;
 echo 'Micro-HIS RBAC - pruebas (PHP ' . PHP_VERSION . ')' . PHP_EOL;
 foreach ($GLOBALS['resultados'] as $r) {
+    if ($prefijos !== [] && !in_array(explode('-', $r['id'])[0], $prefijos, true)) {
+        continue;
+    }
     if ($r['grupo'] !== $grupo) {
         $grupo = $r['grupo'];
         echo PHP_EOL . '== ' . $grupo . ' ==' . PHP_EOL;

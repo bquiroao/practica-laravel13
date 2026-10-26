@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proteger identidad · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra" inert data-estado="base">
+  <span class="hospital"><span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span></span>
+  <span class="rol-actual">Supervisión</span>
+  <span class="avatar" role="img" aria-label="Rosa Díaz, supervisión">RD</span>
+</header>
+<header class="barra" data-estado="sin-conexion exito">
+  <a class="atras btn texto" href="m3-ficha.html" aria-label="Volver a la ficha" style="color:#fff">‹</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual">Supervisión</span>
+  <span class="avatar" role="img" aria-label="Rosa Díaz, supervisión">RD</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Proteger una identidad requiere conexión.
+</div>
+
+<main inert data-estado="base">
+  <h1>Sofía Morales Díaz</h1>
+  <p class="sub">P-000005 · versión 1</p>
+</main>
+<main data-estado="sin-conexion exito">
+  <h1>Sofía Morales Díaz</h1>
+  <div class="fila" style="margin-bottom:12px"><span class="etiqueta-protegida" data-estado="exito">◆ Protegida</span><span class="meta">P-000005</span></div>
+  <div class="aviso ok" role="status" data-estado="exito"><h2>✓ Identidad protegida</h2><p style="margin:0">Solo quien tenga permiso verá sus datos. Puedes quitar la protección desde esta ficha.</p></div>
+  <div class="accion-fija" style="position:static;padding:0;border:0;background:none" data-estado="sin-conexion">
+    <span class="btn bloque" aria-disabled="true">Proteger identidad · requiere conexión</span>
+  </div>
+</main>
+
+<!-- Hoja inferior: acción sensible. Foco inicial en «Cancelar» (I-3); el resto de la página, inerte -->
+<div data-estado="base">
+  <div class="velo"></div>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="h-prot">
+    <div class="asa" aria-hidden="true"></div>
+    <h2 id="h-prot">Proteger la identidad de Sofía Morales Díaz</h2>
+    <div class="aviso atencion">
+      <p style="margin:0">Admisión y clínicos dejarán de ver su nombre, fecha, teléfono y documento, y no la encontrarán por nombre. Podrán atenderla por su código.</p>
+      <p class="meta" style="margin:8px 0 0">Podrás quitar la protección desde la ficha; también exigirá un motivo.</p>
+    </div>
+    <label for="motivo">Motivo * (queda en la bitácora)</label>
+    <textarea id="motivo">Orden judicial de protección</textarea>
+    <label class="casilla"><input type="checkbox"> Entiendo que el cambio es inmediato</label>
+    <div class="acciones">
+      <span class="btn" aria-disabled="true" aria-describedby="falta">Proteger identidad</span>
+      <p class="meta" id="falta" style="margin:0">Para proteger: escribe el motivo y marca la casilla.</p>
+      <a class="btn" href="m3-ficha.html" autofocus>Cancelar</a>
+    </div>
+  </div>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

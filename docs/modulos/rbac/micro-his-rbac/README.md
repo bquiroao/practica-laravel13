@@ -1,41 +1,55 @@
 # Micro-HIS RBAC: roles, permisos y protección de rutas
 
-Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta el flujo «asignación de rol, autorización de una operación y denegación trazable». Se inició en la semana 3 y continúa en las semanas 4 y 5.
+Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta el flujo «asignación de rol, autorización de una operación y denegación trazable».
 
-## Estructura por capas
+| Semana | Evolución |
+|---|---|
+| 3 | Cuatro capas, PDO con sentencias preparadas, pruebas por capa y de arquitectura |
+| 4 | Entrada con **MVC** (controladores, formularios, vistas); patrón **Repository** con adaptadores **PDO e InMemory**; suite de contrato |
+| 5 | **Cliente-servidor**: contrato **OpenAPI 3.1**, endpoint de decisión (PDP), librería **cliente** con resiliencia, observabilidad (`X-Request-ID`) y medición de la frontera de microservicio |
+| 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
+| 7 | Refactor sin ampliar el módulo: `CambioDeMembresia` + `RegistradorDeCambios` separan auditoría y persistencia de los casos de uso; medidor `bin/acoplamiento.php` |
+| 12 | Cambio solicitado (B-6): **permisos efectivos** (`ConsultarPermisosEfectivos`, contrato v1.2.0). La interfaz consulta qué mostrar sin dejar eventos; los intentos siguen auditados. Pruebas PEF-01..10, escritas antes |
+| 15 | Pruebas unitarias (UNI-01..09), de caja blanca (CB-01..04, cobertura de líneas con phpdbg) y de caja negra (CN-01..06), trazadas a RF/RNF; defectos abiertos reproducibles (DEF-01..05) |
+
+## Estructura
 
 ```
 micro-his-rbac/
 ├── public/index.php              ← front controller (único punto de entrada HTTP)
+├── api/openapi.yaml              ← contrato REST (OpenAPI 3.1), validado contra el código (API-01..03)
+├── bin/demo.php                  ← flujo completo en un proceso, sin base de datos
+├── bin/medir.php                 ← latencia de una decisión: en proceso vs. HTTP vs. red
+├── bin/acoplamiento.php          ← Ce / Ca / preocupaciones RBAC por clase
 ├── bootstrap/
 │   ├── autoload.php              ← autoload PSR-4 mínimo
-│   └── contenedor.php            ← raíz de composición: conecta las capas
+│   └── contenedor.php            ← raíz de composición: elige PDO o InMemory y conecta las capas
 ├── config/config.php             ← configuración desde variables de entorno
 ├── database/
 │   ├── schema.sql                ← tablas, índice único parcial y trigger append-only
-│   └── datos-demo.sql            ← datos ficticios
+│   ├── datos-demo.sql            ← datos ficticios para PostgreSQL
+│   └── datos-demo.php            ← los mismos datos para el adaptador InMemory
 ├── src/
-│   ├── Presentacion/Http/        ← Kernel, rutas, middleware, acciones, autenticación
+│   ├── Presentacion/Http/        ← Kernel, Rutas, Controladores, Formularios, Vistas (MVC)
 │   ├── Aplicacion/               ← casos de uso, comandos, resultados, puerto Transaccion
 │   ├── Dominio/                  ← modelo, reglas, políticas, puertos de repositorio, excepciones
-│   └── Persistencia/             ← adaptadores PDO (sentencias preparadas) y respaldo en archivo
-└── tests/                        ← pruebas por capa + arquitectura + integración opcional
+│   ├── Persistencia/             ← Pdo/ (PostgreSQL) · EnMemoria/ · Archivo/ (respaldo)
+│   └── Cliente/                  ← librería para otros módulos: timeout, reintento, circuit breaker, fail-closed
+└── tests/                        ← dominio, aplicación, persistencia, contrato, MVC/HTTP, arquitectura, integración
 ```
 
-Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**. Se verifica automáticamente con las pruebas `ARQ-01` a `ARQ-04`.
+Regla de dependencias: **Presentación → Aplicación → Dominio ← Persistencia**; `Cliente` no conoce ninguna clase del servidor, solo el contrato HTTP. Se verifica con las pruebas `ARQ-01` a `ARQ-08`.
 
 ## Ejecutar las pruebas
-
-No necesitan base de datos: usan dobles en memoria y dobles de PDO.
 
 ```bash
 cd docs/modulos/rbac/micro-his-rbac
 php tests/ejecutar.php
+php tests/ejecutar.php --solo=UNI,CB,CN   # solo unitarias, caja blanca y caja negra (semana 15)
+php tests/ejecutar.php --defectos         # agrega las pruebas de defectos ABIERTOS (DEF-xx), que fallan hasta corregirse
 ```
 
-### Pruebas de integración con PostgreSQL (opcional)
-
-Crean un esquema temporal, aplican `schema.sql` y `datos-demo.sql`, ejecutan las pruebas y eliminan el esquema.
+No necesitan base de datos. Para correr también la suite de contrato contra PDO y las pruebas de integración, que crean y eliminan un esquema temporal:
 
 ```powershell
 $env:MICROHIS_DB_DSN = "pgsql:host=127.0.0.1;port=5432;dbname=postgres"
@@ -44,47 +58,55 @@ $env:MICROHIS_DB_CLAVE = "<tu contraseña>"
 php tests/ejecutar.php
 ```
 
+## Demostración sin base de datos
+
+```bash
+php bin/demo.php
+```
+
+## Contrato y medición
+
+```bash
+npx @redocly/cli@1.34.3 lint api/openapi.yaml   # valida el contrato
+php bin/medir.php 5000 300                      # costo de una decisión en 3 despliegues
+```
+
 ## Ejecutar la API
 
-1. Crear la base y cargar el esquema:
+| `MICROHIS_PERSISTENCIA` | Adaptadores | Requisitos |
+|---|---|---|
+| `pdo` (por defecto) | PostgreSQL | Base creada con `schema.sql` + `datos-demo.sql`, más las variables `MICROHIS_DB_*` |
+| `memoria` | InMemory con `datos-demo.php` | Ninguno. El estado se reinicia en cada petición HTTP. |
 
-   ```bash
-   createdb -U postgres micro_his_rbac
-   psql -U postgres -d micro_his_rbac -f database/schema.sql
-   psql -U postgres -d micro_his_rbac -f database/datos-demo.sql
-   ```
+```bash
+# Con PostgreSQL
+createdb -U postgres micro_his_rbac
+psql -U postgres -d micro_his_rbac -f database/schema.sql
+psql -U postgres -d micro_his_rbac -f database/datos-demo.sql
+php -S 127.0.0.1:8080 -t public
 
-2. Definir las variables de entorno (`MICROHIS_DB_DSN`, `MICROHIS_DB_USUARIO` y `MICROHIS_DB_CLAVE`) y levantar el servidor:
+# Sin base de datos (PowerShell)
+$env:MICROHIS_PERSISTENCIA = "memoria"; php -S 127.0.0.1:8080 -t public
+```
 
-   ```bash
-   php -S 127.0.0.1:8080 -t public
-   ```
+Tokens de demostración: `token-admin-oriente`, `token-ana`, `token-marta` y `token-admin-norte`.
 
-3. Probar con los tokens de demostración (`token-admin-oriente`, `token-ana`, `token-marta`, `token-admin-norte`):
-
-   ```bash
-   # 403: la enfermera no puede prescribir (la respuesta incluye correlation_id)
-   curl -i -X POST http://127.0.0.1:8080/api/v1/prescripciones \
-        -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-ana"
-
-   # 201: el administrador asigna un rol
-   curl -i -X POST http://127.0.0.1:8080/api/v1/roles/asignaciones \
-        -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-admin-oriente" \
-        -H "Content-Type: application/json" \
-        -d '{"usuario_id":"nuevo-01","rol":"laboratorio","valido_desde":"2026-11-15T00:00:00-06:00"}'
-
-   # 200: el administrador consulta la denegación por su correlation_id
-   curl -i http://127.0.0.1:8080/api/v1/auditoria/eventos/<correlation_id> \
-        -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-admin-oriente"
-   ```
-
-Si la base de datos no está disponible, la API responde `503` con un mensaje controlado.
+```bash
+curl -i -X POST http://127.0.0.1:8080/api/v1/prescripciones \
+     -H "X-Tenant-ID: hosp-oriente" -H "Authorization: Bearer token-ana"
+```
 
 ## Rutas
 
-| Método | Ruta | Permiso | Caso de uso |
+Contrato completo en [`api/openapi.yaml`](api/openapi.yaml). Toda respuesta incluye `X-Request-ID`.
+
+
+| Método | Ruta | Permiso | Controlador |
 |---|---|---|---|
-| POST | `/api/v1/roles/asignaciones` | `roles.asignar` | CU-01 Asignar rol |
-| GET | `/api/v1/auditoria/eventos/{correlationId}` | `auditoria.consultar` | CU-06 Consultar evento |
-| POST | `/api/v1/prescripciones` | `prescripciones.crear` | CU-02 (operación demo) |
-| POST | `/api/v1/signos-vitales` | `signos_vitales.registrar` | CU-02 (operación demo) |
+| POST | `/api/v1/roles/asignaciones` | `roles.asignar` | `AsignacionRolControlador::crear` |
+| POST | `/api/v1/roles/revocaciones` | `roles.revocar` | `RevocacionRolControlador::crear` |
+| GET | `/api/v1/auditoria/eventos/{correlationId}` | `auditoria.consultar` | `AuditoriaControlador::mostrar` |
+| POST | `/api/v1/autorizaciones/decisiones` | — (solo autenticación) | `AutorizacionControlador::decidir` (PDP) |
+| POST | `/api/v1/autorizaciones/permisos-efectivos` | — (solo autenticación) | `AutorizacionControlador::permisosEfectivos` (sin auditoría, semana 12) |
+| POST | `/api/v1/prescripciones` | `prescripciones.crear` | `OperacionClinicaControlador::prescribir` (demo) |
+| POST | `/api/v1/signos-vitales` | `signos_vitales.registrar` | `OperacionClinicaControlador::registrarSignosVitales` (demo) |

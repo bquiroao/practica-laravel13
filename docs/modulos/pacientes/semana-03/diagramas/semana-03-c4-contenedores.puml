@@ -1,0 +1,24 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS Pacientes
+
+Person(usuario, "Usuario del HIS", "Admisión, clínico o supervisor.")
+System_Ext(identidad, "Proveedor de identidad", "JWT (simulado con tokens demo).")
+
+System_Boundary(sistema, "Micro-HIS Pacientes") {
+    Container(cliente, "Cliente HTTP", "curl / SPA Vue", "Envía Authorization: Bearer, X-Tenant-ID e If-Match.")
+    Container(app, "Aplicación PHP", "PHP 8.2+ vanilla, servidor embebido", "Front controller public/index.php. Cuatro capas: Presentación, Aplicación, Dominio y Persistencia.")
+    ContainerDb(db, "Base de datos de pacientes", "PostgreSQL 15+", "pacientes (documento cifrado + hash, versión) y eventos_auditoria (append-only por trigger).")
+    Container(secretos, "Configuración y secretos", "Variables de entorno", "DSN y credenciales de la base; claves de hash y de cifrado del documento.")
+}
+
+Rel(usuario, cliente, "Usa")
+Rel(cliente, app, "REST /api/v1/pacientes", "HTTP/JSON")
+Rel(app, identidad, "Valida el token", "Bearer")
+Rel(app, db, "Lee y escribe", "PDO pdo_pgsql, sentencias preparadas")
+Rel(app, secretos, "Lee al arrancar", "getenv()")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,54 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title ANTES: AsignarRol y RevocarRol mezclan 5 preocupaciones (Ce 13 y 11)
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #FFF5F5
+  BorderColor #A33A3A
+}
+
+class AsignarRol <<caso de uso · 112 líneas>> {
+  + ejecutar(ComandoAsignarRol)
+  ..1 permiso: new ComandoAutorizar(… 'roles.asignar' …)..
+  ..2 roles: new Membresia(…, 'active', …)..
+  ..3 auditoría: new EventoAuditoria(ROL_ASIGNADO, [datos…])..
+  ..4 persistencia: transacción + catch MembresiaDuplicada / ErrorPersistencia..
+}
+class RevocarRol <<caso de uso · 106 líneas>> {
+  + ejecutar(ComandoRevocarRol)
+  ..mismo esqueleto copiado..
+  ..evento ROL_REVOCADO armado a mano..
+}
+class AutorizarOperacion {
+  ..arma ACCESO_DENEGADO a mano..
+}
+
+AsignarRol --> AutorizarOperacion
+AsignarRol --> "ComandoAutorizar"
+AsignarRol --> PoliticaAsignacion
+AsignarRol --> RepositorioMembresias
+AsignarRol --> RegistroAuditoria
+AsignarRol --> Transaccion
+AsignarRol --> Membresia
+AsignarRol --> EventoAuditoria
+AsignarRol --> ErrorPersistencia
+AsignarRol --> MembresiaDuplicada
+
+RevocarRol --> AutorizarOperacion
+RevocarRol --> "ComandoAutorizar"
+RevocarRol --> PoliticaRevocacion
+RevocarRol --> RepositorioMembresias
+RevocarRol --> RegistroAuditoria
+RevocarRol --> Transaccion
+RevocarRol --> EventoAuditoria
+RevocarRol --> ErrorPersistencia
+
+AutorizarOperacion --> EventoAuditoria
+
+note bottom of RevocarRol
+  33 líneas duplicadas en Aplicación.
+  El formato de cada evento está repartido en 3 casos de uso.
+  Un tercer cambio (p. ej. suspender) copiaría el bloque otra vez.
+end note
+@enduml

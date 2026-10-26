@@ -1,0 +1,49 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title Semana 3 · C4 nivel 3 · Componentes de la API (por capa)
+
+Person(medico, "Médico tratante")
+ContainerDb(db, "PostgreSQL", "Base del micro-HIS")
+
+Container_Boundary(api, "API HTTP") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "Front controller", "Ruta → X-Tenant-ID (400) → token (401) → acción → error a HTTP.")
+        Component(ctrl, "NotasSoapController", "Controlador", "Convierte JSON en comandos y resultados en JSON. Sin SQL ni reglas.")
+        Component(auth, "AutenticadorTokenDemo", "Adaptador", "Token → Identidad (usuario, hospital, roles).")
+    }
+    Boundary(app, "Aplicación") {
+        Component(registrar, "RegistrarNotaConDiagnostico", "Caso de uso", "CU-01 + CU-02: acceso, expediente, dominio, transacción.")
+        Component(firmar, "FirmarNota", "Caso de uso", "CU-03: solo el autor; registra NOTA_FIRMADA.")
+        Component(consultar, "ConsultarNota", "Caso de uso", "CU-04.")
+        Component(ptx, "Transaccion · Reloj · GeneradorId", "Puertos técnicos", "Interfaces que la aplicación necesita.")
+    }
+    Boundary(dom, "Dominio") {
+        Component(nota, "NotaSoap · SeccionesSoap", "Entidad / valor", "R-04 secciones obligatorias; R-07 firma e inmutabilidad.")
+        Component(dx, "Diagnostico · TipoDiagnostico", "Entidad / enum", "R-05 formato CIE-10 y tipo.")
+        Component(puertos, "RepositorioNotas · RepositorioDiagnosticos · RepositorioExpedientes · VerificadorAcceso · RegistroAuditoria", "Puertos", "Contratos que implementa Persistencia.")
+    }
+    Boundary(per, "Persistencia") {
+        Component(repos, "PdoRepositorioNotas · PdoRepositorioDiagnosticos · PdoRepositorioExpedientes · PdoVerificadorAcceso · PdoRegistroAuditoria", "Adaptadores PDO", "Heredan de RepositorioPdo: prepare + execute; PDOException → ErrorPersistencia.")
+        Component(pdotx, "PdoTransaccion · RelojSistema · GeneradorUuid", "Adaptadores", "BEGIN/COMMIT/ROLLBACK, hora de Guatemala, UUID v4.")
+    }
+}
+
+Rel(medico, kernel, "HTTP/JSON")
+Rel(kernel, auth, "identidad(token)")
+Rel(kernel, ctrl, "despacha")
+Rel(ctrl, registrar, "comando")
+Rel(ctrl, firmar, "comando")
+Rel(ctrl, consultar, "comando")
+Rel(registrar, nota, "crea")
+Rel(registrar, dx, "crea")
+Rel(registrar, puertos, "usa")
+Rel(registrar, ptx, "usa")
+Rel_U(repos, puertos, "implementa")
+Rel_U(pdotx, ptx, "implementa")
+Rel(repos, db, "SQL preparado", "PDO")
+Rel(pdotx, db, "transacción", "PDO")
+
+SHOW_LEGEND()
+@enduml

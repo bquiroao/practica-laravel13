@@ -1,0 +1,202 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * Mismos adaptadores PDO de producción contra una base real:
+ *  - INT-01..05: SQLite en memoria (se crea y se destruye en cada prueba).
+ *  - INT-06: PostgreSQL, solo si se define NOTASSOAP_DB_DSN (de lo contrario se omite).
+ */
+
+use NotasSoap\Persistencia\Pdo\FabricaConexion;
+use NotasSoap\Persistencia\Pdo\PdoRegistroAuditoria;
+use NotasSoap\Persistencia\Pdo\PdoRepositorioDiagnosticos;
+use NotasSoap\Persistencia\Pdo\PdoRepositorioExpedientes;
+use NotasSoap\Persistencia\Pdo\PdoRepositorioNotas;
+use NotasSoap\Persistencia\Pdo\PdoTransaccion;
+use NotasSoap\Persistencia\Pdo\PdoVerificadorAcceso;
+use NotasSoap\Presentacion\Http\AutenticadorTokenDemo;
+use NotasSoap\Presentacion\Http\Autorizacion\PermisosPorRol;
+use NotasSoap\Presentacion\Http\Observabilidad\RegistroAccesoEnMemoria;
+use NotasSoap\Presentacion\Http\Kernel;
+use NotasSoap\Pruebas\Dobles\Escenario;
+use NotasSoap\Pruebas\Dobles\GeneradorSecuencial;
+use NotasSoap\Pruebas\Dobles\RelojFijo;
+
+$kernelSobre = static function (PDO $pdo): Kernel {
+    $ids = new GeneradorSecuencial();
+
+    return construirKernel(new AutenticadorTokenDemo(Escenario::TOKENS), adaptadoresPdo($pdo, $ids), $ids, new RelojFijo(),
+        new PermisosPorRol(Escenario::PERMISOS), new RegistroAccesoEnMemoria());
+};
+
+$sqlite = static function (): PDO {
+    if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+        omitir('la extensión pdo_sqlite no está habilitada');
+    }
+    $pdo = FabricaConexion::crear('sqlite::memory:', '', '');
+    $pdo->exec((string) file_get_contents(__DIR__ . '/esquema-sqlite.sql'));
+    $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
+
+    return $pdo;
+};
+
+$contar = static fn (PDO $pdo, string $tabla): int => (int) $pdo->query("SELECT COUNT(*) FROM $tabla")->fetchColumn();
+
+prueba('INT-01', 'Camino feliz con PDO real: la nota, el diagnóstico y el evento quedan en la base', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $r = $kernelSobre($pdo)->manejar(Escenario::peticion());
+    igual(201, $r->estado, 'estado');
+    igual([1, 1, 1], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'diagnoses'), $contar($pdo, 'audit_events')], 'filas');
+    $fila = $pdo->query("SELECT note_type, status, version_no FROM clinical_notes")->fetch();
+    igual(['note_type' => 'soap', 'status' => 'draft', 'version_no' => 1], $fila, 'fila de la nota');
+});
+
+prueba('INT-02', 'Las reglas de acceso y de expediente se leen de la base (care_assignments, medical_records)', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    igual(403, $k->manejar(Escenario::peticion([], ['authorization' => 'Bearer token-lopez']))->estado, 'no asignado');
+    igual(409, $k->manejar(Escenario::peticion(['care_episode_id' => 'epi-200']))->estado, 'episodio de otro paciente');
+    igual(0, $contar($pdo, 'clinical_notes'), 'sin notas');
+});
+
+prueba('INT-03', 'Firmar y consultar contra la base; firmar dos veces responde 409', function () use ($sqlite, $kernelSobre): void {
+    $k = $kernelSobre($sqlite());
+    $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    igual(200, $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"))->estado, 'firma');
+    igual(409, $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"))->estado, 'segunda firma');
+    $c = $k->manejar(Escenario::peticion([], [], 'GET', "/api/v1/notas-soap/$id"))->cuerpo;
+    igual(['signed', 'J18.9'], [$c['status'], $c['diagnoses'][0]['code']], 'consulta');
+});
+
+prueba('INT-04', 'Error de persistencia real: si falla el INSERT del diagnóstico se revierte la nota (R-06)', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $pdo->exec("CREATE TRIGGER romper_diagnoses BEFORE INSERT ON diagnoses BEGIN SELECT RAISE(ABORT, 'falla simulada'); END;");
+    $r = $kernelSobre($pdo)->manejar(Escenario::peticion());
+    igual([500, 'error_persistencia'], [$r->estado, $r->cuerpo['error']['code']], 'respuesta');
+    igual([0, 0, 0], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'diagnoses'), $contar($pdo, 'audit_events')], 'nada guardado');
+});
+
+prueba('INT-05', 'La base también protege: no deja modificar una nota firmada ni borrar notas (defensa en profundidad)', function () use ($sqlite, $kernelSobre): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+    $repo = new PdoRepositorioNotas($pdo);
+    $nota = $repo->buscar($id);
+    $editada = new NotasSoap\Dominio\Modelo\NotaSoap($nota->id, $nota->expedienteId, $nota->episodioId, $nota->autorId, $nota->secciones, $nota->version, 'signed', $nota->creadaEn, new DateTimeImmutable());
+    // 1.ª barrera (aplicación): el UPDATE condicionado a status = 'draft' no afecta filas.
+    lanza(NotasSoap\Dominio\Excepciones\NotaFirmada::class, fn () => $repo->registrarFirma($editada), 'firma repetida desde el repositorio');
+    // 2.ª barrera (base): aunque alguien salte la aplicación, el trigger rechaza el cambio.
+    lanza(PDOException::class, fn () => $pdo->exec("UPDATE clinical_notes SET content = 'alterado'"), 'UPDATE directo sobre nota firmada');
+    lanza(PDOException::class, fn () => $pdo->exec('DELETE FROM clinical_notes'), 'DELETE');
+    igual('signed', $repo->buscar($id)?->estado, 'la nota sigue firmada');
+});
+
+prueba('INT-06', 'PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb, corrección y reversión con database/schema.sql', function () use ($kernelSobre, $contar): void {
+    $dsn = getenv('NOTASSOAP_DB_DSN');
+    if ($dsn === false || $dsn === '') {
+        omitir('defina NOTASSOAP_DB_DSN para probar contra PostgreSQL');
+    }
+    $pdo = FabricaConexion::crear($dsn, getenv('NOTASSOAP_DB_USUARIO') ?: 'postgres', getenv('NOTASSOAP_DB_CLAVE') ?: '');
+    $esquema = 'prueba_' . bin2hex(random_bytes(4));
+    $pdo->exec("CREATE SCHEMA $esquema");
+    try {
+        $pdo->exec("SET search_path TO $esquema");
+        $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/schema.sql'));
+        $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
+        $k = $kernelSobre($pdo);
+        $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'] ?? null;
+        afirmar($id !== null, 'registro en PostgreSQL');
+        igual(200, $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"))->estado, 'firma');
+        $r = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']));
+        igual([201, 'true'], [$r->estado, $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-pg-0001']))->cabecera('Idempotent-Replayed')], 'idempotencia en PostgreSQL');
+        igual('NotaSoapFirmada', $pdo->query("SELECT payload_minimal->>'clinical_note_id' = '$id' AS ok, event_type FROM outbox_events")->fetch()['event_type'] ?? null, 'outbox en jsonb');
+        // Semana 6: corrección contra PostgreSQL (UNIQUE supersedes_id y CHECK de la corrección)
+        $c = $k->manejar(Escenario::peticionCorreccion($id));
+        igual([201, 2, $id], [$c->estado, $c->cuerpo['version_no'] ?? null, $c->cuerpo['supersedes_id'] ?? null], 'corrección en PostgreSQL');
+        igual(409, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'Segundo intento sobre la misma versión']))->estado, 'una corrección por versión');
+        $pdo->exec("CREATE FUNCTION $esquema.romper() RETURNS trigger LANGUAGE plpgsql AS \$\$ BEGIN RAISE EXCEPTION 'falla simulada'; END; \$\$");
+        $pdo->exec("CREATE TRIGGER romper BEFORE INSERT ON diagnoses FOR EACH ROW EXECUTE FUNCTION $esquema.romper()");
+        $antes = $contar($pdo, 'clinical_notes');
+        $r = $kernelSobre($pdo)->manejar(Escenario::peticion());
+        igual(500, $r->estado, 'error de persistencia');
+        igual($antes, $contar($pdo, 'clinical_notes'), 'la nota del registro fallido se revirtió');
+    } finally {
+        $pdo->exec("DROP SCHEMA $esquema CASCADE");
+    }
+});
+
+prueba('INT-07', 'Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $id = $k->manejar(Escenario::peticion())->cuerpo['clinical_note_id'];
+    igual(0, $contar($pdo, 'outbox_events'), 'el borrador no genera evento');
+    $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+    $fila = $pdo->query('SELECT event_type, aggregate_id, payload_minimal, published_at FROM outbox_events')->fetch();
+    igual(['NotaSoapFirmada', $id, null], [$fila['event_type'], $fila['aggregate_id'], $fila['published_at']], 'fila pendiente de publicar');
+    afirmar(!str_contains((string) $fila['payload_minimal'], 'Tos'), 'payload sin contenido clínico');
+});
+
+prueba('INT-08', 'Objetos reutilizables: el mismo flujo con adaptadores PDO y en memoria da respuestas idénticas', function () use ($sqlite, $kernelSobre): void {
+    $flujo = static function (NotasSoap\Presentacion\Http\Kernel $k): array {
+        $r1 = $k->manejar(Escenario::peticion());
+        $id = $r1->cuerpo['clinical_note_id'];
+        $r2 = $k->manejar(Escenario::peticion([], [], 'POST', "/api/v1/notas-soap/$id/firma"));
+        $r3 = $k->manejar(Escenario::peticion([], [], 'GET', "/api/v1/notas-soap/$id"));
+        $r4 = $k->manejar(Escenario::peticion([], ['authorization' => 'Bearer token-lopez']));
+
+        return [[$r1->estado, $r1->cuerpo], [$r2->estado, $r2->cuerpo], [$r3->estado, $r3->cuerpo], [$r4->estado, $r4->cuerpo]];
+    };
+    $enMemoria = crearKernelEnMemoria(Escenario::config(),
+        new NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria(require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php'), new GeneradorSecuencial(), new RelojFijo());
+    igual($flujo($kernelSobre($sqlite())), $flujo($enMemoria), 'PDO vs memoria');
+});
+
+prueba('INT-09', 'Idempotencia con PDO real: el reintento con la misma clave devuelve la misma nota y la base guarda una sola', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $r1 = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-int-0001']));
+    $r2 = $k->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-int-0001']));
+    igual([201, 201, 'true'], [$r1->estado, $r2->estado, $r2->cabecera('Idempotent-Replayed')], 'respuestas');
+    igual($r1->cuerpo['clinical_note_id'], $r2->cuerpo['clinical_note_id'], 'misma nota');
+    igual([1, 1, 1], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'idempotency_keys'), $contar($pdo, 'audit_events')], 'filas');
+});
+
+prueba('INT-10', 'Modo memoria con archivo: lo guardado sobrevive a un proceso nuevo y el reintento con la misma clave no duplica', function (): void {
+    $archivo = tempnam(sys_get_temp_dir(), 'notas-soap-');
+    unlink($archivo);
+    $datos = require dirname(__DIR__, 2) . '/config/datos-demo-memoria.php';
+    $kernel = static fn (\NotasSoap\Persistencia\EnMemoria\AlmacenesEnMemoria $a): Kernel => crearKernelEnMemoria(Escenario::config(), $a, new GeneradorSecuencial(), new RelojFijo());
+    try {
+        $primero = almacenesDesdeArchivo($archivo, $datos);
+        $r1 = $kernel($primero)->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-mem-0001']));
+        guardarAlmacenes($archivo, $primero);
+
+        $segundo = almacenesDesdeArchivo($archivo, $datos); // simula la siguiente petición de php -S
+        $r2 = $kernel($segundo)->manejar(Escenario::peticion([], ['idempotency-key' => 'clave-mem-0001']));
+        igual([201, 201, 'true'], [$r1->estado, $r2->estado, $r2->cabecera('Idempotent-Replayed')], 'respuestas');
+        igual($r1->cuerpo['clinical_note_id'], $r2->cuerpo['clinical_note_id'], 'misma nota');
+        igual(1, count($segundo->notas->deExpediente('exp-carlos')), 'una sola nota');
+    } finally {
+        if (is_file($archivo)) {
+            unlink($archivo);
+        }
+    }
+});
+
+prueba('INT-11', 'Semana 6: corrección con PDO real; la base guarda la cadena (supersedes_id) y su UNIQUE impide dos correcciones de la misma versión', function () use ($sqlite, $kernelSobre, $contar): void {
+    $pdo = $sqlite();
+    $k = $kernelSobre($pdo);
+    $id = Escenario::notaFirmada($k);
+    $r = $k->manejar(Escenario::peticionCorreccion($id));
+    igual(201, $r->estado, 'corrección');
+    $fila = $pdo->query("SELECT version_no, supersedes_id, correction_reason, status FROM clinical_notes WHERE clinical_note_id = '{$r->cuerpo['clinical_note_id']}'")->fetch(PDO::FETCH_ASSOC);
+    igual(['version_no' => 2, 'supersedes_id' => $id, 'correction_reason' => 'Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C', 'status' => 'draft'], $fila, 'fila de la corrección');
+    igual('signed', $pdo->query("SELECT status FROM clinical_notes WHERE clinical_note_id = '$id'")->fetchColumn(), 'la original sigue firmada');
+    igual(409, $k->manejar(Escenario::peticionCorreccion($id, ['correction_reason' => 'Segundo intento sobre la misma versión']))->estado, 'segunda corrección');
+    lanza(PDOException::class, fn () => $pdo->exec("INSERT INTO clinical_notes (clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, note_type, content, status, version_no, created_at, supersedes_id, correction_reason)
+        VALUES ('directa', 'exp-carlos', 'epi-100', 'dra-mendez', 'soap', '{}', 'draft', 2, '2026-10-12', '$id', 'Inserción directa saltando la aplicación')"), 'la base también lo impide');
+    igual([2, 2], [$contar($pdo, 'clinical_notes'), $contar($pdo, 'diagnoses')], 'dos versiones, cada una con su diagnóstico');
+});
+

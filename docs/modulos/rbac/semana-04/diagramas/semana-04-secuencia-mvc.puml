@@ -1,0 +1,57 @@
+@startuml semana-04-secuencia-mvc
+title Asignación de rol a través de MVC + Repository
+autonumber "<b>00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Administrador" as Admin
+box "Presentación (MVC)" #F5F9FF
+  participant "Kernel" as K
+  participant "AsignacionRol\nControlador" as C
+  participant "Formulario\nAsignacion" as F
+  participant "Asignacion\nVista" as V
+end box
+box "Modelo: Aplicación + Dominio" #FDECEC
+  participant "AsignarRol" as UC
+  participant "PoliticaAsignacion\n+ reglas" as POL
+end box
+box "Persistencia" #E3F2FD
+  participant "RepositorioMembresias\n(PDO | InMemory)" as REPO
+  participant "RegistroAuditoria\n(PDO | InMemory)" as AUD
+  participant "Transaccion\n(PDO | InMemory)" as TX
+end box
+
+Admin -> K : POST /api/v1/roles/asignaciones {usuario_id, rol, valido_desde}
+K -> K : ruta (roles.asignar) · tenant · token · autorización
+K -> C : crear(Peticion)
+C -> F : aComando(Peticion)
+alt formato inválido
+  F --> C : DatosInvalidos(campos)
+  C --> K : ErrorVista::datosInvalidos → 422
+else formato válido
+  F --> C : ComandoAsignarRol
+  C -> UC : ejecutar(comando)
+  UC -> POL : evaluar(SolicitudAsignacion)
+  POL -> REPO : existeActiva(usuario, hospital, rol)
+  REPO --> POL : false
+  POL --> UC : null (sin errores)
+  UC -> TX : ejecutar(trabajo)
+  TX -> REPO : guardar(Membresia)
+  TX -> AUD : registrar(ROL_ASIGNADO)
+  TX --> UC : commit
+  UC --> C : ResultadoAsignacion::creado
+  C -> V : resultado(ResultadoAsignacion)
+  V --> C : Respuesta 201
+  C --> K : Respuesta 201
+end
+K --> Admin : 201 {codigo, correlation_id}
+
+note over C
+  El controlador solo coordina:
+  formulario → caso de uso → vista.
+end note
+note over REPO, TX
+  El caso de uso no sabe si es PDO o InMemory:
+  lo decide bootstrap/contenedor.php.
+end note
+@enduml

@@ -1,0 +1,42 @@
+@startuml semana-05-migracion
+title Migración razonada del módulo RBAC (strangler fig, con compuertas medibles)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:**Fase 0 — Hoy (semanas 3–5)**
+Micro-HIS separado en 4 capas, contrato OpenAPI,
+cliente con resiliencia, mediciones;
+note right: Hecho y probado (60 pruebas)
+:**Fase 1 — Módulo dentro del HIS (semana 16)**
+Portar Dominio + Aplicación a la app Laravel ·
+adaptadores sobre CENTRAL/HOSPITAL ·
+middleware de rutas Laravel → AutorizarOperacion;
+if (¿Contrato API-01..03 y suite\nde contrato de repositorios pasan\ncontra el esquema real?) then (no)
+  :Corregir adaptadores / esquema
+  (brechas: Spatie, H8, multirol);
+  stop
+else (sí)
+endif
+:**Fase 2 — PDP interno**
+Módulos clínicos consultan RBAC solo vía
+interfaz/contrato (nunca leen tablas de permisos) ·
+outbox de membresías → local_user_refs;
+:**Fase 3 — Revisión de frontera (medir 4 semanas)**
+Recolectar C1–C5 desde los logs de acceso;
+if (¿Se cumple al menos uno de C1–C5\nY la latencia remota p95 ≤ 50 ms\ncon conexiones persistentes?) then (no)
+  :**Mantener monolito modular**
+  (decisión vigente);
+  stop
+else (sí)
+endif
+:**Fase 4 — Extraer servicio RBAC**
+Desplegar API separada con su BD ·
+el Gateway enruta /roles y /autorizaciones ·
+módulos cambian adaptador in-process → ClienteRbac;
+:**Fase 5 — Retirar el camino viejo**
+Tráfico 10% → 50% → 100% con bandera ·
+rollback = volver al adaptador in-process;
+stop
+@enduml

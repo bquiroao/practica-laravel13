@@ -1,0 +1,24 @@
+Notas SOAP semana 2 - verificacion SRP (PHP 8.3.6)
+------------------------------------------------------------------------------
+[PASA] CA-01   Registro válido: 201, nota en borrador v1 con su diagnóstico
+[PASA] CA-02   Sin X-Tenant-ID responde 400 y con token inválido 401; no guarda nada
+[PASA] CA-03   Usuario sin rol médico (enfermería) recibe 403
+[PASA] CA-04   Médico no asignado al episodio recibe 403
+[PASA] CA-05   Tenant del token distinto al de la solicitud recibe 403
+[PASA] CA-06   Expediente cerrado o de otro paciente responde 409
+[PASA] CA-07   Falta una sección SOAP: 422 nota_incompleta y no se guarda nada
+[PASA] CA-08   Código CIE-10 inválido: 422 y NO queda nota huérfana
+[PASA] CA-09   Tipo de diagnóstico no permitido o descripción vacía: 422
+[PASA] CA-10   Falla la base al guardar el diagnóstico: 500 y se revierte la nota
+[PASA] CA-11   Firmar: la nota pasa a firmada; firmarla otra vez responde 409
+[PASA] CA-12   El autor sale del token aunque el cliente mande otro author_user_ref_id
+[PASA] SRP-01  Servicios y dominio no contienen SQL ni HTTP
+[PASA] SRP-02  Cada regla vive en una sola clase (CIE-10, secciones SOAP, códigos HTTP)
+[PASA] SRP-03  El servicio solo depende de interfaces y se prueba sin base de datos
+[PASA] SRP-04  La regla del diagnóstico se prueba sola, sin servicio ni repositorios
+[PASA] PAR-01  Antes y después responden el mismo código HTTP en 8 escenarios
+[PASA] DEF-01  Defecto corregido: antes deja nota huérfana con CIE-10 inválido; después no
+[PASA] DEF-02  Defecto corregido: antes deja la nota si falla el diagnóstico; después revierte
+[PASA] DEF-03  Defecto corregido: antes acepta el autor del cuerpo; después usa el token
+------------------------------------------------------------------------------
+Total: 20  Pasan: 20  Fallan: 0

@@ -1,0 +1,52 @@
+@startuml capas_mvc_reportes_analytics_basicos
+title Semana 4 · Capas del Micro-HIS con la entrada organizada en MVC
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "Presentation" {
+  [public/index.php\n+ Enrutador] as front <<Front Controller>>
+  [ReporteController] as ctrl <<Controlador>>
+  [VistaIndicador] as vista <<Vista>>
+  [Respuesta] as resp
+}
+package "Application (Modelo)" {
+  [CalcularIndicador] as caso <<caso de uso>>
+  [PoliticaPermisos] as pol
+  [ResultadoConsulta] as res
+}
+package "Domain (Modelo)" {
+  [ContratoReporte\nReportRegistry\nReporteOcupacion] as reportes
+  [Filtros · Indicador\nDesglose · RegistroOrigen] as valores <<Value Objects>>
+  interface "OcupacionRepository" as repo
+}
+package "Persistence" {
+  [OcupacionPdoRepository] as pdo
+  [OcupacionInMemoryRepository] as mem
+  [ConexionPdo] as con
+}
+database "PostgreSQL 16\nmicro_his" as bd
+
+front --> ctrl : despacha
+ctrl --> caso : ejecuta
+ctrl --> vista : elige
+ctrl --> resp
+caso --> pol
+caso --> reportes
+caso --> res
+reportes --> valores
+reportes --> repo
+pdo ..|> repo
+mem ..|> repo
+pdo --> con
+con --> bd : PDO\nprepare + execute
+
+note right of ctrl
+  Sin SQL ni reglas de negocio
+  (verificado por prueba)
+end note
+note bottom of repo
+  El Repository vive en Domain:
+  todas las dependencias
+  apuntan hacia el dominio
+end note
+@enduml

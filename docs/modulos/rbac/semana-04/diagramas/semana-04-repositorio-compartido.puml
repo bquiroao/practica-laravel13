@@ -1,0 +1,56 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+title Integración del módulo RBAC con el repositorio de datos compartido del HIS
+skinparam componentStyle rectangle
+skinparam database {
+  BackgroundColor #FFF8E1
+}
+
+package "Módulos del HIS (consumidores del repositorio)" {
+  [Usuarios y tenants] as USU
+  [RBAC\n(este módulo)] as RBAC #E3F2FD
+  [Módulos clínicos\n(prescripciones, signos, lab)] as CLI
+  [Gobernanza y auditoría] as GOB
+  [Sincronización\n(outbox / inbox)] as SYNC
+}
+
+node "Repositorio de datos compartido: PostgreSQL federado" {
+  database "CENTRAL (una para la red)" as CENTRAL {
+    frame "Identidad y acceso" {
+      [central_users\n(user_id, status)] as CU
+      [hospital_memberships\n(user_id, hospital_id, role_code,\nstatus, valid_from, valid_to)\níndice único activa-abierta] as HM
+      [hospitals] as HOSP
+    }
+    frame "Propuesto (RBAC)" #E3F2FD {
+      [roles · permissions ·\nrole_has_permissions\n(Spatie, aún sin migrar)] as CAT
+    }
+    [central_inbox_messages] as CIN
+  }
+  database "HOSPITAL (una por hospital)" as HOSPDB {
+    [local_user_refs\n(réplica: central_user_id,\nrole_code, status, valid_to)] as LUR
+    [local_access_audit\n(H8, pendiente)] as LAA
+    [outbox_event (H8, pendiente)] as OUT
+    [datos clínicos] as CLIN
+  }
+}
+
+USU --> CU : escribe (dueño)
+RBAC --> HM : escribe asignaciones\n(PdoRepositorioMembresias → adaptador CENTRAL)
+RBAC --> CU : lee estado\n(PdoDirectorioUsuarios)
+RBAC --> CAT : lee permisos por rol\n(PdoCatalogoPermisos)
+RBAC ..> LUR : lee para autorizar\n(adaptador de réplica local)
+RBAC --> LAA : registra ACCESO_DENEGADO\n(PdoRegistroAuditoria)
+GOB --> LAA : consulta (solo lectura)
+CLI --> CLIN : escribe
+CLI ..> RBAC : pide autorización\n(no leen permisos por su cuenta)
+SYNC --> LUR : replica membresías\nCENTRAL → HOSPITAL
+HM ..> SYNC : evento membresía cambiada
+OUT ..> CIN : eventos locales → CENTRAL
+
+note right of RBAC
+  El Dominio y la Aplicación NO cambian:
+  integrar = escribir adaptadores nuevos
+  que implementen los mismos puertos
+  y cambiar bootstrap/contenedor.php.
+end note
+@enduml

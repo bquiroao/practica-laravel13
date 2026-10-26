@@ -5,53 +5,97 @@ declare(strict_types=1);
 namespace Rbac\Presentacion\Http;
 
 use Rbac\Presentacion\Http\Autenticacion\Autenticador;
+use Rbac\Presentacion\Http\Vistas\ErrorVista;
 
 /**
  * Front controller: resuelve la ruta y aplica la cadena
- * tenant (400) → autenticación (401) → autorización (403) → acción.
+ * tenant (400) → autenticación (401) → autorización (403) → controlador.
+ *
+ * Observabilidad: toda respuesta lleva X-Request-ID (el recibido si es válido, o uno nuevo)
+ * y cada petición produce un registro de acceso estructurado, sin tokens ni cuerpos.
  */
 final class Kernel
 {
+    private const ID_VALIDO = '/^[A-Za-z0-9-]{8,64}$/';
+
+    private readonly \Closure $registrarAcceso;
+    private readonly \Closure $generarId;
+
     /** @param list<Ruta> $rutas */
     public function __construct(
         private readonly array $rutas,
         private readonly Autenticador $autenticador,
         private readonly MiddlewareAutorizacion $autorizacion,
+        ?\Closure $registrarAcceso = null,
+        ?\Closure $generarId = null,
     ) {
+        $this->registrarAcceso = $registrarAcceso ?? static function (array $registro): void {
+        };
+        $this->generarId = $generarId ?? static fn (): string => bin2hex(random_bytes(16));
     }
 
     public function manejar(Solicitud $solicitud): Respuesta
     {
+        $inicio = hrtime(true);
+        $recibido = $solicitud->cabecera('X-Request-ID');
+        $requestId = preg_match(self::ID_VALIDO, $recibido) === 1 ? $recibido : ($this->generarId)();
+
+        [$respuesta, $identidad] = $this->procesar($solicitud);
+
+        try {
+            ($this->registrarAcceso)([
+                'request_id' => $requestId,
+                'metodo' => $solicitud->metodo,
+                'ruta' => $solicitud->ruta,
+                'estado' => $respuesta->estado,
+                'duracion_ms' => round((hrtime(true) - $inicio) / 1e6, 3),
+                'usuario' => $identidad?->usuarioId,
+                'tenant' => $solicitud->cabecera('X-Tenant-ID') ?: null,
+                'correlation_id' => is_string($respuesta->cuerpo['correlation_id'] ?? null) ? $respuesta->cuerpo['correlation_id'] : null,
+            ]);
+        } catch (\Throwable) {
+            // Un registro de observabilidad que falla nunca debe tumbar la respuesta.
+        }
+
+        return $respuesta->conCabecera('X-Request-ID', $requestId);
+    }
+
+    /** @return array{0: Respuesta, 1: ?Identidad} */
+    private function procesar(Solicitud $solicitud): array
+    {
+        $identidad = null;
+
         try {
             $encontrada = $this->resolver($solicitud);
             if ($encontrada instanceof Respuesta) {
-                return $encontrada;
+                return [$encontrada, null];
             }
             [$ruta, $parametros] = $encontrada;
 
             // D-05 / E-05: sin hospital no se evalúan permisos.
             if ($solicitud->cabecera('X-Tenant-ID') === '') {
-                return Respuesta::json(400, ['mensaje' => 'La cabecera X-Tenant-ID es obligatoria.']);
+                return [ErrorVista::sinTenant(), null];
             }
 
             // D-06 / E-06: sin identidad no hay a quién autorizar.
             $identidad = $this->autenticador->autenticar($solicitud);
             if ($identidad === null) {
-                return Respuesta::json(401, ['mensaje' => 'Token inválido o expirado.']);
+                return [ErrorVista::noAutenticado(), null];
             }
 
             // CU-03 / CU-04: protección de la ruta por su permiso declarado.
-            $autorizacion = $this->autorizacion->verificar($solicitud, $identidad, $ruta->permiso);
-            if (!$autorizacion->permitido) {
-                return Respuesta::json(403, [
-                    'mensaje' => 'Acceso denegado.',
-                    'correlation_id' => $autorizacion->correlationId,
-                ]);
+            if ($ruta->permiso !== null) {
+                $autorizacion = $this->autorizacion->verificar($solicitud, $identidad, $ruta->permiso);
+                if (!$autorizacion->permitido) {
+                    return [ErrorVista::accesoDenegado($autorizacion->correlationId), $identidad];
+                }
             }
 
-            return $ruta->accion->ejecutar($solicitud, $identidad, $parametros);
+            $respuesta = ($ruta->destino)(new Peticion($solicitud, $identidad, $parametros));
+
+            return [$respuesta instanceof Respuesta ? $respuesta : ErrorVista::errorInterno(), $identidad];
         } catch (\Throwable) {
-            return Respuesta::json(500, ['mensaje' => 'Error interno.']);
+            return [ErrorVista::errorInterno(), $identidad];
         }
     }
 
@@ -70,8 +114,6 @@ final class Kernel
             $metodoNoPermitido = true;
         }
 
-        return $metodoNoPermitido
-            ? Respuesta::json(405, ['mensaje' => 'Método no permitido.'])
-            : Respuesta::json(404, ['mensaje' => 'Ruta no encontrada.']);
+        return $metodoNoPermitido ? ErrorVista::metodoNoPermitido() : ErrorVista::rutaNoEncontrada();
     }
 }

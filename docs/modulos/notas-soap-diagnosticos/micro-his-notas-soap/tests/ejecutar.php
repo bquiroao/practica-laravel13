@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * Ejecuta todas las pruebas del Micro-HIS Notas SOAP.
+ *   php tests/ejecutar.php
+ * Código de salida: 0 si no hay fallas, 1 si alguna prueba falla.
+ */
+
+require dirname(__DIR__) . '/bootstrap/contenedor.php';
+require __DIR__ . '/Arnes.php';
+
+$grupos = [
+    'Dominio' => 'Reglas de dominio',
+    'Aplicacion' => 'Casos de uso (camino feliz y rechazos)',
+    'Persistencia' => 'Errores de persistencia (dobles de PDO)',
+    'Contrato' => 'Contratos: Repository (memoria y PDO) y API (openapi.yaml ↔ código)',
+    'Cliente' => 'Cliente ↔ servidor (resiliencia e idempotencia)',
+    'Presentacion' => 'Presentación HTTP',
+    'Arquitectura' => 'Regla de dependencias entre capas',
+    'Integracion' => 'Integración con base de prueba (SQLite en memoria y PostgreSQL opcional)',
+];
+
+// Semana 15: --solo=UNI,CB,CN filtra por prefijo; --defectos corre solo los defectos abiertos (fallan a propósito).
+$opciones = getopt('', ['defectos', 'solo:']);
+if (isset($opciones['solo'])) {
+    $GLOBALS['solo'] = '/^(' . str_replace(',', '|', preg_quote((string) $opciones['solo'], '/')) . ')-/';
+}
+if (isset($opciones['defectos'])) {
+    $grupos = ['Defectos' => 'Defectos abiertos (cada prueba falla hasta que se corrija el defecto)'];
+}
+
+foreach ($grupos as $directorio => $titulo) {
+    $GLOBALS['grupoActual'] = $titulo;
+    foreach (glob(__DIR__ . '/' . $directorio . '/*Prueba.php') ?: [] as $archivo) {
+        require $archivo;
+    }
+}
+
+$conteo = ['PASA' => 0, 'FALLA' => 0, 'OMITE' => 0];
+$grupo = null;
+echo 'Micro-HIS Notas SOAP - pruebas (PHP ' . PHP_VERSION . ')' . PHP_EOL;
+foreach ($GLOBALS['resultados'] as $r) {
+    if ($r['grupo'] !== $grupo) {
+        $grupo = $r['grupo'];
+        echo PHP_EOL . '== ' . $grupo . ' ==' . PHP_EOL;
+    }
+    $conteo[$r['estado']]++;
+    echo sprintf('[%s] %-8s %s', str_pad($r['estado'], 5), $r['id'], $r['descripcion']) . PHP_EOL;
+    if ($r['detalle'] !== null) {
+        echo '         -> ' . $r['detalle'] . PHP_EOL;
+    }
+}
+echo PHP_EOL . sprintf('Total: %d  Pasan: %d  Fallan: %d  Omitidas: %d', array_sum($conteo), $conteo['PASA'], $conteo['FALLA'], $conteo['OMITE']) . PHP_EOL;
+
+exit($conteo['FALLA'] === 0 ? 0 : 1);

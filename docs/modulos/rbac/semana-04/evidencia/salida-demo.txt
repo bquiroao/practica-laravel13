@@ -1,0 +1,21 @@
+Micro-HIS RBAC — demostración (persistencia: memoria)
+
+▶ 1. El administrador asigna el rol «laboratorio» a un usuario nuevo
+  POST /api/v1/roles/asignaciones  (token: token-admin-oriente)
+  ← 201 {"codigo":"ROL_ASIGNADO","correlation_id":"f2f2164f-ee06-4a9a-9cf1-529594133010"}
+
+▶ 2. La enfermera registra signos vitales (permitido)
+  POST /api/v1/signos-vitales  (token: token-ana)
+  ← 201 {"mensaje":"Toma de signos vitales registrada (demo)."}
+
+▶ 3. La enfermera intenta crear una prescripción (denegado, sin revelar el motivo)
+  POST /api/v1/prescripciones  (token: token-ana)
+  ← 403 {"mensaje":"Acceso denegado.","correlation_id":"bfe2e59b-9a4b-451e-ba6b-3177414e16db"}
+
+▶ 4. El administrador consulta la denegación por su correlation_id
+  GET /api/v1/auditoria/eventos/bfe2e59b-9a4b-451e-ba6b-3177414e16db  (token: token-admin-oriente)
+  ← 200 {"correlation_id":"bfe2e59b-9a4b-451e-ba6b-3177414e16db","tipo":"ACCESO_DENEGADO","actor":"ana","hospital":"hosp-oriente","datos":{"permiso":"prescripciones.crear","recurso":"POST /api/v1/prescripciones","motivo":"PERMISO_NO_ASIGNADO","ip":"10.20.5.14"},"ocurrido_en":"2026-11-15T10:00:00-06:00"}
+
+▶ 5. La enfermera intenta asignarse un rol (denegado: no tiene roles.asignar)
+  POST /api/v1/roles/asignaciones  (token: token-ana)
+  ← 403 {"mensaje":"Acceso denegado.","correlation_id":"d71cf645-ae63-4536-8e41-49fda66c08f9"}

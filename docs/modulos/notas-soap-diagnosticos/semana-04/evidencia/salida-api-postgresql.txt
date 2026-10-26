@@ -1,0 +1,30 @@
+Micro-HIS Notas SOAP - semana 4: API contra PostgreSQL 16.15 (adaptadores PDO + bandeja de salida)
+Servidor: php -S 127.0.0.1:8080 -t public   (PHP 8.3.6)
+Fecha: 2026-10-10 14:51
+
+## 1. Registrar (vista JSON)
+$ curl -X POST /api/v1/notas-soap -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez' --data @ejemplos/nota.json
+{"clinical_note_id":"29cefd53-2a5d-4aa3-8de7-f32b9fb4d9e9","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"65d2f6c9-9ec1-4d7f-b414-ae0b4d74df69","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 201]
+
+## 2. Campo con formato inválido: el formulario de entrada responde 400
+$ curl -X POST /api/v1/notas-soap ... --data '{"diagnostico":{},"plan":[1,2]}'
+{"error":{"code":"cuerpo_invalido","message":"El campo \"plan\" debe ser texto."}}
+[HTTP 400]
+
+## 3. Firmar
+$ curl -X POST /api/v1/notas-soap/29cefd53-2a5d-4aa3-8de7-f32b9fb4d9e9/firma -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez'
+{"clinical_note_id":"29cefd53-2a5d-4aa3-8de7-f32b9fb4d9e9","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"signed","version_no":1,"signed_at":"2026-10-10T14:51:14-06:00","soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"65d2f6c9-9ec1-4d7f-b414-ae0b4d74df69","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 200]
+
+## 4. Consultar con Accept: text/html (vista HTML, guardada en evidencia/nota-vista-html.html)
+$ curl /api/v1/notas-soap/29cefd53-2a5d-4aa3-8de7-f32b9fb4d9e9 -H 'Accept: text/html' -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez'
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+
+## 5. Bandeja de salida (outbox_events) después de firmar
+   event_type    | es_la_nota | trae_fecha | trae_texto_clinico | published_at 
+-----------------+------------+------------+--------------------+--------------
+ NotaSoapFirmada | t          | t          | f                  | 
+(1 row)
+
