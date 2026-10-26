@@ -1,0 +1,26 @@
+@startuml frontera_microservicio_reportes_analytics_basicos
+!include <C4/C4_Container>
+title Semana 5 · Frontera de microservicio evaluada (hoy vs. candidata)
+
+Person(usuario, "Administrador / Jefe de área / Médico")
+Container(vue, "Cliente Vue 3", "SPA", "Filtros, indicador, desglose y registros")
+
+System_Boundary(hoy, "HOY · dentro del SHI (decisión actual)") {
+  Container(laravel, "API Laravel 12", "PHP 8.2", "Módulo de reportes junto a los demás módulos; contrato /api/v1/reportes")
+  ContainerDb(hospital, "Base HOSPITAL", "PostgreSQL 15+", "Tablas de los módulos dueños + vistas reportes.*")
+}
+
+System_Boundary(futuro, "CANDIDATA · solo si se supera un umbral medido") {
+  Container(servicio, "Servicio de analítica", "PHP", "Misma API v1; calcula sobre proyecciones")
+  ContainerDb(proyecciones, "Base de proyecciones", "PostgreSQL", "ocupacion_diaria, citas_diarias, … (propiedad del servicio)")
+}
+
+Rel(usuario, vue, "Usa")
+Rel(vue, laravel, "GET /api/v1/reportes/*", "HTTPS + JWT")
+Rel(laravel, hospital, "SELECT sobre vistas", "rol reportes_lectura")
+Rel(vue, servicio, "Misma API v1 (fase 4)", "HTTPS + JWT")
+Rel(hospital, servicio, "Eventos outbox_event", "asíncrono")
+Rel(servicio, proyecciones, "Lee y actualiza sus proyecciones")
+
+SHOW_LEGEND()
+@enduml

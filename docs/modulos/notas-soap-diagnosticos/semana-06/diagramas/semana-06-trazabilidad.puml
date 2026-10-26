@@ -1,0 +1,86 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+left to right direction
+title Diagrama trazable — Notas SOAP: actor → UML → requisito → SOLID → capa → Repository → contrato API → prueba
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam rectangle {
+  RoundCorner 10
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+rectangle "**Actor**" as cA #EEF2F7 {
+  actor "Médico tratante" as Med
+  actor "Enfermería" as Enf
+}
+rectangle "**UML (S1)**\ncasos de uso" as cU #EEF2F7 {
+  rectangle "CU-01 + CU-02\nRegistrar nota\ncon diagnóstico" as CU01
+  rectangle "CU-03\nFirmar nota" as CU03
+  rectangle "CU-04\nConsultar historial" as CU04
+  rectangle "CU-06\nCorregir nota firmada\n(cambio S6)" as CU06 #FFE3D6
+}
+rectangle "**RF/RNF (S2)**" as cR #EEF2F7 {
+  rectangle "RF-01..06\nR-02..R-06\nRNF-01 integridad" as RF01
+  rectangle "RF-07, RF-08\nR-07 firmada inmutable" as RF07
+  rectangle "RF-09 errores estables\nRNF-03 sin texto clínico" as RF09
+  rectangle "RF-11..15\ncorregir con motivo\n(nuevo)" as RF10 #FFE3D6
+}
+rectangle "**SOLID (S2)**\nSRP" as cS #EEF2F7 {
+  rectangle "NotaSoap · SeccionesSoap\nDiagnostico: reglas" as S1
+  rectangle "Un caso de uso\npor razón de cambio" as S2
+  rectangle "NotaSoap::corregir()\n+ CorregirNota\n(clase nueva)" as S3 #FFE3D6
+}
+rectangle "**Capas (S3/S4)**\nAplicación + MVC" as cC #EEF2F7 {
+  rectangle "RegistrarNotaConDiagnostico\nFormularioRegistroNota" as C1
+  rectangle "FirmarNota · ConsultarNota\nListarNotasExpediente" as C2
+  rectangle "CorregirNota\nFormularioCorreccionNota" as C3 #FFE3D6
+}
+rectangle "**Repository (S4)**\nPDO · memoria" as cP #EEF2F7 {
+  rectangle "guardar() · buscar()\nRepositorioDiagnosticos" as R1
+  rectangle "registrarFirma()\ndeExpediente()" as R2
+  rectangle "correccionDe()\n+ supersedes_id UNIQUE" as R3 #FFE3D6
+}
+rectangle "**Contrato API (S5)**" as cK #EEF2F7 {
+  rectangle "POST /notas-soap\nnotas_soap.registrar" as K1
+  rectangle "POST …/firma · GET …\nfirmar · consultar" as K2
+  rectangle "POST …/correcciones\nnotas_soap.corregir (v1.1.0)" as K3 #FFE3D6
+}
+rectangle "**Prueba / evidencia**" as cT #EEF2F7 {
+  rectangle "APP-01..06, HTTP-01..04\nINT-01, INT-04" as T1
+  rectangle "APP-07..12, HTTP-05\nHTTP-14, INT-05" as T2
+  rectangle "COR-01..08, DOM-10\nREP-09, INT-11, API-01..04" as T3 #FFE3D6
+}
+
+Med --> CU01
+Med --> CU03
+Enf --> CU04
+Med --> CU06
+CU01 --> RF01
+CU03 --> RF07
+CU04 --> RF09
+CU06 --> RF10
+RF01 --> S1
+RF07 --> S2
+RF10 --> S3
+S1 --> C1
+S2 --> C2
+S3 --> C3
+C1 --> R1
+C2 --> R2
+C3 --> R3
+R1 --> K1
+R2 --> K2
+R3 --> K3
+K1 --> T1
+K2 --> T2
+K3 --> T3
+C3 ..> C1 : mismas reglas\n(R-02..R-06)
+RF09 ..> K2
+
+legend bottom
+  Naranja = cambio práctico defendido (semana 6). R-07 ya decía desde la semana 1 que una corrección es una versión nueva con supersedes_id y motivo.
+  Cada eslabón tiene un archivo y una prueba en la matriz decisión → evidencia.
+endlegend
+@enduml

@@ -1,0 +1,48 @@
+@startuml semana-08-flujo-auditor
+title User flow · Auditor / Administrador con auditoria.consultar
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Auditor|
+start
+:Recibe una referencia de un usuario
+(o de una alerta);
+:Abre «Consulta de auditoría» · W6;
+|Interfaz|
+if (¿permisoGuard: auditoria.consultar?) then (DENEGADO)
+  :W5 · M-10;
+  stop
+else (PERMITIDO)
+endif
+:VACÍO: «Pega la referencia que
+te compartieron» + ayuda · W6;
+|Auditor|
+:Pega la referencia y pulsa «Buscar»;
+|Interfaz|
+if (¿Formato válido? [A-Za-z0-9-]) then (no)
+  :M-30 junto al campo
+  (no se envía la consulta);
+  detach
+else (sí)
+endif
+:CARGA;
+|Servidor RBAC|
+:GET /auditoria/eventos/{referencia};
+|Interfaz|
+if (¿Resultado?) then (200)
+  :ÉXITO: tarjeta del evento
+  tipo, actor, fecha, permiso, motivo
+  + explicación en lenguaje claro · W6;
+  :AYUDA: glosario de motivos;
+  stop
+elseif (404) then (recuperable)
+  :M-31 «No hay un evento con esa referencia
+  en este hospital» (mismo mensaje si es de otro hospital);
+  detach
+else (403 / 500)
+  :M-10 / M-12 [Reintentar];
+  detach
+endif
+@enduml

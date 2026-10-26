@@ -1,0 +1,34 @@
+OK    m1-roles-base-320.png              desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m1-roles-base-360.png              desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m1-roles-base-430.png              desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m1-roles-base-768.png              desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m1-roles-base-1024.png             desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m1-roles-sin-conexion-360.png      desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-paso1-360.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-paso2-360.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-base-360.png            desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-base-320.png            desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-enviando-360.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-incierto-360.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-ya-asignado-360.png     desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-paso1-320.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-paso2-320.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-enviando-320.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-incierto-320.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m2-asignar-ya-asignado-320.png     desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m3-revocar-base-360.png            desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m3-revocar-base-320.png            desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m3-revocar-sin-conexion-360.png    desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m3-revocar-base-768.png            desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-carga-360.png         desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-base-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-base-430.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-sin-conexion-360.png  desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-denegado-360.png      desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m4-operacion-denegado-320.png      desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m5-auditoria-base-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m5-auditoria-404-320.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+OK    m5-auditoria-base-1024.png         desborde=0px  toque<44=0  fuente<16=0  hospital=sí
+
+Vistas: 31  Fallan: 0
+exit=0

@@ -1,0 +1,54 @@
+@startuml semana-01-actividad
+' Semana 1 — Catálogo de salas, wards y camas (tarea Odoo 2443)
+title Actividad — creación de sala y cama con control de estado operativo
+
+start
+:Usuario elige una operación del catálogo;
+if (D1 ¿Autorizado en este hospital?\n(CU-05, R-07)) then (no)
+  :E1 Operación rechazada (403);
+  :F4 Rechazo con mensaje claro;
+  stop
+endif
+switch (D2 ¿Qué operación?)
+case (Registrar sala)
+  :Ingresa código, nombre y ubicación;
+  if (D3 ¿Datos válidos?) then (no)
+    :E2 Error de validación (422) → F4;
+    stop
+  elseif (D4 ¿Código único en el hospital?\n(R-01)) then (no)
+    :E3 Código duplicado (409) → F4;
+    stop
+  endif
+  :Guarda la sala como activa;
+  :F1 Sala creada;
+case (Registrar cama)
+  :Elige sala e ingresa código y tipo;
+  if (D5 ¿Sala activa? (R-03)) then (no)
+    :E4 Sala inactiva (422) → F4;
+    stop
+  elseif (D3 ¿Datos válidos?) then (no)
+    :E2 Error de validación (422) → F4;
+    stop
+  elseif (D4 ¿Código único en la sala?\n(R-02)) then (no)
+    :E3 Código duplicado (409) → F4;
+    stop
+  endif
+  :Guarda la cama como «disponible» (R-04);
+  :F2 Cama creada;
+case (Cambiar estado de cama\no de sala)
+  :Elige cama o sala, nuevo estado y motivo;
+  if (D6 ¿Cama ocupada o sala con\ncamas ocupadas? (R-06)) then (sí)
+    :E5 Gestionar desde admisión (409) → F4;
+    stop
+  elseif (D7 ¿Transición permitida? (R-05)) then (no)
+    :E6 Transición inválida (422) → F4;
+    stop
+  elseif (D8 ¿Sigue igual que al leerla?) then (no)
+    :E7 Conflicto: recargar y reintentar (409) → F4;
+    stop
+  endif
+  :Actualiza el estado y registra usuario,\nfecha y motivo en auditoría (R-09);
+  :F3 Estado actualizado y auditado;
+endswitch
+stop
+@enduml

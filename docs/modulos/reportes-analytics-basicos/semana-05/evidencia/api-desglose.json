@@ -1,0 +1,28 @@
+{
+    "estado": "exito",
+    "datos": {
+        "indicador": {
+            "nombre": "Ocupación de camas",
+            "valor": 78.0,
+            "unidad": "%",
+            "numerador": 39
+        },
+        "trazabilidad": {
+            "formula": "camas ocupadas / camas habilitadas × 100",
+            "periodo": "2026-10-01 a 2026-10-31",
+            "filtros": "ninguno adicional",
+            "fuente": "ward, bed, bed_stay",
+            "calculado_en": "2026-10-22 06:57",
+            "detalle": "39 de 50 camas habilitadas"
+        },
+        "desglose": {
+            "dimension": "sala",
+            "partes": {
+                "Medicina": 18,
+                "Cirugía": 14,
+                "Pediatría": 7
+            },
+            "total": 39
+        }
+    }
+}

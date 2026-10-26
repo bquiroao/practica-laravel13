@@ -1,0 +1,26 @@
+Plan SQA RBAC · medición (PHP 8.4.26)
+--------------------------------------------------------------------------------------------------------------
+VERDE  M1  Pruebas automáticas en verde                    100 % (78/78)
+       umbral: 100 % y omitidas ≤ 2
+       omitidas: 2 (requieren PostgreSQL)
+ROJO   M2  Cobertura de códigos de decisión               88.9 % (16/18)
+       umbral: 100 %
+       sin prueba: USUARIO_INACTIVO, USUARIO_NO_ENCONTRADO
+VERDE  M3  Conformidad contrato ↔ código                 100 % (7/7 operaciones)
+       umbral: 100 % y 0 operaciones solo en el contrato
+       misma ruta, método y x-permiso en las 7 operaciones
+VERDE  M4  Trazabilidad de denegaciones                     100 % (6/6 intentos) · ruido: 0
+       umbral: 100 % con evento completo y 0 eventos por consultas pasivas
+       8 campos presentes en cada evento; 0 eventos tras 3 consultas de permisos efectivos
+VERDE  M5  Confiabilidad fail-closed ante fallas inyectadas 100 % (7/7)
+       umbral: 100 %
+       ningún caso permite ni deja cambios a medias
+ROJO   M6  Hallazgos de revisión Crítico/Mayor sin verificar 3 (Crítico 0 · Mayor 3) · Menor 2
+       umbral: 0 Crítico; Mayor = 0 para liberar
+       abiertos: AR-01, AR-02, AR-04
+ÁMBAR M7  Tiempo de decisión p95 (RNF-09)                 0.006 ms (n = 3000, en memoria)
+       umbral: < 50 ms p95 con PostgreSQL
+       medido sin base de datos: VERDE solo cuando se repita con PDO + PostgreSQL (S15)
+--------------------------------------------------------------------------------------------------------------
+VERDE: 4  ÁMBAR: 1  ROJO: 2
+exit=1

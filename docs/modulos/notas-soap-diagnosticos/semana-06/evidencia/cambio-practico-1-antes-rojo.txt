@@ -1,0 +1,19 @@
+Cambio práctico «Corregir una nota SOAP firmada» — paso 1: pruebas escritas, código SIN implementar (rojo)
+Fecha: 2026-10-13 19:06
+Antes de escribir las pruebas: Total: 101  Pasan: 100  Fallan: 0  Omitidas: 1
+Extracto de php tests/ejecutar.php: solo las pruebas que fallan y el total.
+
+[FALLA] DOM-10   Semana 6: corregir solo se puede sobre una nota firmada, con motivo suficiente; crea la versión siguiente y no toca la original
+[FALLA] COR-01   Corregir una nota firmada crea la versión 2 (supersedes_id + motivo); la original no cambia y queda NOTA_CORREGIDA
+[FALLA] COR-02   Un borrador no se corrige (se puede firmar o seguir trabajando): 409 nota_no_firmada y no se guarda nada
+[FALLA] COR-03   Cada versión se corrige una sola vez (409 nota_ya_corregida); la corrección firmada sí se puede corregir (versión 3)
+[FALLA] COR-04   Quién puede corregir: enfermería 403 por la ruta; otro médico 403; token de otro hospital 403
+[FALLA] COR-05   Reglas: motivo corto 422 motivo_insuficiente; sección vacía 422; CIE-10 inválido 422; nota inexistente 404; sin efectos
+[FALLA] COR-06   Si el expediente ya se cerró, la nota no se corrige: 409 expediente_no_disponible (R-03)
+[FALLA] COR-07   Atomicidad (R-06): si falla el diagnóstico de la corrección, no queda la versión nueva ni NOTA_CORREGIDA
+[FALLA] COR-08   La línea de tiempo muestra las dos versiones y cuál reemplaza a cuál (supersedes_id), sin texto clínico
+[FALLA] API-03   Cada código HTTP que devuelve el servidor en 31 escenarios reales está documentado en su operación
+[FALLA] REP-09 memoria Semana 6: guarda la corrección con supersedes_id y motivo; correccionDe la encuentra; una versión solo se corrige una vez (clase 23)
+[FALLA] REP-09 pdo-sqlite Semana 6: guarda la corrección con supersedes_id y motivo; correccionDe la encuentra; una versión solo se corrige una vez (clase 23)
+[FALLA] INT-11   Semana 6: corrección con PDO real; la base guarda la cadena (supersedes_id) y su UNIQUE impide dos correcciones de la misma versión
+Total: 113  Pasan: 99  Fallan: 13  Omitidas: 1

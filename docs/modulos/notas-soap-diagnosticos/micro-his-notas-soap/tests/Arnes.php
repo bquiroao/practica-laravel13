@@ -13,6 +13,9 @@ $GLOBALS['grupoActual'] = '';
 
 function prueba(string $id, string $descripcion, callable $cuerpo): void
 {
+    if (isset($GLOBALS['solo']) && preg_match($GLOBALS['solo'], $id) !== 1) {
+        return; // semana 15: --solo=UNI,CB corre solo esas pruebas
+    }
     try {
         $cuerpo();
         [$estado, $detalle] = ['PASA', null];
