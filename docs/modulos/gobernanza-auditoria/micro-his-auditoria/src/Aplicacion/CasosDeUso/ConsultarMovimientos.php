@@ -22,6 +22,8 @@ use Auditoria\Dominio\Puertos\Bitacora;
 final class ConsultarMovimientos
 {
     public const PAGINA = 50;
+    public const PERMISO = 'auditoria.consultar';
+    public const PERMISO_RED = 'auditoria.consultar_red';
 
     /** @param iterable<FiltroMovimiento> $filtros */
     public function __construct(
@@ -36,7 +38,7 @@ final class ConsultarMovimientos
     public function ejecutar(ComandoConsultar $comando): Resultado
     {
         $red = $comando->hospital === PoliticaAcceso::RED;
-        if (!$this->acceso->permite($comando->actor, $comando->hospital, $red ? 'auditoria.consultar_red' : 'auditoria.consultar')) {
+        if (!$this->acceso->permite($comando->actor, $comando->hospital, $red ? ConsultarMovimientos::PERMISO_RED : ConsultarMovimientos::PERMISO)) {
             return Resultado::accesoDenegado();
         }
         $parametros = $comando->parametros;

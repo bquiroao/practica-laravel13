@@ -21,6 +21,7 @@ final class Rutas
             new Ruta('GET', "#^$base/movimientos$#", $c->consultar(...)),
             new Ruta('GET', "#^$base/movimientos/(?<id>[1-9][0-9]{0,17})$#", $c->verDetalle(...)),
             new Ruta('POST', "#^$base/verificaciones$#", $c->verificar(...)),
+            new Ruta('GET', "#^$base/anclas$#", $c->ancla(...)),
         ];
     }
 }

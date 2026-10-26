@@ -8,6 +8,7 @@ declare(strict_types=1);
  *   AUDITORIA_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=micro_his_auditoria" AUDITORIA_DB_USUARIO=… AUDITORIA_DB_CLAVE=… php tests/ejecutar.php
  */
 
+use Auditoria\Aplicacion\Comandos\ComandoAncla;
 use Auditoria\Aplicacion\Comandos\ComandoConsultar;
 use Auditoria\Aplicacion\Comandos\ComandoRegistrar;
 use Auditoria\Aplicacion\Comandos\ComandoVerificar;
@@ -107,6 +108,19 @@ prueba('INT-05', 'PostgreSQL: un administrador desactiva el trigger y cambia una
     $s->pdo->exec('ALTER TABLE audit_logs ENABLE TRIGGER audit_logs_sin_update_delete');
     $v = $s->casos['verificar']->ejecutar(new ComandoVerificar('superadmin', Escenario::H_ORIENTE))->datos;
     igual(['ALTERADA', 2], [$v['estado'], $v['primera_secuencia']], 'detección');
+});
+
+prueba('INT-07', 'PostgreSQL: se borra la última fila con el trigger desactivado; solo el ancla publicada antes lo delata (TRUNCADA)', function () use ($intSistema): void {
+    $s = $intSistema();
+    for ($i = 1; $i <= 3; $i++) {
+        $s->casos['registrar']->ejecutar(new ComandoRegistrar('svc-pacientes', Escenario::H_ORIENTE, Escenario::mov(['event_id' => "ev-$i"])));
+    }
+    $ancla = $s->casos['ancla']->ejecutar(new ComandoAncla('superadmin', Escenario::H_ORIENTE))->datos;
+    $s->pdo->exec('ALTER TABLE audit_logs DISABLE TRIGGER audit_logs_sin_update_delete');
+    $s->pdo->exec('DELETE FROM audit_logs WHERE id = 3');
+    $s->pdo->exec('ALTER TABLE audit_logs ENABLE TRIGGER audit_logs_sin_update_delete');
+    $verificar = static fn (?array $a): string => $s->casos['verificar']->ejecutar(new ComandoVerificar('superadmin', Escenario::H_ORIENTE, $a))->datos['estado'];
+    igual(['INTEGRA', 'TRUNCADA'], [$verificar(null), $verificar(['secuencia' => $ancla['secuencia'], 'sello' => $ancla['sello']])], 'sin ancla / con ancla');
 });
 
 prueba('INT-06', 'PostgreSQL: la restricción única (emisor, event_id) y la de (cadena, secuencia) existen en el esquema', function () use ($intSistema): void {

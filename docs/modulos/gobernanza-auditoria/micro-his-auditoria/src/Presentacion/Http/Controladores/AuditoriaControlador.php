@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Auditoria\Presentacion\Http\Controladores;
 
 use Auditoria\Aplicacion\CasosDeUso\ConsultarMovimientos;
+use Auditoria\Aplicacion\CasosDeUso\ObtenerAncla;
 use Auditoria\Aplicacion\CasosDeUso\RegistrarMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerDetalleMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerificarIntegridad;
@@ -27,7 +28,17 @@ final class AuditoriaControlador
         private readonly ConsultarMovimientos $consultar,
         private readonly VerDetalleMovimiento $detalle,
         private readonly VerificarIntegridad $verificar,
+        private readonly ObtenerAncla $ancla,
     ) {
+    }
+
+    public function ancla(Solicitud $solicitud, Identidad $identidad): Respuesta
+    {
+        try {
+            return MovimientosVista::ancla($this->ancla->ejecutar(FormularioMovimientos::ancla($solicitud, $identidad)));
+        } catch (EntradaInvalida $e) {
+            return ErrorVista::entradaInvalida($e);
+        }
     }
 
     public function registrar(Solicitud $solicitud, Identidad $identidad): Respuesta

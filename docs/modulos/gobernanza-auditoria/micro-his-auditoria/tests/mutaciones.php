@@ -46,6 +46,14 @@ $mutaciones = [
         'return array_slice($encontrados, 0, $consulta->limite);', 'return $encontrados;'],
     'M15' => ['El adaptador InMemory acepta el mismo (emisor, event_id) dos veces', 'src/Persistencia/EnMemoria/BitacoraEnMemoria.php',
         'if (($m->emisor === $movimiento->emisor && $m->eventId === $movimiento->eventId)', 'if ((false)'],
+    // Semana 5: cliente-servidor, ancla y observabilidad
+    'M16' => ['El cliente guarda en la bandeja también los 4xx (reintentaría para siempre un error del emisor)', 'src/Cliente/ClienteAuditoria.php',
+        "        if (\$r->origen === ResultadoCliente::SERVIDOR) {\n            return \$r;\n        }",
+        "        if (\$r->origen === ResultadoCliente::SERVIDOR && !\$r->rechazado()) {\n            return \$r;\n        }"],
+    'M17' => ['La verificación ignora el ancla (no detecta el truncamiento)', 'src/Aplicacion/CasosDeUso/VerificarIntegridad.php',
+        'if ($ancla !== null && $ancla[\'secuencia\'] > 0) {', 'if (false) {'],
+    'M18' => ['El kernel no devuelve X-Request-ID', 'src/Presentacion/Http/Kernel.php',
+        "\$respuesta = \$respuesta->conCabecera('X-Request-ID', \$requestId);", ''],
 ];
 
 $sobreviven = 0;

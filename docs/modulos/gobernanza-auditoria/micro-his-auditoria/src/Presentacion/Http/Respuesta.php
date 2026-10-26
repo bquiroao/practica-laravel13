@@ -22,6 +22,12 @@ final class Respuesta
         return new self($estado, $cuerpo, $cabeceras + ['Content-Type' => 'application/json; charset=utf-8']);
     }
 
+    /** La misma respuesta con una cabecera más (inmutable). */
+    public function conCabecera(string $nombre, string $valor): self
+    {
+        return new self($this->estado, $this->cuerpo, [$nombre => $valor] + $this->cabeceras);
+    }
+
     public function enviar(): void
     {
         foreach ($this->cabeceras as $nombre => $valor) {
