@@ -35,6 +35,7 @@ docs/
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
 | Contratos API: centro de documentación y manuales por rol | [`modulos/contratos-api`](modulos/contratos-api/README.md) |
 | Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
+| Órdenes de laboratorio desde EMR | [`modulos/ordenes-laboratorio-emr`](modulos/ordenes-laboratorio-emr/README.md) |
 | Investigación y prototipo NativePHP para extensión móvil/escritorio | [`modulos/investigacion-prototipo-nativephp`](modulos/investigacion-prototipo-nativephp/README.md) |
 | Ingreso de resultados de laboratorio | [`modulos/ingreso-resultados-laboratorio`](modulos/ingreso-resultados-laboratorio/README.md) |
 | Gestión de usuarios, tenants y endurecimiento de autenticación | [`modulos/gestion-usuarios-tenants-autenticacion`](modulos/gestion-usuarios-tenants-autenticacion/README.md) |
