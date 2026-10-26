@@ -9,12 +9,15 @@ micro-his-auditoria/
 ├── config/config.php           ← variables de entorno, catálogo, tokens demo y permisos provisionales
 ├── database/schema.sql         ← audit_logs: solo inserción (trigger), sello, únicos e índices
 ├── src/
-│   ├── Presentacion/Http/      ← Kernel, acciones, traductor Resultado → HTTP, autenticación demo
+│   ├── Presentacion/Http/      ← Kernel, MVC (Controladores, Formularios, Vistas), Rutas, autenticación demo
 │   ├── Aplicacion/             ← casos de uso, CadenaSellada, comandos, Resultado, puertos
 │   ├── Dominio/                ← Movimiento, Sello, reglas y filtros (OCP), puertos Bitacora y Reloj
-│   └── Persistencia/           ← PdoBitacora, PdoTransaccion, adaptadores de configuración
+│   └── Persistencia/           ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), FabricaAdaptadores, configuración
+├── database/integracion-central.sql ← audit_logs en la base central del HIS (semana 4)
+├── bin/demo.php                ← demo de punta a punta SIN base de datos (modo memoria)
 ├── bin/demo-http.sh            ← recorrido de punta a punta con curl
-└── tests/                      ← dominio, aplicación, PDO con dobles, HTTP, arquitectura, integración, mutaciones
+├── bin/validar-integracion-central.php ← aplica integracion-central.sql sobre las migraciones reales
+└── tests/                      ← dominio, aplicación, PDO con dobles, contrato del Repository, MVC y HTTP, arquitectura, integración, mutaciones
 ```
 
 **Regla de dependencias:** Presentación → Aplicación → Dominio ← Persistencia. La verifican las pruebas ARQ-01..ARQ-05.
@@ -36,8 +39,9 @@ Requisitos: PHP 8.2+ con `pdo_pgsql` y `mbstring`.
 
 ```bash
 cd docs/modulos/gobernanza-auditoria/micro-his-auditoria
-php tests/ejecutar.php        # 39 pruebas; las 6 de integración se omiten sin base de datos
-php tests/mutaciones.php      # 12 defectos inyectados; todos deben detectarse
+php tests/ejecutar.php        # 62 pruebas; las 14 de PostgreSQL se omiten sin base de datos
+php tests/mutaciones.php      # 15 defectos inyectados; todos deben detectarse
+php bin/demo.php              # la API completa en memoria, sin base de datos
 ```
 
 **Con PostgreSQL real.** Cada ejecución crea un esquema temporal y lo elimina al terminar. Para usarlo, defina las variables y vuelva a correr los dos scripts:
@@ -45,8 +49,8 @@ php tests/mutaciones.php      # 12 defectos inyectados; todos deben detectarse
 ```bash
 export AUDITORIA_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=micro_his_auditoria"
 export AUDITORIA_DB_USUARIO=postgres AUDITORIA_DB_CLAVE=…
-php tests/ejecutar.php        # 39/39
-php tests/mutaciones.php      # 12/12 (M1 y M11 solo las detecta la base real)
+php tests/ejecutar.php        # 62/62
+php tests/mutaciones.php      # 15/15 (M1 y M11 solo las detecta la base real)
 ```
 
 ## Levantar la API
@@ -62,3 +66,4 @@ bash bin/demo-http.sh         # en otra terminal
 | Semana | Qué agregó |
 |---|---|
 | 3 | Cuatro capas, PDO con sentencias preparadas, `audit_logs` de solo inserción, sello encadenado con candado por cadena, idempotencia, consulta paginada con cursor y meta-auditoría. Pruebas con dobles, de integración con PostgreSQL y de mutación. |
+| 4 | Entrada **MVC** (`AuditoriaControlador`, `FormularioMovimientos`, `MovimientosVista`/`ErrorVista`), adaptadores **InMemory de producción** junto a los PDO, `AUDITORIA_PERSISTENCIA` = `pdo` o `memoria`, suite de **contrato** común (CON-MEM/CON-PDO), demo sin base e integración con la base central del HIS (`integracion-central.sql`, validada sobre las migraciones reales). |

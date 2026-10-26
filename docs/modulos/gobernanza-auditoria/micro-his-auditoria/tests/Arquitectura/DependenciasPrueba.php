@@ -53,6 +53,35 @@ prueba('ARQ-04', 'El Dominio no hace E/S ni conoce HTTP: sin superglobales, arch
     }
 });
 
+prueba('ARQ-06', 'Repository: cada puerto de persistencia tiene un adaptador PDO y uno InMemory de producción', function (): void {
+    foreach (['Auditoria\\Dominio\\Puertos\\Bitacora' => ['Pdo\\PdoBitacora', 'EnMemoria\\BitacoraEnMemoria'],
+        'Auditoria\\Aplicacion\\Puertos\\Transaccion' => ['Pdo\\PdoTransaccion', 'EnMemoria\\TransaccionEnMemoria']] as $puerto => $adaptadores) {
+        foreach ($adaptadores as $adaptador) {
+            $clase = 'Auditoria\\Persistencia\\' . $adaptador;
+            afirmar(class_exists($clase) && is_subclass_of($clase, $puerto), "$clase no implementa $puerto");
+        }
+    }
+});
+
+prueba('ARQ-07', 'Controlador: solo recibe casos de uso; sin SQL, sin «new», sin códigos de negocio y sin armar respuestas', function () use ($arqArchivos): void {
+    $parametros = (new ReflectionMethod(\Auditoria\Presentacion\Http\Controladores\AuditoriaControlador::class, '__construct'))->getParameters();
+    foreach ($parametros as $p) {
+        afirmar(str_starts_with((string) $p->getType(), 'Auditoria\\Aplicacion\\CasosDeUso\\'), "el controlador recibe {$p->getType()}");
+    }
+    foreach ($arqArchivos('Presentacion/Http/Controladores') as $archivo => $codigo) {
+        afirmar(preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b|\bnew\s+\\\\?[A-Z]|[\'"][A-Z]{3,}_[A-Z_]+[\'"]|Respuesta::json|\b[45]\d\d\b/', $codigo) !== 1,
+            "$archivo hace algo que no le toca a un controlador");
+    }
+});
+
+prueba('ARQ-08', 'Vistas: Respuesta::json solo aparece en Presentacion/Http/Vistas', function () use ($arqArchivos): void {
+    foreach ($arqArchivos('Presentacion') as $archivo => $codigo) {
+        if (!str_starts_with(str_replace('\\', '/', $archivo), 'Presentacion/Http/Vistas/') && !str_ends_with($archivo, 'Respuesta.php')) {
+            afirmar(!str_contains($codigo, 'Respuesta::json') && !str_contains($codigo, 'new Respuesta('), "$archivo arma respuestas");
+        }
+    }
+});
+
 prueba('ARQ-05', 'Inmutabilidad en el código: el puerto no ofrece modificar ni borrar, y src/ no tiene UPDATE ni DELETE sobre audit_logs', function () use ($arqArchivos): void {
     foreach ((new ReflectionClass(Bitacora::class))->getMethods() as $metodo) {
         afirmar(preg_match('/^(actualizar|modificar|eliminar|borrar|update|delete)/i', $metodo->getName()) !== 1, "Bitacora::{$metodo->getName()}");

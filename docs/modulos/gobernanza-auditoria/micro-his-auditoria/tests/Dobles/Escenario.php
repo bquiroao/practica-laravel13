@@ -8,6 +8,8 @@ use Auditoria\Aplicacion\Comandos\ComandoConsultar;
 use Auditoria\Aplicacion\Comandos\ComandoRegistrar;
 use Auditoria\Aplicacion\Resultados\Resultado;
 use Auditoria\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Auditoria\Persistencia\EnMemoria\BitacoraEnMemoria;
+use Auditoria\Persistencia\EnMemoria\TransaccionEnMemoria;
 use Auditoria\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Auditoria\Presentacion\Http\Solicitud;
 
@@ -23,8 +25,10 @@ final class Escenario
     public static function crear(): object
     {
         $config = self::config();
-        $bitacora = new BitacoraEnMemoria();
-        $transaccion = new TransaccionEnMemoria($bitacora);
+        // Semana 4: los adaptadores InMemory DE PRODUCCIÓN, envueltos en dobles que simulan fallas y espían.
+        $real = new BitacoraEnMemoria();
+        $bitacora = new BitacoraConFallas($real);
+        $transaccion = new TransaccionEspia(new TransaccionEnMemoria([$real]));
         $contador = 0;
         $casos = \construirCasosDeUso($config, $bitacora, $transaccion, new PoliticaAccesoEstatica($config['permisos']), new RelojFijo(),
             static function () use (&$contador): string {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Auditoria\Presentacion\Http;
 
 use Auditoria\Presentacion\Http\Autenticacion\Autenticador;
+use Auditoria\Presentacion\Http\Vistas\ErrorVista;
 
 /**
  * Front controller. Orden fijo: ruta (404/405) → hospital (400) → token (401) → tenant del token (403)
@@ -24,7 +25,7 @@ final class Kernel
         try {
             return $this->procesar($solicitud);
         } catch (\Throwable) {
-            return TraductorResultado::error(500, 'ERROR_INTERNO');
+            return ErrorVista::errorInterno();
         }
     }
 
@@ -42,20 +43,20 @@ final class Kernel
             }
             $hospital = $solicitud->cabecera('X-Tenant-ID');
             if ($hospital === '') {
-                return TraductorResultado::error(400, 'HOSPITAL_REQUERIDO');
+                return ErrorVista::hospitalRequerido();
             }
             $token = preg_match('/^Bearer\s+(\S+)$/', $solicitud->cabecera('Authorization'), $m) === 1 ? $m[1] : '';
             $identidad = $token === '' ? null : $this->autenticador->identificar($token);
             if ($identidad === null) {
-                return TraductorResultado::error(401, 'NO_AUTENTICADO');
+                return ErrorVista::noAutenticado();
             }
             if (!$identidad->puedeActuarEn($hospital)) {
-                return TraductorResultado::error(403, 'TENANT_NO_COINCIDE');
+                return ErrorVista::tenantNoCoincide();
             }
 
             return ($ruta->accion)($solicitud, $identidad, $parametros);
         }
 
-        return $metodoNoPermitido ? TraductorResultado::error(405, 'METODO_NO_PERMITIDO') : TraductorResultado::error(404, 'RUTA_NO_ENCONTRADA');
+        return $metodoNoPermitido ? ErrorVista::metodoNoPermitido() : ErrorVista::rutaNoEncontrada();
     }
 }
