@@ -57,9 +57,8 @@ prueba('REF-06', 'CursorPaginacion ida y vuelta, cursores inválidos → null; A
     $m = $piezaMov(Escenario::H_ORIENTE, 42);
     [$fecha, $id] = CursorPaginacion::leer(CursorPaginacion::de($m));
     igual([$m->ocurridoEn->format(DATE_ATOM), 42], [$fecha->format(DATE_ATOM), $id], 'ida y vuelta');
-    // DEF-07-01 (hallado por esta prueba, ya existía antes del refactor): «2026-13-45T99:00:00Z|1» NO da null, porque
-    // createFromFormat desborda la fecha imposible a otra válida. Se registró y no se corrige aquí: cambiaría el comportamiento.
-    foreach (['%%%', base64_encode('no-es-un-cursor'), base64_encode('2026-10-21T15:15:00Z|x'), ''] as $malo) {
+    // DEF-07-01 (hallado por esta prueba en la semana 7, corregido en la semana 15 con UNI-08): la fecha imposible da null.
+    foreach (['%%%', base64_encode('no-es-un-cursor'), base64_encode('2026-10-21T15:15:00Z|x'), base64_encode('2026-13-45T99:00:00Z|1'), ''] as $malo) {
         igual(null, CursorPaginacion::leer($malo), 'inválido: ' . $malo);
     }
     $autorizacion = new AutorizacionLectura(new PoliticaAccesoEstatica([

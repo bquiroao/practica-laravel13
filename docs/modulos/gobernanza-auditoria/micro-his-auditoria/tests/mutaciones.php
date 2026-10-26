@@ -73,6 +73,9 @@ $mutaciones = [
         "return \$m->recurso ?? '';", 'return $m->usuario;'],
     'M26' => ['El filtro por recurso hereda el máximo de 64 (no se podría buscar un recurso que sí se registró)', 'src/Dominio/Filtros/FiltroRecurso.php',
         "        return 128;", "        return 64;"],
+    // Semana 15: corrección de DEF-07-01
+    'M27' => ['El cursor vuelve a aceptar fechas imposibles (DEF-07-01)', 'src/Aplicacion/Servicios/CursorPaginacion.php',
+        '$fecha === false || $fecha->format(\'Y-m-d\TH:i:s\Z\') !== $m[1] ? null', '$fecha === false ? null'],
 ];
 
 $sobreviven = 0;

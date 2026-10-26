@@ -43,11 +43,13 @@ Requisitos: PHP 8.2+ con `pdo_pgsql` y `mbstring`.
 
 ```bash
 cd docs/modulos/gobernanza-auditoria/micro-his-auditoria
-php tests/ejecutar.php        # 98 pruebas; las 17 de PostgreSQL se omiten sin base de datos
-php tests/mutaciones.php      # 26 defectos inyectados; todos deben detectarse
+php tests/ejecutar.php        # 116 pruebas; las 17 de PostgreSQL se omiten sin base de datos
+php tests/mutaciones.php      # 27 defectos inyectados; todos deben detectarse
 php bin/demo.php              # la API completa en memoria, sin base de datos
 php bin/demo-correccion.php   # el cambio de la semana 6 (corrección trazable) por la API
 php bin/acoplamiento.php      # acoplamiento por clase (semana 7)
+php tests/ejecutar.php --solo=UNI,CB,CN   # solo las pruebas de la semana 15
+php tests/ejecutar.php --defectos --solo=DEF   # defectos ABIERTOS: fallan hasta corregirse
 ```
 
 **Con PostgreSQL real.** Cada ejecución crea un esquema temporal y lo elimina al terminar. Para usarlo, defina las variables y vuelva a correr los dos scripts:
@@ -55,8 +57,8 @@ php bin/acoplamiento.php      # acoplamiento por clase (semana 7)
 ```bash
 export AUDITORIA_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=micro_his_auditoria"
 export AUDITORIA_DB_USUARIO=postgres AUDITORIA_DB_CLAVE=…
-php tests/ejecutar.php        # 98/98
-php tests/mutaciones.php      # 26/26 (M1 y M11 solo las detecta la base real)
+php tests/ejecutar.php        # 116/116
+php tests/mutaciones.php      # 27/27 (M1 y M11 solo las detecta la base real)
 ```
 
 ## Levantar la API
@@ -77,3 +79,4 @@ bash bin/demo-http.sh         # en otra terminal
 | 6 | **Corrección trazable** (`corrige_evento` + `motivo_correccion`): un movimiento nuevo, sellado, que referencia al original sin modificarlo; una sola corrección por original (`YA_CORREGIDO`), mismo emisor y hospital. `ReglaCorreccion`, `corregido_por` en la consulta y el detalle, contrato **1.1.0**, `bin/demo-correccion.php`. 88 pruebas y 21 mutaciones. |
 | 7 | Refactor de la consulta sin cambiar el comportamiento: `Alcance` y `CatalogoFiltros` (Dominio), `AutorizacionLectura`, `CursorPaginacion` y `ProyeccionMovimientos` (Aplicación); `VerDetalleMovimiento` ya no depende de `ConsultarMovimientos`. Instrumento `bin/acoplamiento.php`. 94 pruebas y 24 mutaciones. |
 | 12 | Cambio solicitado **filtro por recurso** («¿quién vio la ficha de este paciente?»): `FiltroRecurso` (extensión OCP), `FiltroPorCampo::maximo()`, índice `audit_logs_recurso_fecha`, contrato **1.2.0** y guarda «contrato = código» (REC-04). 98 pruebas y 26 mutaciones. |
+| 15 | Pruebas **UNI** (8), **CB** (3) y **CN** (7) trazadas a RF/RNF; grupo **Defectos** con los defectos abiertos (`--defectos`) y filtro por prefijo (`--solo=UNI,CB,CN`); corrección de DEF-07-01 en `CursorPaginacion` (M27). 116 pruebas y 27 mutaciones. |

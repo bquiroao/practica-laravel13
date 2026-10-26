@@ -27,6 +27,8 @@ final class CursorPaginacion
         }
         $fecha = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s\Z', $m[1], new \DateTimeZone('UTC'));
 
-        return $fecha === false ? null : [$fecha, (int) $m[2]];
+        // Semana 15 · DEF-07-01: createFromFormat DESBORDA una fecha imposible (mes 13 → año siguiente); se exige que
+        // la fecha leída, vuelta a formatear, sea exactamente el texto recibido (como FiltroRangoFechas::fecha()).
+        return $fecha === false || $fecha->format('Y-m-d\TH:i:s\Z') !== $m[1] ? null : [$fecha, (int) $m[2]];
     }
 }
