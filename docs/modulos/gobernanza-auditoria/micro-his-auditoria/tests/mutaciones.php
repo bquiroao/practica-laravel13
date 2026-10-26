@@ -24,7 +24,7 @@ $mutaciones = [
     'M5' => ['Sin idempotencia: el reintento se registra otra vez', 'src/Aplicacion/CasosDeUso/RegistrarMovimiento.php',
         'if ($existente !== null) {', 'if (false) {'],
     'M6' => ['La consulta no se audita (R-08)', 'src/Aplicacion/CasosDeUso/ConsultarMovimientos.php',
-        "\$this->cadena->auditarLectura(\$consulta->hospital,", "if (false) \$this->cadena->auditarLectura(\$consulta->hospital,"],
+        "\$this->cadena->auditarLectura(\$alcance->hospital,", "if (false) \$this->cadena->auditarLectura(\$alcance->hospital,"],
     'M7' => ['Registrar responde «creado» aunque la base falle', 'src/Aplicacion/CasosDeUso/RegistrarMovimiento.php',
         "        } catch (ErrorPersistencia) {\n            return Resultado::noDisponible();", "        } catch (ErrorPersistencia) {\n            return Resultado::creado([]);"],
     'M8' => ['La cadena no se bloquea antes de leer el último sello (carrera)', 'src/Aplicacion/Servicios/CadenaSellada.php',
@@ -59,8 +59,15 @@ $mutaciones = [
         'if ($this->bitacora->correccionDe((int) $original->id) !== null) {', 'if (false) {'],
     'M20' => ['Se puede corregir un movimiento de OTRO hospital (fuga entre tenants)', 'src/Aplicacion/CasosDeUso/RegistrarMovimiento.php',
         'if ($original !== null && $original->hospital !== $nuevo->hospital) {', 'if (false) {'],
-    'M21' => ['La consulta deja de avisar que un original fue corregido', 'src/Aplicacion/CasosDeUso/ConsultarMovimientos.php',
+    'M21' => ['La consulta deja de avisar que un original fue corregido', 'src/Aplicacion/Servicios/ProyeccionMovimientos.php',
         "['corregido_por' => \$corregidos[\$m->id] ?? null]", "['corregido_por' => null]"],
+    // Semana 7: refactor de la consulta (vigilan las piezas extraídas)
+    'M22' => ['El alcance de un hospital incluye movimientos de otro (fuga entre tenants en el detalle)', 'src/Dominio/Modelo/Alcance.php',
+        'return $this->esRed() || $m->hospital === $this->hospital;', 'return true;'],
+    'M23' => ['La lectura de red se autoriza con el permiso de hospital', 'src/Aplicacion/Servicios/AutorizacionLectura.php',
+        '$alcance->esRed() ? self::PERMISO_RED : self::PERMISO', 'self::PERMISO'],
+    'M24' => ['El catálogo acepta un parámetro que ningún filtro reclama (se ignoraría en silencio)', 'src/Dominio/Filtros/CatalogoFiltros.php',
+        'if (!in_array($nombre, $reclamados, true)) {', 'if (false) {'],
 ];
 
 $sobreviven = 0;

@@ -8,9 +8,9 @@ declare(strict_types=1);
  * conoce la indentación fija del archivo.
  */
 
-use Auditoria\Aplicacion\CasosDeUso\ConsultarMovimientos;
 use Auditoria\Aplicacion\CasosDeUso\RegistrarMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerificarIntegridad;
+use Auditoria\Aplicacion\Servicios\AutorizacionLectura;
 use Auditoria\Presentacion\Http\Controladores\AuditoriaControlador;
 use Auditoria\Presentacion\Http\Respuesta;
 use Auditoria\Presentacion\Http\Rutas;
@@ -72,8 +72,8 @@ prueba('API-01', 'Contrato = código: las mismas 5 operaciones; cada x-permiso e
     igual($codigo, $a, 'operaciones');
     $esperado = [
         'registrarMovimiento' => [RegistrarMovimiento::PERMISO, null],
-        'consultarMovimientos' => [ConsultarMovimientos::PERMISO, ConsultarMovimientos::PERMISO_RED],
-        'verDetalleMovimiento' => [ConsultarMovimientos::PERMISO, ConsultarMovimientos::PERMISO_RED],
+        'consultarMovimientos' => [AutorizacionLectura::PERMISO, AutorizacionLectura::PERMISO_RED],
+        'verDetalleMovimiento' => [AutorizacionLectura::PERMISO, AutorizacionLectura::PERMISO_RED],
         'verificarIntegridad' => [VerificarIntegridad::PERMISO, null],
         'obtenerAncla' => [VerificarIntegridad::PERMISO, null],
     ];
