@@ -1,0 +1,41 @@
+IGUAL   1. B-6: Ana pide sus permisos efectivos (sin evento)    PHP: 200 sí=2/6 ev=0                         
+IGUAL   2. B-6: Luis sin rol pide sus permisos efectivos        PHP: 200 sí=0/3 ev=0                         
+IGUAL   3. Camino feliz: admin asigna Enfermería a Luis         PHP: 201 ROL_ASIGNADO ref ev=1               
+IGUAL   4. Camino feliz: Luis consulta el PDP                   PHP: 200 PERMITIDO ev=1                      
+IGUAL   5. Camino feliz: Luis registra signos vitales           PHP: 201 ev=1                                
+IGUAL   6. Reintento idéntico de la asignación                  PHP: 409 ASIGNACION_DUPLICADA ev=1           
+IGUAL   7. Asignar a cuenta inactiva                            PHP: 422 USUARIO_INACTIVO ev=1               
+IGUAL   8. Asignar a persona inexistente                        PHP: 404 USUARIO_NO_ENCONTRADO ev=1          
+IGUAL   9. Asignar rol fuera del catálogo                       PHP: 422 ROL_INVALIDO ev=1                   
+IGUAL  10. Autoasignación                                       PHP: 422 AUTOASIGNACION ev=1                 
+IGUAL  11. Vigencia invertida                                   PHP: 422 VIGENCIA_INVALIDA ev=1              
+IGUAL  12. Formulario vacío                                     PHP: 422 DATOS_INVALIDOS usuario_id,rol,valido_desde ev=1
+IGUAL  13. Fecha con formato inválido                           PHP: 422 DATOS_INVALIDOS valido_desde ev=1   
+IGUAL  14. Enfermería intenta asignar (ruta protegida)          PHP: 403 ref ev=2                            
+IGUAL  15. Auditor ve la denegación de ruta                     PHP: 200 ACCESO_DENEGADO PERMISO_NO_ASIGNADO ref ev=2
+IGUAL  16. Error crítico: Ana registra signos (aún con rol)     PHP: 201 ev=2                                
+IGUAL  17. Revocar con motivo corto                             PHP: 422 MOTIVO_INSUFICIENTE ev=2            
+IGUAL  18. Autorrevocación                                      PHP: 422 AUTORREVOCACION ev=2                
+IGUAL  19. Revocar sin motivo                                   PHP: 422 DATOS_INVALIDOS motivo ev=2         
+IGUAL  20. Error crítico: admin revoca Enfermería a Ana         PHP: 200 ROL_REVOCADO ref ev=3               
+IGUAL  21. B-6: permisos de Ana tras la revocación              PHP: 200 sí=0/2 ev=3                         
+IGUAL  22. Reintento idéntico de la revocación                  PHP: 404 MEMBRESIA_NO_ENCONTRADA ev=3        
+IGUAL  23. Error crítico: Ana intenta registrar signos          PHP: 403 ref ev=4                            
+IGUAL  24. Error crítico: el auditor localiza la referencia     PHP: 200 ACCESO_DENEGADO MEMBRESIA_NO_VIGENTE ref ev=4
+IGUAL  25. Otro hospital no ve el evento                        PHP: 404 ev=4                                
+IGUAL  26. Ana no puede consultar la auditoría                  PHP: 403 ref ev=5                            
+IGUAL  27. PDP para Ana tras la revocación                      PHP: 200 DENEGADO ref ev=6                   
+IGUAL  28. Marta (médico) prescribe                             PHP: 201 ev=6                                
+IGUAL  29. Luis (enfermería) no puede prescribir                PHP: 403 ref ev=7                            
+IGUAL  30. Motivo PERMISO_NO_ASIGNADO                           PHP: 200 ACCESO_DENEGADO PERMISO_NO_ASIGNADO ref ev=7
+IGUAL  31. Token de otro hospital contra Oriente                PHP: 403 ref ev=8                            
+IGUAL  32. PDP con permiso malformado                           PHP: 422 DATOS_INVALIDOS permiso,recurso ev=8
+IGUAL  33. Sin hospital                                         PHP: 400 ev=8                                
+IGUAL  34. Token inválido                                       PHP: 401 ev=8                                
+IGUAL  35. Ruta inexistente                                     PHP: 404 ev=8                                
+IGUAL  36. Método no permitido                                  PHP: 405 ev=8                                
+IGUAL  37. B-6: lista vacía → 422                               PHP: 422 DATOS_INVALIDOS permisos ev=8       
+IGUAL  38. B-6: token de otro hospital → todo en no             PHP: 200 sí=0/2 ev=8                         
+
+Pasos: 38  Iguales: 38  Difieren: 0
+exit=0

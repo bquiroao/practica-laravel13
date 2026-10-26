@@ -1,0 +1,59 @@
+@startuml semana-04-capas
+!pragma layout smetana
+title Capas, responsabilidades y objetos reutilizables — Micro-HIS Pacientes (semana 4)
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+top to bottom direction
+
+package "Presentación (V + C de MVC)\nrecibe HTTP, valida FORMATO, da formato a la respuesta" as P {
+  rectangle "Kernel · Rutas · Ruta\n<<reutilizable>>" as K #E8F5E9
+  rectangle "PacientesControlador\n(C)" as C
+  rectangle "FormularioPaciente · EntradaInvalida" as F
+  rectangle "PacienteVista · ErrorVista\n(V) <<reutilizable>>" as V #E8F5E9
+}
+
+package "Aplicación (M de MVC: orquestación)\npermiso, transacción, auditoría" as A {
+  rectangle "RegistrarPaciente · BuscarPacientes\nConsultarPaciente · ActualizarPaciente" as UC
+  rectangle "ControlAcceso · Resultado · Comandos\n<<reutilizable>>" as CA #E8F5E9
+  rectangle "Puertos: Transaccion · PoliticaAcceso · Reloj" as PA
+}
+
+package "Dominio (M de MVC: reglas)\nR-01..R-10, sin E/S" as D {
+  rectangle "Paciente · Identificador · CriterioBusqueda\n<<reutilizable>>" as MO #E8F5E9
+  rectangle "PoliticaDuplicados · PoliticaEdicion\n<<reutilizable>>" as PO #E8F5E9
+  rectangle "Puertos Repository:\nConsultaPacientes · RepositorioPacientes\nIndiceDuplicados · RegistroAuditoria" as PD
+}
+
+package "Persistencia\nimplementa los puertos" as S {
+  rectangle "Pdo*: PdoRepositorioPacientes · PdoIndiceDuplicados\nPdoRegistroAuditoria · PdoTransaccion\nRepositorioPdo::ejecutar() <<reutilizable>>" as PDO
+  rectangle "EnMemoria*: RepositorioPacientesEnMemoria · IndiceDuplicadosEnMemoria\nRegistroAuditoriaEnMemoria · TransaccionEnMemoria\nRestaurable <<reutilizable>>" as MEM
+  rectangle "FabricaPdo · FabricaEnMemoria → ConjuntoAdaptadores\nProteccionDocumentos <<reutilizable>>" as FAB #E8F5E9
+}
+
+K --> C
+C --> F
+C --> UC
+C --> V
+UC --> CA
+UC --> MO
+UC --> PO
+UC ..> PD
+UC ..> PA
+PDO ..|> PD
+MEM ..|> PD
+PDO ..|> PA
+MEM ..|> PA
+FAB --> PDO
+FAB --> MEM
+
+note right of D
+  Dominio y Aplicación NO cambiaron
+  respecto de la semana 3: la entrada MVC
+  y el segundo adaptador se agregaron
+  sin tocar una sola regla.
+end note
+@enduml

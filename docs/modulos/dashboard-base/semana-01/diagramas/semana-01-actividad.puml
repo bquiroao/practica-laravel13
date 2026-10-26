@@ -1,0 +1,53 @@
+@startuml semana-01-actividad
+' Semana 1 — Dashboard base UI/UX e implementación transversal (tarea Odoo 2428)
+title Actividad — navegación del dashboard con estados de carga, vacío, error y resumen inicial
+
+start
+:Usuario abre /dashboard;
+if (D1 ¿Hay token y hospital\nseleccionado? (R-01)) then (no)
+  :E1 Sin sesión: redirige a /login;
+  :F4 Pantalla de inicio de sesión;
+  stop
+endif
+:Muestra el layout y el menú filtrado por rol (R-02);
+switch (D2 ¿Qué hace el usuario?)
+case (Ver resumen)
+  repeat :Muestra esqueleto de carga (R-04)\n(cada tarjeta en paralelo y por su cuenta, R-03);
+    :Pide el conteo de la tarjeta;
+    if (D3 ¿Respondió antes de 10 s? (R-04)) then (no)
+      :E2 Tiempo agotado;
+    else (sí)
+      switch (D4 ¿Código de respuesta?)
+      case (200)
+        if (D5 ¿Trae datos?) then (sí)
+          :F1 Tarjeta con resumen (solo conteos, R-06);
+        else (no)
+          :F2 Tarjeta vacía con acción sugerida (R-05);
+        endif
+        stop
+      case (401)
+        :E3 Sesión expirada: limpia la sesión (R-07);
+        :F4 Pantalla de inicio de sesión;
+        stop
+      case (403)
+        :E4 Sin permiso: oculta la tarjeta (R-07);
+        stop
+      case (5xx o red)
+        :E5 Error del servidor o de red;
+      endswitch
+    endif
+    :Estado de error sin detalles técnicos,\ncon «Reintentar» (R-05, R-09);
+  backward :CU-04 Reintentar solo esta tarjeta (R-08);
+  repeat while (D6 ¿Pulsa «Reintentar»?) is (sí) not (no)
+  :F3 Tarjeta en error; el resto sigue funcionando (R-03);
+case (Navegar)
+  :Elige una opción del menú o escribe una ruta;
+  if (D7 ¿Ruta permitida para su rol? (R-02)) then (sí)
+    :F5 Módulo abierto;
+  else (no)
+    :E6 Acceso denegado;
+    :F6 Aviso sin salir del dashboard;
+  endif
+endswitch
+stop
+@enduml

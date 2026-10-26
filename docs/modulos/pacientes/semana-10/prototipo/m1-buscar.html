@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buscar paciente · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual">Admisión</span>
+  <span class="avatar" role="img" aria-label="Marta López, admisión">ML</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Ves la última búsqueda; para buscar de nuevo hace falta conexión.
+</div>
+
+<main>
+  <div class="fila">
+    <h1>Pacientes</h1>
+    <button class="btn texto icono derecha" aria-label="Ayuda: cómo buscar pacientes">?</button>
+  </div>
+
+  <!-- Un solo campo: código, documento o nombre (carga cognitiva mínima). La fecha va plegada. -->
+  <form role="search" aria-label="Buscar paciente" onsubmit="return false">
+    <label for="buscar">Código, documento o nombre</label>
+    <input id="buscar" type="search" value="lopez ana" autocomplete="off" enterkeyhint="search" aria-describedby="buscar-ayuda">
+    <p class="ayuda" id="buscar-ayuda" style="margin-top:-6px">Código, documento completo o al menos 3 letras del nombre.</p>
+    <details class="mas">
+      <summary>Más criterios</summary>
+      <label for="nacimiento">Fecha de nacimiento (dd/mm/aaaa)</label>
+      <input id="nacimiento" type="date" value="1985-03-14">
+    </details>
+    <button class="btn primario bloque" data-estado="base vacio carga">Buscar</button>
+    <button class="btn bloque" aria-disabled="true" data-estado="sin-conexion">Buscar · requiere conexión</button>
+  </form>
+
+  <!-- Anuncio del resultado (semana 9, BL-08): región viva, el foco se queda en el buscador -->
+  <p class="meta" role="status" aria-live="polite" style="margin:16px 0 8px" data-estado="base sin-conexion">2 resultados · máximo 20</p>
+
+  <!-- móvil y tableta: una tarjeta por paciente; prioridad 1 nombre y código, 2 nacimiento y documento -->
+  <ul class="solo-movil" style="list-style:none;padding:0;margin:0" data-estado="base sin-conexion">
+    <li><a class="resultado" href="m3-ficha.html">
+      <div>
+        <div class="principal">Ana Lucía López Pérez</div>
+        <div class="meta">P-000001 · 14/03/1985</div>
+        <div class="meta">DPI •••• 0101</div>
+      </div><span class="flecha" aria-hidden="true">›</span></a></li>
+    <li><a class="resultado" href="m3-ficha.html">
+      <div>
+        <div class="principal">Ana María López Ruiz</div>
+        <div class="meta">P-000004 · 14/03/1985</div>
+        <div><span class="etiqueta-provisional">Sin documento</span></div>
+      </div><span class="flecha" aria-hidden="true">›</span></a></li>
+  </ul>
+
+  <!-- escritorio (≥1024): la misma información como tabla (W1 de la semana 8) -->
+  <table class="tabla" data-estado="base sin-conexion">
+    <caption class="oculto-visual">Resultados de la búsqueda</caption>
+    <thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Nacimiento</th><th scope="col">Documento</th></tr></thead>
+    <tbody>
+      <tr><td><a href="m3-ficha.html">P-000001</a></td><td>Ana Lucía López Pérez</td><td>14/03/1985</td><td>DPI •••• 0101</td></tr>
+      <tr><td><a href="m3-ficha.html">P-000004</a></td><td>Ana María López Ruiz</td><td>14/03/1985</td><td><span class="etiqueta-provisional">Sin documento</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="tarjeta" data-estado="vacio" role="status" aria-live="polite">
+    <h2>No encontramos pacientes con esos datos</h2>
+    <p class="meta">Revisa el documento o prueba con el código de la pulsera. Si buscaste bien y no está, regístralo.</p>
+  </div>
+
+  <div data-estado="carga" aria-busy="true">
+    <div class="tarjeta"><div class="esq" style="width:60%"></div><div class="esq" style="width:40%"></div></div>
+    <div class="tarjeta"><div class="esq" style="width:55%"></div><div class="esq" style="width:35%"></div></div>
+    <p class="meta" role="status">Buscando…</p>
+  </div>
+</main>
+
+<!-- La acción principal del rol, al alcance del pulgar. Solo con pacientes.registrar. -->
+<div class="accion-fija">
+  <a class="btn primario" href="m2-registrar.html?estado=paso1" data-estado="base vacio carga">＋ Registrar paciente</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">＋ Registrar · requiere conexión</span>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-buscar.html" aria-current="page"><span class="ico" aria-hidden="true">🔎</span>Pacientes</a>
+  <a href="m2-registrar.html?estado=paso1"><span class="ico" aria-hidden="true">＋</span>Registrar</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

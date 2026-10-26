@@ -1,0 +1,60 @@
+@startuml semana-01-secuencia
+' Semana 1 — Catálogo de salas, wards y camas (tarea Odoo 2443)
+title Secuencia — registrar cama (CU-02) y cambiar su estado operativo (CU-03)
+
+actor "Administrador" as U
+participant "UI del catálogo\n(Vue)" as UI
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Autorización\n(RBAC)" as RBAC
+participant "Servicio del\ncatálogo" as SVC
+database "Repositorio\n(base HOSPITAL)" as DB
+participant "Auditoría" as AUD
+
+== CU-02 Registrar cama ==
+U -> UI : S1 Completa sala, código y tipo
+UI -> API : S2 POST /wards/{id}/beds (JWT, X-Tenant-ID)
+API -> RBAC : S3 ¿Puede gestionar el catálogo? (R-07)
+alt sin permiso u otro hospital
+  API --> UI : 403 (E1)
+else autorizado
+  API -> SVC : S4 registrarCama(datos)
+  SVC -> DB : S5 Valida datos y lee la sala
+  alt datos inválidos o sala inactiva (R-03)
+    SVC --> API : rechazo
+    API --> UI : 422 (E2 / E4)
+  else válido
+    SVC -> DB : S6 Inserta cama «disponible» (R-04)
+    alt código repetido en la sala (R-02)
+      DB --> SVC : viola beds_ward_code_unique
+      API --> UI : 409 (E3)
+    else insertada
+      SVC -> AUD : S7 Registra el alta
+      API --> UI : S8 201 Creada (F2)
+    end
+  end
+end
+
+== CU-03 Cambiar estado operativo ==
+U -> UI : S9 Elige nuevo estado y motivo
+UI -> API : S10 PATCH /beds/{id}/status (estado, motivo, updated_at)
+API -> RBAC : S10 ¿Puede cambiar estados? (R-07)
+alt sin permiso u otro hospital
+  API --> UI : 403 (E1)
+else autorizado
+  API -> SVC : S11 cambiarEstado(cama, estado, motivo)
+  SVC -> DB : S11 Lee la cama
+  alt cama ocupada (R-06)
+    API --> UI : 409 (E5)
+  else transición no permitida (R-05)
+    API --> UI : 422 (E6)
+  else transición válida
+    SVC -> DB : S12 UPDATE si updated_at no cambió
+    alt otro usuario la cambió antes
+      API --> UI : 409 (E7)
+    else actualizada
+      SVC -> AUD : S13 Registra cambio y motivo (R-09)
+      API --> UI : S14 200 Actualizado (F3)
+    end
+  end
+end
+@enduml

@@ -1,0 +1,24 @@
+== ANTES: el cliente usa la clase base sin parches ==
+  ReporteOcupacionAntes: valor=0.78, suma_desglose=39
+  ReporteCitasAntes: ERROR -> Citas exige medico_id
+  ReporteMortalidadAntes: ERROR -> Mortalidad no se puede desglosar (datos sensibles)
+
+== DESPUÉS: pruebas de contrato iguales para todos los reportes ==
+  OK    [ocupacion] porcentaje entre 0 y 100
+  OK    [ocupacion] ficha de trazabilidad (RN-05)
+  OK    [ocupacion] declara su dimensión
+  OK    [ocupacion] suma del desglose 39 = indicador 39 (RN-07)
+  OK    [ocupacion] el cliente lo usa sin instanceof
+  OK    [citas] porcentaje entre 0 y 100
+  OK    [citas] ficha de trazabilidad (RN-05)
+  OK    [citas] declara su dimensión
+  OK    [citas] suma del desglose 120 = indicador 120 (RN-07)
+  OK    [citas] el cliente lo usa sin instanceof
+  OK    [mortalidad] porcentaje entre 0 y 100
+  OK    [mortalidad] ficha de trazabilidad (RN-05)
+  OK    [mortalidad] declara su dimensión
+  OK    [mortalidad] suma del desglose 4 = indicador 4 (RN-07)
+  OK    [mortalidad] el cliente lo usa sin instanceof
+  OK    [dominio] rechaza un período invertido (RN-02)
+
+RESULTADO: todos los reportes son sustituibles (LSP cumplido)
