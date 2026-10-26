@@ -1,0 +1,14 @@
+@startuml
+title C4 - Contexto del Micro-HIS de recepción
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Técnico/a de laboratorio" as Tech
+rectangle "Micro-HIS Recepción\n(PHP CLI)" as HIS
+database "Base de datos\n(PDO)" as DB
+rectangle "EMR / órdenes clínicas\n(fuera de alcance)" as EMR
+
+Tech --> HIS : registra datos y condición\nsolicita recepción
+HIS --> DB : persiste recepción\naceptada o rechazada
+HIS ..> EMR : referencia de orden\n(no integrado)
+@enduml

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notas del expediente · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span> ▾</span>
+  <span class="usuario" data-estado="base carga vacio sin-conexion">dra-mendez <span class="rol">· Médico</span></span>
+  <span class="usuario" data-estado="enfermeria enf-carga enf-sin-conexion" hidden>enf-ana <span class="rol">· Enfermería</span></span>
+</header>
+<div class="paciente">Carlos R. · <span>Expediente exp-carlos · Episodio epi-100 (abierto)</span></div>
+<div class="red sin-conexion" role="status" data-estado="sin-conexion enf-sin-conexion" hidden>Sin conexión. Mostramos lo último cargado hace 3 min. <button type="button" class="boton">Reintentar</button></div>
+<main>
+  <h1>Notas SOAP</h1>
+  <div class="filtros" role="group" aria-label="Filtrar por estado">
+    <button type="button" aria-pressed="true">Todas</button>
+    <button type="button" aria-pressed="false">Borradores</button>
+    <button type="button" aria-pressed="false">Firmadas</button>
+  </div>
+
+  <div data-estado="carga enf-carga" hidden aria-busy="true" aria-label="Cargando notas">
+    <div class="esqueleto"></div><div class="esqueleto"></div><div class="esqueleto"></div>
+  </div>
+
+  <div data-estado="vacio" hidden>
+    <p>Este expediente todavía no tiene notas.</p>
+  </div>
+
+  <div class="tarjetas" data-estado="base sin-conexion enfermeria enf-sin-conexion">
+    <article class="tarjeta">
+      <div class="fila"><strong>Versión 2</strong><span class="estado firmada">✓ Firmada</span></div>
+      <p>J18.9 · Neumonía no especificada</p>
+      <p class="secundario">dra-mendez · 13/10/2026 10:05</p>
+      <p class="secundario extra">Corrige la versión 1: «temperatura mal anotada»</p>
+      <a class="ver" href="m3-detalle.html?estado=firmada" aria-label="Ver nota versión 2, firmada, 13/10/2026">Ver nota</a>
+    </article>
+    <article class="tarjeta reemplazada">
+      <div class="fila"><strong>Versión 1</strong><span class="estado reemplazada">⟲ Reemplazada por v2</span></div>
+      <p>J18.9 · Neumonía no especificada</p>
+      <p class="secundario">dra-mendez · 13/10/2026 08:10</p>
+      <a class="ver" href="m3-detalle.html?estado=reemplazada" aria-label="Ver nota versión 1, reemplazada, 13/10/2026">Ver nota</a>
+    </article>
+    <article class="tarjeta">
+      <div class="fila"><strong>Versión 1</strong><span class="estado borrador">✎ Borrador</span></div>
+      <p>R50.9 · Fiebre no especificada</p>
+      <p class="secundario">dr-lopez · 12/10/2026 17:40</p>
+      <a class="ver" href="m3-detalle.html" aria-label="Ver nota versión 1, borrador, 12/10/2026">Ver nota</a>
+    </article>
+  </div>
+
+  <table class="tabla" data-estado="base sin-conexion enfermeria enf-sin-conexion">
+    <caption class="secundario" style="text-align:left">Notas del expediente exp-carlos</caption>
+    <thead><tr><th scope="col">Versión</th><th scope="col">Estado</th><th scope="col">Diagnóstico</th><th scope="col">Autor</th><th scope="col">Fecha</th><th scope="col"><span class="secundario">Acción</span></th></tr></thead>
+    <tbody>
+      <tr><td>v2</td><td><span class="estado firmada">✓ Firmada</span></td><td>J18.9 · Neumonía no especificada</td><td>dra-mendez</td><td>13/10/2026 10:05</td><td><a href="m3-detalle.html?estado=firmada" aria-label="Ver nota versión 2">Ver nota</a></td></tr>
+      <tr><td>v1</td><td><span class="estado reemplazada">⟲ Reemplazada por v2</span></td><td>J18.9 · Neumonía no especificada</td><td>dra-mendez</td><td>13/10/2026 08:10</td><td><a href="m3-detalle.html?estado=reemplazada" aria-label="Ver nota versión 1, reemplazada">Ver nota</a></td></tr>
+      <tr><td>v1</td><td><span class="estado borrador">✎ Borrador</span></td><td>R50.9 · Fiebre no especificada</td><td>dr-lopez</td><td>12/10/2026 17:40</td><td><a href="m3-detalle.html" aria-label="Ver nota versión 1, borrador">Ver nota</a></td></tr>
+    </tbody>
+  </table>
+</main>
+<div class="accion-fija" data-estado="base carga vacio">
+  <a class="boton primario" href="m2-nueva-nota.html?estado=paso1">+ Nueva nota</a>
+</div>
+<div class="accion-fija" data-estado="sin-conexion" hidden>
+  <span class="boton" aria-disabled="true" role="button" aria-describedby="motivo-nueva">+ Nueva nota · requiere conexión</span>
+  <span id="motivo-nueva" hidden>Para escribir una nota se necesita conexión.</span>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

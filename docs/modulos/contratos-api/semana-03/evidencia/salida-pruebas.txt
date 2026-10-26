@@ -1,0 +1,15 @@
+OK    feliz: «ana» envía guia-citas 1.0.0 = 201 en revisión y «luis» la aprueba = 200 (CA-01, CA-04)
+OK    feliz: un médico ve la vigente 1.1.0 (CA-05)
+OK    feliz: enfermería ve la 1.0.0, la mayor publicada de su audiencia (R-06)
+OK    feliz: la 1.0.0 obsoleta se consulta con aviso y la vigente 1.1.0 (CA-07, R-08)
+OK    regla: versión sin formato x.y.z o sin audiencia = 422 E2 (CA-02, R-01)
+OK    regla: versión igual a la vigente = 409 E3 (CA-03, R-02)
+OK    regla: «ana» aprueba su propia versión = 403 E5 (CA-04, R-05)
+OK    regla: rechazar sin motivo = 422 E2 (RF-03)
+OK    regla: rol fuera de la audiencia = 404 E6, igual que un documento inexistente (CA-06, R-07)
+OK    regla: una versión obsoleta no vuelve a publicarse = 409 E7 (R-03, R-08)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException al guardar la audiencia = 503 E8, sin versión a medias (transacción)
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

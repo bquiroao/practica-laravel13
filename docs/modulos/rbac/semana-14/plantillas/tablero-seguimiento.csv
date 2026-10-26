@@ -1,0 +1,8 @@
+﻿semana,metrica,valor,umbral,estado,responsable,accion,fecha_limite,verificado_por
+S14,M1 Pruebas en verde,100 % (78/78; 2 omitidas),100 % y omitidas ≤ 2,VERDE,RM,—,—,
+S14,M2 Cobertura de códigos de decisión,88.9 % (16/18),100 %,ROJO,RM,Afirmar USUARIO_INACTIVO y USUARIO_NO_ENCONTRADO,S15,
+S14,M3 Conformidad contrato-código,100 % (7/7),100 % y lint válido,VERDE,RM,—,—,
+S14,M4 Trazabilidad de denegaciones,100 % (6/6); ruido 0,100 % y 0 eventos pasivos,VERDE,RM,—,—,
+S14,M5 Confiabilidad fail-closed,100 % (7/7),100 %,VERDE,RM,—,—,
+S14,M6 Hallazgos Crítico/Mayor sin verificar,3 Mayor (AR-01; AR-02; AR-04),0 Crítico; 0 Mayor para liberar,ROJO,RSQA,Retrabajo de la revisión S13,S15,
+S14,M7 Tiempo de decisión p95,0.006 ms (en memoria),< 50 ms p95 con PostgreSQL,ÁMBAR,RM,Medir con PDO + PostgreSQL,S15,

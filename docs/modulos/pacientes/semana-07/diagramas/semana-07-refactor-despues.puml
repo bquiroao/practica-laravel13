@@ -1,0 +1,65 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title DESPUÉS: los casos de uso solo orquestan (1 preocupación); las reglas se cruzan en el Dominio
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Aplicación" #FFF4E8 {
+  class ActualizarPaciente <<65 líneas · 6 dependencias>> {
+    + ejecutar(ComandoActualizar)
+    ..exigir → cargar → paraEdicion → guardar + evento..
+  }
+  class RegistrarPaciente <<85 líneas · 7 dependencias>> {
+    + ejecutar(ComandoRegistrar)
+    ..exigir → idempotencia → paraAlta → guardar + evento..
+  }
+  class ControlAcceso {
+    + exigir(actor, hospital, permiso)
+    + capacidades(actor, hospital): Capacidades
+  }
+}
+
+package "Dominio" #E3F1F0 {
+  class RevisionDeFicha #FFE3D6 {
+    + paraAlta(hospital, datos, hoy, Capacidades, confirma, motivo)
+    + paraEdicion(actual, datos, hoy, Capacidades, motivo): Paciente
+    ..único dueño del orden de las reglas..
+  }
+  class Capacidades #FFE3D6 {
+    + verProtegidos
+    + proteger
+    + confirmarDuplicado
+    + editarRestringido
+    + {static} ninguna()
+  }
+  class PoliticaEdicion
+  class PoliticaDuplicados
+  class PoliticaConfidencialidad
+  class EventoAuditoria {
+    + {static} registrado(actor, paciente, confirmadas, motivo)
+    + {static} actualizado(actor, antes, despues, motivo)
+  }
+}
+
+ActualizarPaciente --> ControlAcceso : exigir + capacidades()
+ActualizarPaciente --> RevisionDeFicha
+ActualizarPaciente ..> EventoAuditoria
+RegistrarPaciente --> ControlAcceso : exigir + capacidades()
+RegistrarPaciente --> RevisionDeFicha
+RegistrarPaciente ..> EventoAuditoria
+ControlAcceso ..> Capacidades : crea
+RevisionDeFicha ..> Capacidades
+RevisionDeFicha --> PoliticaEdicion
+RevisionDeFicha --> PoliticaDuplicados
+RevisionDeFicha --> PoliticaConfidencialidad
+
+note bottom of RevisionDeFicha
+  Las tres políticas NO cambiaron.
+  Una regla nueva de la ficha se agrega aquí,
+  en un solo lugar, y no en dos casos de uso.
+end note
+@enduml

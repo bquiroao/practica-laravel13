@@ -1,0 +1,23 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Citas médicas y agenda (tarea Odoo 2459): diseño DESPUÉS de aplicar DIP
+title DESPUÉS — política y detalles dependen de abstracciones
+package "Dominio (alto nivel)" {
+  class ServicioCitas <<política>>
+  interface AgendaCitas
+  interface Reloj
+  interface Auditoria
+}
+package "Detalles (bajo nivel)" {
+  class AgendaPdo
+  class AgendaEnMemoria
+  class RelojFijo
+  class AuditoriaEnMemoria
+}
+ServicioCitas --> AgendaCitas
+ServicioCitas --> Reloj
+ServicioCitas --> Auditoria
+AgendaPdo ..|> AgendaCitas
+AgendaEnMemoria ..|> AgendaCitas
+RelojFijo ..|> Reloj
+AuditoriaEnMemoria ..|> Auditoria
+@enduml

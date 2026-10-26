@@ -1,0 +1,53 @@
+@startuml semana-11-mapa-navegacion
+!pragma layout smetana
+title Mapa de navegación · prototipo RBAC (misma app en escritorio y móvil)
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #3D4F6B
+  RoundCorner 12
+}
+
+rectangle "**Ingresar**\n~#/ingresar\n<size:10>pública · elige persona demo</size>" as Ingresar
+rectangle "**Inicio**\n~#/inicio\n<size:10>tarjetas = secciones que el PDP permite</size>" as Inicio
+rectangle "**Guard de ruta**\n¿PDP PERMITIDO?\n<size:10>POST /autorizaciones/decisiones · caché 30 s</size>" as Guard #FFF4E5
+
+rectangle "**Roles del hospital**\n~#/roles?usuario=…\n<size:10>[roles.asignar] · B-1, B-4</size>" as Roles
+rectangle "**Asignar rol (3 pasos)**\n~#/roles/asignar\n<size:10>[roles.asignar] persona → rol → confirmar</size>" as Asignar
+rectangle "**Resultado de la asignación**\n<size:10>201 ✓ · 409 tras reintento = ya estaba</size>\n<size:10>incierto (R-C1) · 403 con referencia</size>" as Resultado
+rectangle "**Diálogo: revocar rol**\n<size:10>[roles.revocar] · modal, fondo inerte</size>\n<size:10>motivo ≥ 10 + casilla</size>" as Revocar
+
+rectangle "**Ficha del paciente**\n~#/pacientes/P-00123\n<size:10>[expediente.leer]</size>\n<size:10>acciones: [signos_vitales.registrar] · [prescripciones.crear]</size>" as Ficha
+rectangle "**Aviso 403 en la ficha**\n<size:10>«No se guardó: acceso denegado»</size>\n<size:10>referencia + Compartir/Copiar · sin motivo (R-08)</size>" as Aviso403 #FDECEC
+
+rectangle "**Consulta de auditoría**\n~#/auditoria?ref=…\n<size:10>[auditoria.consultar]</size>\n<size:10>motivo en lenguaje claro + código</size>" as Auditoria
+rectangle "**Acceso denegado**\n~#/acceso-denegado\n<size:10>referencia · «Este intento quedó registrado»</size>" as Denegado #FDECEC
+rectangle "**Menú de usuario**\n<size:10>Cambiar de usuario · Demostración:</size>\n<size:10>revocación en otra sesión, sin conexión,</size>\n<size:10>respuesta perdida</size>" as Menu
+
+Ingresar --> Inicio : <color:#1F6B3A>CF-2</color> / EC
+Inicio --> Guard : nav / tarjeta
+Guard --> Roles : <color:#1F6B3A>CF-3</color> PERMITIDO
+Guard --> Ficha : <color:#1F6B3A>CF-8</color> / <color:#A33A3A>EC-2</color>
+Guard --> Auditoria : <color:#A33A3A>EC-5</color>
+Guard --> Denegado : <color:#A33A3A>EC-1</color> DENEGADO\n(URL directa)
+Roles --> Asignar : <color:#1F6B3A>CF-4→5</color> «+ Asignar rol»
+Asignar --> Resultado : <color:#1F6B3A>CF-6→7</color> «Asignar rol»
+Resultado --> Roles : «Ver roles de…»
+Roles --> Revocar : «Revocar rol» (TEC)
+Revocar --> Roles : 200 M-21 · Esc/Cancelar
+Ficha --> Ficha : <color:#1F6B3A>CF-9</color> 201 «Signos vitales registrados»
+Ficha --> Aviso403 : <color:#A33A3A>EC-4</color> 403 (rol revocado\nmientras la pantalla seguía abierta)
+Aviso403 ..> Auditoria : <color:#A33A3A>la referencia viaja</color>\n<color:#A33A3A>al administrador</color>
+Denegado --> Inicio : «Volver al inicio»
+Menu ..> Ingresar : <color:#1F6B3A>CF-8</color> cambiar de usuario
+Menu ..> Ficha : <color:#A33A3A>EC-3</color> otra sesión revoca
+
+legend right
+  <color:#1F6B3A>**CF-n**</color> camino feliz · <color:#A33A3A>**EC-n**</color> error crítico
+  (mismos números que las capturas)
+  [permiso] = permiso que protege la ruta o la acción
+  Toda ruta con permiso pasa por el guard;
+  la operación se vuelve a autorizar en el servidor.
+endlegend
+@enduml

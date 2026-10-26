@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cliente · Reportes y analytics básicos</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1.5rem; max-width: 56rem; }
+  form { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+  label { display: flex; flex-direction: column; font-size: .9rem; }
+  table { border-collapse: collapse; margin-top: .5rem; }
+  td, th { border: 1px solid #999; padding: .3rem .6rem; text-align: left; }
+  .valor { font-size: 2.5rem; font-weight: bold; margin: .5rem 0; }
+  .error { color: #a00; } .aviso { color: #865; }
+  button.enlace { background: none; border: 0; color: #06c; text-decoration: underline; cursor: pointer; padding: 0; }
+</style>
+</head>
+<body>
+<h1>Reportes y analytics básicos</h1>
+<p>Cliente del prototipo cliente-servidor: solo consume la API REST v1, no conoce la base de datos.</p>
+<form id="filtros">
+  <label>Rol <select name="rol">
+    <option value="administrador">Administrador</option>
+    <option value="jefe_area">Jefe de área</option>
+    <option value="medico">Médico</option>
+  </select></label>
+  <label>Desde <input type="date" name="desde" value="2026-10-01" required></label>
+  <label>Hasta <input type="date" name="hasta" value="2026-10-31" required></label>
+  <button type="submit">Calcular ocupación</button>
+</form>
+<div id="estado" role="status" aria-live="polite"></div>
+<section id="resultado"></section>
+
+<script>
+const formulario = document.getElementById('filtros');
+const estado = document.getElementById('estado');
+const resultado = document.getElementById('resultado');
+const texto = (valor) => String(valor ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function pedir(nivel, extra = {}) {
+  const datos = new FormData(formulario);
+  const sufijo = nivel === 'indicador' ? '' : '/' + nivel;
+  const consulta = new URLSearchParams({ desde: datos.get('desde'), hasta: datos.get('hasta'), dimension: 'sala', ...extra });
+  estado.textContent = 'Calculando…';
+  try {
+    const respuesta = await fetch(`/api/v1/reportes/ocupacion${sufijo}?${consulta}`, {
+      headers: { 'X-Rol': datos.get('rol'), 'X-Correlation-Id': crypto.randomUUID() },
+    });
+    const cuerpo = await respuesta.json();
+    estado.textContent = '';
+    mostrar(cuerpo, extra.parte);
+  } catch {
+    estado.textContent = '';
+    resultado.innerHTML = '<p class="error" role="alert">No hay conexión con el servidor. Revise su red e intente de nuevo.</p>';
+  }
+}
+
+function mostrar(cuerpo, parte) {
+  if (cuerpo.error) {
+    resultado.innerHTML = `<p class="error" role="alert">${texto(cuerpo.error.mensaje)} <small>(${texto(cuerpo.error.codigo)} · ${texto(cuerpo.error.correlationId)})</small></p>`;
+    return;
+  }
+  if (cuerpo.estado === 'sin_datos') {
+    resultado.innerHTML = `<p class="aviso">Sin datos: ${texto(cuerpo.mensaje)}</p>`;
+    return;
+  }
+  const { indicador, trazabilidad, desglose, registros } = cuerpo.datos;
+  let html = `<h2>${texto(indicador.nombre)}</h2><p class="valor">${indicador.valor} ${texto(indicador.unidad)}</p>`;
+  html += '<h3>Ficha de trazabilidad</h3><table>' + Object.entries(trazabilidad)
+    .map(([campo, valor]) => `<tr><th>${texto(campo)}</th><td>${texto(valor)}</td></tr>`).join('') + '</table>';
+  if (!desglose) {
+    html += '<p><button class="enlace" data-nivel="desglose">Ver desglose por sala</button></p>';
+  } else {
+    html += `<h3>Desglose por ${texto(desglose.dimension)}</h3><table><tr><th>Sala</th><th>Camas</th></tr>` + Object.entries(desglose.partes)
+      .map(([sala, valor]) => `<tr><td><button class="enlace" data-parte="${texto(sala)}">${texto(sala)}</button></td><td>${valor}</td></tr>`).join('')
+      + `<tr><th>Total</th><th>${desglose.total}</th></tr></table>`;
+  }
+  if (registros) {
+    html += `<h3>Registros de origen: ${texto(parte)} (${registros.length})</h3><table><tr><th>Cama</th><th>Paciente</th><th>Ingreso</th><th>Egreso</th></tr>`
+      + registros.map((r) => `<tr><td>${texto(r.cama)}</td><td>${texto(r.paciente)}</td><td>${texto(r.ingreso)}</td><td>${texto(r.egreso ?? 'en curso')}</td></tr>`).join('') + '</table>';
+  }
+  resultado.innerHTML = html;
+}
+
+formulario.addEventListener('submit', (evento) => { evento.preventDefault(); pedir('indicador'); });
+resultado.addEventListener('click', (evento) => {
+  const boton = evento.target.closest('button');
+  if (boton?.dataset.nivel) pedir('desglose');
+  if (boton?.dataset.parte) pedir('registros', { parte: boton.dataset.parte });
+});
+</script>
+</body>
+</html>
