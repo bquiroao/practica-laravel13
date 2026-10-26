@@ -29,6 +29,7 @@ docs/
 
 | Módulo | Carpeta |
 |---|---|
+| Dashboard de ocupación hospitalaria | [`modulos/dashboard-ocupacion`](modulos/dashboard-ocupacion/README.md) |
 | RBAC: roles, permisos y protección de rutas | [`modulos/rbac`](modulos/rbac/README.md) |
 | Citas médicas y agenda | [`modulos/citas-medicas`](modulos/citas-medicas/README.md) |
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
