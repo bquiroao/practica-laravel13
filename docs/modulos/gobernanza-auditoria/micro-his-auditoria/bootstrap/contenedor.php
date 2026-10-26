@@ -16,7 +16,10 @@ use Auditoria\Aplicacion\CasosDeUso\VerDetalleMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerificarIntegridad;
 use Auditoria\Aplicacion\Puertos\PoliticaAcceso;
 use Auditoria\Aplicacion\Puertos\Transaccion;
+use Auditoria\Aplicacion\Servicios\AutorizacionLectura;
 use Auditoria\Aplicacion\Servicios\CadenaSellada;
+use Auditoria\Aplicacion\Servicios\ProyeccionMovimientos;
+use Auditoria\Dominio\Filtros\CatalogoFiltros;
 use Auditoria\Dominio\Filtros\FiltroAccion;
 use Auditoria\Dominio\Filtros\FiltroModulo;
 use Auditoria\Dominio\Filtros\FiltroMovimiento;
@@ -79,11 +82,14 @@ function construirCasosDeUso(array $config, Bitacora $bitacora, Transaccion $tra
     ?\Closure $nuevoEventId = null): array
 {
     $cadena = new CadenaSellada($bitacora, $reloj, $nuevoEventId ?? static fn (): string => bin2hex(random_bytes(16)));
+    $autorizacion = new AutorizacionLectura($acceso);
+    $proyeccion = new ProyeccionMovimientos($bitacora);
 
     return [
         'registrar' => new RegistrarMovimiento(reglasDeRegistro($config, $reloj), $bitacora, $cadena, $transaccion, $acceso),
-        'consultar' => new ConsultarMovimientos(filtrosDeConsulta($config), $bitacora, $cadena, $transaccion, $acceso),
-        'detalle' => new VerDetalleMovimiento($bitacora, $cadena, $transaccion, $acceso),
+        'consultar' => new ConsultarMovimientos(new CatalogoFiltros(filtrosDeConsulta($config)), $bitacora, $cadena, $transaccion,
+            $autorizacion, $proyeccion),
+        'detalle' => new VerDetalleMovimiento($bitacora, $cadena, $transaccion, $autorizacion, $proyeccion),
         'verificar' => new VerificarIntegridad($bitacora, $cadena, $transaccion, $acceso),
         'ancla' => new ObtenerAncla($bitacora, $acceso, $reloj),
     ];

@@ -43,10 +43,11 @@ Requisitos: PHP 8.2+ con `pdo_pgsql` y `mbstring`.
 
 ```bash
 cd docs/modulos/gobernanza-auditoria/micro-his-auditoria
-php tests/ejecutar.php        # 88 pruebas; las 17 de PostgreSQL se omiten sin base de datos
-php tests/mutaciones.php      # 21 defectos inyectados; todos deben detectarse
+php tests/ejecutar.php        # 94 pruebas; las 17 de PostgreSQL se omiten sin base de datos
+php tests/mutaciones.php      # 24 defectos inyectados; todos deben detectarse
 php bin/demo.php              # la API completa en memoria, sin base de datos
 php bin/demo-correccion.php   # el cambio de la semana 6 (corrección trazable) por la API
+php bin/acoplamiento.php      # acoplamiento por clase (semana 7)
 ```
 
 **Con PostgreSQL real.** Cada ejecución crea un esquema temporal y lo elimina al terminar. Para usarlo, defina las variables y vuelva a correr los dos scripts:
@@ -54,8 +55,8 @@ php bin/demo-correccion.php   # el cambio de la semana 6 (corrección trazable) 
 ```bash
 export AUDITORIA_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=micro_his_auditoria"
 export AUDITORIA_DB_USUARIO=postgres AUDITORIA_DB_CLAVE=…
-php tests/ejecutar.php        # 88/88
-php tests/mutaciones.php      # 21/21 (M1 y M11 solo las detecta la base real)
+php tests/ejecutar.php        # 94/94
+php tests/mutaciones.php      # 24/24 (M1 y M11 solo las detecta la base real)
 ```
 
 ## Levantar la API
@@ -74,3 +75,4 @@ bash bin/demo-http.sh         # en otra terminal
 | 4 | Entrada **MVC** (`AuditoriaControlador`, `FormularioMovimientos`, `MovimientosVista`/`ErrorVista`), adaptadores **InMemory de producción** junto a los PDO, `AUDITORIA_PERSISTENCIA` = `pdo` o `memoria`, suite de **contrato** común (CON-MEM/CON-PDO), demo sin base e integración con la base central del HIS (`integracion-central.sql`, validada sobre las migraciones reales). |
 | 5 | Contrato **OpenAPI 3.1** (5 operaciones) con conformidad probada (API-01..03), capa **Cliente** con reintento idempotente, circuit breaker y **BandejaLocal** (outbox del emisor), `X-Request-ID` y registro de acceso, **ancla externa** (`GET /anclas`, verificación `TRUNCADA`) y medición de la frontera (`bin/medir.php`). |
 | 6 | **Corrección trazable** (`corrige_evento` + `motivo_correccion`): un movimiento nuevo, sellado, que referencia al original sin modificarlo; una sola corrección por original (`YA_CORREGIDO`), mismo emisor y hospital. `ReglaCorreccion`, `corregido_por` en la consulta y el detalle, contrato **1.1.0**, `bin/demo-correccion.php`. 88 pruebas y 21 mutaciones. |
+| 7 | Refactor de la consulta sin cambiar el comportamiento: `Alcance` y `CatalogoFiltros` (Dominio), `AutorizacionLectura`, `CursorPaginacion` y `ProyeccionMovimientos` (Aplicación); `VerDetalleMovimiento` ya no depende de `ConsultarMovimientos`. Instrumento `bin/acoplamiento.php`. 94 pruebas y 24 mutaciones. |

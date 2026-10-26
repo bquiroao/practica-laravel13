@@ -28,6 +28,12 @@ final class ConsultaMovimientos
     ) {
     }
 
+    /** Semana 7: la consulta en el alcance ya decidido (Alcance), sin repetir la decisión con un booleano. */
+    public static function en(Alcance $alcance, array $filtros, array $parametros, int $limite, ?array $despuesDe = null): self
+    {
+        return new self($alcance->hospital, $alcance->esRed(), $filtros, $parametros, $limite, $despuesDe);
+    }
+
     public function coincide(Movimiento $m): bool
     {
         if (!$this->red && $m->hospital !== $this->hospital) {
