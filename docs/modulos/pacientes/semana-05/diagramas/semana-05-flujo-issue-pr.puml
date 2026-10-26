@@ -1,0 +1,30 @@
+@startuml semana-05-flujo-issue-pr
+title Plan de integración: issue → worktree → rama → commits → PR → revisión → limpieza
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+
+start
+:Issue «ASII-03 — Pacientes: registro, edición, búsqueda y detalle»
+(plantilla module_task.md, etiquetas asii + module);
+:git fetch origin
+git worktree add ../shi-asii-03-pacientes -b feature/asii-03-pacientes-bquiroao origin/develop;
+:Commits pequeños por tarea (T1…T5):
+feat(pacientes): … · test(pacientes): … · docs(pacientes): …;
+:Validaciones locales:
+micro-his tests/ejecutar.php · redocly lint · composer test
+php artisan route:list --path=api · npm run build;
+:git push -u origin feature/asii-03-pacientes-bquiroao;
+:PR → develop (plantilla del repo, «Closes #<issue>»);
+if (ASII PR Guard: descripción ≥ 80 caracteres\ny rama feature/asii-NN-…) then (falla)
+  :Corregir descripción o nombre de rama;
+  detach
+else (ok)
+endif
+:Revisión de CODEOWNERS (@rortizs, @bquiroao)
+y 1 aprobación en develop;
+:Merge a develop (sin force push, sin tocar main);
+:git worktree remove ../shi-asii-03-pacientes
+git branch -d feature/asii-03-pacientes-bquiroao;
+stop
+@enduml

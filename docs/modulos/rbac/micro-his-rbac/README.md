@@ -7,6 +7,10 @@ Micro-proyecto en **PHP 8.2+ vanilla** (sin framework ni Composer) que ejecuta e
 | 3 | Cuatro capas, PDO con sentencias preparadas, pruebas por capa y de arquitectura |
 | 4 | Entrada con **MVC** (controladores, formularios, vistas); patrón **Repository** con adaptadores **PDO e InMemory**; suite de contrato |
 | 5 | **Cliente-servidor**: contrato **OpenAPI 3.1**, endpoint de decisión (PDP), librería **cliente** con resiliencia, observabilidad (`X-Request-ID`) y medición de la frontera de microservicio |
+| 6 | Cambio práctico defendido: **revocar rol** (permiso `roles.revocar`, `PoliticaRevocacion`, `revocar()` en PDO e InMemory, contrato v1.1.0), hecho con pruebas primero |
+| 7 | Refactor sin ampliar el módulo: `CambioDeMembresia` + `RegistradorDeCambios` separan auditoría y persistencia de los casos de uso; medidor `bin/acoplamiento.php` |
+| 12 | Cambio solicitado (B-6): **permisos efectivos** (`ConsultarPermisosEfectivos`, contrato v1.2.0). La interfaz consulta qué mostrar sin dejar eventos; los intentos siguen auditados. Pruebas PEF-01..10, escritas antes |
+| 15 | Pruebas unitarias (UNI-01..09), de caja blanca (CB-01..04, cobertura de líneas con phpdbg) y de caja negra (CN-01..06), trazadas a RF/RNF; defectos abiertos reproducibles (DEF-01..05) |
 
 ## Estructura
 
@@ -16,6 +20,7 @@ micro-his-rbac/
 ├── api/openapi.yaml              ← contrato REST (OpenAPI 3.1), validado contra el código (API-01..03)
 ├── bin/demo.php                  ← flujo completo en un proceso, sin base de datos
 ├── bin/medir.php                 ← latencia de una decisión: en proceso vs. HTTP vs. red
+├── bin/acoplamiento.php          ← Ce / Ca / preocupaciones RBAC por clase
 ├── bootstrap/
 │   ├── autoload.php              ← autoload PSR-4 mínimo
 │   └── contenedor.php            ← raíz de composición: elige PDO o InMemory y conecta las capas
@@ -40,6 +45,8 @@ Regla de dependencias: **Presentación → Aplicación → Dominio ← Persisten
 ```bash
 cd docs/modulos/rbac/micro-his-rbac
 php tests/ejecutar.php
+php tests/ejecutar.php --solo=UNI,CB,CN   # solo unitarias, caja blanca y caja negra (semana 15)
+php tests/ejecutar.php --defectos         # agrega las pruebas de defectos ABIERTOS (DEF-xx), que fallan hasta corregirse
 ```
 
 No necesitan base de datos. Para correr también la suite de contrato contra PDO y las pruebas de integración, que crean y eliminan un esquema temporal:
@@ -97,7 +104,9 @@ Contrato completo en [`api/openapi.yaml`](api/openapi.yaml). Toda respuesta incl
 | Método | Ruta | Permiso | Controlador |
 |---|---|---|---|
 | POST | `/api/v1/roles/asignaciones` | `roles.asignar` | `AsignacionRolControlador::crear` |
+| POST | `/api/v1/roles/revocaciones` | `roles.revocar` | `RevocacionRolControlador::crear` |
 | GET | `/api/v1/auditoria/eventos/{correlationId}` | `auditoria.consultar` | `AuditoriaControlador::mostrar` |
 | POST | `/api/v1/autorizaciones/decisiones` | — (solo autenticación) | `AutorizacionControlador::decidir` (PDP) |
+| POST | `/api/v1/autorizaciones/permisos-efectivos` | — (solo autenticación) | `AutorizacionControlador::permisosEfectivos` (sin auditoría, semana 12) |
 | POST | `/api/v1/prescripciones` | `prescripciones.crear` | `OperacionClinicaControlador::prescribir` (demo) |
 | POST | `/api/v1/signos-vitales` | `signos_vitales.registrar` | `OperacionClinicaControlador::registrarSignosVitales` (demo) |

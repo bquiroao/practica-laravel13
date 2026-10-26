@@ -1,0 +1,17 @@
+OK    feliz: registrar sala A = 201
+OK    feliz: registrar cama A/101 = 201
+OK    feliz: la cama nace disponible (R-04)
+OK    feliz: A/101 a mantenimiento = 200
+OK    feliz: el cambio queda en el historial con su motivo (R-09)
+OK    regla: sala A repetida = 409 E3 (R-01)
+OK    regla: cama en sala inexistente = 422 E4 (R-03)
+OK    regla: inactiva -> mantenimiento = 422 E6 (R-05)
+OK    regla: cama ocupada no cambia a mano = 409 E5 (R-06)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException se traduce a 503 E8
+OK    dependencias: Dominio no usa Aplicacion, Persistencia, Presentacion
+OK    dependencias: Aplicacion no usa Persistencia, Presentacion
+OK    dependencias: Persistencia no usa Presentacion
+OK    dependencias: Presentacion no usa Persistencia
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

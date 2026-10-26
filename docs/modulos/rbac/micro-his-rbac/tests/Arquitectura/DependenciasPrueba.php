@@ -195,17 +195,16 @@ prueba('ARQ-07', 'MVC: solo las Vistas dan formato a la respuesta (Respuesta::js
     afirmar($violaciones === [], 'formato de respuesta fuera de las vistas: ' . implode(', ', $violaciones));
 });
 
-prueba('ARQ-08', 'Toda ruta exige un permiso, salvo el endpoint de decisión (que ES la autorización)', function (): void {
-    $e = new \Rbac\Pruebas\Dobles\Escenario();
-    $rutas = \Rbac\Presentacion\Http\Rutas::definir(
-        new \Rbac\Presentacion\Http\Controladores\AsignacionRolControlador($e->asignarRol),
-        new \Rbac\Presentacion\Http\Controladores\AuditoriaControlador($e->consultar),
-        new \Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador(),
-        new \Rbac\Presentacion\Http\Controladores\AutorizacionControlador($e->autorizar),
-    );
+// Semana 12 (B-6): la excepción se amplía a propósito y por nombre. permisos-efectivos tampoco puede
+// exigir un permiso propio: responde solo por la sesión que pregunta y es parte de la autorización.
+prueba('ARQ-08', 'Toda ruta exige un permiso, salvo las dos consultas de autorización (decisiones y permisos efectivos)', function (): void {
+    $rutas = (new \Rbac\Pruebas\Dobles\Escenario())->rutas();
     $sinPermiso = array_values(array_map(
         static fn (\Rbac\Presentacion\Http\Ruta $r): string => $r->metodo . ' ' . $r->patron,
         array_filter($rutas, static fn (\Rbac\Presentacion\Http\Ruta $r): bool => $r->permiso === null),
     ));
-    igual(['POST #^/api/v1/autorizaciones/decisiones$#'], $sinPermiso, 'rutas sin permiso');
+    igual([
+        'POST #^/api/v1/autorizaciones/decisiones$#',
+        'POST #^/api/v1/autorizaciones/permisos-efectivos$#',
+    ], $sinPermiso, 'rutas sin permiso');
 });

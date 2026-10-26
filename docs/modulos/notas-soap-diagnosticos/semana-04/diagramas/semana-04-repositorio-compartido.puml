@@ -1,0 +1,53 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+
+title Semana 4 · Integración del módulo con el repositorio de datos compartido (CENTRAL)
+
+package "HOSPITAL de Oriente (base his_hospital)" as H #FFF6E5 {
+    rectangle "Módulo Notas SOAP\nRegistrar · Firmar · Consultar" as mod
+    rectangle "Fuente de verdad local\nclinical_notes · diagnoses" as tablas
+    rectangle "Referencias lógicas (sin FK entre bases)\nlocal_patients.global_id → mpi_patients\nlocal_user_refs.central_user_id → central_users" as refs
+    rectangle "outbox_events\n(bandeja de salida, misma transacción)" as outbox
+    rectangle "Publicador\n(proceso aparte, reintenta)" as pub
+    rectangle "API de lectura del módulo\nGET /api/v1/notas-soap/{id}" as apil
+}
+
+package "CENTRAL (base his_central) — repositorio de datos compartido" as C #EAF2FB {
+    rectangle "central_inbox_messages\nUNIQUE (source_node_id, event_id)\npayload_minimal jsonb" as inbox
+    rectangle "sync_nodes · sync_checkpoints\n(canal clinical-notes)" as sync
+    rectangle "MPI: mpi_patients\npatient_hospital_links" as mpi
+    rectangle "Índice de documentos clínicos\n(quién tiene notas firmadas de qué paciente)" as indice
+    rectangle "Consentimiento y acceso\npatient_consents · cross_hospital_access_grants\ncross_hospital_access_audits" as acceso
+}
+
+package "Otro hospital de la red" as O #F3ECF9 {
+    rectangle "Médico de otro hospital\n(atiende al mismo paciente)" as otro
+}
+
+mod --> tablas : guarda nota + diagnóstico
+mod --> outbox : NotaSoapFirmada\n(solo ids)
+tablas ..> refs
+pub --> outbox : lee pendientes
+pub --> inbox : envía (idempotente)
+inbox --> sync : actualiza checkpoint
+inbox --> indice : procesa
+indice --> mpi : resuelve paciente global
+otro --> acceso : pide acceso (consentimiento\no break-glass)
+acceso --> indice : ¿qué hospital tiene notas?
+acceso --> apil : lectura autorizada\ny auditada
+apil --> tablas
+
+legend bottom
+  Regla de la red: el contenido clínico NO se copia a CENTRAL. CENTRAL guarda identidad (MPI), consentimientos,
+  auditoría e índice; la nota sigue en el hospital que la escribió y se lee bajo un permiso vigente.
+  Las tablas de CENTRAL son las de las migraciones central/000200 a 000400 del repositorio del grupo;
+  outbox_events y el índice de documentos son la propuesta de esta semana.
+endlegend
+@enduml

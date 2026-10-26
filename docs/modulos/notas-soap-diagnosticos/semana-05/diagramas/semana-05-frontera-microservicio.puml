@@ -1,0 +1,46 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+
+title Semana 5 · Frontera de microservicio evaluada: Notas SOAP
+
+package "Frontera lógica: YA existe (capas + contrato)" as F #EAF7EA {
+    rectangle "Contrato\napi/openapi.yaml\n4 operaciones · x-permiso" as contrato
+    rectangle "Dominio + Aplicación\nNotaSoap · Diagnostico\nRegistrar · Firmar · Consultar · Listar" as nucleo
+    rectangle "Datos propios\nclinical_notes · diagnoses\nidempotency_keys · outbox_events" as datos
+}
+
+package "Lo que el módulo necesita de otros EN CADA registro" as V #FFF6E5 {
+    rectangle "Expediente (ASII-10)\nR-03: expediente abierto\ny del mismo paciente" as exp
+    rectangle "Admisión / asignaciones\nR-02: médico asignado\nal episodio" as asig
+    rectangle "RBAC (ASII-02)\npermiso de la ruta" as rbac
+}
+
+package "Quién lo consume" as C #EAF2FB {
+    rectangle "SPA (médico, enfermería)" as spa
+    rectangle "Expediente: línea de tiempo" as tl
+    rectangle "CENTRAL / Reportes:\neventos NotaSoapFirmada" as ev
+}
+
+spa --> contrato
+tl --> contrato
+contrato --> nucleo
+nucleo --> datos
+nucleo ..> exp : lectura síncrona
+nucleo ..> asig : lectura síncrona
+nucleo ..> rbac : decisión síncrona
+datos ..> ev : asíncrono (outbox)
+
+legend bottom
+  Decisión: NO separar físicamente hoy. La frontera lógica ya existe y está probada (ARQ, API-01 a 04).
+  Separar convertiría 3 lecturas en proceso por registro en 3 llamadas de red, y la transacción
+  nota + diagnóstico + idempotencia + outbox (R-06) seguiría local: no hay nada que ganar todavía.
+  Se reevalúa con los criterios medibles C1 a C5 (documento, sección 5.3).
+endlegend
+@enduml

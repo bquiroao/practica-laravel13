@@ -1,0 +1,90 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Semana 7 · Componentes de Notas SOAP: frontend (Vue, diseño) y backend (micro-HIS PHP, implementado)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam package {
+  BorderColor #3D4F6B
+}
+left to right direction
+
+package "FRONTEND · Vue 3 + Pinia (diseño)" as FE {
+  package "UI" as FUI #EAF2FB {
+    [NotasExpedientePage] as PAG
+    [LineaTiempoNotas] as LTN
+    [NotaSoapDetalle] as DET
+    [NotaSoapFormulario\n(registro y corrección)] as FRM
+    [CorreccionNotaDialog] as COR
+    [FirmarNotaBoton] as FIR
+    [ErrorNotaAviso] as ERR
+  }
+  package "Aplicación (cliente)" as FAP #EAF7EA {
+    [useNotasSoapStore\n(Pinia)] as STO
+    [useEnvioSeguro\nIdempotency-Key · 1 reintento] as ENV
+    [usePermisosNotas\n(solo mostrar u ocultar)] as PER
+  }
+  package "Acceso a datos" as FDA #F3ECF9 {
+    [notasSoapApi] as API
+    [plugins/axios.js (existe)\nBearer · X-Tenant-ID\n+ X-Request-ID] as AX
+  }
+}
+
+interface "Contrato HTTP\nOpenAPI 3.1 · v1.1.0" as HTTP
+
+package "BACKEND · micro-HIS Notas SOAP (implementado)" as BE {
+  package "Presentación (MVC)" as BUI #EAF2FB {
+    [Kernel + Rutas (x-permiso)] as KER
+    [NotasSoapController] as CTL
+    [Formularios · Vistas] as FV
+  }
+  package "Aplicación" as BAP #EAF7EA {
+    [Registrar · Corregir · Firmar\nConsultar · Listar] as UCS
+    [RegistradorClinico\n(nuevo, semana 7)] as REG #FFE3D6
+  }
+  package "Dominio" as BDO #FFF6E5 {
+    [NotaSoap · SeccionesSoap\nDiagnostico] as ENT
+    [ReglasDeEscritura\nR-01 · R-02 · R-03\n(nuevo, semana 7)] as RGL #FFE3D6
+    [CambioClinico · EntradaBitacora\n(nuevo, semana 7)] as CAM #FFE3D6
+    interface "Puertos Repository" as PR
+  }
+  package "Persistencia" as BPE #F3ECF9 {
+    [Adaptadores PDO] as PDO
+    [Adaptadores en memoria] as MEM
+  }
+}
+
+PAG --> LTN
+PAG --> DET
+DET --> FIR
+DET --> COR
+COR --> FRM
+PAG --> FRM
+FRM --> ERR
+LTN --> STO
+FRM --> STO
+FIR --> STO
+PAG --> PER
+STO --> ENV
+ENV --> API
+API --> AX
+AX --> HTTP
+HTTP --> KER
+KER --> CTL
+CTL --> FV
+CTL --> UCS
+UCS --> RGL
+UCS --> REG
+UCS --> ENT
+REG --> CAM
+REG --> PR
+RGL --> PR
+PDO ..|> PR
+MEM ..|> PR
+
+legend bottom
+  El frontend no decide nada clínico: no autoriza, no valida el CIE-10 como regla final ni elige el autor; solo muestra lo que responde el contrato.
+  Naranja = piezas que agregó el refactor de esta semana. Los dos lados solo se conocen por el contrato OpenAPI.
+endlegend
+@enduml

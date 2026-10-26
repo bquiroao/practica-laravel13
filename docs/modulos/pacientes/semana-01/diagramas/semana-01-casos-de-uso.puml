@@ -1,0 +1,60 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo Pacientes — Casos de uso\n«Registro, búsqueda y actualización segura de un paciente»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Personal de\nadmisión / registro" as Admision
+actor "Personal clínico\n(médico, enfermería)" as Clinico
+actor "Supervisor de\nregistros" as Supervisor
+actor "Servicio RBAC\n(autorización)" as RBAC <<sistema>>
+actor "Índice maestro de\npacientes (MPI central)" as MPI <<sistema>>
+
+rectangle "Sistema Hospitalario Integrado — Módulo Pacientes (tenant = hospital)" {
+  usecase "CU-01\nRegistrar paciente" as CU01
+  usecase "CU-02\nBuscar paciente" as CU02
+  usecase "CU-03\nConsultar detalle\ndel paciente" as CU03
+  usecase "CU-04\nActualizar datos\ndel paciente" as CU04
+  usecase "CU-05\nVerificar posible\nduplicado" as CU05
+  usecase "CU-06\nConfirmar registro\npese a coincidencia" as CU06
+  usecase "CU-07\nAutorizar operación" as CU07
+  usecase "CU-08\nRegistrar evento\nde auditoría" as CU08
+}
+
+Admision --> CU01
+Admision --> CU02
+Admision --> CU04
+Clinico --> CU02
+Clinico --> CU03
+Supervisor --> CU06
+Supervisor --> CU04
+
+CU01 ..> CU05 : <<include>>
+CU06 ..> CU01 : <<extend>>\n[coincidencia probable,\nsin identificador igual]
+CU02 <.. CU03 : <<extend>>\n[elige un resultado]
+CU01 ..> CU07 : <<include>>\n(pacientes.registrar)
+CU02 ..> CU07 : <<include>>\n(pacientes.buscar)
+CU03 ..> CU07 : <<include>>\n(pacientes.leer)
+CU04 ..> CU07 : <<include>>\n(pacientes.editar)
+CU01 ..> CU08 : <<include>>
+CU03 ..> CU08 : <<include>>
+CU04 ..> CU08 : <<include>>
+
+CU07 -- RBAC
+CU05 -- MPI
+
+note bottom of CU04
+  Actualización segura: versión del registro (sin
+  sobrescribir cambios ajenos), campos protegidos
+  con motivo, y auditoría de valores antes/después.
+end note
+note bottom of CU05
+  Mismo identificador (DPI, pasaporte) → se bloquea.
+  Nombre + fecha de nacimiento parecidos → se advierte.
+end note
+@enduml

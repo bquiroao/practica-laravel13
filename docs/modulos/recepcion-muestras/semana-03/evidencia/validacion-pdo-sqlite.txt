@@ -1,0 +1,33 @@
+﻿PHP SQLite CLI integration verification
+PHP: 8.2.33
+PDO drivers: sqlite
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\bin\reception.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Application\ReceiveSpecimen.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Application\ReceptionPorts.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Domain\ReceptionDecision.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Infrastructure\Identity\RandomSpecimenIdentifierGenerator.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Persistence\PdoSpecimenRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\src\Presentation\Cli\ReceiveSpecimenCommand.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-recepcion-muestras-arquitectura-mercedes-lopez\docs\modulos\recepcion-muestras\semana-03\ejemplo\tests\run.php
+PASS: camino feliz acepta una muestra conforme
+PASS: camino feliz persiste la recepción aceptada
+PASS: el caso de uso asigna un identificador
+PASS: la regla de dominio rechaza una muestra sin etiqueta
+PASS: el rechazo contiene una razón explícita
+PASS: el rechazo controlado también queda persistido
+PASS: la regla de dominio rechaza un recipiente dañado
+PASS: la regla específica rechaza un tubo de sangre sin sello íntegro
+PASS: se conserva el motivo de rechazo informado por el operador
+PASS: el generador produce identificadores de 128 bits con formato y valores distintos
+PASS: un error de persistencia se propaga y no simula éxito
+PASS: no se registra una recepción si falla el guardado
+PASS: el dominio impide un rechazo sin motivo
+OK: 13 aserciones.
+--- CLI accepted flow ---
+ACEPTADA: identificador=SP-E600CEC358630E4E6A0E465DC553A171 orden=ORD-ACCEPT estado=accepted
+--- CLI rejected flow ---
+RECHAZADA: identificador=SP-FE53514A3CA14A7FBE73D1DB57FB552B orden=ORD-REJECT estado=rejected
+Motivo: La muestra no tiene identificación visible.
+SQLite row assertions PASS: accepted=1, rejected=1, rejection-reason=present
+Temporary SQLite database removed after verification.

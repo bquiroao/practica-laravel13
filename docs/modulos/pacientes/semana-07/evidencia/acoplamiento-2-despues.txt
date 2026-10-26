@@ -1,0 +1,17 @@
+Micro-HIS Pacientes — acoplamiento por clase (81 clases en src/)
+----------------------------------------------------------------------------------------------------------------------
+Clase                      Capa            Ce   Ca  Flags  P   Preocupaciones que mezcla
+PdoRepositorioPacientes    Persistencia     9    1      0  6   identidad · demografia · busqueda · edicion · duplicados · confidencialidad
+RevisionDeFicha            Dominio          7    2      1  5   identidad · demografia · edicion · duplicados · confidencialidad
+Paciente                   Dominio          5   12      1  5   identidad · demografia · busqueda · edicion · confidencialidad
+PoliticaDuplicados         Dominio          3    1      2  5   identidad · demografia · busqueda · duplicados · confidencialidad
+IndiceDuplicadosEnMemoria  Persistencia     3    1      0  5   identidad · demografia · busqueda · duplicados · confidencialidad
+RepositorioPacientesEnMemoria Persistencia     7    2      0  4   identidad · busqueda · edicion · duplicados
+CriterioBusqueda           Dominio          6    4      0  4   identidad · demografia · busqueda · confidencialidad
+RepositorioPacientes       Dominio          6    5      0  3   busqueda · edicion · duplicados
+PdoIndiceDuplicados        Persistencia     4    1      0  3   identidad · duplicados · confidencialidad
+ControlAcceso              Aplicacion       3    4      0  3   edicion · duplicados · confidencialidad
+IndiceDuplicados           Dominio          2    4      0  3   identidad · duplicados · confidencialidad
+BuscarPacientes            Aplicacion      10    1      1  2   busqueda · confidencialidad
+----------------------------------------------------------------------------------------------------------------------
+Ce total: 220 · Ce medio: 2.72 · Clases que mezclan ≥ 4 preocupaciones: 7 · Clases con flags de permiso: 8 (10 flags)
