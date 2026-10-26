@@ -1,0 +1,19 @@
+﻿PHP syntax validation — PHP 8.2.33
+Command: php -l docs/modulos/ordenes-laboratorio-emr/semana-15/pruebas/TestDoubles.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-15-ordenes-laboratorio-emr-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-15\pruebas\TestDoubles.php
+Result: passed
+Command: php -l docs/modulos/ordenes-laboratorio-emr/semana-15/pruebas/run.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-15-ordenes-laboratorio-emr-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-15\pruebas\run.php
+Result: passed
+
+Command: php -l docs/modulos/ordenes-laboratorio-emr/semana-02/ejemplo-srp/src/LabOrderWorkflow.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-15-ordenes-laboratorio-emr-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-02\ejemplo-srp\src\LabOrderWorkflow.php
+Result: passed
+
+Command: php -l docs/modulos/ordenes-laboratorio-emr/semana-02/ejemplo-srp/src/InMemoryAdapters.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-15-ordenes-laboratorio-emr-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-02\ejemplo-srp\src\InMemoryAdapters.php
+Result: passed
+
+Command: php -l docs/modulos/ordenes-laboratorio-emr/semana-02/ejemplo-srp/verificar.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-15-ordenes-laboratorio-emr-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-02\ejemplo-srp\verificar.php
+Result: passed
