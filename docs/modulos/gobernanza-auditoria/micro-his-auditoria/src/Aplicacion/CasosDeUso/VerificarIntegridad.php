@@ -37,7 +37,7 @@ final class VerificarIntegridad
 
         try {
             return $this->transaccion->ejecutar(function () use ($comando): Resultado {
-                $informe = $this->recalcular($comando->hospitalVerificado);
+                $informe = $this->recalcular($comando->hospitalVerificado, $comando->ancla);
                 $this->cadena->auditarLectura(null, $comando->actor, 'INTEGRIDAD_VERIFICADA', ['hospital' => $comando->hospitalVerificado] + $informe);
 
                 return Resultado::ok($informe);
@@ -47,8 +47,11 @@ final class VerificarIntegridad
         }
     }
 
-    /** @return array<string, mixed> */
-    private function recalcular(?string $hospital): array
+    /**
+     * @param array{secuencia: int, sello: string}|null $ancla
+     * @return array<string, mixed>
+     */
+    private function recalcular(?string $hospital, ?array $ancla): array
     {
         $anterior = Sello::GENESIS;
         $cadena = $this->bitacora->cadena($hospital);
@@ -58,7 +61,17 @@ final class VerificarIntegridad
             }
             $anterior = $m->sello;
         }
+        // Semana 5: lo que la cadena sola no puede ver. Si faltan las últimas filas, la cadena que queda
+        // es coherente consigo misma; solo un ancla publicada antes delata el truncamiento.
+        if ($ancla !== null && $ancla['secuencia'] > 0) {
+            if (count($cadena) < $ancla['secuencia']) {
+                return ['estado' => 'TRUNCADA', 'esperada_hasta' => $ancla['secuencia'], 'verificados' => count($cadena)];
+            }
+            if (!hash_equals($cadena[$ancla['secuencia'] - 1]->sello, $ancla['sello'])) {
+                return ['estado' => 'ALTERADA', 'primera_secuencia' => $ancla['secuencia'], 'verificados' => count($cadena)];
+            }
+        }
 
-        return ['estado' => 'INTEGRA', 'verificados' => count($cadena)];
+        return ['estado' => 'INTEGRA', 'verificados' => count($cadena)] + ($ancla === null ? [] : ['ancla_confirmada' => $ancla['secuencia']]);
     }
 }

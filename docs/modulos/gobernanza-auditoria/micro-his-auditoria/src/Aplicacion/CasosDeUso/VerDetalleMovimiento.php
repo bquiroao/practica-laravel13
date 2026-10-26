@@ -26,7 +26,7 @@ final class VerDetalleMovimiento
     public function ejecutar(ComandoDetalle $comando): Resultado
     {
         $red = $comando->hospital === PoliticaAcceso::RED;
-        if (!$this->acceso->permite($comando->actor, $comando->hospital, $red ? 'auditoria.consultar_red' : 'auditoria.consultar')) {
+        if (!$this->acceso->permite($comando->actor, $comando->hospital, $red ? ConsultarMovimientos::PERMISO_RED : ConsultarMovimientos::PERMISO)) {
             return Resultado::accesoDenegado();
         }
 

@@ -42,7 +42,7 @@ prueba('MVC-02', 'Vistas: único lugar con códigos HTTP; Location solo en el 20
 prueba('MVC-03', 'El controlador funciona sin Kernel ni rutas: se prueba solo, con el Modelo real (casos de uso en memoria)', function () use ($mvcEmisor): void {
     $e = Escenario::crear();
     $c = $e->casos;
-    $controlador = new AuditoriaControlador($c['registrar'], $c['consultar'], $c['detalle'], $c['verificar']);
+    $controlador = new AuditoriaControlador($c['registrar'], $c['consultar'], $c['detalle'], $c['verificar'], $c['ancla']);
     $r = $controlador->registrar(new Solicitud('POST', '/', ['X-Tenant-ID' => Escenario::H_ORIENTE], [], Escenario::mov()), $mvcEmisor);
     igual([201, 1], [$r->estado, $r->cuerpo['secuencia']], 'registro');
     $d = $controlador->verDetalle(new Solicitud('GET', '/', ['X-Tenant-ID' => Escenario::H_ORIENTE]), new Identidad('auditor-oriente', Escenario::H_ORIENTE), ['id' => '1']);

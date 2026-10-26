@@ -31,6 +31,11 @@ final class MovimientosVista
         return $r->estado === Resultado::OK ? Respuesta::json(200, $r->datos) : ErrorVista::deResultado($r);
     }
 
+    public static function ancla(Resultado $r): Respuesta
+    {
+        return $r->estado === Resultado::OK ? Respuesta::json(200, $r->datos, ['Cache-Control' => 'no-store']) : ErrorVista::deResultado($r);
+    }
+
     public static function verificacion(Resultado $r): Respuesta
     {
         return $r->estado === Resultado::OK ? Respuesta::json(200, $r->datos) : ErrorVista::deResultado($r);

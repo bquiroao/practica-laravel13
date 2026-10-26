@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Auditoria\Aplicacion\Comandos\ComandoAncla;
 use Auditoria\Aplicacion\Comandos\ComandoDetalle;
 use Auditoria\Aplicacion\Comandos\ComandoVerificar;
 use Auditoria\Aplicacion\Resultados\Resultado;
@@ -122,6 +123,23 @@ prueba('APP-09', 'Integridad: alterar la fila 2 → ALTERADA en 2; recalcular su
     $e->bitacora->alterarParaPrueba(2, $alterado->sellado(2, Sello::calcular($e->bitacora->porId(1)->sello, 2, $alterado)));
     igual(['ALTERADA', 3], [$verificar()['estado'], $verificar()['primera_secuencia']], 'sello recalculado: lo delata la fila 3');
     igual([Resultado::PROHIBIDO, 'ACCESO_DENEGADO'], $appPar($e->casos['verificar']->ejecutar(new ComandoVerificar('auditor-oriente', Escenario::H_ORIENTE))), 'auditor');
+});
+
+prueba('APP-11', 'Ancla externa (semana 5): borrar la ÚLTIMA fila no se ve sin ancla; con el ancla publicada antes, TRUNCADA; el auditor no obtiene anclas', function () use ($appPar): void {
+    $e = Escenario::crear();
+    for ($i = 1; $i <= 4; $i++) {
+        Escenario::registrar($e, Escenario::mov(['event_id' => "ev-$i"]));
+    }
+    $ancla = $e->casos['ancla']->ejecutar(new ComandoAncla('superadmin', Escenario::H_ORIENTE));
+    igual([4, 64], [$ancla->datos['secuencia'], strlen($ancla->datos['sello'])], 'ancla');
+    $verificar = static fn (): array => $e->casos['verificar']->ejecutar(new ComandoVerificar('superadmin', Escenario::H_ORIENTE,
+        ['secuencia' => $ancla->datos['secuencia'], 'sello' => $ancla->datos['sello']]))->datos;
+    igual(['estado' => 'INTEGRA', 'verificados' => 4, 'ancla_confirmada' => 4], $verificar(), 'íntegra');
+    $e->bitacora->ocultarParaPrueba(4);                      // DELETE de la última fila con el trigger desactivado
+    $sinAncla = $e->casos['verificar']->ejecutar(new ComandoVerificar('superadmin', Escenario::H_ORIENTE))->datos;
+    igual('INTEGRA', $sinAncla['estado'], 'SIN ancla el truncamiento no se ve (la cadena que queda es coherente)');
+    igual(['estado' => 'TRUNCADA', 'esperada_hasta' => 4, 'verificados' => 3], $verificar(), 'con ancla');
+    igual([Resultado::PROHIBIDO, 'ACCESO_DENEGADO'], $appPar($e->casos['ancla']->ejecutar(new ComandoAncla('auditor-oriente', Escenario::H_ORIENTE))), 'auditor');
 });
 
 prueba('APP-10', 'La cadena se bloquea ANTES de leer el último sello, una vez por movimiento y por la cadena correcta', function () use ($appHoy): void {

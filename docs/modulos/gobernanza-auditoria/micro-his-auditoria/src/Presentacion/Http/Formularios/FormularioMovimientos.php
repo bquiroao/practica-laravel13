@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Auditoria\Presentacion\Http\Formularios;
 
+use Auditoria\Aplicacion\Comandos\ComandoAncla;
 use Auditoria\Aplicacion\Comandos\ComandoConsultar;
 use Auditoria\Aplicacion\Comandos\ComandoDetalle;
 use Auditoria\Aplicacion\Comandos\ComandoRegistrar;
@@ -50,8 +51,24 @@ final class FormularioMovimientos
         if ($hospital !== null && !is_string($hospital)) {
             throw new EntradaInvalida(EntradaInvalida::FORMATO, ['hospital' => 'Texto, o null para la cadena de red.']);
         }
+        $ancla = $cuerpo['ancla'] ?? null;
+        if ($ancla !== null && (!is_array($ancla) || !is_int($ancla['secuencia'] ?? null) || $ancla['secuencia'] < 1
+            || !is_string($ancla['sello'] ?? null) || preg_match('/^[0-9a-f]{64}$/', $ancla['sello']) !== 1)) {
+            throw new EntradaInvalida(EntradaInvalida::FORMATO, ['ancla' => '{"secuencia": entero ≥ 1, "sello": 64 hexadecimales}.']);
+        }
 
-        return new ComandoVerificar($identidad->actor, $hospital);
+        return new ComandoVerificar($identidad->actor, $hospital, $ancla === null ? null : ['secuencia' => $ancla['secuencia'], 'sello' => $ancla['sello']]);
+    }
+
+    /** @throws EntradaInvalida */
+    public static function ancla(Solicitud $solicitud, Identidad $identidad): ComandoAncla
+    {
+        $hospital = $solicitud->consulta['hospital'] ?? null;
+        if ($hospital !== null && (!is_string($hospital) || $hospital === '')) {
+            throw new EntradaInvalida(EntradaInvalida::FORMATO, ['hospital' => 'Texto; sin el parámetro, la cadena de red.']);
+        }
+
+        return new ComandoAncla($identidad->actor, $hospital);
     }
 
     /**

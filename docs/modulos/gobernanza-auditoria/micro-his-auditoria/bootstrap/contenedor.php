@@ -10,6 +10,7 @@ declare(strict_types=1);
 require __DIR__ . '/autoload.php';
 
 use Auditoria\Aplicacion\CasosDeUso\ConsultarMovimientos;
+use Auditoria\Aplicacion\CasosDeUso\ObtenerAncla;
 use Auditoria\Aplicacion\CasosDeUso\RegistrarMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerDetalleMovimiento;
 use Auditoria\Aplicacion\CasosDeUso\VerificarIntegridad;
@@ -42,6 +43,8 @@ use Auditoria\Presentacion\Http\Autenticacion\Autenticador;
 use Auditoria\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Auditoria\Presentacion\Http\Controladores\AuditoriaControlador;
 use Auditoria\Presentacion\Http\Kernel;
+use Auditoria\Presentacion\Http\Observabilidad\RegistroAcceso;
+use Auditoria\Presentacion\Http\Observabilidad\RegistroAccesoJson;
 use Auditoria\Presentacion\Http\Rutas;
 
 /** @param array<string, mixed> $config @return list<ReglaMovimiento> el ORDEN importa: el tenant va primero */
@@ -68,7 +71,7 @@ function filtrosDeConsulta(array $config): array
 /**
  * @param array<string, mixed> $config
  * @param \Closure(): string|null $nuevoEventId
- * @return array{registrar: RegistrarMovimiento, consultar: ConsultarMovimientos, detalle: VerDetalleMovimiento, verificar: VerificarIntegridad}
+ * @return array{registrar: RegistrarMovimiento, consultar: ConsultarMovimientos, detalle: VerDetalleMovimiento, verificar: VerificarIntegridad, ancla: ObtenerAncla}
  */
 function construirCasosDeUso(array $config, Bitacora $bitacora, Transaccion $transaccion, PoliticaAcceso $acceso, Reloj $reloj,
     ?\Closure $nuevoEventId = null): array
@@ -80,15 +83,16 @@ function construirCasosDeUso(array $config, Bitacora $bitacora, Transaccion $tra
         'consultar' => new ConsultarMovimientos(filtrosDeConsulta($config), $bitacora, $cadena, $transaccion, $acceso),
         'detalle' => new VerDetalleMovimiento($bitacora, $cadena, $transaccion, $acceso),
         'verificar' => new VerificarIntegridad($bitacora, $cadena, $transaccion, $acceso),
+        'ancla' => new ObtenerAncla($bitacora, $acceso, $reloj),
     ];
 }
 
 /** MVC: el Controlador recibe solo casos de uso (el Modelo); las rutas lo conectan con el Kernel. */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+function construirKernel(array $casos, Autenticador $autenticador, ?RegistroAcceso $registroAcceso = null): Kernel
 {
-    $controlador = new AuditoriaControlador($casos['registrar'], $casos['consultar'], $casos['detalle'], $casos['verificar']);
+    $controlador = new AuditoriaControlador($casos['registrar'], $casos['consultar'], $casos['detalle'], $casos['verificar'], $casos['ancla']);
 
-    return new Kernel(Rutas::definir($controlador), $autenticador);
+    return new Kernel(Rutas::definir($controlador), $autenticador, $registroAcceso);
 }
 
 /** Punto de entrada real. AUDITORIA_PERSISTENCIA elige PostgreSQL («pdo», por defecto) o «memoria» (demo sin base). */
@@ -98,5 +102,5 @@ function crearKernel(array $config, ?ConjuntoAdaptadores $adaptadores = null): K
     $casos = construirCasosDeUso($config, $adaptadores->bitacora, $adaptadores->transaccion, new PoliticaAccesoEstatica($config['permisos']),
         new RelojSistema());
 
-    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']), new RegistroAccesoJson());
 }

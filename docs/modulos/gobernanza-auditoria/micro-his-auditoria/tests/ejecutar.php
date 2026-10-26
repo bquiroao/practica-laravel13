@@ -16,7 +16,8 @@ $grupos = [
     'Aplicacion' => 'Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles)',
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas (dobles de PDO)',
     'Contratos' => 'Repository: la misma suite de contrato para InMemory y PDO',
-    'Presentacion' => 'Presentación: MVC y HTTP',
+    'Presentacion' => 'Presentación: MVC, HTTP y observabilidad',
+    'Cliente' => 'Cliente-servidor: librería cliente, bandeja local y resiliencia',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
 ];

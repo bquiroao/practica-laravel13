@@ -4,6 +4,7 @@ Aplicación PHP 8.2+ vanilla, sin framework ni Composer, que ejecuta el flujo **
 
 ```
 micro-his-auditoria/
+├── api/openapi.yaml            ← contrato OpenAPI 3.1 (semana 5), validado con Redocly
 ├── public/index.php            ← front controller (php -S)
 ├── bootstrap/                  ← autoload PSR-4 y raíz de composición (contenedor.php)
 ├── config/config.php           ← variables de entorno, catálogo, tokens demo y permisos provisionales
@@ -12,9 +13,11 @@ micro-his-auditoria/
 │   ├── Presentacion/Http/      ← Kernel, MVC (Controladores, Formularios, Vistas), Rutas, autenticación demo
 │   ├── Aplicacion/             ← casos de uso, CadenaSellada, comandos, Resultado, puertos
 │   ├── Dominio/                ← Movimiento, Sello, reglas y filtros (OCP), puertos Bitacora y Reloj
-│   └── Persistencia/           ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), FabricaAdaptadores, configuración
+│   ├── Persistencia/           ← Pdo/ y EnMemoria/ (dos adaptadores por puerto), FabricaAdaptadores, configuración
+│   └── Cliente/                ← ClienteAuditoria para los emisores: reintento idempotente, circuit breaker, BandejaLocal
 ├── database/integracion-central.sql ← audit_logs en la base central del HIS (semana 4)
 ├── bin/demo.php                ← demo de punta a punta SIN base de datos (modo memoria)
+├── bin/medir.php               ← costo de la frontera: en proceso frente a HTTP (semana 5)
 ├── bin/demo-http.sh            ← recorrido de punta a punta con curl
 ├── bin/validar-integracion-central.php ← aplica integracion-central.sql sobre las migraciones reales
 └── tests/                      ← dominio, aplicación, PDO con dobles, contrato del Repository, MVC y HTTP, arquitectura, integración, mutaciones
@@ -29,9 +32,10 @@ micro-his-auditoria/
 | POST | `/api/v1/auditoria/movimientos` | `auditoria.registrar` (cuenta de servicio) | 201 · 200 `YA_REGISTRADO` · 403 · 409 · 422 · 503 |
 | GET | `/api/v1/auditoria/movimientos?desde=&hasta=[&usuario=&modulo=&accion=&resultado=&cursor=]` | `auditoria.consultar` (`consultar_red` con `X-Tenant-ID: *`) | 200 · 403 · 422 · 503 |
 | GET | `/api/v1/auditoria/movimientos/{id}` | `auditoria.consultar` | 200 · 404 (idéntico fuera del alcance) |
-| POST | `/api/v1/auditoria/verificaciones` `{"hospital": …}` | `auditoria.verificar` | 200 `INTEGRA` / `ALTERADA` |
+| POST | `/api/v1/auditoria/verificaciones` `{"hospital": …, "ancla": {…}}` | `auditoria.verificar` | 200 `INTEGRA` / `ALTERADA` / `TRUNCADA` |
+| GET | `/api/v1/auditoria/anclas?hospital=` | `auditoria.verificar` | 200 cabeza de la cadena (secuencia y sello) |
 
-Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401). Si el token no corresponde a ese hospital, la respuesta es 403.
+Todas exigen `X-Tenant-ID` (400) y `Authorization: Bearer` (401). Si el token no corresponde a ese hospital, la respuesta es 403. Toda respuesta lleva `X-Request-ID`. Contrato completo: [`api/openapi.yaml`](api/openapi.yaml).
 
 ## Ejecutar las pruebas
 
@@ -39,8 +43,8 @@ Requisitos: PHP 8.2+ con `pdo_pgsql` y `mbstring`.
 
 ```bash
 cd docs/modulos/gobernanza-auditoria/micro-his-auditoria
-php tests/ejecutar.php        # 62 pruebas; las 14 de PostgreSQL se omiten sin base de datos
-php tests/mutaciones.php      # 15 defectos inyectados; todos deben detectarse
+php tests/ejecutar.php        # 78 pruebas; las 15 de PostgreSQL se omiten sin base de datos
+php tests/mutaciones.php      # 18 defectos inyectados; todos deben detectarse
 php bin/demo.php              # la API completa en memoria, sin base de datos
 ```
 
@@ -49,8 +53,8 @@ php bin/demo.php              # la API completa en memoria, sin base de datos
 ```bash
 export AUDITORIA_DB_DSN="pgsql:host=127.0.0.1;port=5432;dbname=micro_his_auditoria"
 export AUDITORIA_DB_USUARIO=postgres AUDITORIA_DB_CLAVE=…
-php tests/ejecutar.php        # 62/62
-php tests/mutaciones.php      # 15/15 (M1 y M11 solo las detecta la base real)
+php tests/ejecutar.php        # 78/78
+php tests/mutaciones.php      # 18/18 (M1 y M11 solo las detecta la base real)
 ```
 
 ## Levantar la API
@@ -67,3 +71,4 @@ bash bin/demo-http.sh         # en otra terminal
 |---|---|
 | 3 | Cuatro capas, PDO con sentencias preparadas, `audit_logs` de solo inserción, sello encadenado con candado por cadena, idempotencia, consulta paginada con cursor y meta-auditoría. Pruebas con dobles, de integración con PostgreSQL y de mutación. |
 | 4 | Entrada **MVC** (`AuditoriaControlador`, `FormularioMovimientos`, `MovimientosVista`/`ErrorVista`), adaptadores **InMemory de producción** junto a los PDO, `AUDITORIA_PERSISTENCIA` = `pdo` o `memoria`, suite de **contrato** común (CON-MEM/CON-PDO), demo sin base e integración con la base central del HIS (`integracion-central.sql`, validada sobre las migraciones reales). |
+| 5 | Contrato **OpenAPI 3.1** (5 operaciones) con conformidad probada (API-01..03), capa **Cliente** con reintento idempotente, circuit breaker y **BandejaLocal** (outbox del emisor), `X-Request-ID` y registro de acceso, **ancla externa** (`GET /anclas`, verificación `TRUNCADA`) y medición de la frontera (`bin/medir.php`). |

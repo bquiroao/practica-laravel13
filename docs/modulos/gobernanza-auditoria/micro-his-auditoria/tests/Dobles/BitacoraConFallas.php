@@ -26,6 +26,9 @@ final class BitacoraConFallas implements Bitacora
     /** @var array<int, Movimiento> id => fila alterada */
     private array $alteradas = [];
 
+    /** @var array<int, true> ids borrados «por fuera» */
+    private array $ocultas = [];
+
     public function __construct(public readonly BitacoraEnMemoria $real = new BitacoraEnMemoria())
     {
     }
@@ -62,27 +65,29 @@ final class BitacoraConFallas implements Bitacora
     {
         $this->quizasFallar('ultimo');
 
-        return $this->alterada($this->real->ultimo($hospital));
+        $cadena = $this->cadena($hospital);
+
+        return $cadena === [] ? null : $cadena[count($cadena) - 1];
     }
 
     public function buscar(ConsultaMovimientos $consulta): array
     {
         $this->quizasFallar('buscar');
 
-        return array_map($this->alterada(...), $this->real->buscar($consulta));
+        return array_values(array_filter(array_map($this->alterada(...), $this->real->buscar($consulta))));
     }
 
     public function cadena(?string $hospital): array
     {
         $this->quizasFallar('cadena');
 
-        return array_map($this->alterada(...), $this->real->cadena($hospital));
+        return array_values(array_filter(array_map($this->alterada(...), $this->real->cadena($hospital))));
     }
 
     /** @return list<Movimiento> */
     public function todos(): array
     {
-        return array_map($this->alterada(...), $this->real->todos());
+        return array_values(array_filter(array_map($this->alterada(...), $this->real->todos())));
     }
 
     /** SOLO PRUEBAS: a partir de ahora, la fila $id se lee como $reemplazo. */
@@ -91,9 +96,15 @@ final class BitacoraConFallas implements Bitacora
         $this->alteradas[$id] = $reemplazo->conId($id);
     }
 
+    /** SOLO PRUEBAS: la fila $id desaparece, como un DELETE hecho con el trigger desactivado. */
+    public function ocultarParaPrueba(int $id): void
+    {
+        $this->ocultas[$id] = true;
+    }
+
     private function alterada(?Movimiento $m): ?Movimiento
     {
-        return $m === null ? null : ($this->alteradas[$m->id] ?? $m);
+        return $m === null || isset($this->ocultas[$m->id]) ? null : ($this->alteradas[$m->id] ?? $m);
     }
 
     private function quizasFallar(string $operacion): void
