@@ -13,7 +13,8 @@ use Auditoria\Dominio\Modelo\SolicitudRegistro;
  */
 final class ReglaFormatoCampos implements ReglaMovimiento
 {
-    private const MAXIMOS = ['event_id' => 64, 'usuario' => 64, 'modulo' => 32, 'accion' => 64, 'recurso' => 128, 'correlation_id' => 64];
+    private const MAXIMOS = ['event_id' => 64, 'usuario' => 64, 'modulo' => 32, 'accion' => 64, 'recurso' => 128, 'correlation_id' => 64,
+        'corrige_evento' => 64];
 
     public function evaluar(SolicitudRegistro $s): ?Rechazo
     {

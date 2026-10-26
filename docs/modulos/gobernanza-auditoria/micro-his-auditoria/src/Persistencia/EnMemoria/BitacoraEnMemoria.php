@@ -23,7 +23,8 @@ final class BitacoraEnMemoria implements Bitacora, Restaurable
     {
         foreach ($this->movimientos as $m) {
             if (($m->emisor === $movimiento->emisor && $m->eventId === $movimiento->eventId)
-                || ($m->hospital === $movimiento->hospital && $m->secuencia === $movimiento->secuencia)) {
+                || ($m->hospital === $movimiento->hospital && $m->secuencia === $movimiento->secuencia)
+                || ($movimiento->corrigeA !== null && $m->corrigeA === $movimiento->corrigeA)) {
                 throw new ErrorPersistencia('La bitácora no está disponible.', '23505');   // igual que la violación de unicidad
             }
         }
@@ -66,6 +67,29 @@ final class BitacoraEnMemoria implements Bitacora, Restaurable
         usort($encontrados, static fn (Movimiento $a, Movimiento $b): int => [$b->ocurridoEn, $b->id] <=> [$a->ocurridoEn, $a->id]);
 
         return array_slice($encontrados, 0, $consulta->limite);
+    }
+
+    public function correccionDe(int $id): ?Movimiento
+    {
+        foreach ($this->movimientos as $m) {
+            if ($m->corrigeA === $id) {
+                return $m;
+            }
+        }
+
+        return null;
+    }
+
+    public function correccionesDe(array $ids): array
+    {
+        $correcciones = [];
+        foreach ($this->movimientos as $m) {
+            if ($m->corrigeA !== null && in_array($m->corrigeA, $ids, true)) {
+                $correcciones[$m->corrigeA] = $m->id;
+            }
+        }
+
+        return $correcciones;
     }
 
     public function cadena(?string $hospital): array

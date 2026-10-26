@@ -77,6 +77,20 @@ final class BitacoraConFallas implements Bitacora
         return array_values(array_filter(array_map($this->alterada(...), $this->real->buscar($consulta))));
     }
 
+    public function correccionDe(int $id): ?Movimiento
+    {
+        $this->quizasFallar('correccionDe');
+
+        return $this->alterada($this->real->correccionDe($id));
+    }
+
+    public function correccionesDe(array $ids): array
+    {
+        $this->quizasFallar('correccionesDe');
+
+        return $this->real->correccionesDe($ids);
+    }
+
     public function cadena(?string $hospital): array
     {
         $this->quizasFallar('cadena');

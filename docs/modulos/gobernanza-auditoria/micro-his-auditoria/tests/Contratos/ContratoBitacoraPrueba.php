@@ -126,6 +126,19 @@ $contrato = static function (string $prefijo, callable $fabrica) use ($conMov): 
         afirmar(hash_equals(Sello::calcular(Sello::GENESIS, 1, $leido), $leido->sello), 'el sello recalculado no coincide');
     });
 
+    prueba("CON-$prefijo-09", "[$prefijo] semana 6: correccionDe() y correccionesDe(); una segunda corrección del mismo original → ErrorPersistencia", function () use ($fabrica, $conMov): void {
+        [$b] = $fabrica();
+        $original = $b->agregar($conMov(1, ['event_id' => 'o']));
+        $otro = $b->agregar($conMov(2, ['event_id' => 'x']));
+        $correccion = $b->agregar($conMov(3, ['event_id' => 'c', 'motivo_correccion' => 'Usuario equivocado en el origen'])->corrigiendo($original->id));
+        igual([$correccion->id, null], [$b->correccionDe($original->id)?->id, $b->correccionDe($otro->id)], 'correccionDe');
+        igual([$original->id => $correccion->id], $b->correccionesDe([$original->id, $otro->id, 999]), 'correccionesDe');
+        igual([], $b->correccionesDe([]), 'lista vacía');
+        igual([$original->id, 'Usuario equivocado en el origen'], [$b->porId($correccion->id)->corrigeA, $b->porId($correccion->id)->motivoCorreccion], 'lectura');
+        lanza(ErrorPersistencia::class, fn () => $b->agregar($conMov(4, ['event_id' => 'd', 'motivo_correccion' => 'Otra corrección más'])->corrigiendo($original->id)),
+            'segunda corrección');
+    });
+
     prueba("CON-$prefijo-08", "[$prefijo] Transaccion: lo agregado dentro de una operación que lanza no queda", function () use ($fabrica, $conMov): void {
         [$b, $t] = $fabrica();
         lanza(RuntimeException::class, fn () => $t->ejecutar(function () use ($b, $conMov): void {

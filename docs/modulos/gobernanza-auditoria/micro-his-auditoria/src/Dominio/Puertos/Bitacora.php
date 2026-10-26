@@ -40,6 +40,18 @@ interface Bitacora
      */
     public function buscar(ConsultaMovimientos $consulta): array;
 
+    /** Semana 6: la corrección que referencia a ese movimiento, si existe (hay a lo sumo una). @throws ErrorPersistencia */
+    public function correccionDe(int $id): ?Movimiento;
+
+    /**
+     * Semana 6: para una página de resultados, qué movimientos fueron corregidos y por cuál.
+     *
+     * @param list<int> $ids
+     * @return array<int, int> id original => id de su corrección
+     * @throws ErrorPersistencia
+     */
+    public function correccionesDe(array $ids): array;
+
     /**
      * La cadena completa de un hospital, por secuencia ascendente (para verificarla).
      *

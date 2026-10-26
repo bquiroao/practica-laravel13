@@ -39,7 +39,8 @@ final class VerDetalleMovimiento
                 $this->cadena->auditarLectura($red ? null : $comando->hospital, $comando->actor, 'AUDITORIA_CONSULTADA',
                     ['alcance' => $red ? 'red' : 'hospital', 'detalle' => $comando->id]);
 
-                return Resultado::ok(['movimiento' => $movimiento->completo()]);
+                return Resultado::ok(['movimiento' => $movimiento->completo()
+                    + ['corregido_por' => $this->bitacora->correccionDe((int) $movimiento->id)?->id]]);
             });
         } catch (ErrorPersistencia) {
             return Resultado::noDisponible();

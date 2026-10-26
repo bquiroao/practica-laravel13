@@ -17,12 +17,18 @@ CREATE TABLE audit_logs (
     correlation_id  varchar(64),
     detalle         jsonb        NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(detalle) = 'object'),
     secuencia       bigint       NOT NULL CHECK (secuencia > 0),
-    sello           char(64)     NOT NULL,                 -- sha256(sello anterior ‖ secuencia ‖ contenido) (R-03)
+    sello           char(64)     NOT NULL,
+    corrige_a       bigint       REFERENCES audit_logs (id) ON DELETE RESTRICT,   -- semana 6: corrección del movimiento id
+    motivo_correccion varchar(500),
+    CONSTRAINT audit_logs_correccion_completa CHECK ((corrige_a IS NULL) = (motivo_correccion IS NULL)),                 -- sha256(sello anterior ‖ secuencia ‖ contenido) (R-03)
     CONSTRAINT audit_logs_evento_unico UNIQUE (emisor, event_id)
 );
 
 -- Una sola fila por posición de cada cadena: última defensa si el candado de la aplicación fallara.
 CREATE UNIQUE INDEX audit_logs_cadena_unica ON audit_logs (COALESCE(hospital_id, '*'), secuencia);
+
+-- Semana 6: un movimiento se corrige a lo sumo una vez (para volver a corregir se corrige la corrección).
+CREATE UNIQUE INDEX audit_logs_una_correccion ON audit_logs (corrige_a) WHERE corrige_a IS NOT NULL;
 
 -- Consultas filtradas (R-06, R-09): siempre por rango de fechas, del más reciente al más antiguo.
 CREATE INDEX audit_logs_hospital_fecha ON audit_logs (hospital_id, ocurrido_en DESC, id DESC);
