@@ -1,0 +1,87 @@
+@startuml semana-01-secuencia
+title Módulo de laboratorio — Secuencia\n«Captura y corrección controlada de resultados pendientes»
+autonumber "<b>S-00"
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Personal de laboratorio\n(captura)" as Capturista
+actor "Bioquímico/a validador/a\n(proceso posterior)" as Bioquimico
+boundary "Interfaz de resultados" as UI
+control "Servicio de resultados" as Servicio
+database "Órdenes e ítems\n(lab_order / lab_order_item)" as Ordenes
+database "Versiones de resultados\n(lab_result_version)" as Resultados
+queue "Cola de validación" as Cola
+
+== Captura de resultado [CU-01] ==
+Capturista -> UI : S-01 Iniciar captura para orden e ítem
+UI -> Servicio : S-02 capturar(orden, ítem, datos, contexto)
+Servicio -> Servicio : S-03 validar identidad, hospital y permiso [D-01, R-02]
+alt Actor no autorizado [E-01]
+  Servicio --> UI : S-04 denegar sin exponer datos
+  UI --> Capturista : S-05 informar acceso denegado
+else Actor autorizado
+  Servicio -> Ordenes : S-06 buscar orden e ítem [D-02, R-01]
+  Ordenes --> Servicio : S-07 referencia e ítem elegible / no elegible
+  alt Orden o ítem no disponible [E-02]
+    Servicio --> UI : S-08 informar que no puede iniciarse la captura
+    UI --> Capturista : S-09 mostrar error sin confirmar guardado
+  else Ítem elegible
+    Servicio --> UI : S-10 presentar campos aplicables a la prueba [R-03]
+    UI --> Capturista : S-11 mostrar datos que se deben completar
+    Capturista -> UI : S-12 ingresar valor y datos requeridos
+    UI -> Servicio : S-13 validar entrada [D-03]
+    alt Datos incompletos o inválidos [E-03]
+      Servicio --> UI : S-14 indicar errores; no crear versión
+      UI --> Capturista : S-15 solicitar corrección de entrada
+    else Datos válidos
+      Servicio -> Resultados : S-16 guardar primera versión pendiente [R-04]
+      Resultados --> Servicio : S-17 persistida / error [D-04]
+      alt Error de persistencia [E-04]
+        Servicio --> UI : S-18 error; no confirmar éxito [R-08]
+        UI --> Capturista : S-19 informar que la captura no quedó registrada
+      else Captura guardada
+        Servicio -> Cola : S-20 poner versión pendiente en cola
+        Cola --> Bioquimico : S-21 dejarla disponible para validación posterior
+        Servicio --> UI : S-22 captura pendiente confirmada
+        UI --> Capturista : S-23 mostrar confirmación y referencia
+      end
+    end
+  end
+end
+
+== Corrección antes de validar [CU-02] ==
+Capturista -> UI : S-24 Seleccionar resultado para corregir
+UI -> Servicio : S-25 corregir(resultado, dato nuevo, motivo, contexto)
+Servicio -> Servicio : S-26 volver a comprobar autorización [R-02]
+Servicio -> Resultados : S-27 leer versión vigente y su estado
+Resultados --> Servicio : S-28 pendiente / validada / versión no vigente [D-06]
+alt Resultado validado o versión no vigente [E-05, R-07]
+  Servicio --> UI : S-29 rechazar cambio sin alterar el resultado
+  UI --> Capturista : S-30 informar que este flujo no permite la corrección
+else Resultado vigente y pendiente
+  Servicio --> UI : S-31 solicitar dato corregido y motivo obligatorio
+  UI --> Capturista : S-32 presentar formulario de corrección
+  Capturista -> UI : S-33 ingresar valor corregido y motivo [R-06]
+  UI -> Servicio : S-34 validar campos y motivo [D-07]
+  alt Entrada inválida [E-03]
+    Servicio --> UI : S-35 indicar errores; no crear versión
+    UI --> Capturista : S-36 solicitar completar datos
+  else Entrada válida
+    Servicio -> Resultados : S-37 crear versión enlazada y volver a verificar estado [R-05, R-06]
+    Resultados --> Servicio : S-38 guardada / estado cambió / error [D-08]
+    alt Estado cambió antes de guardar [E-05]
+      Servicio --> UI : S-39 rechazar sin alterar las versiones
+      UI --> Capturista : S-40 informar que ya no está pendiente
+    else Error de persistencia [E-04]
+      Servicio --> UI : S-41 error; no confirmar éxito [R-08]
+      UI --> Capturista : S-42 informar que se conserva la versión previa
+    else Corrección persistida
+      Servicio -> Resultados : S-43 preservar versión previa e historial [R-06]
+      Servicio -> Cola : S-44 actualizar elemento pendiente
+      Cola --> Bioquimico : S-45 dejar disponible la versión vigente
+      Servicio --> UI : S-46 confirmar nueva versión pendiente
+      UI --> Capturista : S-47 mostrar confirmación
+    end
+  end
+end
+@enduml
