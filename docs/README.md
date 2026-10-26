@@ -35,6 +35,7 @@ docs/
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
 | Contratos API: centro de documentación y manuales por rol | [`modulos/contratos-api`](modulos/contratos-api/README.md) |
 | Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
+| Ingreso de resultados de laboratorio | [`modulos/ingreso-resultados-laboratorio`](modulos/ingreso-resultados-laboratorio/README.md) |
 | Validación de resultados por bioquímico | [`modulos/validacion-resultados-bioquimico`](modulos/validacion-resultados-bioquimico/README.md) |
 | Órdenes de laboratorio desde EMR | [`modulos/ordenes-laboratorio-emr`](modulos/ordenes-laboratorio-emr/README.md) |
 | Validación de resultados por bioquímico | [`modulos/validacion-resultados-bioquimico`](modulos/validacion-resultados-bioquimico/README.md) |

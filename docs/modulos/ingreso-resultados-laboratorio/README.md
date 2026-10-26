@@ -9,6 +9,7 @@ Modela la captura de resultados asociados con una orden de laboratorio y la corr
 | Semana | Entrega | Documento | Declaración IA | Defensa oral |
 |---:|---|---|---|---|
 | 1 | UML del proceso «captura y corrección controlada de resultados pendientes»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-ingreso-resultados.md](semana-01/semana-01-uml-ingreso-resultados.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
+| 2 | RF/RNF, criterios de aceptación y aplicación de LSP al diseño del flujo, con ejemplo PHP verificable y pruebas de contrato | [semana-02-lsp-ingreso-resultados.md](semana-02/semana-02-lsp-ingreso-resultados.md) · [ejemplo LSP](semana-02/ejemplo-lsp/README.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
