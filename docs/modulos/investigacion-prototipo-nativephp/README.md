@@ -9,6 +9,7 @@ Evalúa la viabilidad de usar NativePHP como puente para una extensión móvil/e
 | Semana | Entrega | Documento | Declaración IA | Defensa oral |
 |---:|---|---|---|---|
 | 1 | UML del proceso «evaluación y prototipo acotado de un flujo HIS mediante NativePHP»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-investigacion-prototipo-nativephp.md](semana-01/semana-01-uml-investigacion-prototipo-nativephp.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
+| 2 | RF/RNF, criterios de aceptación y aplicación de ISP al flujo de consulta y notificación nativa, con ejemplo PHP verificable | [semana-02-isp-nativephp.md](semana-02/semana-02-isp-nativephp.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
