@@ -1,0 +1,25 @@
+@startuml semana-03-paquetes-dependencias
+' Semana 3 — Catálogo de salas, wards y camas (tarea Odoo 2445): regla de dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorCatalogo
+}
+package Aplicacion {
+  class ServicioCatalogo
+  interface RepositorioCatalogo <<puerto>>
+  class ErrorPersistencia
+}
+package Dominio {
+  enum EstadoCama
+  class ReglaDeDominio
+}
+package Persistencia {
+  class RepositorioPdo
+}
+ControladorCatalogo ..> ServicioCatalogo
+ControladorCatalogo ..> ReglaDeDominio : traduce a HTTP
+ServicioCatalogo ..> EstadoCama
+ServicioCatalogo --> RepositorioCatalogo
+RepositorioPdo ..|> RepositorioCatalogo
+RepositorioPdo ..> ErrorPersistencia : lanza
+@enduml

@@ -33,3 +33,4 @@ docs/
 | Notas SOAP y diagnósticos | [`modulos/notas-soap-diagnosticos`](modulos/notas-soap-diagnosticos/README.md) |
 | Recepción de muestras y códigos identificadores | [`modulos/recepcion-muestras`](modulos/recepcion-muestras/README.md) |
 | Órdenes de laboratorio desde EMR | [`modulos/ordenes-laboratorio-emr`](modulos/ordenes-laboratorio-emr/README.md) |
+| Pacientes: registro, edición, búsqueda y detalle | [`modulos/pacientes`](modulos/pacientes/README.md) |

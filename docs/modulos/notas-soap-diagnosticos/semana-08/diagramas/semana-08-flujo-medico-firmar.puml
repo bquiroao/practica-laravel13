@@ -1,0 +1,49 @@
+@startuml semana-08-flujo-medico-firmar
+!pragma layout smetana
+title User flow · Médico autor — firmar una nota en borrador
+skinparam ActivityBackgroundColor #F2F8F7
+skinparam ActivityBorderColor #1F6F6B
+skinparam ActivityDiamondBackgroundColor #FFF4E5
+skinparam defaultFontSize 12
+
+|Médico autor|
+start
+:Abre una nota en borrador · W3
+(desde la línea de tiempo o tras guardar);
+|Interfaz|
+:CARGA: detalle como esqueleto;
+:Muestra S · O · A · P, diagnóstico y estado «Borrador»;
+:Botón «Firmar» visible solo si es el autor;
+|Médico autor|
+:Presiona «Firmar»;
+|Interfaz|
+:CONFIRMACIÓN: «La firma no se puede deshacer.
+Si después hay un error, se corrige con una versión nueva.»
+[Cancelar] (foco) [Firmar nota];
+|Médico autor|
+if (¿Confirma?) then (no)
+  :Vuelve al detalle sin cambios;
+  stop
+else (sí)
+endif
+|Servidor Notas SOAP|
+:POST /api/v1/notas-soap/{id}/firma
+(no se reintenta sola);
+|Interfaz|
+if (¿Resultado?) then (200)
+  :ÉXITO M-21 «Nota firmada»
+  estado «Firmada», aparece «Corregir»;
+  stop
+elseif (409 nota_firmada) then (ya firmada)
+  :M-09 y recarga la nota
+  (otra pestaña ya la firmó);
+  stop
+elseif (red / sin respuesta) then (duda)
+  :Consulta la nota de nuevo
+  para ver si quedó firmada;
+  detach
+else (403 / 404)
+  :W5 (M-11) o M-10 «La nota no existe»;
+  stop
+endif
+@enduml

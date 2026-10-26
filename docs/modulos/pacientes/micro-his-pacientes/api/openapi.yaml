@@ -1,0 +1,539 @@
+openapi: 3.1.0
+info:
+  title: Micro-HIS Pacientes — API
+  version: 1.2.0
+  summary: Registro, búsqueda, detalle y actualización segura de pacientes por hospital.
+  description: |
+    Contrato del módulo ASII-03 «Pacientes: registro, edición, búsqueda y detalle».
+
+    Reglas transversales:
+    - Toda petición exige `Authorization: Bearer` (401) y `X-Tenant-ID` (400); el token debe ser del
+      mismo hospital (403 `TENANT_NO_COINCIDE`).
+    - Cada operación exige su permiso (`x-permiso`), que decide el módulo RBAC (403 `ACCESO_DENEGADO`).
+    - Toda respuesta lleva `X-Request-ID` (el recibido si es válido, o uno nuevo).
+    - El documento de identidad nunca viaja completo en las respuestas: solo enmascarado (`*********0101`).
+    - Concurrencia optimista: la versión viaja en `ETag`; `PUT` exige `If-Match` (428 sin él, 409 si cambió).
+    - Errores: siempre `{"error": "<CODIGO>", ...detalle}`; nunca trazas ni SQLSTATE.
+    - Versionado: versión mayor en la ruta (`/api/v1`); campos opcionales nuevos no cambian la versión.
+    - 1.1.0 (semana 6, compatible): «identidad protegida» (R-11). Proteger o quitar la protección exige
+      `pacientes.proteger` y `motivo`. Sin `pacientes.leer_protegido`, un protegido no aparece en la búsqueda
+      por nombre, se muestra sin demografía (nombre «Identidad protegida», sin nacimiento, teléfono ni documento),
+      no se puede editar (403) y en los 409 de duplicados su código se reemplaza por `RESERVADO`.
+    - 1.2.0 (semana 12, cambio solicitado B-4): en un `PUT`, si el campo `documento` no se envía, el documento
+      no cambia (como `identidad_protegida`); `documento: null` explícito lo quita (cambio de identidad: exige
+      `motivo`). El detalle agrega `nombres` y `apellidos` por separado (null si se muestra reducido), para que
+      una interfaz pueda editar sin conocer el documento completo ni adivinar dónde empiezan los apellidos.
+  contact:
+    name: Boris Alexander Quiroa Orellana (@bquiroao)
+  license:
+    name: Uso académico — Análisis de Sistemas II 2026
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8081
+    description: Servidor de desarrollo (php -S)
+security:
+  - tokenPortador: []
+tags:
+  - name: pacientes
+    description: Ficha del paciente en el hospital activo.
+paths:
+  /api/v1/pacientes:
+    post:
+      tags: [pacientes]
+      operationId: registrarPaciente
+      summary: Registrar un paciente (CU-01, CU-05, CU-06)
+      description: |
+        Verifica duplicados en toda la red (R-02 bloquea, R-03 advierte). Con `Idempotency-Key`, un
+        reintento con el mismo cuerpo devuelve la respuesta original (cabecera `Idempotent-Replayed`).
+      x-permiso: pacientes.registrar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroPaciente'
+            examples:
+              conDpi:
+                value:
+                  nombres: Ana Lucía
+                  apellidos: López Pérez
+                  fecha_nacimiento: '1985-03-14'
+                  sexo: female
+                  telefono: +502 5555 1234
+                  documento:
+                    tipo: DPI
+                    numero: '2547896320101'
+      responses:
+        '201':
+          description: Registrado (o reintento con la misma Idempotency-Key).
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+            Location:
+              $ref: '#/components/headers/Location'
+            ETag:
+              $ref: '#/components/headers/ETag'
+            Idempotent-Replayed:
+              $ref: '#/components/headers/IdempotentReplayed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PacienteRegistrado'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '409':
+          $ref: '#/components/responses/ConflictoRegistro'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+    get:
+      tags: [pacientes]
+      operationId: buscarPacientes
+      summary: Buscar pacientes del hospital activo (CU-02)
+      description: Máximo 20 resultados con datos mínimos (R-10, R-04). El criterio no se registra en claro.
+      x-permiso: pacientes.buscar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - name: nombre
+          in: query
+          description: Al menos 3 letras; sin distinguir tildes ni mayúsculas.
+          schema:
+            type: string
+        - name: nacimiento
+          in: query
+          description: AAAA, AAAA-MM o AAAA-MM-DD (solo junto con nombre).
+          schema:
+            type: string
+            pattern: '^\d{4}(-\d{2}(-\d{2})?)?$'
+        - name: codigo
+          in: query
+          schema:
+            type: string
+        - name: tipo_documento
+          in: query
+          schema:
+            type: string
+            enum: [DPI, PASAPORTE]
+        - name: numero_documento
+          in: query
+          schema:
+            type: string
+        - name: pais_documento
+          in: query
+          description: Código ISO de 3 letras (solo pasaporte).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista (puede estar vacía).
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaPacientes'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/pacientes/{codigo}:
+    parameters:
+      - $ref: '#/components/parameters/Codigo'
+    get:
+      tags: [pacientes]
+      operationId: consultarPaciente
+      summary: Detalle del paciente con su versión (CU-03)
+      description: Con `If-None-Match` igual a la versión vigente responde 304 sin cuerpo.
+      x-permiso: pacientes.leer
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        '200':
+          description: Detalle.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetallePaciente'
+        '304':
+          description: La copia del cliente sigue vigente.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+    put:
+      tags: [pacientes]
+      operationId: actualizarPaciente
+      summary: Actualización segura (CU-04)
+      description: |
+        Exige `If-Match` con la versión leída (R-06). Cambiar nombres, apellidos, fecha o documento
+        exige `motivo` (R-07). Fallecidos o inactivos: solo con `pacientes.editar_restringido` (R-08).
+      x-permiso: pacientes.editar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizacionPaciente'
+      responses:
+        '200':
+          description: Actualizado; nueva versión en ETag.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PacienteActualizado'
+        '400':
+          $ref: '#/components/responses/SolicitudInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/ConflictoActualizacion'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
+        '428':
+          $ref: '#/components/responses/VersionRequerida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+components:
+  securitySchemes:
+    tokenPortador:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: En el HIS lo emite el módulo de usuarios (JwtAuth); en el micro-HIS, tokens de demostración.
+  parameters:
+    TenantId:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital activo; debe coincidir con el del token.
+      schema:
+        type: string
+        examples: [hosp-oriente]
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Id de traza; si no cumple el patrón, el servidor genera uno nuevo.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Mismo valor en cada reintento del MISMO registro. Distinto cuerpo con la misma clave → 422.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: Versión leída, tal como llegó en ETag (por ejemplo "7").
+      schema:
+        type: string
+        examples: ['"7"']
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      schema:
+        type: string
+    Codigo:
+      name: codigo
+      in: path
+      required: true
+      schema:
+        type: string
+        examples: [P-000001]
+  headers:
+    XRequestId:
+      description: Id de traza de esta petición.
+      schema:
+        type: string
+    ETag:
+      description: Versión vigente del paciente entre comillas.
+      schema:
+        type: string
+    Location:
+      description: Ruta del paciente creado.
+      schema:
+        type: string
+    IdempotentReplayed:
+      description: 'true si la respuesta es la repetición de un registro anterior con la misma Idempotency-Key.'
+      schema:
+        type: string
+        enum: ['true']
+  schemas:
+    Documento:
+      type: [object, 'null']
+      description: |
+        Sin documento = identidad provisional (no se compara por documento).
+        En un PUT: ausente = sin cambio; null = quitar el documento (exige motivo).
+      properties:
+        tipo:
+          type: string
+          enum: [DPI, PASAPORTE]
+        numero:
+          type: string
+          description: DPI de 13 dígitos (departamento 01-22) o pasaporte de 6 a 20 caracteres.
+        pais:
+          type: [string, 'null']
+          description: Código ISO de 3 letras; obligatorio para PASAPORTE.
+    DatosPaciente:
+      type: object
+      required: [nombres, apellidos, fecha_nacimiento, sexo]
+      properties:
+        nombres:
+          type: string
+          maxLength: 100
+        apellidos:
+          type: string
+          maxLength: 100
+        fecha_nacimiento:
+          type: string
+          format: date
+          description: No puede ser futura.
+        sexo:
+          type: string
+          enum: [female, male, other, unknown]
+        telefono:
+          type: [string, 'null']
+          pattern: '^\+?[0-9 ]{8,15}$'
+        documento:
+          $ref: '#/components/schemas/Documento'
+        identidad_protegida:
+          type: [boolean, 'null']
+          description: |
+            R-11. Exige pacientes.proteger y motivo para pasar a true o a false.
+            Ausente en un PUT = sin cambio (no se quita la protección por omisión).
+    RegistroPaciente:
+      allOf:
+        - $ref: '#/components/schemas/DatosPaciente'
+        - type: object
+          properties:
+            confirmar_coincidencia:
+              type: boolean
+              description: Solo con pacientes.confirmar_duplicado, tras un 409 POSIBLE_DUPLICADO.
+            motivo:
+              type: [string, 'null']
+    ActualizacionPaciente:
+      allOf:
+        - $ref: '#/components/schemas/DatosPaciente'
+        - type: object
+          properties:
+            motivo:
+              type: [string, 'null']
+              description: Obligatorio si cambian nombres, apellidos, fecha de nacimiento o documento.
+    PacienteRegistrado:
+      type: object
+      required: [codigo, version, identidad_provisional]
+      properties:
+        codigo:
+          type: string
+        version:
+          type: integer
+          const: 1
+        identidad_provisional:
+          type: boolean
+    ResumenPaciente:
+      type: object
+      required: [codigo, nombre, nacimiento, identificador, identidad_protegida]
+      properties:
+        codigo:
+          type: string
+        nombre:
+          type: string
+          description: «Identidad protegida» si el paciente es protegido y el actor no tiene pacientes.leer_protegido.
+        nacimiento:
+          type: [string, 'null']
+          format: date
+          description: null si se muestra reducido.
+        identificador:
+          type: [string, 'null']
+          description: Enmascarado; null si no hay documento o se muestra reducido.
+        identidad_protegida:
+          type: boolean
+    ListaPacientes:
+      type: object
+      required: [resultados, total]
+      properties:
+        resultados:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/ResumenPaciente'
+        total:
+          type: integer
+    DetallePaciente:
+      type: object
+      required: [paciente]
+      properties:
+        paciente:
+          allOf:
+            - $ref: '#/components/schemas/ResumenPaciente'
+            - type: object
+              required: [sexo, estado, identidad_provisional, version]
+              properties:
+                sexo:
+                  type: string
+                telefono:
+                  type: [string, 'null']
+                  description: null si se muestra reducido.
+                tipo_documento:
+                  type: [string, 'null']
+                  description: null si se muestra reducido.
+                nombres:
+                  type: [string, 'null']
+                  description: Desde 1.2.0. null si se muestra reducido.
+                apellidos:
+                  type: [string, 'null']
+                  description: Desde 1.2.0. null si se muestra reducido.
+                estado:
+                  type: string
+                  enum: [active, inactive, deceased]
+                identidad_provisional:
+                  type: boolean
+                version:
+                  type: integer
+    PacienteActualizado:
+      type: object
+      required: [codigo, version]
+      properties:
+        codigo:
+          type: string
+        version:
+          type: integer
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Código estable del error.
+        campos:
+          type: object
+          additionalProperties:
+            type: string
+      additionalProperties: true
+  responses:
+    SolicitudInvalida:
+      description: 'Formato inválido: HOSPITAL_REQUERIDO, CUERPO_INVALIDO, FORMATO_INVALIDO, IF_MATCH_INVALIDO.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoAutenticado:
+      description: NO_AUTENTICADO (sin token o token inválido).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Prohibido:
+      description: |
+        ACCESO_DENEGADO, TENANT_NO_COINCIDE o REQUIERE_SUPERVISOR. Sin detalles del motivo. Desde 1.1.0 también
+        al proteger sin pacientes.proteger o al editar un protegido sin pacientes.leer_protegido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoEncontrado:
+      description: PACIENTE_NO_ENCONTRADO (idéntico si el paciente es de otro hospital).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ConflictoRegistro:
+      description: |
+        PACIENTE_EXISTENTE, POSIBLE_DUPLICADO, DOCUMENTO_EN_USO o SOLICITUD_EN_CURSO. Si el titular o un
+        candidato es protegido y el actor no tiene pacientes.leer_protegido, su código es RESERVADO (1.1.0).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ConflictoActualizacion:
+      description: VERSION_DESACTUALIZADA (incluye version_vigente), IDENTIFICADOR_EN_USO o DOCUMENTO_EN_USO.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ReglaIncumplida:
+      description: DATOS_INVALIDOS (con campos), MOTIVO_REQUERIDO, CRITERIO_INSUFICIENTE o IDEMPOTENCY_KEY_REUTILIZADA.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    VersionRequerida:
+      description: VERSION_REQUERIDA (falta If-Match).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ErrorInterno:
+      description: ERROR_INTERNO, sin detalles.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoDisponible:
+      description: SERVICIO_NO_DISPONIBLE (base de datos) o CONFIGURACION_INCOMPLETA.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

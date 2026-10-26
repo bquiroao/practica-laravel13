@@ -1,0 +1,52 @@
+@startuml semana-13-proceso-revision
+!pragma layout smetana
+title Proceso de la revisión técnica formal (inspección) · Pacientes
+skinparam defaultFontSize 12
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Autor|
+start
+:Congela el paquete en un commit
+y hace la autorrevisión (AR-xx);
+|Moderador|
+:Planificación: paquete S1/S2/S3, roles,
+perspectivas, fechas;
+:php herramientas/criterios-entrada.php;
+if (¿E-1..E-8 cumplen?) then (no)
+  |Autor|
+  :Corrige lo que falta
+  (pruebas, checklist, autorrevisión);
+  detach
+else (sí)
+endif
+|Moderador|
+:Apertura (15 min): objetivos, checklist,
+formato de hallazgos · envía el material (≥ 48 h);
+|Revisores|
+:Preparación individual (≤ 2 h c/u)
+checklist por perspectiva · registro de tiempo
+hallazgos preliminares en el CSV;
+|Moderador|
+:Reunión de inspección (≤ 90 min por sesión)
+se leen los ítems RT-01..RT-15 · se registran
+hallazgos y severidad · NO se discuten soluciones;
+if (¿Decisión?) then (Aceptado)
+else (con condiciones / re-inspección)
+  |Autor|
+  :Retrabajo: corrige cada hallazgo aceptado
+  con una prueba que lo demuestre;
+  |Moderador|
+  :Seguimiento: verifica cada corrección
+  (estado → Verificado) · suite y lint en verde;
+  if (¿Re-inspección?) then (sí)
+    :Nueva reunión solo sobre lo corregido;
+  else (no)
+  endif
+endif
+|Moderador|
+:Cierre: criterios de salida S-1..S-5,
+métricas y acta firmada;
+stop
+@enduml

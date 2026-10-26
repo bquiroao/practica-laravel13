@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">WF-03 — Confirmar aceptación individual</title>
+  <desc id="desc">Wireframe de confirmación final para recibir una muestra individual, con resumen de vínculo y aviso de que el código se asigna al persistir.</desc>
+  <rect width="1280" height="820" fill="#f3f6fa"/>
+  <rect width="1280" height="74" fill="#12304a"/>
+  <text x="34" y="46" fill="#fff" font-family="Arial,sans-serif" font-size="24" font-weight="700">Sistema Hospitalario Integrado</text>
+  <text x="1040" y="44" fill="#d8e6f1" font-family="Arial,sans-serif" font-size="15">Hospital activo: Central</text>
+  <rect y="74" width="222" height="746" fill="#e8eef4"/>
+  <text x="26" y="126" fill="#25445e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Recepción</text>
+  <rect x="12" y="145" width="198" height="44" rx="7" fill="#d2e5f4"/>
+  <text x="30" y="173" fill="#123b59" font-family="Arial,sans-serif" font-size="15" font-weight="700">Nueva recepción</text>
+  <text x="250" y="120" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">Confirmar recepción</text>
+  <text x="250" y="151" fill="#50677b" font-family="Arial,sans-serif" font-size="16">Paso 3 de 3 · confirma un solo recipiente.</text>
+  <rect x="250" y="182" width="980" height="73" rx="9" fill="#eaf5fb" stroke="#a9cee2"/>
+  <text x="277" y="213" fill="#1d536e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Revisa el vínculo antes de guardar</text>
+  <text x="277" y="237" fill="#385d72" font-family="Arial,sans-serif" font-size="14">La aceptación se confirma solo cuando la decisión y la custodia inicial quedan registradas.</text>
+  <rect x="250" y="276" width="625" height="319" rx="10" fill="#fff" stroke="#cbd7e1"/>
+  <text x="278" y="315" fill="#29475f" font-family="Arial,sans-serif" font-size="19" font-weight="700">Resumen de recepción</text>
+  <text x="278" y="358" fill="#62798b" font-family="Arial,sans-serif" font-size="13" font-weight="700">ORDEN / ÍTEM</text>
+  <text x="278" y="383" fill="#213d53" font-family="Arial,sans-serif" font-size="16">ORD-00482 · Ítem 01</text>
+  <text x="572" y="358" fill="#62798b" font-family="Arial,sans-serif" font-size="13" font-weight="700">PACIENTE</text>
+  <text x="572" y="383" fill="#213d53" font-family="Arial,sans-serif" font-size="16">Paciente de ejemplo</text>
+  <line x1="278" y1="406" x2="846" y2="406" stroke="#e0e7ec"/>
+  <text x="278" y="440" fill="#62798b" font-family="Arial,sans-serif" font-size="13" font-weight="700">EXAMEN / TIPO</text>
+  <text x="278" y="465" fill="#213d53" font-family="Arial,sans-serif" font-size="16">Química · suero</text>
+  <text x="572" y="440" fill="#62798b" font-family="Arial,sans-serif" font-size="13" font-weight="700">DECISIÓN</text>
+  <rect x="572" y="449" width="130" height="29" rx="14" fill="#e5f4eb"/>
+  <text x="590" y="469" fill="#21613b" font-family="Arial,sans-serif" font-size="14" font-weight="700">ACEPTAR</text>
+  <line x1="278" y1="495" x2="846" y2="495" stroke="#e0e7ec"/>
+  <text x="278" y="530" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Código interno: se asignará al guardar</text>
+  <text x="278" y="555" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Custodia inicial: recepción · ubicación actual</text>
+  <text x="278" y="577" fill="#526a7e" font-family="Arial,sans-serif" font-size="13">La etiqueta es un paso técnico posterior; no cambia la decisión.</text>
+  <rect x="897" y="276" width="333" height="319" rx="10" fill="#fff" stroke="#cbd7e1"/>
+  <text x="923" y="315" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Confirmación explícita</text>
+  <text x="923" y="354" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Al guardar, se registrará esta</text>
+  <text x="923" y="377" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">muestra con su identificador y</text>
+  <text x="923" y="400" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">evento de custodia.</text>
+  <rect x="923" y="428" width="22" height="22" rx="4" fill="#fff" stroke="#748b9d" stroke-width="2"/>
+  <text x="956" y="445" fill="#29475f" font-family="Arial,sans-serif" font-size="14">Confirmo orden e ítem</text>
+  <text x="956" y="465" fill="#29475f" font-family="Arial,sans-serif" font-size="14">con el recipiente físico.</text>
+  <rect x="923" y="493" width="277" height="45" rx="7" fill="#12608a"/>
+  <text x="966" y="522" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">Guardar recepción</text>
+  <text x="923" y="564" fill="#62798b" font-family="Arial,sans-serif" font-size="12">Evita enviar de nuevo si la respuesta tarda.</text>
+  <rect x="250" y="621" width="980" height="81" rx="9" fill="#fff5df" stroke="#edcc80"/>
+  <text x="276" y="654" fill="#77520c" font-family="Arial,sans-serif" font-size="15" font-weight="700">Guardado incierto o fallido</text>
+  <text x="276" y="680" fill="#77520c" font-family="Arial,sans-serif" font-size="14">No afirmes éxito ni repitas a ciegas: consulta el estado de esta operación para evitar un registro duplicado.</text>
+  <text x="250" y="750" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Anotación: éxito solo tras persistir decisión, specimenId y evento inicial; impresión pendiente se comunica aparte.</text>
+</svg>

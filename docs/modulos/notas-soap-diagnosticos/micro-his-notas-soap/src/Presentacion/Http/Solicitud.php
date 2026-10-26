@@ -10,12 +10,14 @@ final class Solicitud
     /**
      * @param array<string, string> $cabeceras nombres en minúsculas
      * @param array<string, mixed>|null $cuerpo
+     * @param array<string, string> $consulta parámetros de la query string (?estado=signed)
      */
     public function __construct(
         public readonly string $metodo,
         public readonly string $ruta,
         public readonly array $cabeceras = [],
         public readonly ?array $cuerpo = null,
+        public readonly array $consulta = [],
     ) {
     }
 
@@ -34,7 +36,13 @@ final class Solicitud
             (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH),
             $cabeceras,
             is_array($json) ? $json : null,
+            array_map(static fn ($v): string => is_scalar($v) ? (string) $v : '', $_GET),
         );
+    }
+
+    public function parametro(string $nombre): ?string
+    {
+        return $this->consulta[$nombre] ?? null;
     }
 
     public function cabecera(string $nombre): string

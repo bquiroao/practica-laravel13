@@ -18,7 +18,9 @@ use NotasSoap\Dominio\Modelo\SeccionesSoap;
 use NotasSoap\Dominio\Puertos\RepositorioDiagnosticos;
 use NotasSoap\Dominio\Puertos\RepositorioNotas;
 use NotasSoap\Persistencia\EnMemoria\RepositorioDiagnosticosEnMemoria;
+use NotasSoap\Persistencia\EnMemoria\RegistroIdempotenciaEnMemoria;
 use NotasSoap\Persistencia\EnMemoria\RepositorioNotasEnMemoria;
+use NotasSoap\Persistencia\Pdo\PdoRegistroIdempotencia;
 use NotasSoap\Persistencia\Pdo\FabricaConexion;
 use NotasSoap\Persistencia\Pdo\PdoRepositorioDiagnosticos;
 use NotasSoap\Persistencia\Pdo\PdoRepositorioNotas;
@@ -28,7 +30,7 @@ $adaptadores = [
     'memoria' => static function (): array {
         $notas = new RepositorioNotasEnMemoria();
 
-        return [$notas, new RepositorioDiagnosticosEnMemoria($notas)];
+        return [$notas, new RepositorioDiagnosticosEnMemoria($notas), new RegistroIdempotenciaEnMemoria()];
     },
     'pdo-sqlite' => static function (): array {
         if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
@@ -38,12 +40,12 @@ $adaptadores = [
         $pdo->exec((string) file_get_contents(dirname(__DIR__) . '/Integracion/esquema-sqlite.sql'));
         $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
 
-        return [new PdoRepositorioNotas($pdo), new PdoRepositorioDiagnosticos($pdo)];
+        return [new PdoRepositorioNotas($pdo), new PdoRepositorioDiagnosticos($pdo), new PdoRegistroIdempotencia($pdo)];
     },
 ];
 
-$nota = static fn (string $id = 'n-1'): NotaSoap => NotaSoap::registrar($id, 'exp-carlos', 'epi-100', 'dra-mendez',
-    new SeccionesSoap('Tos y fiebre', 'T 38.6 °C', 'Probable neumonía', 'Radiografía'), new DateTimeImmutable('2026-10-12T09:30:00-06:00'));
+$nota = static fn (string $id = 'n-1', string $exp = 'exp-carlos', string $cuando = '2026-10-12T09:30:00-06:00'): NotaSoap => NotaSoap::registrar($id, $exp, 'epi-100', 'dra-mendez',
+    new SeccionesSoap('Tos y fiebre', 'T 38.6 °C', 'Probable neumonía', 'Radiografía'), new DateTimeImmutable($cuando));
 
 foreach ($adaptadores as $nombre => $crear) {
     prueba("REP-01 $nombre", 'guardar y buscar devuelven la misma nota (secciones, estado, versión, autor)', function () use ($crear, $nota): void {
@@ -91,5 +93,45 @@ foreach ($adaptadores as $nombre => $crear) {
         [, $dx] = $crear();
         $e = lanza(ErrorPersistencia::class, fn () => $dx->guardar(Diagnostico::registrar('d-1', $nota('fantasma'), 'J18.9', 'Neumonía', 'primary')), 'llave foránea');
         afirmar(str_starts_with((string) $e->sqlState, '23'), 'SQLSTATE de integridad, obtenido ' . var_export($e->sqlState, true));
+    });
+
+    prueba("REP-07 $nombre", 'deExpediente devuelve solo las notas de ese expediente, en orden de creación y luego por id', function () use ($crear, $nota): void {
+        [$notas] = $crear();
+        $notas->guardar($nota('n-3', 'exp-carlos', '2026-10-12T11:00:00-06:00'));
+        $notas->guardar($nota('n-2', 'exp-carlos', '2026-10-12T09:30:00-06:00'));
+        $notas->guardar($nota('n-1', 'exp-carlos', '2026-10-12T09:30:00-06:00'));
+        $notas->guardar($nota('n-9', 'exp-rosa', '2026-10-12T08:00:00-06:00'));
+        igual(['n-1', 'n-2', 'n-3'], array_map(static fn (NotaSoap $n): string => $n->id, $notas->deExpediente('exp-carlos')), 'orden');
+        igual([], $notas->deExpediente('exp-nadie'), 'sin notas');
+    });
+
+    prueba("REP-08 $nombre", 'RegistroIdempotencia: buscar una clave nueva da null; guardada devuelve huella y nota; repetida es error de integridad', function () use ($crear, $nota): void {
+        [$notas, , $idem] = $crear();
+        $notas->guardar($nota());
+        igual(null, $idem->buscar('hosp-oriente', 'dra-mendez', 'clave-rep-0001'), 'clave nueva');
+        $huella = str_repeat('a', 64);
+        $idem->guardar('hosp-oriente', 'dra-mendez', 'clave-rep-0001', $huella, 'n-1');
+        igual(['huella' => $huella, 'nota_id' => 'n-1'], $idem->buscar('hosp-oriente', 'dra-mendez', 'clave-rep-0001'), 'guardada');
+        igual(null, $idem->buscar('hosp-oriente', 'dr-lopez', 'clave-rep-0001'), 'es por usuario');
+        $e = lanza(ErrorPersistencia::class, fn () => $idem->guardar('hosp-oriente', 'dra-mendez', 'clave-rep-0001', $huella, 'n-1'), 'duplicada');
+        afirmar(str_starts_with((string) $e->sqlState, '23'), 'SQLSTATE de integridad');
+    });
+
+    prueba("REP-09 $nombre", 'Semana 6: guarda la corrección con supersedes_id y motivo; correccionDe la encuentra; una versión solo se corrige una vez (clase 23)', function () use ($crear, $nota): void {
+        [$notas] = $crear();
+        $original = $nota()->firmar(new DateTimeImmutable('2026-10-12T10:00:00-06:00'));
+        $notas->guardar($original);
+        $nuevas = new SeccionesSoap('Tos y fiebre', 'T 37.6 °C', 'Probable neumonía', 'Radiografía');
+        $v2 = NotaSoap::corregir($original, 'n-2', $nuevas, 'Temperatura mal anotada', new DateTimeImmutable('2026-10-12T11:00:00-06:00'));
+        igual(null, $notas->correccionDe('n-1'), 'sin corrección todavía');
+        $notas->guardar($v2);
+        $leida = $notas->buscar('n-2');
+        igual([2, 'n-1', 'Temperatura mal anotada', 'T 37.6 °C'], [$leida?->version, $leida?->reemplazaA, $leida?->motivoCorreccion, $leida?->secciones->objetivo], 'leída de vuelta');
+        igual('n-2', $notas->correccionDe('n-1')?->id, 'correccionDe');
+        igual(null, $notas->correccionDe('n-2'), 'la v2 aún no tiene corrección');
+        igual([null, null], [$notas->buscar('n-1')?->reemplazaA, $notas->buscar('n-1')?->motivoCorreccion], 'la original no apunta a nada');
+        $otra = NotaSoap::corregir($original, 'n-3', $nuevas, 'Otro intento sobre la misma versión', new DateTimeImmutable('2026-10-12T11:05:00-06:00'));
+        $e = lanza(ErrorPersistencia::class, fn () => $notas->guardar($otra), 'segunda corrección de n-1');
+        afirmar(str_starts_with((string) $e->sqlState, '23'), 'SQLSTATE de integridad');
     });
 }
