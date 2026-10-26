@@ -1,0 +1,40 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title Diseño ANTES de OCP — una clase registra, valida, filtra, sella y audita
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #FDECEC
+skinparam classBorderColor #B03A2E
+
+class BitacoraAuditoria {
+  - movimientos : array
+  - permisos : array
+  + fallar : bool
+  --
+  + registrar(emisor, hospitalToken, datos) : array
+  + consultar(actor, hospitalToken, alcance, p) : array
+  - guardar(emisor, contenido) : array
+}
+
+note right of BitacoraAuditoria::registrar
+  catálogo escrito dentro del método
+  if tenant … elseif campos … elseif catálogo …
+  elseif resultado … elseif fecha … elseif prohibidos …
+  <b>// Una regla nueva sería otro elseif aquí.</b>
+end note
+
+note right of BitacoraAuditoria::consultar
+  lista fija de filtros admitidos
+  foreach movimiento:
+    if hospital … if fechas … if usuario …
+    if módulo … if acción …
+  <b>// Un filtro nuevo sería otro if aquí</b>
+  <b>// (y otro nombre en la lista).</b>
+end note
+
+note bottom of BitacoraAuditoria
+  Razones para cambiar: catálogo, validaciones, filtros, alcance,
+  sello, meta-auditoría y persistencia → 7 razones en una clase.
+  «Filtrar por resultado» o «cada cuenta solo su módulo»
+  obligan a EDITAR registrar() o consultar() y volver a probarlo todo.
+end note
+@enduml

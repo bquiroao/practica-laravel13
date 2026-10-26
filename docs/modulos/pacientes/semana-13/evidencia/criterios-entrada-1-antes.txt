@@ -1,0 +1,97 @@
+Revisión técnica formal Pacientes · criterios de entrada
+Repositorio: sistema-hospitalario-integrado-SistenasII-2026-G1 · micro-his-pacientes @ 6698035
+----------------------------------------------------------------------------------------------------
+PASA   E-1   Paquete congelado en un commit y sin cambios locales
+       commit 6698035
+PASA   E-2   Suite automatizada sin fallas
+       Total 87 · Pasan 85 · Fallan 0 · Omitidas 2
+PASA   E-3   Guardas de contrato (API-01..03) y de capas (ARQ-01..08) en verde
+       11 guardas en verde
+PASA   E-4   Cada sesión ≤ 1600 líneas efectivas
+       S1: 957 líneas en 25 archivos · S2: 865 líneas en 24 archivos · S3: 1284 líneas en 19 archivos
+FALLA  E-5   Checklist de 12–15 ítems y formato de hallazgos publicados
+       0 ítems en el checklist · formato FALTA
+FALLA  E-6   Autorrevisión del autor registrada con el mismo formato
+       0 hallazgos del autor en el registro CSV · 0 en autorrevision-autor.md
+MANUAL E-7   Material distribuido ≥ 48 h antes de la reunión
+       el moderador anota la fecha de envío en el acta
+MANUAL E-8   Roles asignados y revisores confirmados
+       nombres en el plan §3 y en el acta
+----------------------------------------------------------------------------------------------------
+PAQUETE DE REVISIÓN
+
+S1 · Reglas de dominio de la ficha — 957 líneas efectivas, 25 archivos
+    71  database/schema.sql
+    11  src/Dominio/Excepciones/ConflictoVersion.php
+    12  src/Dominio/Excepciones/DatosInvalidos.php
+    14  src/Dominio/Excepciones/DocumentoDuplicado.php
+    22  src/Dominio/Excepciones/ErrorDominio.php
+    14  src/Dominio/Excepciones/ErrorPersistencia.php
+    11  src/Dominio/Excepciones/PacienteNoEncontrado.php
+    27  src/Dominio/Modelo/Capacidades.php
+    77  src/Dominio/Modelo/CriterioBusqueda.php
+    22  src/Dominio/Modelo/DatosPaciente.php
+    43  src/Dominio/Modelo/Dpi.php
+    47  src/Dominio/Modelo/EventoAuditoria.php
+    22  src/Dominio/Modelo/FabricaIdentificador.php
+    22  src/Dominio/Modelo/Identificador.php
+   195  src/Dominio/Modelo/Paciente.php
+    43  src/Dominio/Modelo/Pasaporte.php
+    17  src/Dominio/Modelo/Texto.php
+    22  src/Dominio/Puertos/ConsultaPacientes.php
+    30  src/Dominio/Puertos/IndiceDuplicados.php
+    11  src/Dominio/Puertos/RegistroAuditoria.php
+    22  src/Dominio/Puertos/RepositorioPacientes.php
+    48  src/Dominio/Servicios/PoliticaConfidencialidad.php
+    71  src/Dominio/Servicios/PoliticaDuplicados.php
+    22  src/Dominio/Servicios/PoliticaEdicion.php
+    61  src/Dominio/Servicios/RevisionDeFicha.php
+
+S2 · Aplicación y persistencia (orquestación, integridad y protección del documento) — 865 líneas efectivas, 24 archivos
+    56  src/Aplicacion/CasosDeUso/ActualizarPaciente.php
+    47  src/Aplicacion/CasosDeUso/BuscarPacientes.php
+    40  src/Aplicacion/CasosDeUso/ConsultarPaciente.php
+    74  src/Aplicacion/CasosDeUso/RegistrarPaciente.php
+    17  src/Aplicacion/Comandos/ComandoActualizar.php
+    13  src/Aplicacion/Comandos/ComandoBuscar.php
+    12  src/Aplicacion/Comandos/ComandoConsultar.php
+    17  src/Aplicacion/Comandos/ComandoRegistrar.php
+    26  src/Aplicacion/Comandos/FormularioPaciente.php
+    12  src/Aplicacion/Excepciones/ClaveIdempotenciaEnUso.php
+    24  src/Aplicacion/Puertos/AlmacenIdempotencia.php
+     8  src/Aplicacion/Puertos/PoliticaAcceso.php
+     8  src/Aplicacion/Puertos/Reloj.php
+    15  src/Aplicacion/Puertos/Transaccion.php
+    44  src/Aplicacion/Resultados/Resultado.php
+    43  src/Aplicacion/Servicios/ControlAcceso.php
+    21  src/Persistencia/Pdo/FabricaConexion.php
+    37  src/Persistencia/Pdo/PdoAlmacenIdempotencia.php
+    41  src/Persistencia/Pdo/PdoIndiceDuplicados.php
+    27  src/Persistencia/Pdo/PdoRegistroAuditoria.php
+   148  src/Persistencia/Pdo/PdoRepositorioPacientes.php
+    34  src/Persistencia/Pdo/PdoTransaccion.php
+    36  src/Persistencia/Pdo/RepositorioPdo.php
+    65  src/Persistencia/Seguridad/ProteccionDocumentos.php
+
+S3 · Contrato, frontera HTTP, permisos/tenant y dependencias — 1284 líneas efectivas, 19 archivos
+   538  api/openapi.yaml
+    94  bootstrap/contenedor.php
+    33  config/config.php
+    18  public/index.php
+    10  src/Presentacion/Http/Autenticacion/Autenticador.php
+    21  src/Presentacion/Http/Autenticacion/AutenticadorTokenDemo.php
+    59  src/Presentacion/Http/Controladores/PacientesControlador.php
+    16  src/Presentacion/Http/Formularios/EntradaInvalida.php
+   109  src/Presentacion/Http/Formularios/FormularioPaciente.php
+    12  src/Presentacion/Http/Identidad.php
+    94  src/Presentacion/Http/Kernel.php
+     9  src/Presentacion/Http/Observabilidad/RegistroAcceso.php
+    19  src/Presentacion/Http/Observabilidad/RegistroAccesoJson.php
+    42  src/Presentacion/Http/Respuesta.php
+    22  src/Presentacion/Http/Ruta.php
+    19  src/Presentacion/Http/Rutas.php
+    49  src/Presentacion/Http/Solicitud.php
+    61  src/Presentacion/Http/Vistas/ErrorVista.php
+    59  src/Presentacion/Http/Vistas/PacienteVista.php
+
+Criterios automáticos que fallan: 2

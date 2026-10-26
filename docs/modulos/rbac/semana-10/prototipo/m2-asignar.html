@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asignar rol · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<header class="barra">
+  <a class="atras btn texto" href="m1-roles.html" aria-label="Volver a Roles del hospital" style="color:#fff">←</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="avatar" role="img" aria-label="Carlos Méndez, administración">CM</span>
+</header>
+
+<div class="red lenta" role="status" data-estado="enviando incierto">
+  <span aria-hidden="true">◔</span> Conexión lenta
+</div>
+
+<main>
+  <!-- ===================== PASO 1: ¿a quién? ===================== -->
+  <div data-estado="paso1">
+    <h1>Asignar rol</h1>
+    <ol class="pasos" aria-hidden="true"><li class="hecho"></li><li></li><li></li></ol>
+    <p class="paso-texto">Paso 1 de 3 · Persona</p>
+    <label for="q">Buscar por nombre o usuario</label>
+    <input id="q" type="search" value="Luis" autocomplete="off" aria-describedby="q-ayuda">
+    <p class="ayuda" id="q-ayuda">Solo personas de Hospital Regional de Oriente.</p>
+    <div role="listbox" aria-label="Resultados" style="margin-top:12px">
+      <div class="resultado" role="option" aria-selected="true">
+        <span class="avatar" aria-hidden="true" style="background:#7A5AA6">LG</span>
+        <div><strong>Luis García</strong><div class="meta">nuevo-01 · Laboratorio clínico</div></div>
+        <span class="derecha" aria-hidden="true" style="color:var(--primario);font-weight:700">✓</span>
+      </div>
+      <div class="resultado" role="option" aria-selected="false">
+        <span class="avatar" aria-hidden="true" style="background:#5B7083">LR</span>
+        <div><strong>Luisa Ramírez</strong><div class="meta">nuevo-10 · Consulta externa</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PASO 2: ¿qué rol y hasta cuándo? ===================== -->
+  <div data-estado="paso2">
+    <h1>Asignar rol</h1>
+    <ol class="pasos" aria-hidden="true"><li class="hecho"></li><li class="hecho"></li><li></li></ol>
+    <p class="paso-texto">Paso 2 de 3 · Rol y vigencia para <strong>Luis García</strong></p>
+    <label for="rol">Rol</label>
+    <select id="rol"><option>Laboratorio</option><option>Enfermería</option><option>Médico</option></select>
+    <p class="ayuda">Podrá: registrar resultados de laboratorio.</p>
+    <label for="desde">Válido desde (dd/mm/aaaa)</label>
+    <input id="desde" type="date" value="2026-11-15">
+    <label for="hasta">Válido hasta (opcional)</label>
+    <input id="hasta" type="date" aria-describedby="hasta-ayuda">
+    <p class="ayuda" id="hasta-ayuda">Déjalo vacío si el rol no vence.</p>
+  </div>
+
+  <!-- ===================== PASO 3: confirmar ===================== -->
+  <div data-estado="base enviando">
+    <h1>Asignar rol</h1>
+    <ol class="pasos" aria-hidden="true"><li class="hecho"></li><li class="hecho"></li><li class="hecho"></li></ol>
+    <p class="paso-texto">Paso 3 de 3 · Confirmar</p>
+    <section class="tarjeta" aria-labelledby="conf">
+      <h2 id="conf">Luis García <span class="meta">(nuevo-01)</span></h2>
+      <p style="margin:0 0 8px">recibirá el rol <strong>Laboratorio</strong> en <strong>Hospital Regional de Oriente</strong> desde el <strong>15/11/2026</strong>, sin fecha de fin.</p>
+      <p class="etiqueta" style="margin-top:8px">Podrá</p>
+      <ul style="margin:0;padding-left:20px"><li>Registrar resultados de laboratorio</li></ul>
+      <p class="extra ayuda">El cambio queda registrado en la bitácora con tu nombre.</p>
+    </section>
+  </div>
+
+  <!-- ===================== RESULTADO INCIERTO (timeout) ===================== -->
+  <div data-estado="incierto">
+    <h1>Asignar rol</h1>
+    <section class="aviso atencion" role="alert" aria-labelledby="inc">
+      <h2 id="inc">No sabemos si se asignó</h2>
+      <p style="margin:0">La conexión se cortó después de enviar. Puede que el rol <strong>Laboratorio</strong> para <strong>Luis García</strong> ya esté asignado.</p>
+      <p class="ayuda">Puedes reintentar sin riesgo: como no tiene fecha de fin, el sistema no crea una segunda asignación.</p>
+    </section>
+    <section class="tarjeta">
+      <h2>Lo que enviaste</h2>
+      <dl class="datos">
+        <dt>Persona</dt><dd>Luis García (nuevo-01)</dd>
+        <dt>Rol</dt><dd>Laboratorio · desde 15/11/2026</dd>
+      </dl>
+    </section>
+  </div>
+
+  <!-- ===================== YA ESTABA (409 tras reintentar) ===================== -->
+  <div data-estado="ya-asignado">
+    <h1>Asignar rol</h1>
+    <section class="aviso ok" role="status" aria-labelledby="ya">
+      <button class="btn texto icono cerrar" aria-label="Cerrar aviso">×</button>
+      <h2 id="ya">✓ El rol ya estaba asignado</h2>
+      <p style="margin:0">Tu solicitud anterior sí llegó. <strong>Luis García</strong> tiene <strong>Laboratorio</strong> activo desde el 15/11/2026.</p>
+    </section>
+  </div>
+
+  <!-- ===================== ÉXITO ===================== -->
+  <div data-estado="exito">
+    <h1>Asignar rol</h1>
+    <section class="aviso ok" role="status" aria-labelledby="ok">
+      <button class="btn texto icono cerrar" aria-label="Cerrar aviso">×</button>
+      <h2 id="ok">✓ Rol asignado</h2>
+      <p style="margin:0 0 8px">Luis García ya puede registrar resultados de laboratorio.</p>
+      <div class="referencia">142371fa-927f-4c1e-9d55-3c0a0e8b7d21</div>
+      <div class="acciones"><button class="btn">Copiar referencia</button></div>
+    </section>
+  </div>
+</main>
+
+<div class="accion-fija">
+  <a class="btn" href="m1-roles.html" data-estado="paso1">Cancelar</a>
+  <button class="btn primario" data-estado="paso1">Siguiente</button>
+  <button class="btn" data-estado="paso2">Atrás</button>
+  <button class="btn primario" data-estado="paso2">Revisar</button>
+  <button class="btn" data-estado="base">Atrás</button>
+  <button class="btn primario" data-estado="base">Asignar rol</button>
+  <button class="btn primario" aria-disabled="true" data-estado="enviando"><span aria-hidden="true">◌</span> Asignando…</button>
+  <button class="btn" data-estado="incierto">Ver sus roles</button>
+  <button class="btn primario" data-estado="incierto">Reintentar</button>
+  <a class="btn primario" href="m1-roles.html" data-estado="ya-asignado exito">Volver a roles</a>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

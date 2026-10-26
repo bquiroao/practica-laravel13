@@ -1,0 +1,29 @@
+Pacientes semana 2 - verificacion LSP (PHP 8.4.26)
+----------------------------------------------------------------------------------------------------
+[PASA] CA-01   Registro válido: 201, código, versión 1 y PACIENTE_REGISTRADO con DPI enmascarado
+[PASA] CA-02   Datos inválidos: 422 con cada campo que falla y sin guardar nada
+[PASA] CA-03   Mismo DPI (escrito con espacios): 409 PACIENTE_EXISTENTE con el código y el DPI enmascarado
+[PASA] CA-04   Coincidencia probable: 409; admisión no confirma (403); sin motivo 422; supervisor con motivo 201
+[PASA] CA-05   Dos pacientes sin documento: ambos 201 (identidad provisional) y se pueden corregir
+[PASA] CA-06   Búsqueda: criterio corto 422; solo el hospital activo, máx. 20, datos mínimos y auditoría sin datos
+[PASA] CA-07   Detalle con versión; de otro hospital da el mismo 404 que uno inexistente
+[PASA] CA-08   Edición concurrente: la primera guarda (versión 2); la segunda recibe 409 y no borra la primera
+[PASA] CA-09   Identidad: sin motivo 422; DPI de otro paciente 409; con motivo 200 y auditoría antes/después
+[PASA] CA-10   Paciente fallecido: admisión recibe 403 REQUIERE_SUPERVISOR; el supervisor sí edita
+[PASA] CA-11   Bitácora caída: registro y actualización responden 500 y no queda nada a medias
+[PASA] CA-12   Acceso: sin hospital 400; sin permiso 403 en registrar, buscar y editar
+[PASA] LSP-01  Contrato Identificador: Dpi y Pasaporte cumplen las 4 cláusulas
+[PASA] LSP-02  Contrato ConsultaPacientes: repositorio, réplica y caché cumplen las 8 cláusulas
+[PASA] LSP-03  Contrato RepositorioPacientes: repositorio y caché cumplen las 8 cláusulas de escritura
+[PASA] LSP-04  Los servicios no usan instanceof ni dependen de implementaciones concretas
+[PASA] LSP-05  La réplica sirve para buscar, pero el sistema de tipos impide inyectarla donde se escribe
+[PASA] LSP-06  Sustitución en contexto: el mismo escenario da respuestas idénticas con cada implementación
+[PASA] ANT-01  V1: IdentificadorTemporal implementa la interfaz pero viola I1 e I3 (clave vacía y compartida)
+[PASA] ANT-02  V2: ReplicaPacientes cumple la lectura, pero viola R1 (registrar lanza LogicException)
+[PASA] ANT-03  V3: la caché por herencia viola R5 (pierde ediciones) y R7 (acepta otro hospital)
+[PASA] ANT-04  El servicio del antes pregunta por tipos concretos (3 instanceof) para esquivar las violaciones
+[PASA] ANT-05  Consecuencia de V1: corregir el nombre de un paciente sin documento da 409 falso en el antes
+[PASA] ANT-06  Consecuencia de V3: con la caché del antes la segunda edición concurrente borra la primera
+[PASA] PAR-01  Antes (repositorio base, pacientes con documento) y después responden igual en 8 escenarios
+----------------------------------------------------------------------------------------------------
+Total: 25  Pasan: 25  Fallan: 0

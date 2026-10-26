@@ -1,0 +1,31 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Dashboard de ocupación hospitalaria (tarea Odoo 2488)
+title Casos de uso — consolidación y consulta de ocupación por sala y estado de cama
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Temporizador\n(cada 5 min)" <<tiempo>> as T
+actor "Jefatura o supervisión\nde enfermería" as J
+actor "Administrador\nde hospital" as A
+
+rectangle "Dashboard de ocupación hospitalaria" {
+  usecase "CU-01\nConsolidar ocupación" as CU01
+  usecase "CU-02\nConsultar ocupación por sala\n--\npunto de extensión:\nfiltro por estado" as CU02
+  usecase "CU-03\nFiltrar por estado de cama" as CU03
+  usecase "CU-04\nVerificar consistencia\ncama-estancia" as CU04
+  usecase "CU-05\nAutorizar consulta" as CU05
+}
+
+T --> CU01
+J --> CU02
+A --> CU02
+
+CU01 ..> CU04 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU02 : <<extend>>
+
+note right of CU01
+  Solo lee wards, beds y bed_stays;
+  no cambia ningún estado (R-09).
+end note
+@enduml

@@ -1,0 +1,3 @@
+Asignar sin fecha de fin   1.er envío: 201   reintento idéntico: 409 ASIGNACION_DUPLICADA     → SEGURO (no repite el efecto)
+Asignar con fecha de fin   1.er envío: 201   reintento idéntico: 201 ROL_ASIGNADO             → NO SEGURO (repite el efecto)
+Revocar                    1.er envío: 200   reintento idéntico: 404 MEMBRESIA_NO_ENCONTRADA  → SEGURO (no repite el efecto)

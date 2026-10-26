@@ -1,0 +1,52 @@
+@startuml semana-08-flujo-clinico
+title User flow · Usuario clínico (médico, enfermería, laboratorio)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Usuario clínico|
+start
+:Abre la ficha de un paciente · W4;
+|Interfaz|
+:CARGA: acciones como esqueleto
+mientras usePermiso consulta el PDP;
+|Servidor RBAC|
+:POST /autorizaciones/decisiones
+(una por permiso visible, caché 30 s en memoria);
+|Interfaz|
+if (¿Respuesta del PDP?) then (falla de red / 5xx)
+  :FAIL-CLOSED: acciones deshabilitadas
+  M-13 «No pudimos verificar tus permisos» [Reintentar];
+  detach
+else (200)
+endif
+:Muestra solo las acciones PERMITIDAS
+(las demás no aparecen) · W4;
+|Usuario clínico|
+:Elige una acción (p. ej. «Registrar signos vitales»);
+|Servidor RBAC|
+:La ruta vuelve a autorizar
+(la UI no es la que decide);
+|Interfaz|
+if (¿Resultado?) then (2xx)
+  :ÉXITO de la operación clínica;
+  stop
+elseif (401) then (sesión)
+  :M-14 «Tu sesión expiró»
+  → login y vuelve a la misma pantalla;
+  detach
+elseif (400) then (sin hospital)
+  :M-15 «Elige un hospital» → selector;
+  detach
+else (403 denegado)
+  :Aviso «Acceso denegado» · W4 / W5
+  referencia copiable, sin motivo · M-10;
+  :AYUDA: «Comparte esta referencia
+  con tu administrador» · M-11;
+  |Usuario clínico|
+  :Copia la referencia y la envía
+  al administrador;
+  stop
+endif
+@enduml

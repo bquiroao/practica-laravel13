@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS RBAC — API de roles, permisos y autorización
-  version: 1.1.0
+  version: 1.2.0
   summary: Asignación de roles, decisión de autorización y consulta de denegaciones trazables.
   description: |
     Contrato del módulo RBAC del Sistema Hospitalario Integrado (HIS).
@@ -196,6 +196,54 @@ paths:
                   value:
                     decision: DENEGADO
                     correlation_id: 6f0b0f8e-2a63-4c55-9b7e-0d2f4f6b1c11
+        '400':
+          $ref: '#/components/responses/SinTenant'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '422':
+          $ref: '#/components/responses/DatosInvalidos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /api/v1/autorizaciones/permisos-efectivos:
+    post:
+      operationId: consultarPermisosEfectivos
+      tags: [Autorización]
+      summary: Indica qué permisos de una lista tiene el usuario del token en el hospital indicado.
+      description: |
+        Semana 12 (cambio solicitado, brecha B-6). Pensado para que la interfaz decida qué
+        MOSTRAR (menú, botones) sin dejar eventos en la bitácora: preguntar «¿qué puedo hacer?»
+        no es un intento de acceso. Usa la misma política que `/autorizaciones/decisiones`, así
+        que la respuesta coincide con la decisión que tomaría el PDP. NO registra eventos.
+        Los intentos reales (ejecutar una operación, entrar a una ruta protegida) siguen
+        pasando por el PDP y quedan auditados. Solo responde por la sesión que pregunta.
+        Fail-closed: si no se pueden leer las membresías, todos los permisos van en `false`.
+      x-permiso: null
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudPermisosEfectivos'
+            example:
+              permisos: [expediente.leer, signos_vitales.registrar, roles.asignar]
+      responses:
+        '200':
+          description: Mapa permiso → ¿lo tiene ahora en este hospital?
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermisosEfectivos'
+              example:
+                permisos:
+                  expediente.leer: true
+                  signos_vitales.registrar: true
+                  roles.asignar: false
         '400':
           $ref: '#/components/responses/SinTenant'
         '401':
@@ -425,6 +473,26 @@ components:
         correlation_id:
           type: string
           description: Presente solo si la decisión es DENEGADO.
+    SolicitudPermisosEfectivos:
+      type: object
+      required: [permisos]
+      additionalProperties: false
+      properties:
+        permisos:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            pattern: '^[a-z_]+\.[a-z_]+$'
+    PermisosEfectivos:
+      type: object
+      required: [permisos]
+      properties:
+        permisos:
+          type: object
+          additionalProperties:
+            type: boolean
     EventoAuditoria:
       type: object
       required: [correlation_id, tipo, actor, hospital, datos, ocurrido_en]
