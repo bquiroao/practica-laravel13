@@ -123,6 +123,21 @@ prueba('INT-07', 'PostgreSQL: se borra la última fila con el trigger desactivad
     igual(['INTEGRA', 'TRUNCADA'], [$verificar(null), $verificar(['secuencia' => $ancla['secuencia'], 'sello' => $ancla['sello']])], 'sin ancla / con ancla');
 });
 
+prueba('INT-08', 'PostgreSQL (semana 6): la base sola impide una corrección sin motivo y una segunda corrección del mismo original', function () use ($intSistema): void {
+    $s = $intSistema();
+    $s->casos['registrar']->ejecutar(new ComandoRegistrar('svc-pacientes', Escenario::H_ORIENTE, Escenario::mov()));
+    $c = $s->casos['registrar']->ejecutar(new ComandoRegistrar('svc-pacientes', Escenario::H_ORIENTE, Escenario::mov(['event_id' => 'ev-c',
+        'usuario' => 'u-correcto', 'corrige_evento' => 'ev-1', 'motivo_correccion' => 'Usuario equivocado en el origen'])));
+    igual('creado', $c->estado, 'corrección por el caso de uso');
+    $insertar = static fn (string $evento, string $motivo, int $secuencia): string => "INSERT INTO audit_logs (emisor, event_id, hospital_id, usuario_id,
+        modulo, accion, ocurrido_en, resultado, secuencia, sello, corrige_a, motivo_correccion) VALUES ('svc-pacientes', '$evento', 'hosp-oriente', 'u',
+        'pacientes', 'PACIENTE_REGISTRADO', now(), 'exito', $secuencia, repeat('b', 64), 1, $motivo)";
+    $sinMotivo = lanza(PDOException::class, fn () => $s->pdo->exec($insertar('ev-d', 'NULL', 10)), 'sin motivo');
+    igual('23514', $sinMotivo->errorInfo[0], 'CHECK de corrección completa');
+    $segunda = lanza(PDOException::class, fn () => $s->pdo->exec($insertar('ev-e', "'otra vez el mismo original'", 11)), 'segunda corrección');
+    igual('23505', $segunda->errorInfo[0], 'único por original');
+});
+
 prueba('INT-06', 'PostgreSQL: la restricción única (emisor, event_id) y la de (cadena, secuencia) existen en el esquema', function () use ($intSistema): void {
     $s = $intSistema();
     $indices = $s->pdo->query("SELECT indexname FROM pg_indexes WHERE tablename = 'audit_logs' ORDER BY indexname")->fetchAll(PDO::FETCH_COLUMN);

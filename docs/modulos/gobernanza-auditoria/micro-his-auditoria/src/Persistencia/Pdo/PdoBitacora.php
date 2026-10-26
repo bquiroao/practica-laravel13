@@ -17,7 +17,7 @@ use Auditoria\Dominio\Puertos\Bitacora;
 final class PdoBitacora implements Bitacora
 {
     private const COLUMNAS = 'id, emisor, event_id, hospital_id, usuario_id, modulo, accion, ocurrido_en, resultado, recurso,
-        correlation_id, detalle, secuencia, sello';
+        correlation_id, detalle, secuencia, sello, corrige_a, motivo_correccion';
 
     public function __construct(private readonly \PDO $pdo)
     {
@@ -27,14 +27,15 @@ final class PdoBitacora implements Bitacora
     {
         $id = $this->ejecutar(
             'INSERT INTO audit_logs (emisor, event_id, hospital_id, usuario_id, modulo, accion, ocurrido_en, resultado, recurso,
-                correlation_id, detalle, secuencia, sello)
+                correlation_id, detalle, secuencia, sello, corrige_a, motivo_correccion)
              VALUES (:emisor, :event_id, :hospital_id, :usuario_id, :modulo, :accion, CAST(:ocurrido_en AS timestamptz), :resultado,
-                :recurso, :correlation_id, CAST(:detalle AS jsonb), :secuencia, :sello)
+                :recurso, :correlation_id, CAST(:detalle AS jsonb), :secuencia, :sello, :corrige_a, :motivo_correccion)
              RETURNING id',
             ['emisor' => $m->emisor, 'event_id' => $m->eventId, 'hospital_id' => $m->hospital, 'usuario_id' => $m->usuario,
                 'modulo' => $m->modulo, 'accion' => $m->accion, 'ocurrido_en' => $m->ocurridoEn->format('Y-m-d H:i:sP'),
                 'resultado' => $m->resultado, 'recurso' => $m->recurso, 'correlation_id' => $m->correlationId,
-                'detalle' => json_encode((object) $m->detalle, JSON_UNESCAPED_UNICODE), 'secuencia' => $m->secuencia, 'sello' => $m->sello],
+                'detalle' => json_encode((object) $m->detalle, JSON_UNESCAPED_UNICODE), 'secuencia' => $m->secuencia, 'sello' => $m->sello,
+                'corrige_a' => $m->corrigeA, 'motivo_correccion' => $m->motivoCorreccion],
         )->fetchColumn();
 
         return $m->conId((int) $id);
@@ -88,6 +89,32 @@ final class PdoBitacora implements Bitacora
         return array_map($this->hidratar(...), $this->ejecutar($sql, $parametros)->fetchAll());
     }
 
+    public function correccionDe(int $id): ?Movimiento
+    {
+        return $this->uno('SELECT ' . self::COLUMNAS . ' FROM audit_logs WHERE corrige_a = :id', ['id' => $id]);
+    }
+
+    public function correccionesDe(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+        // Un marcador por id (:c0, :c1, …): los valores nunca entran al texto del SQL.
+        $marcadores = [];
+        $parametros = [];
+        foreach (array_values($ids) as $i => $id) {
+            $marcadores[] = ':c' . $i;
+            $parametros['c' . $i] = $id;
+        }
+        $filas = $this->ejecutar('SELECT corrige_a, id FROM audit_logs WHERE corrige_a IN (' . implode(', ', $marcadores) . ')', $parametros)->fetchAll();
+        $correcciones = [];
+        foreach ($filas as $f) {
+            $correcciones[(int) $f['corrige_a']] = (int) $f['id'];
+        }
+
+        return $correcciones;
+    }
+
     public function cadena(?string $hospital): array
     {
         return array_map($this->hidratar(...), $this->ejecutar('SELECT ' . self::COLUMNAS . ' FROM audit_logs
@@ -123,6 +150,7 @@ final class PdoBitacora implements Bitacora
     {
         return Movimiento::reconstituir((int) $f['id'], $f['emisor'], $f['event_id'], $f['hospital_id'], $f['usuario_id'], $f['modulo'],
             $f['accion'], new \DateTimeImmutable($f['ocurrido_en']), $f['resultado'], $f['recurso'], $f['correlation_id'],
-            json_decode((string) $f['detalle'], true) ?? [], (int) $f['secuencia'], trim((string) $f['sello']));
+            json_decode((string) $f['detalle'], true) ?? [], (int) $f['secuencia'], trim((string) $f['sello']),
+            $f['corrige_a'] === null ? null : (int) $f['corrige_a'], $f['motivo_correccion']);
     }
 }

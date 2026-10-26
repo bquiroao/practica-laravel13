@@ -28,6 +28,7 @@ use Auditoria\Dominio\Puertos\Bitacora;
 use Auditoria\Dominio\Puertos\Reloj;
 use Auditoria\Dominio\Reglas\ReglaAccionEnCatalogo;
 use Auditoria\Dominio\Reglas\ReglaCamposObligatorios;
+use Auditoria\Dominio\Reglas\ReglaCorreccion;
 use Auditoria\Dominio\Reglas\ReglaFechaNoFutura;
 use Auditoria\Dominio\Reglas\ReglaFormatoCampos;
 use Auditoria\Dominio\Reglas\ReglaModuloDelEmisor;
@@ -55,6 +56,7 @@ function reglasDeRegistro(array $config, Reloj $reloj): array
         new ReglaCamposObligatorios(),
         new ReglaModuloDelEmisor($config['modulo_de_emisor']),
         new ReglaFormatoCampos(),
+        new ReglaCorreccion(),                         // semana 6: forma de una corrección
         new ReglaAccionEnCatalogo(new CatalogoAcciones($config['catalogo'])),
         new ReglaResultadoValido(),
         new ReglaFechaNoFutura($reloj, 5),

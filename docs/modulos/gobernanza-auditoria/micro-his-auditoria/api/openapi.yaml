@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API de Gobernanza y auditoría de movimientos — Sistema Hospitalario Integrado
-  version: 1.0.0
+  version: 1.1.0
   summary: Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas.
   description: |
     Bitácora de movimientos del HIS. Los módulos emisores REGISTRAN movimientos con una cuenta de
@@ -15,6 +15,11 @@ info:
     - El permiso de cada operación está en `x-permiso` y lo decide RBAC (403 `ACCESO_DENEGADO`).
     - Toda respuesta trae `X-Request-ID` (se respeta el del cliente si cumple el patrón).
     - Los errores no revelan detalles internos: 500 `ERROR_INTERNO`, 503 `SERVICIO_NO_DISPONIBLE`.
+
+    1.1.0 (semana 6, compatible con 1.0.0): CORRECCIÓN TRAZABLE. Un emisor corrige un movimiento
+    suyo enviando otro movimiento con `corrige_evento` (el event_id del original) y `motivo_correccion`.
+    El original no cambia; queda marcado con `corregido_por`. A lo sumo una corrección por movimiento
+    (409 `YA_CORREGIDO`); para volver a corregir, se corrige la corrección.
   contact:
     name: Boris Alexander Quiroa Orellana (@bquiroao)
   license:
@@ -83,7 +88,7 @@ paths:
         '404':
           $ref: '#/components/responses/RutaNoEncontrada'
         '409':
-          description: EVENTO_EN_CONFLICTO — el event_id ya existe con otro contenido.
+          description: EVENTO_EN_CONFLICTO — el event_id ya existe con otro contenido; YA_CORREGIDO — el original ya tiene una corrección.
           content:
             application/json:
               schema:
@@ -286,6 +291,15 @@ components:
         detalle:
           type: object
           description: Referencias y resumen (≤ 4 KB). Prohibidas las claves password, contrasena, token, secreto, clave y diagnostico.
+        corrige_evento:
+          type: string
+          maxLength: 64
+          description: '1.1.0 — event_id de un movimiento ANTERIOR del mismo emisor y hospital que este corrige. Si no existe (o es de otro hospital o emisor), 422.'
+        motivo_correccion:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: '1.1.0 — obligatorio con corrige_evento, prohibido sin él.'
     MovimientoRegistrado:
       type: object
       required: [id, secuencia, sello]
@@ -304,6 +318,8 @@ components:
         accion: {type: string}
         resultado: {type: string}
         recurso: {type: [string, 'null']}
+        corrige_a: {type: [integer, 'null'], description: '1.1.0 — id del movimiento que esta corrección corrige.'}
+        corregido_por: {type: [integer, 'null'], description: '1.1.0 — id de la corrección de este movimiento, si la tiene.'}
     MovimientoCompleto:
       allOf:
         - $ref: '#/components/schemas/ResumenMovimiento'
@@ -315,6 +331,7 @@ components:
             detalle: {type: object}
             secuencia: {type: integer}
             sello: {type: string}
+            motivo_correccion: {type: [string, 'null']}
     Pagina:
       type: object
       required: [movimientos, cursor_siguiente]
@@ -355,7 +372,7 @@ components:
           type: string
           enum: [CUERPO_INVALIDO, FORMATO_INVALIDO, HOSPITAL_REQUERIDO, NO_AUTENTICADO, TENANT_NO_COINCIDE, ACCESO_DENEGADO,
             MODULO_NO_PERMITIDO, RUTA_NO_ENCONTRADA, MOVIMIENTO_NO_ENCONTRADO, METODO_NO_PERMITIDO, EVENTO_EN_CONFLICTO,
-            DATOS_INVALIDOS, FILTRO_NO_SOPORTADO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE]
+            DATOS_INVALIDOS, FILTRO_NO_SOPORTADO, YA_CORREGIDO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE]
         campos:
           type: object
           additionalProperties: {type: string}

@@ -23,6 +23,7 @@ $perFila = static fn (array $cambios = []): array => array_merge([
     'id' => 7, 'emisor' => 'svc-pacientes', 'event_id' => 'ev-1', 'hospital_id' => 'hosp-oriente', 'usuario_id' => 'u-ana', 'modulo' => 'pacientes',
     'accion' => 'PACIENTE_REGISTRADO', 'ocurrido_en' => '2026-10-21 15:15:00+00', 'resultado' => 'exito', 'recurso' => 'paciente:P-000001',
     'correlation_id' => 'corr-0001', 'detalle' => '{"codigo": "P-000001"}', 'secuencia' => 3, 'sello' => str_repeat('a', 64),
+    'corrige_a' => null, 'motivo_correccion' => null,
 ], $cambios);
 
 prueba('PER-01', 'agregar(): un INSERT preparado con parámetros con nombre, fecha en UTC, detalle JSON y el id que devuelve RETURNING', function () use ($perMov): void {

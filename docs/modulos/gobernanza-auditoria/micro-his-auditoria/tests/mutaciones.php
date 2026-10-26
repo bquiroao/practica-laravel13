@@ -54,6 +54,13 @@ $mutaciones = [
         'if ($ancla !== null && $ancla[\'secuencia\'] > 0) {', 'if (false) {'],
     'M18' => ['El kernel no devuelve X-Request-ID', 'src/Presentacion/Http/Kernel.php',
         "\$respuesta = \$respuesta->conCabecera('X-Request-ID', \$requestId);", ''],
+    // Semana 6: cambio práctico «corrección trazable»
+    'M19' => ['Se acepta corregir dos veces el mismo original', 'src/Aplicacion/CasosDeUso/RegistrarMovimiento.php',
+        'if ($this->bitacora->correccionDe((int) $original->id) !== null) {', 'if (false) {'],
+    'M20' => ['Se puede corregir un movimiento de OTRO hospital (fuga entre tenants)', 'src/Aplicacion/CasosDeUso/RegistrarMovimiento.php',
+        'if ($original !== null && $original->hospital !== $nuevo->hospital) {', 'if (false) {'],
+    'M21' => ['La consulta deja de avisar que un original fue corregido', 'src/Aplicacion/CasosDeUso/ConsultarMovimientos.php',
+        "['corregido_por' => \$corregidos[\$m->id] ?? null]", "['corregido_por' => null]"],
 ];
 
 $sobreviven = 0;

@@ -79,9 +79,11 @@ final class ConsultarMovimientos
                 $this->cadena->auditarLectura($consulta->hospital, $comando->actor, 'AUDITORIA_CONSULTADA',
                     ['alcance' => $red ? 'red' : 'hospital', 'filtros' => $parametros, 'resultados' => count($pagina)]);
                 $ultimo = $pagina === [] ? null : $pagina[count($pagina) - 1];
+                // Semana 6: el original sigue en SU fecha, pero avisa que fue corregido y por cuál.
+                $corregidos = $this->bitacora->correccionesDe(array_map(static fn (Movimiento $m): int => (int) $m->id, $pagina));
 
                 return Resultado::ok([
-                    'movimientos' => array_map(static fn (Movimiento $m): array => $m->resumen(), $pagina),
+                    'movimientos' => array_map(static fn (Movimiento $m): array => $m->resumen() + ['corregido_por' => $corregidos[$m->id] ?? null], $pagina),
                     'cursor_siguiente' => count($encontrados) > self::PAGINA && $ultimo !== null ? self::cursorDe($ultimo) : null,
                 ]);
             });

@@ -20,9 +20,14 @@ CREATE TABLE audit_logs (
     detalle         jsonb        NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(detalle) = 'object'),
     secuencia       bigint       NOT NULL CHECK (secuencia > 0),
     sello           char(64)     NOT NULL,
+    corrige_a       bigint       REFERENCES audit_logs (id) ON DELETE RESTRICT,   -- semana 6: corrección del movimiento id
+    motivo_correccion text,
+    CONSTRAINT audit_logs_correccion_completa CHECK ((corrige_a IS NULL) = (motivo_correccion IS NULL)),
     CONSTRAINT audit_logs_evento_unico UNIQUE (emisor, event_id)
 );
 CREATE UNIQUE INDEX audit_logs_cadena_unica ON audit_logs (COALESCE(hospital_id::text, '*'), secuencia);
+-- Semana 6: un movimiento se corrige a lo sumo una vez.
+CREATE UNIQUE INDEX audit_logs_una_correccion ON audit_logs (corrige_a) WHERE corrige_a IS NOT NULL;
 CREATE INDEX audit_logs_hospital_fecha ON audit_logs (hospital_id, ocurrido_en DESC, id DESC);
 CREATE INDEX audit_logs_usuario_fecha  ON audit_logs (usuario_id, ocurrido_en DESC);
 CREATE INDEX audit_logs_modulo_fecha   ON audit_logs (modulo, ocurrido_en DESC);
