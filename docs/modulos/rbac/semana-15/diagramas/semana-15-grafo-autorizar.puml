@@ -1,0 +1,38 @@
+@startuml semana-15-grafo-autorizar
+!pragma layout smetana
+title Grafo de flujo · AutorizarOperacion::ejecutar() + denegar() · V(G) = 4 decisiones + 1 = 5 caminos básicos
+skinparam defaultFontSize 12
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:armar SolicitudAutorizacion;
+if (D1 · ¿membresiasDe() lanza?) then (sí)
+  :motivo = ERROR_EVALUACION;
+  note right: C2 (fail-closed)
+else (no)
+  :motivo = PoliticaAutorizacion::evaluar();
+  if (D2 · ¿motivo === null?) then (sí)
+    :PERMITIDO;
+    note right: C1
+    stop
+  else (no)
+  endif
+endif
+:denegar(): correlation_id + EventoAuditoria::accesoDenegado;
+if (D3 · ¿la bitácora principal lanza?) then (no)
+  :evento en la principal;
+  note right: C3
+else (sí)
+  if (D4 · ¿el respaldo lanza?) then (no)
+    :evento en el respaldo;
+    note right: C4
+  else (sí)
+    :sin evidencia\n(sigue DENEGADO);
+    note right: C5 · defecto DEF-04
+  endif
+endif
+:DENEGADO 403 + correlation_id;
+stop
+@enduml

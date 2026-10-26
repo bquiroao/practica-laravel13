@@ -35,6 +35,10 @@ final class Escenario
     public AsignarRol $asignarRol;
     public ConsultarEventoAuditoria $consultar;
     public Kernel $kernel;
+    /** @var list<array<string, mixed>> registros de acceso que emite el Kernel (observabilidad) */
+    public array $accesos = [];
+    /** @var array<string, object> */
+    private array $casosDeUso = [];
     private int $contador = 0;
 
     public function __construct()
@@ -58,13 +62,39 @@ final class Escenario
         $this->autorizar = $casos['autorizar'];
         $this->asignarRol = $casos['asignarRol'];
         $this->consultar = $casos['consultar'];
+        $this->casosDeUso = $casos;
 
         $this->kernel = construirKernel($casos, new AutenticadorTokenDemo([
             'token-admin-oriente' => ['admin-01', self::H_ORIENTE],
             'token-admin-norte' => ['admin-02', self::H_NORTE],
             'token-ana' => ['ana', self::H_ORIENTE],
             'token-marta' => ['marta', self::H_ORIENTE],
-        ]));
+        ]), function (array $registro): void {
+            $this->accesos[] = $registro;
+        });
+    }
+
+    /** @return array<string, mixed> casos de uso para armar otros kernels en pruebas */
+    public function casos(): array
+    {
+        return $this->casosDeUso;
+    }
+
+    /** Caso de uso por nombre (p. ej. 'revocarRol'); falla con un mensaje claro si no existe. */
+    public function caso(string $nombre): object
+    {
+        return $this->casosDeUso[$nombre] ?? throw new \LogicException("El caso de uso «{$nombre}» no existe en la composición");
+    }
+
+    /** La tabla de rutas real, construida con los mismos controladores que usa construirKernel(). */
+    public function rutas(): array
+    {
+        return construirRutas($this->casosDeUso);
+    }
+
+    public static function comandoRevocar(string $admin, string $destino, string $rol, string $motivo = 'Cambio de servicio: ya no atiende en esta unidad'): object
+    {
+        return new \Rbac\Aplicacion\Comandos\ComandoRevocarRol($admin, self::H_ORIENTE, self::H_ORIENTE, $destino, $rol, $motivo, '10.20.5.14');
     }
 
     /** @return array<string, mixed> */

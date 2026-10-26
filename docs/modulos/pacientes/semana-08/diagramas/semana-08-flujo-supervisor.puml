@@ -1,0 +1,56 @@
+@startuml semana-08-flujo-supervisor
+title User flow · Supervisor — confirmar un duplicado y proteger una identidad\n(pacientes.confirmar_duplicado · pacientes.proteger · pacientes.leer_protegido)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Supervisor|
+start
+if (¿Qué necesita?) then (coincidencia probable)
+  :Recibe el caso de admisión
+  (409 POSIBLE_DUPLICADO) · W3;
+  :Abre cada candidato y compara · W4;
+  if (¿Es la misma persona?) then (sí)
+    :Usa la ficha existente
+    (no registra);
+    stop
+  else (no: homónimo)
+    :[Registrar como otra persona] · W3
+    + motivo obligatorio · M-10;
+    |Servidor Pacientes|
+    :POST con confirmar_coincidencia = true
+    y motivo (queda auditado);
+    |Supervisor|
+    :ÉXITO · M-20;
+    stop
+  endif
+else (proteger identidad)
+  :Abre la ficha completa · W4;
+  :[Proteger identidad] · W6;
+  |Interfaz|
+  :Diálogo con las consecuencias:
+  quién deja de ver qué · M-17;
+  if (¿Motivo escrito y casilla marcada?) then (no)
+    :Botón «Proteger» deshabilitado
+    foco inicial en «Cancelar»;
+    detach
+  else (sí)
+  endif
+  |Servidor Pacientes|
+  :PUT con identidad_protegida = true,
+  motivo e If-Match;
+  |Interfaz|
+  if (¿Resultado?) then (200)
+    :ÉXITO «Identidad protegida» · M-22
+    etiqueta visible en la ficha;
+    stop
+  elseif (409 versión) then (conflicto)
+    :M-11 [Recargar] · no sobrescribe;
+    detach
+  else (403 · 422)
+    :M-18 sin permiso / M-10 falta motivo;
+    detach
+  endif
+endif
+@enduml

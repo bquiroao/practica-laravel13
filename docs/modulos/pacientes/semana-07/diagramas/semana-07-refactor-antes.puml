@@ -1,0 +1,63 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title ANTES: los casos de uso de escritura cruzan 5 y 4 preocupaciones (Ce 16 y 15)
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Aplicación" #FFF4E8 {
+  class ActualizarPaciente <<84 líneas · 8 dependencias>> #FDE2E2 {
+    + ejecutar(ComandoActualizar)
+    ..tiene(LEER_PROTEGIDO) · tiene(EDITAR_RESTRINGIDO) · tiene(PROTEGER)..
+    ..visibilidad → datos → campo ausente → edición → protección → documento..
+    ..arma el evento ACTUALIZADO (antes/después/motivo)..
+  }
+  class RegistrarPaciente <<98 líneas · 8 dependencias>> #FDE2E2 {
+    + ejecutar(ComandoRegistrar)
+    ..tiene(PROTEGER) · tiene(CONFIRMAR_DUPLICADO) · tiene(LEER_PROTEGIDO)..
+    ..datos → protección → duplicados..
+    ..arma el evento REGISTRADO (motivo y motivo_proteccion)..
+  }
+  class ControlAcceso {
+    + exigir(actor, hospital, permiso)
+    + tiene(actor, hospital, permiso): bool
+  }
+}
+
+package "Dominio" #E3F1F0 {
+  class PoliticaEdicion {
+    + verificar(actual, nuevo, bool, motivo)
+  }
+  class PoliticaDuplicados {
+    + verificarRegistro(p, bool, bool, motivo, bool)
+    + verificarDocumentoNuevo(actual, nuevo)
+  }
+  class PoliticaConfidencialidad {
+    + verificarRegistro(p, bool, motivo)
+    + exigirVisibilidad(actual, bool)
+    + verificarCambio(actual, nuevo, bool, motivo)
+  }
+  class EventoAuditoria {
+    + __construct(accion, actor, hospital, paciente, detalle[])
+  }
+}
+
+ActualizarPaciente --> ControlAcceso : exigir + 3 tiene()
+ActualizarPaciente --> PoliticaEdicion
+ActualizarPaciente --> PoliticaDuplicados
+ActualizarPaciente --> PoliticaConfidencialidad
+ActualizarPaciente ..> EventoAuditoria : arma el detalle
+RegistrarPaciente --> ControlAcceso : exigir + 3 tiene()
+RegistrarPaciente --> PoliticaDuplicados
+RegistrarPaciente --> PoliticaConfidencialidad
+RegistrarPaciente ..> EventoAuditoria : arma el detalle
+
+note bottom of ActualizarPaciente
+  El ORDEN de las reglas de la ficha (del que depende
+  no revelar a un protegido) estaba en la Aplicación,
+  en dos clases, y cada una traducía permisos a booleanos.
+end note
+@enduml

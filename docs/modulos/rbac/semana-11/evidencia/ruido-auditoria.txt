@@ -1,0 +1,4 @@
+Ana                  eventos ACCESO_DENEGADO solo por mostrar el menú: 2  + por mostrar la ficha: 1
+Luis (sin rol aún)   eventos ACCESO_DENEGADO solo por mostrar el menú: 3  + por mostrar la ficha: 2
+Marta                eventos ACCESO_DENEGADO solo por mostrar el menú: 2  + por mostrar la ficha: 0
+Carlos               eventos ACCESO_DENEGADO solo por mostrar el menú: 1  + por mostrar la ficha: 2

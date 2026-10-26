@@ -1,0 +1,64 @@
+@startuml semana-08-flujo-admision-editar
+title User flow · Admisión — actualizar datos de un paciente (pacientes.editar)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Admisión|
+start
+:Busca y abre la ficha · W1 → W4;
+|Interfaz|
+if (¿Ficha?) then (protegida, sin permiso)
+  :W4 reducida «Identidad protegida»
+  sin botón «Editar» · M-15;
+  stop
+elseif (fallecido o inactivo) then (restringida)
+  :W4 con aviso «Solo un supervisor
+  puede editar esta ficha» · M-16;
+  stop
+else (activa)
+endif
+|Admisión|
+:Pulsa «Editar» · W5
+(el formulario guarda la versión leída);
+:Cambia teléfono, nombre, fecha o documento;
+|Interfaz|
+if (¿Cambió un dato de identidad?\n(nombre, apellidos, fecha, documento)) then (sí)
+  :Pide motivo obligatorio · M-10
+  (ayuda: por qué se pide);
+else (no)
+endif
+:CONFIRMACIÓN · W5
+cambios «antes → después»;
+|Admisión|
+if (¿Confirma?) then (Volver)
+  :Regresa al formulario sin perder datos;
+  detach
+else (Guardar)
+endif
+|Servidor Pacientes|
+:PUT /api/v1/pacientes/{codigo} ·
+con If-Match con la versión leída;
+|Interfaz|
+if (¿Resultado?) then (200)
+  :ÉXITO «Datos actualizados» · M-21
+  la ficha muestra la nueva versión;
+  stop
+elseif (409 VERSION_DESACTUALIZADA) then (conflicto)
+  :W5 «Otra persona modificó esta ficha» · M-11
+  [Ver cambios y recargar] · nunca sobrescribe;
+  detach
+elseif (409 IDENTIFICADOR_EN_USO) then (duplicado)
+  :Junto al documento · M-08b
+  no revela de quién es;
+  detach
+elseif (422 · 400) then (recuperable)
+  :Mensaje junto al campo · M-04..M-07 · M-10;
+  detach
+else (red / 503)
+  :M-14 «No sabemos si se guardó»
+  [Recargar la ficha] (el PUT no se reintenta solo);
+  detach
+endif
+@enduml
