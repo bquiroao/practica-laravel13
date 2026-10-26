@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificar integridad · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: base · error · confirmar · verificando · integra · alterada · truncada · incierto · sin-conexion -->
+<header class="barra red-activa">
+  <button class="hospital" aria-label="Alcance: red hospitalaria"><span>Red hospitalaria</span> ▾</button>
+  <span class="alcance-red">RED</span>
+  <span class="avatar" role="img" aria-label="Super administrador">SA</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. La verificación se hace en el servidor: hace falta conexión.
+</div>
+
+<main>
+  <h1>Verificar integridad</h1>
+
+  <form aria-label="Verificación" onsubmit="return false" data-estado="base error confirmar verificando sin-conexion">
+    <p class="obligatorio">* obligatorio</p>
+    <label for="cadena">Cadena *</label>
+    <select id="cadena" aria-required="true"><option>Hospital Regional de Oriente</option><option>Hospital Regional del Norte</option><option>Red (consultas de red)</option></select>
+    <details class="mas" open>
+      <summary>Ancla publicada (recomendado)</summary>
+      <p class="ayuda" style="margin-top:0">Sin el ancla no se detecta que falten las últimas filas. Péguela tal como se publicó.</p>
+      <label for="sec">Secuencia</label>
+      <input id="sec" type="text" inputmode="numeric" value="1520">
+      <label for="sello">Sello</label>
+      <textarea id="sello" rows="3" spellcheck="false" autocapitalize="off">9c0e4ad1b7e3f02c58d6e19a3b4c7f81e2d9a0b6c3f5e8d7a1b4c9e2f6a371ab</textarea>
+      <p class="error" id="sello-error" data-estado="error">Deben ser 64 caracteres hexadecimales. Copie el sello completo.</p>
+    </details>
+  </form>
+
+  <div data-estado="verificando" aria-busy="true" role="status">
+    <p class="meta">Verificando 1.520 movimientos… no cierre esta pantalla.</p>
+    <div class="esq" style="width:100%"></div>
+  </div>
+
+  <div class="veredicto integra" role="status" data-estado="integra">
+    <h2>✓ Cadena íntegra</h2>
+    <p>1.520 movimientos de Oriente verificados, ninguno alterado. Ancla 1520 confirmada.</p>
+  </div>
+  <div class="veredicto alterada" role="alert" data-estado="alterada">
+    <h2>✕ Cadena alterada desde la secuencia 812</h2>
+    <p>No modifique nada. Envíe el informe a seguridad: seguridad@red-his.example.</p>
+    <!-- semana 9, B-08 -->
+    <div class="acciones" style="display:flex;flex-wrap:wrap;gap:8px"><button class="btn primario">Copiar informe</button></div>
+  </div>
+  <div class="veredicto truncada" role="alert" data-estado="truncada">
+    <h2>⚠ Faltan movimientos al final</h2>
+    <p>El ancla dice 1520 y hay 1498. Envíe el informe a seguridad.</p>
+    <button class="btn primario">Copiar informe</button>
+  </div>
+  <!-- Conexión cortada durante la verificación: no se sabe si terminó; repetir es seguro (medido en evidencia/reintento.txt) -->
+  <div class="veredicto incierto" role="alert" data-estado="incierto">
+    <h2>No sabemos si la verificación terminó</h2>
+    <p>Se cortó la conexión antes de recibir el resultado. Verificar no cambia la bitácora: puede repetirla sin riesgo. Si el servidor alcanzó a verificar, quedará registrada dos veces.</p>
+    <a class="btn primario bloque" href="m4-verificar.html?estado=integra">Verificar de nuevo</a>
+  </div>
+</main>
+
+<div class="accion-fija" data-estado="base error sin-conexion integra alterada truncada">
+  <!-- semana 9, B-07: siempre habilitado; con errores, el foco va al primer campo inválido -->
+  <a class="btn primario" href="m4-verificar.html?estado=confirmar" data-estado="base error">Verificar</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">Verificar · requiere conexión</span>
+  <a class="btn" href="m4-verificar.html" data-estado="integra alterada truncada">Nueva verificación</a>
+</div>
+
+<div class="velo" data-estado="confirmar"></div>
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-ver" data-estado="confirmar">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-ver">¿Verificar la cadena de Oriente?</h2>
+  <p>Se recalcularán los sellos de 1.520 movimientos. Puede tardar unos segundos y queda registrado.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m4-verificar.html?estado=verificando">Verificar</a>
+    <a class="btn" href="m4-verificar.html" autofocus>Cancelar</a>
+  </div>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-consultar.html?estado=red"><span class="ico" aria-hidden="true">📋</span>Bitácora</a>
+  <a href="m4-verificar.html" aria-current="page"><span class="ico" aria-hidden="true">🛡</span>Integridad</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+<script>
+  if (document.body.dataset.estadoActual === 'error') {
+    const s = document.getElementById('sello');
+    s.value = '9c0e…71ab'; s.setAttribute('aria-invalid', 'true'); s.setAttribute('aria-describedby', 'sello-error'); s.focus();
+  }
+</script>
+</body>
+</html>
