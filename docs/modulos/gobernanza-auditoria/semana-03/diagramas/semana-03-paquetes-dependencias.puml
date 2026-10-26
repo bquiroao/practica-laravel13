@@ -1,0 +1,57 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+title UML · Paquetes y regla de dependencias (verificada por ARQ-01..ARQ-05)
+skinparam defaultFontSize 11
+skinparam packageBackgroundColor #F5F9FF
+skinparam packageBorderColor #2F5D8A
+
+package "bootstrap/contenedor.php\n(raíz de composición)" as raiz #FFF8E1
+
+package "Presentacion / Http" as P {
+  package "Kernel, Ruta, Solicitud, Respuesta" as P1
+  package "Acciones" as P2
+  package "TraductorResultado" as P3
+  package "Autenticacion" as P4
+}
+package "Aplicacion" as A {
+  package "CasosDeUso" as A1
+  package "Servicios (CadenaSellada)" as A2
+  package "Puertos (Transaccion, PoliticaAcceso)" as A3
+  package "Comandos, Resultados" as A4
+}
+package "Dominio" as D {
+  package "Modelo" as D1
+  package "Reglas" as D2
+  package "Filtros" as D3
+  package "Puertos (Bitacora, Reloj)" as D4
+  package "Excepciones" as D5
+}
+package "Persistencia" as R {
+  package "Pdo (PdoBitacora, PdoTransaccion)" as R1
+  package "Configuracion" as R2
+}
+
+P ..> A : usa comandos, casos de uso y Resultado
+A ..> D : usa
+R ..> D4 : implementa
+R1 ..> A3 : implementa Transaccion
+R2 ..> A3 : implementa PoliticaAcceso
+raiz ..> P
+raiz ..> A
+raiz ..> D
+raiz ..> R
+
+note bottom of D
+  No depende de nadie: sin PDO, sin HTTP,
+  sin E/S (ARQ-01, ARQ-02, ARQ-04).
+end note
+note right of P
+  No importa el Dominio ni la
+  Persistencia (ARQ-01).
+end note
+note bottom of R
+  Única capa con PDO (ARQ-02);
+  solo prepare() + execute() (ARQ-03);
+  sin UPDATE ni DELETE (ARQ-05).
+end note
+@enduml
