@@ -1,0 +1,6 @@
+Operación                       1.er env. Reintento   Respuesta del reintento                    Pacientes
+----------------------------------------------------------------------------------------------------------------
+Registrar con Idempotency-Key    201       201         misma respuesta (Idempotent-Replayed)      1
+Registrar sin Idempotency-Key    201       409         PACIENTE_EXISTENTE                         1
+Registrar provisional sin clave  201       409         POSIBLE_DUPLICADO                          1
+Editar (PUT con If-Match)        200       409         VERSION_DESACTUALIZADA                     —

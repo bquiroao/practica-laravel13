@@ -1,0 +1,19 @@
+OK    CA-01 responde 200 con 5 citas: antes=resumen después=resumen
+OK    CA-01 el texto no muestra detalles técnicos: «5 citas hoy»
+OK    CA-02 responde 200 con 0 citas: antes=vacio después=vacio
+OK    CA-02 el texto no muestra detalles técnicos: «No hay citas hoy. Puedes agendar una.»
+OK    CA-03 responde 500: antes=error después=error
+OK    CA-03 el texto no muestra detalles técnicos: «No pudimos cargar las citas de hoy. Intenta de nuevo.»
+OK    CA-03 falla la red: antes=error después=error
+OK    CA-03 el texto no muestra detalles técnicos: «No pudimos cargar las citas de hoy. Intenta de nuevo.»
+OK    CA-04 no responde en el límite de tiempo: antes=error después=error
+OK    CA-04 el texto no muestra detalles técnicos: «No pudimos cargar las citas de hoy. Intenta de nuevo.»
+OK    CA-05 responde 401: antes=sesion_expirada después=sesion_expirada
+OK    CA-05 el texto no muestra detalles técnicos: «Tu sesión terminó. Vuelve a iniciar sesión.»
+OK    CA-05 la sesión se limpió (R-07)
+OK    CA-06 responde 403: antes=oculta después=oculta
+OK    CA-06 el texto no muestra detalles técnicos: «»
+OK    CA-07 regla aislada: vacío no es error (R-05)
+OK    CA-07 regla aislada: sin respuesta es error (R-04)
+OK    CA-07 texto aislado: el vacío sugiere una acción
+RESULTADO: todo correcto

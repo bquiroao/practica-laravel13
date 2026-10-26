@@ -15,10 +15,21 @@ $grupos = [
     'Dominio' => 'Reglas de dominio',
     'Aplicacion' => 'Casos de uso (camino feliz y rechazos)',
     'Persistencia' => 'Errores de persistencia (dobles de PDO)',
+    'Contrato' => 'Contratos: Repository (memoria y PDO) y API (openapi.yaml ↔ código)',
+    'Cliente' => 'Cliente ↔ servidor (resiliencia e idempotencia)',
     'Presentacion' => 'Presentación HTTP',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con base de prueba (SQLite en memoria y PostgreSQL opcional)',
 ];
+
+// Semana 15: --solo=UNI,CB,CN filtra por prefijo; --defectos corre solo los defectos abiertos (fallan a propósito).
+$opciones = getopt('', ['defectos', 'solo:']);
+if (isset($opciones['solo'])) {
+    $GLOBALS['solo'] = '/^(' . str_replace(',', '|', preg_quote((string) $opciones['solo'], '/')) . ')-/';
+}
+if (isset($opciones['defectos'])) {
+    $grupos = ['Defectos' => 'Defectos abiertos (cada prueba falla hasta que se corrija el defecto)'];
+}
 
 foreach ($grupos as $directorio => $titulo) {
     $GLOBALS['grupoActual'] = $titulo;

@@ -1,0 +1,26 @@
+Detección comprobada: se introdujo cada violación a propósito, se corrieron las pruebas y se revirtió.
+
+## 1. En el contrato, la firma pide notas_soap.consultar en vez de notas_soap.firmar
+[FALLA] API-01   Contrato ↔ código: mismas operaciones (método y ruta) y mismo permiso (x-permiso) en cada una
+         -> permisos por operación: esperado array (
+Total: 100  Pasan: 98  Fallan: 1  Omitidas: 1
+
+## 2. Se quita la respuesta 409 del registro en el contrato
+[FALLA] API-03   Cada código HTTP que devuelve el servidor en 24 escenarios reales está documentado en su operación
+         -> no documentados: POST /api/v1/notas-soap → 409 (Arnes.php:37)
+Total: 100  Pasan: 98  Fallan: 1  Omitidas: 1
+
+## 3. Se quita idempotency_key_reutilizada del enum de errores
+[FALLA] API-04   Cada código de error que devuelve el servidor está en el enum Error.code del contrato
+         -> códigos no documentados: idempotency_key_reutilizada (Arnes.php:37)
+Total: 100  Pasan: 98  Fallan: 1  Omitidas: 1
+
+## 4. La librería cliente importa una clase del servidor
+[FALLA] ARQ-13   La librería Cliente solo conoce el contrato: no importa clases del servidor, y el servidor no importa el Cliente
+         -> Cliente/ClienteNotasSoap.php usa NotasSoap\Presentacion\Http\Kernel (Arnes.php:37)
+Total: 100  Pasan: 98  Fallan: 1  Omitidas: 1
+
+## Estado final, con todo revertido
+Total: 100  Pasan: 99  Fallan: 0  Omitidas: 1
+
+Nota: esta comprobación se hizo antes de agregar INT-10 (modo memoria con archivo). Con INT-10 el total actual es 101 pruebas; ver salida-pruebas.txt.

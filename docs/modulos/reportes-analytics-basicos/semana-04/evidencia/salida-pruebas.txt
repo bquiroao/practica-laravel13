@@ -1,0 +1,33 @@
+Ejecutado: 2026-10-22 06:26 · PHP 8.4.26
+
+== 1. Camino feliz con el adaptador PDO (micro_his_test) ==
+  OK    [camino feliz] responde 200
+  OK    [camino feliz] ocupación = 78 % (39 de 50 camas habilitadas)
+  OK    [camino feliz] ficha de trazabilidad completa (RN-05)
+  OK    [camino feliz] desglose suma 39 = numerador (RN-07)
+  OK    [camino feliz] Medicina: 18 registros = su parte del desglose (RN-07)
+  OK    [camino feliz] pacientes solo con código PAC-NNNNN (RN-09)
+== 1. Camino feliz con el adaptador InMemory ==
+  OK    [camino feliz] responde 200
+  OK    [camino feliz] ocupación = 78 % (39 de 50 camas habilitadas)
+  OK    [camino feliz] ficha de trazabilidad completa (RN-05)
+  OK    [camino feliz] desglose suma 39 = numerador (RN-07)
+  OK    [camino feliz] Medicina: 18 registros = su parte del desglose (RN-07)
+  OK    [camino feliz] pacientes solo con código PAC-NNNNN (RN-09)
+== 2. Repository: los dos adaptadores son intercambiables ==
+  OK    [repository] PDO e InMemory dan el mismo desglose
+  OK    [repository] PDO e InMemory dan los mismos registros de Cirugía
+== 3. Reglas de dominio ==
+  OK    [regla de dominio] rechaza un período invertido (RN-02)
+  OK    [regla de dominio] el Médico no puede ver Ocupación: 403 (RN-01)
+  OK    [regla de dominio] período sin datos informa «Sin datos», no cero (RN-06)
+== 4. Error de persistencia (doble RepositorioQueFalla) ==
+  OK    [error de persistencia] responde 503 controlado
+  OK    [error de persistencia] el mensaje no expone detalles técnicos
+== 5. MVC: el controlador solo coordina ==
+  OK    [mvc] GET / responde 200 y la vista muestra 78 %
+  OK    [mvc] fecha inválida: el controlador responde 422
+  OK    [mvc] ruta desconocida responde 404
+  OK    [mvc] los controladores no contienen SQL ni PDO
+
+RESULTADO: 23 pruebas, todas correctas

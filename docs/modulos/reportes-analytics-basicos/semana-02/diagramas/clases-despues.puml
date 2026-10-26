@@ -1,0 +1,38 @@
+@startuml m23_s2_clases_despues
+title M23 · Semana 2 · DESPUÉS: contrato que cumple LSP
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+interface ContratoReporte {
+  +tipo(): string
+  +dimensiones(): array
+  +calcular(f: Filtros): Indicador
+  +desglosar(f: Filtros, dimension): Desglose
+}
+class Filtros <<valor>> {
+  -- invariante: desde <= hasta (RN-02)
+}
+class Indicador <<valor>> {
+  -- post: si es %, entre 0 y 100
+}
+class Desglose <<valor>> {
+  +total(): int
+  -- post: total() = numerador (RN-07)
+}
+class ReporteOcupacion
+class ReporteCitas
+class ReporteMortalidad <<"Otro" sin cambiar el total>>
+class ReportRegistry
+class "mostrarTrazable()" as Cliente <<cliente>>
+
+ContratoReporte <|.. ReporteOcupacion
+ContratoReporte <|.. ReporteCitas
+ContratoReporte <|.. ReporteMortalidad
+ReportRegistry o--> ContratoReporte
+Cliente ..> ContratoReporte : solo el contrato
+ContratoReporte ..> Filtros
+ContratoReporte ..> Indicador
+ContratoReporte ..> Desglose
+
+note right of Cliente : Sin instanceof: cualquier\nimplementación es sustituible
+@enduml
