@@ -1,0 +1,27 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Expediente médico electrónico base (tarea Odoo 2504): DESPUÉS de aplicar DIP
+title DESPUÉS — política y detalles dependen de abstracciones del dominio
+package "Dominio (alto nivel)" {
+  class ServicioExpediente <<política>>
+  interface ExpedientesHospital
+  interface IndiceCentral
+  interface Auditoria
+  interface Reloj
+}
+package "Detalles (bajo nivel)" {
+  class ExpedientesPdo
+  class ExpedientesEnMemoria
+  class IndiceCentralEnMemoria
+  class AuditoriaEnMemoria
+  class RelojFijo
+}
+ServicioExpediente --> ExpedientesHospital
+ServicioExpediente --> IndiceCentral
+ServicioExpediente --> Auditoria
+ServicioExpediente --> Reloj
+ExpedientesPdo ..|> ExpedientesHospital
+ExpedientesEnMemoria ..|> ExpedientesHospital
+IndiceCentralEnMemoria ..|> IndiceCentral
+AuditoriaEnMemoria ..|> Auditoria
+RelojFijo ..|> Reloj
+@enduml
