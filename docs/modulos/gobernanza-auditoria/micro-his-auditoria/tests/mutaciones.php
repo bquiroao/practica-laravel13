@@ -68,6 +68,11 @@ $mutaciones = [
         '$alcance->esRed() ? self::PERMISO_RED : self::PERMISO', 'self::PERMISO'],
     'M24' => ['El catálogo acepta un parámetro que ningún filtro reclama (se ignoraría en silencio)', 'src/Dominio/Filtros/CatalogoFiltros.php',
         'if (!in_array($nombre, $reclamados, true)) {', 'if (false) {'],
+    // Semana 12: cambio solicitado «filtrar por recurso»
+    'M25' => ['El filtro por recurso compara contra otro campo (nunca encuentra la ficha)', 'src/Dominio/Filtros/FiltroRecurso.php',
+        "return \$m->recurso ?? '';", 'return $m->usuario;'],
+    'M26' => ['El filtro por recurso hereda el máximo de 64 (no se podría buscar un recurso que sí se registró)', 'src/Dominio/Filtros/FiltroRecurso.php',
+        "        return 128;", "        return 64;"],
 ];
 
 $sobreviven = 0;

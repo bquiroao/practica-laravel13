@@ -18,6 +18,12 @@ abstract class FiltroPorCampo implements FiltroMovimiento
 
     abstract protected function valorDe(Movimiento $m): string;
 
+    /** Semana 12: el máximo es el mismo que al registrar ese campo (recurso admite 128). */
+    protected function maximo(): int
+    {
+        return 64;
+    }
+
     public function parametros(): array
     {
         return [$this->parametro()];
@@ -37,7 +43,7 @@ abstract class FiltroPorCampo implements FiltroMovimiento
     {
         $valor = trim($p[$this->parametro()]);
 
-        return $valor === '' || mb_strlen($valor) > 64 ? [$this->parametro() => 'De 1 a 64 caracteres.'] : [];
+        return $valor === '' || mb_strlen($valor) > $this->maximo() ? [$this->parametro() => "De 1 a {$this->maximo()} caracteres."] : [];
     }
 
     public function coincide(Movimiento $m, array $p): bool

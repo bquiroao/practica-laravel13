@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
   title: API de Gobernanza y auditoría de movimientos — Sistema Hospitalario Integrado
-  version: 1.1.0
+  version: 1.2.0
   summary: Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas.
   description: |
     Bitácora de movimientos del HIS. Los módulos emisores REGISTRAN movimientos con una cuenta de
     servicio; el super administrador y los auditores CONSULTAN por rango de fechas (obligatorio),
-    usuario, módulo, acción y resultado, siempre dentro de su alcance (un hospital, o la red con
+    usuario, módulo, acción, resultado y recurso, siempre dentro de su alcance (un hospital, o la red con
     `X-Tenant-ID: *`). No existe ninguna operación para modificar ni borrar un movimiento.
 
     Reglas transversales:
@@ -102,7 +102,7 @@ paths:
     get:
       operationId: consultarMovimientos
       tags: [consulta]
-      summary: Consulta filtrada por rango de fechas (obligatorio), usuario, módulo, acción y resultado.
+      summary: Consulta filtrada por rango de fechas (obligatorio), usuario, módulo, acción, resultado y recurso.
       description: |
         Fechas en la hora local del hospital (America/Guatemala); `hasta` incluye el día completo.
         Hasta 50 movimientos, del más reciente al más antiguo; `cursor_siguiente` continúa. Un
@@ -119,6 +119,7 @@ paths:
         - {name: modulo, in: query, schema: {type: string, maxLength: 64}}
         - {name: accion, in: query, schema: {type: string, maxLength: 64}}
         - {name: resultado, in: query, schema: {type: string, enum: [exito, denegado, error]}}
+        - {name: recurso, in: query, description: '1.2.0: «¿quién vio la ficha de este paciente?», p. ej. paciente:P-000001', schema: {type: string, maxLength: 128}}
         - {name: cursor, in: query, schema: {type: string}}
       responses:
         '200':
