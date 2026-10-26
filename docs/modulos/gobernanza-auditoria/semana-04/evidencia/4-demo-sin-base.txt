@@ -1,0 +1,11 @@
+$ php bin/demo.php
+Micro-HIS Auditoría · demo sin base de datos (AUDITORIA_PERSISTENCIA=memoria)
+----------------------------------------------------------------------------------------------------
+1. Pacientes registra una consulta de ficha                    POST /api/v1/auditoria/movimientos → 201 {"id":1,"secuencia":1,"sello":"5e22af6466946d53d13615c8d074af5643c307fd944c37f6e51e42e569f2962c"}
+2. Reintento por corte de red (idempotente)                    POST /api/v1/auditoria/movimientos → 200 {"codigo":"YA_REGISTRADO","id":1,"secuencia":1,"sello":"5e22af6466946d53d13615c8d074af5643c307fd944c37f6e51e4…
+3. Otro usuario en el mismo hospital                           POST /api/v1/auditoria/movimientos → 201 {"id":2,"secuencia":2,"sello":"185fae6d62450511c1c45d1498b4334ea003e449b5b09ec0cbcd2e34816c2680"}
+4. Un movimiento en hosp-norte                                 POST /api/v1/auditoria/movimientos → 201 {"id":3,"secuencia":1,"sello":"e1e43fe69314044fc1952890a95244023c96920a246707858be25ffb8e436a47"}
+5. El auditor de oriente filtra por usuario                    GET /api/v1/auditoria/movimientos?desde=2026-10-26&hasta=2026-10-26&usuario=u-ana → 200 {"movimientos":[{"id":1,"ocurrido_en":"2026-10-26T14:00:00Z","hospital":"hosp-oriente","usuario":"u-ana","mod…
+6. El auditor intenta ver la red                               GET /api/v1/auditoria/movimientos?desde=2026-10-26&hasta=2026-10-26 → 403 {"error":"TENANT_NO_COINCIDE"}
+7. El super administrador ve a u-ana en toda la red            GET /api/v1/auditoria/movimientos?desde=2026-10-26&hasta=2026-10-26&usuario=u-ana → 200 {"movimientos":[{"id":3,"ocurrido_en":"2026-10-26T16:00:00Z","hospital":"hosp-norte","usuario":"u-ana","modul…
+8. Verificación de la cadena de oriente                       POST /api/v1/auditoria/verificaciones → 200 {"estado":"INTEGRA","verificados":3}

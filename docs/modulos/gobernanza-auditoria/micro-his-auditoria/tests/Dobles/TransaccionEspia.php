@@ -6,26 +6,24 @@ namespace Auditoria\Pruebas\Dobles;
 
 use Auditoria\Aplicacion\Puertos\Transaccion;
 
-/** Guarda una instantánea de la bitácora y la restaura si la operación lanza (como un ROLLBACK). */
-final class TransaccionEnMemoria implements Transaccion
+/** Envuelve una Transaccion real y cuenta cuántas se confirmaron y cuántas se revirtieron. */
+final class TransaccionEspia implements Transaccion
 {
     public int $confirmadas = 0;
     public int $revertidas = 0;
 
-    public function __construct(private readonly BitacoraEnMemoria $bitacora)
+    public function __construct(private readonly Transaccion $real)
     {
     }
 
     public function ejecutar(callable $operacion): mixed
     {
-        $antes = $this->bitacora->instantanea();
         try {
-            $resultado = $operacion();
+            $resultado = $this->real->ejecutar($operacion);
             $this->confirmadas++;
 
             return $resultado;
         } catch (\Throwable $e) {
-            $this->bitacora->restaurar($antes);
             $this->revertidas++;
             throw $e;
         }

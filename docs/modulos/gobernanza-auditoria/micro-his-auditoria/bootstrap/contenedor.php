@@ -36,14 +36,13 @@ use Auditoria\Dominio\Reglas\ReglaSinDatosProhibidos;
 use Auditoria\Dominio\Reglas\ReglaTenantDelEmisor;
 use Auditoria\Persistencia\Configuracion\PoliticaAccesoEstatica;
 use Auditoria\Persistencia\Configuracion\RelojSistema;
-use Auditoria\Persistencia\Pdo\FabricaConexion;
-use Auditoria\Persistencia\Pdo\PdoBitacora;
-use Auditoria\Persistencia\Pdo\PdoTransaccion;
-use Auditoria\Presentacion\Http\Acciones\AccionesAuditoria;
+use Auditoria\Persistencia\ConjuntoAdaptadores;
+use Auditoria\Persistencia\FabricaAdaptadores;
 use Auditoria\Presentacion\Http\Autenticacion\Autenticador;
 use Auditoria\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
+use Auditoria\Presentacion\Http\Controladores\AuditoriaControlador;
 use Auditoria\Presentacion\Http\Kernel;
-use Auditoria\Presentacion\Http\Ruta;
+use Auditoria\Presentacion\Http\Rutas;
 
 /** @param array<string, mixed> $config @return list<ReglaMovimiento> el ORDEN importa: el tenant va primero */
 function reglasDeRegistro(array $config, Reloj $reloj): array
@@ -84,25 +83,19 @@ function construirCasosDeUso(array $config, Bitacora $bitacora, Transaccion $tra
     ];
 }
 
-/** @param array<string, object> $casos */
+/** MVC: el Controlador recibe solo casos de uso (el Modelo); las rutas lo conectan con el Kernel. */
 function construirKernel(array $casos, Autenticador $autenticador): Kernel
 {
-    $acciones = new AccionesAuditoria($casos['registrar'], $casos['consultar'], $casos['detalle'], $casos['verificar']);
-    $base = '/api/v1/auditoria';
+    $controlador = new AuditoriaControlador($casos['registrar'], $casos['consultar'], $casos['detalle'], $casos['verificar']);
 
-    return new Kernel([
-        new Ruta('POST', "#^$base/movimientos$#", $acciones->registrar(...)),
-        new Ruta('GET', "#^$base/movimientos$#", $acciones->consultar(...)),
-        new Ruta('GET', "#^$base/movimientos/(?<id>[1-9][0-9]{0,17})$#", $acciones->detalle(...)),
-        new Ruta('POST', "#^$base/verificaciones$#", $acciones->verificar(...)),
-    ], $autenticador);
+    return new Kernel(Rutas::definir($controlador), $autenticador);
 }
 
-/** Punto de entrada real: PostgreSQL con PDO. */
-function crearKernel(array $config): Kernel
+/** Punto de entrada real. AUDITORIA_PERSISTENCIA elige PostgreSQL («pdo», por defecto) o «memoria» (demo sin base). */
+function crearKernel(array $config, ?ConjuntoAdaptadores $adaptadores = null): Kernel
 {
-    $pdo = FabricaConexion::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave']);
-    $casos = construirCasosDeUso($config, new PdoBitacora($pdo), new PdoTransaccion($pdo), new PoliticaAccesoEstatica($config['permisos']),
+    $adaptadores ??= FabricaAdaptadores::crear($config);
+    $casos = construirCasosDeUso($config, $adaptadores->bitacora, $adaptadores->transaccion, new PoliticaAccesoEstatica($config['permisos']),
         new RelojSistema());
 
     return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']));

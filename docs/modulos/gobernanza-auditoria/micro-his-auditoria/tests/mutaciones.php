@@ -29,7 +29,7 @@ $mutaciones = [
         "        } catch (ErrorPersistencia) {\n            return Resultado::noDisponible();", "        } catch (ErrorPersistencia) {\n            return Resultado::creado([]);"],
     'M8' => ['La cadena no se bloquea antes de leer el último sello (carrera)', 'src/Aplicacion/Servicios/CadenaSellada.php',
         "        \$this->bitacora->bloquearCadena(\$movimiento->hospital);\n", ''],
-    'M9' => ['Presentación importa una clase del Dominio (rompe la regla de capas)', 'src/Presentacion/Http/Acciones/AccionesAuditoria.php',
+    'M9' => ['Presentación importa una clase del Dominio (rompe la regla de capas)', 'src/Presentacion/Http/Controladores/AuditoriaControlador.php',
         "use Auditoria\\Presentacion\\Http\\Identidad;", "use Auditoria\\Presentacion\\Http\\Identidad;\nuse Auditoria\\Dominio\\Modelo\\Movimiento;"],
     'M10' => ['Un valor se concatena en el SQL (inyección)', 'src/Persistencia/Pdo/PdoBitacora.php',
         "return \$this->uno('SELECT ' . self::COLUMNAS . ' FROM audit_logs WHERE emisor = :emisor AND event_id = :event_id',\n            ['emisor' => \$emisor, 'event_id' => \$eventId]);",
@@ -38,6 +38,14 @@ $mutaciones = [
         "CREATE TRIGGER audit_logs_sin_update_delete BEFORE UPDATE OR DELETE ON audit_logs\n    FOR EACH ROW EXECUTE FUNCTION audit_logs_solo_insercion();\n", ''],
     'M12' => ['El kernel no compara el hospital del token con X-Tenant-ID', 'src/Presentacion/Http/Kernel.php',
         'if (!$identidad->puedeActuarEn($hospital)) {', 'if (false) {'],
+    // Semana 4: MVC y Repository
+    'M13' => ['El controlador arma la respuesta de error él mismo (salta la Vista)', 'src/Presentacion/Http/Controladores/AuditoriaControlador.php',
+        "        } catch (EntradaInvalida \$e) {\n            return ErrorVista::entradaInvalida(\$e);\n        }\n    }\n\n    public function consultar",
+        "        } catch (EntradaInvalida \$e) {\n            return Respuesta::json(400, ['error' => 'CUERPO_INVALIDO']);\n        }\n    }\n\n    public function consultar"],
+    'M14' => ['El adaptador InMemory ignora el límite de la consulta', 'src/Persistencia/EnMemoria/BitacoraEnMemoria.php',
+        'return array_slice($encontrados, 0, $consulta->limite);', 'return $encontrados;'],
+    'M15' => ['El adaptador InMemory acepta el mismo (emisor, event_id) dos veces', 'src/Persistencia/EnMemoria/BitacoraEnMemoria.php',
+        'if (($m->emisor === $movimiento->emisor && $m->eventId === $movimiento->eventId)', 'if ((false)'],
 ];
 
 $sobreviven = 0;

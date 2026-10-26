@@ -15,7 +15,8 @@ $grupos = [
     'Dominio' => 'Dominio: reglas del movimiento, filtros y sello',
     'Aplicacion' => 'Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles)',
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas (dobles de PDO)',
-    'Presentacion' => 'Presentación: HTTP',
+    'Contratos' => 'Repository: la misma suite de contrato para InMemory y PDO',
+    'Presentacion' => 'Presentación: MVC y HTTP',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
 ];
