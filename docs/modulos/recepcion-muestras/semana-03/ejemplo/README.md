@@ -14,6 +14,8 @@ php bin/reception.php --order=ORD-001 --patient=PAT-001 --exam=CBC --type=blood 
 
 La CLI registra la recepción antes de imprimir la confirmación. Si falla la conexión o el guardado, termina con código distinto de cero e informa el error; no muestra una confirmación de éxito. Un rechazo clínico controlado sí se registra y presenta su motivo. Para registrar una discordancia confirmada se puede agregar `--reject="Discordancia con la orden"`.
 
+El ejemplo fue validado con PDO SQLite ejecutando un caso aceptado y otro rechazado y comprobando los registros guardados; la salida está en [`../evidencia/validacion-pdo-sqlite.txt`](../evidencia/validacion-pdo-sqlite.txt).
+
 ## Capas
 
 - `src/Presentation/Cli`: interpreta argumentos y presenta resultados; no contiene reglas ni SQL.

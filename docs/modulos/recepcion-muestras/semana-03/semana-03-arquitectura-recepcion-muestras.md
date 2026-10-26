@@ -144,6 +144,8 @@ php tests/run.php
 
 El suite usa dobles y no requiere una base de datos ni driver PDO. La ejecución de la CLI requiere PDO y el driver de la conexión elegida (por defecto, `pdo_sqlite`). El resultado verificado se conserva en [salida-pruebas.txt](evidencia/salida-pruebas.txt). Las fuentes PlantUML están junto a los diagramas y las vistas Mermaid se renderizan directamente en Markdown.
 
+La validación con PHP 8.2.33 y el driver SQLite también ejecutó una recepción aceptada y otra rechazada contra una base temporal, comprobó sus estados y el motivo persistido y eliminó la base de prueba: [validacion-pdo-sqlite.txt](evidencia/validacion-pdo-sqlite.txt).
+
 ## 7. Relación con entregas anteriores
 
 - **Semana 1:** conserva el flujo de recepción, identificación inequívoca y rechazo controlado, así como la relación declarada con orden, paciente y examen.
