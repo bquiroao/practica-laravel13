@@ -1,0 +1,103 @@
+Revisión técnica formal Auditoría · criterios de entrada
+Repositorio: sistema-hospitalario-integrado-SistenasII-2026-G1 · micro-his-auditoria @ 4682fcc
+----------------------------------------------------------------------------------------------------
+PASA   E-1   Paquete congelado en un commit y sin cambios locales
+       commit 4682fcc
+PASA   E-2   Suite automatizada sin fallas
+       Total 98 · Pasan 81 · Fallan 0 · Omitidas 17
+PASA   E-3   Guardas de contrato (API-01..03, REC-04) y de capas (ARQ-01..08) en verde
+       12 guardas en verde
+PASA   E-4   Cada sesión ≤ 1600 líneas efectivas
+       S1: 919 líneas en 31 archivos · S2: 936 líneas en 24 archivos · S3: 1091 líneas en 19 archivos
+FALLA  E-5   Checklist de 12–15 ítems y formato de hallazgos publicados
+       0 ítems en el checklist · formato FALTA
+FALLA  E-6   Autorrevisión del autor registrada con el mismo formato
+       0 hallazgos del autor en el registro CSV · 0 en autorrevision-autor.md
+MANUAL E-7   Material distribuido ≥ 48 h antes de la reunión
+       el moderador anota la fecha de envío en el acta
+MANUAL E-8   Roles asignados y revisores confirmados
+       nombres en el plan §3 y en el acta
+----------------------------------------------------------------------------------------------------
+PAQUETE DE REVISIÓN
+
+S1 · Reglas de dominio del movimiento (inmutabilidad, sello, filtros, corrección) — 919 líneas efectivas, 31 archivos
+    46  database/schema.sql
+    14  src/Dominio/Excepciones/ConsultaInvalida.php
+    11  src/Dominio/Excepciones/ErrorPersistencia.php
+    48  src/Dominio/Filtros/CatalogoFiltros.php
+    19  src/Dominio/Filtros/FiltroAccion.php
+    19  src/Dominio/Filtros/FiltroModulo.php
+    32  src/Dominio/Filtros/FiltroMovimiento.php
+    44  src/Dominio/Filtros/FiltroPorCampo.php
+    61  src/Dominio/Filtros/FiltroRangoFechas.php
+    27  src/Dominio/Filtros/FiltroRecurso.php
+    36  src/Dominio/Filtros/FiltroResultado.php
+    19  src/Dominio/Filtros/FiltroUsuario.php
+    39  src/Dominio/Modelo/Alcance.php
+    15  src/Dominio/Modelo/CatalogoAcciones.php
+    46  src/Dominio/Modelo/ConsultaMovimientos.php
+   129  src/Dominio/Modelo/Movimiento.php
+    28  src/Dominio/Modelo/Rechazo.php
+    12  src/Dominio/Modelo/Sello.php
+    14  src/Dominio/Modelo/SolicitudRegistro.php
+    50  src/Dominio/Puertos/Bitacora.php
+     8  src/Dominio/Puertos/Reloj.php
+    18  src/Dominio/Reglas/ReglaAccionEnCatalogo.php
+    21  src/Dominio/Reglas/ReglaCamposObligatorios.php
+    33  src/Dominio/Reglas/ReglaCorreccion.php
+    24  src/Dominio/Reglas/ReglaFechaNoFutura.php
+    31  src/Dominio/Reglas/ReglaFormatoCampos.php
+    21  src/Dominio/Reglas/ReglaModuloDelEmisor.php
+    11  src/Dominio/Reglas/ReglaMovimiento.php
+    15  src/Dominio/Reglas/ReglaResultadoValido.php
+    15  src/Dominio/Reglas/ReglaSinDatosProhibidos.php
+    13  src/Dominio/Reglas/ReglaTenantDelEmisor.php
+
+S2 · Aplicación y persistencia (transacción, cadena, meta-auditoría, adaptadores) — 936 líneas efectivas, 24 archivos
+    65  database/integracion-central.sql
+    70  src/Aplicacion/CasosDeUso/ConsultarMovimientos.php
+    36  src/Aplicacion/CasosDeUso/ObtenerAncla.php
+    75  src/Aplicacion/CasosDeUso/RegistrarMovimiento.php
+    44  src/Aplicacion/CasosDeUso/VerDetalleMovimiento.php
+    67  src/Aplicacion/CasosDeUso/VerificarIntegridad.php
+    12  src/Aplicacion/Comandos/ComandoAncla.php
+    14  src/Aplicacion/Comandos/ComandoConsultar.php
+    12  src/Aplicacion/Comandos/ComandoDetalle.php
+    14  src/Aplicacion/Comandos/ComandoRegistrar.php
+    17  src/Aplicacion/Comandos/ComandoVerificar.php
+    11  src/Aplicacion/Puertos/PoliticaAcceso.php
+    13  src/Aplicacion/Puertos/Transaccion.php
+    51  src/Aplicacion/Resultados/Resultado.php
+    22  src/Aplicacion/Servicios/AutorizacionLectura.php
+    41  src/Aplicacion/Servicios/CadenaSellada.php
+    26  src/Aplicacion/Servicios/CursorPaginacion.php
+    30  src/Aplicacion/Servicios/ProyeccionMovimientos.php
+    95  src/Persistencia/EnMemoria/BitacoraEnMemoria.php
+     9  src/Persistencia/EnMemoria/Restaurable.php
+    24  src/Persistencia/EnMemoria/TransaccionEnMemoria.php
+    24  src/Persistencia/Pdo/FabricaConexion.php
+   134  src/Persistencia/Pdo/PdoBitacora.php
+    30  src/Persistencia/Pdo/PdoTransaccion.php
+
+S3 · Contrato, frontera HTTP, permisos/tenant y dependencias — 1091 líneas efectivas, 19 archivos
+   426  api/openapi.yaml
+   104  bootstrap/contenedor.php
+    40  config/config.php
+    13  public/index.php
+     9  src/Presentacion/Http/Autenticacion/Autenticador.php
+    21  src/Presentacion/Http/Autenticacion/AutenticadorTokenDemo.php
+    67  src/Presentacion/Http/Controladores/AuditoriaControlador.php
+    14  src/Presentacion/Http/Formularios/EntradaInvalida.php
+    73  src/Presentacion/Http/Formularios/FormularioMovimientos.php
+    16  src/Presentacion/Http/Identidad.php
+    72  src/Presentacion/Http/Kernel.php
+    13  src/Presentacion/Http/Observabilidad/RegistroAcceso.php
+    19  src/Presentacion/Http/Observabilidad/RegistroAccesoJson.php
+    34  src/Presentacion/Http/Respuesta.php
+    21  src/Presentacion/Http/Ruta.php
+    21  src/Presentacion/Http/Rutas.php
+    39  src/Presentacion/Http/Solicitud.php
+    55  src/Presentacion/Http/Vistas/ErrorVista.php
+    34  src/Presentacion/Http/Vistas/MovimientosVista.php
+
+Criterios automáticos que fallan: 2
