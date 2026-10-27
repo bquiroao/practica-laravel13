@@ -1,0 +1,382 @@
+openapi: 3.1.0
+info:
+  title: API de Prescripciones electrónicas con validación de alergias — Sistema Hospitalario Integrado
+  version: 1.0.0
+  summary: Creación de prescripción con verificación previa de alergias y bloqueo seguro.
+  description: |
+    El médico VERIFICA una prescripción antes de firmar (sin efectos) y la EMITE; el servidor vuelve a
+    verificar las alergias activas del paciente en la misma operación. Farmacia y enfermería CONSULTAN la
+    prescripción con su verificación. No existe ninguna operación para modificar ni borrar una prescripción.
+
+    Reglas transversales:
+    - Toda petición exige `Authorization: Bearer` (401) y `X-Tenant-ID` (400) igual al hospital del token
+      (403 `TENANT_NO_COINCIDE`). El hospital nunca se toma del cuerpo.
+    - El permiso de cada operación está en `x-permiso` y lo decide RBAC (403 `PERMISO_DENEGADO`).
+    - Toda respuesta trae `X-Request-ID` (se respeta el del cliente si cumple el patrón).
+    - Un paciente o una prescripción de otro hospital responde igual que uno inexistente (404).
+    - Bloqueo seguro: si el Expediente no responde, la emisión responde 503 `VERIFICACION_NO_DISPONIBLE` y no emite.
+    - Los errores no revelan detalles internos: 500 `ERROR_INTERNO`, 503 `ERROR_PERSISTENCIA` o `SERVICIO_NO_DISPONIBLE`.
+  contact:
+    name: Boris Alexander Quiroa Orellana (@bquiroao)
+  license:
+    name: Uso académico — Análisis de Sistemas II 2026
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8091
+    description: Micro-HIS local (php -S)
+security:
+  - bearer: []
+tags:
+  - name: verificacion
+    description: Verificación previa y consultiva; no guarda ni traza nada.
+  - name: emision
+    description: Emisión con verificación obligatoria en el servidor (idempotente por Idempotency-Key).
+  - name: consulta
+    description: Lectura para farmacia, enfermería y el médico.
+paths:
+  /api/v1/prescripciones/verificaciones:
+    post:
+      operationId: verificarAlergias
+      tags: [verificacion]
+      summary: Verifica la prescripción contra las alergias activas, sin emitir.
+      description: |
+        Responde 200 con el resultado aunque haya hallazgos o el Expediente no responda: es informativa.
+        La emisión vuelve a verificar; este resultado nunca se acepta del cliente.
+      x-permiso: prescripcion.emitir
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescripcionEntrada'
+      responses:
+        '200':
+          description: Resultado de la verificación (SIN_HALLAZGOS, ADVERTENCIA, BLOQUEO, CONFIRMACION_REQUERIDA o VERIFICACION_NO_DISPONIBLE).
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verificacion'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /api/v1/prescripciones:
+    post:
+      operationId: emitirPrescripcion
+      tags: [emision]
+      summary: Emite una prescripción (verificación obligatoria; idempotente).
+      description: |
+        Reintentar con la MISMA `Idempotency-Key` y el mismo contenido devuelve 200 `YA_EMITIDA` con el mismo
+        id, sin volver a verificar; con otro contenido, 409 `CLAVE_REUTILIZADA`. Una advertencia de reactividad
+        cruzada exige `justificacion` (≥ 20 caracteres) y además el permiso `x-permiso-advertencia`.
+      x-permiso: prescripcion.emitir
+      x-permiso-advertencia: prescripcion.override
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmisionEntrada'
+      responses:
+        '201':
+          description: Emitida.
+          headers:
+            Location:
+              description: /api/v1/prescripciones/{id}
+              schema: {type: string}
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Emision'
+        '200':
+          description: Reintento con la misma clave y el mismo contenido (YA_EMITIDA). No vuelve a verificar.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Emision'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
+  /api/v1/prescripciones/{id}:
+    get:
+      operationId: consultarPrescripcion
+      tags: [consulta]
+      summary: Devuelve la prescripción con su verificación.
+      description: Otro hospital o inexistente → el mismo 404. PUT, PATCH y DELETE responden 405 (la prescripción es inmutable).
+      x-permiso: prescripcion.consultar
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer, minimum: 1}
+      responses:
+        '200':
+          description: La prescripción.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescripcion'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '405':
+          $ref: '#/components/responses/Error405'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: En el HIS, JWT del módulo de autenticación; en el Micro-HIS, tokens de demostración.
+  parameters:
+    XTenantID:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital del alcance; debe ser el del token.
+      schema: {type: string, minLength: 1}
+    XRequestID:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Se respeta si cumple el patrón; si no, el servidor genera uno. Repetirlo en los reintentos.
+      schema: {type: string, pattern: '^[A-Za-z0-9-]{8,64}$'}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Una por intención de emitir; la MISMA en todos los reintentos.
+      schema: {type: string, pattern: '^[A-Za-z0-9._:-]{1,128}$'}
+  headers:
+    XRequestID:
+      description: Identificador de la petición, para seguirla en el registro de acceso.
+      schema: {type: string}
+  schemas:
+    Item:
+      type: object
+      required: [medicamento, dosis, unidad, frecuencia_horas, via, dias]
+      properties:
+        medicamento: {type: string, description: Código del catálogo; activo.}
+        dosis: {type: number, exclusiveMinimum: 0, description: La dosis diaria (dosis × 24 / frecuencia) no supera la máxima del catálogo.}
+        unidad: {type: string, description: La del catálogo.}
+        frecuencia_horas: {type: integer, enum: [4, 6, 8, 12, 24]}
+        via: {type: string, description: Una de las vías permitidas del medicamento.}
+        dias: {type: integer, minimum: 1, maximum: 90}
+    PrescripcionEntrada:
+      type: object
+      required: [paciente, items]
+      properties:
+        paciente: {type: string, description: Paciente del hospital del token.}
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Item'
+    EmisionEntrada:
+      allOf:
+        - $ref: '#/components/schemas/PrescripcionEntrada'
+        - type: object
+          properties:
+            justificacion: {type: [string, 'null'], description: Obligatoria (≥ 20) si hay una advertencia de reactividad cruzada.}
+            confirma_sin_alergias: {type: boolean, default: false, description: Obligatoria si el paciente no tiene alergias registradas.}
+    Hallazgo:
+      type: object
+      required: [tipo, medicamento, alergeno, severidad, bloquea]
+      properties:
+        tipo: {type: string, enum: [DIRECTA, CRUZADA]}
+        medicamento: {type: string}
+        alergeno: {type: string}
+        severidad: {type: string, enum: [mild, moderate, severe, life_threatening, unknown]}
+        bloquea: {type: boolean}
+        reaccion: {type: [string, 'null']}
+    Verificacion:
+      type: object
+      required: [codigo, hallazgos]
+      properties:
+        codigo: {type: string, enum: [SIN_HALLAZGOS, ADVERTENCIA, BLOQUEO, CONFIRMACION_REQUERIDA, VERIFICACION_NO_DISPONIBLE]}
+        hallazgos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hallazgo'
+    Emision:
+      type: object
+      required: [codigo, id, verificacion]
+      properties:
+        codigo: {type: string, enum: [EMITIDA, YA_EMITIDA]}
+        id: {type: integer}
+        verificacion: {type: string, enum: [SIN_HALLAZGOS, ADVERTENCIA]}
+    Prescripcion:
+      type: object
+      required: [codigo, id, paciente, prescriptor, estado, emitida_en, items, verificacion]
+      properties:
+        codigo: {type: string, enum: [PRESCRIPCION]}
+        id: {type: integer}
+        paciente: {type: string}
+        prescriptor: {type: string}
+        estado: {type: string, enum: [EMITIDA]}
+        emitida_en: {type: string, format: date-time, description: Siempre en UTC (+00:00).}
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        verificacion:
+          type: object
+          properties:
+            resultado: {type: string, enum: [SIN_HALLAZGOS, ADVERTENCIA]}
+            hallazgos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Hallazgo'
+            alergenos_evaluados: {type: array, items: {type: string}}
+            justificacion: {type: [string, 'null']}
+            confirma_sin_alergias: {type: boolean}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum: [NO_AUTENTICADO, TENANT_REQUERIDO, TENANT_NO_COINCIDE, PERMISO_DENEGADO, NO_ENCONTRADO, RUTA_NO_ENCONTRADA, METODO_NO_PERMITIDO,
+            IDEMPOTENCY_KEY_REQUERIDA, JSON_INVALIDO, CUERPO_INVALIDO, DATOS_INVALIDOS, DOSIS_EXCEDE_MAXIMO, CONFIRMACION_REQUERIDA,
+            BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA, JUSTIFICACION_REQUERIDA, CLAVE_REUTILIZADA, VERIFICACION_NO_DISPONIBLE,
+            ERROR_PERSISTENCIA, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE]
+        campos: {type: array, items: {type: string}, description: Con DATOS_INVALIDOS.}
+        items: {type: array, items: {type: string}, description: Con DOSIS_EXCEDE_MAXIMO.}
+        hallazgos:
+          type: array
+          description: Con BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA y JUSTIFICACION_REQUERIDA.
+          items:
+            $ref: '#/components/schemas/Hallazgo'
+  responses:
+    Error400:
+      description: Formato inválido (TENANT_REQUERIDO, IDEMPOTENCY_KEY_REQUERIDA, JSON_INVALIDO, CUERPO_INVALIDO).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error401:
+      description: Token ausente o inválido (NO_AUTENTICADO).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error403:
+      description: TENANT_NO_COINCIDE o PERMISO_DENEGADO.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error404:
+      description: NO_ENCONTRADO (inexistente u otro hospital, indistinguibles) o RUTA_NO_ENCONTRADA.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error405:
+      description: METODO_NO_PERMITIDO (no hay PUT, PATCH ni DELETE).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error409:
+      description: JUSTIFICACION_REQUERIDA (advertencia sin justificación o sin override) o CLAVE_REUTILIZADA.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error422:
+      description: Regla clínica (DATOS_INVALIDOS, DOSIS_EXCEDE_MAXIMO, CONFIRMACION_REQUERIDA, BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error500:
+      description: ERROR_INTERNO, sin detalles.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error503:
+      description: VERIFICACION_NO_DISPONIBLE (bloqueo seguro), ERROR_PERSISTENCIA o SERVICIO_NO_DISPONIBLE. Reintentar con la misma Idempotency-Key.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/XRequestID'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

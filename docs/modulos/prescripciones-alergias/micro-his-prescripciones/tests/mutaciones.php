@@ -31,7 +31,7 @@ $mutaciones = [
         'if (!$expediente->evaluado && !$s->confirmaSinAlergias) {', 'if (false) {'],
     'M7 la advertencia no exige el permiso override' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
         <<<'X'
-        || !$this->acceso->permite($s->usuario, 'prescripcion.override', $s->hospital)
+        || !$this->acceso->permite($s->usuario, self::PERMISO_OVERRIDE, $s->hospital)
         X, '|| false'],
     'M8 sin idempotencia' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
         'if ($previa !== null) {', 'if (false) {'],
@@ -70,6 +70,23 @@ $mutaciones = [
         X, '$i'],
     'M19 la vista pone Location también en un reintento (200)' => ['src/Presentacion/Http/Vistas/PrescripcionVista.php',
         '$r->tipo === Resultado::CREADO ? [', 'true ? ['],
+    // Semana 5: Expediente remoto, cliente, observabilidad y contrato.
+    'M20 HttpFuenteAlergias trata un estado ≠ 200 como «sin alergias»' => ['src/Persistencia/Http/HttpFuenteAlergias.php',
+        'throw new \RuntimeException("estado $estado");', 'return new ExpedienteAlergias(true, []);'],
+    'M21 HttpFuenteAlergias acepta «evaluado=false» con alergias' => ['src/Persistencia/Http/HttpFuenteAlergias.php',
+        "if (!\$datos['evaluado'] && \$alergias !== []) {", 'if (false) {'],
+    'M22 el circuito nunca se abre' => ['src/Persistencia/Http/CircuitoInterruptor.php',
+        '$this->fallasSeguidas >= $this->umbral', 'false'],
+    'M23 el cliente reintenta también los 4xx' => ['src/Cliente/ClientePrescripciones.php',
+        "if (\$r['estado'] < 500) {", "if (\$r['estado'] < 400) {"],
+    'M24 el cliente informa INCIERTO cuando el servidor afirmó que no emitió' => ['src/Cliente/ClientePrescripciones.php',
+        "=== 'VERIFICACION_NO_DISPONIBLE' ? ResultadoCliente::RECHAZADO", "=== 'X' ? ResultadoCliente::RECHAZADO"],
+    'M25 el kernel acepta cualquier X-Request-ID (inyección de cabeceras)' => ['src/Presentacion/Http/Kernel.php',
+        'preg_match(self::PATRON_REQUEST_ID, $recibido)', 'true'],
+    'M26 el registro de acceso guarda el cuerpo de la petición' => ['src/Presentacion/Http/Kernel.php',
+        "'tenant' => \$identidad?->hospital,", "'tenant' => \$identidad?->hospital, 'cuerpo' => \$solicitud->cuerpo,"],
+    'M27 el contrato documenta otro permiso para consultar' => ['api/openapi.yaml',
+        'x-permiso: prescripcion.consultar', 'x-permiso: prescripcion.emitir'],
 ];
 
 $origen = dirname(__DIR__);

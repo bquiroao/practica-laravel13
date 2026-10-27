@@ -27,6 +27,8 @@ use Prescripciones\Dominio\Puertos\RepositorioPrescripciones;
  */
 final class EmitirPrescripcion
 {
+    public const PERMISO = 'prescripcion.emitir';
+    public const PERMISO_OVERRIDE = 'prescripcion.override';
     public const MIN_JUSTIFICACION = 20;
 
     public function __construct(
@@ -51,7 +53,7 @@ final class EmitirPrescripcion
 
     private function emitir(SolicitudEmision $s): Resultado
     {
-        if (!$this->acceso->permite($s->usuario, 'prescripcion.emitir', $s->hospital)) {
+        if (!$this->acceso->permite($s->usuario, self::PERMISO, $s->hospital)) {
             return new Resultado(Resultado::DENEGADO, 'PERMISO_DENEGADO');
         }
 
@@ -88,7 +90,7 @@ final class EmitirPrescripcion
 
         if ($verificacion->estado === ResultadoVerificacion::ADVERTENCIA
             && (mb_strlen(trim((string) $s->justificacion)) < self::MIN_JUSTIFICACION
-                || !$this->acceso->permite($s->usuario, 'prescripcion.override', $s->hospital))) {
+                || !$this->acceso->permite($s->usuario, self::PERMISO_OVERRIDE, $s->hospital))) {
             return new Resultado(Resultado::CONFLICTO, 'JUSTIFICACION_REQUERIDA', ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
         }
 

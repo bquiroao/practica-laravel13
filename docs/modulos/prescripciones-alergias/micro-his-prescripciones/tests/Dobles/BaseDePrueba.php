@@ -16,6 +16,7 @@ function baseLimpia(): array
     }
     $config = require dirname(__DIR__, 2) . '/config/config.php';
     $config['persistencia'] = 'pdo';
+    $config['registro_acceso'] = 'ninguno';
     $pdo = FabricaConexion::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave']);
     $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/schema.sql'));
     $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));

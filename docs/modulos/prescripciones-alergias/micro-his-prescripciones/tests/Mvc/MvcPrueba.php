@@ -51,6 +51,7 @@ prueba('MVC-04', 'Formato frente a regla: JSON roto → 400 del formulario; dosi
 prueba('MVC-05', 'Modo «memoria» de producción: crearKernel funciona de punta a punta sin base de datos', function (): void {
     $config = Escenario::config();
     $config['persistencia'] = 'memoria';
+    $config['registro_acceso'] = 'ninguno';
     $config['db']['dsn'] = 'pgsql:host=127.0.0.1;port=1;dbname=no-se-usa';
     $k = crearKernel($config);
     $emitida = $k->manejar(Escenario::http('POST', '/api/v1/prescripciones', ['paciente' => 'P-005', 'items' => [Escenario::item('PARA500')]],

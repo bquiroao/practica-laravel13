@@ -27,7 +27,9 @@ use Prescripciones\Presentacion\Http\Autenticacion\Autenticador;
 use Prescripciones\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Prescripciones\Presentacion\Http\Controladores\PrescripcionesControlador;
 use Prescripciones\Presentacion\Http\Kernel;
-use Prescripciones\Presentacion\Http\Ruta;
+use Prescripciones\Presentacion\Http\Observabilidad\RegistroAcceso;
+use Prescripciones\Presentacion\Http\Observabilidad\RegistroAccesoJson;
+use Prescripciones\Presentacion\Http\Rutas;
 
 /**
  * @param array{acceso: PoliticaAcceso, pacientes: Pacientes, catalogo: CatalogoMedicamentos, alergias: FuenteAlergias,
@@ -46,20 +48,16 @@ function construirCasosDeUso(array $p): array
 }
 
 /** @param array{previa: VerificarAlergiasPrevia, emitir: EmitirPrescripcion, consultar: ConsultarPrescripcion} $casos */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+function construirKernel(array $casos, Autenticador $autenticador, ?RegistroAcceso $registro = null): Kernel
 {
     $controlador = new PrescripcionesControlador($casos['previa'], $casos['emitir'], $casos['consultar']);
-    $base = '/api/v1/prescripciones';
 
-    return new Kernel([
-        new Ruta('POST', "#^$base/verificaciones$#", $controlador->verificar(...)),
-        new Ruta('POST', "#^$base$#", $controlador->emitir(...)),
-        new Ruta('GET', "#^$base/(?<id>[1-9][0-9]{0,17})$#", $controlador->consultar(...)),
-    ], $autenticador);
+    return new Kernel(Rutas::definir($controlador), $autenticador, $registro);
 }
 
 /** Punto de entrada real: PostgreSQL con PDO, o todo en memoria (PRESCRIPCIONES_PERSISTENCIA=memoria). */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']),
+        ($config['registro_acceso'] ?? 'stderr') === 'ninguno' ? null : new RegistroAccesoJson());
 }
