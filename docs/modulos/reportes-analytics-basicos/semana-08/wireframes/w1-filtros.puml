@@ -1,0 +1,13 @@
+@startsalt w1_filtros
+{+
+  <b>Reportes y analytics básicos</b> | Rol: Jefe de área
+  --
+  Reporte      | ^Ocupación hospitalaria^ | <&info> Camas ocupadas entre camas habilitadas
+  Desde        | "01/10/2026"
+  Hasta        | "31/10/2026"
+  Dimensión    | ^Sala^
+  Granularidad | (X) Día | () Semana | () Mes
+  --
+  Ocupación · 01/10/2026 a 31/10/2026 | [Calcular]
+}
+@endsalt
