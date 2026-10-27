@@ -1,0 +1,3 @@
+# Declaración de uso de inteligencia artificial
+
+Se utilizó un asistente de inteligencia artificial como apoyo para escribir la medición de la frontera, proponer el contrato API, evaluar los criterios de microservicio, dibujar los diagramas y redactar el plan de migración. La estudiante debe ejecutar la medición, verificar el contrato contra el prototipo de la Semana 3 y poder defender la decisión. El contrato, la idempotencia, la custodia, el outbox y la integración con Órdenes son propuestas no implementadas, y los umbrales de los disparadores son una propuesta sin datos de carga. Los datos son ficticios.
