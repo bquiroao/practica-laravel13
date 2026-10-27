@@ -76,7 +76,7 @@ prueba('HTTP-08', 'POST /verificaciones: 200 con los hallazgos y sin efectos', f
     $e = new Escenario();
     $r = $e->kernel()->manejar(Escenario::http('POST', '/api/v1/prescripciones/verificaciones', ['paciente' => 'P-001', 'items' => [Escenario::item('AMOX500')]]));
     igual([200, 'BLOQUEO', 'J01CA04'], [$r->estado, $r->cuerpo['codigo'], $r->cuerpo['hallazgos'][0]['alergeno']], 'respuesta');
-    igual([0, []], [count($e->repositorio->guardadas), $e->auditoria->acciones()], 'sin efectos');
+    igual([0, []], [count($e->repositorio->todas()), $e->auditoria->acciones()], 'sin efectos');
 });
 
 prueba('HTTP-10', 'H-1: cada código que responde el kernel tiene su frase de estado (el servidor embebido no conoce la del 422)', function (): void {

@@ -55,6 +55,21 @@ $mutaciones = [
     'M14 el esquema sin el trigger de inmutabilidad' => ['database/schema.sql',
         "CREATE TRIGGER prescriptions_inmutable BEFORE UPDATE OR DELETE ON prescriptions\n    FOR EACH ROW EXECUTE FUNCTION rechazar_cambio_prescripcion();",
         ''],
+    // Semana 4: MVC, adaptadores InMemory de producción y el hallazgo H-4.
+    'M15 el controlador arma él mismo la respuesta de error' => ['src/Presentacion/Http/Controladores/PrescripcionesControlador.php',
+        'return ErrorVista::entradaInvalida($e);', <<<'X'
+        return Respuesta::json(400, ['error' => $e->codigo]);
+        X],
+    'M16 el repositorio InMemory ignora el hospital en porId' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
+        'return $p !== null && $p->hospital === $hospital ? $p : null;', 'return $p;'],
+    'M17 el repositorio InMemory acepta una clave repetida' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
+        'if ($this->porClave($prescripcion->hospital, $prescripcion->clave) !== null) {', 'if (false) {'],
+    'M18 regresión de H-4: la dosis no se normaliza' => ['src/Dominio/Modelo/Prescripcion.php',
+        <<<'X'
+        array_replace($i, ['dosis' => (float) $i['dosis']])
+        X, '$i'],
+    'M19 la vista pone Location también en un reintento (200)' => ['src/Presentacion/Http/Vistas/PrescripcionVista.php',
+        '$r->tipo === Resultado::CREADO ? [', 'true ? ['],
 ];
 
 $origen = dirname(__DIR__);

@@ -12,6 +12,9 @@ final readonly class Prescripcion
 {
     public const EMITIDA = 'EMITIDA';
 
+    /** @var list<array<string, mixed>> con la dosis SIEMPRE decimal (hallazgo H-4 de la semana 4) */
+    public array $items;
+
     /**
      * @param list<array<string, mixed>> $items
      * @param list<string>               $alergenosEvaluados alérgenos activos contra los que se verificó
@@ -23,7 +26,7 @@ final readonly class Prescripcion
         public string $prescriptor,
         public string $clave,
         public string $huella,
-        public array $items,
+        array $items,
         public ResultadoVerificacion $verificacion,
         public array $alergenosEvaluados,
         public ?string $justificacion,
@@ -31,6 +34,8 @@ final readonly class Prescripcion
         public \DateTimeImmutable $emitidaEn,
         public string $estado = self::EMITIDA,
     ) {
+        // Una dosis de 500 y una de 500.0 son la misma; sin esto, la consulta respondía 500 en memoria y 500.0 con PDO.
+        $this->items = array_map(static fn (array $i): array => array_replace($i, ['dosis' => (float) $i['dosis']]), array_values($items));
     }
 
     public function conId(int $id): self

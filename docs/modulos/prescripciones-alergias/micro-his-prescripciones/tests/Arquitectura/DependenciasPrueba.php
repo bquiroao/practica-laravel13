@@ -54,7 +54,53 @@ prueba('ARQ-05', 'PDO y SQL solo existen en Persistencia', function () use ($arc
     igual([], $violaciones, 'archivos');
 });
 
-prueba('ARQ-06', 'Sin framework: ningún archivo usa Composer ni namespaces de terceros', function () use ($archivosDe, $codigoDe): void {
+prueba('ARQ-07', 'Controlador MVC: sin SQL, sin new, sin códigos de negocio ni HTTP escritos a mano, sin armar respuestas',
+    function () use ($codigoDe): void {
+        $codigo = $codigoDe(dirname(__DIR__, 2) . '/src/Presentacion/Http/Controladores/PrescripcionesControlador.php');
+        $prohibido = [
+            'SQL' => '/\b(SELECT|INSERT|UPDATE|DELETE)\b/',
+            'new' => '/\bnew\s+[A-Z\\\\]/',
+            'código de negocio literal' => '/[\'"][A-Z][A-Z_]{3,}[\'"]/',
+            'Respuesta::json' => '/Respuesta::json/',
+            'número de estado HTTP' => '/\b[1-5][0-9]{2}\b/',
+            'acceso a reglas o puertos' => '/Prescripciones\\\\(Dominio\\\\Reglas|Aplicacion\\\\Puertos|Persistencia)/',
+        ];
+        $hallazgos = array_keys(array_filter($prohibido, static fn (string $re): bool => (bool) preg_match($re, $codigo)));
+        igual([], $hallazgos, 'el controlador contiene');
+    });
+
+prueba('ARQ-08', 'Solo las Vistas (y el Kernel para sus propios 4xx/500) arman respuestas HTTP', function () use ($archivosDe, $codigoDe): void {
+    $arman = [];
+    foreach ($archivosDe('Presentacion') as $archivo) {
+        if (str_contains($codigoDe($archivo), 'Respuesta::json(')) {
+            $arman[] = basename($archivo);
+        }
+    }
+    sort($arman);
+    igual(['ErrorVista.php', 'Kernel.php', 'PrescripcionVista.php'], $arman, 'archivos que arman respuestas');
+});
+
+prueba('ARQ-09', 'Cada puerto de datos tiene adaptador PDO e InMemory', function (): void {
+    $puertos = [
+        'Prescripciones\\Dominio\\Puertos\\RepositorioPrescripciones', 'Prescripciones\\Aplicacion\\Puertos\\FuenteAlergias',
+        'Prescripciones\\Aplicacion\\Puertos\\CatalogoMedicamentos', 'Prescripciones\\Aplicacion\\Puertos\\Pacientes',
+        'Prescripciones\\Aplicacion\\Puertos\\RegistroAuditoria', 'Prescripciones\\Aplicacion\\Puertos\\Transaccion',
+    ];
+    $faltan = [];
+    foreach ($puertos as $puerto) {
+        foreach (['Pdo', 'EnMemoria'] as $tipo) {
+            $hay = false;
+            foreach (glob(dirname(__DIR__, 2) . "/src/Persistencia/$tipo/*.php") as $archivo) {
+                $clase = "Prescripciones\\Persistencia\\$tipo\\" . basename($archivo, '.php');
+                $hay = $hay || (class_exists($clase) && in_array($puerto, class_implements($clase), true));
+            }
+            $hay || $faltan[] = substr(strrchr($puerto, '\\'), 1) . " sin $tipo";
+        }
+    }
+    igual([], $faltan, 'faltan');
+});
+
+prueba('ARQ-06','Sin framework: ningún archivo usa Composer ni namespaces de terceros', function () use ($archivosDe, $codigoDe): void {
     $violaciones = [];
     foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
         foreach ($archivosDe($capa) as $archivo) {
