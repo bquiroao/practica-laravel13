@@ -78,6 +78,43 @@ prueba('DOM-07', 'R-11: la huella distingue el contenido y no depende de la clav
 prueba('DOM-08', 'R-10: la prescripción es readonly y no tiene métodos que la cambien', function (): void {
     $clase = new \ReflectionClass(Prescripcion::class);
     afirmar($clase->isReadOnly(), 'debe ser readonly');
-    $publicos = array_map(static fn (\ReflectionMethod $m): string => $m->getName(), $clase->getMethods(\ReflectionMethod::IS_PUBLIC));
-    igual(['__construct', 'conId', 'aArreglo'], $publicos, 'métodos públicos');
+    // De instancia: solo leer o crear OTRA (conId). Estático: el constructor con nombre emitir() de la semana 7.
+    $metodos = $clase->getMethods(\ReflectionMethod::IS_PUBLIC);
+    $deInstancia = array_map(static fn (\ReflectionMethod $m): string => $m->getName(), array_filter($metodos, static fn ($m): bool => !$m->isStatic()));
+    $estaticos = array_map(static fn (\ReflectionMethod $m): string => $m->getName(), array_filter($metodos, static fn ($m): bool => $m->isStatic()));
+    igual([['__construct', 'conId', 'aArreglo'], ['emitir']], [array_values($deInstancia), array_values($estaticos)], 'métodos públicos');
+});
+
+prueba('DOM-09', 'Semana 7 · PoliticaEmision: tabla de decisiones (confirmación → bloqueo → advertencia) y RBAC solo si hace falta', function (): void {
+    $politica = new \Prescripciones\Dominio\Reglas\PoliticaEmision();
+    $hallazgo = static fn (bool $bloquea, string $tipo = 'CRUZADA'): Hallazgo => new Hallazgo($tipo, 'CEFA500', 'Penicilina', 'moderate', $bloquea, null);
+    $sin = ResultadoVerificacion::desde([]);
+    $adv = ResultadoVerificacion::desde([$hallazgo(false)]);
+    $blq = ResultadoVerificacion::desde([$hallazgo(true, 'DIRECTA')]);
+    $evaluado = new ExpedienteAlergias(true, []);
+    $noEvaluado = new ExpedienteAlergias(false, []);
+    $consultas = 0;
+    $override = static function () use (&$consultas): bool {
+        $consultas++;
+
+        return true;
+    };
+    $s = static fn (?string $j = null, bool $c = false) => Escenario::solicitud('P-002', [], justificacion: $j, confirma: $c);
+    $casos = [
+        'no evaluado, sin confirmar' => [$sin, $noEvaluado, $s(), 'REQUIERE_CONFIRMACION', null, false],
+        'no evaluado, confirmado' => [$sin, $noEvaluado, $s(null, true), 'PERMITIDA', null, true],
+        'bloqueo' => [$blq, $evaluado, $s('una justificación de sobra larga'), 'BLOQUEADA', null, false],
+        'advertencia sin justificación' => [$adv, $evaluado, $s(), 'REQUIERE_JUSTIFICACION', null, false],
+        'advertencia con 20 y espacios' => [$adv, $evaluado, $s('  ' . str_repeat('j', 20) . '  '), 'PERMITIDA', str_repeat('j', 20), false],
+        'sin hallazgos: la justificación no se guarda' => [$sin, $evaluado, $s('una justificación de sobra larga'), 'PERMITIDA', null, false],
+    ];
+    foreach ($casos as $nombre => [$v, $exp, $sol, $tipo, $justificacion, $confirmacion]) {
+        $d = $politica->decidir($v, $exp, $sol, $override);
+        igual([$tipo, $justificacion, $confirmacion], [$d->tipo, $d->justificacion, $d->confirmacionRegistrada], $nombre);
+    }
+    igual(1, $consultas, 'el permiso override se consultó solo en la advertencia con justificación suficiente');
+    igual('BLOQUEO_ALERGIA', $politica->decidir($blq, $evaluado, $s(), $override)->codigoBloqueo, 'código del bloqueo');
+    igual(['CONFIRMACION_REQUERIDA', 'ADVERTENCIA'], [$politica->resultadoPrevio($adv, $noEvaluado), $politica->resultadoPrevio($adv, $evaluado)], 'previa');
+    lanza(\LogicException::class, static fn () => \Prescripciones\Dominio\Modelo\Prescripcion::emitir($s(), $evaluado, $blq,
+        $politica->decidir($blq, $evaluado, $s(), $override), new \DateTimeImmutable()), 'no se construye una prescripción bloqueada');
 });

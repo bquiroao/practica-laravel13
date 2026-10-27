@@ -38,6 +38,19 @@ final readonly class Prescripcion
         $this->items = array_map(static fn (array $i): array => array_replace($i, ['dosis' => (float) $i['dosis']]), array_values($items));
     }
 
+    /** Semana 7: la prescripción se construye a partir de lo que decidió el Dominio, no de la solicitud cruda. */
+    public static function emitir(SolicitudEmision $s, ExpedienteAlergias $expediente, ResultadoVerificacion $verificacion,
+        DecisionEmision $decision, \DateTimeImmutable $ahora): self
+    {
+        if (!$decision->permiteEmitir()) {
+            throw new \LogicException('No se puede emitir con la decisión ' . $decision->tipo);
+        }
+
+        return new self(null, $s->hospital, $s->paciente, $s->usuario, $s->clave, $s->huella(), $s->items, $verificacion,
+            array_map(static fn (Alergia $a): string => $a->alergeno(), $expediente->activas()), $decision->justificacion,
+            $decision->confirmacionRegistrada, $ahora);
+    }
+
     public function conId(int $id): self
     {
         return new self($id, $this->hospital, $this->paciente, $this->prescriptor, $this->clave, $this->huella, $this->items,

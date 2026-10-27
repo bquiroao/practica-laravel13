@@ -10,6 +10,7 @@ use Prescripciones\Aplicacion\Puertos\PoliticaAcceso;
 use Prescripciones\Aplicacion\Resultados\Resultado;
 use Prescripciones\Aplicacion\Servicios\EvaluacionClinica;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
+use Prescripciones\Dominio\Reglas\PoliticaEmision;
 
 /** CU-02, verificación previa y consultiva: informa, no guarda ni traza nada. */
 final class VerificarAlergiasPrevia
@@ -21,6 +22,7 @@ final class VerificarAlergiasPrevia
         private readonly PoliticaAcceso $acceso,
         private readonly Pacientes $pacientes,
         private readonly EvaluacionClinica $evaluacion,
+        private readonly PoliticaEmision $politica = new PoliticaEmision(),
     ) {
     }
 
@@ -44,8 +46,8 @@ final class VerificarAlergiasPrevia
             return $evaluada;
         }
         [$expediente, $verificacion] = $evaluada;
-        $codigo = $expediente->evaluado ? $verificacion->estado : 'CONFIRMACION_REQUERIDA';
 
-        return new Resultado(Resultado::OK, $codigo, ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
+        return new Resultado(Resultado::OK, $this->politica->resultadoPrevio($verificacion, $expediente),
+            ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
     }
 }

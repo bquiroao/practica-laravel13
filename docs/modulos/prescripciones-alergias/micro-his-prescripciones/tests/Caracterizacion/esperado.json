@@ -1,0 +1,627 @@
+{
+    "previa P-001 amoxicilina (directa)": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "BLOQUEO",
+            "hallazgos": [
+                {
+                    "tipo": "DIRECTA",
+                    "medicamento": "AMOX500",
+                    "alergeno": "J01CA04",
+                    "severidad": "severe",
+                    "bloquea": true,
+                    "reaccion": "urticaria generalizada"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa P-002 cefalexina (cruzada)": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "ADVERTENCIA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "CEFA500",
+                    "alergeno": "Penicilina",
+                    "severidad": "moderate",
+                    "bloquea": false,
+                    "reaccion": "exantema"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa P-003 sin alergias evaluadas": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "CONFIRMACION_REQUERIDA",
+            "hallazgos": []
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa P-004 ibuprofeno (cruzada grave)": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "BLOQUEO",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "IBU400",
+                    "alergeno": "N02BA01",
+                    "severidad": "life_threatening",
+                    "bloquea": true,
+                    "reaccion": "anafilaxia"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa P-005 paracetamol": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "SIN_HALLAZGOS",
+            "hallazgos": []
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa dosis excedida": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "DOSIS_EXCEDE_MAXIMO",
+            "items": [
+                "items[0]"
+            ]
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa datos inválidos": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "DATOS_INVALIDOS",
+            "campos": [
+                "items[0].medicamento",
+                "items[1].dosis",
+                "items[1].frecuencia_horas",
+                "items[1].via",
+                "items[1].dias"
+            ]
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "previa paciente ajeno": {
+        "estado": 404,
+        "cuerpo": {
+            "error": "NO_ENCONTRADO"
+        },
+        "location": null,
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "emitir P-005 paracetamol": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 1,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "location": "/api/v1/prescripciones/1",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 1
+    },
+    "reintento igual": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "YA_EMITIDA",
+            "id": 1,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 1
+    },
+    "misma clave, otro contenido": {
+        "estado": 409,
+        "cuerpo": {
+            "error": "CLAVE_REUTILIZADA"
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 1
+    },
+    "misma clave, datos inválidos": {
+        "estado": 409,
+        "cuerpo": {
+            "error": "CLAVE_REUTILIZADA"
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 1
+    },
+    "emitir directa con justificación": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "BLOQUEO_ALERGIA",
+            "hallazgos": [
+                {
+                    "tipo": "DIRECTA",
+                    "medicamento": "AMOX500",
+                    "alergeno": "J01CA04",
+                    "severidad": "severe",
+                    "bloquea": true,
+                    "reaccion": "urticaria generalizada"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 1
+    },
+    "emitir directa por nombre (P-007)": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "BLOQUEO_ALERGIA",
+            "hallazgos": [
+                {
+                    "tipo": "DIRECTA",
+                    "medicamento": "AMOX500",
+                    "alergeno": "  AMOXICILINA ",
+                    "severidad": "moderate",
+                    "bloquea": true,
+                    "reaccion": "prurito"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 1
+    },
+    "emitir cruzada sin justificación": {
+        "estado": 409,
+        "cuerpo": {
+            "error": "JUSTIFICACION_REQUERIDA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "CEFA500",
+                    "alergeno": "Penicilina",
+                    "severidad": "moderate",
+                    "bloquea": false,
+                    "reaccion": "exantema"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 1
+    },
+    "emitir cruzada justificación 19": {
+        "estado": 409,
+        "cuerpo": {
+            "error": "JUSTIFICACION_REQUERIDA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "CEFA500",
+                    "alergeno": "Penicilina",
+                    "severidad": "moderate",
+                    "bloquea": false,
+                    "reaccion": "exantema"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 1
+    },
+    "emitir cruzada justificación 20 con espacios": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 2,
+            "verificacion": "ADVERTENCIA"
+        },
+        "location": "/api/v1/prescripciones/2",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 2
+    },
+    "emitir cruzada sin override (dr-ruiz)": {
+        "estado": 409,
+        "cuerpo": {
+            "error": "JUSTIFICACION_REQUERIDA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "CEFA500",
+                    "alergeno": "Penicilina",
+                    "severidad": "moderate",
+                    "bloquea": false,
+                    "reaccion": "exantema"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 2
+    },
+    "emitir cruzada grave con justificación": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "BLOQUEO_ALERGIA_CRUZADA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "IBU400",
+                    "alergeno": "N02BA01",
+                    "severidad": "life_threatening",
+                    "bloquea": true,
+                    "reaccion": "anafilaxia"
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 2
+    },
+    "emitir cruzada unknown": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "BLOQUEO_ALERGIA_CRUZADA",
+            "hallazgos": [
+                {
+                    "tipo": "CRUZADA",
+                    "medicamento": "CEFA500",
+                    "alergeno": "penicilina",
+                    "severidad": "unknown",
+                    "bloquea": true,
+                    "reaccion": null
+                }
+            ]
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 2
+    },
+    "emitir sin alergias evaluadas": {
+        "estado": 422,
+        "cuerpo": {
+            "error": "CONFIRMACION_REQUERIDA"
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA"
+        ],
+        "prescripciones": 2
+    },
+    "emitir sin alergias evaluadas, confirmada": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 3,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "location": "/api/v1/prescripciones/3",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 3
+    },
+    "emitir confirmada con alergias evaluadas": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 4,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "location": "/api/v1/prescripciones/4",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 4
+    },
+    "emitir justificación sin advertencia": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 5,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "location": "/api/v1/prescripciones/5",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 5
+    },
+    "emitir dos ítems, uno cruzado": {
+        "estado": 201,
+        "cuerpo": {
+            "codigo": "EMITIDA",
+            "id": 6,
+            "verificacion": "ADVERTENCIA"
+        },
+        "location": "/api/v1/prescripciones/6",
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 6
+    },
+    "emitir sin permiso (farmacia)": {
+        "estado": 403,
+        "cuerpo": {
+            "error": "PERMISO_DENEGADO"
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 6
+    },
+    "consultar 1": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "PRESCRIPCION",
+            "id": 1,
+            "paciente": "P-005",
+            "prescriptor": "dr-lopez",
+            "estado": "EMITIDA",
+            "emitida_en": "2026-10-27T15:00:00+00:00",
+            "items": [
+                {
+                    "medicamento": "PARA500",
+                    "dosis": 500.0,
+                    "unidad": "mg",
+                    "frecuencia_horas": 8,
+                    "via": "oral",
+                    "dias": 5
+                }
+            ],
+            "verificacion": {
+                "resultado": "SIN_HALLAZGOS",
+                "hallazgos": [],
+                "alergenos_evaluados": [],
+                "justificacion": null,
+                "confirma_sin_alergias": false
+            }
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 6
+    },
+    "consultar 2 (advertencia justificada)": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "PRESCRIPCION",
+            "id": 2,
+            "paciente": "P-002",
+            "prescriptor": "dr-lopez",
+            "estado": "EMITIDA",
+            "emitida_en": "2026-10-27T15:00:00+00:00",
+            "items": [
+                {
+                    "medicamento": "CEFA500",
+                    "dosis": 500.0,
+                    "unidad": "mg",
+                    "frecuencia_horas": 8,
+                    "via": "oral",
+                    "dias": 5
+                }
+            ],
+            "verificacion": {
+                "resultado": "ADVERTENCIA",
+                "hallazgos": [
+                    {
+                        "tipo": "CRUZADA",
+                        "medicamento": "CEFA500",
+                        "alergeno": "Penicilina",
+                        "severidad": "moderate",
+                        "bloquea": false,
+                        "reaccion": "exantema"
+                    }
+                ],
+                "alergenos_evaluados": [
+                    "Penicilina"
+                ],
+                "justificacion": "xxxxxxxxxxxxxxxxxxxx",
+                "confirma_sin_alergias": false
+            }
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 6
+    },
+    "consultar 3 (confirmada)": {
+        "estado": 200,
+        "cuerpo": {
+            "codigo": "PRESCRIPCION",
+            "id": 3,
+            "paciente": "P-003",
+            "prescriptor": "dr-lopez",
+            "estado": "EMITIDA",
+            "emitida_en": "2026-10-27T15:00:00+00:00",
+            "items": [
+                {
+                    "medicamento": "AMOX500",
+                    "dosis": 500.0,
+                    "unidad": "mg",
+                    "frecuencia_horas": 8,
+                    "via": "oral",
+                    "dias": 5
+                }
+            ],
+            "verificacion": {
+                "resultado": "SIN_HALLAZGOS",
+                "hallazgos": [],
+                "alergenos_evaluados": [],
+                "justificacion": null,
+                "confirma_sin_alergias": true
+            }
+        },
+        "location": null,
+        "trazas": [
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_BLOQUEADA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA",
+            "PRESCRIPCION_EMITIDA"
+        ],
+        "prescripciones": 6
+    },
+    "fuente caída": {
+        "tipo": "NO_DISPONIBLE",
+        "codigo": "VERIFICACION_NO_DISPONIBLE",
+        "datos": [],
+        "trazas": [
+            "VERIFICACION_NO_DISPONIBLE"
+        ],
+        "prescripciones": 0
+    },
+    "traza falla en la transacción": {
+        "tipo": "NO_DISPONIBLE",
+        "codigo": "ERROR_PERSISTENCIA",
+        "datos": [],
+        "trazas": [],
+        "prescripciones": 0
+    },
+    "carrera de idempotencia": {
+        "tipo": "OK",
+        "codigo": "YA_EMITIDA",
+        "datos": {
+            "id": 1,
+            "verificacion": "SIN_HALLAZGOS"
+        },
+        "trazas": [],
+        "prescripciones": 1
+    }
+}
