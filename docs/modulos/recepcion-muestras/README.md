@@ -9,6 +9,7 @@ Modela la recepción de muestras de laboratorio, su vinculación con la orden y 
 | Semana | Entrega | Documento | Declaración IA | Defensa oral |
 |---:|---|---|---|---|
 | 1 | UML del proceso «recepción, identificación inequívoca y rechazo controlado de muestra»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-recepcion-muestras.md](semana-01/semana-01-uml-recepcion-muestras.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
+| 13 | Revisión técnica formal del módulo de recepción | [semana-13-revision-tecnica-formal.md](semana-13/semana-13-revision-tecnica-formal.md) | [DECLARACION_IA.md](semana-13/DECLARACION_IA.md) | No aplica |
 
 ## Diagramas
 
