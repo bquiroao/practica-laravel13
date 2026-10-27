@@ -14,6 +14,9 @@ use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
 /** CU-02, verificación previa y consultiva: informa, no guarda ni traza nada. */
 final class VerificarAlergiasPrevia
 {
+    /** Verificar antes de firmar exige el mismo permiso que emitir. */
+    public const PERMISO = EmitirPrescripcion::PERMISO;
+
     public function __construct(
         private readonly PoliticaAcceso $acceso,
         private readonly Pacientes $pacientes,
@@ -24,7 +27,7 @@ final class VerificarAlergiasPrevia
     /** @param list<array<string, mixed>> $items */
     public function ejecutar(string $usuario, string $hospital, string $paciente, array $items): Resultado
     {
-        if (!$this->acceso->permite($usuario, 'prescripcion.emitir', $hospital)) {
+        if (!$this->acceso->permite($usuario, self::PERMISO, $hospital)) {
             return new Resultado(Resultado::DENEGADO, 'PERMISO_DENEGADO');
         }
         try {
