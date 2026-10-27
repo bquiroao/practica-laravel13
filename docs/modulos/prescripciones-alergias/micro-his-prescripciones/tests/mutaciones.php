@@ -27,12 +27,10 @@ $mutaciones = [
         X],
     'M5 la dosis máxima se duplica' => ['src/Dominio/Reglas/ValidadorPrescripcion.php',
         '> $m->dosisMaximaDiaria', '> $m->dosisMaximaDiaria * 2'],
-    'M6 no se exige confirmar «sin alergias conocidas»' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
-        'if (!$expediente->evaluado && !$s->confirmaSinAlergias) {', 'if (false) {'],
-    'M7 la advertencia no exige el permiso override' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
-        <<<'X'
-        || !$this->acceso->permite($s->usuario, self::PERMISO_OVERRIDE, $s->hospital)
-        X, '|| false'],
+    'M6 no se exige confirmar «sin alergias conocidas»' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'if (!$expediente->evaluado && !$solicitud->confirmaSinAlergias) {', 'if (false) {'],
+    'M7 la advertencia no exige el permiso override' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '|| !$tieneOverride()', '|| false'],
     'M8 sin idempotencia' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
         'if ($previa !== null) {', 'if (false) {'],
     'M9 no se verifica el hospital del paciente' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
@@ -87,6 +85,14 @@ $mutaciones = [
         "'tenant' => \$identidad?->hospital,", "'tenant' => \$identidad?->hospital, 'cuerpo' => \$solicitud->cuerpo,"],
     'M27 el contrato documenta otro permiso para consultar' => ['api/openapi.yaml',
         'x-permiso: prescripcion.consultar', 'x-permiso: prescripcion.emitir'],
+    // Semana 7: la política de emisión del Dominio.
+    'M28 el mínimo de la justificación baja a 19' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'mb_strlen($texto) < self::MIN_JUSTIFICACION', 'mb_strlen($texto) < self::MIN_JUSTIFICACION - 1'],
+    'M29 se consulta el permiso override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '$confirmacion = !$expediente->evaluado && $solicitud->confirmaSinAlergias;',
+        '$confirmacion = !$expediente->evaluado && $solicitud->confirmaSinAlergias; $tieneOverride();'],
+    'M30 la prescripción guarda la justificación cruda, no la de la decisión' => ['src/Dominio/Modelo/Prescripcion.php',
+        '$decision->justificacion,', '$s->justificacion,'],
 ];
 
 $origen = dirname(__DIR__);

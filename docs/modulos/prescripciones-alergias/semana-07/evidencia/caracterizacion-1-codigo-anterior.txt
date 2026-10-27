@@ -1,0 +1,7 @@
+$ php tests/ejecutar.php --solo=CAR   (con el código ANTERIOR al refactor: graba y verifica)
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Caracterización (semana 7): el refactor no cambia el comportamiento ==
+[PASA ] CAR-01   Caracterización: los 32 escenarios responden EXACTAMENTE lo grabado antes del refactor de la semana 7
+
+Total: 1  Pasan: 1  Fallan: 0  Omitidas: 0

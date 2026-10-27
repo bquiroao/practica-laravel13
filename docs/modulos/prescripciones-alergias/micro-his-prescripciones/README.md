@@ -32,7 +32,7 @@ micro-his-prescripciones/
 │   ├── Dominio/                  ← Modelo, Reglas, Puertos (RepositorioPrescripciones, Reloj), Excepciones
 │   ├── Persistencia/             ← Pdo/* y EnMemoria/* (6 + 6), Http/HttpFuenteAlergias + CircuitoInterruptor, FabricaAdaptadores
 │   └── Cliente/                  ← ClientePrescripciones (reintento idempotente, sin bandeja) y transporte HTTP
-└── tests/                        ← arnés propio, decoradores de prueba, suite de contrato, 95 pruebas y 27 mutaciones
+└── tests/                        ← arnés propio, decoradores de prueba, suite de contrato, 97 pruebas y 30 mutaciones
 ```
 
 ## API
@@ -49,13 +49,13 @@ Todas exigen `Authorization: Bearer <token>` y `X-Tenant-ID` igual al hospital d
 
 ```bash
 cd docs/modulos/prescripciones-alergias/micro-his-prescripciones
-php tests/ejecutar.php                                   # sin base: 79 pasan, 16 omitidas
+php tests/ejecutar.php                                   # sin base: 81 pasan, 16 omitidas
 php bin/demo.php                                         # demo sin base (adaptadores InMemory)
 
 export PRESCRIPCIONES_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_prescripciones"
 export PRESCRIPCIONES_DB_USUARIO=postgres
-php tests/ejecutar.php                                   # 95/95 con PostgreSQL
-php tests/mutaciones.php                                 # 27/27 mutaciones detectadas
+php tests/ejecutar.php                                   # 97/97 con PostgreSQL
+php tests/mutaciones.php                                 # 30/30 mutaciones detectadas
 php bin/medir.php 200                                    # medición de la frontera (semana 5)
 php bin/validar-integracion-hospital.php                 # 13/13 sobre las migraciones reales del hospital
 bash bin/demo-http.sh                                    # recorrido HTTP con php -S
