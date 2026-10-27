@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 // Pruebas sin dependencias:  php tests/ejecutar.php   (usa SQLite en memoria como base de prueba)
-use SignosVitales\Aplicacion\{ErrorPersistencia, RegistrarToma, Usuario};
-use SignosVitales\Dominio\ErrorDominio;
-use SignosVitales\Persistencia\TomasPdo;
-use SignosVitales\Presentacion\TomasControlador;
+use SignosVitales\Aplicacion\{ConsultarTomas, ErrorPersistencia, RegistrarToma, Usuario};
+use SignosVitales\Dominio\{ErrorDominio, RangoSigno};
+use SignosVitales\Persistencia\{EnMemoria, TomasPdo};
+use SignosVitales\Presentacion\{Enrutador, Peticion, TomasControlador};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -28,7 +28,17 @@ function base(): PDO {
     return $pdo;
 }
 function filas(PDO $pdo, string $tabla): int { return (int) $pdo->query("SELECT COUNT(*) FROM $tabla")->fetchColumn(); }
-function caso(PDO $pdo): RegistrarToma { return new RegistrarToma(new TomasPdo($pdo), fn () => new DateTimeImmutable('2026-10-25 08:00'), fn () => 'toma-1'); }
+function caso(PDO|TomasPdo|EnMemoria $base): RegistrarToma {
+    $repo = $base instanceof PDO ? new TomasPdo($base) : $base;
+    return new RegistrarToma($repo, $repo, fn () => new DateTimeImmutable('2026-10-25 08:00'), fn () => 'toma-1');
+}
+function enMemoria(): EnMemoria { // los mismos datos de demostración de sql/esquema.sql que usan las pruebas
+    return new EnMemoria(['epi-1' => ['paciente_id' => 'pac-adulto', 'hospital_id' => 'hosp-1', 'fecha_nacimiento' => '1980-05-10', 'activo' => true]],
+                         [[18, 120, ['fc' => new RangoSigno(60, 100, 40, 130), 'spo2' => new RangoSigno(95, 100, 90, 100)]]]);
+}
+function app(EnMemoria $repo, array $usuarios): Enrutador {
+    return new Enrutador(new TomasControlador(caso($repo), new ConsultarTomas($repo, $repo), $usuarios));
+}
 $ana = new Usuario('enf-ana', 'enfermeria', 'hosp-1');
 $toma = fn (array $mediciones, string $paciente = 'pac-adulto', string $episodio = 'epi-1') => ['paciente_id' => $paciente, 'episodio_id' => $episodio, 'mediciones' => $mediciones];
 
@@ -60,21 +70,36 @@ prueba('APP-02', 'Episodio cerrado → 409; médico o enfermería de otro hospit
     igual('acceso_denegado', errorDe(fn () => caso(base())->ejecutar($toma(['fc' => 80]), new Usuario('dr-luis', 'medico', 'hosp-1')))->codigo);
     igual('acceso_denegado', errorDe(fn () => caso(base())->ejecutar($toma(['fc' => 80]), new Usuario('enf-eva', 'enfermeria', 'hosp-2')))->codigo);
 });
-prueba('HTTP-01', 'Presentación: 201, 401, 400, 404, 405 y 422 con su código', function () use ($ana) {
-    $pdo = base();
-    $api = new TomasControlador(caso($pdo), ['enf-ana' => $ana]);
-    $ruta = '/api/v1/signos-vitales/tomas';
-    $ok = '{"paciente_id":"pac-adulto","episodio_id":"epi-1","mediciones":{"fc":72}}';
-    igual(201, $api->atender('POST', $ruta, 'enf-ana', $ok)[0], 'registro');
-    igual([401, 400, 404, 405], [$api->atender('POST', $ruta, '', $ok)[0], $api->atender('POST', $ruta, 'enf-ana', '{')[0],
-                                 $api->atender('POST', '/x', 'enf-ana', $ok)[0], $api->atender('GET', $ruta, 'enf-ana', '')[0]], 'errores');
-    $r = $api->atender('POST', $ruta, 'enf-ana', str_replace('72', '"alto"', $ok));
-    igual([422, 'medicion_invalida'], [$r[0], $r[1]['codigo']], '422');
+prueba('REP-01', 'Contrato Repository: los adaptadores PDO y en memoria responden igual', function () use ($ana, $toma) {
+    $vistas = [];
+    foreach (['pdo' => new TomasPdo(base()), 'memoria' => enMemoria()] as $nombre => $repo) {
+        caso($repo)->ejecutar($toma(['fc' => 135, 'spo2' => 97]), $ana);
+        $vistas[$nombre] = [$repo->episodioActivo('pac-adulto', 'epi-1'), $repo->episodioActivo('pac-nino', 'epi-1'),
+                            array_keys(array_intersect_key($repo->rangosPara(40), ['fc' => 1, 'spo2' => 1])), $repo->rangosPara(5), $repo->deEpisodio('epi-1')];
+    }
+    igual($vistas['pdo'], $vistas['memoria'], 'pdo frente a memoria');
 });
-prueba('ARQ-01', 'Dependencias: Dominio no usa otras capas ni PDO; Aplicación y Presentación no tienen SQL', function () {
+prueba('MVC-01', 'Enrutador → controlador → vista: 201, 200, 401, 400, 403, 404, 405, 409 y 422', function () use ($ana) {
+    $app = app(enMemoria(), ['enf-ana' => $ana, 'dr-luis' => new Usuario('dr-luis', 'medico', 'hosp-1')]);
+    $q = ['paciente_id' => 'pac-adulto', 'episodio_id' => 'epi-1'];
+    $pide = fn (string $m, string $cuerpo = '', string $u = 'enf-ana', string $ruta = '/api/v1/signos-vitales/tomas', array $consulta = []) => $app->atender(new Peticion($m, $ruta, $consulta ?: $q, $u, $cuerpo))[0];
+    $ok = '{"paciente_id":"pac-adulto","episodio_id":"epi-1","mediciones":{"fc":72}}';
+    igual([201, 200, 200], [$pide('POST', $ok), $pide('GET'), $pide('GET', '', 'dr-luis')], 'registrar y consultar');
+    igual([401, 400, 403, 404, 405, 409, 422], [$pide('POST', $ok, ''), $pide('POST', '{'), $pide('POST', $ok, 'dr-luis'), $pide('POST', $ok, 'enf-ana', '/x'),
+        $pide('DELETE'), $pide('GET', '', 'enf-ana', '/api/v1/signos-vitales/tomas', ['paciente_id' => 'pac-adulto', 'episodio_id' => 'otro']), $pide('POST', str_replace('72', '"alto"', $ok))], 'errores');
+});
+prueba('PER-02', 'Doble en memoria que falla al guardar → 500 error_persistencia por HTTP', function () use ($ana) {
+    $repo = enMemoria();
+    $repo->fallarAlGuardar = true;
+    $r = app($repo, ['enf-ana' => $ana])->atender(new Peticion('POST', '/api/v1/signos-vitales/tomas', [], 'enf-ana', '{"paciente_id":"pac-adulto","episodio_id":"epi-1","mediciones":{"fc":72}}'));
+    igual([500, 'error_persistencia', []], [$r[0], $r[1]['codigo'], $repo->deEpisodio('epi-1')]);
+});
+prueba('ARQ-01', 'Dependencias: Dominio aislado; Aplicación sin Persistencia ni SQL; controlador sin SQL ni reglas', function () {
     $codigo = fn (string $capa) => implode("\n", array_map('file_get_contents', glob(__DIR__ . "/../src/$capa/*.php")));
     igual(0, preg_match('/Aplicacion|Persistencia|Presentacion|PDO/', $codigo('Dominio')), 'Dominio');
+    igual(0, preg_match('/SignosVitales\\\\Persistencia|\\\\PDO\b/', $codigo('Aplicacion')), 'Aplicación → Persistencia');
     igual(0, preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b/', $codigo('Aplicacion') . $codigo('Presentacion')), 'SQL fuera de Persistencia');
+    igual(0, preg_match('/Clasificacion|RangoSigno|LIMITES|Toma::/', (string) file_get_contents(__DIR__ . '/../src/Presentacion/TomasControlador.php')), 'reglas en el controlador');
 });
 
 printf("\nTotal: %d  Pasan: %d  Fallan: %d\n", array_sum($conteo), $conteo['PASA'], $conteo['FALLA']);

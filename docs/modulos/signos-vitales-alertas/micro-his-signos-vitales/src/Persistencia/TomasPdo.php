@@ -4,10 +4,10 @@ declare(strict_types=1);
 // Persistencia: SQL con sentencias preparadas. Toma, mediciones y alertas en una sola transacción (RNF-01).
 namespace SignosVitales\Persistencia;
 
-use SignosVitales\Aplicacion\ErrorPersistencia;
+use SignosVitales\Aplicacion\{ErrorPersistencia, FuenteClinica, RepositorioTomas};
 use SignosVitales\Dominio\{Clasificacion, RangoSigno, Toma};
 
-final class TomasPdo {
+final class TomasPdo implements RepositorioTomas, FuenteClinica {
     public function __construct(private \PDO $pdo) { $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); }
 
     public function episodioActivo(string $pacienteId, string $episodioId): ?array {
@@ -41,6 +41,16 @@ final class TomasPdo {
             if ($this->pdo->inTransaction()) { $this->pdo->rollBack(); }
             throw new ErrorPersistencia('No se pudo guardar la toma', 0, $e);
         }
+    }
+
+    public function deEpisodio(string $episodioId): array {
+        $tomas = [];
+        foreach ($this->leer('SELECT t.id, t.tomada_en, t.autor_id, m.tipo, m.valor, m.clasificacion FROM tomas_signos_vitales t
+                              JOIN mediciones_signo m ON m.toma_id = t.id WHERE t.episodio_id = :e ORDER BY t.tomada_en DESC, t.id', [':e' => $episodioId]) as $f) {
+            $tomas[$f['id']] ??= ['toma_id' => $f['id'], 'tomada_en' => $f['tomada_en'], 'autor_id' => $f['autor_id'], 'mediciones' => []];
+            $tomas[$f['id']]['mediciones'][$f['tipo']] = ['valor' => (float) $f['valor'], 'clasificacion' => $f['clasificacion']];
+        }
+        return array_values($tomas);
     }
 
     private function leer(string $sql, array $parametros): array {
