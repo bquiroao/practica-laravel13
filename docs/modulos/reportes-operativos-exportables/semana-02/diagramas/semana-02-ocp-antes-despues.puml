@@ -1,0 +1,45 @@
+@startuml semana-02-ocp-antes-despues
+title OCP en «filtrado y exportación reproducible»: antes (switch que se edita) y después (núcleo cerrado, extensiones abiertas)
+skinparam defaultFontName Arial
+skinparam classBackgroundColor #EEF2F7
+skinparam classBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+hide empty members
+package "ANTES" #FFF6F2 {
+  class ExportadorReportes #FFE3D6
+}
+ExportadorReportes : +exportar(reporte, filtros, formato, verDatosPersonales)
+ExportadorReportes : switch reporte: censo | egresos | citas
+ExportadorReportes : switch formato: csv | json
+ExportadorReportes : **D1** citas sin fecha de corte
+ExportadorReportes : **D2** formato nuevo = editar la clase
+ExportadorReportes : **D3** egresos sin enmascarar
+package "DESPUÉS" #F2FFF5 {
+  class ExportadorReproducible <<núcleo cerrado>>
+  interface DefinicionReporte <<extensión>>
+  interface FormatoExportacion <<extensión>>
+  class ReporteTabular
+  class Csv
+  class Json
+  class "TSV, PDF, … (nuevo)" as Nuevo #FFFFFF
+  class "estancias, … (nuevo)" as NuevoR #FFFFFF
+  ExportadorReproducible o--> "*" DefinicionReporte
+  ExportadorReproducible o--> "*" FormatoExportacion
+  DefinicionReporte <|.. ReporteTabular
+  ReporteTabular <.. NuevoR : instancia
+  FormatoExportacion <|.. Csv
+  FormatoExportacion <|.. Json
+  FormatoExportacion <|.. Nuevo
+}
+ExportadorReproducible : +registrarReporte() / registrarFormato()
+ExportadorReproducible : +exportar() / reproducir()
+ExportadorReproducible : normalizar filtros · corte · orden · enmascarado · hash
+DefinicionReporte : codigo(), fuente(), columnas(), filtros()
+FormatoExportacion : codigo(), generar(columnas, filas)
+note bottom of ExportadorReproducible
+  Las reglas que hacen reproducible la exportación
+  están una sola vez aquí: ningún reporte nuevo
+  puede olvidar el corte ni el enmascarado.
+end note
+ExportadorReportes -[hidden]down- ExportadorReproducible
+@enduml
