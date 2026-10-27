@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 // Configuración leída de variables de entorno: ninguna credencial queda en el repositorio.
 return [
+    // «pdo» (PostgreSQL) o «memoria» (adaptadores InMemory con database/datos-demo.php; sin base).
+    'persistencia' => getenv('PRESCRIPCIONES_PERSISTENCIA') ?: 'pdo',
     'db' => [
         'dsn' => getenv('PRESCRIPCIONES_DB_DSN') ?: 'pgsql:host=127.0.0.1;port=5432;dbname=micro_his_prescripciones',
         'usuario' => getenv('PRESCRIPCIONES_DB_USUARIO') ?: 'postgres',
