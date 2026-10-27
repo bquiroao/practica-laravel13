@@ -1,0 +1,15 @@
+@startsalt m5_sin_conexion
+{+
+  [<] | Indicador › <b>Desglose</b>
+  --
+  <size:22><b>78,0 %</b></size>
+  Calculado a las 10:30 · <b>sin conexión</b>
+  --
+  {+ <&warning> Sin conexión.
+     Revise su red. El indicador
+     se conserva. | [Reintentar] }
+  --
+  Al volver la conexión:
+  «Conexión restablecida» | [Actualizar]
+}
+@endsalt
