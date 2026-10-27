@@ -12,6 +12,7 @@ Modela la revisión profesional de resultados de laboratorio pendientes y la dec
 |---:|---|---|---|---|
 | 1 | UML del proceso «revisión, validación o rechazo de un resultado por bioquímico»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-validacion-resultados.md](semana-01/semana-01-uml-validacion-resultados.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
 | 2 | Requerimientos, criterios de aceptación y aplicación de DIP al mismo flujo, con ejemplo PHP verificable | [semana-02-dip-validacion-resultados.md](semana-02/semana-02-dip-validacion-resultados.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
+| 7 | Diseño de componentes backend y frontend, contratos de entrada/salida y comparación medible antes/después del punto más acoplado | [semana-07-componentes-refactorizacion-validacion.md](semana-07/semana-07-componentes-refactorizacion-validacion.md) | [DECLARACION_IA.md](semana-07/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-07/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
