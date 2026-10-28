@@ -1,0 +1,101 @@
+Revisión técnica formal Prescripciones · criterios de entrada
+Repositorio: sistema-hospitalario-integrado-SistenasII-2026-G1 · micro-his-prescripciones @ c525b3d
+----------------------------------------------------------------------------------------------------
+PASA   E-1   Paquete congelado en un commit y sin cambios locales
+       commit c525b3d
+PASA   E-2   Suite automatizada sin fallas
+       Total 111 · Pasan 93 · Fallan 0 · Omitidas 18
+PASA   E-3   Guardas de contrato (API-01..03, JUS-04) y de capas (ARQ-01..10) en verde
+       14 guardas en verde
+PASA   E-4   Cada sesión ≤ 1600 líneas efectivas
+       S1: 672 líneas en 19 archivos · S2: 1241 líneas en 33 archivos · S3: 1023 líneas en 20 archivos
+PASA   E-5   Checklist de 12–15 ítems y formato de hallazgos publicados
+       15 ítems en el checklist · formato disponible
+PASA   E-6   Autorrevisión del autor registrada con el mismo formato
+       7 hallazgos del autor en el registro CSV · 7 en autorrevision-autor.md
+MANUAL E-7   Material distribuido ≥ 48 h antes de la reunión
+       el moderador anota la fecha de envío en el acta
+MANUAL E-8   Roles asignados y revisores confirmados
+       nombres en el plan §3 y en el acta
+----------------------------------------------------------------------------------------------------
+PAQUETE DE REVISIÓN
+
+S1 · Reglas de dominio clínico (dosis, alergias, decisión de emisión, anulación, inmutabilidad) — 672 líneas efectivas, 19 archivos
+   113  database/schema.sql
+     7  src/Dominio/Excepciones/ClaveEnUso.php
+     7  src/Dominio/Excepciones/ErrorPersistencia.php
+     7  src/Dominio/Excepciones/YaAnulada.php
+    39  src/Dominio/Modelo/Alergia.php
+    23  src/Dominio/Modelo/Anulacion.php
+    39  src/Dominio/Modelo/DecisionEmision.php
+    19  src/Dominio/Modelo/ExpedienteAlergias.php
+    36  src/Dominio/Modelo/Hallazgo.php
+    20  src/Dominio/Modelo/Medicamento.php
+    80  src/Dominio/Modelo/Prescripcion.php
+    41  src/Dominio/Modelo/ResultadoVerificacion.php
+    26  src/Dominio/Modelo/SolicitudEmision.php
+     7  src/Dominio/Puertos/Reloj.php
+    30  src/Dominio/Puertos/RepositorioPrescripciones.php
+    21  src/Dominio/Reglas/PoliticaAnulacion.php
+    55  src/Dominio/Reglas/PoliticaEmision.php
+    56  src/Dominio/Reglas/ValidadorPrescripcion.php
+    46  src/Dominio/Reglas/VerificadorAlergias.php
+
+S2 · Aplicación y persistencia (casos de uso, transacción y traza, adaptadores PDO, InMemory y HTTP) — 1241 líneas efectivas, 33 archivos
+    99  database/integracion-hospital.sql
+    57  src/Aplicacion/CasosDeUso/AnularPrescripcion.php
+    32  src/Aplicacion/CasosDeUso/ConsultarPrescripcion.php
+   114  src/Aplicacion/CasosDeUso/EmitirPrescripcion.php
+    49  src/Aplicacion/CasosDeUso/VerificarAlergiasPrevia.php
+    11  src/Aplicacion/Puertos/CatalogoMedicamentos.php
+    16  src/Aplicacion/Puertos/FuenteAlergias.php
+     7  src/Aplicacion/Puertos/FuenteAlergiasNoDisponible.php
+     8  src/Aplicacion/Puertos/Pacientes.php
+     8  src/Aplicacion/Puertos/PoliticaAcceso.php
+     8  src/Aplicacion/Puertos/RegistroAuditoria.php
+    15  src/Aplicacion/Puertos/Transaccion.php
+    20  src/Aplicacion/Resultados/Resultado.php
+    55  src/Aplicacion/Servicios/EvaluacionClinica.php
+    16  src/Persistencia/Configuracion/PoliticaAccesoEstatica.php
+    11  src/Persistencia/Configuracion/RelojSistema.php
+    40  src/Persistencia/EnMemoria/CatalogoEnMemoria.php
+    23  src/Persistencia/EnMemoria/FuenteAlergiasEnMemoria.php
+    15  src/Persistencia/EnMemoria/PacientesEnMemoria.php
+    32  src/Persistencia/EnMemoria/RegistroAuditoriaEnMemoria.php
+    69  src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php
+     9  src/Persistencia/EnMemoria/Restaurable.php
+    24  src/Persistencia/EnMemoria/TransaccionEnMemoria.php
+    78  src/Persistencia/FabricaAdaptadores.php
+    43  src/Persistencia/Http/CircuitoInterruptor.php
+    82  src/Persistencia/Http/HttpFuenteAlergias.php
+    24  src/Persistencia/Pdo/FabricaConexion.php
+    49  src/Persistencia/Pdo/PdoCatalogoMedicamentos.php
+    33  src/Persistencia/Pdo/PdoFuenteAlergias.php
+    21  src/Persistencia/Pdo/PdoPacientes.php
+    25  src/Persistencia/Pdo/PdoRegistroAuditoria.php
+   119  src/Persistencia/Pdo/PdoRepositorioPrescripciones.php
+    29  src/Persistencia/Pdo/PdoTransaccion.php
+
+S3 · Contrato, frontera HTTP, permisos/tenant y dependencias — 1023 líneas efectivas, 20 archivos
+   460  api/openapi.yaml
+    56  bootstrap/contenedor.php
+    31  config/config.php
+    13  public/index.php
+     9  src/Presentacion/Http/Autenticacion/Autenticador.php
+    20  src/Presentacion/Http/Autenticacion/AutenticadorTokenDemo.php
+    63  src/Presentacion/Http/Controladores/PrescripcionesControlador.php
+    11  src/Presentacion/Http/Formularios/EntradaInvalida.php
+    10  src/Presentacion/Http/Formularios/EntradaVerificacion.php
+    65  src/Presentacion/Http/Formularios/FormularioPrescripcion.php
+    10  src/Presentacion/Http/Identidad.php
+    82  src/Presentacion/Http/Kernel.php
+     9  src/Presentacion/Http/Observabilidad/RegistroAcceso.php
+    16  src/Presentacion/Http/Observabilidad/RegistroAccesoJson.php
+    39  src/Presentacion/Http/Respuesta.php
+    18  src/Presentacion/Http/Ruta.php
+    20  src/Presentacion/Http/Rutas.php
+    36  src/Presentacion/Http/Solicitud.php
+    12  src/Presentacion/Http/Vistas/ErrorVista.php
+    43  src/Presentacion/Http/Vistas/PrescripcionVista.php
+
+Criterios automáticos que fallan: 0

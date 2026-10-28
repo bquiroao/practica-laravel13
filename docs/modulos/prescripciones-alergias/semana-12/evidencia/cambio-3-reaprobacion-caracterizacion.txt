@@ -1,0 +1,3 @@
+Escenarios: 32  Iguales: 31  Solo la clave nueva: 1  Otras diferencias: 0
+  previa P-002 cefalexina (cruzada)                + puede_justificar: true (codigo ADVERTENCIA)
+Regrabado: esperado.json

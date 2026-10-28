@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace Prescripciones\Dominio\Modelo;
 
 /**
- * Prescripción EMITIDA con su verificación (R-12). Inmutable: no tiene ningún método que la cambie (R-10);
+ * Prescripción con su verificación (R-12). Inmutable: no tiene ningún método que la cambie (R-10);
  * la base lo refuerza con un trigger que rechaza UPDATE y DELETE.
+ * Semana 6: el estado ya no se guarda, se DERIVA. Es ANULADA si existe su Anulacion, que es un hecho aparte.
  */
 final readonly class Prescripcion
 {
     public const EMITIDA = 'EMITIDA';
+    public const ANULADA = 'ANULADA';
 
     /** @var list<array<string, mixed>> con la dosis SIEMPRE decimal (hallazgo H-4 de la semana 4) */
     public array $items;
+    public string $estado;
 
     /**
      * @param list<array<string, mixed>> $items
@@ -32,19 +35,40 @@ final readonly class Prescripcion
         public ?string $justificacion,
         public bool $confirmaSinAlergias,
         public \DateTimeImmutable $emitidaEn,
-        public string $estado = self::EMITIDA,
+        public ?Anulacion $anulacion = null,
     ) {
         // Una dosis de 500 y una de 500.0 son la misma; sin esto, la consulta respondía 500 en memoria y 500.0 con PDO.
         $this->items = array_map(static fn (array $i): array => array_replace($i, ['dosis' => (float) $i['dosis']]), array_values($items));
+        $this->estado = $anulacion === null ? self::EMITIDA : self::ANULADA;
+    }
+
+    /** Semana 7: la prescripción se construye a partir de lo que decidió el Dominio, no de la solicitud cruda. */
+    public static function emitir(SolicitudEmision $s, ExpedienteAlergias $expediente, ResultadoVerificacion $verificacion,
+        DecisionEmision $decision, \DateTimeImmutable $ahora): self
+    {
+        if (!$decision->permiteEmitir()) {
+            throw new \LogicException('No se puede emitir con la decisión ' . $decision->tipo);
+        }
+
+        return new self(null, $s->hospital, $s->paciente, $s->usuario, $s->clave, $s->huella(), $s->items, $verificacion,
+            array_map(static fn (Alergia $a): string => $a->alergeno(), $expediente->activas()), $decision->justificacion,
+            $decision->confirmacionRegistrada, $ahora);
     }
 
     public function conId(int $id): self
     {
         return new self($id, $this->hospital, $this->paciente, $this->prescriptor, $this->clave, $this->huella, $this->items,
-            $this->verificacion, $this->alergenosEvaluados, $this->justificacion, $this->confirmaSinAlergias, $this->emitidaEn, $this->estado);
+            $this->verificacion, $this->alergenosEvaluados, $this->justificacion, $this->confirmaSinAlergias, $this->emitidaEn, $this->anulacion);
     }
 
-    /** @return array<string, mixed> vista para farmacia y enfermería (CU-09) */
+    /** La vista de la prescripción junto con su anulación. Devuelve OTRA instancia; esta no cambia. */
+    public function conAnulacion(Anulacion $anulacion): self
+    {
+        return new self($this->id, $this->hospital, $this->paciente, $this->prescriptor, $this->clave, $this->huella, $this->items,
+            $this->verificacion, $this->alergenosEvaluados, $this->justificacion, $this->confirmaSinAlergias, $this->emitidaEn, $anulacion);
+    }
+
+    /** @return array<string, mixed> vista para farmacia y enfermería (CU-09); «anulacion» solo si la hay (contrato 1.1.0, compatible) */
     public function aArreglo(): array
     {
         return [
@@ -61,6 +85,6 @@ final readonly class Prescripcion
                 'justificacion' => $this->justificacion,
                 'confirma_sin_alergias' => $this->confirmaSinAlergias,
             ],
-        ];
+        ] + ($this->anulacion !== null ? ['anulacion' => $this->anulacion->aArreglo()] : []);
     }
 }

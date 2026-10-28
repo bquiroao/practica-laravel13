@@ -1,0 +1,14 @@
+PASS U01 valor decimal coma y punto equivalentes
+PASS U02 formatos invalidos y unidad obligatoria
+PASS U03 limites de rango inclusivos y vecinos
+PASS U04 correccion inmutable enlazada y pendiente
+PASS W01 validacion temprana no lee ni escribe
+PASS W02 unidad incompatible no llega a persistencia
+PASS W03 conflicto al escribir no crea nueva version
+PASS B01 captura canonica pendiente
+PASS B02 correccion valida y motivo vacio
+PASS B03 version obsoleta y duplicado inicial
+PASS B04 validado inmutable y recurso inexistente
+PASS B05 unidad distinta rechazada y fuera de rango no valida
+PASS B06 autor vacio bloqueado
+13 casos, 0 fallidos.

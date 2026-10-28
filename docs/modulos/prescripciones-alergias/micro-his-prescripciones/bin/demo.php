@@ -13,6 +13,7 @@ use Prescripciones\Presentacion\Http\Solicitud;
 
 $config = require dirname(__DIR__) . '/config/config.php';
 $config['persistencia'] = 'memoria';
+$config['registro_acceso'] = 'ninguno';
 $kernel = crearKernel($config);
 
 $item = static fn (string $m, float|int $dosis = 500, int $cada = 8): array => ['medicamento' => $m, 'dosis' => $dosis, 'unidad' => 'mg',

@@ -1,0 +1,14 @@
+$ php tests/ejecutar.php --solo=UNI
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Dominio: reglas de prescripción, dosis y alergias ==
+[PASA ] UNI-01   Prescripción · inmutable: todas las propiedades son readonly, anular devuelve OTRA instancia y la dosis queda decimal
+[PASA ] UNI-02   Dosis · la dosis diaria máxima es inclusiva: 1000 mg c/6 h = 4000 sí; 1000,5 no; 4000 c/24 h sí; 0,001 sí
+[PASA ] UNI-03   Medicamentos · completitud: días 1 y 90 sí, 0 y 91 no; frecuencia, vía y unidad del catálogo; un inactivo se rechaza solo por el medicamento
+[PASA ] UNI-04   Alergias · coincidencia directa: por código sin importar mayúsculas ni espacios; por nombre normalizado si no hay código; una resuelta no cuenta
+[PASA ] UNI-05   Alergias · reactividad cruzada: moderada y grave advierten; potencialmente mortal y desconocida bloquean; sin grupo no hay cruzada; la directa manda en el código
+[PASA ] UNI-06   Alergias · una alergia sin código ni nombre, o con una severidad fuera del esquema, no existe; impideJustificar solo en mortal y desconocida
+[PASA ] UNI-07   Validación previa · PoliticaEmision: orden confirmación → bloqueo → advertencia; justificación 19/20 sin contar espacios; override solo con advertencia
+[PASA ] UNI-08   Bloqueo seguro de la anulación · PoliticaAnulacion: el estado se mira antes que el motivo; motivo de 9 no, de 10 sí, sin contar espacios
+
+Total: 8  Pasan: 8  Fallan: 0  Omitidas: 0

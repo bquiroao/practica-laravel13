@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emisión · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<!-- Estados: emitiendo · lenta · emitida · rechazada · no-emitida · incierto · reintentando · ya-emitida · sin-conexion -->
+<header class="barra">
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. R. Norte</span><span class="largo">Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Médico</span>
+  <span class="avatar" role="img" aria-label="Dr. López, médico">DL</span>
+</header>
+
+<div class="red lenta" role="status" data-estado="lenta">
+  <span aria-hidden="true">◔</span> La conexión está lenta. Seguimos esperando la respuesta.
+</div>
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. No sabemos si la prescripción quedó emitida.
+</div>
+
+<main>
+  <div class="paciente"><div class="nombre">María E. · P-002</div><div class="meta">Cefalexina 500 mg c/6 h · 7 días · con justificación</div></div>
+  <h1>Emisión</h1>
+
+  <div data-estado="emitiendo lenta reintentando" aria-busy="true" role="status">
+    <p class="meta" data-estado="emitiendo lenta">Emitiendo… el servidor vuelve a verificar las alergias.</p>
+    <p class="meta" data-estado="reintentando">Reintentando con la misma solicitud… nunca se emite dos veces.</p>
+    <div class="esq" style="width:80%"></div><div class="esq"></div>
+  </div>
+
+  <div class="veredicto ok" role="status" tabindex="-1" data-estado="emitida ya-emitida">
+    <h2>✓ Prescripción #123 emitida</h2>
+    <p data-estado="emitida">Emitida a las 10:42. Farmacia ya puede verla.</p>
+    <!-- Medido (evidencia/reintento.txt): el reintento con la misma clave responde 200 YA_EMITIDA; hay UNA sola -->
+    <p data-estado="ya-emitida">Ya había quedado emitida a las 10:42, antes del corte. Hay una sola prescripción: el reintento no la duplicó.</p>
+  </div>
+
+  <div class="veredicto rechazada" role="alert" data-estado="rechazada">
+    <h2>⛔ No se emitió: alergia nueva</h2>
+    <p>Al emitir, el servidor volvió a consultar y encontró una alergia registrada después de su verificación: <b>Amoxicilina · grave</b>.</p>
+    <a class="btn primario" href="m1-prescribir.html">Cambiar medicamento</a>
+  </div>
+
+  <div class="veredicto no-disponible" role="alert" data-estado="no-emitida">
+    <h2>✕ Por seguridad, no se emitió</h2>
+    <p>El expediente de alergias no respondió al emitir. Su prescripción está intacta: puede reintentar en unos minutos.</p>
+  </div>
+
+  <!-- Incierto: la UI no adivina. El borrador queda BLOQUEADO hasta resolverlo:
+       medido, la misma clave con otro contenido da 409 CLAVE_REUTILIZADA, y una clave nueva duplica. -->
+  <div class="veredicto incierto" role="alert" data-estado="incierto sin-conexion">
+    <h2>? No sabemos si quedó emitida</h2>
+    <p>Se cortó la conexión antes de la respuesta. <b>Reintentar es seguro: nunca se emite dos veces.</b></p>
+    <p class="meta">Mientras no se resuelva, el borrador no se puede editar.</p>
+    <p class="meta">Código de soporte</p>
+    <p class="referencia">cli-7f3a9e21-4c6b-4d0e-9b8f-2a51c0d7e3aa</p>
+  </div>
+</main>
+
+<div class="accion-fija">
+  <a class="btn primario" href="m4-prescripcion.html?estado=medico" data-estado="emitida ya-emitida">Ver prescripción</a>
+  <a class="btn" href="m1-prescribir.html" data-estado="emitida ya-emitida">Nueva prescripción</a>
+  <a class="btn primario" href="m3-emision.html?estado=emitiendo" data-estado="no-emitida">Reintentar</a>
+  <a class="btn primario" href="m3-emision.html?estado=ya-emitida" data-estado="incierto">Reintentar</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">Reintentar · requiere conexión</span>
+  <span class="btn" aria-disabled="true" data-estado="emitiendo lenta reintentando">Emitiendo…</span>
+</div>
+<script src="estado.js"></script>
+<script>
+  // El foco va al resultado (W4-1): el lector de pantalla lo lee de inmediato.
+  document.querySelector('.veredicto:not([hidden])')?.focus();
+</script>
+</body>
+</html>

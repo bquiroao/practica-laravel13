@@ -1,0 +1,32 @@
+@startuml user-flow-jefe
+title User flow — Jefe de laboratorio: alta de prueba o nueva versión
+start
+:Entra a «Laboratorio › Catálogo de pruebas» (W-01);
+if (¿Tiene permiso lab.catalogo.gestionar?) then (no)
+  :No ve el botón «Nueva prueba»;
+  stop
+endif
+:Pulsa «Nueva prueba» (W-03);
+repeat
+  :Llena datos generales, requisitos\nde muestra y vigencia;
+  :Ayuda contextual junto a volumen,\nestabilidad y vigencia;
+repeat while (¿Errores por campo al validar?) is (sí: se marcan\ny se conserva lo escrito)
+->no;
+:Revisa el resumen (W-04);
+if (¿El código ya tiene versión vigente?) then (sí)
+  :Aviso: «La versión 1 quedará vigente\nhasta el 2027-01-31»;
+endif
+if (¿Confirma?) then (no)
+  :Vuelve al formulario sin perder datos;
+  stop
+endif
+:Guardando… (botón deshabilitado);
+if (Resultado) then (201)
+  :Éxito: detalle de la versión creada (W-05 / W-02);
+elseif (409) then
+  :Error recuperable: vigencia superpuesta;\nsugiere fecha desde posterior (W-05);
+else (500 o sin conexión)
+  :«No se guardó nada»; botón Reintentar (W-05);
+endif
+stop
+@enduml

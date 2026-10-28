@@ -1,0 +1,1 @@
+Se utilizó IA para revisar la propuesta escrita de semana 11 y preparar prototipo web local, presentación, matriz, cambio simulado y pruebas en navegador. CH-01 no se atribuye al docente ni al usuario. No se presentan autorización, persistencia ni correcciones del backend como realizadas. La estudiante debe comprender y revisar la demostración.

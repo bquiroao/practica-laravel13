@@ -1,0 +1,33 @@
+@startuml semana-04-capas-repository
+title Semana 4 — Capas, MVC y Repository del Micro-HIS Reportes operativos
+skinparam defaultFontName Arial
+hide empty members
+package "Presentación (MVC)" #EEF2F7 {
+  class Enrutador
+  class ReportesControlador <<Controlador>>
+  class VistaHttp <<Vista>>
+}
+package "Aplicación" #E8F5E9 {
+  class ExportarReporte
+  interface RepositorioExportaciones <<Repository>>
+  interface FuenteReportes <<solo lectura>>
+}
+package "Dominio" #FFF8E1 {
+  class "Filtros · Archivo · FormatoExportacion · catalogo()" as Dom <<Modelo>>
+}
+package "Persistencia" #FCE4EC {
+  class ReportesPdo
+  class EnMemoria
+}
+Enrutador -right-> ReportesControlador
+ReportesControlador -down-> ExportarReporte
+ReportesControlador .right.> VistaHttp
+ExportarReporte -down-> RepositorioExportaciones
+ExportarReporte -down-> FuenteReportes
+ExportarReporte .left.> Dom
+ReportesPdo .up.|> RepositorioExportaciones
+ReportesPdo .up.|> FuenteReportes
+EnMemoria .up.|> RepositorioExportaciones
+EnMemoria .up.|> FuenteReportes
+note right of EnMemoria : ReportesPdo: SQL preparado\nEnMemoria: pruebas y doble que falla
+@enduml
