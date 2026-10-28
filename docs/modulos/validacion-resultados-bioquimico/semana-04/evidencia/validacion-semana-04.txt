@@ -1,0 +1,39 @@
+Semana 4 - MVC, Repository y repositorio de datos compartido
+Fecha: 2026-10-27
+Base: origin/develop bf38699dc974e999d91b293999f8255b9417a409
+Entorno: PHP 8.2.33, PDO SQLite disponible.
+Datos: ficticios; no se usaron datos clínicos reales.
+
+Comando:
+php docs/modulos/validacion-resultados-bioquimico/semana-04/ejemplo/tests/run.php
+Resultado: PASSED - 25 comprobaciones, 0 fallidas (exit code 0).
+La suite cubre el adaptador InMemory, routing y mapeo MVC, contrato de entrada, separación del controlador, lectura/escritura PDO, auditoría atómica, rollback ante falla de auditoría y fallo PDO de lectura traducido a 503.
+
+Comando:
+php docs/modulos/validacion-resultados-bioquimico/semana-02/ejemplo-dip/verificar.php
+Resultado: PASSED - 33 aserciones, 0 fallidas (exit code 0).
+
+Comando:
+php -l docs/modulos/validacion-resultados-bioquimico/semana-04/ejemplo/src/Application/ReviewRepositoryUnavailable.php
+Resultado: PASSED (exit code 0).
+
+Comando:
+php -l docs/modulos/validacion-resultados-bioquimico/semana-04/ejemplo/src/Persistence/PdoLabResultDecisionRepository.php
+Resultado: PASSED (exit code 0).
+
+Comando:
+php -l docs/modulos/validacion-resultados-bioquimico/semana-04/ejemplo/src/Presentation/Mvc.php
+Resultado: PASSED (exit code 0).
+
+Comando:
+php -l docs/modulos/validacion-resultados-bioquimico/semana-04/ejemplo/tests/run.php
+Resultado: PASSED (exit code 0).
+
+Comando:
+git diff --check
+Resultado: PASSED (exit code 0; sin salida).
+
+Límites:
+- PDO fue verificado con SQLite en memoria, no PostgreSQL.
+- No se ejecutó el runtime Laravel ni se conectó la base hospitalaria compartida.
+- El repositorio central y la integración asíncrona son analizados/propuestos, no implementados.
