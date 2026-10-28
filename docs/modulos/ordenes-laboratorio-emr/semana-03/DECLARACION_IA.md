@@ -1,0 +1,1 @@
+IA utilizada para revisar reglas de semana 2, implementar Micro-HIS PHP/PDO por capas, elaborar diagramas y ejecutar pruebas. La estudiante revisa y defiende decisiones. Persistencia SQLite temporal real; autorización/contexto/catálogo son dobles de demostración. No se atribuye infraestructura clínica, autenticación o revisión independiente.

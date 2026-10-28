@@ -1,0 +1,27 @@
+# Líneas del frontend compartido (origin/develop, commit e83c98e) citadas en los hallazgos.
+# Comando: git show origin/develop:<archivo> | grep -nE '<patrón>'
+
+[H-02] resources/views/app.blade.php
+2:<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+[H-02] config/app.php
+81:    'locale' => env('APP_LOCALE', 'en'),
+
+[H-02] .env.example
+8:APP_LOCALE=en
+
+[H-03] resources/views/app.blade.php
+7:    <title>{{ config('app.name', 'Hospital HIS') }}</title>
+
+[H-04] resources/js/router/index.js
+23:router.beforeEach(authGuard);
+
+[H-01, H-09] resources/js/shared/components/AppLayout.vue
+3:        <header class="layout__header">
+7:            <nav class="layout__nav">
+16:        <main class="layout__main">
+55:    text-decoration: none;
+59:.layout__link.router-link-active {
+
+[H-03, H-04] menciones de document.title y focus en resources/js
+document.title: 0 archivos · focus: 0 archivos

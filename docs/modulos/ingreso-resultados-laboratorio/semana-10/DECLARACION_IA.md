@@ -1,0 +1,1 @@
+Entrega elaborada con apoyo de IA para revisar el diseño UX previo, proponer cinco pantallas móviles, variantes SVG, breakpoints y escenarios de error. Se verificó la estructura de los SVG; no se atribuyen pruebas de usuarios ni de navegador no realizadas. La estudiante debe revisar las decisiones y preparar su defensa.

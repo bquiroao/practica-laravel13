@@ -100,6 +100,15 @@ $mutaciones = [
         'if (isset($this->anulaciones[$anulacion->prescripcionId])) {', 'if (false) {'],
     'M33 la anulación no deja traza' => ['src/Aplicacion/CasosDeUso/AnularPrescripcion.php',
         "\$this->auditoria->registrar('PRESCRIPCION_ANULADA'", "if (false) \$this->auditoria->registrar('PRESCRIPCION_ANULADA'"],
+    // Semana 12: «puede_justificar» en la previa
+    'M34 la previa promete que siempre se puede justificar' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '=== ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;', '=== ResultadoVerificacion::ADVERTENCIA ? true : null;'],
+    'M35 la previa pregunta a RBAC por override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;',
+        '$t = $tieneOverride(); return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $t : null;'],
+    // Semana 15: corrección de DEF-02
+    'M36 un reintento de OTRO prescriptor con la misma clave se trata como propio' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
+        '$previa->huella === $s->huella() && $previa->prescriptor === $s->usuario', '$previa->huella === $s->huella()'],
 ];
 
 $origen = dirname(__DIR__);

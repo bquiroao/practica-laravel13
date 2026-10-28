@@ -11,6 +11,8 @@ interface EscritorVersiones { public function versiones(string $slug): array; pu
 interface RevisionPublicaciones { public function datosRevision(int $id): ?array; public function cambiarEstado(int $id, string $de, string $a, string $revisor, ?string $motivo): bool; }
 /** Versiones publicadas u obsoletas, cada una con 'version', 'tipo', 'estado' y 'audiencia' (lista de role_code). */
 interface LectorDocumentos { public function consultables(string $slug): array; }
+/** Interfaz Repository del módulo, en el límite de Aplicación: la unión de los tres puertos por cliente. La implementan PDO e InMemory. */
+interface RepositorioDocumentos extends EscritorVersiones, RevisionPublicaciones, LectorDocumentos {}
 
 final class ErrorPersistencia extends \RuntimeException {}   // fallo técnico de la base: no es una regla de negocio
 

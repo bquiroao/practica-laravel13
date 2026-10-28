@@ -1,0 +1,3 @@
+# Declaración de uso de inteligencia artificial
+
+Se utilizó un asistente de inteligencia artificial como apoyo para refactorizar el prototipo de la Semana 3 hacia MVC y Repository, escribir el adaptador InMemory, las pruebas de contrato y de arquitectura, los diagramas y la redacción. La estudiante debe revisar el código y el análisis y poder defenderlos. Los datos son ficticios; el prototipo no consulta órdenes reales, no valida resultados clínicamente y no sustituye controles de seguridad o autorización institucionales. El adaptador de repositorio compartido es solo una propuesta de análisis.

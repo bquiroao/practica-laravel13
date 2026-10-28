@@ -1,0 +1,5 @@
+REPRODUCCION: PASS indica defecto observado, no corregido.
+PASS D01 orden inexistente aceptada sin verificacion externa
+PASS D02 identificador solo espacios aceptado
+PASS D03 rechazo con motivo solo espacios aceptado por modelo
+3 casos, 0 fallidos.

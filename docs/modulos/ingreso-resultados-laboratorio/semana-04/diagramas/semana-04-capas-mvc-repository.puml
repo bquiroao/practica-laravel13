@@ -1,0 +1,47 @@
+@startuml
+title Semana 4 - Capas, MVC y Repository
+left to right direction
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Personal de laboratorio" as User
+
+package "Presentation" {
+  component "LabResultCommand\nfront controller" as Front
+  component "ResultController" as Controller
+  component "ResultForm\nvalida formato" as Form
+  component "ResultView\ntexto y codigo de salida" as View
+}
+
+package "Application" {
+  component "CaptureOrCorrectResult\ncaso de uso" as UseCase
+  interface "LabResultRepository\n(puerto)" as Port
+}
+
+package "Domain" {
+  component "PendingLabResult\nValidatedLabResult\nResultVersion" as Domain
+}
+
+package "Persistence" {
+  component "PdoLabResultRepository" as Pdo
+  component "InMemoryLabResultRepository" as Mem
+}
+
+package "Composicion" {
+  component "bootstrap.php\nLAB_RESULTS_PERSISTENCE" as Boot
+}
+
+User --> Front
+Front --> Controller
+Controller --> Form
+Controller --> UseCase
+Controller --> View
+UseCase --> Port
+UseCase --> Domain
+Pdo ..|> Port
+Mem ..|> Port
+Boot ..> Pdo : elige
+Boot ..> Mem : elige
+Boot ..> Front : ensambla
+@enduml

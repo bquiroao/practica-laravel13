@@ -1,0 +1,48 @@
+Validacion de Semana 3
+======================
+
+Entorno: PHP CLI con PDO SQLite habilitado.
+Base SQLite de la prueba CLI: archivo temporal; eliminado al finalizar.
+
+1. Sintaxis PHP
+---------------
+Comando:
+Get-ChildItem . -Filter '*.php' -Recurse | ForEach-Object { php -l $_.FullName }
+
+Resultado: OK. Los 10 archivos PHP reportaron "No syntax errors detected".
+
+2. Suite automatizada
+---------------------
+Comando:
+php tests/run.php
+
+Resultado: OK. 22 aserciones pasaron, incluyendo pruebas con dobles y operaciones
+reales del repositorio PDO SQLite: captura, append de corrección, versión vigente,
+vínculo entre versiones, rechazo de versión obsoleta e historial intacto tras el
+conflicto.
+
+3. Flujo CLI con PDO SQLite
+---------------------------
+Se ejecutó desde ejemplo/ con LAB_RESULTS_DATABASE apuntando a una base temporal.
+Los identificadores aleatorios se registran para mostrar la relación observada.
+
+Captura:
+  php bin/result.php --action=capture --item=ITEM-E2E-01 --value=5.4 --actor=TECH-E2E-01
+  Resultado: Resultado capturado como pendiente.
+  Estado: version=1, state=pending, exit=0.
+  ID generado: RES-BFAACC9F76C0A1ED4C5A25ACEF98DF18
+
+Corrección:
+  php bin/result.php --action=correct --item=ITEM-E2E-01 --expected=RES-BFAACC9F76C0A1ED4C5A25ACEF98DF18 --value=5.6 --reason=Correccion-sintetica --actor=TECH-E2E-02
+  Resultado: Corrección guardada como nueva versión pendiente.
+  Estado: version=2, state=pending, exit=0.
+  ID generado: RES-667B77F2DB7673B7E43040F38D164EB6
+
+Reintento con versión anterior:
+  php bin/result.php --action=correct --item=ITEM-E2E-01 --expected=RES-BFAACC9F76C0A1ED4C5A25ACEF98DF18 --value=5.7 --reason=Reintento-obsoleto --actor=TECH-E2E-02
+  Resultado: La versión cambió; vuelve a cargar el resultado.
+  Estado vigente devuelto: version=2, state=pending, exit=3.
+
+4. Validaciones del repositorio
+------------------------------
+git diff --check: OK, sin errores de espacios en blanco.

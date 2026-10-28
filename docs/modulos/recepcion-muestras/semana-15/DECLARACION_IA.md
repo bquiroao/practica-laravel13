@@ -1,0 +1,1 @@
+Se utilizó IA para revisar el prototipo histórico disponible, diseñar y ejecutar pruebas PHP/PDO SQLite, reproducir defectos y preparar matriz/capturas. No se atribuyen permisos, cadena de custodia ni integración clínica reales no implementados. Los datos son ficticios y las reglas clínicas no se amplían. La estudiante debe comprender cobertura y límites.
