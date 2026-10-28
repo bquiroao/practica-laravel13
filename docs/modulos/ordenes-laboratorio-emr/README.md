@@ -24,3 +24,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr
 ## Semana 3
 
 [Micro-HIS por capas, PDO y arquitectura C4/UML](semana-03/README.md).
+
+## Semana 4
+
+[MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
