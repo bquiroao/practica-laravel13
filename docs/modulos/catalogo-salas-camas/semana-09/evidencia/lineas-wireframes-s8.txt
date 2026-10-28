@@ -1,0 +1,32 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 54f336a (rama semana-8-catalogo-salas-camas, PR #202). Comando: git show 54f336a:<archivo> | grep -nE '<patrón>'
+
+[H-01] wf2-nueva-sala.puml
+5:  Código * | "A        " | <i>Único en el hospital (R-01)</i>
+6:  Nombre * | "Medicina interna" | .
+7:  . | <color:red>Ya existe una sala con el código A.</color> | .
+
+[H-02] wf3-nueva-cama.puml
+5:  Sala * | ^A · Medicina interna^ | <i>Solo salas activas (R-03)</i>
+6:  Código de cama * | "101      " | <i>Único dentro de la sala (R-02)</i>
+
+[H-03, H-04] wf4-cambiar-estado.puml
+5:  Nuevo estado * | () Mantenimiento | <i>Solo destinos permitidos (R-05)</i>
+6:  . | () Inactiva | .
+9:  [Cancelar] | . | [Confirmar cambio]
+
+[H-08] wf5-error-recuperable.puml
+10:  No perdiste lo que escribiste. Intenta de nuevo en unos segundos.
+
+[H-05] semana-08-flujo-ux.md
+30:Enter en el buscador filtra sin recargar
+
+[H-06] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-lista-salas.puml: 0
+semana-08-wf2-nueva-sala.puml: 0
+semana-08-wf3-nueva-cama.puml: 0
+semana-08-wf4-cambiar-estado.puml: 0
+semana-08-wf5-error-recuperable.puml: 0
+semana-08-flujo-ux.md: 0

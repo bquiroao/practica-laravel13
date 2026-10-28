@@ -1,0 +1,31 @@
+@startuml frontera-microservicio
+title Frontera candidata a microservicio y migración por etapas
+skinparam componentStyle rectangle
+
+rectangle "Etapa 0 (hoy): módulo dentro del monolito" {
+  [Catálogo] as C0
+  [Órdenes] as O0
+  database "HOSPITAL" as H0
+  C0 --> H0
+  O0 --> H0 : lee lab_test
+}
+rectangle "Etapa 1: contrato API como única vía de lectura" {
+  [Catálogo] as C1
+  [Órdenes] as O1
+  database "HOSPITAL" as H1
+  C1 --> H1
+  O1 --> C1 : GET /api/v1/laboratorio/pruebas
+}
+rectangle "Etapa 2 (solo si se cumplen los gatillos): servicio separado" {
+  [Servicio Catálogo] as C2
+  database "lab_catalog (propia)" as D2
+  [Órdenes] as O2
+  queue "Evento\nPruebaVersionada" as EV
+  C2 --> D2
+  O2 --> C2 : GET (con caché)
+  C2 --> EV
+  EV --> O2 : copia local de\nversiones vigentes
+}
+C0 -[hidden]down- C1
+C1 -[hidden]down- C2
+@enduml

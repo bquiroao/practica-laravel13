@@ -23,3 +23,13 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 ```bash
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/validacion-resultados-bioquimico/semana-01/diagramas/*.puml
 ```
+
+## Semana 11
+
+[Prototipo navegable desktop/móvil, mapa y capturas](semana-11/README.md).
+## Semana 10
+
+[Movilidad: cinco pantallas, breakpoints y escenarios](semana-10/README.md).
+## Semana 9
+
+[Evaluación UX/accesibilidad: checklist, hallazgos y backlog](semana-09/README.md).

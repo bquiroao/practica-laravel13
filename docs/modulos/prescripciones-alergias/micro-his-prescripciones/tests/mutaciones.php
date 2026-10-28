@@ -106,6 +106,9 @@ $mutaciones = [
     'M35 la previa pregunta a RBAC por override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
         'return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;',
         '$t = $tieneOverride(); return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $t : null;'],
+    // Semana 15: corrección de DEF-02
+    'M36 un reintento de OTRO prescriptor con la misma clave se trata como propio' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
+        '$previa->huella === $s->huella() && $previa->prescriptor === $s->usuario', '$previa->huella === $s->huella()'],
 ];
 
 $origen = dirname(__DIR__);

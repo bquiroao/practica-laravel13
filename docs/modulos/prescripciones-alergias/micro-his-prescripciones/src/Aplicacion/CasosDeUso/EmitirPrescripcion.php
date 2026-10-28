@@ -121,9 +121,13 @@ final class EmitirPrescripcion
         return new Resultado(Resultado::CREADO, 'EMITIDA', ['id' => $guardada->id, 'verificacion' => $prescripcion->verificacion->estado]);
     }
 
+    /**
+     * Es un reintento solo si es la MISMA intención: mismo contenido y mismo prescriptor. Semana 15 (DEF-02, AR-02 de la
+     * semana 13): antes bastaba la huella, y otro médico con la misma clave recibía «ya emitida» una prescripción ajena.
+     */
     private function reintento(Prescripcion $previa, SolicitudEmision $s): Resultado
     {
-        return $previa->huella === $s->huella()
+        return $previa->huella === $s->huella() && $previa->prescriptor === $s->usuario
             ? new Resultado(Resultado::OK, 'YA_EMITIDA', ['id' => $previa->id, 'verificacion' => $previa->verificacion->estado])
             : new Resultado(Resultado::CONFLICTO, 'CLAVE_REUTILIZADA');
     }

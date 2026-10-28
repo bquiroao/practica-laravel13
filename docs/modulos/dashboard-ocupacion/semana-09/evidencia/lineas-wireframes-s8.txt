@@ -1,0 +1,34 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 273a165 (rama semana-8-dashboard-ocupacion, PR #206). Comando: git show 273a165:<archivo> | grep -nE '<patrón>'
+
+[H-01, H-03] semana-08-wf1-tablero-salas.puml
+5:  Hospital: <b>Hospital Central</b> | Corte: <b>10:35</b> (hace 4 min) | [Actualizar]
+
+[H-02] semana-08-wf2-filtro-estado.puml
+5:  Estado de cama: | { (X) disponible | () ocupada | () mantenimiento | () inactiva } | [Quitar filtro]
+10:  <i>1 de 3 salas con camas disponibles · corte de las 10:35.</i>
+
+[H-03, H-08] semana-08-wf4-consolidar.puml
+7:  [Cancelar] | [Consolidar]
+9:  <i>Mientras consolida: «Consolidando…» y el botón deshabilitado.</i>
+
+[H-04] semana-08-wf3-inconsistencias.puml
+6:    <b>Cama</b> | <b>Estado en el catálogo</b> | <b>Estancia abierta</b> | <b>Dónde se corrige</b>
+7:    A/103 | ocupada | no | Admisión: registrar o cerrar la estancia
+
+[H-05] semana-08-wf5-error-recuperable.puml
+7:  <b>Datos de las 10:20: pueden estar desactualizados</b> (más de 15 min, R-06)
+
+[H-07] semana-08-wf1-tablero-salas.puml
+8:    A · Medicina interna | 5 | 6 | 1 | 0 | 54.5 %
+9:    B · Cirugía | 0 | 6 | 2 | 0 | 100.0 %
+
+[foco] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-tablero-salas.puml: 0
+semana-08-wf2-filtro-estado.puml: 0
+semana-08-wf3-inconsistencias.puml: 0
+semana-08-wf4-consolidar.puml: 0
+semana-08-wf5-error-recuperable.puml: 0
+semana-08-flujo-ux.md: 0

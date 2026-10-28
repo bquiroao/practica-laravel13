@@ -1,0 +1,24 @@
+@startuml semana-04-repositorio-compartido
+title Repositorio de datos compartido — base HOSPITAL (una por tenant)
+component "Catálogo de salas y camas" as cat
+component "Admisión y traslados" as adm
+component "Dashboard de ocupación" as ocu
+interface "FuenteCamas (solo lectura)" as fc
+interface "EscritorCortes / LectorCortes" as ec
+database "Base HOSPITAL" {
+  [wards]
+  [beds]
+  [bed_stays]
+  [occupancy_snapshots]
+}
+cat --> [wards] : escribe (dueño)
+cat --> [beds] : alta y cambios manuales
+adm --> [bed_stays] : escribe (dueño)
+adm --> [beds] : ocupada / disponible
+ocu --> fc
+ocu --> ec
+fc ..> [wards] : lee
+fc ..> [beds] : lee
+fc ..> [bed_stays] : lee estancias abiertas
+ec --> [occupancy_snapshots] : escribe y lee (dueño)
+@enduml

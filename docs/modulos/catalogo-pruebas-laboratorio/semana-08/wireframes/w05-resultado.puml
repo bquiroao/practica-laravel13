@@ -1,0 +1,17 @@
+@startsalt w05-resultado
+title W-05 Resultado: éxito y errores recuperables
+{+
+  <b>Éxito (201)</b>
+  <&check> "GLU-001 versión 2 registrada. Vigente desde 2027-02-01." [Ver detalle] [Registrar otra]
+  ==
+  <b>Vigencia superpuesta (409)</b>
+  <&warning> "GLU-001 ya tiene la versión 1 vigente desde 2027-01-04."
+  "Elija una fecha desde posterior al 2027-01-04." [Corregir fecha]
+  ==
+  <b>Sin permiso (403)</b>
+  <&lock-locked> "Su rol no puede registrar pruebas." [Volver al catálogo]
+  ==
+  <b>Falla al guardar (500) o sin conexión</b>
+  <&circle-x> "No se guardó ningún cambio. Sus datos siguen en el formulario." [Reintentar]
+}
+@endsalt
