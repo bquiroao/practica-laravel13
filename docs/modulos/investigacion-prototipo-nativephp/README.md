@@ -19,6 +19,17 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo-nativephp/semana-01/diagramas/*.puml
 ```
 
+## Semana 3
+
+[Micro-HIS PHP vanilla, capas, PDO y arquitectura](semana-03/README.md).
+
+## Semana 5
+
+[Contrato API y diseño cliente-servidor](semana-05/README.md).
+
+## Semana 6
+
+[Primera evaluación: presentación, matriz y cambio práctico](semana-06/README.md).
 ## Semana 7
 
 [Componentes, contratos y refactor conceptual](semana-07/semana-07-componentes-refactor-nativephp.md).
