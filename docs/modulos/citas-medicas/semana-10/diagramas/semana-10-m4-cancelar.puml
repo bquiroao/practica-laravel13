@@ -1,0 +1,14 @@
+@startsalt
+title M4 — Cancelar la cita (pantalla completa)
+{+
+  [< Cita] | <b>Cancelar la cita</b>
+  <b>P-0047 · L. Gómez</b>
+  Mié 28/10 · 09:00–09:30 · Dra. Ruiz
+  <b>Motivo de la cancelación *</b>
+  "viaje del paciente   "
+  <i>El horario queda libre. Queda en la auditoría.</i>
+  ---
+  [Cancelar la cita de L. Gómez]
+  [Volver sin cancelar]
+}
+@endsalt
