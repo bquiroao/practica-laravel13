@@ -1,0 +1,25 @@
+Plan SQA Prescripciones · medición 2026-10-28 04:47 · micro-his: micro-his-prescripciones
+--------------------------------------------------------------------------------------------------------------
+VERDE  M1  Pruebas automáticas en verde (calidad)
+       valor: 111/111 · 0 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL)
+       incluye integración con PostgreSQL
+VERDE  M2  Defectos inyectados detectados (mutation score)
+       valor: 100 % (35/35) · umbral: 100 %
+       con PostgreSQL
+ROJO   M3  Sensibilidad de la verificación de alergias en el corpus (seguridad clínica)
+       valor: 9/12 detectadas · especificidad 2/2 · umbral: 100 % de sensibilidad (0 falsos negativos)
+       falsos negativos: sal: «Amoxicilina trihidrato», grave → SIN_HALLAZGOS · sal: «Amoxicilina (sal sódica)», grave → SIN_HALLAZGOS · variante: «Penicilina G», grave + Amoxicilina → SIN_HALLAZGOS
+ROJO   M4  Intentos de acceso indebido bloqueados (seguridad)
+       valor: 11/12 · umbral: 100 %
+       NO bloqueadas: otro médico reusa la clave de dr-lopez → 200
+VERDE  M5  Bloqueo seguro e idempotencia (confiabilidad)
+       valor: 4/4 · umbral: 100 %
+       previa con el Expediente caído → «no disponible» (nunca «sin hallazgos») · emisión con el Expediente caído → 503 y nada emitido · anular con el Expediente caído → 200 (bloqueo seguro asimétrico) · 50 envíos con la misma clave → 1 prescripción (201 + 49 × 200)
+ÁMBAR M6  Contrato = código y códigos de error con prueba (trazabilidad)
+       valor: 4/4 guardas · 20/23 códigos · umbral: 100 % y 100 %
+       códigos del contrato que ninguna prueba afirma: RUTA_NO_ENCONTRADA, METODO_NO_PERMITIDO, SERVICIO_NO_DISPONIBLE
+ROJO   M7  Hallazgos de la revisión abiertos (riesgo)
+       valor: 1 críticos · 2 mayores · 3 menores · 1 obs. · umbral: 0 críticos; mayores con plazo ≤ 7 días
+       fuente: semana-13/plantillas/registro-hallazgos.csv
+--------------------------------------------------------------------------------------------------------------
+En ROJO: 3

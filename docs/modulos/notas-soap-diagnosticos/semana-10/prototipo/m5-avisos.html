@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso denegado · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="volver" href="m1-notas.html" aria-label="Volver a las notas">←</a>
+  <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span> ▾</span>
+  <span class="usuario">dr-lopez <span class="rol">· Médico</span></span>
+</header>
+<div class="red sin-conexion" role="status" data-estado="sin-conexion" hidden>Sin conexión. <button type="button" class="boton">Reintentar</button></div>
+<main>
+  <section data-estado="denegado">
+    <h1 tabindex="-1">No tiene permiso para hacer esto</h1>
+    <p>Si cree que debería poder hacerlo, comparta esta referencia con el administrador del hospital.</p>
+    <p class="referencia" aria-label="Referencia 7f3c2a91 1b9e 4c2d 9a10">7f3c2a91 · 1b9e · 4c2d · 9a10</p>
+    <p class="secundario">Al compartir solo va la referencia y el hospital, nunca datos del paciente.</p>
+  </section>
+
+  <section data-estado="sesion" hidden>
+    <div class="aviso incierto" role="alertdialog" aria-labelledby="titulo-sesion">
+      <strong id="titulo-sesion">Su sesión termina en 2 minutos</strong>
+      <p>Lo que está escribiendo sigue en pantalla. Pulse «Seguir conectado» para no perderlo.</p>
+    </div>
+  </section>
+
+  <section data-estado="sin-conexion" hidden>
+    <h1>Sin conexión</h1>
+    <p>Lo escrito sigue en pantalla. No se guarda en el teléfono, así que no cierre esta pantalla.</p>
+    <p class="secundario">Guardar, firmar y corregir necesitan conexión. Sin red no se muestra «acceso denegado»: eso solo lo decide el servidor.</p>
+  </section>
+</main>
+<div class="accion-fija" data-estado="denegado">
+  <button type="button" class="boton">Copiar</button>
+  <button type="button" class="boton primario">Compartir referencia</button>
+</div>
+<div class="accion-fija" data-estado="sesion" hidden>
+  <button type="button" class="boton">Cerrar sesión</button>
+  <button type="button" class="boton primario">Seguir conectado</button>
+</div>
+<div class="accion-fija" data-estado="sin-conexion" hidden>
+  <span class="boton" role="button" aria-disabled="true">Guardar · requiere conexión</span>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

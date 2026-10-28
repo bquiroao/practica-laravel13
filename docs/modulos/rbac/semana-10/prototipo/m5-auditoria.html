@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consulta de auditoría · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual">Administración</span>
+  <span class="avatar" role="img" aria-label="Carlos Méndez, administración">CM</span>
+</header>
+
+<main>
+  <h1>Consulta de auditoría</h1>
+  <form role="search">
+    <label for="ref">Referencia</label>
+    <div class="fila">
+      <input id="ref" value="0c56479a 1c07 4cb5 a895 75ecaa973bb6" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="ref-ayuda">
+      <button class="btn primario icono" aria-label="Buscar" style="flex:none;font-size:1.5rem">⌕</button>
+    </div>
+    <p class="ayuda" id="ref-ayuda">Pégala o escríbela: los espacios no importan.</p>
+  </form>
+
+  <!-- prioridad 1: qué pasó, a quién, cuándo · prioridad 2: permiso y motivo · prioridad 3: recurso e IP -->
+  <article class="tarjeta" aria-labelledby="ev" data-estado="base">
+    <div class="fila">
+      <span class="estado revocado" id="ev">ACCESO DENEGADO</span>
+      <span class="meta derecha">15/11/2026 10:00</span>
+    </div>
+    <dl class="datos">
+      <dt>Persona</dt><dd>Ana Pérez (ana)</dd>
+      <dt>Intentó</dt><dd>Registrar signos vitales</dd>
+    </dl>
+    <div class="aviso atencion" style="margin:12px 0 0">
+      <strong>Motivo: rol no vigente</strong>
+      <p style="margin:4px 0 0">Ana no tiene un rol vigente en este hospital (vencido o revocado).</p>
+      <p class="meta" style="margin:4px 0 0">Código: MEMBRESIA_NO_VIGENTE</p>
+    </div>
+    <details style="margin-top:12px">
+      <summary style="min-height:48px;display:flex;align-items:center;font-weight:700;color:var(--primario)">Detalles técnicos</summary>
+      <dl class="datos">
+        <dt>Permiso</dt><dd>signos_vitales.registrar</dd>
+        <dt>Recurso</dt><dd>POST /api/v1/signos-vitales</dd>
+        <dt>Origen (IP)</dt><dd>10.20.5.14</dd>
+        <dt>Referencia</dt><dd class="referencia">0c56479a-1c07-4cb5-a895-75ecaa973bb6</dd>
+      </dl>
+    </details>
+  </article>
+
+  <section class="aviso atencion" role="status" data-estado="404">
+    <h2>No hay un evento con esa referencia en Hospital Regional de Oriente</h2>
+    <p style="margin:0">Revisa que esté completa: 32 letras y números, sin contar espacios ni guiones. Si la persona trabaja en otro hospital, cámbialo arriba y vuelve a buscar.</p>
+  </section>
+</main>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-roles.html"><span class="ico" aria-hidden="true">👥</span>Roles</a>
+  <a href="m5-auditoria.html" aria-current="page"><span class="ico" aria-hidden="true">🔎</span>Auditoría</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

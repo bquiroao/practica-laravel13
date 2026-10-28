@@ -1,0 +1,39 @@
+@startuml semana-04-secuencia-mvc
+title Una consulta filtrada a través de MVC y Repository (S-18..S-33 de la semana 1, con las clases de la semana 4)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+autonumber
+
+actor "Auditor" as U
+participant Kernel
+participant AuditoriaControlador as C
+participant FormularioMovimientos as F
+participant ConsultarMovimientos as CU
+participant "FiltroMovimiento ×5" as FI
+participant "Bitacora\n(PdoBitacora | BitacoraEnMemoria)" as B
+participant CadenaSellada as CS
+participant MovimientosVista as V
+
+U -> Kernel : GET /movimientos?desde&hasta&usuario\nBearer + X-Tenant-ID
+Kernel -> Kernel : ruta · hospital · token · tenant del token
+Kernel -> C : consultar(solicitud, identidad)
+C -> F : consulta(solicitud, identidad)
+F --> C : ComandoConsultar (o EntradaInvalida → 400)
+C -> CU : ejecutar(comando)
+CU -> CU : permiso por alcance; ¿parámetros reclamados por algún filtro?
+CU -> FI : validar(p) de cada filtro activo u obligatorio
+CU -> B : buscar(ConsultaMovimientos) [dentro de la transacción]
+note right of B
+  PDO: WHERE compuesto con los fragmentos sql() de cada filtro
+  InMemory: coincide() de cada filtro
+  — el mismo contrato (CON-*-06)
+end note
+B --> CU : hasta 51 movimientos
+CU -> CS : auditarLectura(AUDITORIA_CONSULTADA)
+CU --> C : Resultado ok {movimientos, cursor_siguiente}
+C -> V : lista(resultado)
+V --> Kernel : Respuesta 200
+Kernel --> U : JSON
+@enduml

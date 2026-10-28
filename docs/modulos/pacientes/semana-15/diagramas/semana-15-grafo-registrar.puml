@@ -1,0 +1,53 @@
+@startuml semana-15-grafo-registrar
+!pragma layout smetana
+title Grafo de flujo · RegistrarPaciente::ejecutar() · 4 if + 2 catch = 6 decisiones · V(G) = 7 caminos básicos
+skinparam defaultFontSize 12
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+partition "try" {
+  :exigir(pacientes.registrar);
+  note right: C2 · sin permiso → lanza ErrorDominio (ACCESO_DENEGADO) → catch D5
+  if (D1 · ¿trae Idempotency-Key?) then (sí)
+    :huella = sha256(datos, confirma, motivo)\nprevia = idempotencia.buscar() ·;
+    if (D2 · ¿hay una respuesta previa?) then (sí)
+      if (D3 · ¿la huella es distinta?) then (sí)
+        :lanza IDEMPOTENCY_KEY_REUTILIZADA;
+        note right: C5 → catch D5 (422)
+      else (no)
+        :devolver la respuesta original\n+ repetida = true;
+        note right: C4 (201, sin ficha nueva)
+        stop
+      endif
+    else (no)
+    endif
+  else (no)
+  endif
+  :RevisionDeFicha::paraAlta();
+  note right: C6 · datos, protección o duplicado → lanza ErrorDominio → catch D5
+  :transacción { registrar · evento ·;
+  if (D4 · ¿trae Idempotency-Key?) then (sí)
+    :guardar la clave;
+    note right: C3
+  else (no)
+    :sin clave que guardar;
+    note right: C1
+  endif
+  :} commit;
+  note right: C7 · la bitácora falla → rollback → lanza ErrorPersistencia → catch D6
+  :Resultado::creado (201);
+  stop
+}
+partition "catch" {
+  if (D5 · ErrorDominio) then (sí)
+    :Resultado::desdeError\n(403 / 409 / 422);
+    note right: C2, C5, C6
+  else (D6 · ErrorPersistencia)
+    :Resultado::noDisponible (503)\nsin nada guardado;
+    note right: C7
+  endif
+}
+stop
+@enduml

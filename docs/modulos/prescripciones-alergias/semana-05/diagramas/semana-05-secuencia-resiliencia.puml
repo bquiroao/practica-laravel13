@@ -1,0 +1,43 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia de la emisión: respuesta perdida, Expediente caído y resultado incierto
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+autonumber "R-00"
+
+participant "Interfaz" as UI
+participant "ClientePrescripciones" as C
+participant "API (Kernel + MVC)" as API
+participant "EmitirPrescripcion" as E
+participant "FuenteAlergias\n(base o HTTP + circuito)" as F
+database "prescriptions" as BD
+
+UI -> C : emitir(paciente, ítems)
+C -> C : Idempotency-Key = emi-… (UNA para todos los intentos)\nX-Request-ID = cli-…
+== Caso 1 · la respuesta se pierde (CLI-02) ==
+C -> API : POST (intento 1)
+API -> E : ejecutar
+E -> F : alergiasDe()
+E -> BD : INSERT (emitida)
+API --> C : 201 … se pierde en la red
+C -> API : POST (intento 2, misma clave)
+API -> E : ejecutar
+E -> BD : porClave(clave) → ya existe
+API --> C : 200 YA_EMITIDA (mismo id, sin reverificar)
+C --> UI : CONFIRMADO
+== Caso 2 · Expediente caído (CLI-05, HFA-03) ==
+C -> API : POST
+API -> E : ejecutar
+E -> F : alergiasDe()
+F --> E : FuenteAlergiasNoDisponible\n(2 s o, con el circuito abierto, inmediato)
+API --> C : 503 VERIFICACION_NO_DISPONIBLE
+C -> API : reintentos (misma clave)
+API --> C : 503 VERIFICACION_NO_DISPONIBLE
+C --> UI : RECHAZADO: «no se pudo verificar; no se emitió»
+== Caso 3 · sin respuesta en ningún intento (CLI-03) ==
+C -> API : POST × 3 (caídas o respuestas perdidas)
+C --> UI : INCIERTO + clave\n(nada queda encolado)
+UI -> C : «Reintentar» (misma clave)
+C -> API : POST
+API --> C : 200 YA_EMITIDA o 201 EMITIDA
+C --> UI : CONFIRMADO, nunca dos prescripciones
+@enduml

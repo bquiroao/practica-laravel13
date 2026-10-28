@@ -1,0 +1,25 @@
+Plan SQA Auditoría · línea base 2026-10-26 23:18 · micro-his: micro-his-auditoria
+--------------------------------------------------------------------------------------------------------------
+VERDE  M1  Pruebas automáticas en verde (calidad)
+       valor: 98/98 · 0 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL)
+       incluye integración con PostgreSQL
+VERDE  M2  Defectos inyectados detectados (mutation score)
+       valor: 100 % (26/26) · umbral: 100 %
+       con PostgreSQL
+VERDE  M3  Cadenas íntegras en la verificación (confiabilidad)
+       valor: 3/3 · 4.2 ms por 1 000 movimientos · umbral: 100 % íntegras; ALTERADA o TRUNCADA = incidente
+       1203 movimientos verificados en 3 cadenas (2 hospitales + red)
+VERDE  M4  Intentos de fuga entre tenants / sin permiso bloqueados (seguridad)
+       valor: 12/12 · umbral: 100 %
+       12 sondas: tenant, red, permisos, emisor ajeno, DELETE/PUT y sin token
+VERDE  M5  Contrato = código y códigos de error con prueba (trazabilidad)
+       valor: 4/4 guardas · 16/16 códigos · umbral: 100 % y 100 %
+       todos los códigos del enum de errores aparecen en una prueba
+ROJO   M6  Hallazgos de la revisión abiertos (riesgo)
+       valor: 1 críticos · 2 mayores · 2 menores · umbral: 0 críticos; mayores con plazo ≤ 7 días
+       fuente: semana-13/plantillas/registro-hallazgos.csv
+ROJO   M7  Capacidad de la verificación para 1 año de un hospital (confiabilidad)
+       valor: 588 MB necesarios · umbral: ≤ 50 % del memory_limit (128 MB)
+       845 B por movimiento × 730.000 movimientos/año (2 000/día); la verificación carga toda la cadena (AR-02)
+--------------------------------------------------------------------------------------------------------------
+En ROJO: 2

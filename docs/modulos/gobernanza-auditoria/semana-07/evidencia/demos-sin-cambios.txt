@@ -1,0 +1,8 @@
+Salida estándar de las demos ANTES (git stash: código de la semana 6) y DESPUÉS del refactor.
+(El registro de acceso va a stderr y lleva request_id aleatorio y duraciones: no se compara.)
+
+$ diff <(demo.php antes) <(demo.php después)
+sin diferencias (10 líneas)
+
+$ diff <(demo-correccion.php antes) <(demo-correccion.php después)
+sin diferencias (10 líneas)

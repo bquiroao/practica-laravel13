@@ -1,0 +1,6 @@
+PASS 01-usuarios.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).
+PASS 02-invitacion.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).
+PASS 03-credencial.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).
+PASS 04-login.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).
+PASS 05-sesion.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).
+PASS 06-recuperacion.svg: XML valido; textos dentro de panel/lienzo (Arial/System.Drawing).

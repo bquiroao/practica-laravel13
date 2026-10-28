@@ -1,0 +1,10 @@
+$ php herramientas/reintento.php
+Caso (la misma intención, dos peticiones)            1.ª respuesta                  2.ª respuesta                      Presc Anuladas Trazas
+--------------------------------------------------------------------------------------------------------------------------------------------
+Repetir la verificación previa                       200 SIN_HALLAZGOS              200 SIN_HALLAZGOS                      0        0      0
+Repetir «Emitir» con la MISMA clave                  201 EMITIDA                    200 YA_EMITIDA                         1        0      1
+Repetir «Emitir» con una clave NUEVA (anti-patrón)   201 EMITIDA                    201 EMITIDA                            2        0      2
+Expediente caído, luego vuelve (misma clave)         503 VERIFICACION_NO_DISPONIBLE 201 EMITIDA                            1        0      2
+Misma clave, pero el médico cambió la dosis          201 EMITIDA                    409 CLAVE_REUTILIZADA                  1        0      1
+Repetir «Anular» con el mismo motivo                 200 ANULADA                    409 ESTADO_NO_PERMITE_ANULAR           1        1      2
+Repetir la consulta                                  200 PRESCRIPCION               200 PRESCRIPCION                       1        0      1

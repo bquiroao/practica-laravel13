@@ -1,0 +1,7 @@
+Control de la prueba de paridad: la MISMA herramienta sobre una copia de la API simulada con un defecto inyectado
+(la consulta deja de dejar su meta-auditoría, R-08). Debe detectar diferencias.
+
+DISTINTO  17. Super admin: verifica Oriente
+DISTINTO  21. Oriente con un ancla más adelante que la cadena → TRUNCADA
+DISTINTO  22. Super admin: ahora la red muestra las verificaciones
+Pasos: 22 + semilla  Diferencias: 3

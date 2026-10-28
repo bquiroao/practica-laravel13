@@ -1,0 +1,13 @@
+@startsalt
+title M4 — Sesión por expirar y cierre de sesión
+{+
+  <b>Tu sesión expira en 2 minutos</b>
+  ¿Sigues trabajando?
+  [Seguir conectado]
+  [Cerrar sesión ahora]
+  ---
+  <b>¿Cerrar sesión?</b>
+  Se borrará la sesión de este teléfono.
+  [Volver] | [Cerrar sesión]
+}
+@endsalt

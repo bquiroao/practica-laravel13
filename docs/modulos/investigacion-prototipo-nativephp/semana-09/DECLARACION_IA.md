@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar los wireframes, medir color calculado/contraste/recorte en Edge y preparar checklist, hallazgos y backlog. Las fuentes W3C ya se consultaron en la conversación. No se atribuyen pruebas con usuarios, lector de pantalla, runtime NativePHP ni certificación WCAG. La estudiante debe revisar prioridades y límites.

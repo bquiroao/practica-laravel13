@@ -1,0 +1,15 @@
+Semana 7 — pruebas de caracterización sobre el código ANTERIOR al refactor (PHP 8.3.6)
+Extracto de las salidas de php tests/ejecutar.php. La salida completa se obtiene ejecutando el mismo comando.
+
+Paso 0 — línea base: código de la semana 6, sin cambios
+Total: 113  Pasan: 112  Fallan: 0  Omitidas: 1
+
+Paso 1 — se agregan solo tests/Aplicacion/RefactorPrueba.php y bin/acoplamiento.php; los casos de uso siguen iguales
+[PASA ] REF-01   Caracterización: nombre, campos y orden exactos de los eventos de bitácora al registrar, firmar y corregir
+[PASA ] REF-02   Caracterización: orden de las verificaciones (hospital → acceso → versión ya corregida → expediente → reglas)
+[PASA ] REF-03   Caracterización: un error inesperado al verificar el acceso da 500 error_interno en registro y corrección, sin guardar nada
+[PASA ] REF-04   Caracterización: si la base falla dentro de la transacción, registro y corrección responden igual y no queda nota, evento ni clave
+Total: 117  Pasan: 116  Fallan: 0  Omitidas: 1
+
+La prueba omitida es INT-06, que necesita PostgreSQL. Las 4 pruebas REF pasan sin tocar el código:
+fijan el comportamiento que el refactor va a mover de lugar.

@@ -26,3 +26,21 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo
 ## Semana 4
 
 [MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
+## Semana 5
+
+[Contrato API y diseño cliente-servidor](semana-05/README.md).
+
+## Semana 6
+
+[Primera evaluación: presentación, matriz y cambio práctico](semana-06/README.md).
+## Semana 7
+
+[Componentes, contratos y refactor conceptual](semana-07/semana-07-componentes-refactor-nativephp.md).
+
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/semana-08-ux-nativephp.md).
+
+## Semana 9
+
+[Evaluación UX/accesibilidad: checklist, hallazgos y backlog](semana-09/README.md).

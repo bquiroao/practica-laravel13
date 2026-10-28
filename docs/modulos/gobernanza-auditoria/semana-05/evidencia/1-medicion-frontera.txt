@@ -1,0 +1,12 @@
+$ AUDITORIA_DB_DSN=… php bin/medir.php 200   (php -S en 127.0.0.1:8088 + PostgreSQL 18 local)
+Micro-HIS Auditoría · costo de la frontera (PHP 8.4.26, 200 movimientos por escenario)
+--------------------------------------------------------------------------------------------------------------
+A · en proceso, memoria                                   n=200  p50=  0.065 ms   p95=  0.105 ms   máx=  1.981 ms
+B · en proceso, PostgreSQL                                n=200  p50=  1.643 ms   p95=  2.284 ms   máx=  6.923 ms
+C · por HTTP (php -S) + PostgreSQL, con ClienteAuditoria  n=200  p50= 72.951 ms   p95= 88.903 ms   máx= 95.013 ms
+D · consulta filtrada por HTTP (rango de hoy + usuario + módulo) n=200  p50= 76.623 ms   p95= 93.232 ms   máx=101.121 ms
+--------------------------------------------------------------------------------------------------------------
+Costo de la base (B − A, p50):         1.578 ms por movimiento
+Costo de la red  (C − B, p50):        71.308 ms por movimiento
+Registros por HTTP que NO quedaron:  0 de 200
+RNF-06 (consulta p95 < 500 ms):      cumple (p95 = 93.232 ms; la tabla tiene pocas filas: no es prueba de carga)

@@ -1,0 +1,58 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title Semana 7 · DESPUÉS: cada preocupación tiene un dueño; los casos de uso solo orquestan
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #4A6FA5
+}
+hide empty members
+left to right direction
+
+package "Aplicación" #EAF7EA {
+  class RegistrarNotaConDiagnostico <<7 dependencias · Ce 15 · P 4>>
+  class CorregirNota <<5 dependencias · Ce 16 · P 4>>
+  class FirmarNota <<4 dependencias · P 3>>
+  class RegistradorClinico <<nuevo>> #FFE3D6 {
+    + guardar(CambioClinico, tambien?)
+    única transacción + evento
+  }
+}
+package "Dominio" #FFF6E5 {
+  class ReglasDeEscritura <<nuevo>> #FFE3D6 {
+    + exigirMismoHospital()
+    + exigirPuedeEscribir()
+    + exigirExpedienteDisponible()
+  }
+  interface CambioClinico <<nuevo>> #FFE3D6 {
+    + aplicarEn(notas, diagnosticos)
+    + entrada(): EntradaBitacora
+  }
+  class NotaConDiagnostico <<nuevo>> #FFE3D6
+  class FirmaDeNota <<nuevo>> #FFE3D6
+  class EntradaBitacora <<nuevo>> #FFE3D6 {
+    + notaRegistrada() · notaFirmada() · notaCorregida()
+  }
+  interface "Puertos\nVerificadorAcceso · RepositorioExpedientes\nRepositorioNotas · RepositorioDiagnosticos\nRegistroAuditoria" as P
+}
+interface Transaccion
+
+RegistrarNotaConDiagnostico --> ReglasDeEscritura
+RegistrarNotaConDiagnostico --> RegistradorClinico
+CorregirNota --> ReglasDeEscritura
+CorregirNota --> RegistradorClinico
+FirmarNota --> RegistradorClinico
+RegistradorClinico --> CambioClinico
+RegistradorClinico --> Transaccion
+RegistradorClinico --> P
+ReglasDeEscritura --> P
+NotaConDiagnostico ..|> CambioClinico
+FirmaDeNota ..|> CambioClinico
+CambioClinico --> EntradaBitacora
+
+legend bottom
+  Formato de la bitácora: 1 lugar (EntradaBitacora). Transacción + evento: 1 lugar (RegistradorClinico). R-01/R-02/R-03: 1 lugar (ReglasDeEscritura).
+  Presentación, Persistencia, puertos y contrato API no cambiaron. Las 118 pruebas dan el mismo resultado (REF-01..04 lo fijan).
+endlegend
+@enduml

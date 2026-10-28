@@ -1,0 +1,44 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+title Fronteras evaluadas (con medición) y decisión
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Opción 0 — HOY y recomendada: monolito modular" #EEF7EE {
+  rectangle "Prescripciones\n(módulo, puertos)" as P0
+  rectangle "Expediente / Alergias\n(otro módulo)" as E0
+  database "Base del hospital" as B0
+  P0 --> B0 : PDO (1,7 ms p50)
+  E0 --> B0
+  P0 ..> B0 : lee alergias por la vista\n(consistente, sin red)
+}
+
+package "Opción 1 — Expediente como servicio (medido: D y E)" #FFF8E1 {
+  rectangle "Prescripciones" as P1
+  rectangle "Servicio Expediente" as E1
+  database "Base\nprescripciones" as B1
+  database "Base\nexpediente" as B2
+  P1 --> E1 : HTTP en CADA emisión\n+15 ms p50 (D)
+  P1 --> B1
+  E1 --> B2
+}
+
+package "Opción 2 — Prescripciones como microservicio (medido: C)" #FDECEC {
+  rectangle "Clientes" as C2
+  rectangle "Servicio Prescripciones" as P2
+  C2 --> P2 : HTTP\n+62 ms p50 (C, php -S)
+}
+
+note bottom of E1
+  E: con el Expediente caído, 0 de 200 emisiones
+  (fail-closed). El circuit breaker solo hace que
+  el «no» llegue en ~1 ms en lugar de 2 s.
+  La disponibilidad de prescribir pasa a ser el
+  PRODUCTO de las dos disponibilidades.
+end note
+note bottom of P2
+  No resuelve ningún problema medido hoy:
+  ni volumen, ni equipo propio, ni un SLA
+  distinto. Agrega red y despliegues.
+end note
+@enduml

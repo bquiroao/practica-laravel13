@@ -1,0 +1,78 @@
+@startuml semana-01-actividad
+title Actividad — CU-01 Consultar, CU-03 Exportar y CU-05 Reproducir (con CU-02, CU-04 y CU-06)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam ActivityBackgroundColor #EEF2F7
+skinparam ActivityBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+
+|Jefatura o Auditor|
+start
+if (D0 ¿Exportación nueva o reproducir una anterior?) then (nueva)
+  :A1 Elige el reporte y los filtros
+  (fechas, servicio, estado) y el formato;
+else (reproducir [CU-05])
+  :A2 Indica el id de la exportación;
+endif
+|Sistema (módulo)|
+if (D1 ¿Sesión válida, rol con permiso\nal reporte y mismo hospital?) then (no)
+  #FFE3D6:E1 401 o 403. No se consulta nada;
+  stop
+else (sí)
+endif
+if (D2 ¿El reporte o la exportación existen?) then (no)
+  #FFE3D6:E2 404 reporte_no_encontrado;
+  stop
+else (sí)
+endif
+if (D3 ¿Filtros válidos? desde ≤ hasta, máximo 92 días,\nsin fechas futuras, valores del catálogo [CU-02]) then (no)
+  #FFE3D6:E3 422 filtro_invalido con el campo;
+  |Jefatura o Auditor|
+  :A3 Corrige el filtro;
+  stop
+else (sí)
+endif
+|Sistema (módulo)|
+:A4 Nueva: fija la fecha de corte = ahora.
+Reproducir: usa filtros y corte guardados;
+:A5 Consulta las vistas de solo lectura con
+registrado_en ≤ corte y orden estable;
+if (D4 ¿Tardó más de 30 s?) then (sí)
+  #FFE3D6:E4 504 consulta_lenta:
+  sugiere un rango menor;
+  stop
+else (no)
+endif
+if (D5 ¿Hay filas?) then (no)
+  #FFF4CC:E5 Reporte vacío: se informa
+  y el archivo lleva solo encabezados;
+else (sí)
+endif
+if (D6 ¿El rol puede ver datos personales?) then (no)
+  :A6 Enmascara nombre y documento [CU-06];
+else (sí)
+endif
+:A7 Genera CSV o PDF y calcula SHA-256;
+if (D7 ¿Reproducción?) then (sí)
+  if (D8 ¿El hash coincide con el original?) then (sí)
+    :R2 «Reproducción exacta» y el archivo;
+  else (no)
+    #FFF4CC:E6 Los datos cambiaron después del corte:
+    se marca la diferencia en la bitácora;
+  endif
+else (no)
+  :A8 Registra la exportación: filtros normalizados,
+  corte, versión de consulta, formato, filas, hash [CU-04];
+  if (D9 ¿Se guardó el registro?) then (no)
+    #FFE3D6:E7 500: no se entrega un archivo
+    que no se pueda reproducir;
+    stop
+  else (sí)
+  endif
+  :R1 Descarga con id de exportación y hash;
+endif
+|Jefatura o Auditor|
+:A9 Recibe el archivo o el resultado de la comparación;
+stop
+@enduml

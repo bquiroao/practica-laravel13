@@ -1,0 +1,117 @@
+Revisión técnica formal RBAC · criterios de entrada
+Repositorio: sistema-hospitalario-integrado-SistenasII-2026-G1 · micro-his-rbac @ 801fb17
+----------------------------------------------------------------------------------------------------
+PASA   E-1   Paquete congelado en un commit y sin cambios locales
+       commit 801fb17
+PASA   E-2   Suite automatizada sin fallas
+       Total 80 · Pasan 78 · Fallan 0 · Omitidas 2
+PASA   E-3   Guardas de contrato (API-01..03) y de capas (ARQ-01..08) en verde
+       11 guardas en verde
+PASA   E-4   Cada sesión ≤ 1600 líneas efectivas
+       S1: 1512 líneas en 58 archivos · S2: 1557 líneas en 31 archivos
+PASA   E-5   Checklist de 12–15 ítems y formato de hallazgos publicados
+       15 ítems en el checklist · formato disponible
+PASA   E-6   Autorrevisión del autor registrada con el mismo formato
+       7 hallazgos del autor en el registro CSV · 7 en autorrevision-autor.md
+MANUAL E-7   Material distribuido ≥ 48 h antes de la reunión
+       el moderador anota la fecha de envío en el acta
+MANUAL E-8   Roles asignados y revisores confirmados
+       nombres en el plan §3 y en el acta
+----------------------------------------------------------------------------------------------------
+PAQUETE DE REVISIÓN
+
+S1 · Dominio, aplicación y persistencia (integridad) — 1512 líneas efectivas, 58 archivos
+    62  database/schema.sql
+    55  src/Aplicacion/CasosDeUso/AsignarRol.php
+    73  src/Aplicacion/CasosDeUso/AutorizarOperacion.php
+    30  src/Aplicacion/CasosDeUso/ConsultarEventoAuditoria.php
+    46  src/Aplicacion/CasosDeUso/ConsultarPermisosEfectivos.php
+    54  src/Aplicacion/CasosDeUso/RevocarRol.php
+    18  src/Aplicacion/Comandos/ComandoAsignarRol.php
+    16  src/Aplicacion/Comandos/ComandoAutorizar.php
+    17  src/Aplicacion/Comandos/ComandoRevocarRol.php
+    13  src/Aplicacion/Puertos/Transaccion.php
+    30  src/Aplicacion/Resultados/ResultadoAsignacion.php
+    24  src/Aplicacion/Resultados/ResultadoAutorizacion.php
+    30  src/Aplicacion/Resultados/ResultadoRevocacion.php
+    15  src/Aplicacion/Servicios/Desenlace.php
+    39  src/Aplicacion/Servicios/RegistradorDeCambios.php
+    33  src/Dominio/Cambios/AsignacionDeRol.php
+    22  src/Dominio/Cambios/CambioDeMembresia.php
+    29  src/Dominio/Cambios/RevocacionDeRol.php
+    14  src/Dominio/Excepciones/ErrorPersistencia.php
+     7  src/Dominio/Excepciones/MembresiaDuplicada.php
+    21  src/Dominio/Modelo/ContextoAutorizacion.php
+    12  src/Dominio/Modelo/ErrorAsignacion.php
+    12  src/Dominio/Modelo/ErrorRevocacion.php
+    54  src/Dominio/Modelo/EventoAuditoria.php
+    22  src/Dominio/Modelo/Membresia.php
+    17  src/Dominio/Modelo/SolicitudAsignacion.php
+    17  src/Dominio/Modelo/SolicitudAutorizacion.php
+    16  src/Dominio/Modelo/SolicitudRevocacion.php
+    12  src/Dominio/Puertos/CatalogoPermisos.php
+    13  src/Dominio/Puertos/DirectorioUsuarios.php
+    13  src/Dominio/Puertos/RegistroAuditoria.php
+    28  src/Dominio/Puertos/RepositorioMembresias.php
+    16  src/Dominio/Reglas/Asignacion/ReglaNoAutoasignacion.php
+    18  src/Dominio/Reglas/Asignacion/ReglaRolEnCatalogo.php
+    20  src/Dominio/Reglas/Asignacion/ReglaSinMembresiaDuplicada.php
+    22  src/Dominio/Reglas/Asignacion/ReglaUsuarioDestinoActivo.php
+    17  src/Dominio/Reglas/Asignacion/ReglaVigenciaValida.php
+    13  src/Dominio/Reglas/Autorizacion/ReglaMembresiaVigente.php
+    22  src/Dominio/Reglas/Autorizacion/ReglaRolConcedePermiso.php
+    14  src/Dominio/Reglas/Autorizacion/ReglaTenantCoincide.php
+    10  src/Dominio/Reglas/ReglaAsignacion.php
+     9  src/Dominio/Reglas/ReglaAutorizacion.php
+    10  src/Dominio/Reglas/ReglaRevocacion.php
+    28  src/Dominio/Reglas/Revocacion/ReglaMembresiaRevocable.php
+    17  src/Dominio/Reglas/Revocacion/ReglaMotivoSuficiente.php
+    16  src/Dominio/Reglas/Revocacion/ReglaNoAutorrevocacion.php
+    37  src/Dominio/Servicios/PoliticaAsignacion.php
+    41  src/Dominio/Servicios/PoliticaAutorizacion.php
+    37  src/Dominio/Servicios/PoliticaRevocacion.php
+    47  src/Persistencia/Archivo/RegistroAuditoriaArchivo.php
+    21  src/Persistencia/Pdo/FabricaConexion.php
+    18  src/Persistencia/Pdo/FabricaPdo.php
+    18  src/Persistencia/Pdo/PdoCatalogoPermisos.php
+    13  src/Persistencia/Pdo/PdoDirectorioUsuarios.php
+    44  src/Persistencia/Pdo/PdoRegistroAuditoria.php
+    71  src/Persistencia/Pdo/PdoRepositorioMembresias.php
+    33  src/Persistencia/Pdo/PdoTransaccion.php
+    36  src/Persistencia/Pdo/RepositorioPdo.php
+
+S2 · Contrato, frontera HTTP, permisos/tenant y dependencias — 1557 líneas efectivas, 31 archivos
+   544  api/openapi.yaml
+   172  bootstrap/contenedor.php
+    20  config/config.php
+    14  public/index.php
+    10  src/Presentacion/Http/Autenticacion/Autenticador.php
+    24  src/Presentacion/Http/Autenticacion/AutenticadorTokenDemo.php
+    26  src/Presentacion/Http/Controladores/AsignacionRolControlador.php
+    20  src/Presentacion/Http/Controladores/AuditoriaControlador.php
+    51  src/Presentacion/Http/Controladores/AutorizacionControlador.php
+    21  src/Presentacion/Http/Controladores/OperacionClinicaControlador.php
+    26  src/Presentacion/Http/Controladores/RevocacionRolControlador.php
+    12  src/Presentacion/Http/Formularios/DatosInvalidos.php
+    65  src/Presentacion/Http/Formularios/FormularioAsignacion.php
+    37  src/Presentacion/Http/Formularios/FormularioDecision.php
+    27  src/Presentacion/Http/Formularios/FormularioPermisosEfectivos.php
+    37  src/Presentacion/Http/Formularios/FormularioRevocacion.php
+    12  src/Presentacion/Http/Identidad.php
+   100  src/Presentacion/Http/Kernel.php
+    24  src/Presentacion/Http/MiddlewareAutorizacion.php
+    31  src/Presentacion/Http/Peticion.php
+    34  src/Presentacion/Http/Respuesta.php
+    27  src/Presentacion/Http/Ruta.php
+    36  src/Presentacion/Http/Rutas.php
+    47  src/Presentacion/Http/Solicitud.php
+    18  src/Presentacion/Http/Vistas/AsignacionVista.php
+    18  src/Presentacion/Http/Vistas/DecisionVista.php
+    46  src/Presentacion/Http/Vistas/ErrorVista.php
+    15  src/Presentacion/Http/Vistas/EventoAuditoriaVista.php
+    12  src/Presentacion/Http/Vistas/OperacionVista.php
+    13  src/Presentacion/Http/Vistas/PermisosEfectivosVista.php
+    18  src/Presentacion/Http/Vistas/RevocacionVista.php
+
+Criterios automáticos que fallan: 0
+exit=0

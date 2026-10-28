@@ -1,0 +1,10 @@
+$ PRESCRIPCIONES_DB_DSN=… php bin/medir.php 200
+Emisiones por escenario: 200 (PHP 8.4.26)
+
+A · en proceso, memoria                                 p50=   0.019 ms   p95=   0.028 ms   emitidas=200/200
+B · en proceso, PostgreSQL                              p50=   1.688 ms   p95=   2.595 ms   emitidas=200/200
+C · por HTTP (php -S) + PostgreSQL, con el cliente      p50=  63.423 ms   p95= 175.790 ms   emitidas=200/200
+D · en proceso + PostgreSQL, Expediente remoto (HTTP)   p50=  16.750 ms   p95=  33.933 ms   emitidas=200/200
+E · como D, con el Expediente caído (500)              p50=   0.853 ms   p95=   1.843 ms   emitidas=0/200
+
+Costo de la base (B − A): 1.669 ms · Costo de la API por HTTP (C − B): 61.735 ms · Costo del Expediente remoto (D − B): 15.061 ms

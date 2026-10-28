@@ -1,0 +1,33 @@
+@startuml semana-04-secuencia-mvc
+title Una emisión por MVC y Repository (S-15..S-46 de la semana 1 con las clases de la semana 4)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+autonumber "M-00"
+
+participant Kernel
+participant "PrescripcionesControlador\n(Controller)" as C
+participant "FormularioPrescripcion\n(entrada)" as F
+participant "EmitirPrescripcion\n(Model)" as M
+participant "RepositorioPrescripciones\n(PDO o InMemory)" as R
+participant "Transaccion" as T
+participant "PrescripcionVista\n(View)" as V
+
+Kernel -> C : emitir(solicitud, identidad)
+C -> F : emision(solicitud, identidad)
+alt formato inválido
+  F --> C : EntradaInvalida(JSON_INVALIDO…)
+  C -> V : ErrorVista::entradaInvalida()
+  V --> Kernel : 400
+else formato correcto
+  F --> C : SolicitudEmision (usuario y hospital del token)
+  C -> M : ejecutar(solicitud)
+  M -> R : porClave(hospital, clave)
+  M -> M : tenant · catálogo · dosis · alergias · bloqueo/advertencia
+  M -> T : ejecutar { guardar + traza }
+  T -> R : guardar(prescripción)
+  R --> T : prescripción con id\n(o ClaveEnUso → se responde como reintento)
+  M --> C : Resultado(CREADO, EMITIDA, id)
+  C -> V : PrescripcionVista::emision(resultado)
+  V --> Kernel : 201 + Location
+end
+@enduml

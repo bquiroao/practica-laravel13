@@ -1,0 +1,47 @@
+@startuml
+title UML - Modelo y dependencias de recepción
+
+class ReceiveSpecimen {
+  +execute(request): SpecimenReception
+}
+interface SpecimenRepository {
+  +save(reception): void
+}
+interface SpecimenIdentifierGenerator {
+  +generate(): string
+}
+class SpecimenAcceptancePolicy {
+  +decide(request): ReceptionDecision
+}
+class ReceptionRequest
+class ReceptionDecision {
+  +status: ReceptionStatus
+  +reasons: list<string>
+}
+class SpecimenReception
+enum ReceptionStatus {
+  ACCEPTED
+  REJECTED
+}
+enum SpecimenType {
+  BLOOD
+  URINE
+  SWAB
+}
+class PdoSpecimenRepository
+class RandomSpecimenIdentifierGenerator
+class ReceiveSpecimenCommand
+
+ReceiveSpecimen --> SpecimenAcceptancePolicy
+ReceiveSpecimen --> SpecimenRepository
+ReceiveSpecimen --> SpecimenIdentifierGenerator
+ReceiveSpecimen --> ReceptionRequest
+ReceiveSpecimen --> SpecimenReception
+SpecimenAcceptancePolicy --> ReceptionRequest
+SpecimenAcceptancePolicy --> ReceptionDecision
+SpecimenReception --> ReceptionStatus
+SpecimenReception --> SpecimenType
+PdoSpecimenRepository ..|> SpecimenRepository
+RandomSpecimenIdentifierGenerator ..|> SpecimenIdentifierGenerator
+ReceiveSpecimenCommand --> ReceiveSpecimen
+@enduml

@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace NotasSoap\Presentacion\Http;
 
-/** Respuesta HTTP inmutable. La arma una Vista; el Kernel solo la envía. */
+/** Respuesta HTTP inmutable. La arma una Vista; el Kernel le agrega X-Request-ID y la envía. */
 final class Respuesta
 {
-    /** @param array<string, mixed> $cuerpo cuerpo JSON (vacío si la respuesta es HTML) */
+    /**
+     * @param array<string, mixed> $cuerpo cuerpo JSON (vacío si la respuesta es HTML)
+     * @param array<string, string> $cabeceras
+     */
     public function __construct(
         public readonly int $estado,
         public readonly array $cuerpo,
         public readonly ?string $html = null,
+        public readonly array $cabeceras = [],
     ) {
     }
 
@@ -31,6 +35,22 @@ final class Respuesta
         return new self($estado, ['error' => ['code' => $codigo, 'message' => $mensaje]]);
     }
 
+    public function conCabecera(string $nombre, string $valor): self
+    {
+        return new self($this->estado, $this->cuerpo, $this->html, [$nombre => $valor] + $this->cabeceras);
+    }
+
+    public function cabecera(string $nombre): ?string
+    {
+        foreach ($this->cabeceras as $n => $v) {
+            if (strcasecmp($n, $nombre) === 0) {
+                return $v;
+            }
+        }
+
+        return null;
+    }
+
     public function esHtml(): bool
     {
         return $this->html !== null;
@@ -39,6 +59,9 @@ final class Respuesta
     public function enviar(): void
     {
         http_response_code($this->estado);
+        foreach ($this->cabeceras as $nombre => $valor) {
+            header($nombre . ': ' . $valor);
+        }
         if ($this->html !== null) {
             header('Content-Type: text/html; charset=utf-8');
             echo $this->html;

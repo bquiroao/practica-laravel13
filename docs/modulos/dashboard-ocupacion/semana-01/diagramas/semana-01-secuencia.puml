@@ -1,0 +1,46 @@
+@startuml semana-01-secuencia
+' Semana 1 — Dashboard de ocupación hospitalaria (tarea Odoo 2488)
+title Secuencia — consolidar la ocupación (CU-01 con CU-04) y consultarla (CU-02)
+
+actor "Temporizador" as T
+actor "Jefatura" as J
+participant "UI del tablero\n(Vue)" as UI
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Autorización\n(RBAC)" as RBAC
+participant "Servicio de\nocupación" as SVC
+database "Base HOSPITAL\n(wards, beds,\nbed_stays)" as DB
+database "Almacén\nde cortes" as CUT
+
+== CU-01 Consolidar ocupación ==
+T -> SVC : S1 consolidar() cada 5 min
+SVC -> DB : S2 Salas activas, camas por estado y estancias abiertas (R-03)
+alt falla la lectura
+  DB --> SVC : error
+  SVC -> SVC : Conserva el corte anterior (E2, R-09)
+else lectura correcta
+  DB --> SVC : filas
+  SVC -> SVC : S3 Ocupación por sala; «no aplica» sin camas operativas (R-01, R-02)
+  SVC -> SVC : S4 Compara camas «ocupadas» con estancias abiertas (R-04)
+  opt hay diferencias
+    SVC -> SVC : Marca inconsistencia (E1)
+  end
+  SVC -> CUT : S5 Guarda el corte con su hora (R-05, F1)
+end
+
+== CU-02 Consultar ocupación por sala ==
+J -> UI : S6 Abre el tablero (y elige un estado, CU-03)
+UI -> API : S7 GET /occupancy?estado=... (JWT, X-Tenant-ID)
+API -> RBAC : S8 ¿Puede consultar ocupación? (R-08)
+alt sin permiso u otro hospital
+  API --> UI : 403 (E3)
+else autorizado
+  API -> SVC : consultar(estado)
+  SVC -> CUT : S9 Lee el último corte
+  alt no hay cortes
+    API --> UI : 200 con estado vacío (E4)
+  else hay corte
+    SVC -> SVC : S10 ¿Más de 15 min? → agrega aviso (R-06)
+    API --> UI : S11 200 Ocupación por sala, solo cifras (F3, R-07)
+  end
+end
+@enduml

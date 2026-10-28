@@ -1,0 +1,613 @@
+openapi: 3.1.0
+info:
+  title: Micro-HIS Notas SOAP y diagnósticos — API
+  version: 1.2.0
+  summary: Registro de nota SOAP con diagnóstico CIE-10, firma, corrección, consulta y listado por expediente.
+  description: |
+    Contrato del módulo ASII-11 Notas SOAP y diagnósticos del Sistema Hospitalario Integrado (HIS).
+
+    Reglas comunes a todas las operaciones:
+    - `X-Tenant-ID` es obligatorio (400 si falta). Identifica al hospital.
+    - `Authorization: Bearer <token>` es obligatorio (401 si falta o es inválido).
+    - Cada operación declara su permiso en la extensión `x-permiso` (403 si el rol no lo tiene).
+      Además, el registro exige asignación activa al episodio (regla R-02) y la firma, ser el autor.
+    - Toda respuesta incluye `X-Request-ID`: el recibido, si cumple el formato, o uno nuevo.
+    - Los errores tienen siempre la forma `{"error": {"code": "...", "message": "..."}}`;
+      un 500 nunca incluye SQL, SQLSTATE ni detalles internos.
+    - El texto clínico (secciones SOAP) solo viaja en la consulta de una nota por su id;
+      el listado por expediente devuelve resúmenes sin texto.
+
+    Corrección (desde 1.1.0): una nota firmada no se edita ni se borra. Se corrige con una versión
+    nueva que apunta a la anterior (`supersedes_id`) y explica el motivo (`correction_reason`).
+    Cada versión se corrige una sola vez; para seguir corrigiendo se corrige la versión más reciente.
+    Desde 1.2.0 la corrección también acepta `Idempotency-Key`: el reintento devuelve la misma versión nueva.
+
+    Versionado: la versión mayor va en la ruta (`/api/v1`). Agregar campos opcionales no cambia
+    la versión; un cambio incompatible crea `/api/v2` y `/api/v1` se mantiene al menos un semestre
+    con aviso de deprecación.
+  contact:
+    name: Joshua Eduardo García Reyes
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8080
+    description: Desarrollo local (php -S)
+security:
+  - tokenPortador: []
+tags:
+  - name: Notas SOAP
+    description: Registro (CU-01 + CU-02), firma (CU-03), consulta (CU-04) y corrección (CU-06) de notas.
+  - name: Expediente
+    description: Consulta de notas por expediente para otros módulos (línea de tiempo del expediente).
+paths:
+  /api/v1/notas-soap:
+    post:
+      operationId: registrarNota
+      tags: [Notas SOAP]
+      summary: Registra una nota SOAP con su diagnóstico en una sola transacción.
+      description: |
+        El autor y el hospital salen del token, nunca del cuerpo. Si se envía `Idempotency-Key`
+        y la misma petición se repite (por ejemplo, porque se perdió la respuesta), el servidor
+        devuelve la nota ya creada con `Idempotent-Replayed: true` y no crea otra.
+      x-permiso: notas_soap.registrar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroNota'
+            example:
+              medical_record_id: exp-carlos
+              care_episode_id: epi-100
+              subjetivo: Tos productiva y fiebre de 3 días
+              objetivo: T 38.6 °C, estertores en base derecha
+              analisis: Probable neumonía adquirida en la comunidad
+              plan: Radiografía de tórax y antibiótico
+              diagnostico:
+                code: J18.9
+                description: Neumonía no especificada
+                type: primary
+      responses:
+        '201':
+          description: Nota registrada (o devuelta de nuevo si la Idempotency-Key ya se había usado con el mismo contenido).
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+            Idempotent-Replayed:
+              $ref: '#/components/headers/IdempotentReplayed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/notas-soap/{notaId}:
+    get:
+      operationId: consultarNota
+      tags: [Notas SOAP]
+      summary: Devuelve la nota completa con sus secciones y diagnósticos.
+      description: Con `Accept text/html` la misma operación responde una página HTML de solo lectura.
+      x-permiso: notas_soap.consultar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/NotaId'
+      responses:
+        '200':
+          description: La nota.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/notas-soap/{notaId}/firma:
+    post:
+      operationId: firmarNota
+      tags: [Notas SOAP]
+      summary: Firma la nota. Solo el autor; una nota firmada ya no cambia.
+      description: |
+        No es idempotente por diseño: una segunda firma responde 409 `nota_firmada`. Si la
+        respuesta de la primera se perdió, el cliente consulta la nota en vez de reintentar.
+      x-permiso: notas_soap.firmar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/NotaId'
+      responses:
+        '200':
+          description: Nota firmada.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/notas-soap/{notaId}/correcciones:
+    post:
+      operationId: corregirNota
+      tags: [Notas SOAP]
+      summary: Corrige una nota firmada creando la versión siguiente (desde 1.1.0).
+      description: |
+        La nota original no cambia: queda firmada como evidencia. La corrección hereda expediente,
+        episodio y autor, nace en borrador con `version_no` + 1, `supersedes_id` = la nota corregida
+        y `correction_reason` = el motivo, y se firma con `POST /api/v1/notas-soap/{id}/firma`.
+        Solo el autor, todavía asignado al episodio y con el expediente abierto, puede corregir.
+        Desde 1.2.0: con `Idempotency-Key`, repetir la misma corrección devuelve la versión ya creada
+        con `Idempotent-Replayed: true`; sin clave, el segundo envío sigue respondiendo 409 `nota_ya_corregida`.
+      x-permiso: notas_soap.corregir
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/NotaId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorreccionNota'
+            example:
+              correction_reason: 'Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C'
+              subjetivo: Tos productiva y fiebre de 3 días
+              objetivo: T 37.6 °C, estertores en base derecha
+              analisis: Probable neumonía adquirida en la comunidad
+              plan: Radiografía de tórax y antibiótico
+              diagnostico:
+                code: J18.9
+                description: Neumonía no especificada
+                type: primary
+      responses:
+        '201':
+          description: Corrección creada (versión nueva en borrador), o devuelta de nuevo si la Idempotency-Key ya se usó con el mismo contenido.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+            Idempotent-Replayed:
+              $ref: '#/components/headers/IdempotentReplayed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nota'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/ReglaIncumplida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/expedientes/{expedienteId}/notas-soap:
+    get:
+      operationId: listarNotasDeExpediente
+      tags: [Expediente]
+      summary: Lista los resúmenes de las notas de un expediente, de la más antigua a la más reciente.
+      description: Los resúmenes no incluyen el texto de las secciones SOAP. Un expediente sin notas devuelve una lista vacía.
+      x-permiso: notas_soap.consultar
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/ExpedienteId'
+        - $ref: '#/components/parameters/Estado'
+      responses:
+        '200':
+          description: Resúmenes de las notas.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaNotas'
+        '400':
+          $ref: '#/components/responses/PeticionInvalida'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+components:
+  securitySchemes:
+    tokenPortador:
+      type: http
+      scheme: bearer
+      description: En el HIS es el JWT del módulo ASII-01; en el micro-HIS, un token de demostración.
+  parameters:
+    TenantId:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital de la solicitud. Debe coincidir con el hospital del token.
+      schema:
+        type: string
+        minLength: 1
+      example: hosp-oriente
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Identificador para seguir la petición entre módulos. Si no cumple el formato, el servidor genera uno nuevo.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+      example: traza-expediente-0001
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Clave única por intento de registro o de corrección. Reutilizarla con otro contenido responde 422.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+      example: 7f3c2a9e-registro-0001
+    NotaId:
+      name: notaId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{1,64}$'
+    ExpedienteId:
+      name: expedienteId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{1,64}$'
+    Estado:
+      name: estado
+      in: query
+      required: false
+      description: Filtra por estado de la nota.
+      schema:
+        type: string
+        enum: [draft, signed]
+  headers:
+    RequestId:
+      description: El X-Request-ID de la petición (recibido o generado).
+      schema:
+        type: string
+    IdempotentReplayed:
+      description: Vale `true` cuando la respuesta repite una nota ya creada con la misma Idempotency-Key.
+      schema:
+        type: string
+        enum: ['true']
+  responses:
+    PeticionInvalida:
+      description: Falta X-Tenant-ID, el cuerpo no tiene la forma esperada o un parámetro no tiene el formato correcto.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: cuerpo_invalido
+              message: El campo "plan" debe ser texto.
+    NoAutenticado:
+      description: Token ausente o inválido.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: token_invalido
+              message: Inicie sesión de nuevo.
+    Prohibido:
+      description: El rol no tiene el permiso de la ruta, el token es de otro hospital, el médico no está asignado o no es el autor.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: acceso_denegado
+              message: No tiene permiso para esta operación.
+    NoEncontrado:
+      description: La nota no existe.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: nota_no_encontrada
+              message: La nota no existe.
+    Conflicto:
+      description: Expediente cerrado o episodio de otro paciente (registro y corrección), nota ya firmada (firma), nota en borrador o versión ya corregida (corrección).
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: nota_firmada
+              message: La nota ya está firmada y no se puede modificar.
+    ReglaIncumplida:
+      description: Sección SOAP vacía, diagnóstico CIE-10 inválido, Idempotency-Key reutilizada con otro contenido o motivo de corrección insuficiente.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: diagnostico_invalido
+              message: El código "NEUMO" no tiene formato CIE-10 (ejemplo J18.9).
+    ErrorInterno:
+      description: Error de base de datos o inesperado. Mensaje genérico, sin detalles internos.
+      headers:
+        X-Request-ID:
+          $ref: '#/components/headers/RequestId'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: error_persistencia
+              message: No se pudo guardar. Intente de nuevo.
+    NoDisponible:
+      description: El servidor no tiene conexión con la base de datos. El cliente puede reintentar después de Retry-After segundos.
+      headers:
+        Retry-After:
+          description: Segundos sugeridos antes de reintentar.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: servicio_no_disponible
+              message: No hay conexión con la base de datos.
+  schemas:
+    RegistroNota:
+      type: object
+      required: [medical_record_id, care_episode_id, subjetivo, objetivo, analisis, plan, diagnostico]
+      properties:
+        medical_record_id:
+          type: string
+        care_episode_id:
+          type: string
+        subjetivo:
+          type: string
+          description: Lo que cuenta el paciente. No puede ir vacío (422 nota_incompleta).
+        objetivo:
+          type: string
+        analisis:
+          type: string
+        plan:
+          type: string
+        diagnostico:
+          $ref: '#/components/schemas/DiagnosticoEntrada'
+    CorreccionNota:
+      type: object
+      required: [correction_reason, subjetivo, objetivo, analisis, plan, diagnostico]
+      properties:
+        correction_reason:
+          type: string
+          description: Por qué se corrige. Al menos 10 caracteres (422 motivo_insuficiente).
+        subjetivo:
+          type: string
+        objetivo:
+          type: string
+        analisis:
+          type: string
+        plan:
+          type: string
+        diagnostico:
+          $ref: '#/components/schemas/DiagnosticoEntrada'
+    DiagnosticoEntrada:
+      type: object
+      required: [code, description, type]
+      properties:
+        code:
+          type: string
+          description: Código CIE-10, por ejemplo J18.9.
+          examples: [J18.9]
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/TipoDiagnostico'
+    TipoDiagnostico:
+      type: string
+      enum: [primary, secondary, differential]
+    Diagnostico:
+      type: object
+      required: [id, code, description, type]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/TipoDiagnostico'
+    Nota:
+      type: object
+      required: [clinical_note_id, medical_record_id, care_episode_id, author_user_ref_id, status, version_no, signed_at, supersedes_id, correction_reason, soap, diagnoses]
+      properties:
+        clinical_note_id:
+          type: string
+        medical_record_id:
+          type: string
+        care_episode_id:
+          type: string
+        author_user_ref_id:
+          type: string
+        status:
+          type: string
+          enum: [draft, signed]
+        version_no:
+          type: integer
+          minimum: 1
+        signed_at:
+          type: [string, 'null']
+          format: date-time
+        supersedes_id:
+          type: [string, 'null']
+          description: Nota que esta versión corrige; null en una nota original (desde 1.1.0).
+        correction_reason:
+          type: [string, 'null']
+          description: Motivo de la corrección; null en una nota original (desde 1.1.0).
+        soap:
+          type: object
+          required: [subjetivo, objetivo, analisis, plan]
+          properties:
+            subjetivo:
+              type: string
+            objetivo:
+              type: string
+            analisis:
+              type: string
+            plan:
+              type: string
+        diagnoses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diagnostico'
+    ResumenNota:
+      type: object
+      required: [clinical_note_id, care_episode_id, author_user_ref_id, status, version_no, supersedes_id, created_at, signed_at, diagnosis_codes]
+      properties:
+        clinical_note_id:
+          type: string
+        care_episode_id:
+          type: string
+        author_user_ref_id:
+          type: string
+        status:
+          type: string
+          enum: [draft, signed]
+        version_no:
+          type: integer
+        supersedes_id:
+          type: [string, 'null']
+          description: Nota que esta versión corrige (desde 1.1.0).
+        created_at:
+          type: string
+          format: date-time
+        signed_at:
+          type: [string, 'null']
+          format: date-time
+        diagnosis_codes:
+          type: array
+          items:
+            type: string
+    ListaNotas:
+      type: object
+      required: [medical_record_id, items]
+      properties:
+        medical_record_id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResumenNota'
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - tenant_requerido
+                - token_invalido
+                - cuerpo_invalido
+                - acceso_denegado
+                - nota_no_encontrada
+                - ruta_no_encontrada
+                - metodo_no_permitido
+                - expediente_no_disponible
+                - nota_firmada
+                - nota_incompleta
+                - diagnostico_invalido
+                - idempotency_key_reutilizada
+                - nota_no_firmada
+                - nota_ya_corregida
+                - motivo_insuficiente
+                - error_persistencia
+                - error_interno
+                - servicio_no_disponible
+            message:
+              type: string

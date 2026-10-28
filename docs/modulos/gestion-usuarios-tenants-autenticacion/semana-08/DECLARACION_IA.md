@@ -1,0 +1,1 @@
+Se utilizó IA para revisar el contrato local de semana 5 y preparar user flow, seis wireframes anotados y reglas UX. Datos ficticios y sin credenciales reales. No se atribuyen JWT operativo, autenticación, persistencia ni pruebas de accesibilidad ejecutadas. La estudiante debe revisar y comprender el diseño.
