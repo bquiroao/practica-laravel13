@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nota SOAP · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div id="fondo" data-inerte-en="hoja-firma">
+<header class="barra">
+  <a class="volver" href="m1-notas.html" aria-label="Volver a las notas">←</a>
+  <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span> ▾</span>
+  <span class="usuario" data-estado="base hoja-firma firmada incierto-firma reemplazada">dra-mendez <span class="rol">· Médico</span></span>
+  <span class="usuario" data-estado="enfermeria" hidden>enf-ana <span class="rol">· Enfermería</span></span>
+</header>
+<div class="paciente">Carlos R. · <span>Expediente exp-carlos · Episodio epi-100 (abierto)</span></div>
+<main>
+  <div class="aviso info" data-estado="reemplazada" hidden>
+    Esta versión fue reemplazada por la versión 2.
+    <p><a href="m3-detalle.html?estado=firmada">Ver la versión vigente</a></p>
+  </div>
+  <div class="aviso exito" role="status" data-estado="firmada" hidden>
+    <button type="button" class="cerrar" aria-label="Cerrar aviso">×</button>
+    ✓ Nota firmada.
+    <p>Ya no se puede modificar. Si hay un error, use «Corregir».</p>
+  </div>
+  <div class="aviso incierto" role="alert" tabindex="-1" data-estado="incierto-firma" hidden>
+    No sabemos si la firma llegó: se cortó la conexión.
+    <p>No la repetimos sola. Consulte el estado de la nota antes de volver a firmar.</p>
+  </div>
+
+  <h1>Nota versión 1
+    <span class="estado borrador" data-estado="base hoja-firma incierto-firma enfermeria">✎ Borrador</span>
+    <span class="estado firmada" data-estado="firmada" hidden>✓ Firmada</span>
+    <span class="estado reemplazada" data-estado="reemplazada" hidden>⟲ Reemplazada por v2</span>
+  </h1>
+  <p class="secundario">dra-mendez · 13/10/2026 08:10</p>
+  <div class="seccion-soap"><b>S</b>Tos productiva y fiebre de 3 días</div>
+  <div class="seccion-soap"><b>O</b>T 38.6 °C, estertores en base derecha</div>
+  <div class="seccion-soap"><b>A</b>Probable neumonía adquirida en la comunidad</div>
+  <div class="seccion-soap"><b>P</b>Radiografía de tórax y antibiótico</div>
+  <h2>Diagnóstico</h2>
+  <p>J18.9 · Neumonía no especificada · principal</p>
+  <p class="secundario" data-estado="enfermeria" hidden>Solo lectura: enfermería consulta las notas para dar seguimiento.</p>
+</main>
+<div class="accion-fija" data-estado="base">
+  <button type="button" class="boton primario">Firmar nota</button>
+</div>
+<div class="accion-fija" data-estado="firmada" hidden>
+  <a class="boton" href="m4-corregir.html">Corregir</a>
+</div>
+<div class="accion-fija" data-estado="incierto-firma" hidden>
+  <button type="button" class="boton primario">Consultar estado de la nota</button>
+</div>
+</div>
+
+<div data-estado="hoja-firma" hidden>
+  <div class="velo"></div>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="titulo-firma">
+    <h2 id="titulo-firma">¿Firmar la nota versión 1 de Carlos R.?</h2>
+    <p class="secundario">13/10/2026 08:10 · J18.9 Neumonía no especificada</p>
+    <p>La firma no se puede deshacer. Si después encuentra un error, se corrige con una versión nueva.</p>
+    <div class="acciones">
+      <button type="button" class="boton" autofocus>Cancelar</button>
+      <button type="button" class="boton primario">Firmar nota</button>
+    </div>
+  </div>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

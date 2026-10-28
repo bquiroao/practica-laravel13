@@ -1,0 +1,2 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-6-nativephp-evaluacion-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-06\cambio\ConsentNotifier.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-6-nativephp-evaluacion-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-06\cambio\verificar.php

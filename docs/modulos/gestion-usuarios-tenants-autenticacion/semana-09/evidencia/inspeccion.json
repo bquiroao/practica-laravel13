@@ -1,0 +1,56 @@
+[
+  {
+    "file": "01-usuarios.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "02-invitacion.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "03-credencial.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "04-login.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "05-sesion.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "06-recuperacion.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  }
+]

@@ -1,0 +1,16 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Catálogo de salas, wards y camas (tarea Odoo 2444): diseño ANTES de aplicar SRP
+title ANTES — una clase con cuatro razones para cambiar
+class CatalogoCamasAntes {
+  - salas, camas : array
+  + bitacora : array
+  + registrarSala(sala) : array
+  + registrarCama(sala, cama) : array
+  + cambiarEstado(sala, cama, nuevo, motivo) : array
+}
+note right of CatalogoCamasAntes
+  Razones para cambiar: 1. reglas de estado (enfermería)
+  2. almacenamiento (base de datos) · 3. auditoría (gobernanza)
+  4. códigos HTTP (contrato de la API)
+end note
+@enduml

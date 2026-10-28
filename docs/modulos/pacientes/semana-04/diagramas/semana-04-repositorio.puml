@@ -1,0 +1,90 @@
+@startuml semana-04-repositorio
+!pragma layout smetana
+title Patrón Repository: interfaces en el límite del Dominio, adaptadores PDO e InMemory
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Aplicación" {
+  class "Casos de uso" as UC
+  interface Transaccion {
+    + ejecutar(Closure) : mixed
+  }
+}
+
+package "Dominio\\Puertos (el límite: quien los NECESITA los define)" #E8F5E9 {
+  interface ConsultaPacientes {
+    + porCodigo(hospital, codigo) : ?Paciente
+    + buscar(hospital, CriterioBusqueda) : list<Paciente>
+  }
+  interface RepositorioPacientes {
+    + registrar(Paciente) : Paciente
+    + actualizar(Paciente, versionEsperada) : Paciente
+  }
+  interface IndiceDuplicados {
+    + titularDe(Identificador) : ?string
+    + coincidenciasProbables(nombre, nacimiento) : list<string>
+  }
+  interface RegistroAuditoria {
+    + registrar(EventoAuditoria) : void
+  }
+}
+
+package "Persistencia\\Pdo (PostgreSQL)" {
+  class PdoRepositorioPacientes
+  class PdoIndiceDuplicados
+  class PdoRegistroAuditoria
+  class PdoTransaccion
+  abstract class RepositorioPdo {
+    # ejecutar(sql, parametros) : PDOStatement
+  }
+}
+
+package "Persistencia\\EnMemoria" {
+  class RepositorioPacientesEnMemoria
+  class IndiceDuplicadosEnMemoria
+  class RegistroAuditoriaEnMemoria
+  class TransaccionEnMemoria
+  interface Restaurable
+}
+
+package "Persistencia (composición)" {
+  class ConjuntoAdaptadores
+  class FabricaPdo
+  class FabricaEnMemoria
+}
+
+UC ..> ConsultaPacientes
+UC ..> RepositorioPacientes
+UC ..> IndiceDuplicados
+UC ..> RegistroAuditoria
+UC ..> Transaccion
+ConsultaPacientes <|-- RepositorioPacientes
+
+RepositorioPacientes <|.. PdoRepositorioPacientes
+IndiceDuplicados <|.. PdoIndiceDuplicados
+RegistroAuditoria <|.. PdoRegistroAuditoria
+Transaccion <|.. PdoTransaccion
+RepositorioPdo <|-- PdoRepositorioPacientes
+RepositorioPdo <|-- PdoIndiceDuplicados
+RepositorioPdo <|-- PdoRegistroAuditoria
+
+RepositorioPacientes <|.. RepositorioPacientesEnMemoria
+IndiceDuplicados <|.. IndiceDuplicadosEnMemoria
+RegistroAuditoria <|.. RegistroAuditoriaEnMemoria
+Transaccion <|.. TransaccionEnMemoria
+TransaccionEnMemoria --> "*" Restaurable : deshace
+
+FabricaPdo ..> ConjuntoAdaptadores : crea (misma conexión)
+FabricaEnMemoria ..> ConjuntoAdaptadores : crea (mismos almacenes)
+
+note bottom of ConjuntoAdaptadores
+  bootstrap/contenedor.php elige con
+  PACIENTES_PERSISTENCIA = pdo | memoria.
+  Los dos pasan la MISMA suite de contrato
+  (CON-MEM-01..06 / CON-PDO-01..06).
+end note
+@enduml

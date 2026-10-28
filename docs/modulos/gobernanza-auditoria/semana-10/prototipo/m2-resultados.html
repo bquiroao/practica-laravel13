@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movimientos · Bitácora · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: base · red · carga · vacio · lenta · sin-conexion · error-mas · fin -->
+<header class="barra">
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital" data-estado="base carga vacio lenta sin-conexion error-mas fin">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <button class="hospital" aria-label="Alcance: toda la red hospitalaria. Cambiar" data-estado="red">
+    <span>Red hospitalaria</span> ▾
+  </button>
+  <span class="alcance-red" data-estado="red">RED</span>
+  <span class="avatar" role="img" aria-label="Auditor de oriente">AO</span>
+</header>
+
+<div class="red lenta" role="status" data-estado="lenta">
+  <span aria-hidden="true">◔</span> La conexión está lenta. Seguimos esperando la respuesta.
+  <button>Cancelar</button>
+</div>
+<div class="red" role="status" data-estado="sin-conexion error-mas">
+  <span aria-hidden="true">⦸</span> Sin conexión. Las filas ya cargadas siguen aquí.
+</div>
+
+<main>
+  <div class="fila">
+    <a class="btn texto" href="m1-consultar.html" style="margin-left:-8px">‹ Filtros</a>
+  </div>
+  <h1>Movimientos</h1>
+  <p class="sub">21/10/2026 · resultado: denegado · más recientes primero</p>
+
+  <!-- semana 9, B-11: el resultado se anuncia; el foco se queda donde estaba -->
+  <p class="meta" role="status" aria-live="polite" data-estado="base red lenta sin-conexion error-mas fin">
+    <span data-estado="base red lenta sin-conexion">50 movimientos · hay más</span>
+    <span data-estado="error-mas">50 movimientos · no se pudieron cargar más</span>
+    <span data-estado="fin">53 movimientos · fin de la lista</span>
+  </p>
+
+  <div data-estado="carga" aria-busy="true">
+    <p class="meta" role="status">Buscando movimientos…</p>
+    <div class="tarjeta"><div class="esq" style="width:70%"></div><div class="esq" style="width:45%"></div><div class="esq" style="width:30%"></div></div>
+    <div class="tarjeta"><div class="esq" style="width:65%"></div><div class="esq" style="width:40%"></div><div class="esq" style="width:35%"></div></div>
+  </div>
+
+  <div class="tarjeta" role="status" data-estado="vacio">
+    <h2>No hay movimientos el 21/10/2026 con esos filtros</h2>
+    <p class="meta">Pruebe con «7 días» o quite el filtro de resultado.</p>
+    <a class="btn bloque" href="m1-consultar.html">Cambiar filtros</a>
+  </div>
+
+  <!-- Teléfono y tableta: una tarjeta por movimiento. Prioridad 1: qué y quién · 2: cuándo y resultado · 3: recurso -->
+  <ul class="movs solo-movil" data-estado="base red lenta sin-conexion error-mas fin">
+    <li class="mov" id="m-9">
+      <div class="cab"><span class="num">#9</span><span class="que">Edición de paciente</span></div>
+      <div class="codigo">PACIENTE_ACTUALIZADO</div>
+      <div class="quien">u-ana <span class="meta">· 07:42</span><span class="meta" data-estado="red"> · Oriente</span></div>
+      <div class="extra meta">paciente:P-000007 · pacientes</div>
+      <div class="pie">
+        <span class="res denegado"><span aria-hidden="true">✕</span> Denegado</span>
+        <a class="btn ver" href="m3-detalle.html" aria-label="Ver detalle del movimiento #9">Ver</a>
+      </div>
+    </li>
+    <li class="mov" id="m-2">
+      <div class="cab"><span class="num">#2</span><span class="que">Consulta de paciente</span></div>
+      <div class="codigo">PACIENTE_CONSULTADO</div>
+      <div class="quien">u-correcto <span class="meta">· 09:00</span></div>
+      <div class="extra meta">paciente:P-000001 · pacientes</div>
+      <div class="pie">
+        <span class="res exito"><span aria-hidden="true">✓</span> Éxito</span>
+        <a class="insignia corrige" href="m3-detalle.html">Corrige a #1</a>
+        <a class="btn ver" href="m3-detalle.html?estado=correccion" aria-label="Ver detalle del movimiento #2">Ver</a>
+      </div>
+    </li>
+    <li class="mov" id="m-1">
+      <div class="cab"><span class="num">#1</span><span class="que">Consulta de paciente</span></div>
+      <div class="codigo">PACIENTE_CONSULTADO</div>
+      <div class="quien">u-equivocado <span class="meta">· 08:00</span></div>
+      <div class="extra meta">paciente:P-000001 · pacientes</div>
+      <div class="pie">
+        <span class="res exito"><span aria-hidden="true">✓</span> Éxito</span>
+        <a class="insignia corregido" href="m3-detalle.html?estado=correccion">Corregido por #2</a>
+        <a class="btn ver" href="m3-detalle.html" aria-label="Ver detalle del movimiento #1">Ver</a>
+      </div>
+    </li>
+  </ul>
+
+  <!-- Escritorio (≥1024): tabla de W2 con «#» y «Fecha y hora» -->
+  <table class="tabla" data-estado="base red lenta sin-conexion error-mas fin">
+    <caption class="oculto-visual">Movimientos encontrados</caption>
+    <thead><tr><th scope="col">#</th><th scope="col">Fecha y hora</th><th scope="col">Usuario</th><th scope="col">Acción</th><th scope="col">Resultado</th><th scope="col">Recurso</th><th scope="col"><span class="oculto-visual">Detalle</span></th></tr></thead>
+    <tbody>
+      <tr><td>9</td><td>21/10 07:42</td><td>u-ana</td><td>Edición de paciente<span class="codigo">PACIENTE_ACTUALIZADO</span></td><td><span class="res denegado">✕ Denegado</span></td><td>paciente:P-000007</td><td><a href="m3-detalle.html" aria-label="Ver detalle del movimiento #9">Ver</a></td></tr>
+      <tr><td>2</td><td>21/10 09:00</td><td>u-correcto</td><td>Consulta de paciente<span class="codigo">PACIENTE_CONSULTADO</span> <a class="insignia corrige" href="m3-detalle.html">Corrige a #1</a></td><td><span class="res exito">✓ Éxito</span></td><td>paciente:P-000001</td><td><a href="m3-detalle.html?estado=correccion" aria-label="Ver detalle del movimiento #2">Ver</a></td></tr>
+      <tr><td>1</td><td>21/10 08:00</td><td>u-equivocado</td><td>Consulta de paciente<span class="codigo">PACIENTE_CONSULTADO</span> <a class="insignia corregido" href="m3-detalle.html?estado=correccion">Corregido por #2</a></td><td><span class="res exito">✓ Éxito</span></td><td>paciente:P-000001</td><td><a href="m3-detalle.html" aria-label="Ver detalle del movimiento #1">Ver</a></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Paginación por cursor: «Cargar más» al final de la lista; si falla, lo ya cargado se conserva -->
+  <div style="margin-top:12px">
+    <a class="btn bloque" href="m2-resultados.html?estado=fin" data-estado="base red">Cargar 50 más</a>
+    <span class="btn bloque" aria-disabled="true" data-estado="sin-conexion">Cargar más · requiere conexión</span>
+    <div class="aviso error" role="alert" data-estado="error-mas">
+      <h2>No se pudieron cargar más movimientos</h2>
+      <p class="meta" style="color:var(--texto)">Las 50 filas de arriba siguen siendo válidas. Código de soporte: 3f9a…c21</p>
+      <div class="acciones"><a class="btn primario" href="m2-resultados.html?estado=fin">Reintentar</a></div>
+    </div>
+    <p class="meta" data-estado="fin">No hay más movimientos para estos filtros.</p>
+  </div>
+</main>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-consultar.html" aria-current="page"><span class="ico" aria-hidden="true">📋</span>Bitácora</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+<script>
+  // En la red, la barra cambia de tono además de decir «Red hospitalaria» (1.4.1: no solo color).
+  if (document.body.dataset.estadoActual === 'red') document.querySelector('.barra').classList.add('red-activa');
+</script>
+</body>
+</html>

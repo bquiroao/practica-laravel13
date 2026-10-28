@@ -1,0 +1,19 @@
+@startsalt m02-detalle
+title M-02 Detalle en móvil: lo que se usa primero, arriba
+{+
+  {[<] | <b>GLU-001</b> }
+  ==
+  <b>Glucosa en ayunas</b> · v1
+  <&warning> Vigente hasta 31/01/2027
+  ..
+  <b>Preparación del paciente</b>
+  Ayuno 8 h. Solo agua.
+  <b>Muestra</b>
+  Plasma · Tubo tapa gris · 2 mL
+  ..
+  [v] Conservación y estabilidad
+  [v] Datos generales (sección, tiempo de respuesta)
+  ..
+  Datos guardados: 15/01/2027 08:10 (sin conexión)
+}
+@endsalt

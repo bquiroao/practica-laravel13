@@ -1,0 +1,13 @@
+$ php tests/ejecutar.php --solo=CN
+Micro-HIS Auditoría - pruebas (PHP 8.4.26)
+
+== Presentación: MVC, HTTP y observabilidad ==
+[PASA ] CN-01    Particiones de equivalencia del filtro «resultado»: 3 clases válidas → 200 con solo esa clase; mayúsculas, sinónimo y vacío → 422
+[PASA ] CN-02    Valores límite del rango de fechas: 00:00:00 y 23:59:59 locales dentro, 00:00 del día siguiente fuera; desde = hasta; desde = hasta + 1; 29/02 y 30/02
+[PASA ] CN-03    Valores límite de longitud: usuario 64/65 al registrar y al filtrar; recurso 128/129; detalle de 4096/4097 bytes
+[PASA ] CN-04    Permisos (tabla de decisión rol × operación): cada rol hace exactamente lo suyo; todo lo demás → 403
+[PASA ] CN-05    Tenant: sin X-Tenant-ID → 400; tenant ajeno al token → 403; «*» solo con token de red; un detalle de otro hospital = uno inexistente
+[PASA ] CN-06    Errores: cuerpo ausente → 400; parámetro repetido → 400; método no permitido → 405; ruta inexistente → 404; cursor manipulado → 422; base caída → 503 genérico
+[PASA ] CN-07    Valores límite de la paginación: 50 movimientos → una página sin cursor; 51 → 50 + cursor, y la 2.ª página trae 1
+
+Total: 7  Pasan: 7  Fallan: 0  Omitidas: 0

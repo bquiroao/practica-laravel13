@@ -1,0 +1,12 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Contratos API: centro de documentación por rol (tarea Odoo 2474): ANTES de aplicar ISP
+title ANTES — una interfaz de 7 métodos para todos los clientes
+interface RepositorioDocumentosAntes {
+  publicada() · vigente() · guardarEnRevision()
+  enRevision() · publicar() · rechazar() · marcarObsoleta()
+}
+class ServicioConsultaAntes <<usa 1 de 7>>
+class CacheLecturaAntes <<6 métodos lanzan «no soportado»>>
+ServicioConsultaAntes --> RepositorioDocumentosAntes
+CacheLecturaAntes ..|> RepositorioDocumentosAntes
+@enduml

@@ -1,0 +1,23 @@
+OK    CA-01 enviar 1.0.0 con audiencia = 201 (en revisión)
+OK    CA-02 versión sin formato x.y.z = 422
+OK    CA-02 sin audiencia = 422
+OK    CA-04 el autor aprueba lo propio = 403 (E5)
+OK    CA-04 otro revisor aprueba = 200
+OK    CA-03 repetir la versión vigente = 409 (E3)
+OK    CA-01 enviar 1.1.0 = 201
+OK    CA-07 marcar obsoleta la 1.0.0 = 200 (no se borra)
+OK    [repositorio] CA-05 médico ve la vigente 1.1.0
+OK    [repositorio] CA-07 la 1.0.0 se ve con aviso de obsoleta
+OK    [repositorio] CA-06 rol fuera de la audiencia = 404
+OK    [repositorio] CA-06 documento inexistente = 404
+OK    [caché de solo lectura] CA-05 médico ve la vigente 1.1.0
+OK    [caché de solo lectura] CA-07 la 1.0.0 se ve con aviso de obsoleta
+OK    [caché de solo lectura] CA-06 rol fuera de la audiencia = 404
+OK    [caché de solo lectura] CA-06 documento inexistente = 404
+OK    ServicioConsulta depende de una interfaz de 1 método(s)
+OK    ServicioPublicacion depende de una interfaz de 2 método(s)
+OK    ServicioRevision depende de una interfaz de 4 método(s)
+OK    ServicioConsultaAntes depende de una interfaz de 7 método(s)
+OK    CacheLectura implementa solo LectorDocumentos
+OK    CacheLecturaAntes tiene 6 métodos obligados que solo lanzan «no soportado»
+RESULTADO: todo correcto

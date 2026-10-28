@@ -1,0 +1,66 @@
+@startuml
+!include <C4/C4_Component>
+
+title Semana 3 · C4 nivel 3: componentes del Micro-HIS Reportes y analytics básicos
+
+Person(usuario, "Administrador / Jefe de área / Médico")
+ContainerDb(bd, "Base micro_his", "PostgreSQL 16 en Docker, puerto 55440", "ward, bed, bed_stay, appointment")
+
+Container_Boundary(app, "Aplicación PHP (PHP 8.2+ vanilla)") {
+  Component(bootstrap, "bootstrap.php", "Composition Root", "Crea y conecta todas las piezas")
+
+  Boundary(presentation, "Presentation") {
+    Component(index, "public/index.php", "Front Controller", "Lee la petición y arma los Filtros")
+    Component(vista, "VistaIndicador", "Vista HTML", "Muestra indicador, ficha, desglose y registros")
+  }
+
+  Boundary(application, "Application") {
+    Component(caso, "CalcularIndicador", "Caso de uso", "Orquesta los tres niveles de trazabilidad")
+    Component(permisos, "PoliticaPermisos", "Servicio", "Valida el rol (RN-01, RN-08)")
+  }
+
+  Boundary(domain, "Domain") {
+    Component(registry, "ReportRegistry", "Registry", "Entrega el reporte por su tipo")
+    Component(contrato, "ContratoReporte", "Interfaz", "calcular, desglosar y registros")
+    Component(ocupacion, "ReporteOcupacion", "Strategy", "ocupadas / habilitadas × 100")
+    Component(valores, "Filtros, Indicador, Desglose, RegistroOrigen", "Value Objects", "Invariantes RN-02 y RN-07")
+    Component(lector, "LectorOcupacion", "Interfaz (puerto)", "Datos que el dominio necesita")
+  }
+
+  Boundary(persistence, "Persistence") {
+    Component(adaptador, "OcupacionPdo", "Adaptador PDO", "Consultas preparadas sobre ward, bed y bed_stay")
+    Component(conexion, "ConexionPdo", "PDO pgsql", "DSN en config/app.ini, ERRMODE_EXCEPTION")
+  }
+}
+
+Boundary(pruebas, "Pruebas") {
+  Component(doble, "LectorQueFalla", "Test Double", "Simula una falla de la base")
+}
+
+Rel(usuario, index, "Consulta", "HTTP GET")
+Rel(index, caso, "Ejecuta")
+Rel(index, vista, "Entrega el resultado")
+Rel(caso, permisos, "Valida el rol")
+Rel(caso, registry, "Obtiene el reporte")
+Rel(caso, contrato, "Usa solo el contrato")
+Rel(registry, contrato, "Guarda implementaciones de")
+Rel(ocupacion, contrato, "Implementa")
+Rel(ocupacion, valores, "Crea")
+Rel(ocupacion, lector, "Lee datos mediante")
+Rel(adaptador, lector, "Implementa")
+Rel(adaptador, conexion, "Usa")
+Rel(conexion, bd, "Sentencias preparadas", "PDO")
+Rel(doble, lector, "Implementa")
+Rel(bootstrap, ocupacion, "Crea con OcupacionPdo")
+
+note right of lector
+  Inversión de dependencias:
+  Domain define el puerto y
+  Persistence lo implementa.
+  Todas las dependencias apuntan
+  hacia Domain; Domain no depende
+  de ninguna otra capa.
+end note
+
+SHOW_LEGEND()
+@enduml

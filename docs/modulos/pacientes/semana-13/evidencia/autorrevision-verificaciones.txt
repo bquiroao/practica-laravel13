@@ -1,0 +1,26 @@
+AR-01 · El punto de entrada real siempre acepta los tokens de demostración
+  crearKernel() + «Bearer token-supervisor-oriente» → HTTP 200 · tokens demo configurados: 4 · variable de entorno que lo impida: ninguna
+
+AR-02 · El 409 por documento revela el código de un paciente de OTRO hospital
+  admisión de hosp-NORTE registra el DPI de una paciente de hosp-ORIENTE → HTTP 409 {"error":"PACIENTE_EXISTENTE","codigo":"P-000001","identificador":"*********0101"}
+  la misma admisión abre la ficha P-000001 que le dio el 409 → HTTP 404 {"error":"PACIENTE_NO_ENCONTRADO"}
+
+AR-03 · Los candidatos de POSIBLE_DUPLICADO incluyen pacientes de otros hospitales
+  admisión de hosp-NORTE registra a una homónima sin documento → HTTP 409 {"error":"POSIBLE_DUPLICADO","candidatos":["P-000001"]}
+
+AR-04 · Quien tiene el DPI de una paciente protegida confirma que está en el hospital
+  clínico busca el DPI de la protegida → total=1 {"codigo":"P-000001","nombre":"Identidad protegida","nacimiento":null,"identificador":null,"identidad_protegida":true}
+  clínico busca un DPI que no existe   → total=0 (la diferencia confirma la presencia)
+
+AR-05 · Extensiones PHP usadas por src/ y declaradas en el README
+  json      usada en src/ · declarada en README: sí
+  pdo       usada en src/ · declarada en README: sí
+  mbstring  usada en src/ · declarada en README: NO
+  sodium    usada en src/ · declarada en README: NO
+
+AR-06 · Las claves de idempotencia no vencen
+  50 registros con clave → el almacén conserva todas; propiedades del almacén: registros (ninguna de vencimiento); el puerto AlmacenIdempotencia no define limpieza
+
+AR-07 · El DPI solo valida longitud y departamento (no el dígito verificador ni el municipio)
+  DPI 0000000000101 (ceros + departamento 01) → HTTP 201 aceptado
+  DPI 1234567890199 (departamento 01, municipio 99 (Guatemala tiene 17)) → HTTP 201 aceptado

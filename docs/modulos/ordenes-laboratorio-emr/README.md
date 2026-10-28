@@ -12,6 +12,7 @@ Modela la emisión de una o varias pruebas de laboratorio desde el expediente m�
 |---:|---|---|---|---|
 | 1 | UML del proceso «emisión de orden desde el expediente y seguimiento de su estado»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-ordenes-laboratorio-emr.md](semana-01/semana-01-uml-ordenes-laboratorio-emr.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
 | 2 | RF/RNF, criterios de aceptación y aplicación de SRP al flujo de emisión y seguimiento, con ejemplo PHP verificable | [semana-02-srp-ordenes-laboratorio-emr.md](semana-02/semana-02-srp-ordenes-laboratorio-emr.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
+| 15 | Pruebas unitarias, de caja blanca y caja negra para reglas y seguimiento de órdenes, trazadas a RF/RNF y con evidencia de ejecución | [semana-15-pruebas-ordenes-emr.md](semana-15/semana-15-pruebas-ordenes-emr.md) · [suite](semana-15/pruebas/README.md) | [DECLARACION_IA.md](semana-15/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-15/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
@@ -21,6 +22,9 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/*.puml
 ```
 
+## Semana 6
+
+[Defensa arquitectónica, presentación y cambio práctico](semana-06/README.md).
 ## Semana 3
 
 [Micro-HIS por capas, PDO y arquitectura C4/UML](semana-03/README.md).
@@ -32,3 +36,6 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr
 ## Semana 5
 
 [API cliente-servidor, frontera y plan de integración](semana-05/README.md).
+## Semana 7
+
+[Componentes, contratos y refactor conceptual](semana-07/README.md).

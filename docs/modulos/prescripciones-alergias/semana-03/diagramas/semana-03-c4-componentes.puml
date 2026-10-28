@@ -1,0 +1,48 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes de la API Prescripciones (cuatro capas)
+
+Container(cliente, "Cliente HTTP", "curl / SPA")
+ContainerDb(bd, "PostgreSQL", "esquema prescripciones")
+
+Container_Boundary(api, "API Prescripciones") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "Http", "Ruta (404/405) → token (401) → tenant (400/403) → acción; 500 sin detalles.")
+        Component(acciones, "AccionesPrescripciones", "Http", "Lee JSON e Idempotency-Key; arma la solicitud; sin SQL ni reglas.")
+        Component(traductor, "TraductorResultado", "Http", "Tipo de resultado → código HTTP; Location.")
+    }
+    Boundary(app, "Aplicación") {
+        Component(emitir, "EmitirPrescripcion", "Caso de uso", "Permiso → idempotencia → tenant → evaluación → bloqueo/advertencia → transacción.")
+        Component(previa, "VerificarAlergiasPrevia", "Caso de uso", "Informa sin efectos.")
+        Component(consultar, "ConsultarPrescripcion", "Caso de uso", "Vista para farmacia; 404 fuera del hospital.")
+        Component(evaluacion, "EvaluacionClinica", "Servicio", "Catálogo + validador + fuente + verificador.")
+        Component(puertosApp, "Puertos de Aplicación", "Interfaces", "FuenteAlergias, CatalogoMedicamentos, Pacientes, PoliticaAcceso, RegistroAuditoria, Transaccion.")
+    }
+    Boundary(dom, "Dominio") {
+        Component(reglas, "ValidadorPrescripcion · VerificadorAlergias", "Reglas puras", "R-01, R-02, R-04, R-05.")
+        Component(modelo, "Prescripcion · Alergia · ResultadoVerificacion", "Modelo", "Prescripcion readonly.")
+        Component(puertosDom, "RepositorioPrescripciones · Reloj", "Puertos del dominio", "Sin actualizar ni eliminar.")
+    }
+    Boundary(per, "Persistencia") {
+        Component(pdo, "Adaptadores PDO", "PDO pgsql", "PdoRepositorioPrescripciones, PdoFuenteAlergias, PdoCatalogoMedicamentos, PdoPacientes, PdoRegistroAuditoria, PdoTransaccion.")
+        Component(config, "PoliticaAccesoEstatica · RelojSistema", "Configuración", "Stand-ins de RBAC y del reloj.")
+    }
+}
+
+Rel(cliente, kernel, "HTTP/JSON")
+Rel(kernel, acciones, "despacha")
+Rel(acciones, emitir, "ejecutar()")
+Rel(acciones, previa, "ejecutar()")
+Rel(acciones, consultar, "ejecutar()")
+Rel(acciones, traductor, "traducir()")
+Rel(emitir, evaluacion, "evaluar()")
+Rel(previa, evaluacion, "evaluar()")
+Rel(evaluacion, reglas, "usa")
+Rel(emitir, puertosApp, "depende de")
+Rel(emitir, puertosDom, "depende de")
+Rel(pdo, puertosApp, "implementa")
+Rel(pdo, puertosDom, "implementa")
+Rel(pdo, bd, "sentencias preparadas")
+@enduml
