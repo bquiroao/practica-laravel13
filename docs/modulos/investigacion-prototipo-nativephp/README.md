@@ -18,3 +18,7 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 ```bash
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo-nativephp/semana-01/diagramas/*.puml
 ```
+
+## Semana 14
+
+[Plan SQA: métricas, riesgos, controles, responsables y calendario](semana-14/semana-14-plan-sqa-nativephp.md).
