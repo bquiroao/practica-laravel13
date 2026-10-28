@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="640" viewBox="0 0 980 640" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 7 - Componentes de validación de resultados por bioquímico</title>
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker>
+    <marker id="i" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><path d="M0,0 L11,5 L0,10 z" fill="#fff" stroke="#333"/></marker>
+  </defs>
+  <text x="490" y="24" text-anchor="middle" font-size="16" font-weight="bold">Semana 7 - Componentes (sólido: existe; discontinuo: propuesto o futuro)</text>
+
+  <rect x="10" y="40" width="960" height="90" fill="#eef5ff" stroke="#5b8bd0" stroke-dasharray="6,3"/>
+  <text x="20" y="58" font-weight="bold">Frontend (propuesto)</text>
+  <rect x="60" y="70" width="270" height="48" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="195" y="92" text-anchor="middle">ResultReviewScreen</text><text x="195" y="108" text-anchor="middle">contexto y decisión</text>
+  <rect x="520" y="70" width="270" height="48" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="655" y="92" text-anchor="middle">ReviewApiClient</text><text x="655" y="108" text-anchor="middle">estados y errores</text>
+
+  <rect x="10" y="150" width="960" height="90" fill="#fdf1f1" stroke="#c0645b" stroke-dasharray="6,3"/>
+  <text x="20" y="168" font-weight="bold">Backend - Presentation (propuesto)</text>
+  <rect x="60" y="180" width="270" height="48" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="195" y="202" text-anchor="middle">ReviewController</text><text x="195" y="218" text-anchor="middle">HTTP a ReviewCommand</text>
+  <rect x="520" y="180" width="270" height="48" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="655" y="202" text-anchor="middle">ReviewResponseMapper</text><text x="655" y="218" text-anchor="middle">ReviewOutcome a respuesta</text>
+
+  <rect x="10" y="260" width="960" height="150" fill="#f1fbf1" stroke="#5aa55a"/>
+  <text x="20" y="278" font-weight="bold">Backend - Application (existe, Semana 2)</text>
+  <rect x="60" y="300" width="270" height="48" fill="#fff" stroke="#333"/><text x="195" y="322" text-anchor="middle">ReviewPendingLabResult</text><text x="195" y="338" text-anchor="middle">caso de uso</text>
+  <rect x="400" y="290" width="200" height="34" fill="#fff8dc" stroke="#333"/><text x="500" y="312" text-anchor="middle">«interface» ReviewerAuthorization</text>
+  <rect x="400" y="330" width="200" height="34" fill="#fff8dc" stroke="#333"/><text x="500" y="352" text-anchor="middle">«interface» Clock</text>
+  <rect x="640" y="310" width="310" height="34" fill="#fff8dc" stroke="#333"/><text x="795" y="332" text-anchor="middle">«interface» LabResultDecisionRepository</text>
+  <rect x="60" y="368" width="540" height="34" fill="#fff4e8" stroke="#d08a3b"/><text x="330" y="390" text-anchor="middle">Domain: LabResult · LabResultStatus · ReviewDecision · ReviewDecisionRecord</text>
+
+  <rect x="10" y="430" width="960" height="190" fill="#f7eefb" stroke="#9a5bb5"/>
+  <text x="20" y="448" font-weight="bold">Persistencia e infraestructura</text>
+  <rect x="640" y="470" width="310" height="40" fill="#fff" stroke="#333"/><text x="795" y="494" text-anchor="middle">InMemoryLabResultDecisionRepository (existe)</text>
+  <rect x="640" y="525" width="310" height="40" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="795" y="549" text-anchor="middle">PdoLabResultDecisionRepository (futuro)</text>
+  <rect x="400" y="470" width="200" height="40" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="500" y="494" text-anchor="middle">Adaptador de roles (futuro)</text>
+  <rect x="400" y="525" width="200" height="40" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="500" y="549" text-anchor="middle">Reloj del sistema (futuro)</text>
+
+  <g stroke="#333" fill="none" marker-end="url(#a)">
+    <path d="M330,94 H520" stroke-dasharray="6,3"/>
+    <path d="M655,118 V150 H330 V180" stroke-dasharray="6,3"/>
+    <path d="M195,228 V300"/>
+    <path d="M330,315 H400"/><path d="M330,327 L400,345"/><path d="M330,332 Q480,300 640,327"/>
+    <path d="M195,348 V368"/>
+  </g>
+  <g stroke="#333" fill="none" stroke-dasharray="5,3" marker-end="url(#i)">
+    <path d="M795,470 V344"/><path d="M850,525 L880,344"/><path d="M500,470 V324"/><path d="M450,525 L430,364"/>
+  </g>
+  <text x="60" y="618">Contratos: ReviewCommand entra al caso de uso; ReviewOutcome sale. Los nueve estados de salida se mapean en Presentation.</text>
+</svg>
