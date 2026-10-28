@@ -1,0 +1,1 @@
+Se utilizó IA para revisar el ejemplo existente, diseñar componentes y contratos, y redactar la comparación antes/después. Los componentes propuestos son un refactor conceptual; no se presentan como integración NativePHP ejecutada. Se conserva el código previo y se verifica su regresión. La estudiante debe revisar las decisiones y límites antes de la defensa.

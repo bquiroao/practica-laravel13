@@ -1,0 +1,6 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\cli.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\Persistence\InMemoryEvaluationRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\Presentation\EvaluationController.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\Presentation\JsonView.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-nativephp-mvc-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-04\mvc\tests\run.php

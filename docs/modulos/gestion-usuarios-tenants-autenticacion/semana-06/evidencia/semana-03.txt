@@ -1,0 +1,40 @@
+
+A. Camino feliz: alta, autenticación y revocación
+PASS: el alta responde 201
+PASS: el inicio de sesión responde 200 y entrega token
+PASS: el correo se normalizó a minúsculas
+PASS: la revocación responde 204
+PASS: la sesión revocada ya no puede revocarse de nuevo (401)
+
+B. Reglas de dominio
+PASS: contraseña débil responde 422
+PASS: contraseña sin dígitos responde 422
+PASS: correo inválido responde 422
+PASS: correo repetido en el mismo tenant responde 409
+PASS: el mismo correo en otro tenant sí se permite (201)
+PASS: un tenant inactivo responde 404
+PASS: un tenant inexistente responde 404
+PASS: contraseña errónea y usuario inexistente dan 401 con el mismo mensaje
+PASS: un usuario no inicia sesión en otro tenant donde no existe (401)
+
+C. Expiración de la sesión (reloj controlado)
+PASS: pasadas 8 horas la sesión expira (401)
+
+D. Seguridad de lo almacenado
+PASS: la contraseña se guarda con hash bcrypt, no en claro
+PASS: solo se guarda el hash SHA-256 del token, nunca el token
+PASS: un correo con comillas y SQL se rechaza en el dominio (422)
+PASS: el repositorio trata la inyección como dato literal: no encuentra usuario
+PASS: las sentencias preparadas dejan intacta la tabla users
+
+E. Error de persistencia
+PASS: sin esquema, la base falla y el alta responde 503 (no 500)
+PASS: el cuerpo del 503 no filtra SQL ni detalles del motor
+PASS: un doble que falla al guardar produce 503
+PASS: la restricción UNIQUE de la base también se traduce a 503 si hay carrera
+
+F. Arquitectura: el núcleo no conoce la persistencia
+PASS: dominio, aplicación y presentación no usan PDO ni SQL
+PASS: el dominio no depende de la capa de aplicación
+
+26 comprobaciones, 0 fallidas.

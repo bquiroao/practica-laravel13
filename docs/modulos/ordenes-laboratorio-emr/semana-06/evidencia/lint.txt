@@ -1,0 +1,1 @@
+No syntax errors detected in docs/modulos/ordenes-laboratorio-emr/semana-06/cambio/UniqueTestCatalog.phpNo syntax errors detected in docs/modulos/ordenes-laboratorio-emr/semana-06/cambio/verificar.php

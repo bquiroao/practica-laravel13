@@ -1,0 +1,19 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-pacientes (#pacientes) | 320 | 320 | 320 | no | Pacientes · Expedientes · Hospital HIS | H1
+01-pacientes (#pacientes) | 360 | 360 | 360 | no | Pacientes · Expedientes · Hospital HIS | H1
+01-pacientes (#pacientes) | 430 | 430 | 430 | no | Pacientes · Expedientes · Hospital HIS | H1
+02-expediente (#expediente/HC-000123) | 320 | 320 | 320 | no | Expediente HC-000123 · Expedientes · Hospital HIS | H1
+02-expediente (#expediente/HC-000123) | 360 | 360 | 360 | no | Expediente HC-000123 · Expedientes · Hospital HIS | H1
+02-expediente (#expediente/HC-000123) | 430 | 430 | 430 | no | Expediente HC-000123 · Expedientes · Hospital HIS | H1
+03-historia-externa (#externa/HC-000123) | 320 | 320 | 320 | no | Otros hospitales · Expedientes · Hospital HIS | H1
+03-historia-externa (#externa/HC-000123) | 360 | 360 | 360 | no | Otros hospitales · Expedientes · Hospital HIS | H1
+03-historia-externa (#externa/HC-000123) | 430 | 430 | 430 | no | Otros hospitales · Expedientes · Hospital HIS | H1
+04-error-sin-atencion (#expediente/HC-000098) | 320 | 320 | 320 | no | Sin atención activa · Expedientes · Hospital HIS | H1
+04-error-sin-atencion (#expediente/HC-000098) | 360 | 360 | 360 | no | Sin atención activa · Expedientes · Hospital HIS | H1
+04-error-sin-atencion (#expediente/HC-000098) | 430 | 430 | 430 | no | Sin atención activa · Expedientes · Hospital HIS | H1
+05-admision-confirmar (#crear/P1) | 320 | 320 | 320 | no | Crear expediente · Expedientes · Hospital HIS | H1
+05-admision-confirmar (#crear/P1) | 360 | 360 | 360 | no | Crear expediente · Expedientes · Hospital HIS | H1
+05-admision-confirmar (#crear/P1) | 430 | 430 | 430 | no | Crear expediente · Expedientes · Hospital HIS | H1
+06-expediente-creado (#crear/P1) | 320 | 320 | 320 | no | Pacientes · Expedientes · Hospital HIS | H1
+06-expediente-creado (#crear/P1) | 360 | 360 | 360 | no | Pacientes · Expedientes · Hospital HIS | H1
+06-expediente-creado (#crear/P1) | 430 | 430 | 430 | no | Pacientes · Expedientes · Hospital HIS | H1

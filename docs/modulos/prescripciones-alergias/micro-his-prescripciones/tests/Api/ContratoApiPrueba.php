@@ -7,6 +7,7 @@ declare(strict_types=1);
  * estas pruebas fallan. El YAML se lee con un lector mínimo (sin dependencias) que conoce su indentación fija.
  */
 
+use Prescripciones\Aplicacion\CasosDeUso\AnularPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\ConsultarPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\EmitirPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\VerificarAlergiasPrevia;
@@ -57,10 +58,10 @@ $apiCodigo = static function (): array {
     $c = (new Escenario())->casos;
 
     return array_map(static fn ($r): string => $r->metodo . ' ' . preg_replace(['/^#\^|\$#$/', '/\(\?<(\w+)>[^)]*\)/'], ['', '{$1}'], $r->patron),
-        Rutas::definir(new PrescripcionesControlador($c['previa'], $c['emitir'], $c['consultar'])));
+        Rutas::definir(new PrescripcionesControlador($c['previa'], $c['emitir'], $c['consultar'], $c['anular'])));
 };
 
-prueba('API-01', 'Contrato = código: las mismas 3 operaciones, y cada x-permiso es la constante del caso de uso', function () use ($apiContrato, $apiCodigo): void {
+prueba('API-01', 'Contrato = código: las mismas 4 operaciones, y cada x-permiso es la constante del caso de uso', function () use ($apiContrato, $apiCodigo): void {
     $contrato = $apiContrato();
     $enContrato = array_keys($contrato);
     $enCodigo = $apiCodigo();
@@ -71,6 +72,7 @@ prueba('API-01', 'Contrato = código: las mismas 3 operaciones, y cada x-permiso
         'verificarAlergias' => [VerificarAlergiasPrevia::PERMISO, null],
         'emitirPrescripcion' => [EmitirPrescripcion::PERMISO, EmitirPrescripcion::PERMISO_OVERRIDE],
         'consultarPrescripcion' => [ConsultarPrescripcion::PERMISO, null],
+        'anularPrescripcion' => [AnularPrescripcion::PERMISO, null],
     ];
     foreach ($contrato as $operacion => $datos) {
         igual($esperado[$datos['operationId']] ?? null, [$datos['permiso'], $datos['advertencia']], "permisos de $operacion");
@@ -78,7 +80,7 @@ prueba('API-01', 'Contrato = código: las mismas 3 operaciones, y cada x-permiso
 });
 
 prueba('API-02', 'Cada operación documenta los errores transversales (400, 401, 403, 404, 500, 503) y su respuesta de éxito', function () use ($apiContrato): void {
-    $exito = ['verificarAlergias' => ['200'], 'emitirPrescripcion' => ['201', '200'], 'consultarPrescripcion' => ['200']];
+    $exito = ['verificarAlergias' => ['200'], 'emitirPrescripcion' => ['201', '200'], 'consultarPrescripcion' => ['200'], 'anularPrescripcion' => ['200']];
     foreach ($apiContrato() as $operacion => $datos) {
         $faltan = array_diff([...$exito[$datos['operationId']], '400', '401', '403', '404', '500', '503'], $datos['respuestas']);
         igual([], array_values($faltan), "faltan en $operacion");

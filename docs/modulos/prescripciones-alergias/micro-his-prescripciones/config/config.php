@@ -25,9 +25,9 @@ return [
     ],
     // Provisional: en el HIS los decide RBAC detrás del puerto PoliticaAcceso. Clave «usuario|hospital».
     'permisos' => [
-        'dr-lopez|hosp-norte' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar'],
-        'dr-ruiz|hosp-norte' => ['prescripcion.emitir', 'prescripcion.consultar'],
+        'dr-lopez|hosp-norte' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar', 'prescripcion.anular'],
+        'dr-ruiz|hosp-norte' => ['prescripcion.emitir', 'prescripcion.consultar', 'prescripcion.anular'],
         'farm-norte|hosp-norte' => ['prescripcion.consultar'],
-        'dr-sur|hosp-sur' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar'],
+        'dr-sur|hosp-sur' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar', 'prescripcion.anular'],
     ],
 ];

@@ -89,9 +89,18 @@ CREATE TABLE prescription_items (
     PRIMARY KEY (prescription_id, line_no)
 );
 
+-- Semana 6 (CU-07): la anulación es un hecho NUEVO; la prescripción no se toca. A lo sumo una por prescripción (PK).
+CREATE TABLE prescription_voids (
+    prescription_id bigint PRIMARY KEY REFERENCES prescriptions (prescription_id) ON DELETE RESTRICT,
+    reason          text NOT NULL CHECK (char_length(btrim(reason)) >= 10),
+    voided_by       text NOT NULL,
+    voided_at       timestamptz NOT NULL
+);
+
 CREATE TABLE prescription_audit_outbox (
     outbox_id   bigserial PRIMARY KEY,
-    action      text NOT NULL CHECK (action IN ('PRESCRIPCION_EMITIDA', 'PRESCRIPCION_BLOQUEADA', 'VERIFICACION_NO_DISPONIBLE')),
+    action      text NOT NULL CHECK (action IN ('PRESCRIPCION_EMITIDA', 'PRESCRIPCION_BLOQUEADA', 'VERIFICACION_NO_DISPONIBLE',
+                                           'PRESCRIPCION_ANULADA')),
     hospital    text NOT NULL,
     actor       text NOT NULL,
     resource    text NOT NULL,
@@ -109,4 +118,6 @@ $$;
 CREATE TRIGGER prescriptions_inmutable BEFORE UPDATE OR DELETE ON prescriptions
     FOR EACH ROW EXECUTE FUNCTION rechazar_cambio_prescripcion();
 CREATE TRIGGER prescription_items_inmutable BEFORE UPDATE OR DELETE ON prescription_items
+    FOR EACH ROW EXECUTE FUNCTION rechazar_cambio_prescripcion();
+CREATE TRIGGER prescription_voids_inmutable BEFORE UPDATE OR DELETE ON prescription_voids
     FOR EACH ROW EXECUTE FUNCTION rechazar_cambio_prescripcion();
