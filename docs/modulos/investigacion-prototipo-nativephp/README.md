@@ -22,3 +22,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo
 ## Semana 3
 
 [Micro-HIS PHP vanilla, capas, PDO y arquitectura](semana-03/README.md).
+
+## Semana 4
+
+[MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
