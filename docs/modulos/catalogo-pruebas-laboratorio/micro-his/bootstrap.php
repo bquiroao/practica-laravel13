@@ -9,6 +9,7 @@ use Lab\Persistence\Conexion;
 use Lab\Domain\LabTestRepository;
 use Lab\Persistence\InMemoryLabTestRepository;
 use Lab\Persistence\PdoLabTestRepository;
+use Lab\Presentation\Api\ApiLabTestController;
 use Lab\Presentation\Cli\ConsolaCatalogo;
 use Lab\Presentation\Http\LabTestController;
 use Lab\Presentation\Http\Router;
@@ -39,6 +40,12 @@ function crearRouter(?array $config = null, ?LabTestRepository $repositorio = nu
 {
     $s = crearServicios($config, $repositorio);
     return new Router(new LabTestController($s['registrar'], $s['consultar'], $s['detalle'], $s['tenant'], 'jefe.lab'));
+}
+
+function crearApi(?array $config = null, ?LabTestRepository $repositorio = null): ApiLabTestController
+{
+    $s = crearServicios($config, $repositorio);
+    return new ApiLabTestController($s['registrar'], $s['consultar'], $s['detalle']);
 }
 
 function crearConsola(): ConsolaCatalogo
