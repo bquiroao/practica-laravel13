@@ -1,0 +1,1 @@
+Ejecutar CLI memory y pdo. Mostrar Controller sin SQL/política, View sin efectos y Model compuesto de aplicación/dominio. Demostrar el mismo Repository para save/find y las 34 aserciones más 19 de regresión. Explicar rollback real y límites de InMemory. Defender almacenamiento compartido en servidor con propiedad por módulo, referencias autorizadas y tenant aún pendiente.

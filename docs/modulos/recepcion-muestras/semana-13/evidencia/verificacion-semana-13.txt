@@ -1,0 +1,72 @@
+Semana 13 - Evidencia reproducible de revisión
+Commit fuente revisado: d0eed5698f5de27aab218ff518c2052a837a1642
+Rama fuente: semana-12-recepcion-muestras-evaluacion-parcial-mercedes-lopez
+Worktree fuente: C:\Users\azul1\OneDrive\Desktop\shi-semana-12-recepcion-muestras-evaluacion-parcial-mercedes-lopez
+Entorno: PHP 8.2.33 con driver SQLite disponible.
+Datos: sintéticos; SQLite en memoria para el recorrido. No se usaron datos clínicos.
+
+Comando:
+php -l docs\modulos\recepcion-muestras\semana-03\ejemplo\bin\reception.php
+Resultado: PASSED (exit code 0)
+No syntax errors detected in docs\modulos\recepcion-muestras\semana-03\ejemplo\bin\reception.php
+
+Comando:
+php docs\modulos\recepcion-muestras\semana-03\ejemplo\tests\run.php
+Resultado: PASSED - 13 assertions, 0 failures (exit code 0)
+PASS: camino feliz acepta una muestra conforme
+PASS: camino feliz persiste la recepción aceptada
+PASS: el caso de uso asigna un identificador
+PASS: la regla de dominio rechaza una muestra sin etiqueta
+PASS: el rechazo contiene una razón explícita
+PASS: el rechazo controlado también queda persistido
+PASS: la regla de dominio rechaza un recipiente dañado
+PASS: la regla específica rechaza un tubo de sangre sin sello íntegro
+PASS: se conserva el motivo de rechazo informado por el operador
+PASS: el generador produce identificadores de 128 bits con formato y valores distintos
+PASS: un error de persistencia se propaga y no simula éxito
+PASS: no se registra una recepción si falla el guardado
+PASS: el dominio impide un rechazo sin motivo
+OK: 13 aserciones.
+
+Comando:
+php docs\modulos\recepcion-muestras\semana-12\recorrido\recorrido.php
+Resultado: PASSED - 12 checks, 0 failures (exit code 0)
+
+Paso 1. Rol sin permiso no llega al caso de uso (guarda del recorrido)
+PASS: el rol "enfermeria" no crea ninguna recepción
+
+Paso 2. Técnico acepta una muestra de sangre íntegra
+PASS: sangre con etiqueta, recipiente y sello íntegros queda aceptada
+PASS: recibe un identificador interno SP-...
+PASS: hay exactamente una fila persistida
+
+Paso 3. Rechazo por sello roto en sangre
+PASS: sello roto en sangre se rechaza con motivo
+
+Paso 4. El mismo sello roto en orina no es causa de rechazo
+PASS: la regla del sello aplica solo a sangre
+
+Paso 5. Sin etiqueta y recipiente dañado: motivos acumulados
+PASS: se registran los dos motivos, sin perder ninguno
+
+Paso 6. Identificadores únicos en recepciones de la misma orden
+PASS: dos recipientes de la misma orden reciben identificadores distintos
+
+Paso 7. Falla de persistencia: el error no se oculta
+PASS: sin tabla, el guardado lanza error en lugar de devolver éxito
+
+Paso 8. Límite conocido: el motivo libre del operador se acepta sin catálogo
+PASS: LIMITE DEMOSTRADO: el prototipo guarda texto libre como motivo (origen del cambio CC-REC-01)
+
+Paso 9. Límite conocido: el prototipo no verifica que la orden exista
+PASS: LIMITE DEMOSTRADO: una orden inexistente se acepta porque no hay sistema de órdenes
+
+Paso 10. Estado final persistido
+PASS: hay 3 rechazos guardados: sello roto, doble motivo y texto libre
+
+12 comprobaciones, 0 fallidas.
+
+Notas de alcance:
+- El paso 1 comprueba una guarda implementada dentro del propio script del recorrido; no demuestra autorización del caso de uso ni aislamiento por tenant.
+- Los pasos 8 y 9 pasan como demostraciones deliberadas de límites, no como aprobación de esos comportamientos.
+- La ejecución demuestra el comportamiento de prototipo y no una integración con EMR/LIS o una base productiva.

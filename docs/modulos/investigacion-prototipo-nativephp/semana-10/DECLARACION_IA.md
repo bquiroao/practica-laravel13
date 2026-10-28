@@ -1,0 +1,1 @@
+IA utilizada para revisar continuidad UX, crear propuestas SVG, escenarios y reglas de movilidad y verificar encaje con navegador. La estudiante revisa conclusiones. No se ejecutó runtime NativePHP, notificación nativa, API ni sesión real. Las capturas representan dibujos y datos ficticios.

@@ -1,0 +1,16 @@
+@startsalt
+title M2 — Menú (pantalla completa)
+{+
+  [× Cerrar menú] | <b>Menú</b>
+  ---
+  <b><u>Inicio</u></b> (estás aquí)
+  Pacientes
+  Citas
+  Camas
+  Ayuda
+  ---
+  .
+  [Cerrar sesión]
+  <i>Solo los módulos de tu rol (R-02).</i>
+}
+@endsalt

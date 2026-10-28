@@ -106,3 +106,24 @@ foreach ($fabricas as $nombre => $fabrica) {
             igual(null, $a['catalogo']->grupoDelAlergeno(new Alergia('Z99', 'desconocido', 'allergy', 'mild', 'active')), 'sin grupo');
         });
 }
+
+foreach ($fabricas as $nombre => $fabrica) {
+    prueba("CON-$nombre-08", "[$nombre] semana 6: anular agrega la anulación sin cambiar la prescripción; una segunda → YaAnulada; se revierte con la transacción",
+        function () use ($fabrica, $prescripcion, $vista): void {
+            $a = $fabrica();
+            $p = $a['repositorio']->guardar($prescripcion('c-1'));
+            $anulacion = new \Prescripciones\Dominio\Modelo\Anulacion($p->id, 'hosp-norte', 'Alergia nueva registrada', 'dr-lopez',
+                new \DateTimeImmutable('2026-10-28T10:00:00+00:00'));
+            lanza(\RuntimeException::class, static fn () => $a['transaccion']->ejecutar(static function () use ($a, $anulacion): void {
+                $a['repositorio']->anular($anulacion);
+                throw new \RuntimeException('falla a mitad');
+            }), 'anulación revertida');
+            igual('EMITIDA', $a['repositorio']->porId('hosp-norte', $p->id)->estado, 'sigue emitida tras el rollback');
+            $a['repositorio']->anular($anulacion);
+            $leida = $a['repositorio']->porId('hosp-norte', $p->id);
+            igual(['ANULADA', $anulacion->aArreglo()], [$leida->estado, $leida->anulacion?->aArreglo()], 'leída con su anulación');
+            igual(array_diff_key($vista($p), ['estado' => 1]), array_diff_key($vista($leida), ['estado' => 1, 'anulacion' => 1]), 'lo emitido no cambió');
+            igual('ANULADA', $a['repositorio']->porClave('hosp-norte', 'c-1')->estado, 'también por clave');
+            lanza(\Prescripciones\Dominio\Excepciones\YaAnulada::class, static fn () => $a['repositorio']->anular($anulacion), 'segunda anulación');
+        });
+}

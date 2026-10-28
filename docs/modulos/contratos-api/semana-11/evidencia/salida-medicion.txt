@@ -1,0 +1,13 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-mi-documentacion (#docs) | 320 | 320 | 320 | no | Mi documentación · Documentación · Hospital HIS | H1
+01-mi-documentacion (#docs) | 360 | 360 | 360 | no | Mi documentación · Documentación · Hospital HIS | H1
+01-mi-documentacion (#docs) | 430 | 430 | 430 | no | Mi documentación · Documentación · Hospital HIS | H1
+02-citas-api-vigente (#doc/citas-api) | 320 | 320 | 320 | no | citas-api 2.0.0 · Documentación · Hospital HIS | H1
+02-citas-api-vigente (#doc/citas-api) | 360 | 360 | 360 | no | citas-api 2.0.0 · Documentación · Hospital HIS | H1
+02-citas-api-vigente (#doc/citas-api) | 430 | 430 | 430 | no | citas-api 2.0.0 · Documentación · Hospital HIS | H1
+03-version-obsoleta (#doc/citas-api/1.0.0) | 320 | 320 | 320 | no | citas-api 1.0.0 · Documentación · Hospital HIS | H1
+03-version-obsoleta (#doc/citas-api/1.0.0) | 360 | 360 | 360 | no | citas-api 1.0.0 · Documentación · Hospital HIS | H1
+03-version-obsoleta (#doc/citas-api/1.0.0) | 430 | 430 | 430 | no | citas-api 1.0.0 · Documentación · Hospital HIS | H1
+04-error-documento-ajeno (#doc/inventario-farmacia) | 320 | 320 | 320 | no | Documento no encontrado · Documentación · Hospital HIS | H1
+04-error-documento-ajeno (#doc/inventario-farmacia) | 360 | 360 | 360 | no | Documento no encontrado · Documentación · Hospital HIS | H1
+04-error-documento-ajeno (#doc/inventario-farmacia) | 430 | 430 | 430 | no | Documento no encontrado · Documentación · Hospital HIS | H1

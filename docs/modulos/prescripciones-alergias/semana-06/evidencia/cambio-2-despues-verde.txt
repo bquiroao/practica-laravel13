@@ -1,0 +1,13 @@
+$ php tests/ejecutar.php --solo=ANU   (DESPUÉS de implementar el cambio)
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Cambio práctico de la semana 6: anular con motivo ==
+[PASA ] ANU-01   Anular una prescripción emitida → 200 ANULADA; la consulta muestra la anulación y la prescripción original intacta
+[PASA ] ANU-02   Motivo de menos de 10 caracteres (sin contar espacios) → 422 MOTIVO_REQUERIDO y nada anulado
+[PASA ] ANU-03   Una prescripción ya anulada no se vuelve a anular → 409 ESTADO_NO_PERMITE_ANULAR
+[PASA ] ANU-04   Tenant y permisos: otro hospital o inexistente → el mismo 404; sin prescripcion.anular (farmacia) → 403
+[PASA ] ANU-05   Todo o nada: la anulación y su traza PRESCRIPCION_ANULADA van juntas; si la traza falla, no queda anulada
+[PASA ] ANU-06   Bloqueo seguro asimétrico: con el Expediente caído no se emite (503), pero SÍ se puede anular
+[PASA ] ANU-07   Entrada mal formada: sin «motivo» o no texto → 400 CUERPO_INVALIDO; id no numérico → 404
+
+Total: 7  Pasan: 7  Fallan: 0  Omitidas: 0

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prescripciones\Presentacion\Http\Controladores;
 
+use Prescripciones\Aplicacion\CasosDeUso\AnularPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\ConsultarPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\EmitirPrescripcion;
 use Prescripciones\Aplicacion\CasosDeUso\VerificarAlergiasPrevia;
@@ -25,6 +26,7 @@ final class PrescripcionesControlador
         private readonly VerificarAlergiasPrevia $previa,
         private readonly EmitirPrescripcion $emitir,
         private readonly ConsultarPrescripcion $consultar,
+        private readonly AnularPrescripcion $anular,
     ) {
     }
 
@@ -50,6 +52,18 @@ final class PrescripcionesControlador
         }
 
         return PrescripcionVista::emision($this->emitir->ejecutar($comando));
+    }
+
+    /** POST /api/v1/prescripciones/{id}/anulacion (semana 6) @param array<string, string> $parametros */
+    public function anular(Solicitud $solicitud, Identidad $identidad, array $parametros): Respuesta
+    {
+        try {
+            $motivo = FormularioPrescripcion::anulacion($solicitud);
+        } catch (EntradaInvalida $e) {
+            return ErrorVista::entradaInvalida($e);
+        }
+
+        return PrescripcionVista::anulacion($this->anular->ejecutar($identidad->usuario, $identidad->hospital, FormularioPrescripcion::id($parametros), $motivo));
     }
 
     /** GET /api/v1/prescripciones/{id} @param array<string, string> $parametros */
