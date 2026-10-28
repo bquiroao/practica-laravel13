@@ -1,0 +1,20 @@
+@startuml semana-04-repositorio-compartido
+title Repositorio de datos compartido — el dashboard como lector puro de la base HOSPITAL
+component "Pacientes" as pac
+component "Citas médicas" as cit
+component "Catálogo y admisión" as cam
+component "Dashboard base" as das
+interface "FuenteConteos (solo conteos)" as fc
+database "Base HOSPITAL (una por tenant)" {
+  [local_patients]
+  [appointments]
+  [beds]
+}
+pac --> [local_patients] : escribe (dueño)
+cit --> [appointments] : escribe (dueño)
+cam --> [beds] : escribe (dueños)
+das --> fc
+fc ..> [local_patients] : COUNT activos
+fc ..> [appointments] : COUNT de hoy
+fc ..> [beds] : COUNT disponibles
+@enduml
