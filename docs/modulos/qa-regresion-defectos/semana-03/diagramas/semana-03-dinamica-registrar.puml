@@ -1,0 +1,46 @@
+@startuml semana-03-dinamica-registrar
+!pragma layout smetana
+title Vista dinámica — POST /campanas/{id}/resultados (FALLA con captura y defecto)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+
+actor Tester
+participant "Kernel" as K
+participant "AccionesQa" as A
+participant "RegistrarResultado" as U
+participant "Campana\n(dominio)" as C
+participant "AlmacenEvidencias" as AL
+participant "Transaccion" as T
+database "PostgreSQL\nesquema qa" as BD
+
+Tester -> K : POST + Bearer + X-Tenant-ID + Idempotency-Key
+K -> K : ruta, token (401), tenant (400/403)
+K -> A : registrar(solicitud, identidad, {id})
+A -> A : JSON y base64 → bytes (400 si no se puede)
+A -> U : ejecutar(tester, tenant, campaña, clave, datos)
+U -> U : permiso qa.ejecutar (403)
+U -> BD : intentoPorClave(tenant, clave)
+alt la clave ya existe
+  U --> A : misma huella → 200 RESULTADO_YA_REGISTRADO\notra huella → 409 CLAVE_REUTILIZADA
+end
+U -> BD : porId(tenant, campaña) con sus intentos (404 si es de otro tenant)
+U -> C : admite(caso)? (409 si no está EN_CURSO o fuera del alcance)
+U -> U : R-05 evidencia, R-06 defecto, R-10 motivo (422), > 5 MB (413)
+U -> AL : guardar(tenant, captura)
+alt el almacén no confirma
+  AL --> U : AlmacenNoDisponible
+  U --> A : 503 EVIDENCIA_NO_DISPONIBLE (no se escribe nada)
+end
+AL --> U : ubicación (huella verificada)
+U -> T : ejecutar(trabajo)
+activate T
+T -> BD : BEGIN
+T -> BD : INSERT defectos + defecto_historial
+T -> BD : INSERT intentos (UNIQUE tenant+clave) + evidencias
+T -> BD : INSERT auditoria_bandeja
+T -> BD : COMMIT (o ROLLBACK si algo falla → 503)
+deactivate T
+U --> A : Salida CREADO
+A --> K : 201 {intento, numero, defecto}
+K --> Tester : 201 + X-Request-ID
+@enduml
