@@ -22,3 +22,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo
 ## Semana 7
 
 [Componentes, contratos y refactor conceptual](semana-07/semana-07-componentes-refactor-nativephp.md).
+
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/semana-08-ux-nativephp.md).
