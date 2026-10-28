@@ -10,4 +10,5 @@ return [
     'usuario' => getenv('LAB_DB_USER') ?: 'postgres',
     'clave' => getenv('LAB_DB_PASSWORD') ?: 'lab_local_2026',
     'tenant' => 'HOSP-01',
+    'repositorio' => getenv('LAB_REPOSITORIO') ?: 'pdo', // 'pdo' o 'memoria'
 ];

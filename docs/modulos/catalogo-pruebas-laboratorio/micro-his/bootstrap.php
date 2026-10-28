@@ -6,8 +6,12 @@ use Lab\Application\RegistrarPrueba;
 use Lab\Application\RelojSistema;
 use Lab\Application\VerDetallePrueba;
 use Lab\Persistence\Conexion;
+use Lab\Domain\LabTestRepository;
+use Lab\Persistence\InMemoryLabTestRepository;
 use Lab\Persistence\PdoLabTestRepository;
 use Lab\Presentation\Cli\ConsolaCatalogo;
+use Lab\Presentation\Http\LabTestController;
+use Lab\Presentation\Http\Router;
 
 spl_autoload_register(static function (string $clase): void {
     if (str_starts_with($clase, 'Lab\\')) {
@@ -16,10 +20,12 @@ spl_autoload_register(static function (string $clase): void {
 });
 
 /** Composition Root: único lugar donde se eligen las implementaciones concretas. */
-function crearServicios(?array $config = null): array
+function crearServicios(?array $config = null, ?LabTestRepository $repositorio = null): array
 {
     $config ??= require __DIR__ . '/config.php';
-    $repositorio = new PdoLabTestRepository(Conexion::crear($config));
+    $repositorio ??= ($config['repositorio'] ?? 'pdo') === 'memoria'
+        ? new InMemoryLabTestRepository()
+        : new PdoLabTestRepository(Conexion::crear($config));
     $reloj = new RelojSistema();
     return [
         'tenant' => $config['tenant'],
@@ -27,6 +33,12 @@ function crearServicios(?array $config = null): array
         'consultar' => new ConsultarPruebasVigentes($repositorio, $reloj),
         'detalle' => new VerDetallePrueba($repositorio, $reloj),
     ];
+}
+
+function crearRouter(?array $config = null, ?LabTestRepository $repositorio = null): Router
+{
+    $s = crearServicios($config, $repositorio);
+    return new Router(new LabTestController($s['registrar'], $s['consultar'], $s['detalle'], $s['tenant'], 'jefe.lab'));
 }
 
 function crearConsola(): ConsolaCatalogo
