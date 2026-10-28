@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo de pruebas — Prototipo</title>
+<style>
+  :root { --texto: #1a1a1a; --fondo: #fff; --borde: #767676; --primario: #0b5cad; --error: #aa0000; --ok: #006600; --aviso: #7a4b00; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--texto); background: var(--fondo); }
+  .saltar { position: absolute; left: -999px; } .saltar:focus { left: 8px; top: 8px; background: #fff; padding: 8px; z-index: 9; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--borde); }
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  a, button { color: var(--primario); } button, select, input { font: inherit; min-height: 44px; }
+  button.primario { background: var(--primario); color: #fff; border: 0; border-radius: 4px; padding: 0 16px; }
+  button.secundario { background: #fff; border: 1px solid var(--primario); border-radius: 4px; padding: 0 16px; }
+  :focus-visible { outline: 3px solid #f2a900; outline-offset: 2px; }
+  label { display: block; font-weight: 600; margin-top: 12px; } input, select { width: 100%; border: 1px solid var(--borde); border-radius: 4px; padding: 0 8px; }
+  .fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 16px; }
+  .err { color: var(--error); font-size: .95rem; } [aria-invalid="true"] { border: 2px solid var(--error); }
+  .alerta { border-left: 6px solid var(--error); padding: 8px 12px; background: #fff4f4; }
+  .exito { border-left: 6px solid var(--ok); padding: 8px 12px; background: #f1fbf1; }
+  .aviso { border-left: 6px solid var(--aviso); padding: 8px 12px; background: #fff8e6; }
+  table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--borde); }
+  caption { text-align: left; font-weight: 600; padding: 8px 0; }
+  .tarjetas { display: none; list-style: none; padding: 0; } .tarjetas li { border: 1px solid var(--borde); border-radius: 6px; padding: 12px; margin-bottom: 8px; }
+  .acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  @media (max-width: 767px) {
+    table { display: none; } .tarjetas { display: block; }
+    .acciones button { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header>
+  <strong>Laboratorio · Catálogo de pruebas</strong>
+  <label style="margin:0;font-weight:400">Rol de la demostración
+    <select id="rol" style="width:auto">
+      <option value="jefe">Jefe de laboratorio</option>
+      <option value="medico">Médico</option>
+      <option value="laboratorista">Laboratorista</option>
+    </select>
+  </label>
+</header>
+<main id="contenido" tabindex="-1"></main>
+<script>
+// Prototipo navegable: datos ficticios en memoria, mismas reglas y mensajes que el Micro-HIS.
+const pruebas = [
+  { codigo: 'GLU-001', version: 1, nombre: 'Glucosa en ayunas', seccion: 'Química clínica', muestra: 'Plasma', contenedor: 'Tubo tapa gris (fluoruro)', volumen: 2, ayuno: 8, prep: 'Solo agua durante el ayuno.', conservacion: 'Refrigerada 2–8 °C', estabilidad: 24, desde: '2027-01-04', hasta: null },
+  { codigo: 'HEM-001', version: 1, nombre: 'Hematología completa', seccion: 'Hematología', muestra: 'Sangre total', contenedor: 'Tubo tapa lila (EDTA)', volumen: 3, ayuno: 0, prep: '', conservacion: 'Refrigerada 2–8 °C', estabilidad: 24, desde: '2027-01-04', hasta: null },
+];
+const estado = { fecha: '2027-01-15', borrador: null, errores: {} };
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const vigente = (p, f) => p.desde <= f && (p.hasta === null || p.hasta >= f);
+const textoVig = (p) => 'desde ' + p.desde + (p.hasta ? ' hasta ' + p.hasta : ' sin fecha de fin');
+const diaAntes = (f) => { const d = new Date(f + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - 1); return d.toISOString().slice(0, 10); };
+const esJefe = () => $('#rol').value === 'jefe';
+
+function pintar(titulo, html) {
+  document.title = titulo + ' — Catálogo de pruebas';
+  $('#contenido').innerHTML = html;
+  const foco = $('#contenido [data-foco]') || $('#contenido h1');
+  if (foco) { foco.setAttribute('tabindex', '-1'); foco.focus(); }
+}
+
+function vistaCatalogo() {
+  const lista = pruebas.filter((p) => vigente(p, estado.fecha));
+  const filas = lista.map((p) => `<tr><td><a href="#detalle/${p.codigo}">${p.codigo}</a></td><td>${esc(p.nombre)}</td><td>${p.muestra}</td><td>${p.ayuno ? 'Ayuno ' + p.ayuno + ' h' : 'Sin ayuno'}</td><td>${textoVig(p)}</td></tr>`).join('');
+  const tarjetas = lista.map((p) => `<li><a href="#detalle/${p.codigo}"><strong>${p.codigo}</strong> ${esc(p.nombre)}</a><br>${p.muestra} · ${p.ayuno ? 'Ayuno ' + p.ayuno + ' h' : 'Sin ayuno'}<br>Vigente ${textoVig(p)}</li>`).join('');
+  pintar('Pruebas vigentes', `
+    <h1>Pruebas vigentes</h1>
+    <div class="fila"><label>Fecha de referencia <input type="date" id="fecha" value="${estado.fecha}"></label></div>
+    ${esJefe() ? '<div class="acciones"><button class="primario" onclick="location.hash=\'#nueva\'">Nueva prueba</button></div>' : ''}
+    ${lista.length ? `<table><caption>Pruebas vigentes al ${estado.fecha}</caption>
+      <tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Muestra</th><th scope="col">Preparación</th><th scope="col">Vigencia</th></tr>${filas}</table>
+      <ul class="tarjetas" aria-label="Pruebas vigentes al ${estado.fecha}">${tarjetas}</ul>`
+      : '<p>No hay pruebas vigentes para esa fecha.</p>'}`);
+  $('#fecha').onchange = (e) => { estado.fecha = e.target.value; vistaCatalogo(); };
+}
+
+function vistaDetalle(codigo) {
+  const versiones = pruebas.filter((p) => p.codigo === codigo).sort((a, b) => b.version - a.version);
+  const p = versiones.find((v) => vigente(v, estado.fecha));
+  if (!p) {
+    const u = versiones[0];
+    return pintar('Prueba no vigente', `<h1>Prueba no vigente</h1><p class="alerta" role="alert">${codigo} no está vigente el ${estado.fecha}${u ? '; su última versión es vigente ' + textoVig(u) : ''}.</p>
+      ${u ? `<div class="acciones"><button class="secundario" onclick="estado.fecha='${u.desde}';location.hash='#detalle/${codigo}';vistaDetalle('${codigo}')">Ver la versión vigente desde ${u.desde}</button></div>` : ''}<p><a href="#catalogo">Volver al catálogo</a></p>`);
+  }
+  pintar(p.codigo, `<h1>${p.codigo} — ${esc(p.nombre)} (versión ${p.version})</h1>
+    <h2>Preparación del paciente</h2><p>${p.ayuno ? 'Ayuno ' + p.ayuno + ' h. ' : 'Sin ayuno. '}${esc(p.prep)}</p>
+    <h2>Muestra</h2><p>${p.muestra} · ${esc(p.contenedor)} · volumen mínimo ${p.volumen} mL</p>
+    <p>Conservación: ${p.conservacion} · Estabilidad: ${p.estabilidad} h · Sección: ${p.seccion}</p>
+    <p>Vigencia: ${textoVig(p)}</p><p><a href="#catalogo">Volver al catálogo</a></p>`);
+}
+
+const campos = [
+  ['codigo', 'Código (AAA-000)', 'text'], ['nombre', 'Nombre', 'text'],
+  ['muestra', 'Tipo de muestra', ['Plasma', 'Suero', 'Sangre total', 'Orina', 'Heces', 'Hisopado']],
+  ['contenedor', 'Contenedor', 'text'], ['volumen', 'Volumen mínimo (mL)', 'number'], ['ayuno', 'Ayuno (h)', 'number'],
+  ['desde', 'Vigente desde', 'date'],
+];
+function vistaAlta() {
+  if (!esJefe()) return pintar('Sin permiso', '<h1>Sin permiso</h1><p class="alerta" role="alert">Su rol no puede registrar pruebas.</p><p><a href="#catalogo">Volver al catálogo</a></p>');
+  const v = estado.borrador || { codigo: 'GLU-001', nombre: 'Glucosa en ayunas', muestra: 'Plasma', contenedor: 'Tubo tapa gris (fluoruro)', volumen: '1', ayuno: '8', desde: '2027-02-01' };
+  const e = estado.errores;
+  const n = Object.keys(e).length;
+  const html = campos.map(([id, txt, tipo]) => {
+    const inv = e[id] ? ` aria-invalid="true" aria-describedby="err-${id}"` : '';
+    const control = Array.isArray(tipo)
+      ? `<select id="${id}"${inv}>${tipo.map((o) => `<option${o === v[id] ? ' selected' : ''}>${o}</option>`).join('')}</select>`
+      : `<input id="${id}" type="${tipo}" value="${esc(v[id] || '')}"${inv}${tipo === 'number' ? ' step="any"' : ''}>`;
+    return `<div><label for="${id}">${txt}</label>${control}${e[id] ? `<span class="err" id="err-${id}">${e[id]}</span>` : ''}</div>`;
+  }).join('');
+  pintar('Nueva prueba', `<h1>Nueva prueba</h1>
+    ${n ? `<div class="alerta" role="alert" data-foco><strong>Hay ${n} campo${n > 1 ? 's' : ''} con error.</strong> ${Object.keys(e).map((k) => `<a href="#" onclick="document.getElementById('${k}').focus();return false">${e[k]}</a>`).join(' ')}</div>` : ''}
+    <p class="aviso">Un cambio en una prueba existente se registra como versión nueva y cierra la anterior el día previo.</p>
+    <div class="fila">${html}</div>
+    <div class="acciones"><button class="secundario" onclick="estado.borrador=null;estado.errores={};location.hash='#catalogo'">Cancelar</button>
+    <button class="primario" onclick="revisar()">Revisar y confirmar</button></div>`);
+}
+function revisar() {
+  const v = {}; campos.forEach(([id]) => { v[id] = $('#' + id).value.trim(); });
+  const e = {};
+  if (!/^[A-Z]{3}-\d{3}$/.test(v.codigo)) e.codigo = 'El código debe tener el formato AAA-000 en mayúsculas.';
+  if (!v.nombre) e.nombre = 'El nombre es obligatorio.';
+  if (!v.contenedor) e.contenedor = 'El contenedor es obligatorio.';
+  if (!(parseFloat(v.volumen) > 0)) e.volumen = 'El volumen mínimo debe ser mayor que 0 mL.';
+  if (!/^\d+$/.test(v.ayuno)) e.ayuno = 'Las horas de ayuno deben ser un entero de 0 o más.';
+  if (!v.desde) e.desde = 'La fecha desde es obligatoria.';
+  estado.borrador = v; estado.errores = e;
+  location.hash = Object.keys(e).length ? '#nueva' : '#confirmar';
+  if (Object.keys(e).length) vistaAlta();
+}
+function ultima(codigo) { return pruebas.filter((p) => p.codigo === codigo).sort((a, b) => b.version - a.version)[0]; }
+function vistaConfirmar() {
+  const v = estado.borrador; if (!v) return (location.hash = '#nueva');
+  const u = ultima(v.codigo);
+  const abierta = u && (u.hasta === null || u.hasta >= v.desde);
+  pintar('Confirmar', `<h1>Confirmar ${u ? 'nueva versión de ' : ''}${esc(v.codigo)}</h1>
+    <p>Versión ${u ? u.version + 1 : 1} · vigente desde ${v.desde} sin fecha de fin · ${esc(v.muestra)}, ${esc(v.contenedor)}, ${esc(v.volumen)} mL</p>
+    ${abierta && v.desde > u.desde ? `<p class="aviso" data-foco>La versión ${u.version} quedará vigente hasta el ${diaAntes(v.desde)}. Las órdenes ya hechas conservan la versión ${u.version}.</p>` : ''}
+    <div class="acciones"><button class="secundario" onclick="location.hash='#nueva'">Volver a editar</button>
+    <button class="primario" id="guardar" onclick="guardar()">Confirmar y guardar</button></div>`);
+}
+function guardar() {
+  const b = $('#guardar'); b.disabled = true; b.textContent = 'Guardando…';
+  setTimeout(() => {
+    const v = estado.borrador, u = ultima(v.codigo);
+    if (u && (u.hasta === null || u.hasta >= v.desde) && v.desde <= u.desde) {
+      estado.errores = { desde: `La prueba ${v.codigo} ya tiene la versión ${u.version} vigente ${textoVig(u)}. Elija una fecha desde posterior al ${u.desde}.` };
+      location.hash = '#nueva'; return vistaAlta();
+    }
+    if (u && (u.hasta === null || u.hasta >= v.desde)) u.hasta = diaAntes(v.desde);
+    pruebas.push({ codigo: v.codigo, version: u ? u.version + 1 : 1, nombre: v.nombre, seccion: u ? u.seccion : 'Química clínica', muestra: v.muestra, contenedor: v.contenedor, volumen: +v.volumen, ayuno: +v.ayuno, prep: u ? u.prep : '', conservacion: u ? u.conservacion : 'Refrigerada 2–8 °C', estabilidad: u ? u.estabilidad : 24, desde: v.desde, hasta: null });
+    estado.borrador = null; estado.errores = {}; estado.ultimoGuardado = v;
+    location.hash = '#exito';
+  }, 600);
+}
+function vistaExito() {
+  const v = estado.ultimoGuardado || {};
+  pintar('Prueba registrada', `<h1>Prueba registrada</h1><p class="exito" role="status" data-foco>${esc(v.codigo || '')} registrada. Vigente desde ${v.desde || ''}.</p>
+    <div class="acciones"><button class="primario" onclick="estado.fecha='${v.desde}';location.hash='#detalle/${v.codigo}'">Ver detalle</button>
+    <button class="secundario" onclick="location.hash='#catalogo'">Volver al catálogo</button></div>`);
+}
+function enrutar() {
+  const [ruta, arg] = (location.hash || '#catalogo').slice(1).split('/');
+  ({ catalogo: vistaCatalogo, detalle: () => vistaDetalle(arg), nueva: vistaAlta, confirmar: vistaConfirmar, exito: vistaExito }[ruta] || vistaCatalogo)();
+}
+window.addEventListener('hashchange', enrutar);
+$('#rol').onchange = enrutar;
+enrutar();
+</script>
+</body>
+</html>
