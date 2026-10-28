@@ -1,0 +1,18 @@
+<!doctype html><html lang='es'><meta charset='utf-8'><title>Semana 15 · Autenticación</title><style>body{font:16px system-ui;background:#f2f6f7;color:#193c46;margin:40px}section{padding:28px;background:white;border:1px solid #ccd9dd;margin:20px 0}pre{white-space:pre-wrap;font:16px monospace;line-height:1.6}</style><h1>Usuarios y tenants · Evidencia PHP</h1><p>Modelo de sesión en memoria; no verificación de JWT firmado.</p><section id='suite'><h2>Suite funcional</h2><pre>PASS U01 membresia limites inclusivo inicio exclusivo fin
+PASS U02 credencial correcta incorrecta desconocida
+PASS U03 sesion limite exp exacto y futuro
+PASS U04 revocacion aislada por tenant y jti
+PASS W01 alta invalida corta antes de dependencias
+PASS W02 credencial invalida no emite token
+PASS W03 falla de alta no deja identidad ni membresia
+PASS B01 alta permitida y membresia duplicada
+PASS B02 administrador rol y tenant denegados
+PASS B03 login contextual y aislamiento sin membresia cruzada
+PASS B04 errores genericos sin token
+PASS B05 logout revocado y acceso tenant ajeno rechazados
+PASS B06 falla revocacion no confirma cierre
+PASS B07 membresia inactiva y expirada bloquean login
+14 casos, 0 fallidos.</pre></section><section id='defectos'><h2>Defectos abiertos</h2><p>PASS indica defecto observado, no corregido.</p><pre>REPRODUCCION: PASS indica defecto observado, no corregido.
+PASS D01 sesion con campos solo blancos aceptada
+PASS D02 emisor devuelve token de otro tenant y login informa exito
+2 casos, 0 fallidos.</pre></section></html>

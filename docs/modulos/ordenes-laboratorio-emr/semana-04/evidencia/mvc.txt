@@ -1,0 +1,35 @@
+PASS: memory: vacío exitoso
+PASS: memory: mismo controller emite
+PASS: memory: seguimiento confirmado
+PASS: memory: partidas completas
+PASS: memory: estado guardado
+PASS: memory: trazabilidad actor
+PASS: memory: consulta denegada
+PASS: memory: emisión denegada
+PASS: memory: regla de dominio no vive en controller
+PASS: memory: tipo incorrecto rechazado en frontera
+PASS: memory: catálogo conserva regla
+PASS: memory: segunda orden no sobrescribe
+PASS: memory: vista conserva resultado
+PASS: memory: vista indica alcance
+PASS: pdo: vacío exitoso
+PASS: pdo: mismo controller emite
+PASS: pdo: seguimiento confirmado
+PASS: pdo: partidas completas
+PASS: pdo: estado guardado
+PASS: pdo: trazabilidad actor
+PASS: pdo: consulta denegada
+PASS: pdo: emisión denegada
+PASS: pdo: regla de dominio no vive en controller
+PASS: pdo: tipo incorrecto rechazado en frontera
+PASS: pdo: catálogo conserva regla
+PASS: pdo: segunda orden no sobrescribe
+PASS: pdo: vista conserva resultado
+PASS: pdo: vista indica alcance
+PASS: InMemory no mezcla paciente
+PASS: InMemory no mezcla episodio
+PASS: controller mantiene error PDO
+PASS: rollback cabecera
+PASS: rollback partidas
+PASS: lectura rota no se convierte en vacío
+OK: 34 aserciones MVC/Repository; PDO SQLite temporal real.

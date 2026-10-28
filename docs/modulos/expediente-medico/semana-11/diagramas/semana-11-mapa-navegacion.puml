@@ -1,0 +1,17 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Pacientes
+Pacientes : &#35;pacientes (tarjetas con el documento enmascarado)
+Expediente : &#35;expediente/HC-000123 (profesional con atención activa)
+Externa : &#35;externa/HC-000123 (con consentimiento, R-06)
+SinAtencion : &#35;expediente/HC-000098 (error crítico E1, auditado)
+Crear : &#35;crear/P1 (solo admisión)
+Pacientes --> Expediente : «Ver expediente HC-000123»
+Expediente --> Externa : «Historia de otros hospitales»
+Externa --> Expediente : «‹ HC-000123»
+Pacientes --> SinAtencion : «Ver expediente HC-000098»
+SinAtencion --> Pacientes : «Volver a pacientes»
+Pacientes --> Crear : «Crear expediente»
+Crear --> Pacientes : «Crear expediente» (HC-000124) o «Volver sin crear»
+@enduml

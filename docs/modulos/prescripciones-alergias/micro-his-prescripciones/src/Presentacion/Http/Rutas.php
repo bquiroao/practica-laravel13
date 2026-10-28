@@ -20,6 +20,7 @@ final class Rutas
             new Ruta('POST', "#^$base/verificaciones$#", $c->verificar(...)),
             new Ruta('POST', "#^$base$#", $c->emitir(...)),
             new Ruta('GET', "#^$base/(?<id>[1-9][0-9]{0,17})$#", $c->consultar(...)),
+            new Ruta('POST', "#^$base/(?<id>[1-9][0-9]{0,17})/anulacion$#", $c->anular(...)),
         ];
     }
 }

@@ -1,0 +1,7 @@
+ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
+
+H-01  reproducido     entrada atender(accion, d); códigos: E2 E3 E4 E5 E7 NF
+H-02  reproducido     la solicitud que empezó primero = 201 (se esperaba 409 E6); citas activas de m1 en [5000,6000): 2; E6 en el mapa HTTP: no
+H-03  reproducido     confirmar a las 7500 una cita de [7000,8000) = 200
+H-04  reproducido     appointment_cancellations: appointment_id, reason, cancelled_at
+H-05  reproducido     doctor_specialties: doctor, specialty, status; tablas: appointment_cancellations, appointments, doctor_specialties

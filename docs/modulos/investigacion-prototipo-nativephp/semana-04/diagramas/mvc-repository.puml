@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+actor "Evaluador local demo" as E
+package Presentation {
+ component "CLI / composición" as ROOT
+ component EvaluationController as C
+ component JsonView as V
+}
+package "Application (semana 3)" {
+ component Evaluate as UC
+}
+package "Domain (semana 3)" {
+ class Evaluation
+ interface EvaluationRepository as R
+ interface DemoOrderGateway as G
+ interface Notifier as N
+}
+package Persistence {
+ component "InMemoryEvaluationRepository (nuevo)" as MEM
+ component "PdoEvaluationRepository (reutilizado)" as PDO
+}
+database "SQLite temporal\nevaluación + evento" as DB
+E --> ROOT
+ROOT --> C
+ROOT --> V
+C --> UC
+C --> [Modelo de salida]
+[Modelo de salida] --> V
+UC --> Evaluation
+UC --> R
+UC --> G
+UC --> N
+MEM ..|> R
+PDO ..|> R
+PDO --> DB
+note bottom of C
+Solo forma/tipos y delegación.
+Sin SQL ni reglas de negocio.
+end note
+@enduml

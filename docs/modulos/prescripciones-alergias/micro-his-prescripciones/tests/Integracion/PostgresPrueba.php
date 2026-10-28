@@ -152,3 +152,18 @@ prueba('INT-09', 'Mismo comportamiento que los dobles: 11 escenarios dan la mism
         igual([$b->estado, $sinHora($b->cuerpo)], [$a->estado, $sinHora($a->cuerpo)], "consulta $id");
     }
 });
+
+prueba('INT-10', 'Semana 6 en la base: la anulación es inmutable (trigger), única por prescripción y con motivo ≥ 10; la traza queda en la bandeja', function (): void {
+    [$pdo, $config] = baseLimpia();
+    $kernel = crearKernel($config);
+    $id = $kernel->manejar(Escenario::http('POST', '/api/v1/prescripciones', ['paciente' => 'P-005', 'items' => [Escenario::item('PARA500')]],
+        cabeceras: ['idempotency-key' => 'int-10']))->cuerpo['id'];
+    $r = $kernel->manejar(Escenario::http('POST', "/api/v1/prescripciones/$id/anulacion", ['motivo' => 'Paciente refiere reacción previa']));
+    igual([200, 'ANULADA'], [$r->estado, $kernel->manejar(Escenario::http('GET', "/api/v1/prescripciones/$id"))->cuerpo['estado']], 'anulada por HTTP');
+    foreach (["UPDATE prescription_voids SET reason = 'otro motivo cualquiera'", 'DELETE FROM prescription_voids'] as $sql) {
+        afirmar(str_contains((string) lanza(\PDOException::class, static fn () => $pdo->exec($sql), $sql)->getMessage(), 'prescripcion_inmutable'), $sql);
+    }
+    lanza(\PDOException::class, static fn () => $pdo->exec("INSERT INTO prescription_voids VALUES ($id, 'segundo motivo largo', 'dr-ruiz', now())"), 'segunda anulación');
+    igual(['PRESCRIPCION_EMITIDA', 'PRESCRIPCION_ANULADA'], $pdo->query('SELECT action FROM prescription_audit_outbox ORDER BY outbox_id')->fetchAll(\PDO::FETCH_COLUMN), 'bandeja');
+    igual('EMITIDA', $pdo->query("SELECT status FROM prescriptions WHERE prescription_id = $id")->fetchColumn(), 'la fila de la prescripción no cambió');
+});

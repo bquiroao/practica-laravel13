@@ -12,7 +12,7 @@ use Prescripciones\Aplicacion\Servicios\EvaluacionClinica;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
 use Prescripciones\Dominio\Reglas\PoliticaEmision;
 
-/** CU-02, verificación previa y consultiva: informa, no guarda ni traza nada. */
+/** CU-02, verificación previa y consultiva: informa, no guarda ni traza nada. Semana 12: dice si se puede justificar. */
 final class VerificarAlergiasPrevia
 {
     /** Verificar antes de firmar exige el mismo permiso que emitir. */
@@ -47,7 +47,11 @@ final class VerificarAlergiasPrevia
         }
         [$expediente, $verificacion] = $evaluada;
 
+        // Semana 12 (RF-19): con una advertencia, la previa dice si este usuario puede justificarla (brecha M-07).
+        $puede = $this->politica->puedeJustificar($verificacion, $expediente,
+            fn (): bool => $this->acceso->permite($usuario, EmitirPrescripcion::PERMISO_OVERRIDE, $hospital));
+
         return new Resultado(Resultado::OK, $this->politica->resultadoPrevio($verificacion, $expediente),
-            ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
+            ['hallazgos' => $verificacion->hallazgosComoArreglo()] + ($puede === null ? [] : ['puede_justificar' => $puede]));
     }
 }
