@@ -22,6 +22,7 @@ $grupos = [
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas (dobles de PDO)',
     'Contratos' => 'Repository y demás puertos: la misma suite de contrato para InMemory y PDO',
     'Mvc' => 'MVC: formulario, controlador y vistas',
+    'Cambio' => 'Cambio práctico de la semana 6: anular con motivo',
     'Caracterizacion' => 'Caracterización (semana 7): el refactor no cambia el comportamiento',
     'Presentacion' => 'Presentación: HTTP',
     'Api' => 'Contrato API (OpenAPI) = código',

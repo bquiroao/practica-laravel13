@@ -78,11 +78,12 @@ prueba('DOM-07', 'R-11: la huella distingue el contenido y no depende de la clav
 prueba('DOM-08', 'R-10: la prescripción es readonly y no tiene métodos que la cambien', function (): void {
     $clase = new \ReflectionClass(Prescripcion::class);
     afirmar($clase->isReadOnly(), 'debe ser readonly');
-    // De instancia: solo leer o crear OTRA (conId). Estático: el constructor con nombre emitir() de la semana 7.
+    // De instancia: solo leer o crear OTRA (conId, conAnulacion). Estático: el constructor con nombre emitir() de la semana 7.
     $metodos = $clase->getMethods(\ReflectionMethod::IS_PUBLIC);
     $deInstancia = array_map(static fn (\ReflectionMethod $m): string => $m->getName(), array_filter($metodos, static fn ($m): bool => !$m->isStatic()));
     $estaticos = array_map(static fn (\ReflectionMethod $m): string => $m->getName(), array_filter($metodos, static fn ($m): bool => $m->isStatic()));
-    igual([['__construct', 'conId', 'aArreglo'], ['emitir']], [array_values($deInstancia), array_values($estaticos)], 'métodos públicos');
+    // Semana 6: conAnulacion() tampoco cambia la prescripción: devuelve OTRA con la anulación (que es un hecho aparte).
+    igual([['__construct', 'conId', 'conAnulacion', 'aArreglo'], ['emitir']], [array_values($deInstancia), array_values($estaticos)], 'métodos públicos');
 });
 
 prueba('DOM-09', 'Semana 7 · PoliticaEmision: tabla de decisiones (confirmación → bloqueo → advertencia) y RBAC solo si hace falta', function (): void {

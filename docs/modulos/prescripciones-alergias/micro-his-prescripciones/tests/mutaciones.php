@@ -59,7 +59,7 @@ $mutaciones = [
         return Respuesta::json(400, ['error' => $e->codigo]);
         X],
     'M16 el repositorio InMemory ignora el hospital en porId' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
-        'return $p !== null && $p->hospital === $hospital ? $p : null;', 'return $p;'],
+        'return $p !== null && $p->hospital === $hospital ? $this->conSuAnulacion($p) : null;', 'return $p === null ? null : $this->conSuAnulacion($p);'],
     'M17 el repositorio InMemory acepta una clave repetida' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
         'if ($this->porClave($prescripcion->hospital, $prescripcion->clave) !== null) {', 'if (false) {'],
     'M18 regresión de H-4: la dosis no se normaliza' => ['src/Dominio/Modelo/Prescripcion.php',
@@ -93,6 +93,13 @@ $mutaciones = [
         '$confirmacion = !$expediente->evaluado && $solicitud->confirmaSinAlergias; $tieneOverride();'],
     'M30 la prescripción guarda la justificación cruda, no la de la decisión' => ['src/Dominio/Modelo/Prescripcion.php',
         '$decision->justificacion,', '$s->justificacion,'],
+    // Semana 6: cambio práctico (anulación con motivo).
+    'M31 la anulación no exige el motivo mínimo' => ['src/Dominio/Reglas/PoliticaAnulacion.php',
+        "mb_strlen(trim(\$motivo)) < self::MIN_MOTIVO ? 'MOTIVO_REQUERIDO' : null", 'null'],
+    'M32 el repositorio InMemory acepta dos anulaciones' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
+        'if (isset($this->anulaciones[$anulacion->prescripcionId])) {', 'if (false) {'],
+    'M33 la anulación no deja traza' => ['src/Aplicacion/CasosDeUso/AnularPrescripcion.php',
+        "\$this->auditoria->registrar('PRESCRIPCION_ANULADA'", "if (false) \$this->auditoria->registrar('PRESCRIPCION_ANULADA'"],
 ];
 
 $origen = dirname(__DIR__);
