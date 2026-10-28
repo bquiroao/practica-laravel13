@@ -1,0 +1,7 @@
+ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
+
+H-01  reproducido     m2 sin asignación consulta p1 = 403 E4 (la semana 1 dice 403 E1); códigos: E2 E3 E4 E5 NF
+H-02  reproducido     abrir p5 con profesional = m2 (escrito por el cliente) = 201
+H-03  reproducido     columnas de alcance: ninguna; externos devueltos: [{"hospital":"h2","expediente":"EXP-H2-77"}]
+H-04  reproducido     UPDATE de eventos rechazados a «ok»: 1 fila(s) cambiada(s)
+H-05  reproducido     consulta longitudinal con CENTRAL caída = 503 E8; eventos nuevos en la auditoría: 0

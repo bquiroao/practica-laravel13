@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+actor "Profesional demo" as M
+package Presentation {
+ component "CLI / composición" as ROOT
+ component OrderController as C
+ component JsonView as V
+}
+package "Application reutilizada" {
+ component Issue as I
+ component Find as F
+}
+package "Domain reutilizado" {
+ class Order
+ interface ClinicalRules as RULES
+ interface Repository as R
+}
+package Persistence {
+ component "InMemoryRepository nuevo" as MEM
+ component "PdoRepository existente" as PDO
+}
+database "SQLite temporal: orden/partidas" as DB
+M --> ROOT
+ROOT --> C
+ROOT --> V
+C --> I
+C --> F
+I --> Order
+I --> RULES
+F --> RULES
+I --> R
+F --> R
+MEM ..|> R
+PDO ..|> R
+PDO --> DB
+C --> [Resultado de aplicación]
+[Resultado de aplicación] --> V
+note bottom of C
+Sin SQL ni reglas de negocio.
+Solo tipos, forma y delegación.
+end note
+@enduml

@@ -1,0 +1,1 @@
+Ejecutar CLI y suite. Mostrar Presentation/Application/Domain/Persistence. Explicar prepare/execute, dos INSERT y rollback del segundo. Relacionar reglas demo y privacidad con ISP/DIP. Aclarar que evidencia registrada no equivale a capacidad nativa y que DB-SO no tienen transacción distribuida. SQLite temporal desaparece al cerrar proceso.

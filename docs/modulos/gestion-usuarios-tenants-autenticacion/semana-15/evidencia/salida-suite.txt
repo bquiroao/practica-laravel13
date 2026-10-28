@@ -1,0 +1,15 @@
+PASS U01 membresia limites inclusivo inicio exclusivo fin
+PASS U02 credencial correcta incorrecta desconocida
+PASS U03 sesion limite exp exacto y futuro
+PASS U04 revocacion aislada por tenant y jti
+PASS W01 alta invalida corta antes de dependencias
+PASS W02 credencial invalida no emite token
+PASS W03 falla de alta no deja identidad ni membresia
+PASS B01 alta permitida y membresia duplicada
+PASS B02 administrador rol y tenant denegados
+PASS B03 login contextual y aislamiento sin membresia cruzada
+PASS B04 errores genericos sin token
+PASS B05 logout revocado y acceso tenant ajeno rechazados
+PASS B06 falla revocacion no confirma cierre
+PASS B07 membresia inactiva y expirada bloquean login
+14 casos, 0 fallidos.

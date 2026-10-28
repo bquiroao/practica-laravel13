@@ -1,0 +1,7 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\Application\Workflow.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\Domain\Model.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\Persistence\PdoRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\Presentation\cli.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\Presentation\DemoRules.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-ordenes-emr-arquitectura-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-03\micro-his\tests\run.php
