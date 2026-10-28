@@ -1,0 +1,16 @@
+Verificación estructural SVG — 2026-10-27; no sustituye prueba de navegador.
+PASS 01-bandeja-320.svg: XML válido; ancho 320; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 01-bandeja-375.svg: XML válido; ancho 375; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 01-bandeja-430.svg: XML válido; ancho 430; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 02-captura-320.svg: XML válido; ancho 320; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 02-captura-375.svg: XML válido; ancho 375; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 02-captura-430.svg: XML válido; ancho 430; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 03-correccion-320.svg: XML válido; ancho 320; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 03-correccion-375.svg: XML válido; ancho 375; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 03-correccion-430.svg: XML válido; ancho 430; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 04-confirmacion-320.svg: XML válido; ancho 320; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 04-confirmacion-375.svg: XML válido; ancho 375; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 04-confirmacion-430.svg: XML válido; ancho 430; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 05-recuperacion-320.svg: XML válido; ancho 320; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 05-recuperacion-375.svg: XML válido; ancho 375; texto dentro de lienzo (medición Arial con System.Drawing).
+PASS 05-recuperacion-430.svg: XML válido; ancho 430; texto dentro de lienzo (medición Arial con System.Drawing).

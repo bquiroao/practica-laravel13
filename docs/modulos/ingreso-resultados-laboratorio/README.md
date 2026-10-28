@@ -24,6 +24,9 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/*.puml
 ```
 
+## Semana 10 — Movilidad
+
+[Propuesta responsive, cinco pantallas y dos escenarios](semana-10/semana-10-movilidad-ingreso-resultados.md).
 ## Semana 12
 
 [Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
