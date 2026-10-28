@@ -31,7 +31,8 @@
                     "bloquea": false,
                     "reaccion": "exantema"
                 }
-            ]
+            ],
+            "puede_justificar": true
         },
         "location": null,
         "trazas": [],
