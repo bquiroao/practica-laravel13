@@ -1,0 +1,7 @@
+POST /patients/p1/record (X-Profesional: admision1) -> 201 {"expediente":"EXP-p1"}
+POST /patients/p1/record (X-Profesional: admision1) -> 409 {"error":"E3","mensaje":"El paciente ya tiene el expediente EXP-p1."}
+POST /patients/p3/record (X-Profesional: admision1) -> 422 {"error":"E2","mensaje":"Solo un paciente activo puede tener expediente."}
+GET /patients/p1/record (X-Profesional: m1) -> 200 {"expediente":"EXP-p1"}
+GET /patients/p1/record/external (X-Profesional: m1) -> 200 {"expediente":"EXP-p1","externos":[{"hospital":"h2","expediente":"EXP-H2-77"}]}
+GET /patients/p1/record (X-Profesional: m2) -> 403 {"error":"E4","mensaje":"No tienes una asignación de atención activa con este paciente."}
+DELETE /patients/p1/record (X-Profesional: m1) -> 404 {}
