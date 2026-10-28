@@ -4,8 +4,8 @@ declare(strict_types=1);
 // Pruebas sin dependencias:  php tests/ejecutar.php   (usa SQLite en memoria como base de prueba)
 use Reportes\Aplicacion\{ErrorPersistencia, ExportarReporte, Usuario};
 use Reportes\Dominio\{Csv, ErrorDominio};
-use Reportes\Persistencia\ReportesPdo;
-use Reportes\Presentacion\ReportesControlador;
+use Reportes\Persistencia\{EnMemoria, ReportesPdo};
+use Reportes\Presentacion\{Enrutador, Peticion, ReportesControlador};
 use function Reportes\Dominio\catalogo;
 
 require __DIR__ . '/../bootstrap.php';
@@ -28,7 +28,10 @@ function base(): PDO {
     $pdo->exec((string) file_get_contents(__DIR__ . '/../sql/esquema.sql'));
     return $pdo;
 }
-function caso(PDO $pdo): ExportarReporte { return new ExportarReporte(new ReportesPdo($pdo), catalogo(), ['csv' => new Csv()], fn () => '2026-10-25 12:00:00'); }
+function repo(PDO|EnMemoria $r): ReportesPdo|EnMemoria { return $r instanceof PDO ? new ReportesPdo($r) : $r; }
+function caso(PDO|EnMemoria $r): ExportarReporte { return new ExportarReporte(repo($r), repo($r), catalogo(), ['csv' => new Csv()], fn () => '2026-10-25 12:00:00'); }
+function enrutador(PDO|EnMemoria $r, array $usuarios): Enrutador { return new Enrutador(new ReportesControlador(caso($r), $usuarios)); }
+function pedir(Enrutador $e, string $metodo, string $ruta, string $usuario, array $consulta = []): array { return $e->atender(new Peticion($metodo, $ruta, $consulta, $usuario)); }
 function registros(PDO $pdo): int { return (int) $pdo->query('SELECT COUNT(*) FROM exportaciones_reporte')->fetchColumn(); }
 $jefa = new Usuario('usr-jefa', 'jefatura', 'hosp-1', true);
 $auditor = new Usuario('usr-aud', 'auditor', 'hosp-1', false);
@@ -63,7 +66,7 @@ prueba('PER-01', 'Error de persistencia: sin tabla de registro → ErrorPersiste
     $pdo->exec('DROP TABLE exportaciones_reporte');
     $e = errorDe(fn () => caso($pdo)->ejecutar('censo', $rango, 'csv', $jefa));
     igual([ErrorPersistencia::class, PDOException::class], [$e::class, $e->getPrevious()::class], 'error envuelto');
-    [$estado, $cuerpo] = (new ReportesControlador(caso($pdo), ['jefa' => $jefa]))->atender('GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango);
+    [$estado, $cuerpo] = pedir(enrutador($pdo, ['jefa' => $jefa]), 'GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango);
     igual([500, 'error_persistencia'], [$estado, $cuerpo['codigo']], 'respuesta');
 });
 
@@ -71,25 +74,49 @@ prueba('APP-02', 'Reproducible: una fila registrada después del corte no cambia
     $pdo = base();
     $r = caso($pdo)->ejecutar('censo', $rango, 'csv', $jefa);
     $pdo->exec("INSERT INTO vw_censo_servicio VALUES ('hosp-1', 'Tardía', '4444', 'medicina', 'A9', '2026-10-24', '2026-10-25 15:00:00')");
-    $otra = new ExportarReporte(new ReportesPdo($pdo), catalogo(), ['csv' => new Csv()], fn () => '2026-10-26 09:00:00');
+    $repo = new ReportesPdo($pdo);
+    $otra = new ExportarReporte($repo, $repo, catalogo(), ['csv' => new Csv()], fn () => '2026-10-26 09:00:00');
     igual([true, $r['hash']], [$otra->reproducir($r['id'], $jefa)['coincide'], $otra->reproducir($r['id'], $jefa)['hash']], 'reproducción');
     igual(3, $otra->ejecutar('censo', $rango, 'csv', $jefa)['filas'], 'una exportación nueva sí ve la fila');
 });
 
-prueba('HTTP-01', 'Controlador: 200 con cabeceras, 401, 403, 404, 405, 400 y 422', function () use ($jefa, $rango) {
-    $c = new ReportesControlador(caso(base()), ['jefa' => $jefa, 'enf' => new Usuario('usr-enf', 'enfermeria', 'hosp-1', false)]);
-    [$estado, $cuerpo, $cab] = $c->atender('GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango + ['formato' => 'csv']);
+prueba('MVC-01', 'MVC: Enrutador → controlador → vista con PDO: 200 (CSV y reproducir), 401, 403, 404, 405, 400 y 422', function () use ($jefa, $rango) {
+    $e = enrutador(base(), ['jefa' => $jefa, 'enf' => new Usuario('usr-enf', 'enfermeria', 'hosp-1', false)]);
+    [$estado, $cuerpo, $cab] = pedir($e, 'GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango + ['formato' => 'csv']);
     igual([200, 'text/csv; charset=utf-8', hash('sha256', $cuerpo)], [$estado, $cab['Content-Type'], $cab['X-Reporte-Sha256']], 'exportación');
-    $estados = [['GET', '/api/v1/reportes/censo/exportar', 'nadie', $rango], ['GET', '/api/v1/reportes/censo/exportar', 'enf', $rango],
-                ['GET', '/api/v1/reportes/farmacia/exportar', 'jefa', $rango], ['POST', '/api/v1/reportes/censo/exportar', 'jefa', $rango],
-                ['GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango + ['formato' => 'pdf']], ['GET', '/api/v1/reportes/censo/exportar', 'jefa', ['desde' => '2026-10-25', 'hasta' => '2026-10-01']]];
-    igual([401, 403, 404, 405, 400, 422], array_map(fn ($p) => $c->atender(...$p)[0], $estados), 'estados');
+    igual([200, true], [($r = pedir($e, 'POST', '/api/v1/exportaciones/' . $cab['X-Exportacion-Id'] . '/reproducir', 'jefa'))[0], $r[1]['coincide']], 'reproducir');
+    $censo = '/api/v1/reportes/censo/exportar';
+    $casos = [['GET', $censo, 'nadie', $rango], ['GET', $censo, 'enf', $rango], ['GET', '/api/v1/reportes/farmacia/exportar', 'jefa', $rango],
+              ['GET', '/x', 'jefa', []], ['POST', $censo, 'jefa', $rango], ['GET', $censo, 'jefa', $rango + ['formato' => 'pdf']], ['GET', $censo, 'jefa', ['desde' => '2026-10-25', 'hasta' => '2026-10-01']]];
+    igual([401, 403, 404, 404, 405, 400, 422], array_map(fn ($p) => pedir($e, ...$p)[0], $casos), 'estados');
 });
 
-prueba('ARQ-01', 'Dependencias: Dominio no conoce otras capas ni PDO; Aplicación no conoce HTTP ni SQL; Presentación no conoce PDO', function () {
+prueba('REP-01', 'Contrato del Repository: PDO y memoria dan el mismo archivo, hash, corte, reproducción y aislamiento por hospital', function () use ($jefa, $auditor, $rango) {
+    $resultado = function (PDO|EnMemoria $r) use ($jefa, $auditor, $rango) {
+        $c = caso($r);
+        $a = $c->ejecutar('censo', $rango, 'csv', $jefa);
+        $b = $c->ejecutar('egresos', $rango, 'csv', $auditor);
+        $f = $c->ejecutar('censo', $rango + ['servicio' => 'cirugia'], 'csv', $jefa);
+        $antes = new ExportarReporte(repo($r), repo($r), catalogo(), ['csv' => new Csv()], fn () => '2026-10-21 00:00:00'); // corte anterior a la fila de Luis
+        return [[$a['contenido'], $a['hash'], $a['filas']], [$b['contenido'], $b['hash']], [$f['contenido'], $f['filas']], $antes->ejecutar('censo', ['desde' => '2026-10-01', 'hasta' => '2026-10-21'], 'csv', $jefa)['filas'], $c->reproducir($a['id'], $jefa)['coincide'],
+                errorDe(fn () => $c->reproducir($a['id'], new Usuario('usr-x', 'jefatura', 'hosp-2', true)))->codigo];
+    };
+    $pdo = $resultado(base());
+    igual(2, $pdo[0][2], 'el hosp-2 no aparece');
+    igual($pdo, $resultado(EnMemoria::demo()), 'PDO vs memoria');
+});
+
+prueba('PER-02', 'Doble en memoria que falla al guardar → 500 por el Enrutador, ningún archivo y nada registrado', function () use ($jefa, $rango) {
+    $memoria = EnMemoria::demo();
+    $memoria->fallarAlGuardar = true;
+    [$estado, $cuerpo] = pedir(enrutador($memoria, ['jefa' => $jefa]), 'GET', '/api/v1/reportes/censo/exportar', 'jefa', $rango);
+    igual([500, 'error_persistencia', 0], [$estado, $cuerpo['codigo'], $memoria->cantidad()], 'respuesta');
+});
+
+prueba('ARQ-01', 'Dependencias: Dominio no conoce otras capas ni PDO; Aplicación no importa Persistencia ni PDO; el controlador no tiene SQL ni reglas', function () {
     $prohibido = ['Dominio' => '/Reportes\\\\(Aplicacion|Persistencia|Presentacion)|\\\\PDO\b|SELECT |\$_(GET|POST)/',
-                  'Aplicacion' => '/Reportes\\\\Presentacion|\\\\PDO\b|SELECT |INSERT |\$_(GET|POST)|header\(/',
-                  'Presentacion' => '/Reportes\\\\Persistencia|\\\\PDO\b|SELECT |INSERT /',
+                  'Aplicacion' => '/Reportes\\\\(Persistencia|Presentacion)|\bPDO\b|SELECT |INSERT |\$_(GET|POST)|header\(/',
+                  'Presentacion' => '/Reportes\\\\Persistencia|Reportes\\\\Dominio\\\\(?!ErrorDominio)|\bPDO\b|SELECT |INSERT |hash\(/',
                   'Persistencia' => '/Reportes\\\\Presentacion|\$_(GET|POST)/'];
     foreach ($prohibido as $capa => $patron) {
         foreach (glob(__DIR__ . "/../src/$capa/*.php") as $archivo) {
