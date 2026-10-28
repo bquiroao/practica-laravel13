@@ -1,0 +1,118 @@
+@startuml semana-01-secuencia
+title Módulo QA y regresión — Secuencia\n«Diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad»
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F4F8F2
+skinparam ParticipantBorderColor #3B6E2E
+skinparam DatabaseBackgroundColor #F4F8F2
+autonumber "S-00"
+
+actor "Líder QA" as LID
+actor "Tester" as TST
+actor "Desarrollador" as DEV
+actor "Responsable\nde producto" as PRO
+participant "Interfaz\n(Vue)" as UI
+participant "API QA\n(controlador)" as API
+participant "Servicio RBAC\n(PDP)" as RBAC
+participant "Caso de uso\nQA" as CU
+participant "Almacén de\nevidencias" as ALM
+database "Repositorio QA\n(casos, campañas,\nintentos, defectos)" as BD
+participant "Módulo\nAuditoría" as AUD
+
+== 1 · Iniciar la campaña de regresión (CU-04, CU-13, CU-14) ==
+LID -> UI : Elige la campaña PLANIFICADA y el build bajo prueba
+UI -> API : POST /api/v1/qa/campanas/{id}/inicio\nBearer + X-Tenant-ID {build}
+API -> RBAC : decidir(qa.planificar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : iniciar(campaña, build, tenant del token)
+CU -> BD : campaña del tenant + alcance + matriz de regresión
+BD --> CU : estado PLANIFICADA · casos del alcance\n· casos críticos de las funcionalidades afectadas
+CU -> CU : ¿build informado? ¿el alcance cubre\ntodos los críticos afectados? [R-03]\n¿todos los casos APROBADOS? [R-02]
+alt falta un caso crítico o hay un caso sin aprobar
+  CU --> API : ALCANCE_INCOMPLETO (lista lo que falta) | CASO_NO_APROBADO
+  API --> UI : 422
+else alcance válido
+  CU -> BD : congelar alcance, versión de cada caso y build; EN_CURSO
+  CU -> AUD : CAMPANA_INICIADA (campaña:<id>, build)
+  CU --> API : EN_CURSO
+  API --> UI : 200
+end
+
+== 2 · Ejecutar un caso: FALLA con evidencia y defecto (CU-05, CU-06, CU-07) ==
+TST -> UI : Sigue los pasos del caso; el paso 3 no da lo esperado.\nAdjunta la captura y describe el defecto (severidad propuesta)
+UI -> UI : ¿hay evidencia? ¿tipo y tamaño? ¿pasos para reproducir? (usabilidad)
+UI -> API : POST /api/v1/qa/campanas/{id}/resultados\nIdempotency-Key + Bearer + X-Tenant-ID\n{caso, resultado: FALLA, evidencia, defecto}
+API -> RBAC : decidir(qa.ejecutar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : registrarResultado(solicitud, tester del token)
+CU -> BD : ¿campaña EN_CURSO? ¿caso en el alcance? [R-04]\n¿la clave ya se usó? [R-12]
+BD --> CU : sí · sí · no
+CU -> CU : FALLA exige evidencia y defecto [R-05, R-06]
+CU -> ALM : guardar(archivo)
+alt el almacén no responde
+  ALM --> CU : error / tiempo agotado
+  CU --> API : EVIDENCIA_NO_DISPONIBLE
+  API --> UI : 503 (nada se registra: sin evidencia no hay FALLA)
+else guardada
+  ALM --> CU : ubicación + hash SHA-256
+  CU -> BD : en UNA transacción: intento n (inmutable)\n+ referencia a la evidencia + defecto NUEVO
+  CU -> AUD : RESULTADO_REGISTRADO, DEFECTO_REPORTADO
+  CU --> API : intento n · defecto D-<id>
+  API --> UI : 201
+end
+
+== 3 · Clasificar y corregir el defecto (CU-08, CU-09) ==
+LID -> UI : Confirma severidad CRÍTICA y prioridad alta (con motivo si cambia)
+UI -> API : PATCH /api/v1/qa/defectos/{id}/clasificacion
+API -> RBAC : decidir(qa.clasificar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : clasificar(defecto, severidad, prioridad, motivo)
+CU -> CU : CRÍTICA exige pasos y evidencia [R-07]\n¿cambió la severidad propuesta? → motivo
+CU -> BD : historial de la clasificación; ABIERTO
+CU -> AUD : DEFECTO_CLASIFICADO
+API --> UI : 200
+DEV -> API : POST /api/v1/qa/defectos/{id}/correccion {build con la corrección}
+API -> RBAC : decidir(qa.corregir, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : marcarCorregido(defecto, build)
+CU -> BD : ABIERTO → CORREGIDO [R-08]
+API --> DEV : 200 (el desarrollador NO puede cerrarlo)
+
+== 4 · Verificar la corrección: re-ejecución (CU-10) ==
+TST -> UI : Re-ejecuta el caso que lo detectó, sobre el build corregido
+UI -> API : POST /api/v1/qa/campanas/{id}/resultados\n{caso, resultado: PASA, verifica: D-<id>}
+API -> RBAC : decidir(qa.ejecutar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : registrarResultado(...)
+CU -> BD : intento n+1 (el intento n sigue visible) [R-11]
+alt PASA
+  CU -> BD : defecto CORREGIDO → CERRADO (verificado)
+else FALLA
+  CU -> BD : defecto CORREGIDO → REABIERTO (+ evidencia nueva)
+end
+CU -> AUD : DEFECTO_VERIFICADO | DEFECTO_REABIERTO
+API --> UI : 201
+
+== 5 · Cerrar la campaña con decisión GO / NO-GO (CU-11) ==
+LID -> UI : Cierra la campaña
+UI -> API : POST /api/v1/qa/campanas/{id}/cierre
+API -> RBAC : decidir(qa.cerrar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : cerrar(campaña)
+CU -> BD : último intento de cada caso · defectos abiertos por severidad
+BD --> CU : 40/40 con resultado · 0 críticos abiertos · 38 PASA
+CU -> CU : ¿sin pendientes? ¿0 críticos? ¿tasa 95 % ≥ umbral 95 %? [R-09]
+CU -> BD : CERRADA · GO · informe congelado
+CU -> AUD : CAMPANA_CERRADA (GO)
+API --> UI : 200 informe (GO, causas si NO-GO)
+
+== 6 · Consultar la trazabilidad (CU-12) ==
+PRO -> UI : ¿Qué pasó con el RF-07 en la versión 2.4?
+UI -> API : GET /api/v1/qa/trazabilidad?requisito=RF-07&build=2.4
+API -> RBAC : decidir(qa.consultar, tenant)
+RBAC --> API : PERMITIDO
+API -> CU : trazar(requisito, build, tenant)
+CU -> BD : requisito → casos → intentos → evidencias → defectos
+BD --> CU : 3 casos · 4 intentos · 1 defecto CERRADO
+API --> UI : 200 cadena completa (y los requisitos SIN caso) [R-10]
+@enduml
