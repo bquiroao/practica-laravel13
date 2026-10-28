@@ -22,3 +22,47 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/investigacion-prototipo
 ## Semana 12
 
 [Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
+## Semana 13
+
+[Revisión técnica formal: plan, checklist, roles y formatos](semana-13/semana-13-revision-tecnica-nativephp.md).
+## Semana 14
+
+[Plan SQA: métricas, riesgos, controles, responsables y calendario](semana-14/semana-14-plan-sqa-nativephp.md).
+## Semana 15
+
+[Pruebas, matriz RF/RNF, capturas y defectos](semana-15/README.md).
+## Semana 5
+
+[Cliente-servidor, contrato API, frontera y plan de issues](semana-05/README.md).
+## Semana 3
+
+[Micro-HIS PHP vanilla, capas, PDO y arquitectura](semana-03/README.md).
+
+## Semana 4
+
+[MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
+## Semana 5
+
+[Contrato API y diseño cliente-servidor](semana-05/README.md).
+
+## Semana 6
+
+[Primera evaluación: presentación, matriz y cambio práctico](semana-06/README.md).
+## Semana 7
+
+[Componentes, contratos y refactor conceptual](semana-07/semana-07-componentes-refactor-nativephp.md).
+
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/semana-08-ux-nativephp.md).
+
+## Semana 10
+
+[Movilidad: cinco pantallas, breakpoints y dos escenarios](semana-10/README.md).
+
+## Semana 11
+
+[Prototipo navegable y evidencia desktop/móvil](semana-11/README.md).
+## Semana 9
+
+[Evaluación UX/accesibilidad: checklist, hallazgos y backlog](semana-09/README.md).

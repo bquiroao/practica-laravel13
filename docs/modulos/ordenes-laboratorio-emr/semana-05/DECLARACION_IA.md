@@ -1,0 +1,1 @@
+IA utilizada para continuar el Micro-HIS propio, elaborar contrato OpenAPI, propiedad/seguridad/resiliencia, evaluación de frontera y plan de integración; validación estática y regresiones ejecutadas. La estudiante revisa y defiende decisiones. No hay servidor desplegado, garantías de tenant/idempotencia implementadas, mediciones de carga o aprobación independiente.

@@ -1,0 +1,13 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash y estados de cada tarjeta)
+hide empty description
+[*] --> Inicio
+Inicio : &#35;inicio · cada tarjeta: carga → resumen, vacío o error
+Modulo : &#35;modulo/camas (el módulo, fuera del prototipo)
+SinAcceso : &#35;modulo/usuarios con rol de enfermería (E6)
+Inicio --> Modulo : «Ver camas» o el menú
+Modulo --> Inicio : «Volver al inicio»
+Inicio --> Inicio : tarjeta en error (E5, o más de 10 s: E2) → «Reintentar» recarga solo esa
+[*] --> SinAcceso : ruta escrita a mano sin permiso
+SinAcceso --> Inicio : «Volver al inicio»
+@enduml

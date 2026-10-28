@@ -1,0 +1,47 @@
+﻿PASS: [InMemory] sin historial devuelve null
+PASS: [InMemory] guarda la versión inicial
+PASS: [InMemory] no duplica la versión inicial
+PASS: [InMemory] la inicial conservada es la primera
+PASS: [InMemory] anexa corrección sobre la versión vigente
+PASS: [InMemory] la vigente es la versión dos
+PASS: [InMemory] rechaza corrección con versión obsoleta
+PASS: [InMemory] el rechazo no altera el historial
+PASS: [InMemory] recupera un resultado validado
+PASS: [InMemory] no anexa sobre un resultado validado
+PASS: [PDO SQLite] sin historial devuelve null
+PASS: [PDO SQLite] guarda la versión inicial
+PASS: [PDO SQLite] no duplica la versión inicial
+PASS: [PDO SQLite] la inicial conservada es la primera
+PASS: [PDO SQLite] anexa corrección sobre la versión vigente
+PASS: [PDO SQLite] la vigente es la versión dos
+PASS: [PDO SQLite] rechaza corrección con versión obsoleta
+PASS: [PDO SQLite] el rechazo no altera el historial
+PASS: [PDO SQLite] recupera un resultado validado
+PASS: [PDO SQLite] no anexa sobre un resultado validado
+PASS: captura una versión inicial pendiente
+PASS: la captura no se considera validada
+PASS: corrige resultado que sigue pendiente
+PASS: la nueva versión enlaza la anterior
+PASS: el historial conserva ambas versiones
+PASS: rechaza valor vacío
+PASS: rechaza corrección sin motivo
+PASS: rechaza versión obsoleta
+PASS: no permite corregir un resultado validado
+PASS: propaga el error de persistencia sin crear resultado
+PASS: informa conflicto si el append condicional no se aplica
+PASS: MVC: captura devuelve código 0 y vista con estado pendiente
+PASS: MVC: formulario rechaza entrada sin valor (código 2)
+PASS: MVC: duplicado se presenta como conflicto (código 3)
+PASS: MVC: ítem inexistente se presenta como no encontrado (código 4)
+PASS: front controller rechaza acciones desconocidas
+PASS: front controller enruta la corrección
+PASS: ARQ-01 el controlador no tiene SQL, PDO, dominio, persistencia, new ni formato de salida
+PASS: ARQ-01 el detector sí encuentra una violación (control negativo)
+PASS: ARQ-02 Application no depende de PDO, Persistence ni Presentation: CaptureOrCorrectResult.php
+PASS: ARQ-02 Application no depende de PDO, Persistence ni Presentation: ResultOperation.php
+PASS: ARQ-02 Application no depende de PDO, Persistence ni Presentation: ResultPorts.php
+PASS: ARQ-03 Domain no depende de otras capas
+PASS: ARQ-04 la interfaz Repository vive en el límite de Application
+PASS: ARQ-05 el adaptador Pdo implementa el puerto
+PASS: ARQ-05 el adaptador InMemory implementa el puerto
+OK: 46 aserciones.

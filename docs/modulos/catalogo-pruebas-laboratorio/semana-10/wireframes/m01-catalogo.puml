@@ -1,0 +1,22 @@
+@startsalt m01-catalogo
+title M-01 Catálogo en móvil (360 px)
+{+
+  {[≡] | <b>Catálogo de pruebas</b> | [Buscar]}
+  ==
+  "glucosa          " | [Filtros (1)]
+  Vigentes al 15/01/2027 [Cambiar]
+  ..
+  {+
+    <b>GLU-001</b> Glucosa en ayunas
+    Plasma · Ayuno 8 h
+    Vigente hasta 31/01/2027 | [>]
+  }
+  {+
+    <b>HEM-001</b> Hematología completa
+    Sangre total · Sin ayuno
+    Vigente | [>]
+  }
+  ..
+  [+ Nueva prueba] (solo Jefe, botón fijo abajo)
+}
+@endsalt

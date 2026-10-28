@@ -1,0 +1,20 @@
+PASS: consulta exitosa vacía
+PASS: emisión camino feliz
+PASS: consulta orden persistida
+PASS: estado de política demo conservado
+PASS: ambas partidas persistidas
+PASS: trazabilidad solicitante
+PASS: trazabilidad paciente
+PASS: trazabilidad episodio
+PASS: regla al menos una prueba
+PASS: regla catálogo disponible
+PASS: contexto inválido sin emisión
+PASS: emisión denegada
+PASS: consulta denegada
+PASS: rechazos no crean órdenes
+PASS: error real PDO sin éxito
+PASS: rollback cabecera
+PASS: rollback partida previa
+PASS: lectura fallida no se presenta como vacía
+PASS: deniega antes de consultar BD rota
+OK: 19 aserciones. PDO SQLite real temporal; reglas clínicas de demostración.

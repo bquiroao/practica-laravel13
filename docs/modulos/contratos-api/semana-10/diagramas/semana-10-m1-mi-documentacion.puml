@@ -1,0 +1,19 @@
+@startsalt
+title M1 — Mi documentación (320 px)
+{+
+  [≡ Menú] | <b>Documentación</b>
+  Tus roles: <b>médico</b>
+  "Buscar   " | ^Todos^
+  <i>2 documentos</i>
+  ---
+  {+
+    <b><u>guia-citas</u></b> · Manual
+    Vigente <b>1.1.0</b> · 26/10/2026
+  }
+  {+
+    <b><u>citas-api</u></b> · OpenAPI
+    Vigente <b>2.0.0</b> · 20/10/2026
+  }
+  <i>El nombre es un enlace que abre M2.</i>
+}
+@endsalt
