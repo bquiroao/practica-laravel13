@@ -1,0 +1,20 @@
+@startuml user-flow-medico
+title User flow — Médico: consultar qué puede ordenar y qué preparación necesita
+start
+:Entra al catálogo desde la orden de laboratorio (W-01);
+:Fecha de referencia = hoy (editable);
+:Escribe «glucosa» y filtra por sección;
+:Cargando… (esqueleto de la tabla);
+if (¿Hay pruebas vigentes?) then (no)
+  :Estado vacío: «No hay pruebas vigentes\npara esos filtros» + «Limpiar filtros»;
+  stop
+endif
+:Abre GLU-001 (W-02);
+if (¿Vigente en la fecha?) then (sí)
+  :Ve preparación del paciente\n(ayuno 8 h, instrucciones);
+  :Vuelve a la orden;
+else (no)
+  :Aviso: «No vigente el … ; vigente desde …»;
+endif
+stop
+@enduml
