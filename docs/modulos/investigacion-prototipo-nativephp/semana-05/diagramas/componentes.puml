@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+actor "Operador autorizado" as U
+component "UI / Caso de uso cliente" as C
+interface DemoOrderStatusGateway as G
+component "Adaptador HTTP (propuesto)" as A
+component "API Laravel demo" as API
+database "Orden demo / HIS dueño" as DB
+interface NativeNotifier as N
+component "Adaptador local elegido" as Native
+U --> C
+C --> G
+A ..|> G
+A --> API : HTTPS / sesión / Request-ID
+API --> DB : lectura tenant autorizada
+C --> N
+Native ..|> N
+Native --> [Permiso / notificación SO]
+note bottom of API
+Módulo en HIS, no microservicio nuevo.
+Contrato propuesto, no desplegado.
+end note
+@enduml
