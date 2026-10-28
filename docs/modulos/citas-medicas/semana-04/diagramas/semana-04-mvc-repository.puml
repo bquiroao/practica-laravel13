@@ -1,0 +1,34 @@
+@startuml semana-04-mvc-repository
+title MVC y Repository — Micro-HIS Citas médicas y agenda
+package "Entrada" {
+  class "public/index.php" as Front <<front controller>>
+}
+package Presentacion {
+  class Rutas
+  class ControladorCitas <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class ServicioCitas
+  interface RepositorioCitas <<repository>>
+  interface Reloj <<puerto>>
+  class Horario
+  enum EstadoCita
+}
+package Persistencia {
+  class RepositorioPdo
+  class RepositorioEnMemoria
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorCitas : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorCitas --> ServicioCitas
+ControladorCitas --> VistaJson
+ServicioCitas --> RepositorioCitas
+ServicioCitas --> Reloj
+ServicioCitas ..> Horario
+ServicioCitas ..> EstadoCita
+RepositorioPdo ..|> RepositorioCitas
+RepositorioEnMemoria ..|> RepositorioCitas
+note bottom of ControladorCitas : sin SQL ni reglas de negocio
+@enduml
