@@ -12,6 +12,7 @@ Modela el alta autorizada de una identidad con acceso a un tenant, la autenticac
 |---:|---|---|---|---|
 | 1 | UML del proceso «alta de usuario por tenant, autenticación segura y revocación de sesión»: casos de uso, actividad, secuencia y narrativa de alcance | [semana-01-uml-usuarios-tenants-autenticacion.md](semana-01/semana-01-uml-usuarios-tenants-autenticacion.md) | [DECLARACION_IA.md](semana-01/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-01/GUIA_DEFENSA_ORAL.md) |
 | 2 | RF/RNF, criterios de aceptación y aplicación de SRP al mismo flujo, con ejemplo PHP verificable | [semana-02-srp-usuarios-tenants.md](semana-02/semana-02-srp-usuarios-tenants.md) | [DECLARACION_IA.md](semana-02/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-02/GUIA_DEFENSA_ORAL.md) |
+| 4 | Arquitectura MVC, interfaces Repository con adaptadores PDO e InMemory verificados con el mismo contrato, y análisis del repositorio de datos compartido | [semana-04-mvc-repositorio-usuarios-tenants.md](semana-04/semana-04-mvc-repositorio-usuarios-tenants.md) | [DECLARACION_IA.md](semana-04/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-04/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
