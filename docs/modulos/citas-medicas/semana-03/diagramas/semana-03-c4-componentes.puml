@@ -1,0 +1,20 @@
+@startuml semana-03-c4-componentes
+' Semana 3 — Citas médicas y agenda (tarea Odoo 2460): C4 nivel 3
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Citas médicas y agenda
+Person(rec, "Recepcionista / Médico", "Solicita, confirma y cancela citas")
+Container_Boundary(micro, "Micro-HIS Citas (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorCitas", "Presentación", "Entrada, traducción E2..E8 a HTTP")
+  Component(svc, "ServicioCitas", "Aplicación", "CU-01 a CU-03 con CU-04 incluido")
+  Component(dom, "EstadoCita, Horario, ReglaDeDominio", "Dominio", "R-01 y R-07")
+  Component(repo, "RepositorioPdo", "Persistencia", "PDO con sentencias preparadas")
+  Component(reloj, "Reloj", "Puerto", "«ahora» inyectado")
+}
+ContainerDb(db, "Base HOSPITAL", "PostgreSQL (SQLite en pruebas)", "appointments, doctor_specialties, cancelaciones")
+Rel(rec, ctrl, "solicitar, confirmar, cancelar")
+Rel(ctrl, svc, "llama")
+Rel(svc, dom, "valida reglas")
+Rel(svc, reloj, "hora actual")
+Rel(svc, repo, "puerto RepositorioCitas")
+Rel(repo, db, "SQL preparado: cruces y estados")
+@enduml

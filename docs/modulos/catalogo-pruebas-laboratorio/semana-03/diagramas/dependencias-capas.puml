@@ -1,0 +1,40 @@
+@startuml dependencias-capas
+title Dependencias entre capas del Micro-HIS — todas apuntan hacia Domain
+skinparam packageStyle rectangle
+
+package "Presentation" as P {
+  [ConsolaCatalogo]
+}
+package "Application" as A {
+  [RegistrarPrueba]
+  [ConsultarPruebasVigentes]
+  [VerDetallePrueba]
+  interface Reloj
+}
+package "Domain" as D {
+  [LabTest]
+  [RequisitoMuestra]
+  [Vigencia]
+  interface LabTestRepository
+  [Excepciones de dominio]
+}
+package "Persistence" as Pe {
+  [PdoLabTestRepository]
+  [Conexion]
+}
+
+[ConsolaCatalogo] --> [RegistrarPrueba]
+[RegistrarPrueba] --> [LabTest]
+[RegistrarPrueba] --> LabTestRepository
+[ConsultarPruebasVigentes] --> LabTestRepository
+[VerDetallePrueba] --> LabTestRepository
+[PdoLabTestRepository] ..|> LabTestRepository
+[PdoLabTestRepository] --> [LabTest] : reconstruye
+
+note right of D
+  Domain no depende de ninguna otra capa
+  ni de PDO. Persistence implementa el
+  puerto definido en Domain (inversión
+  de dependencias).
+end note
+@enduml

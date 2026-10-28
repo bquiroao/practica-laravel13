@@ -1,0 +1,16 @@
+@startsalt
+title M4 — Publicar versión, paso 2 de 2: audiencia
+{+
+  [< Paso 1] | <b>Publicar · 2 de 2</b>
+  guia-citas <b>1.2.0</b> · Manual
+  <b>Audiencia *</b>
+  [X] médico
+  [X] enfermería
+  [ ] farmacia
+  <b>Archivo *</b>
+  [Elegir archivo]
+  <i>Manual: .pdf · máx. 10 MB</i>
+  ---
+  [Enviar: lo verán médico y enfermería]
+}
+@endsalt

@@ -1,0 +1,18 @@
+@startsalt w01-catalogo
+title W-01 Catálogo de pruebas vigentes (todos los roles)
+{+
+  {/ <b>Laboratorio</b> | Catálogo de pruebas | Usuario: dr.perez (Médico) — HOSP-01 }
+  ==
+  <b>Pruebas vigentes</b> | . | . | [Nueva prueba] (solo Jefe)
+  { Buscar: | "glucosa       " | Sección: | ^Todas^ | Muestra: | ^Todas^ | Fecha: | "2027-01-15" | [Consultar] }
+  ..
+  {#
+    <b>Código</b> | <b>Nombre</b> | <b>Sección</b> | <b>Muestra</b> | <b>Vigencia</b>
+    GLU-001 | Glucosa en ayunas | Química clínica | Plasma | desde 2027-01-04 hasta 2027-01-31
+    HEM-001 | Hematología completa | Hematología | Sangre total | desde 2027-01-04
+  }
+  ..
+  Estado vacío: "No hay pruebas vigentes para esos filtros." [Limpiar filtros]
+  Estado carga: filas grises de marcador mientras responde la API
+}
+@endsalt

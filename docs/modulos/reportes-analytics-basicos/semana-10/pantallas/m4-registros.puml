@@ -1,0 +1,15 @@
+@startsalt m4_registros
+{+
+  [<] | Desglose › <b>Medicina (18)</b>
+  --
+  {+ <b>MED-01</b> · PAC-00465
+     Ingreso 16/10 · en curso }
+  {+ <b>MED-02</b> · PAC-00466
+     Ingreso 17/10 · egreso 21/10 }
+  {+ <b>MED-03</b> · PAC-00467
+     Ingreso 18/10 · en curso }
+  --
+  10 de 18 | [ Cargar más ]
+  <&lock-locked> Solo datos mínimos
+}
+@endsalt

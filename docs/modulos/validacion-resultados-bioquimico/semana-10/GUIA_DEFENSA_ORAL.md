@@ -1,0 +1,1 @@
+Abrir variantes 320 y 430 de las cinco pantallas. Explicar contexto/versión, validar frente a rechazar con motivo y confirmación con firma de trazabilidad. Recorrer respuesta perdida y conflicto: comprobar antes de reenviar y revisar nueva versión. Recibo solo tras persistencia; no firma criptográfica. Son SVG estáticos, no app probada en red ni autorización real.

@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+package "UI propuesta" {
+ component OrderWorkspace as W
+ component TestSelectionForm as S
+ component OrderReview as V
+ component OrderStatusList as LIST
+ component OrderApiClient as HTTP
+}
+package "Presentación propuesta" {
+ component Controllers as C
+}
+package Application {
+ component Issue as I
+ component Find as F
+}
+package "Puertos de dominio después" {
+ interface ClinicalAuthorization as A
+ interface ClinicalContextValidator as CTX
+ interface LabCatalog as CAT
+ interface OrderLifecyclePolicy as LIFE
+ interface Repository as R
+}
+component "PdoRepository existente" as PDO
+database "Orden / partidas" as DB
+W --> S
+W --> V
+W --> LIST
+V --> HTTP
+LIST --> HTTP
+HTTP --> C
+C --> I
+C --> F
+I --> A
+F --> A
+I --> CTX
+I --> CAT
+I --> LIFE
+I --> R
+F --> R
+PDO ..|> R
+PDO --> DB
+note bottom of C
+Diseño UI/API y puertos específicos propuestos.
+El refactor no se aplica al código de semana 3.
+end note
+@enduml

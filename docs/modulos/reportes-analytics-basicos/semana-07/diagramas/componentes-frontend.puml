@@ -1,0 +1,44 @@
+@startuml componentes_frontend_reportes_analytics_basicos
+title Semana 7 · Componentes frontend (Vue 3) del módulo Reportes y analytics básicos
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "Vista" {
+  [ReportesView] as vista
+}
+package "Componentes de presentación" {
+  [FiltrosReporte] as filtros
+  [TarjetaIndicador] as tarjeta
+  [FichaTrazabilidad] as ficha
+  [TablaDesglose] as desglose
+  [TablaRegistros] as registros
+  [EstadoConsulta] as estado
+}
+package "Estado y datos" {
+  [useReportesStore (Pinia)] as store
+  [reportesApi (Axios)] as api
+}
+package "Utilidades" {
+  [formatearIndicador] as formato
+}
+cloud "API v1\n/api/v1/reportes" as servidor
+
+vista --> filtros
+vista --> tarjeta
+vista --> ficha
+vista --> desglose
+vista --> registros
+vista --> estado
+filtros --> store : consultar()
+desglose --> store : abrirParte()
+registros --> store : cambiarPagina()
+store --> api
+api --> servidor : GET + JWT\nX-Correlation-Id
+tarjeta --> formato
+desglose --> formato
+
+note bottom of formato
+  Único lugar donde se redondea
+  y se pone la unidad (refactor)
+end note
+@enduml

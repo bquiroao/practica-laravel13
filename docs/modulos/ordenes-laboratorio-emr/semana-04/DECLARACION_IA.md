@@ -1,0 +1,1 @@
+IA utilizada para continuar el Micro-HIS de semana 3, implementar MVC y adaptador InMemory, generar análisis/diagrama de integración y ejecutar pruebas. La estudiante revisa y defiende decisiones. PDO SQLite temporal real; reglas clínicas ficticias, sin identidad real, servidor compartido ni revisión independiente.

@@ -1,0 +1,1 @@
+Se utilizó IA para adaptar el prototipo local previamente creado en semana 12 a una entrega independiente de semana 11, documentar mapa y repetir pruebas/capturas. No se atribuyen JWT real, backend seguro, persistencia ni pruebas de lector de pantalla. La estudiante debe revisar el alcance y los escenarios.

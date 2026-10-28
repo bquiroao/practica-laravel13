@@ -1,0 +1,17 @@
+@startsalt m04-confirmar-sin-conexion
+title M-04 Confirmación y recuperación sin conexión
+{+
+  <b>Confirmar GLU-001 v2</b>
+  Vigente desde 01/02/2027
+  <&warning> La v1 quedará vigente hasta 31/01/2027.
+  [Confirmar y guardar]
+  ==
+  <b>Sin conexión al guardar</b>
+  <&circle-x> No se guardó. Sus datos siguen aquí.
+  [Reintentar] | [Guardar borrador]
+  ==
+  <b>Guardado (201)</b>
+  <&check> GLU-001 v2 registrada.
+  [Ver detalle]
+}
+@endsalt

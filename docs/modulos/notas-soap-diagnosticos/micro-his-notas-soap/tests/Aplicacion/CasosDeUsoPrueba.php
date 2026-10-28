@@ -107,3 +107,49 @@ prueba('APP-12', 'Firmar devuelve la nota completa: secciones SOAP y diagnóstic
     $r = $e->firmar->ejecutar(new FirmarNotaComando('dra-mendez', 'hosp-oriente', 'hosp-oriente', $id));
     igual(['Radiografía de tórax y antibiótico', 'J18.9'], [$r->soap['plan'], $r->diagnosticos[0]['code'] ?? null], 'plan y diagnóstico');
 });
+
+/* ---------- Semana 5: idempotencia del registro ---------- */
+
+prueba('APP-13', 'Idempotencia: la misma clave con el mismo contenido devuelve la misma nota y no crea otra', function (): void {
+    $e = new Escenario();
+    $r1 = $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0001']));
+    $r2 = $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0001']));
+    igual([$r1->notaId, false, true], [$r2->notaId, $r1->repetida, $r2->repetida], 'misma nota, marcada como repetida');
+    igual(1, count($e->notas->todas()), 'una sola nota');
+    igual(['NOTA_REGISTRADA'], array_column($e->auditoria->eventos(), 'evento'), 'un solo evento');
+});
+
+prueba('APP-14', 'Idempotencia: la misma clave con otro contenido es un error del cliente', function (): void {
+    $e = new Escenario();
+    $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0002']));
+    lanza(NotasSoap\Aplicacion\Excepciones\ClaveIdempotenciaReutilizada::class, fn () => $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0002', 'P' => 'Otro plan'])), 'contenido distinto');
+    igual(1, count($e->notas->todas()), 'no se creó otra');
+});
+
+prueba('APP-15', 'Idempotencia: la clave es por usuario; otro médico no puede leer ni reutilizar la nota de otro con su clave', function (): void {
+    $e = new Escenario();
+    $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0003']));
+    // El Dr. López no está asignado: se le niega ANTES de buscar la clave (no puede sondear claves ajenas).
+    lanza(AccesoDenegado::class, fn () => $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0003', 'usuario' => 'dr-lopez'])), 'otro médico');
+});
+
+prueba('APP-16', 'Idempotencia: si la transacción falla, la clave no queda guardada y el reintento crea la nota', function (): void {
+    $e = new Escenario(diagnosticos: new NotasSoap\Pruebas\Dobles\RepositorioDiagnosticosQueFalla());
+    lanza(NotasSoap\Dominio\Excepciones\ErrorPersistencia::class, fn () => $e->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0004'])), 'falla');
+    igual(null, $e->almacenes->idempotencia->buscar('hosp-oriente', 'dra-mendez', 'clave-app-0004'), 'clave revertida');
+    $ok = new Escenario();
+    afirmar(!$ok->registrar->ejecutar(Escenario::comando(['clave' => 'clave-app-0004']))->repetida, 'el reintento (con la base sana) crea la nota');
+});
+
+prueba('APP-17', 'Listar notas de un expediente: orden de creación, filtro por estado y hospital del token', function (): void {
+    $e = new Escenario();
+    $a = $e->registrar->ejecutar(Escenario::comando())->notaId;
+    $e->firmar->ejecutar(new FirmarNotaComando('dra-mendez', 'hosp-oriente', 'hosp-oriente', $a));
+    $b = $e->registrar->ejecutar(Escenario::comando(['codigo' => 'R50.9', 'descripcion' => 'Fiebre']))->notaId;
+    $todas = $e->listar->ejecutar(new NotasSoap\Aplicacion\Comandos\ListarNotasExpedienteComando('hosp-oriente', 'hosp-oriente', 'exp-carlos'));
+    igual([$a, $b], array_map(static fn ($r) => $r->notaId, $todas), 'orden');
+    igual(['J18.9'], $todas[0]->codigosCie10, 'códigos del resumen');
+    $firmadas = $e->listar->ejecutar(new NotasSoap\Aplicacion\Comandos\ListarNotasExpedienteComando('hosp-oriente', 'hosp-oriente', 'exp-carlos', 'signed'));
+    igual([$a], array_map(static fn ($r) => $r->notaId, $firmadas), 'solo firmadas');
+    lanza(AccesoDenegado::class, fn () => $e->listar->ejecutar(new NotasSoap\Aplicacion\Comandos\ListarNotasExpedienteComando('hosp-oriente', 'hosp-central', 'exp-carlos')), 'otro hospital');
+});

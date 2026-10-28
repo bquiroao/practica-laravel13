@@ -1,0 +1,58 @@
+@startuml diagrama-trazable
+title Trazabilidad: actor → CU → RF/RNF → regla → capa → endpoint → prueba
+left to right direction
+skinparam rectangleFontSize 11
+
+rectangle "Actores" as AC {
+  rectangle "Jefe de laboratorio" as A1
+  rectangle "Médico / Laboratorista\n/ Órdenes" as A2
+}
+rectangle "UML (S1)" as UML {
+  rectangle "CU-01 a CU-03\nAlta con requisitos\ny vigencia" as CU1
+  rectangle "CU-04, CU-05\nConsulta y detalle" as CU2
+  rectangle "CU-06 Permiso" as CU6
+}
+rectangle "RF/RNF (S2)" as REQ {
+  rectangle "RF-01..RF-04, RF-08\nRNF-01" as R1
+  rectangle "RF-05, RF-06\nRNF-02" as R2
+  rectangle "RF-07\nRNF-03, RNF-06" as R7
+}
+rectangle "SOLID (S2)" as SO {
+  rectangle "SRP: validar / versionar\n/ guardar separados" as SRP
+}
+rectangle "Capas y Repository (S3-S4)" as CA {
+  rectangle "Domain: LabTest, Vigencia,\nRequisitoMuestra (RN-02..RN-06)" as DOM
+  rectangle "LabTestRepository\nPDO / InMemory (RN-07)" as REP
+  rectangle "Application:\nRegistrarPrueba / Consultar / Detalle" as APP
+}
+rectangle "API (S5)" as API {
+  rectangle "POST /pruebas\n201 409 422 500" as E1
+  rectangle "GET /pruebas, /{código}\n200 404" as E2
+  rectangle "401 / 403" as E3
+}
+rectangle "Pruebas" as PR {
+  rectangle "T-01..T-05, T-08\nT-13, T-15" as P1
+  rectangle "T-06, T-07, T-09\nT-16" as P2
+  rectangle "T-14" as P3
+}
+
+A1 --> CU1
+A2 --> CU2
+A1 --> CU6
+A2 --> CU6
+CU1 --> R1
+CU2 --> R2
+CU6 --> R7
+R1 --> SRP
+SRP --> APP
+R1 --> DOM
+R2 --> REP
+APP --> DOM
+APP --> REP
+R1 --> E1
+R2 --> E2
+R7 --> E3
+E1 --> P1
+E2 --> P2
+E3 --> P3
+@enduml
