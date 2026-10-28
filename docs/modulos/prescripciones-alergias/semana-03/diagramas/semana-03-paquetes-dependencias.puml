@@ -1,0 +1,41 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+title Paquetes y regla de dependencias (verificada por ARQ-01..ARQ-06)
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+rectangle "bootstrap/contenedor.php\n(raíz de composición)" as Raiz #EEEEEE
+package "Presentacion\\Http" #E8F0FB {
+  rectangle "Kernel · Acciones ·\nTraductorResultado" as Pres
+}
+package "Aplicacion" #F5F9FF {
+  rectangle "CasosDeUso · Servicios ·\nResultados" as App
+  rectangle "Puertos\n(FuenteAlergias, Transaccion…)" as PApp
+}
+package "Dominio" #FFF8E1 {
+  rectangle "Modelo · Reglas ·\nExcepciones" as Dom
+  rectangle "Puertos\n(RepositorioPrescripciones, Reloj)" as PDom
+}
+package "Persistencia" #EEF7EE {
+  rectangle "Pdo · Configuracion" as Per
+}
+
+Pres --> App
+Pres --> Dom
+App --> PApp
+App --> Dom
+App --> PDom
+Per ..|> PApp : implementa
+Per ..|> PDom : implementa
+Per --> Dom
+Raiz --> Pres
+Raiz --> Per
+Raiz --> App
+
+note right of Dom
+  Dominio no depende de nada (ARQ-01).
+  PDO y SQL solo en Persistencia (ARQ-05).
+  Presentación no conoce Persistencia (ARQ-04):
+  solo la raíz de composición las une.
+end note
+@enduml

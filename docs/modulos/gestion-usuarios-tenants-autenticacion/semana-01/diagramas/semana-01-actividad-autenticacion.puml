@@ -1,0 +1,34 @@
+@startuml semana-01-actividad-autenticacion
+title Módulo de identidad — Actividad de autenticación contextualizada
+skinparam shadowing false
+
+start
+:A-11 Usuario envía credenciales\ny tenant por canal seguro [R-04];
+:A-12 HIS resuelve tenant y estado [R-01];
+if (¿Tenant activo? [D-01]) then (sí)
+  :A-13 Comprobar límite de intentos\nsegún política institucional [R-05];
+  if (¿Se permiten más intentos? [D-09]) then (sí)
+    :A-14 Verificar credenciales con\nproveedor confiable [R-04];
+    :A-15 Comprobar identidad activa\ny membresía vigente del tenant [R-02];
+    if (¿Credenciales, identidad y membresía válidas? [D-05]) then (sí)
+      :A-16 Firmar JWT con sujeto, tenant,\njti y expiración [R-06];
+      if (¿JWT emitido correctamente? [D-08]) then (sí)
+        :A-17 Entregar sesión contextualizada;
+        stop
+      else (no)
+        :E-08 Fallar cerrado;\nno entregar token;
+        stop
+      endif
+    else (no)
+      :E-05 Error genérico;\nno emitir token;
+      stop
+    endif
+  else (no)
+    :E-06 Aplicar límite temporal;\nno verificar credenciales;
+    stop
+  endif
+else (no)
+  :E-01 Denegar contexto inválido o inactivo;
+  stop
+endif
+@enduml

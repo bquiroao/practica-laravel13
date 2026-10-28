@@ -1,0 +1,44 @@
+@startuml semana-04-sincronizacion-outbox
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign left
+autonumber "<b>X-00"
+
+title Semana 4 · Firma de la nota y sincronización con el repositorio compartido (patrón outbox)
+
+actor "Dra. Méndez" as M
+box "HOSPITAL" #FFF6E5
+    participant "FirmarNota" as UC
+    participant "RepositorioNotasConEventos\n«decorador»" as DEC
+    participant "PdoRepositorioNotas" as RN
+    participant "PdoBandejaSalida" as BS
+    database "his_hospital" as HDB
+    participant "Publicador" as PUB
+end box
+box "CENTRAL" #EAF2FB
+    participant "Receptor de\nsincronización" as REC
+    database "his_central" as CDB
+end box
+
+M -> UC : POST /notas-soap/{id}/firma
+UC -> HDB : BEGIN
+UC -> DEC : registrarFirma(nota)
+DEC -> RN : registrarFirma(nota)
+RN -> HDB : UPDATE clinical_notes ... WHERE status = 'draft'
+DEC -> BS : agregar(NotaSoapFirmada)
+BS -> HDB : INSERT INTO outbox_events (payload_minimal = solo ids)
+UC -> HDB : INSERT audit_events NOTA_FIRMADA
+UC -> HDB : COMMIT
+note right of HDB : La nota firmada y su evento quedan juntos o no queda ninguno.\nSi CENTRAL está caído, la firma igual funciona.
+UC --> M : 200 firmada
+
+== más tarde, cuando hay conexión ==
+PUB -> HDB : SELECT ... FROM outbox_events WHERE published_at IS NULL
+PUB -> REC : enviar(event_id, NotaSoapFirmada, payload_minimal)
+REC -> CDB : INSERT central_inbox_messages\nON CONFLICT (source_node_id, event_id) DO NOTHING
+REC -> CDB : UPDATE sync_checkpoints (canal clinical-notes)
+REC --> PUB : recibido
+PUB -> HDB : UPDATE outbox_events SET published_at = now()
+note over PUB, REC : Si el envío falla, published_at sigue vacío y se reintenta.\nSi se envía dos veces, la restricción UNIQUE evita el duplicado.
+@enduml

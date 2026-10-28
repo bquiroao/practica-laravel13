@@ -24,4 +24,12 @@ interface RepositorioMembresias
      * @throws ErrorPersistencia
      */
     public function guardar(Membresia $membresia): void;
+
+    /**
+     * Marca como 'revoked' las membresías activas y no vencidas del rol (semana 6).
+     *
+     * @return int cuántas membresías se revocaron
+     * @throws ErrorPersistencia
+     */
+    public function revocar(string $usuarioId, string $hospitalId, string $rol, \DateTimeImmutable $momento): int;
 }

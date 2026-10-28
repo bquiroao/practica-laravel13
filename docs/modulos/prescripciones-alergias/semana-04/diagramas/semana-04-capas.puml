@@ -1,0 +1,40 @@
+@startuml semana-04-capas
+!pragma layout smetana
+title Capas, responsabilidades y objetos reutilizables (semana 4)
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Presentación — HTTP ↔ formularios y vistas" #E8F0FB {
+  rectangle "Kernel · Ruta · Solicitud · Respuesta\n<<reutilizable: sin nada de prescripciones>>" as K
+  rectangle "FormularioPrescripcion (entrada: solo formato)\nPrescripcionesControlador (coordina)\nPrescripcionVista · ErrorVista (únicas con HTTP)" as MVC
+}
+package "Aplicación — orquestar" #F5F9FF {
+  rectangle "EmitirPrescripcion · VerificarAlergiasPrevia · ConsultarPrescripcion" as CU
+  rectangle "EvaluacionClinica\n<<reutilizable: cualquier verificación previa>>" as EV
+  rectangle "Puertos: FuenteAlergias · CatalogoMedicamentos ·\nPacientes · RegistroAuditoria · Transaccion · PoliticaAcceso" as PA
+}
+package "Dominio — qué es válido" #FFF8E1 {
+  rectangle "VerificadorAlergias · ValidadorPrescripcion\n<<reutilizable: reglas puras>>" as REG
+  rectangle "Prescripcion · Alergia · ResultadoVerificacion" as MOD
+  rectangle "Puertos: RepositorioPrescripciones · Reloj" as PD
+}
+package "Persistencia — implementar los puertos" #EEF7EE {
+  rectangle "Pdo/* (6)" as PDO
+  rectangle "EnMemoria/* (6)\n<<reutilizable: pruebas de otros módulos>>" as MEM
+  rectangle "FabricaAdaptadores\n(pdo | memoria)" as FAB
+}
+
+K --> MVC
+MVC --> CU
+CU --> EV
+CU --> PA
+CU --> PD
+EV --> REG
+CU --> MOD
+PDO ..|> PA
+PDO ..|> PD
+MEM ..|> PA
+MEM ..|> PD
+FAB --> PDO
+FAB --> MEM
+@enduml

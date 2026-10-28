@@ -1,0 +1,39 @@
+IGUAL    1. Camino feliz: admisión busca «ramirez» (no existe)   PHP: 200 total=0
+IGUAL    2. Camino feliz: admisión registra a Carlos (con clave) PHP: 201 P-000006 v1
+IGUAL    3. Camino feliz: reintento con la misma clave           PHP: 201 P-000006 v1 repetida
+IGUAL    4. Camino feliz: abre la ficha                          PHP: 200 v1
+IGUAL    5. Camino feliz: corrige el teléfono (If-Match 1)       PHP: 200 P-000006 v2
+IGUAL    6. Camino feliz: la ficha queda en versión 2            PHP: 200 v2
+IGUAL    7. Reintento del PUT con la versión vieja               PHP: 409 VERSION_DESACTUALIZADA
+IGUAL    8. Cambio B-4: PUT sin «documento» conserva el documento PHP: 200 P-000006 v3
+IGUAL    9. Cambio B-4: el detalle conserva el DPI y separa nombres PHP: 200 v3
+IGUAL   10. Cambio B-4: documento null sin motivo                PHP: 422 MOTIVO_REQUERIDO
+IGUAL   11. Cambio B-4: documento null con motivo lo quita       PHP: 200 P-000006 v4
+IGUAL   12. Cambio B-4: clínico ve nombres y apellidos en null   PHP: 200 v1
+IGUAL   13. PUT sin If-Match                                     PHP: 428 VERSION_REQUERIDA
+IGUAL   14. Error crítico: admisión busca a Sofía por nombre     PHP: 200 total=0
+IGUAL   15. Error crítico: admisión la registra otra vez         PHP: 409 PACIENTE_EXISTENTE
+IGUAL   16. Error crítico: con otro nombre, mismo DPI            PHP: 409 PACIENTE_EXISTENTE
+IGUAL   17. Error crítico: supervisión la busca por documento    PHP: 200 total=1
+IGUAL   18. Error crítico: supervisión intenta registrarla       PHP: 409 PACIENTE_EXISTENTE
+IGUAL   19. Clínico abre la ficha protegida                      PHP: 200 v1
+IGUAL   20. Admisión intenta editar a la protegida               PHP: 403 ACCESO_DENEGADO
+IGUAL   21. Coincidencia probable (admisión)                     PHP: 409 POSIBLE_DUPLICADO [P-000001]
+IGUAL   22. Confirmar coincidencia sin permiso (admisión)        PHP: 403 ACCESO_DENEGADO
+IGUAL   23. Supervisión confirma sin motivo                      PHP: 422 MOTIVO_REQUERIDO
+IGUAL   24. Supervisión confirma con motivo                      PHP: 201 P-000007 v1
+IGUAL   25. Datos inválidos (fecha futura, DPI corto, sexo)      PHP: 422 DATOS_INVALIDOS
+IGUAL   26. Formato inválido (protegida = «si»)                  PHP: 400 FORMATO_INVALIDO
+IGUAL   27. Admisión intenta proteger al registrar               PHP: 403 ACCESO_DENEGADO
+IGUAL   28. Cambiar el nombre sin motivo                         PHP: 422 MOTIVO_REQUERIDO
+IGUAL   29. Cambiar solo una tilde no pide motivo                PHP: 200 P-000001 v2
+IGUAL   30. Usar el documento de otro paciente                   PHP: 409 IDENTIFICADOR_EN_USO
+IGUAL   31. Criterio insuficiente                                PHP: 422 CRITERIO_INSUFICIENTE
+IGUAL   32. Clínico intenta registrar                            PHP: 403 ACCESO_DENEGADO
+IGUAL   33. Otro hospital no ve la ficha (mismo 404)             PHP: 404 PACIENTE_NO_ENCONTRADO
+IGUAL   34. Token de un hospital contra otro                     PHP: 403 TENANT_NO_COINCIDE
+IGUAL   35. Sin token                                            PHP: 401 NO_AUTENTICADO
+IGUAL   36. Ruta inexistente                                     PHP: 404 RUTA_NO_ENCONTRADA
+IGUAL   37. Método no permitido                                  PHP: 405 METODO_NO_PERMITIDO
+
+Pasos: 37  Iguales: 37  Difieren: 0

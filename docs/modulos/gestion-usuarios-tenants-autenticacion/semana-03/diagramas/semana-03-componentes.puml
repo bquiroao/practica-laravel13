@@ -1,0 +1,53 @@
+@startuml
+title Semana 3 - Vista de componentes y dependencias (C4 nivel 3)
+skinparam shadowing false
+left to right direction
+
+package "Presentation" {
+  [AuthController]
+}
+package "Application" {
+  [RegisterUser]
+  [Authenticate]
+  [RevokeSession]
+  [ValidateSession]
+  interface "UserRepository" as UR
+  interface "SessionRepository" as SR
+  interface "TenantRepository" as TR
+  interface "PasswordHasher" as PH
+  interface "TokenGenerator" as TG
+  interface "Clock" as CK
+}
+package "Domain" {
+  [User]
+  [Session]
+}
+package "Persistence" {
+  [PdoUserRepository]
+  [PdoSessionRepository]
+  [PdoTenantRepository]
+}
+database "SQLite / SQL\n(tenants, users, sessions)" as DB
+
+[AuthController] --> [RegisterUser]
+[AuthController] --> [Authenticate]
+[AuthController] --> [RevokeSession]
+[RegisterUser] --> [User]
+[Authenticate] --> [Session]
+[RevokeSession] --> [Session]
+[RegisterUser] ..> UR
+[RegisterUser] ..> TR
+[Authenticate] ..> UR
+[Authenticate] ..> SR
+[RevokeSession] ..> SR
+[RegisterUser] ..> PH
+[Authenticate] ..> TG
+[Authenticate] ..> CK
+[PdoUserRepository] ..|> UR
+[PdoSessionRepository] ..|> SR
+[PdoTenantRepository] ..|> TR
+[PdoUserRepository] --> DB : PDO preparado
+[PdoSessionRepository] --> DB : PDO preparado
+[PdoTenantRepository] --> DB : PDO preparado
+note bottom of Domain : Sin dependencias hacia otras capas
+@enduml

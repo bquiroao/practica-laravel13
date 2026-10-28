@@ -1,0 +1,30 @@
+@startuml refactor_antes_despues_reportes_analytics_basicos
+title Semana 7 · Refactor: precisión y visualización separadas del cálculo
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+package "ANTES (acoplado)" {
+  [ReporteController\nSQL + cálculo + round + texto] as c1
+  [TarjetaIndicador\nsuma porcentajes redondeados] as v1
+  database "bed_stay" as b1
+  c1 --> b1 : SQL directo
+  v1 --> c1 : "78%" (texto)
+}
+
+package "DESPUÉS (separado)" {
+  [ReporteController\nsolo coordina] as c2
+  [CalcularIndicadorAction] as a2
+  [ReporteOcupacion\nvalor exacto + Precision(1, %)] as d2
+  [OcupacionPgRepository] as r2
+  [TablaDesglose / TarjetaIndicador] as v2
+  [formatearIndicador] as f2
+  database "vistas reportes.*" as b2
+  c2 --> a2
+  a2 --> d2
+  d2 --> r2 : interfaz
+  r2 --> b2
+  v2 --> c2 : JSON con conteos\ny precisión
+  v2 --> f2 : único formateo
+}
+@enduml

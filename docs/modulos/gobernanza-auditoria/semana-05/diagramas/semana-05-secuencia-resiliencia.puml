@@ -1,0 +1,49 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia del emisor: reintento idempotente, bandeja local y circuit breaker
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+autonumber
+
+participant "Caso de uso\ndel emisor" as CUE
+participant ClienteAuditoria as CLI
+participant "CircuitoInterruptor" as CB
+database BandejaLocal as BL
+participant "Servicio de auditoría" as SRV
+
+CUE -> CLI : registrar({event_id: e-17, …})
+CLI -> CB : permite()?
+CB --> CLI : sí (CERRADO)
+CLI -> SRV : POST /movimientos  X-Request-ID: r-1
+SRV --> CLI : 201 (la respuesta se PIERDE en la red)
+CLI -> SRV : reintento: mismo cuerpo, mismo X-Request-ID r-1
+SRV --> CLI : 200 YA_REGISTRADO (mismo id y sello)
+CLI --> CUE : registrado (UNA fila)
+
+== el servicio se cae ==
+CUE -> CLI : registrar({event_id: e-18, …})
+loop 3 intentos con espera creciente
+  CLI -> SRV : POST
+  SRV --> CLI : (sin respuesta)
+  CLI -> CB : falla()
+end
+CB -> CB : 3 fallas → ABIERTO
+CLI -> BL : guardar(e-18)
+CLI --> CUE : EN_BANDEJA_LOCAL (el emisor sigue atendiendo)
+CUE -> CLI : registrar({event_id: e-19, …})
+CLI -> CB : permite()?
+CB --> CLI : no (ABIERTO) — ni se intenta
+CLI -> BL : guardar(e-19)
+
+== 30 s después ==
+CUE -> CLI : reenviarPendientes()
+CLI -> CB : permite()? → SEMIABIERTO
+CLI -> SRV : POST e-18
+SRV --> CLI : 201
+CLI -> CB : exito() → CERRADO
+CLI -> BL : quitar(e-18)
+CLI -> SRV : POST e-19
+SRV --> CLI : 201
+CLI -> BL : quitar(e-19)
+@enduml

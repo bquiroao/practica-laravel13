@@ -1,0 +1,57 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title ANTES: ConsultarMovimientos decide alcance, permiso, filtros, cursor y forma de salida (y VerDetalle lo repite)
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+hide empty members
+
+class ConsultarMovimientos <<Aplicación>> #FDE2E2 {
+  +PAGINA = 50
+  +PERMISO = "auditoria.consultar"
+  +PERMISO_RED = "auditoria.consultar_red"
+  +ejecutar(ComandoConsultar): Resultado
+  -cursorDe(Movimiento): string
+  -leerCursor(string): ?array
+  --
+  111 líneas · 23 ramas · 7 decisiones $red
+  tenant · fechas · usuario · inmutabilidad
+}
+class VerDetalleMovimiento <<Aplicación>> #FDE2E2 {
+  +ejecutar(ComandoDetalle): Resultado
+  --
+  repite: $red, permiso, «fuera de alcance»,
+  etiqueta de la meta-auditoría, corregido_por
+  7 decisiones $red
+}
+interface "FiltroMovimiento" as F <<Dominio>>
+class ConsultaMovimientos <<Dominio>> {
+  +hospital: ?string
+  +red: bool
+}
+interface PoliticaAcceso <<Aplicación>> {
+  +RED = "*"
+  +permite(actor, hospital, permiso)
+}
+interface Bitacora <<Dominio>>
+class CadenaSellada <<Aplicación>>
+
+ConsultarMovimientos --> F : reclama parámetros,\nvalida y elige activos
+ConsultarMovimientos --> ConsultaMovimientos : new (hospital, red, …)
+ConsultarMovimientos --> PoliticaAcceso : elige PERMISO o PERMISO_RED
+ConsultarMovimientos --> Bitacora : buscar · correccionesDe
+ConsultarMovimientos --> CadenaSellada : auditarLectura
+VerDetalleMovimiento --> ConsultarMovimientos : usa PERMISO y PERMISO_RED\n(un caso de uso depende de otro)
+VerDetalleMovimiento --> PoliticaAcceso
+VerDetalleMovimiento --> Bitacora : porId · correccionDe
+VerDetalleMovimiento --> CadenaSellada
+
+note bottom of ConsultarMovimientos
+  Un método de 60 líneas con 6 razones para cambiar:
+  1. quién puede leer (permiso según alcance)
+  2. el alcance de tenant («*» = red)
+  3. qué parámetros son filtros y en qué orden se validan
+  4. el formato del cursor (base64url)
+  5. la transacción y la meta-auditoría (R-08)
+  6. la forma de cada fila (+ corregido_por)
+end note
+@enduml

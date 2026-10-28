@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar el prototipo existente, diseñar y ejecutar pruebas con adaptadores en memoria, documentar RF/RNF y reproducir defectos. Las capturas representan salidas PHP reales. No se atribuyen pruebas de JWT firmado, integración Laravel ni revocación persistente no realizadas. La estudiante debe comprender la cobertura parcial y sus límites.

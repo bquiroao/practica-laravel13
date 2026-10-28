@@ -1,0 +1,47 @@
+@startuml semana-05-migracion
+title Migración razonada del módulo Pacientes (strangler fig, con compuertas y vuelta atrás)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:Fase 0 — Hoy: Micro-HIS con contrato, cliente,
+idempotencia, observabilidad y medición
+(72 pruebas, 18/18 mutaciones);
+:Fase 1 — Esquema compartido (sem. 16):
+migraciones en HOSPITAL: version, local_access_audit,
+outbox_event, idempotencia_registros;
+if (¿composer test verde y contratoRepositorios()\npasa contra el esquema real?) then (no)
+  :Revertir el PR;
+  stop
+else (sí)
+endif
+:Fase 2 — Módulo en el HIS (sem. 16):
+Dominio + Aplicación a app/; controladores Laravel
+sobre los mismos casos de uso; rutas /api/v1/pacientes;
+if (¿API-01..03 pasan contra routes/api.php?) then (no)
+  :Revertir el PR;
+  stop
+else (sí)
+endif
+:Fase 3 — Eventos (sem. 16–17):
+outbox «pacientes.paciente.*» → central_inbox_messages → MPI;
+if (¿lag_seconds p95 ≤ 60 s y 0 eventos perdidos\nen 2 semanas?) then (no)
+  :Mantener la lectura directa del MPI;
+else (sí)
+endif
+:Fase 4 — Revisión de frontera (4 semanas de registros de acceso):
+medir P1–P5;
+if (¿algún P1–P5 se cumple y p95 remoto ≤ 50 ms\ny las 4 FK tienen reemplazo aceptado?) then (no)
+  :Pacientes sigue como módulo (fin);
+  stop
+else (sí)
+endif
+:Fase 5 — Extraer servicio (condicional):
+consumidores cambian el adaptador en proceso
+por ClientePacientes detrás de una bandera;
+:Tráfico 10 % → 50 % → 100 %
+(volver a 0 % si sube el error o el p95);
+stop
+@enduml

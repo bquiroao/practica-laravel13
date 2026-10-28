@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+package "ANTES - semana 2 existente" {
+ component RunOrderStatusPrototype as Old
+ interface DemoOrderStatusGateway as OG
+ interface NativeNotifier as ON
+ Old --> OG
+ Old --> ON
+ note bottom of Old
+ Un status final; gateway null ambiguo.
+ Sin frescura ni evaluación de destino.
+ end note
+}
+package "DESPUÉS - propuesta conceptual" {
+ component Presenter
+ component QueryAndNotifyDemoOrder as New
+ component EvaluatePrototype as Eval
+ component FreshnessPolicy as F
+ component ViabilityPolicy as V
+ interface "Puertos HIS / Notification / Evidence / Snapshot / Clock" as Ports
+ Presenter --> New
+ Presenter --> Eval
+ New --> F
+ New --> Ports
+ Eval --> V
+ note bottom of New
+ Resultado compuesto:
+ consulta + frescura + capacidad + evidencia.
+ end note
+}
+@enduml

@@ -7,11 +7,15 @@ namespace Rbac\Presentacion\Http;
 /** Una ruta protegida: método, patrón, permiso requerido y método de controlador que la atiende. */
 final class Ruta
 {
-    /** @param \Closure(Peticion): Respuesta $destino método de controlador, p. ej. $controlador->crear(...) */
+    /**
+     * @param string|null $permiso permiso que exige la ruta; null = solo autenticación
+     *                             (reservado al endpoint de decisión, que ES la autorización; ver ARQ-08)
+     * @param \Closure(Peticion): Respuesta $destino método de controlador, p. ej. $controlador->crear(...)
+     */
     public function __construct(
         public readonly string $metodo,
         public readonly string $patron,
-        public readonly string $permiso,
+        public readonly ?string $permiso,
         public readonly \Closure $destino,
     ) {
     }

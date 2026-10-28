@@ -1,0 +1,41 @@
+OK    escritorio cf-01-ingresar                     esperado=sí  axe=0
+OK    escritorio cf-02-inicio-admin                 esperado=sí  axe=0
+OK    escritorio cf-03-buscar-persona               esperado=sí  axe=0
+OK    escritorio cf-04-roles-de-luis                esperado=sí  axe=0
+OK    escritorio cf-05-paso2-rol                    esperado=sí  axe=0
+OK    escritorio cf-06-paso3-confirmar              esperado=sí  axe=0
+OK    escritorio cf-07-rol-asignado                 esperado=sí  axe=0
+OK    escritorio cf-08-luis-ficha                   esperado=sí  axe=0
+OK    escritorio cf-09-signos-registrados           esperado=sí  axe=0
+OK    escritorio ec-01-ruta-protegida               esperado=sí  axe=0
+OK    escritorio ec-02-ana-ficha                    esperado=sí  axe=0
+OK    escritorio ec-03-menu-demostracion            esperado=sí  axe=0
+OK    escritorio ec-04-operacion-denegada           esperado=sí  axe=0
+OK    escritorio ec-05-auditor-localiza             esperado=sí  axe=0
+OK    escritorio ec-01 auditada como PERMISO_NO_ASIGNADO (sin captura)
+OK    escritorio tec-01-dialogo-revocar             esperado=sí  axe=0
+OK    escritorio tec: 12 Tab sin salir del diálogo (barra inerte)
+OK    escritorio tec: Esc cierra y el foco vuelve a «Revocar rol»
+OK    escritorio tec-02-revocado-con-teclado        esperado=sí  axe=0
+OK    movil      cf-01-ingresar                     esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-02-inicio-admin                 esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-03-buscar-persona               esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-04-roles-de-luis                esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-05-paso2-rol                    esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-06-paso3-confirmar              esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-07-rol-asignado                 esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-08-luis-ficha                   esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      cf-09-signos-registrados           esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-01-ruta-protegida               esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-02-ana-ficha                    esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-03-menu-demostracion            esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-04-operacion-denegada           esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-05-auditor-localiza             esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      ec-01 auditada como PERMISO_NO_ASIGNADO (sin captura)
+OK    movil      tec-01-dialogo-revocar             esperado=sí  axe=0  desborde=0  toque<44=0
+OK    movil      tec: 12 Tab sin salir del diálogo (barra inerte)
+OK    movil      tec: Esc cierra y el foco vuelve a «Revocar rol»
+OK    movil      tec-02-revocado-con-teclado        esperado=sí  axe=0  desborde=0  toque<44=0
+
+Comprobaciones: 38  Fallan: 0
+exit=0

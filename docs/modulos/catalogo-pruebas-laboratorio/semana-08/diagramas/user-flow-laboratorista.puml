@@ -1,0 +1,18 @@
+@startuml user-flow-laboratorista
+title User flow — Laboratorista: requisitos para preparar la toma de muestra
+start
+:Entra al catálogo (W-01);
+:Busca por código (HEM-001)\no filtra por tipo de muestra;
+:Abre el detalle (W-02);
+:Lee contenedor, volumen mínimo,\nconservación y estabilidad;
+if (¿Necesita la versión de otra fecha?) then (sí)
+  :Cambia la fecha de referencia\n(p. ej. la fecha de la orden);
+  :Ve la versión vigente en esa fecha;
+endif
+:Prepara la toma con esos requisitos;
+note right
+  Solo lectura: no ve botones
+  de alta ni de nueva versión.
+end note
+stop
+@enduml

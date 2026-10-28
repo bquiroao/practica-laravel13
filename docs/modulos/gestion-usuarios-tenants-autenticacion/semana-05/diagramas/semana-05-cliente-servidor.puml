@@ -1,0 +1,30 @@
+@startuml
+title Semana 5 - Cliente-servidor y frontera de servicio
+left to right direction
+skinparam componentStyle rectangle
+
+actor "Administrador / usuario" as Person
+component "Cliente web HIS\nHTTPS + JSON" as Client
+component "API REST /api/v1\nControladores HTTP" as Api
+component "Módulo Identidad y Sesiones\nCasos de uso + dominio" as Identity
+database "Almacén de identidad\nusuarios, membresías,\ninvitaciones y sesiones" as IdentityDb
+component "Adaptadores PDO\ntransacciones y consultas" as Persistence
+cloud "Proveedor de notificación\npendiente de selección" as Notify
+
+Person --> Client : usa tenant y flujo
+Client --> Api : HTTPS / JSON\nX-Tenant-ID + Bearer
+Api --> Identity : DTO validado\nprincipal + tenant resuelto
+Identity --> Persistence : puertos/repositorios
+Persistence --> IdentityDb : SQL preparado\ntransacción
+Identity ..> Notify : outbox asíncrono\nsolo tras aprobación
+
+note bottom of Api
+El límite de API no implica un
+microservicio independiente.
+end note
+note bottom of IdentityDb
+Identidad/RBAC y Auth son
+propietarios lógicos distintos.
+No se exponen escrituras directas.
+end note
+@enduml

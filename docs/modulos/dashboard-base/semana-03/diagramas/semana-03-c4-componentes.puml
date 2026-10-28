@@ -1,0 +1,22 @@
+@startuml semana-03-c4-componentes
+' Semana 3 — Dashboard base UI/UX (tarea Odoo 2430): C4 nivel 3
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Dashboard base
+Person(usr, "Usuario del hospital", "Abre el dashboard y ve el resumen de su rol")
+Container(spa, "Dashboard (Vue)", "Frontend", "Pinta «cargando», límite de 10 s y «Reintentar»")
+Container_Boundary(micro, "Micro-HIS Dashboard base (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorDashboard", "Presentación", "Entrada, traducción E1, E4 y E5 a HTTP")
+  Component(svc, "ServicioDashboard", "Aplicación", "inicio y tarjeta (CU-01, CU-02, CU-04)")
+  Component(dom, "EstadoTarjeta, Tarjeta, Catalogo", "Dominio", "R-02, R-04 a R-06, R-09")
+  Component(repo, "RepositorioPdo", "Persistencia", "Solo COUNT con sentencias preparadas")
+  Component(reloj, "Reloj", "Puerto", "«hoy» inyectado")
+}
+ContainerDb(db, "Base HOSPITAL (una por tenant)", "PostgreSQL (SQLite en pruebas)", "local_patients, appointments, beds")
+Rel(usr, spa, "usa")
+Rel(spa, ctrl, "inicio; una petición por tarjeta")
+Rel(ctrl, svc, "llama")
+Rel(svc, dom, "estados, textos y permisos")
+Rel(svc, reloj, "fecha de hoy")
+Rel(svc, repo, "puerto FuenteConteos")
+Rel(repo, db, "SQL preparado: conteos")
+@enduml

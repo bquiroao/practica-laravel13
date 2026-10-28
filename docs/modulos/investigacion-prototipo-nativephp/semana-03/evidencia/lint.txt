@@ -1,0 +1,6 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\Application\Evaluate.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\Domain\Model.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\Persistence\PdoEvaluationRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\Presentation\cli.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-3-nativephp-arquitectura-mercedes-lopez\docs\modulos\investigacion-prototipo-nativephp\semana-03\micro-his\tests\run.php

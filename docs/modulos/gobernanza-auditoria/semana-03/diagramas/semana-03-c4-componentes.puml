@@ -1,0 +1,54 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes de la Aplicación PHP
+
+Container(cliente, "Cliente HTTP / módulo emisor", "HTTP/JSON")
+ContainerDb(db, "audit_logs", "PostgreSQL")
+
+Container_Boundary(app, "Aplicación PHP") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "front controller", "Ruta 404/405 → hospital 400 → token 401 → tenant 403 → acción; 500 genérico.")
+        Component(acciones, "AccionesAuditoria", "acciones HTTP", "Formato del cuerpo y de la consulta → comandos.")
+        Component(traductor, "TraductorResultado", "vista", "Categoría → código HTTP. Único lugar con códigos.")
+        Component(autenticador, "AutenticadorTokenDemo", "adaptador", "Token → Identidad (actor, hospital).")
+    }
+    Boundary(apl, "Aplicación") {
+        Component(registrar, "RegistrarMovimiento", "caso de uso", "Permiso → reglas → idempotencia → sello, en una transacción.")
+        Component(consultar, "ConsultarMovimientos", "caso de uso", "Permiso y alcance → filtros → página de 50 + cursor → meta-auditoría.")
+        Component(detalle, "VerDetalleMovimiento / VerificarIntegridad", "casos de uso", "404 idéntico fuera del alcance; recálculo de la cadena.")
+        Component(cadena, "CadenaSellada", "servicio", "ÚNICA vía de escritura: bloquea la cadena, sella y agrega.")
+        Component(puertosApl, "Transaccion, PoliticaAcceso", "puertos")
+    }
+    Boundary(dom, "Dominio") {
+        Component(modelo, "Movimiento, Sello, ConsultaMovimientos", "modelo", "Inmutable; contenido canónico.")
+        Component(reglas, "ReglaMovimiento ×8", "reglas (OCP)", "Tenant, campos, módulo del emisor, formato, catálogo, resultado, fecha, datos prohibidos.")
+        Component(filtros, "FiltroMovimiento ×5", "filtros (OCP)", "Rango obligatorio, usuario, módulo, acción, resultado; cada uno con su SQL.")
+        Component(puertoBit, "Bitacora, Reloj", "puertos", "Sin actualizar() ni eliminar().")
+    }
+    Boundary(per, "Persistencia") {
+        Component(pdoBit, "PdoBitacora", "adaptador PDO", "INSERT … RETURNING; WHERE desde los fragmentos de los filtros; candado por cadena.")
+        Component(pdoTx, "PdoTransaccion", "adaptador PDO", "BEGIN/COMMIT/ROLLBACK.")
+        Component(politica, "PoliticaAccesoEstatica, RelojSistema", "adaptadores")
+    }
+}
+
+Rel(cliente, kernel, "HTTP")
+Rel(kernel, autenticador, "identificar()")
+Rel(kernel, acciones, "acción de la ruta")
+Rel(acciones, registrar, "ComandoRegistrar")
+Rel(acciones, consultar, "ComandoConsultar")
+Rel(acciones, detalle, "ComandoDetalle / ComandoVerificar")
+Rel(acciones, traductor, "Resultado")
+Rel(registrar, reglas, "evalúa")
+Rel(consultar, filtros, "valida y aplica")
+Rel(registrar, cadena, "anexar()")
+Rel(consultar, cadena, "auditarLectura()")
+Rel(cadena, puertoBit, "usa")
+Rel(cadena, modelo, "sella")
+Rel_U(pdoBit, puertoBit, "implementa")
+Rel_U(pdoTx, puertosApl, "implementa")
+Rel_U(politica, puertosApl, "implementa")
+Rel(pdoBit, db, "SQL preparado")
+@enduml

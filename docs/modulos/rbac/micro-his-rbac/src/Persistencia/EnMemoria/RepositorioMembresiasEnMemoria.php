@@ -44,6 +44,20 @@ final class RepositorioMembresiasEnMemoria implements RepositorioMembresias, Res
         $this->membresias[] = $membresia;
     }
 
+    public function revocar(string $usuarioId, string $hospitalId, string $rol, \DateTimeImmutable $momento): int
+    {
+        $revocadas = 0;
+        foreach ($this->membresias as $i => $m) {
+            if ($m->usuarioId === $usuarioId && $m->hospitalId === $hospitalId && $m->rol === $rol
+                && $m->estado === 'active' && ($m->validoHasta === null || $m->validoHasta > $momento)) {
+                $this->membresias[$i] = new Membresia($m->usuarioId, $m->hospitalId, $m->rol, 'revoked', $m->validoDesde, $m->validoHasta);
+                $revocadas++;
+            }
+        }
+
+        return $revocadas;
+    }
+
     public function instantanea(): mixed
     {
         return $this->membresias;

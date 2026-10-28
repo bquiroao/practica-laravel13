@@ -1,0 +1,15 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Citas médicas y agenda (tarea Odoo 2459): diseño ANTES de aplicar DIP
+title ANTES — la política depende de los detalles
+class ServicioCitasAntes <<política>> {
+  + solicitar(medico, paciente, inicio, fin, motivo) : ?string
+  + cancelar(id, motivo) : ?string
+}
+class PDO <<detalle: base de datos>>
+class "time()" as Hora <<detalle: reloj del sistema>>
+ServicioCitasAntes --> PDO : new PDO('sqlite::memory:')
+ServicioCitasAntes --> Hora : llama directo
+note bottom of ServicioCitasAntes
+  No se puede cambiar la base ni fijar «ahora» para probar R-01.
+end note
+@enduml
