@@ -20,6 +20,11 @@ final readonly class Respuesta
         return new self($estado, $cuerpo, $cabeceras);
     }
 
+    public function conCabecera(string $nombre, string $valor): self
+    {
+        return new self($this->estado, $this->cuerpo, [$nombre => $valor] + $this->cabeceras);
+    }
+
     /** Frases de estado: el servidor embebido de PHP no conoce la del 422 y enviaba «Unknown Status Code» (hallazgo H-1). */
     public const FRASES = [200 => 'OK', 201 => 'Created', 400 => 'Bad Request', 401 => 'Unauthorized', 403 => 'Forbidden', 404 => 'Not Found',
         405 => 'Method Not Allowed', 409 => 'Conflict', 422 => 'Unprocessable Content', 500 => 'Internal Server Error', 503 => 'Service Unavailable'];

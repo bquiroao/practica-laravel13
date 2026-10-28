@@ -6,6 +6,11 @@ declare(strict_types=1);
 return [
     // «pdo» (PostgreSQL) o «memoria» (adaptadores InMemory con database/datos-demo.php; sin base).
     'persistencia' => getenv('PRESCRIPCIONES_PERSISTENCIA') ?: 'pdo',
+    // Registro de acceso (una línea JSON por petición): «stderr» o «ninguno».
+    'registro_acceso' => getenv('PRESCRIPCIONES_REGISTRO_ACCESO') ?: 'stderr',
+    // Fuente de alergias: «base» (tabla allergies del hospital) o «http» (Expediente como servicio aparte; semana 5).
+    'fuente_alergias' => getenv('PRESCRIPCIONES_FUENTE_ALERGIAS') ?: 'base',
+    'expediente_url' => getenv('PRESCRIPCIONES_EXPEDIENTE_URL') ?: 'http://127.0.0.1:8092',
     'db' => [
         'dsn' => getenv('PRESCRIPCIONES_DB_DSN') ?: 'pgsql:host=127.0.0.1;port=5432;dbname=micro_his_prescripciones',
         'usuario' => getenv('PRESCRIPCIONES_DB_USUARIO') ?: 'postgres',
@@ -20,9 +25,9 @@ return [
     ],
     // Provisional: en el HIS los decide RBAC detrás del puerto PoliticaAcceso. Clave «usuario|hospital».
     'permisos' => [
-        'dr-lopez|hosp-norte' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar'],
-        'dr-ruiz|hosp-norte' => ['prescripcion.emitir', 'prescripcion.consultar'],
+        'dr-lopez|hosp-norte' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar', 'prescripcion.anular'],
+        'dr-ruiz|hosp-norte' => ['prescripcion.emitir', 'prescripcion.consultar', 'prescripcion.anular'],
         'farm-norte|hosp-norte' => ['prescripcion.consultar'],
-        'dr-sur|hosp-sur' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar'],
+        'dr-sur|hosp-sur' => ['prescripcion.emitir', 'prescripcion.override', 'prescripcion.consultar', 'prescripcion.anular'],
     ],
 ];

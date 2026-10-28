@@ -1,0 +1,25 @@
+@startuml semana-05-flujo-issue-pr
+title Flujo de integración: issue → rama → worktree → PR (por tarea T1..T5)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+
+actor "Estudiante\n(@bquiroao)" as Est
+participant "GitHub\nissue ASII-15" as Issue
+participant "origin/develop" as Dev
+participant "worktree\n../shi-asii-15-prescripciones-<tarea>" as WT
+participant "PR → develop" as PR
+actor "Revisor" as Rev
+
+Est -> Issue : gh issue create (plan/issue-asii-15-prescripciones.md)
+Est -> Dev : git fetch origin
+Est -> WT : git worktree add … -b feature/asii-15-prescripciones-<tarea>-bquiroao origin/develop
+loop por cada tarea (T1 esquema, T2 núcleo, T3 API, T4 integración, T5 seguridad)
+  Est -> WT : commits pequeños (RED → GREEN → REFACTOR)
+  Est -> WT : php tests/ejecutar.php · suite de contrato · validador
+  Est -> PR : git push -u · gh pr create --body-file pr.md (Refs #ASII-15)
+  Rev -> PR : revisión
+  PR -> Dev : merge
+  Est -> WT : git worktree remove · git branch -d
+end
+Est -> Issue : Closes #ASII-15 con el último PR
+@enduml

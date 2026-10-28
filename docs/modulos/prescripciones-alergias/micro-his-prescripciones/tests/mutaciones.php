@@ -27,12 +27,10 @@ $mutaciones = [
         X],
     'M5 la dosis máxima se duplica' => ['src/Dominio/Reglas/ValidadorPrescripcion.php',
         '> $m->dosisMaximaDiaria', '> $m->dosisMaximaDiaria * 2'],
-    'M6 no se exige confirmar «sin alergias conocidas»' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
-        'if (!$expediente->evaluado && !$s->confirmaSinAlergias) {', 'if (false) {'],
-    'M7 la advertencia no exige el permiso override' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
-        <<<'X'
-        || !$this->acceso->permite($s->usuario, 'prescripcion.override', $s->hospital)
-        X, '|| false'],
+    'M6 no se exige confirmar «sin alergias conocidas»' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'if (!$expediente->evaluado && !$solicitud->confirmaSinAlergias) {', 'if (false) {'],
+    'M7 la advertencia no exige el permiso override' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '|| !$tieneOverride()', '|| false'],
     'M8 sin idempotencia' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
         'if ($previa !== null) {', 'if (false) {'],
     'M9 no se verifica el hospital del paciente' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
@@ -61,7 +59,7 @@ $mutaciones = [
         return Respuesta::json(400, ['error' => $e->codigo]);
         X],
     'M16 el repositorio InMemory ignora el hospital en porId' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
-        'return $p !== null && $p->hospital === $hospital ? $p : null;', 'return $p;'],
+        'return $p !== null && $p->hospital === $hospital ? $this->conSuAnulacion($p) : null;', 'return $p === null ? null : $this->conSuAnulacion($p);'],
     'M17 el repositorio InMemory acepta una clave repetida' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
         'if ($this->porClave($prescripcion->hospital, $prescripcion->clave) !== null) {', 'if (false) {'],
     'M18 regresión de H-4: la dosis no se normaliza' => ['src/Dominio/Modelo/Prescripcion.php',
@@ -70,6 +68,47 @@ $mutaciones = [
         X, '$i'],
     'M19 la vista pone Location también en un reintento (200)' => ['src/Presentacion/Http/Vistas/PrescripcionVista.php',
         '$r->tipo === Resultado::CREADO ? [', 'true ? ['],
+    // Semana 5: Expediente remoto, cliente, observabilidad y contrato.
+    'M20 HttpFuenteAlergias trata un estado ≠ 200 como «sin alergias»' => ['src/Persistencia/Http/HttpFuenteAlergias.php',
+        'throw new \RuntimeException("estado $estado");', 'return new ExpedienteAlergias(true, []);'],
+    'M21 HttpFuenteAlergias acepta «evaluado=false» con alergias' => ['src/Persistencia/Http/HttpFuenteAlergias.php',
+        "if (!\$datos['evaluado'] && \$alergias !== []) {", 'if (false) {'],
+    'M22 el circuito nunca se abre' => ['src/Persistencia/Http/CircuitoInterruptor.php',
+        '$this->fallasSeguidas >= $this->umbral', 'false'],
+    'M23 el cliente reintenta también los 4xx' => ['src/Cliente/ClientePrescripciones.php',
+        "if (\$r['estado'] < 500) {", "if (\$r['estado'] < 400) {"],
+    'M24 el cliente informa INCIERTO cuando el servidor afirmó que no emitió' => ['src/Cliente/ClientePrescripciones.php',
+        "=== 'VERIFICACION_NO_DISPONIBLE' ? ResultadoCliente::RECHAZADO", "=== 'X' ? ResultadoCliente::RECHAZADO"],
+    'M25 el kernel acepta cualquier X-Request-ID (inyección de cabeceras)' => ['src/Presentacion/Http/Kernel.php',
+        'preg_match(self::PATRON_REQUEST_ID, $recibido)', 'true'],
+    'M26 el registro de acceso guarda el cuerpo de la petición' => ['src/Presentacion/Http/Kernel.php',
+        "'tenant' => \$identidad?->hospital,", "'tenant' => \$identidad?->hospital, 'cuerpo' => \$solicitud->cuerpo,"],
+    'M27 el contrato documenta otro permiso para consultar' => ['api/openapi.yaml',
+        'x-permiso: prescripcion.consultar', 'x-permiso: prescripcion.emitir'],
+    // Semana 7: la política de emisión del Dominio.
+    'M28 el mínimo de la justificación baja a 19' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'mb_strlen($texto) < self::MIN_JUSTIFICACION', 'mb_strlen($texto) < self::MIN_JUSTIFICACION - 1'],
+    'M29 se consulta el permiso override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '$confirmacion = !$expediente->evaluado && $solicitud->confirmaSinAlergias;',
+        '$confirmacion = !$expediente->evaluado && $solicitud->confirmaSinAlergias; $tieneOverride();'],
+    'M30 la prescripción guarda la justificación cruda, no la de la decisión' => ['src/Dominio/Modelo/Prescripcion.php',
+        '$decision->justificacion,', '$s->justificacion,'],
+    // Semana 6: cambio práctico (anulación con motivo).
+    'M31 la anulación no exige el motivo mínimo' => ['src/Dominio/Reglas/PoliticaAnulacion.php',
+        "mb_strlen(trim(\$motivo)) < self::MIN_MOTIVO ? 'MOTIVO_REQUERIDO' : null", 'null'],
+    'M32 el repositorio InMemory acepta dos anulaciones' => ['src/Persistencia/EnMemoria/RepositorioPrescripcionesEnMemoria.php',
+        'if (isset($this->anulaciones[$anulacion->prescripcionId])) {', 'if (false) {'],
+    'M33 la anulación no deja traza' => ['src/Aplicacion/CasosDeUso/AnularPrescripcion.php',
+        "\$this->auditoria->registrar('PRESCRIPCION_ANULADA'", "if (false) \$this->auditoria->registrar('PRESCRIPCION_ANULADA'"],
+    // Semana 12: «puede_justificar» en la previa
+    'M34 la previa promete que siempre se puede justificar' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '=== ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;', '=== ResultadoVerificacion::ADVERTENCIA ? true : null;'],
+    'M35 la previa pregunta a RBAC por override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;',
+        '$t = $tieneOverride(); return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $t : null;'],
+    // Semana 15: corrección de DEF-02
+    'M36 un reintento de OTRO prescriptor con la misma clave se trata como propio' => ['src/Aplicacion/CasosDeUso/EmitirPrescripcion.php',
+        '$previa->huella === $s->huella() && $previa->prescriptor === $s->usuario', '$previa->huella === $s->huella()'],
 ];
 
 $origen = dirname(__DIR__);

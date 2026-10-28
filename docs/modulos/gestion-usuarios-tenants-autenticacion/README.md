@@ -26,3 +26,10 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/gestion-usuarios-tenant
 ## Semana 6
 
 [Primera evaluación: ocho diapositivas, trazabilidad y cambio práctico](semana-06/README.md).
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/README.md).
+
+## Semana 9
+
+[Evaluación UX, checklist y backlog de accesibilidad](semana-09/README.md).

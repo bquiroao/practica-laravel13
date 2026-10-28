@@ -39,6 +39,21 @@ final class FormularioPrescripcion
         return new EntradaVerificacion($datos['paciente'], $datos['items']);
     }
 
+    /** Semana 6: el motivo de la anulación. Solo formato (texto); su largo mínimo es regla del Dominio. @throws EntradaInvalida */
+    public static function anulacion(Solicitud $solicitud): string
+    {
+        try {
+            $datos = json_decode($solicitud->cuerpo, true, 4, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            throw new EntradaInvalida('JSON_INVALIDO');
+        }
+        if (!is_array($datos) || !is_string($datos['motivo'] ?? null)) {
+            throw new EntradaInvalida('CUERPO_INVALIDO');
+        }
+
+        return $datos['motivo'];
+    }
+
     /** @throws EntradaInvalida */
     public static function id(array $parametros): int
     {
