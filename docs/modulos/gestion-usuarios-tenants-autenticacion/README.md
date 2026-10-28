@@ -22,3 +22,7 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 ```bash
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/diagramas/*.puml
 ```
+
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/README.md).
