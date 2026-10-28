@@ -1,0 +1,25 @@
+@startuml semana-04-capas
+!pragma layout smetana
+title Capas, responsabilidades y objetos reutilizables (semana 4)
+skinparam defaultFontSize 11
+skinparam rectangleBorderColor #2F5D8A
+
+rectangle "Presentación\n—\nKernel · Rutas · AuditoriaControlador\nFormularioMovimientos · MovimientosVista · ErrorVista\nAutenticadorTokenDemo\n—\nHTTP ↔ comandos y vistas" as P #EEF4FB
+rectangle "Aplicación\n—\nRegistrarMovimiento · ConsultarMovimientos\nVerDetalleMovimiento · VerificarIntegridad\nCadenaSellada · Resultado · Comandos\nPuertos: Transaccion, PoliticaAcceso\n—\norquesta: permiso, alcance, transacción, meta-auditoría" as A #F3F8EE
+rectangle "Dominio\n—\nMovimiento · Sello · ConsultaMovimientos · CatalogoAcciones\n8 ReglaMovimiento · 5 FiltroMovimiento\nPuertos: Bitacora, Reloj\n—\nqué es válido, cómo se sella, qué coincide" as D #FFF8E1
+rectangle "Persistencia\n—\nPdoBitacora · PdoTransaccion · FabricaConexion\nBitacoraEnMemoria · TransaccionEnMemoria\nFabricaAdaptadores · PoliticaAccesoEstatica · RelojSistema\n—\nSQL preparado o memoria, detrás de los puertos" as R #FDF0F0
+
+P -down-> A : comandos / Resultado
+A -down-> D : usa
+R -up-> D : implementa Bitacora, Reloj
+R -up-> A : implementa Transaccion, PoliticaAcceso
+
+legend right
+  <b>Reutilizables fuera de este módulo</b>
+  • Movimiento + Sello (cualquier bitácora encadenada)
+  • FiltroMovimiento (en memoria y en SQL)
+  • Kernel / Solicitud / Respuesta / Ruta
+  • Suite de contrato (cualquier adaptador nuevo)
+  • BitacoraEnMemoria (demo y pruebas de otros módulos)
+endlegend
+@enduml

@@ -1,0 +1,49 @@
+@startuml semana-03-dinamica-actualizacion
+title UML · Vista dinámica — actualización segura a través de las capas (S-46..S-70 de la semana 1)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+autonumber
+
+participant "Kernel +\nActualizarPacienteAccion" as P <<Presentación>>
+participant "ActualizarPaciente" as A <<Aplicación>>
+participant "ControlAcceso" as C <<Aplicación>>
+participant "Paciente +\nPoliticaEdicion +\nPoliticaDuplicados" as D <<Dominio>>
+participant "PdoTransaccion" as T <<Persistencia>>
+participant "PdoRepositorioPacientes" as R <<Persistencia>>
+participant "PdoRegistroAuditoria" as B <<Persistencia>>
+database "PostgreSQL" as DB
+
+-> P : PUT /api/v1/pacientes/P-000001\nX-Tenant-ID · Bearer · If-Match: "7"
+P -> P : hospital (400) · token (401) · tenant (403)\nIf-Match ausente → 428
+P -> A : ComandoActualizar(actor, hospital, código, 7, datos, motivo)
+A -> C : exigir(pacientes.editar)
+A -> R : porCodigo(hospital, código)
+R -> DB : SELECT … WHERE hospital_id = :hospital AND code = :codigo
+A -> D : desdeDatos() [R-01] · verificar estado [R-08] y motivo [R-07]\n· documento nuevo libre [R-02]
+A -> T : ejecutar(trabajo)
+T -> DB : BEGIN
+T -> R : trabajo de ActualizarPaciente:\nactualizar(nuevo, versión 7)
+R -> DB : UPDATE … SET version = version + 1\nWHERE … AND version = :version RETURNING version
+alt otra persona ya guardó (versión vigente 8)
+  DB --> R : 0 filas
+  R -> DB : SELECT version … → 8
+  R --> T : ConflictoVersion(8)
+  T -> DB : ROLLBACK
+  T --> A : ConflictoVersion
+  A --> P : Resultado(conflicto, VERSION_DESACTUALIZADA)
+  <-- P : 409 {"error":"VERSION_DESACTUALIZADA","version_vigente":8}
+else versión vigente
+  DB --> R : version = 8
+  T -> B : trabajo: registrar(PACIENTE_ACTUALIZADO,\nantes/después enmascarado, motivo)
+  B -> DB : INSERT INTO eventos_auditoria … CAST(:detalle AS jsonb)
+  T -> DB : COMMIT
+  A --> P : Resultado(ok, versión 8)
+  <-- P : 200 · ETag: "8"
+end
+note over T, DB
+  Si la bitácora o el COMMIT fallan: ROLLBACK,
+  ErrorPersistencia → Resultado(no_disponible) → 503.
+end note
+@enduml

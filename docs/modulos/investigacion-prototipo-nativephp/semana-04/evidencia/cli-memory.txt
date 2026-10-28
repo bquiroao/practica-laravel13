@@ -1,0 +1,8 @@
+{
+    "scope": "CONTRACT_ONLY",
+    "result": {
+        "status": "RECORDED",
+        "evidenceId": 1,
+        "notification": "UNAVAILABLE"
+    }
+}

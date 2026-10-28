@@ -1,0 +1,14 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Expediente médico electrónico base (tarea Odoo 2504): ANTES de aplicar DIP
+title ANTES — la política crea y usa sus detalles
+class ServicioExpedienteAntes <<política>>
+class PDO <<detalle: base HOSPITAL>>
+class IndiceCentralHttp <<detalle: base CENTRAL>>
+class "time()" as T <<detalle: reloj>>
+ServicioExpedienteAntes --> PDO : new PDO('sqlite::memory:')
+ServicioExpedienteAntes --> IndiceCentralHttp : new
+ServicioExpedienteAntes --> T : llama directo
+note bottom of ServicioExpedienteAntes
+  No se puede probar el vencimiento de 1 hora (R-07) ni cambiar la base o el índice.
+end note
+@enduml

@@ -1,0 +1,11 @@
+@startsalt
+title W3 — Revisar una versión (responsable de integración)
+{+
+  <b>guia-citas 1.1.0</b> · enviada por <b>ana</b> · audiencia: médico | [?] Ayuda
+  Cambios frente a la vigente 1.0.0: | <i>+2 secciones, 1 ejemplo actualizado</i>
+  Validación: | <color:green>✓ formato y versión</color> · <color:green>✓ sin datos reales</color>
+  Motivo (obligatorio para rechazar) | "                       "
+  <i>Si la enviaste tú, «Aprobar» está deshabilitado: debe aprobarla otra persona (R-05).</i> | .
+  [Rechazar] | [Aprobar y publicar]
+}
+@endsalt

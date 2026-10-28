@@ -1,0 +1,22 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 15e8c46 (rama semana-8-dashboard-base, PR #205). Comando: git show 15e8c46:<archivo> | grep -nE '<patrón>'
+
+[H-05] semana-08-wf1-resumen-clinico.puml
+8:    <b>42</b> pacientes activos | ░░░░░░░░ (cargando…)
+
+[H-06] semana-08-wf3-tarjeta-error.puml
+11:  <i>«Reintentar» recarga solo esa tarjeta y se deshabilita mientras carga; nunca hay reintento automático (R-08).</i>
+
+[H-07] semana-08-wf5-sesion.puml
+4:  <b>Tu sesión expiró</b>
+5:  Por seguridad cerramos la sesión en este equipo. No se perdió ningún dato.
+
+[foco] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-resumen-clinico.puml: 0
+semana-08-wf2-resumen-admin.puml: 0
+semana-08-wf3-tarjeta-error.puml: 0
+semana-08-wf4-acceso-denegado.puml: 0
+semana-08-wf5-sesion.puml: 0
+semana-08-flujo-ux.md: 0

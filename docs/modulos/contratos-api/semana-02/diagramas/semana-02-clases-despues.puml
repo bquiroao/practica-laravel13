@@ -1,0 +1,25 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Contratos API: centro de documentación por rol (tarea Odoo 2474): DESPUÉS de aplicar ISP
+title DESPUÉS — una interfaz pequeña por tipo de cliente
+interface LectorDocumentos {
+  publicada()
+}
+interface EscritorVersiones {
+  vigente() · guardarEnRevision()
+}
+interface RevisionPublicaciones {
+  enRevision() · publicar() · rechazar() · marcarObsoleta()
+}
+class ServicioConsulta <<CU-03, lector>>
+class ServicioPublicacion <<CU-01, autor>>
+class ServicioRevision <<CU-02, CU-04, revisor>>
+class RepositorioDocumentos
+class CacheLectura <<solo lectura>>
+ServicioConsulta --> LectorDocumentos
+ServicioPublicacion --> EscritorVersiones
+ServicioRevision --> RevisionPublicaciones
+RepositorioDocumentos ..|> LectorDocumentos
+RepositorioDocumentos ..|> EscritorVersiones
+RepositorioDocumentos ..|> RevisionPublicaciones
+CacheLectura ..|> LectorDocumentos
+@enduml

@@ -1,0 +1,10 @@
+@startsalt
+title W3 — Nueva cama
+{+
+  <b>Nueva cama</b> | . | [?] Ayuda
+  Sala * | ^A · Medicina interna^ | <i>Solo salas activas (R-03)</i>
+  Código de cama * | "101      " | <i>Único dentro de la sala (R-02)</i>
+  Estado inicial | <b>Disponible</b> | <i>Fijo, no editable (R-04)</i>
+  [Cancelar] | . | [Crear cama]
+}
+@endsalt

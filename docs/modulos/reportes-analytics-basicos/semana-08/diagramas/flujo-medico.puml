@@ -1,0 +1,28 @@
+@startuml flujo_medico_reportes_analytics_basicos
+title Semana 8 · User flow: Médico (solo sus citas)
+skinparam shadowing false
+
+start
+:Menú → Mis citas en reportes;
+note right: El reporte de Citas es el único visible (RN-01)
+:Período y estado de la cita;
+note right: El filtro «médico» está fijo en él mismo (RN-08)
+if (¿Período válido? RN-02) then (no)
+  :Mensaje junto al campo;
+  stop
+else (sí)
+endif
+:«Calcular» → estado de carga;
+if (¿Resultado?) then (éxito)
+  :Citas del período con asistencia;
+  :Desglose por estado (atendidas, canceladas, no asistió);
+  :Registros: sus citas con código de paciente;
+elseif (sin datos) then
+  :«No tiene citas en este período»;
+elseif (503) then
+  :Error recuperable con «Reintentar»;
+else (intenta abrir otro reporte por URL)
+  :403 «No tiene permiso para ver este reporte»\nsin botón de reintento;
+endif
+stop
+@enduml

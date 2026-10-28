@@ -1,0 +1,15 @@
+@startsalt
+title M2 — Filtrar por estado de cama
+{+
+  [< Ocupación] | <b>Filtrar</b>
+  <b>Estado de cama</b>
+  (X) disponible
+  () ocupada
+  () mantenimiento
+  () inactiva
+  ---
+  <i>1 de 3 salas con camas disponibles.</i>
+  [Ver 1 sala]
+  [Quitar filtro]
+}
+@endsalt

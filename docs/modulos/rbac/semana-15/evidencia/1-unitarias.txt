@@ -1,0 +1,15 @@
+$ php tests/ejecutar.php --solo=UNI
+Micro-HIS RBAC - pruebas (PHP 8.4.26)
+
+== Reglas de dominio ==
+[PASA ] UNI-01   ReglaTenantCoincide: mismo hospital → sin motivo; hospital distinto → TENANT_NO_COINCIDE
+[PASA ] UNI-02   Vigencia (valores límite): desde = ahora vigente; hasta = ahora NO vigente; hasta = ahora + 1 s vigente; revoked/inactive no
+[PASA ] UNI-03   ReglaRolConcedePermiso: concede si ALGUNA membresía vigente incluye el permiso; si no, PERMISO_NO_ASIGNADO
+[PASA ] UNI-04   ReglaVigenciaValida (límites): hasta = desde → VIGENCIA_INVALIDA; hasta = desde + 1 s y hasta nulo → válidas
+[PASA ] UNI-05   ReglaMotivoSuficiente (límites): 9 → insuficiente, 10 → suficiente, se recortan espacios y cuenta caracteres, no bytes
+[PASA ] UNI-06   Autoasignación y autorrevocación prohibidas (R-04); otra persona sí
+[PASA ] UNI-07   ReglaUsuarioDestinoActivo: inexistente → USUARIO_NO_ENCONTRADO 404; inactivo → USUARIO_INACTIVO 422; activo → sin error
+[PASA ] UNI-08   EventoAuditoria::accesoDenegado lleva los 8 datos de R-06 y el hospital de la SOLICITUD
+[PASA ] UNI-09   PoliticaAutorizacion: devuelve el motivo de la PRIMERA regla que falla y no evalúa las siguientes (corto circuito)
+
+Total: 9  Pasan: 9  Fallan: 0  Omitidas: 0

@@ -1,0 +1,58 @@
+@startuml semana-08-flujo-superadmin
+!pragma layout smetana
+title User flow — Super administrador: consulta de red y verificación de integridad
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #EEF4FB
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityBorderColor #2F5D8A
+
+start
+:Menú «Auditoría»;
+split
+  :Bitácora → W1 con selector de alcance\n(visible solo con consultar_red);
+  if (¿Elige «Toda la red»?) then (sí)
+    :W4 · Diálogo «¿Consultar toda la red?» (M-15)\nfoco en Cancelar;
+    if (¿Confirma?) then (no)
+      :Vuelve al alcance anterior\nsin consultar;
+      stop
+    else (sí)
+      :Cabecera «Red hospitalaria»\nX-Tenant-ID: *;
+    endif
+  else (no)
+    :Alcance = un hospital;
+  endif
+  :Mismo flujo del auditor (W1 → W2 → W3)\ncon la columna Hospital en la red;
+  if (¿403 por permiso de red retirado?) then (sí)
+    #FDECEC:Vuelve al hospital · M-08\nfiltros conservados;
+  endif
+  stop
+split again
+  :Integridad → W5 (solo con auditoria.verificar);
+  :Elige la cadena (un hospital o la red);
+  if (¿Tiene un ancla publicada?) then (sí)
+    repeat
+      :Escribe secuencia y sello;
+      backward:Marca el campo (64 hexadecimales);
+    repeat while (¿Formato válido y van juntos?) is (no)
+    ->sí;
+  else (no)
+    :Sin ancla: la ayuda advierte que\nno se detecta el truncamiento;
+  endif
+  :Confirmación con el tamaño de la cadena (M-16);
+  if (¿Confirma?) then (no)
+    stop
+  endif
+  :Verificando… (sin doble envío);
+  switch (Resultado)
+  case (ÍNTEGRA)
+    #E7F4EC:M-17 · cifra verificada y ancla confirmada;
+  case (ALTERADA)
+    #FDECEC:M-18 · primera secuencia rota\n→ avisar a seguridad (sin «reparar»);
+  case (TRUNCADA)
+    #FFF4E5:M-19 · esperado vs. encontrado\n→ avisar a seguridad;
+  case (503)
+    #FDECEC:M-10 · Reintentar;
+  endswitch
+  stop
+end split
+@enduml

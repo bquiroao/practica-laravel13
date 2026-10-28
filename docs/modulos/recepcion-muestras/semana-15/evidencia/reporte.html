@@ -1,0 +1,18 @@
+<!doctype html><html lang='es'><meta charset='utf-8'><title>Semana 15 · Recepción de muestras</title><style>body{font:16px system-ui;background:#f2f6f7;color:#193c46;margin:40px}section{padding:28px;background:white;border:1px solid #ccd9dd;margin:20px 0}pre{white-space:pre-wrap;font:16px monospace;line-height:1.6}</style><h1>Recepción de muestras · Evidencia PHP</h1><section id='suite'><h2>Suite funcional</h2><pre>PASS U01 referencias y motivo vacios bloqueados
+PASS U02 rechazo acumula no conformidades
+PASS U03 identificador formato y muestra de unicidad
+PASS U04 modelo no acepta rechazo sin motivos
+PASS W01 rama sello solo aplica a sangre
+PASS W02 decision aceptada y rechazada se guardan una vez
+PASS W03 fallo save no devuelve recepcion exitosa
+PASS B01 recepcion conforme PDO conserva referencias
+PASS B02 sin etiqueta y recipiente dan rechazo persistido
+PASS B03 motivo manual se conserva sin aceptar
+PASS B04 colision PDO no sobrescribe registro
+PASS B05 tipos validos equivalentes y tipo desconocido
+PASS B06 fallo PDO sin esquema no finge exito
+13 casos, 0 fallidos.</pre></section><section id='defectos'><h2>Defectos abiertos</h2><p>PASS indica defecto observado, no corregido.</p><pre>REPRODUCCION: PASS indica defecto observado, no corregido.
+PASS D01 orden inexistente aceptada sin verificacion externa
+PASS D02 identificador solo espacios aceptado
+PASS D03 rechazo con motivo solo espacios aceptado por modelo
+3 casos, 0 fallidos.</pre></section></html>

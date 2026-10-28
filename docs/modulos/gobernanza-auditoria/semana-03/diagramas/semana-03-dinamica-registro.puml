@@ -1,0 +1,59 @@
+@startuml semana-03-dinamica-registro
+title Vista dinámica — registro de un movimiento a través de las cuatro capas (S-01..S-17 de la semana 1, con las clases reales)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+autonumber
+
+participant "Módulo emisor" as EM
+box "Presentación" #EEF4FB
+participant Kernel
+participant AccionesAuditoria as AC
+end box
+box "Aplicación" #F3F8EE
+participant RegistrarMovimiento as UC
+participant CadenaSellada as CS
+end box
+box "Dominio" #FFF8E1
+participant "ReglaMovimiento ×8" as RG
+participant "Movimiento / Sello" as MS
+end box
+box "Persistencia" #FDF0F0
+participant PdoTransaccion as TX
+participant PdoBitacora as PB
+end box
+database "audit_logs" as DB
+
+EM -> Kernel : POST /api/v1/auditoria/movimientos\nBearer + X-Tenant-ID + JSON
+Kernel -> Kernel : ruta, hospital, token, tenant del token
+Kernel -> AC : registrar(solicitud, identidad)
+AC -> UC : ejecutar(ComandoRegistrar)
+UC -> UC : PoliticaAcceso: auditoria.registrar
+loop cada regla, en orden (la primera que rechaza corta)
+  UC -> RG : evaluar(SolicitudRegistro)
+end
+UC -> TX : ejecutar(…)
+TX -> DB : BEGIN
+UC -> PB : porEvento(emisor, event_id)
+PB -> DB : SELECT … WHERE emisor = :emisor AND event_id = :event_id
+alt ya existe con el mismo contenido
+  UC --> AC : ok YA_REGISTRADO (mismo id y sello)
+else nuevo
+  UC -> CS : anexar(movimiento)
+  CS -> PB : bloquearCadena(hospital)
+  PB -> DB : SELECT pg_advisory_xact_lock(…)
+  CS -> PB : ultimo(hospital)
+  CS -> MS : Sello::calcular(anterior, secuencia, contenido canónico)
+  CS -> PB : agregar(sellado)
+  PB -> DB : INSERT … RETURNING id
+  TX -> DB : COMMIT
+  UC --> AC : creado {id, secuencia, sello}
+end
+AC --> Kernel : TraductorResultado → 201 + Location | 200
+Kernel --> EM : respuesta
+note over TX, DB
+  Si cualquier paso lanza: ROLLBACK, ErrorPersistencia → 503
+  y nada queda escrito (R-10). El emisor reintenta con el mismo event_id.
+end note
+@enduml

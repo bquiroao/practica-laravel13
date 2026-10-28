@@ -1,0 +1,31 @@
+@startuml semana-04-repositorio-compartido
+title Integración con el repositorio de datos compartido (PostgreSQL del grupo; vistas de lectura + una tabla propia)
+skinparam defaultFontName Arial
+component "Micro-HIS Reportes\n(M27)" as M27
+component "Módulos dueños de los datos\n(camas, traslados y altas, admisiones)" as DUENOS
+actor "Auditoría" as AUD
+database "Base compartida" {
+  folder "Fuentes (M27 solo lee, por vista)" {
+    [vw_censo_servicio]
+    [vw_egresos]
+  }
+  folder "Tablas de otros módulos" {
+    [bed_stays]
+    [care_episodes]
+    [local_patients]
+  }
+  folder "Propia de M27 (escribe solo M27)" {
+    [exportaciones_reporte]
+  }
+}
+DUENOS --> [care_episodes] : dueños (escriben)
+DUENOS --> [bed_stays]
+DUENOS --> [local_patients]
+[vw_censo_servicio] ..> [bed_stays] : se define sobre
+[vw_censo_servicio] ..> [local_patients]
+[vw_egresos] ..> [care_episodes]
+M27 ..> [vw_censo_servicio] : FuenteReportes\n(SELECT, hospital + rango + corte)
+M27 ..> [vw_egresos] : FuenteReportes
+M27 --> [exportaciones_reporte] : RepositorioExportaciones\n(INSERT y SELECT)
+AUD ..> [exportaciones_reporte] : lectura (auditoría)
+@enduml

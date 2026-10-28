@@ -1,0 +1,53 @@
+@startuml semana-06-capas
+!pragma layout smetana
+title Arquitectura vigente del Micro-HIS Pacientes (semana 6) — en verde lo que agregó el cambio práctico
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+top to bottom direction
+
+package "Presentación (MVC) — sin cambios de código en S6" {
+  rectangle "Kernel · Rutas\nX-Request-ID · registro de acceso" as K
+  rectangle "PacientesControlador" as C
+  rectangle "FormularioPaciente\n+ identidad_protegida (formato)" as F #E8F5E9
+  rectangle "PacienteVista · ErrorVista" as V
+}
+
+package "Aplicación" {
+  rectangle "RegistrarPaciente · BuscarPacientes\nConsultarPaciente · ActualizarPaciente\n(+ permisos proteger / leer_protegido)" as UC #E8F5E9
+  rectangle "ControlAcceso · Resultado · Comandos\nPuertos: Transaccion · PoliticaAcceso\nReloj · AlmacenIdempotencia" as AP
+}
+
+package "Dominio" {
+  rectangle "Paciente (+ identidadProtegida)\nIdentificador · CriterioBusqueda\n(+ incluyendoProtegidos)" as M #E8F5E9
+  rectangle "PoliticaDuplicados (+ RESERVADO)\nPoliticaEdicion (sin cambios)\n**PoliticaConfidencialidad** (nueva)" as P #E8F5E9
+  rectangle "Puertos: ConsultaPacientes ⊂ RepositorioPacientes\nIndiceDuplicados (+ protegidos())\nRegistroAuditoria" as PD #E8F5E9
+}
+
+package "Persistencia" {
+  rectangle "Pdo* (+ columna identidad_protegida,\n:ver_protegidos en la búsqueda)" as PDO #E8F5E9
+  rectangle "EnMemoria* (+ protegidos())" as MEM #E8F5E9
+  rectangle "ProteccionDocumentos · Fábricas" as SEG
+}
+
+package "Cliente (S5) — sin cambios" {
+  rectangle "ClientePacientes · CircuitoInterruptor" as CL
+}
+
+K --> C
+C --> F
+C --> UC
+C --> V
+UC --> AP
+UC --> M
+UC --> P
+P ..> PD
+UC ..> PD
+PDO ..|> PD
+MEM ..|> PD
+PDO --> SEG
+CL ..> K : HTTP (contrato v1.1.0)
+@enduml

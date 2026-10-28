@@ -1,0 +1,16 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Dashboard de ocupación hospitalaria (tarea Odoo 2489): ANTES de aplicar ISP
+title ANTES — el tablero depende del almacén compartido con el catálogo
+interface AlmacenOcupacionAntes {
+  salasActivas() · camas() · estanciasAbiertas()
+  guardarCorte() · ultimoCorte()
+  **cambiarEstadoCama()**
+}
+class ConsolidadorAntes <<usa 4 de 6>>
+class ConsultaOcupacionAntes <<usa 1 de 6>>
+ConsolidadorAntes --> AlmacenOcupacionAntes
+ConsultaOcupacionAntes --> AlmacenOcupacionAntes
+note bottom of AlmacenOcupacionAntes
+  Con cambiarEstadoCama() a la vista, nada impide que el tablero cambie estados (rompe R-09).
+end note
+@enduml

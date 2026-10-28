@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+actor "Profesional / EMR" as MED
+actor "Origen laboratorio autorizado" as LAB
+package "Presentación propuesta" {
+ component "Controlador API" as HTTP
+}
+package "Aplicación existente" {
+ component "IssueLabOrder\nRF01-04" as I
+ component "FindLabOrders\nRF05-06" as F
+ component "ApplyLabOrderStatus\nRF07-08" as U
+}
+package "Contratos / políticas" {
+ interface LabOrderRepository as R
+ interface LabCatalog as C
+ interface ClinicalAuthorization as A
+ interface OrderLifecyclePolicy as P
+}
+component "UniqueTestCatalog\nC06-01" as UNIQUE
+component "Fixture memoria actual" as MEM
+component "Adaptador PDO propuesto\ntransacción orden/partidas" as PDO
+MED --> HTTP
+HTTP --> I
+HTTP --> F
+LAB --> U
+I --> A
+F --> A
+I --> C
+I --> P
+U --> P
+I --> R
+F --> R
+U --> R
+UNIQUE ..|> C
+UNIQUE --> C : delega catálogo de disponibilidad
+MEM ..|> R
+PDO ..|> R
+note bottom of R
+RNF03 integridad / RNF04 trazabilidad.
+PDO, API e identidad real no implementados aquí.
+end note
+@enduml

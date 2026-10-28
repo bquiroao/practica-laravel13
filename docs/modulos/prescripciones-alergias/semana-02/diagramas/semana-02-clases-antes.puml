@@ -1,0 +1,42 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title ANTES (sin DIP) — la política depende de los detalles
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+skinparam class {
+  BackgroundColor #FDECEC
+  BorderColor #A33A3A
+}
+
+class ServicioPrescripcion <<alto nivel>> {
+  - CATALOGO : array (constante)
+  - GRUPOS_ALERGENOS : array (constante)
+  - PACIENTES : array (constante)
+  - PERMISOS : array (constante)
+  - dsn : string
+  - archivoTraza : string
+  + emitir(solicitud : array) : array
+}
+
+class "\\PDO" as PDO <<detalle>>
+class "tabla allergies\n(SQL escrito en la clase)" as Allergies <<detalle>>
+class "tabla prescripciones_antes\n(SQL escrito en la clase)" as Tabla <<detalle>>
+class "file_put_contents()\n(traza en archivo)" as Archivo <<detalle>>
+class "date()\n(reloj del sistema)" as Fecha <<detalle>>
+
+ServicioPrescripcion ..> PDO : <<create>> new \\PDO($dsn)
+ServicioPrescripcion ..> Allergies : SELECT …
+ServicioPrescripcion ..> Tabla : SELECT / INSERT …
+ServicioPrescripcion ..> Archivo
+ServicioPrescripcion ..> Fecha
+
+note bottom of ServicioPrescripcion
+  La dependencia va de la POLÍTICA al DETALLE.
+  Consecuencias medidas en verificar.php:
+  • ANT-01: ni la regla de dosis se puede probar sin PostgreSQL.
+  • DIP-05: try { SELECT allergies } catch { $filas = []; }
+    → con el expediente inaccesible pide «confirmar sin alergias»
+    y, si el médico confirma, EMITE amoxicilina a un alérgico.
+  • Cambiar a otra fuente (API del Expediente, FHIR) = editar esta clase.
+end note
+@enduml

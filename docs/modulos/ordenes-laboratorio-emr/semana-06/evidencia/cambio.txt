@@ -1,0 +1,13 @@
+PASS: antes: ejemplo acepta codigo repetido
+PASS: despues: repeticion rechazada
+PASS: rechazo no escribe orden parcial
+PASS: pruebas diferentes conservan camino feliz
+PASS: conserva partidas y orden solicitado
+PASS: conserva referencia de expediente
+PASS: conserva episodio
+PASS: catalogo sigue validando disponibilidad
+PASS: autorizacion sigue antes de emitir
+PASS: no confirma persistencia fallida
+PASS: seguimiento conserva consulta autorizada
+PASS: falla de lectura no es estado actual
+OK: 12 aserciones del cambio.

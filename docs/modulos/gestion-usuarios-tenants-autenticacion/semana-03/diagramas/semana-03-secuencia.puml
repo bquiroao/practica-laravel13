@@ -1,0 +1,34 @@
+@startuml
+title Semana 3 - Secuencia: autenticación y revocación de sesión
+autonumber
+actor Usuario
+participant AuthController as C
+participant Authenticate as A
+participant "UserRepository\n(PDO)" as U
+participant "SessionRepository\n(PDO)" as S
+
+Usuario -> C : login(tenant, correo, contraseña)
+C -> A : __invoke
+A -> U : findByEmail(tenant, correo)
+U --> A : User | null
+alt usuario inexistente, inactivo o contraseña errónea
+  A --> C : InvalidCredentials
+  C --> Usuario : 401 (mismo mensaje)
+else válido
+  A -> S : add(Session, sha256(token))
+  A --> C : token
+  C --> Usuario : 200 token (única vez)
+end
+Usuario -> C : logout(token)
+C -> S : findByTokenHash(sha256(token))
+alt activa
+  C -> S : revoke(id, ahora)
+  C --> Usuario : 204
+else expirada o revocada
+  C --> Usuario : 401
+end
+alt falla la base
+  S --> C : PersistenceFailure
+  C --> Usuario : 503
+end
+@enduml

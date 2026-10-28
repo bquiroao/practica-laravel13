@@ -1,0 +1,19 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-inicio-cargando (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | H1
+01-inicio-cargando (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | H1
+01-inicio-cargando (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | H1
+02-inicio-resumen (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | H1
+02-inicio-resumen (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | H1
+02-inicio-resumen (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | H1
+03-abrir-modulo (#inicio) | 320 | 320 | 320 | no | Camas · Hospital HIS | H1
+03-abrir-modulo (#inicio) | 360 | 360 | 360 | no | Camas · Hospital HIS | H1
+03-abrir-modulo (#inicio) | 430 | 430 | 430 | no | Camas · Hospital HIS | H1
+04-error-tarjeta (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | H1
+04-error-tarjeta (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | H1
+04-error-tarjeta (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | H1
+05-reintento-recupera (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | H2
+05-reintento-recupera (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | H2
+05-reintento-recupera (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | H2
+06-sin-permiso (#modulo/usuarios) | 320 | 320 | 320 | no | Sin acceso · Hospital HIS | H1
+06-sin-permiso (#modulo/usuarios) | 360 | 360 | 360 | no | Sin acceso · Hospital HIS | H1
+06-sin-permiso (#modulo/usuarios) | 430 | 430 | 430 | no | Sin acceso · Hospital HIS | H1

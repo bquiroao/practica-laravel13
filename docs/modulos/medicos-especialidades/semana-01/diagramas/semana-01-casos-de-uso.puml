@@ -1,0 +1,49 @@
+@startuml semana-01-casos-de-uso
+left to right direction
+title Casos de uso — «registro de médico, asociación de especialidad y consulta de disponibilidad»
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #EEF2F7
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+actor "Administrador de\npersonal médico\n(actor principal)" as Adm
+actor "Recepcionista" as Rec
+actor "Médico" as Med
+actor "Identidad y permisos\n(RBAC) <<sistema>>" as Rbac
+actor "Citas médicas\n(M05) <<sistema>>" as Cit
+
+rectangle "Módulo Médicos, especialidades y disponibilidad" {
+  usecase "CU-01\nRegistrar médico" as CU01 #D6E8FF
+  usecase "CU-02\nValidar datos únicos\n(colegiado y documento)" as CU02
+  usecase "CU-03\nAsociar especialidad\ncon vigencia" as CU03 #D6E8FF
+  usecase "CU-04\nDefinir horario\nde atención" as CU04
+  usecase "CU-05\nRegistrar ausencia" as CU05
+  usecase "CU-06\nConsultar disponibilidad" as CU06 #D6E8FF
+  usecase "CU-07\nCalcular franjas libres\n(horario − ausencias − citas)" as CU07
+}
+
+Adm --> CU01
+Adm --> CU03
+Adm --> CU04
+Adm --> CU05
+Med --> CU05
+Rec --> CU06
+Med --> CU06
+Cit --> CU06 : antes de agendar
+CU01 ..> CU02 : <<include>>
+CU06 ..> CU07 : <<include>>
+CU04 ..> CU03 : requiere especialidad\nvigente
+CU01 --> Rbac : sesión, rol\ny hospital
+CU07 --> Cit : citas activas\ndel médico
+
+note bottom of CU07
+  Objetivo: que solo se ofrezcan horarios en los que
+  el médico atiende, está presente y no tiene otra cita.
+  Fuera del límite: agendar o cancelar citas (M05),
+  nómina y turnos de hospitalización.
+end note
+@enduml

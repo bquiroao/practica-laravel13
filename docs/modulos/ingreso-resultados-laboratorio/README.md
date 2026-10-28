@@ -13,7 +13,10 @@ Modela la captura de resultados asociados con una orden de laboratorio y la corr
 | 3 | Micro-HIS PHP CLI por capas para captura y corrección versionada de resultados pendientes, PDO preparado y vistas C4/UML | [arquitectura y ejemplo](semana-03/semana-03-arquitectura-ingreso-resultados.md) · [prototipo CLI](semana-03/ejemplo/README.md) | [DECLARACION_IA.md](semana-03/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-03/GUIA_DEFENSA_ORAL.md) |
 | 4 | Arquitectura en capas con entrada MVC y patrón Repository (adaptadores PDO e InMemory), pruebas de contrato y análisis de repositorio compartido | [semana-04-capas-mvc-repositorio-ingreso-resultados.md](semana-04/semana-04-capas-mvc-repositorio-ingreso-resultados.md) · [ejemplo](semana-04/ejemplo/README.md) | [DECLARACION_IA.md](semana-04/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-04/GUIA_DEFENSA_ORAL.md) |
 | 5 | Cliente-servidor, contrato API REST propuesto y evaluación de frontera de microservicio (monolito modular con API) | [semana-05-api-microservicio-ingreso-resultados.md](semana-05/semana-05-api-microservicio-ingreso-resultados.md) | [DECLARACION_IA.md](semana-05/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-05/GUIA_DEFENSA_ORAL.md) |
+| 6 | Primera evaluación parcial: presentación (8 diapositivas), diagrama trazable, matriz decisión→evidencia y cambio práctico defendido sobre valor/unidad/rango | [semana-06-evaluacion-parcial-arquitectura-ingreso.md](semana-06/semana-06-evaluacion-parcial-arquitectura-ingreso.md) · [registro del cambio](semana-06/registro-cambio-practico.md) | [DECLARACION_IA.md](semana-06/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-06/GUIA_DEFENSA_ORAL.md) |
+| 7 | Diseño de componentes backend/frontend y refactorización del acoplamiento entre valor, unidad, rango, estado y corrección controlada | [semana-07-componentes-refactorizacion-ingreso.md](semana-07/semana-07-componentes-refactorizacion-ingreso.md) · [verificación](semana-07/verificacion/acoplamiento.php) | [DECLARACION_IA.md](semana-07/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-07/GUIA_DEFENSA_ORAL.md) |
 | 11 | Prototipo navegable desktop y móvil para ingreso, corrección y validación de resultados con enfoque en prevención de errores y accesibilidad | [semana-11-prototipo-navegable-ingreso-resultados.md](semana-11/semana-11-prototipo-navegable-ingreso-resultados.md) | [DECLARACION_IA.md](semana-11/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-11/GUIA_DEFENSA_ORAL.md) |
+| 8 | Diseño UX del flujo de captura y corrección controlada, con wireframes anotados | [semana-08-ux-ingreso-resultados.md](semana-08/semana-08-ux-ingreso-resultados.md) | [DECLARACION_IA.md](semana-08/DECLARACION_IA.md) | [GUIA_DEFENSA_ORAL.md](semana-08/GUIA_DEFENSA_ORAL.md) |
 
 ## Diagramas
 
@@ -22,3 +25,22 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 ```bash
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/*.puml
 ```
+
+## Semana 10 — Movilidad
+
+[Propuesta responsive, cinco pantallas y dos escenarios](semana-10/semana-10-movilidad-ingreso-resultados.md).
+## Semana 12
+
+[Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
+## Semana 13
+
+[Plan de revisión técnica, checklist, roles y formatos](semana-13/semana-13-revision-tecnica-ingreso.md).
+## Semana 14
+
+[Plan SQA: métricas, riesgos, controles y calendario](semana-14/semana-14-plan-sqa-ingreso-resultados.md).
+## Semana 15
+
+[Pruebas, matriz RF/RNF, capturas y defectos](semana-15/README.md).
+## Semana 9
+
+[Evaluación UX/accesibilidad: checklist, evidencia y backlog](semana-09/README.md).

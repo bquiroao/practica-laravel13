@@ -1,0 +1,40 @@
+@startuml semana-04-secuencia-mvc
+title Una petición a través de MVC y Repository: PUT /api/v1/pacientes/P-000001 con If-Match: "1"
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+autonumber
+
+participant "Kernel" as K <<Front Controller>>
+participant "PacientesControlador" as C <<C>>
+participant "FormularioPaciente" as F <<formato>>
+participant "ActualizarPaciente" as A <<M: Aplicación>>
+participant "Paciente / Políticas" as D <<M: Dominio>>
+participant "«interface»\nRepositorioPacientes" as R
+participant "Adaptador elegido\n(Pdo… o …EnMemoria)" as X <<Persistencia>>
+participant "PacienteVista /\nErrorVista" as V <<V>>
+
+-> K : Solicitud(PUT, If-Match "1", JSON)
+K -> K : ruta · X-Tenant-ID (400) · token (401) · tenant (403)
+K -> C : actualizar(solicitud, identidad, {codigo})
+C -> F : actualizacion(solicitud, identidad, código)
+alt sin If-Match / JSON mal formado
+  F --> C : EntradaInvalida (VERSION_REQUERIDA | FORMATO …)
+  C -> V : ErrorVista::entradaInvalida(e)
+  V --> C : 428 / 400
+else formato correcto
+  F --> C : ComandoActualizar(actor, hospital, código, 1, datos, motivo)
+  C -> A : ejecutar(comando)
+  A -> R : porCodigo(hospital, código)
+  R -> X : (polimorfismo)
+  A -> D : desdeDatos() · PoliticaEdicion · PoliticaDuplicados
+  A -> R : actualizar(nuevo, versión 1) dentro de Transaccion
+  R -> X : UPDATE … WHERE version = :version  |  comparación en memoria
+  A --> C : Resultado(ok, versión 2) | Resultado(conflicto, VERSION_DESACTUALIZADA)
+  C -> V : PacienteVista::actualizado(resultado)
+  V --> C : 200 + ETag "2"  |  409 (vía ErrorVista)
+end
+C --> K : Respuesta
+<-- K : HTTP
+@enduml
