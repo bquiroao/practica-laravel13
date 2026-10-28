@@ -1,0 +1,41 @@
+PHP 8.2.33; PDO SQLite; 2026-10-27
+PASS: happy path HTTP 200
+PASS: validated status persisted
+PASS: value unchanged
+PASS: decision audit persisted
+PASS: reject requires reason
+PASS: invalid reject has no write
+PASS: unauthorized actor denied
+PASS: already validated conflicts
+PASS: stale version conflicts
+PASS: cross hospital not found
+PASS: in-memory persistence failure
+PASS: failed memory write has no partial state
+PASS: PDO missing decision schema returns 503
+PASS: PDO failure rolled back result
+PASS: controller contains no persistence tokens
+PASS: use case constructor takes interfaces
+PASS: memory reject succeeds
+PASS: memory rejection persisted
+PASS: memory same ID isolated by hospital
+PASS: memory second hospital validates independently
+PASS: memory final decision cannot be repeated
+PASS: memory missing result
+PASS: memory invalid input
+PASS: pdo reject succeeds
+PASS: pdo rejection persisted
+PASS: pdo same ID isolated by hospital
+PASS: pdo second hospital validates independently
+PASS: pdo final decision cannot be repeated
+PASS: pdo missing result
+PASS: pdo invalid input
+PASS: PDO audit for both hospitals
+PASS: PDO rejection reason trimmed and saved
+PASS: PDO read failure is not 404
+PASS: physical layer Domain exists
+PASS: physical layer Application exists
+PASS: physical layer Presentation exists
+PASS: physical layer Persistence exists
+PASS: Domain independent of infrastructure
+PASS: Application independent of infrastructure
+39 comprobaciones, 0 fallidas.
