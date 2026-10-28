@@ -1,0 +1,6 @@
+{
+  "codigo": "HEM-001", "nombre": "Hematología completa", "seccion": "hematologia",
+  "tiempo_respuesta_horas": 4, "tipo_muestra": "sangre-total", "contenedor": "Tubo tapa lila (EDTA)",
+  "volumen_minimo_ml": 3, "horas_ayuno": 0, "instrucciones_preparacion": "",
+  "conservacion": "refrigerada", "estabilidad_horas": 24, "vigente_desde": "2027-01-04", "vigente_hasta": ""
+}

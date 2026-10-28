@@ -1,0 +1,15 @@
+@startsalt
+title M2 — Camas de la sala A (320 px)
+{+
+  [< Salas] | <b>Sala A · 12 camas</b>
+  Estado: | ^Todas^
+  ---
+  A/101 · <b>Disponible</b> | [Cambiar estado]
+  A/102 · <b>Ocupada</b> | <i>La gestiona admisión</i>
+  A/103 · <b>Mantenimiento</b> | [Cambiar estado]
+  A/104 · <b>Disponible</b> | [Cambiar estado]
+  ---
+  <i>Una cama por fila; estado en texto.</i>
+  <i>Botón de 44 px de alto.</i>
+}
+@endsalt

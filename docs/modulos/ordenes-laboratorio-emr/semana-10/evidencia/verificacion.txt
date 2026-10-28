@@ -1,0 +1,15 @@
+PASS 01-episodio-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 01-episodio-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 01-episodio-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-pruebas-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-pruebas-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-pruebas-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-confirmacion-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-confirmacion-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-confirmacion-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-seguimiento-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-seguimiento-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-seguimiento-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.

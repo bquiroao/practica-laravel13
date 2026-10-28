@@ -1,0 +1,14 @@
+@startsalt
+title W1 — Catálogo de camas (lista de salas)
+{+
+  {* Inicio | <b>Catálogo de camas</b> | Ayuda }
+  Hospital: <b>Hospital Central</b> | . | [+ Nueva sala] | [+ Nueva cama]
+  {+ Buscar sala o cama: | "A-1     " | Estado: | ^Todos^ }
+  {#
+    <b>Sala</b> | <b>Camas</b> | <b>Disponibles</b> | <b>Mantenimiento</b> | <b>Ocupadas</b> | <b>Inactivas</b>
+    A · Medicina interna | 12 | 5 | 1 | 6 | 0
+    B · Cirugía | 8 | 0 | 2 | 6 | 0
+  }
+  <i>Cargando: filas grises de esqueleto. Vacío: «Aún no hay salas: crea la primera».</i>
+}
+@endsalt

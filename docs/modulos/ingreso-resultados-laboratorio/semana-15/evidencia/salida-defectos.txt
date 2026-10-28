@@ -1,0 +1,5 @@
+REPRODUCCION: PASS indica defecto observado, no corregido.
+PASS D01 actor no autorizado aceptado sin verificar rol hospital
+PASS D02 precision canonical cambia valor persistido
+PASS D03 excepcion de persistencia escapa del servicio
+3 casos, 0 fallidos.

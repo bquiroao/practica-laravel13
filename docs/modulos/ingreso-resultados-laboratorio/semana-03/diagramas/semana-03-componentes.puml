@@ -1,0 +1,50 @@
+@startuml
+title Semana 3 - Componentes y dependencias
+left to right direction
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Personal de laboratorio" as User
+
+package "Presentation" {
+  component "LabResultCommand\nCLI" as Cli
+}
+
+package "Application" {
+  component "CaptureOrCorrectResult\ncaso de uso" as UseCase
+  interface "LabResultRepository" as RepositoryPort
+  interface "ResultIdentifierGenerator" as IdPort
+}
+
+package "Domain" {
+  component "PendingLabResult" as Pending
+  component "ValidatedLabResult\nsolo lectura" as Validated
+  component "ResultVersion" as Version
+}
+
+package "Infrastructure" {
+  component "RandomResultIdentifierGenerator" as IdGenerator
+}
+
+package "Persistence" {
+  component "PdoLabResultRepository" as PdoRepository
+  database "SQLite" as Database
+}
+
+User --> Cli : Opciones de captura/corrección
+Cli --> UseCase : Solicitud tipada
+UseCase --> Pending : Crea versión inicial o corregida
+Pending --> Version : Composición
+Validated --> Version : Composición
+UseCase --> RepositoryPort : Busca y guarda versión
+UseCase --> IdPort : Solicita ID
+PdoRepository ..|> RepositoryPort
+IdGenerator ..|> IdPort
+PdoRepository --> Database : PDO preparado
+
+note bottom of UseCase
+  Sin consulta de orden, autorización real,
+  validación clínica ni publicación.
+end note
+@enduml

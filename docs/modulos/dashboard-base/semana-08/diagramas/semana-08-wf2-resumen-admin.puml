@@ -1,0 +1,13 @@
+@startsalt
+title W2 — Resumen inicial (administrador de hospital)
+{+
+  {* Inicio | Pacientes | Citas | Camas | Ayuda | Cerrar sesión }
+  Hospital: <b>Hospital Central</b> | . | . | Rol: administrador
+  {#
+    <b>Pacientes</b> | <b>Citas de hoy</b> | <b>Camas disponibles</b>
+    <b>42</b> pacientes activos | <b>18</b> citas hoy | No hay camas disponibles ahora.
+    [Ver pacientes] | [Ver agenda] | [Ver camas]
+  }
+  <i>Solo conteos: ningún nombre ni dato que identifique a un paciente (R-06).</i>
+}
+@endsalt

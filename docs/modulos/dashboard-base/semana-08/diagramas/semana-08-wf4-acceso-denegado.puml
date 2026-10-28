@@ -1,0 +1,11 @@
+@startsalt
+title W4 — Ruta no permitida para el rol (E6)
+{+
+  {* Inicio | Pacientes | Citas | Ayuda | Cerrar sesión }
+  <b>No tienes acceso a esa sección</b>
+  Tu rol no incluye «Camas». Si lo necesitas, pídelo al administrador del hospital.
+  [Volver al inicio] | [Ver qué puedo usar]
+  ---
+  <i>El aviso aparece dentro del dashboard: el menú y las tarjetas siguen disponibles.</i>
+}
+@endsalt

@@ -1,0 +1,10 @@
+@startsalt
+title W2 — Nueva sala
+{+
+  <b>Nueva sala</b> | . | [?] Ayuda
+  Código * | "A        " | <i>Único en el hospital (R-01)</i>
+  Nombre * | "Medicina interna" | .
+  . | <color:red>Ya existe una sala con el código A.</color> | .
+  [Cancelar] | . | [Crear sala]
+}
+@endsalt

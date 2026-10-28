@@ -1,0 +1,1 @@
+Se utilizó IA para adaptar el prototipo previamente construido en semana 12 a una entrega independiente de semana 11, documentar navegación y regenerar pruebas/capturas. No se atribuyen autorización de servidor, persistencia clínica, API ni pruebas de lector de pantalla. La estudiante debe revisar límites y decisiones.

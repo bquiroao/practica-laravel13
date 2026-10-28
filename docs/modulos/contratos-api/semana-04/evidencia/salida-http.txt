@@ -1,0 +1,6 @@
+POST /documentos/guia-citas/versiones [usuario=ana roles=] {"tipo":"manual","version":"1.0.0","audiencia":["medico"]} -> 201 {"id":1}
+POST /versiones/1/aprobacion [usuario=ana roles=]  -> 403 {"error":"E5","mensaje":"Nadie aprueba su propia publicación."}
+POST /versiones/1/aprobacion [usuario=luis roles=]  -> 200 {}
+GET /documentos/guia-citas [usuario= roles=medico]  -> 200 {"version":"1.0.0","tipo":"manual","obsoleta":false,"vigente":"1.0.0"}
+GET /documentos/guia-citas [usuario= roles=farmacia]  -> 404 {"error":"E6","mensaje":"Documento no encontrado."}
+GET /documentos/guia-citas/versiones/1.0.0 [usuario= roles=medico,enfermeria]  -> 200 {"version":"1.0.0","tipo":"manual","obsoleta":false,"vigente":"1.0.0"}

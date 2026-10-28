@@ -1,0 +1,1 @@
+Exponer las ocho diapositivas en 6–8 minutos. Conectar actor→RF/RNF→SRP→capa→Repository→API→prueba. Señalar explícitamente alta directa del ejemplo frente a invitación propuesta en API. Defender CH-01 sin ampliar a otros usuarios o tenants. Las salidas PHP no prueban endpoints ni JWT real; registrar esos límites si se pregunta.
