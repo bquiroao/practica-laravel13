@@ -1,0 +1,49 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+title Integración por repositorio de datos compartido: la base de CADA hospital del HIS
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+rectangle "Módulo Prescripciones\n(rol app_prescripciones)" as Presc #F5F9FF
+rectangle "Módulo Expediente" as Exp #FFFFFF
+rectangle "Módulo Pacientes / Atención" as Pac #FFFFFF
+rectangle "Identidad y RBAC" as Rbac #FFFFFF
+
+database "Base del hospital (repositorio compartido · migraciones database/migrations/hospital)" as BD {
+  package "Del Expediente (H4)" #FFF8E1 {
+    rectangle "allergies\n(trigger allergies_retention)" as Alg
+  }
+  package "De Pacientes y Atención (H2)" #FFF8E1 {
+    rectangle "local_patients · care_episodes ·\ncare_assignments" as Pat
+  }
+  package "De Identidad (H1)" #FFF8E1 {
+    rectangle "local_user_refs · doctor_profiles" as Usr
+  }
+  package "De Prescripciones (H5, propuesta)" #EEF7EE {
+    rectangle "medications · allergen_groups ·\nprescriptions · prescription_items\n(trigger de integridad e inmutabilidad)" as H5
+    rectangle "VISTA prescripcion_alergias\n(solo columnas necesarias)" as Vista
+  }
+  package "Integración (H8, pendiente)" #EEEEEE {
+    rectangle "outbox_event" as Out
+  }
+}
+database "Base central" as Central {
+  rectangle "central_inbox_messages" as Inbox
+}
+
+Exp --> Alg : escribe (dueño)
+Pac --> Pat : escribe (dueño)
+Rbac --> Usr : sincroniza
+Presc --> H5 : SELECT · INSERT (dueño)
+Presc --> Vista : SELECT (sin privilegios sobre allergies)
+Vista ..> Alg : lee
+H5 ..> Pat : FK + trigger: episodio del paciente,\nprescriptor asignado
+H5 ..> Usr : FK prescriber_user_ref_id
+Presc --> Out : traza en la misma transacción\n(hoy: prescription_audit_outbox)
+Out ..> Inbox : evento lógico (UUID)
+
+note bottom of BD
+  bin/validar-integracion-hospital.php aplica las 6 migraciones REALES
+  y database/integracion-hospital.sql, y comprueba 13 afirmaciones.
+end note
+@enduml

@@ -1,0 +1,86 @@
+[
+  {
+    "file": "01-bandeja-pendientes.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "Sesión, rol y hospital se verifican antes de mostrar la bandeja.",
+      "Cada fila separa captura de corrección y abre el detalle.",
+      "Carga, vacío y error tienen contenido y acciones distintos."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "02-captura-resultado.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "La orden y el ítem quedan bloqueados para evitar asociación errónea.",
+      "Valor tiene etiqueta persistente y validación inmediata."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "03-confirmar-captura.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "El resumen permite detectar errores antes de persistir.",
+      "Valor y unidad se muestran juntos para evitar ambigüedad.",
+      "El éxito solo aparece después de respuesta persistida."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "04-correccion-controlada.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "Historial visible conserva la trazabilidad de la versión anterior.",
+      "Solo una versión PENDING vigente puede corregirse.",
+      "La versión anterior se conserva, nunca se sobrescribe.",
+      "La nueva versión queda enlazada y vuelve a PENDING."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "05-resultado-registrado.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "El mensaje de éxito aparece únicamente con persistencia confirmada.",
+      "Versión y estado permiten verificar qué quedó registrado.",
+      "PENDING usa texto, icono y contraste, no solo color."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "06-errores-recuperables.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Captura autorizada",
+      "409 exige recargar historial y revisar antes de reenviar.",
+      "Una versión validada es solo lectura y explica el bloqueo.",
+      "Fallo de guardado conserva el borrador sin éxito falso."
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  }
+]

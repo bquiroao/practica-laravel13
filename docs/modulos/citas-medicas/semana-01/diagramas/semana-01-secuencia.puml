@@ -1,0 +1,62 @@
+@startuml semana-01-secuencia
+' Semana 1 — Citas médicas y agenda (tarea Odoo 2458)
+title Secuencia — solicitar cita (CU-01 con CU-04) y cancelarla (CU-03)
+
+actor "Recepcionista" as U
+participant "UI de agenda\n(Vue)" as UI
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Autorización\n(RBAC)" as RBAC
+participant "Servicio de\ncitas" as SVC
+database "Repositorio\n(base HOSPITAL)" as DB
+participant "Auditoría" as AUD
+
+== CU-01 Solicitar cita ==
+U -> UI : S1 Paciente, médico, especialidad, horario y motivo
+UI -> API : S2 POST /appointments (JWT, X-Tenant-ID)
+API -> RBAC : S3 ¿Puede agendar? (R-09)
+alt sin permiso u otro hospital
+  API --> UI : 403 (E1)
+else autorizado
+  API -> SVC : S4 solicitarCita(datos)
+  SVC -> SVC : S5 Valida horario y motivo (R-01, R-06)
+  alt datos inválidos
+    API --> UI : 422 (E2)
+  else válidos
+    SVC -> DB : S6 Lee perfil y especialidad del médico (R-04, R-05)
+    alt no vigentes
+      API --> UI : 422 (E3)
+    else vigentes
+      SVC -> DB : S7 Busca citas activas cruzadas (R-02, R-03)
+      alt hay cruce del médico o del paciente
+        API --> UI : 409 (E4 / E5)
+      else libre
+        SVC -> DB : S8 Inserta la cita «programada»
+        alt la exclusión la rechaza (carrera)
+          DB --> SVC : viola ..._active_period_exclusion
+          API --> UI : 409 (E6)
+        else insertada
+          API --> UI : S9 201 Programada (F1)
+        end
+      end
+    end
+  end
+end
+
+== CU-03 Cancelar cita ==
+U -> UI : S10 Elige la cita y escribe el motivo
+UI -> API : S11 PATCH /appointments/{id}/cancel (motivo)
+API -> RBAC : S12 ¿Puede cancelar esta cita? (R-09)
+alt sin permiso, o médico con cita ajena
+  API --> UI : 403 (E1)
+else autorizado
+  API -> SVC : cancelarCita(id, motivo)
+  SVC -> DB : S13 Lee la cita
+  alt completada o cancelada (R-07)
+    API --> UI : 422 (E7)
+  else programada o confirmada
+    SVC -> DB : S14 Actualiza a «cancelada» (R-08)
+    SVC -> AUD : S15 Registra usuario, fecha y motivo (R-10)
+    API --> UI : S16 200 Cancelada (F3)
+  end
+end
+@enduml

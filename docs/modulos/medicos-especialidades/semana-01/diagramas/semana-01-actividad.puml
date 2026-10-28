@@ -1,0 +1,76 @@
+@startuml semana-01-actividad
+title Actividad — CU-01 Registrar médico, CU-03 Asociar especialidad y CU-06 Consultar disponibilidad
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam ActivityBackgroundColor #EEF2F7
+skinparam ActivityBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+
+|Administrador|
+start
+:A1 Escribe nombre, número de colegiado,
+documento y usuario del médico [CU-01];
+|Sistema (módulo)|
+if (D1 ¿Sesión válida, rol administrador\ny mismo hospital?) then (no)
+  #FFE3D6:E1 401 o 403. Nada se guarda;
+  stop
+else (sí)
+endif
+if (D2 ¿Datos completos y con formato válido?) then (no)
+  #FFE3D6:E2 422 dato_invalido con el campo;
+  stop
+else (sí)
+endif
+if (D3 ¿Colegiado o documento ya registrados\nen el hospital? [CU-02]) then (sí)
+  #FFE3D6:E3 409 medico_duplicado;
+  stop
+else (no)
+endif
+:A2 Guarda el médico como «activo»;
+|Administrador|
+:A3 Elige especialidad, vigencia
+(desde, hasta) y si es principal [CU-03];
+|Sistema (módulo)|
+if (D4 ¿La especialidad existe\ny está activa en el catálogo?) then (no)
+  #FFE3D6:E4 422 especialidad_invalida;
+  stop
+else (sí)
+endif
+if (D5 ¿Ya tiene esa especialidad\ncon vigencia que se cruza?) then (sí)
+  #FFE3D6:E5 409 especialidad_duplicada;
+  stop
+else (no)
+endif
+:A4 Guarda la asociación y el horario
+semanal de atención [CU-04];
+|Recepcionista o Citas (M05)|
+:A5 Pide disponibilidad: especialidad,
+médico (opcional) y rango de fechas [CU-06];
+|Sistema (módulo)|
+if (D6 ¿Rango válido? futuro y máximo 14 días) then (no)
+  #FFE3D6:E6 422 rango_invalido;
+  stop
+else (sí)
+endif
+:A6 Elige médicos activos con la especialidad
+vigente en cada fecha;
+if (D7 ¿Responde Citas (M05) con las citas activas?) then (no)
+  #FFE3D6:E7 503: no se muestra disponibilidad
+  sin descontar citas (evita doble cita);
+  stop
+else (sí)
+endif
+:A7 Calcula franjas = horario − ausencias
+− citas activas [CU-07];
+if (D8 ¿Quedan franjas libres?) then (no)
+  #FFF4CC:E8 200 lista vacía con la próxima
+  fecha que sí tiene espacio;
+else (sí)
+  :R Lista de franjas por médico
+  (inicio, fin, especialidad);
+endif
+|Recepcionista o Citas (M05)|
+:A8 Elige una franja para agendar (en M05);
+stop
+@enduml

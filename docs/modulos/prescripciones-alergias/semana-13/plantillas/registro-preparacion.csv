@@ -1,0 +1,6 @@
+revisor,rol,sesion,items_asignados,lineas_revisadas,minutos_preparacion,hallazgos_preliminares,fecha
+Autor,autor (autorrevisión),S1+S2+S3,RT-01..RT-15,2936,,7,2026-10-27
+R1,"revisor · permisos, tenant e identidad (S)",S2+S3,"RT-08, RT-10, RT-11, RT-12",,,,
+R2,"revisor · contrato y frontera (C)",S3,"RT-07, RT-08, RT-09",,,,
+R3,"revisor · dominio clínico (D)",S1+S2,"RT-01, RT-02, RT-03, RT-04, RT-06",,,,
+R4,"revisor · integridad y dependencias (I, A)",S1+S2+S3,"RT-05, RT-13, RT-14, RT-15",,,,

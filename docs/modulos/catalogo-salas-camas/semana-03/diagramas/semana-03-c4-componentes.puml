@@ -1,0 +1,20 @@
+@startuml semana-03-c4-componentes
+' Semana 3 — Catálogo de salas, wards y camas (tarea Odoo 2445): C4 nivel 3
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Catálogo de salas, wards y camas
+Person(admin, "Administrador / Supervisor", "Registra salas y camas y cambia su estado")
+System_Ext(admision, "Módulo de admisión", "Único que ocupa y libera camas")
+Container_Boundary(micro, "Micro-HIS Catálogo (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorCatalogo", "Presentación", "Entrada, traducción E2..E8 a HTTP")
+  Component(svc, "ServicioCatalogo", "Aplicación", "Casos de uso CU-01..CU-03")
+  Component(dom, "EstadoCama, ReglaDeDominio", "Dominio", "Transiciones R-05 y R-06")
+  Component(repo, "RepositorioPdo", "Persistencia", "PDO con sentencias preparadas")
+}
+ContainerDb(db, "Base HOSPITAL", "PostgreSQL (SQLite en pruebas)", "wards, beds, bed_status_history")
+Rel(admin, ctrl, "registrarSala, registrarCama, cambiarEstado")
+Rel(ctrl, svc, "llama")
+Rel(svc, dom, "valida reglas")
+Rel(svc, repo, "puerto RepositorioCatalogo")
+Rel(repo, db, "SQL preparado")
+Rel(admision, db, "occupied / available")
+@enduml

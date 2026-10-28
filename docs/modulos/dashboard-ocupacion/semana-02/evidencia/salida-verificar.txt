@@ -1,0 +1,18 @@
+OK    CA-04 sin corte todavía = estado vacío
+OK    CA-01 consolidar a la hora 1000
+OK    CA-01 sala A: 2 ocupadas ÷ (2 disponibles + 2 ocupadas) = 50.0 %; mantenimiento no cuenta
+OK    CA-02 sala B sin camas operativas = «no aplica»
+OK    CA-02 la sala inactiva C no aparece
+OK    CA-03 inconsistencias: A4 (ocupada sin estancia) y A5 (estancia sin ocupar)
+OK    CA-05 corte de hace 5 min: sin aviso
+OK    CA-05 corte de hace 20 min: aviso de datos viejos
+OK    CA-06 filtro «disponible»: solo la sala A
+OK    CA-07 falla la lectura: se conserva el corte de la hora 1000
+OK    CA-08 el corte solo tiene cifras, sin datos de pacientes
+OK    ConsolidadorOcupacion depende de 3 + 1 método(s): FuenteCamas, EscritorCortes
+OK    ConsultaOcupacion depende de 1 método(s): LectorCortes
+OK    ConsolidadorAntes depende de 6 método(s): AlmacenOcupacionAntes
+OK    ConsultaOcupacionAntes depende de 6 método(s): AlmacenOcupacionAntes
+OK    Ninguna interfaz del tablero permite cambiar camas (R-09)
+OK    Antes: el tablero dependía de cambiarEstadoCama()
+RESULTADO: todo correcto

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registrar paciente · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<header class="barra">
+  <a class="atras btn texto" href="m1-buscar.html" aria-label="Volver a la búsqueda" style="color:#fff">‹</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="avatar" role="img" aria-label="Marta López, admisión">ML</span>
+</header>
+
+<div class="red lenta" role="status" data-estado="enviando">
+  <span aria-hidden="true">◔</span> Conexión lenta. Seguimos intentando; no cierres esta pantalla.
+</div>
+
+<main>
+  <h1>Registrar paciente</h1>
+
+  <!-- 3 pasos cortos en lugar de un formulario largo: una decisión por pantalla -->
+  <ol class="pasos" aria-hidden="true" data-estado="paso1"><li class="hecho"></li><li></li><li></li></ol>
+  <ol class="pasos" aria-hidden="true" data-estado="paso2"><li class="hecho"></li><li class="hecho"></li><li></li></ol>
+  <ol class="pasos" aria-hidden="true" data-estado="base enviando"><li class="hecho"></li><li class="hecho"></li><li class="hecho"></li></ol>
+
+  <!-- PASO 1 · ¿Quién es? (identidad y datos demográficos) -->
+  <section data-estado="paso1" aria-labelledby="p1">
+    <p class="paso-texto" id="p1">Paso 1 de 3 · ¿Quién es?</p>
+    <p class="meta">Los campos con * son obligatorios.</p>
+    <label for="nombres">Nombres *</label>
+    <input id="nombres" value="Ana Lucía" autocomplete="off" aria-required="true">
+    <label for="apellidos">Apellidos *</label>
+    <input id="apellidos" value="López Pérez" autocomplete="off" aria-required="true">
+    <label for="nac">Fecha de nacimiento * (dd/mm/aaaa)</label>
+    <input id="nac" type="date" value="1985-03-14" aria-required="true">
+    <label for="sexo">Sexo *</label>
+    <select id="sexo" aria-required="true">
+      <option>Femenino</option><option>Masculino</option><option>Otro</option><option>Desconocido</option>
+    </select>
+  </section>
+
+  <!-- PASO 2 · Documento y contacto -->
+  <section data-estado="paso2" aria-labelledby="p2">
+    <p class="paso-texto" id="p2">Paso 2 de 3 · Documento y contacto</p>
+    <label class="casilla"><input type="checkbox"> No tiene documento ahora (identidad provisional)</label>
+    <label for="tipo">Tipo de documento</label>
+    <select id="tipo"><option>DPI</option><option>Pasaporte</option></select>
+    <label for="numero">Número</label>
+    <input id="numero" inputmode="numeric" value="2547896320101" autocomplete="off" aria-describedby="numero-ayuda">
+    <p class="ayuda" id="numero-ayuda">13 dígitos. Lo usamos para no registrar dos veces a la misma persona.</p>
+    <label for="tel">Teléfono (opcional)</label>
+    <input id="tel" type="tel" inputmode="tel" value="+502 5555 1234" autocomplete="off">
+  </section>
+
+  <!-- PASO 3 · Revisar y registrar -->
+  <section data-estado="base enviando" aria-labelledby="p3">
+    <p class="paso-texto" id="p3">Paso 3 de 3 · Revisa antes de registrar</p>
+    <div class="tarjeta">
+      <dl class="datos">
+        <dt>Nombre</dt><dd>Ana Lucía López Pérez</dd>
+        <dt>Nacimiento</dt><dd>14/03/1985 (41 años)</dd>
+        <dt>Sexo</dt><dd>Femenino</dd>
+        <dt>Documento</dt><dd>DPI •••• 0101</dd>
+        <dt>Teléfono</dt><dd>+502 5555 1234</dd>
+      </dl>
+      <a class="btn texto" href="m2-registrar.html?estado=paso1" style="padding:0;margin-top:8px">Corregir datos</a>
+    </div>
+  </section>
+
+  <!-- RESULTADO INCIERTO: la red se cortó; reintentar con la MISMA Idempotency-Key no duplica -->
+  <section class="aviso atencion" data-estado="incierto" role="alert">
+    <h2>No sabemos si se registró</h2>
+    <p>Se cortó la conexión antes de recibir la respuesta. Puedes reintentar sin riesgo: si ya se registró, verás el mismo código y no se creará otro paciente.</p>
+    <div class="acciones"><button class="btn primario bloque">Reintentar</button></div>
+    <p class="meta">Tus datos siguen en esta pantalla.</p>
+  </section>
+
+  <!-- 409 PACIENTE_EXISTENTE: el documento ya pertenece a otro paciente -->
+  <section class="aviso error" data-estado="duplicado" role="alert">
+    <h2>Ya existe un paciente con ese documento</h2>
+    <p>DPI •••• 0101 pertenece a <strong>P-000001</strong>. No se puede registrar dos veces a la misma persona.</p>
+    <div class="acciones">
+      <a class="btn primario bloque" href="m3-ficha.html">Abrir ficha P-000001</a>
+      <a class="btn bloque" href="m2-registrar.html?estado=paso2">Revisar el número de documento</a>
+    </div>
+  </section>
+
+  <!-- 409 POSIBLE_DUPLICADO (admisión): no puede confirmar; salida segura y aviso a supervisión -->
+  <section class="aviso atencion" data-estado="coincidencia" role="alert">
+    <h2>Hay un paciente parecido</h2>
+    <p>Mismo nombre y fecha de nacimiento. Ábrelo y compara antes de seguir.</p>
+    <a class="resultado" href="m3-ficha.html"><div><div class="principal">Ana María López Ruiz</div><div class="meta">P-000004 · 14/03/1985 · sin documento</div></div><span class="flecha" aria-hidden="true">›</span></a>
+    <p class="meta">Si es otra persona, solo un supervisor puede confirmarlo. Supervisión de turno: ext. 2140. No cambies los datos para evitar el aviso: crearías un duplicado.</p>
+    <div class="acciones"><a class="btn primario bloque" href="m3-ficha.html">Es la misma: usar la ficha</a></div>
+  </section>
+
+  <!-- ÉXITO -->
+  <section class="aviso ok" data-estado="exito" role="status">
+    <h2>✓ Paciente registrado · P-000123</h2>
+    <div class="acciones"><a class="btn primario bloque" href="m3-ficha.html">Abrir ficha</a></div>
+  </section>
+</main>
+
+<!-- Acción del paso, abajo y a todo el ancho -->
+<div class="accion-fija">
+  <a class="btn primario" href="m2-registrar.html?estado=paso2" data-estado="paso1">Siguiente</a>
+  <a class="btn" href="m2-registrar.html?estado=paso1" data-estado="paso2">Atrás</a>
+  <a class="btn primario" href="m2-registrar.html" data-estado="paso2">Siguiente</a>
+  <a class="btn primario" href="m2-registrar.html?estado=enviando" data-estado="base">Registrar paciente</a>
+  <span class="btn" aria-disabled="true" data-estado="enviando">Registrando…</span>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

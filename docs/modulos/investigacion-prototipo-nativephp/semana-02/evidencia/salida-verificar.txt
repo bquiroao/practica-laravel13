@@ -1,0 +1,15 @@
+﻿PASS: CA-01 consulta y notifica un estado de demostración
+PASS: CA-01 envía una notificación
+PASS: CA-02 limita la notificación a un estado permitido y no incluye datos personales
+PASS: CA-03 rechaza un identificador vacío
+PASS: CA-03 no notifica entradas inválidas
+PASS: CA-04 distingue el flujo HIS no disponible
+PASS: CA-04 no notifica una consulta no resuelta
+PASS: CA-05 comunica explícitamente que la capacidad nativa no está disponible
+PASS: CA-06 exporta evidencia con su propia capacidad
+PASS: CA-06 el adaptador conserva el contenido exportado
+PASS: CA-07 la interfaz de notificaciones no obliga a exportar ni escanear
+PASS: CA-08 el flujo depende solo de las capacidades que usa
+PASS: CA-09 exportar evidencia no requiere implementar otras capacidades
+PASS: CA-10 el escáner se mantiene como capacidad independiente
+OK: 14 aserciones.

@@ -1,0 +1,1 @@
+Se utilizó IA para revisar requisitos locales y preparar user flow, seis wireframes SVG anotados y reglas UX. Los identificadores y datos son ficticios. No se atribuyen pruebas de usuario, API implementada, accesibilidad completa ni ejecución clínica no realizadas. La estudiante debe revisar las decisiones antes de defender la entrega.

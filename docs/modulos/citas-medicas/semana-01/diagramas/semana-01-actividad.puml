@@ -1,0 +1,53 @@
+@startuml semana-01-actividad
+' Semana 1 — Citas médicas y agenda (tarea Odoo 2458)
+title Actividad — solicitud, validación de disponibilidad y confirmación o cancelación de cita
+
+start
+:Usuario elige una operación de la agenda;
+if (D1 ¿Autorizado en este hospital?\n(médico: ¿la cita es suya?) (R-09)) then (no)
+  :E1 Operación rechazada (403);
+  :F4 Rechazo con mensaje claro;
+  stop
+endif
+switch (D2 ¿Qué operación?)
+case (Solicitar cita)
+  :Elige paciente, médico, especialidad,\nhorario y motivo;
+  if (D3 ¿Horario futuro, fin > inicio\ny motivo? (R-01, R-06)) then (no)
+    :E2 Error de validación (422) → F4;
+    stop
+  elseif (D4 ¿Perfil y especialidad\nvigentes? (R-04, R-05)) then (no)
+    :E3 Médico no disponible para\nesa especialidad (422) → F4;
+    stop
+  elseif (D5 ¿Médico libre? (R-02)) then (no)
+    :E4 Horario del médico ocupado (409) → F4;
+    stop
+  elseif (D6 ¿Paciente libre? (R-03)) then (no)
+    :E5 El paciente ya tiene cita\na esa hora (409) → F4;
+    stop
+  endif
+  :Guarda la cita como «programada»;
+  if (D7 ¿La base la aceptó?) then (no)
+    :E6 Otra persona tomó el horario (409) → F4;
+    stop
+  endif
+  :F1 Cita programada;
+case (Confirmar cita)
+  if (D8 ¿Programada y aún no inicia? (R-07)) then (no)
+    :E7 Estado no permite la operación (422) → F4;
+    stop
+  endif
+  :F2 Cita confirmada;
+case (Cancelar cita)
+  :Escribe el motivo de cancelación;
+  if (D3 ¿Hay motivo?) then (no)
+    :E2 Error de validación (422) → F4;
+    stop
+  elseif (D8 ¿Programada o confirmada? (R-07)) then (no)
+    :E7 Estado no permite la operación (422) → F4;
+    stop
+  endif
+  :Pasa a «cancelada»: el horario se libera (R-08)\ny el motivo queda en auditoría (R-10);
+  :F3 Cita cancelada y auditada;
+endswitch
+stop
+@enduml

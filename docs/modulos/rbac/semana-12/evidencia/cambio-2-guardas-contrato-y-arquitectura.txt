@@ -1,0 +1,124 @@
+Micro-HIS RBAC - pruebas (PHP 8.4.26)
+
+== Reglas de dominio ==
+[PASA ] DOM-01   Membresía vigente solo si está activa y dentro de [desde, hasta)
+[PASA ] DOM-02   Política de autorización: la primera regla que falla define el motivo
+[PASA ] DOM-03   Fail-closed: sin reglas o con una regla que lanza excepción se deniega
+[PASA ] DOM-04   Reglas de asignación: autoasignación, vigencia, rol y usuario destino
+
+== Casos de uso (camino feliz y denegación) ==
+[PASA ] APP-01   Camino feliz: asignar rol crea la membresía y registra ROL_ASIGNADO (201)
+[PASA ] APP-02   Camino feliz: operación permitida por el rol vigente, sin eventos
+[PASA ] APP-03   Denegación trazable: 403 + correlation_id + ACCESO_DENEGADO completo; el resultado no expone el motivo
+[PASA ] APP-04   Asignar sin «roles.asignar»: 403, ACCESO_DENEGADO y ninguna membresía nueva
+[PASA ] APP-05   Reglas de dominio desde el caso de uso: duplicado 409, autoasignación 422, usuario inactivo 422
+[PASA ] APP-06   Consultar evento: solo desde el mismo hospital (aislamiento por tenant)
+[PASA ] PEF-01   Devuelve, para cada permiso pedido, si el usuario de la sesión lo tiene en el hospital
+[PASA ] PEF-02   Consultar permisos efectivos NO registra eventos (aunque la mayoría sean «no»)
+[PASA ] PEF-03   Concordancia: para cada usuario y permiso, la respuesta coincide con la decisión del PDP
+[PASA ] PEF-04   Tras revocar el rol, la consulta cambia de inmediato (sin caché en el servidor)
+[PASA ] PEF-05   Hospital distinto al de la sesión: todo en «no» (aislamiento por tenant)
+[PASA ] PEF-06   Fail-closed: si no se pueden leer las membresías, todo en «no» y sin excepción
+[PASA ] PEF-07   HTTP: 200 con el mapa de permisos; sin evento de auditoría
+[PASA ] PEF-08   HTTP: formato inválido → 422 (lista vacía, permiso mal escrito o más de 20)
+[PASA ] PEF-09   HTTP: sin hospital 400 y sin token 401 (mismo orden que el resto del kernel)
+[PASA ] PEF-10   Los intentos ACTIVOS siguen auditados: una operación denegada deja ACCESO_DENEGADO
+[PASA ] REF-01   Asignar con el directorio de usuarios caído: 500 ERROR_PERSISTENCIA y ninguna membresía nueva
+[PASA ] REF-02   Revocar cuando la regla no puede leer las membresías del destino: 500 ERROR_PERSISTENCIA y nada revocado
+[PASA ] REF-03   El formato de los tres eventos de auditoría no cambia (campos y orden)
+[PASA ] REV-01   Camino feliz: el administrador revoca un rol (200) y queda ROL_REVOCADO con el motivo en la bitácora
+[PASA ] REV-02   La decisión cambia: después de revocar, la misma operación se deniega con MEMBRESIA_NO_VIGENTE (auditado)
+[PASA ] REV-03   Sin el permiso nuevo «roles.revocar»: 403, ACCESO_DENEGADO auditado y la membresía no cambia
+[PASA ] REV-04   Reglas de dominio: autorrevocación 422, motivo insuficiente 422, membresía inexistente o vencida 404
+[PASA ] REV-05   Si la bitácora falla al revocar, la transacción se revierte: 500 y la membresía sigue activa
+[PASA ] REV-06   Ruta protegida HTTP: admin 200, enfermera 403 genérico, formato inválido 422
+
+== Errores de persistencia (dobles) ==
+[PASA ] PER-01   Adaptador PDO: una PDOException (08006) se traduce a ErrorPersistencia sin perder la causa
+[PASA ] PER-02   Adaptador PDO: violación de unicidad (23505) se traduce a MembresiaDuplicada
+[PASA ] PER-03   Todos los adaptadores PDO traducen sus fallas a ErrorPersistencia
+[PASA ] PER-04   PdoTransaccion: COMMIT si todo sale bien; ROLLBACK si el trabajo o el COMMIT fallan
+[PASA ] PER-05   AsignarRol con escritura fallida: 500 y sin ROL_ASIGNADO
+[PASA ] PER-06   AsignarRol con bitácora caída: la transacción se revierte (500, sin membresía nueva)
+[PASA ] PER-07   Carrera entre dos solicitudes: la base rechaza el duplicado y el caso de uso responde 409
+[PASA ] PER-08   Autorizar con la base caída: fail-closed (403) y evento con motivo ERROR_EVALUACION
+[PASA ] PER-09   Bitácora principal caída: el evento va al respaldo en archivo y la operación sigue denegada
+[PASA ] PER-10   Capas completas sobre PDO caído: Aplicación + adaptadores PDO reales → 403 y evento en el respaldo
+
+== Contratos: Repository (InMemory y PDO) y API (OpenAPI) ==
+[FALLA] API-01   Contrato ↔ código: mismas operaciones (método y ruta) y mismo permiso (x-permiso) en cada una
+         -> operaciones: esperado array (
+  0 => 'GET /api/v1/auditoria/eventos/{correlationId}',
+  1 => 'POST /api/v1/autorizaciones/decisiones',
+  2 => 'POST /api/v1/autorizaciones/permisos-efectivos',
+  3 => 'POST /api/v1/prescripciones',
+  4 => 'POST /api/v1/roles/asignaciones',
+  5 => 'POST /api/v1/roles/revocaciones',
+  6 => 'POST /api/v1/signos-vitales',
+), obtenido array (
+  0 => 'GET /api/v1/auditoria/eventos/{correlationId}',
+  1 => 'POST /api/v1/autorizaciones/decisiones',
+  2 => 'POST /api/v1/prescripciones',
+  3 => 'POST /api/v1/roles/asignaciones',
+  4 => 'POST /api/v1/roles/revocaciones',
+  5 => 'POST /api/v1/signos-vitales',
+) (Arnes.php:41)
+[PASA ] API-02   Toda operación documenta 400, 401 y 500; las protegidas por permiso documentan además 403
+[PASA ] API-03   Cada código HTTP que devuelve el servidor en escenarios reales está documentado en el contrato
+[PASA ] CON-MEM-07 RepositorioMembresias::revocar marca como revocadas las membresías activas del rol (no las vencidas)
+[PASA ] CON-MEM-01 RepositorioMembresias::membresiasDe filtra por usuario y hospital y conserva la vigencia
+[PASA ] CON-MEM-02 RepositorioMembresias::existeActiva solo cuenta membresías activas y abiertas
+[PASA ] CON-MEM-03 RepositorioMembresias::guardar persiste y rechaza el duplicado activo con MembresiaDuplicada
+[PASA ] CON-MEM-04 CatalogoPermisos y DirectorioUsuarios responden igual que los datos semilla
+[PASA ] CON-MEM-05 RegistroAuditoria guarda y recupera el evento completo por correlation_id
+[PASA ] CON-MEM-06 Transaccion: confirma si el trabajo termina y revierte si lanza
+[OMITE] CON-PDO  El mismo contrato contra los adaptadores PDO (PostgreSQL)
+         -> defina MICROHIS_DB_DSN para ejecutarlo
+
+== Presentación MVC, HTTP y observabilidad ==
+[PASA ] HTTP-01  Camino feliz HTTP: POST asignaciones con token de administrador → 201 + correlation_id
+[PASA ] HTTP-02  Cadena del Kernel: 404 ruta, 405 método, 400 sin tenant, 401 sin token o token inválido
+[PASA ] HTTP-03  Ruta protegida denegada: 403 solo con mensaje genérico y correlation_id (sin motivo ni rol)
+[PASA ] HTTP-04  Ruta protegida permitida: la médica crea una prescripción (201)
+[PASA ] HTTP-05  Validación de formato en el formulario: datos faltantes o fechas inválidas → 422 DATOS_INVALIDOS
+[PASA ] HTTP-06  Consulta de auditoría: admin del mismo hospital 200; admin de otro hospital 404; enfermera 403
+[PASA ] HTTP-07  Token de un hospital con X-Tenant-ID de otro → 403
+[PASA ] HTTP-08  Error inesperado en una acción → 500 genérico, sin traza ni detalles
+[PASA ] MVC-01   Formulario: convierte el JSON en comando (actor = identidad del token) o informa los campos inválidos
+[PASA ] MVC-02   Vista: cada resultado del caso de uso tiene un formato fijo; el 403 no revela el código interno
+[PASA ] MVC-03   Controlador sin Kernel: delega en el caso de uso y en la vista (201 / 422 / 409)
+[PASA ] OBS-01   X-Request-ID: se respeta el recibido si es válido y se genera uno nuevo si falta o es inválido
+[PASA ] OBS-02   Registro de acceso: un registro por petición con estado, duración, usuario y correlation_id; nunca el token
+[PASA ] OBS-03   Si el registro de acceso falla, la respuesta al usuario no cambia
+
+== Cliente-servidor: librería cliente y resiliencia ==
+[PASA ] CLI-01   Cliente ↔ servidor por HTTP (en proceso): permite a la médica, deniega a la enfermera y propaga X-Request-ID
+[PASA ] CLI-02   Reintento: una falla de red transitoria se recupera en el segundo intento
+[PASA ] CLI-03   Fail-closed: si el servicio falla (5xx o red) en todos los intentos, se deniega sin lanzar excepción
+[PASA ] CLI-04   Circuit breaker: tras 2 fallas deja de llamar (ABIERTO), prueba de nuevo pasado el tiempo y se cierra al responder
+[PASA ] CLI-05   Un 4xx es respuesta del servicio: deniega sin reintentar y sin abrir el circuito
+[PASA ] CLI-06   Red real: servidor inalcanzable → FallaTransporte → DENEGADO (fail-closed) en poco tiempo
+[PASA ] CLI-07   Endpoint de decisión: 200 con PERMITIDO/DENEGADO, sin motivo en el cuerpo, 422 si el permiso es inválido
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado del servidor
+[PASA ] ARQ-02   PDO y SQL solo existen en la capa de Persistencia
+[PASA ] ARQ-03   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL concatenado
+[PASA ] ARQ-04   El Dominio no hace E/S: ni superglobales, ni archivos, ni salida HTTP
+[PASA ] ARQ-05   Controladores MVC: solo reciben casos de uso, no crean objetos, sin SQL ni códigos de reglas de negocio
+[PASA ] ARQ-06   Patrón Repository: cada puerto tiene un adaptador PDO y uno InMemory en Persistencia
+[PASA ] ARQ-07   MVC: solo las Vistas dan formato a la respuesta (Respuesta::json fuera de Vistas está prohibido)
+[FALLA] ARQ-08   Toda ruta exige un permiso, salvo el endpoint de decisión (que ES la autorización)
+         -> rutas sin permiso: esperado array (
+  0 => 'POST #^/api/v1/autorizaciones/decisiones$#',
+), obtenido array (
+  0 => 'POST #^/api/v1/autorizaciones/decisiones$#',
+  1 => 'POST #^/api/v1/autorizaciones/permisos-efectivos$#',
+) (Arnes.php:41)
+
+== Integración con PostgreSQL ==
+[OMITE] INT-00   Integración PostgreSQL (MVC + PDO de punta a punta, 23505, append-only, rollback)
+         -> defina MICROHIS_DB_DSN para ejecutarla
+
+Total: 80  Pasan: 76  Fallan: 2  Omitidas: 2
+exit=1

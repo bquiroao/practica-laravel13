@@ -1,0 +1,14 @@
+PASS U01 viabilidad y riesgos de plataforma
+PASS U02 sincronizacion conserva snapshot marcado obsoleto
+PASS U03 capacidad nativa sin permiso no envia
+PASS U04 exportacion aislada de notificaciones
+PASS W01 rama entrada invalida corta gateway y notifier
+PASS W02 rama gateway nulo corta notificacion
+PASS W03 ramas capacidad enviada y no disponible
+PASS B01 equivalencia orden conocida
+PASS B02 limites vacio y espacios
+PASS B03 orden inexistente no simula exito
+PASS B04 permiso denegado capacidad no disponible
+PASS B05 notificacion no contiene identificador ni paciente
+PASS B06 estados de demostracion reconocidos
+13 casos, 0 fallidos.

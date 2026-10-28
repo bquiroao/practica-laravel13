@@ -1,0 +1,27 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Catálogo de salas, wards y camas (tarea Odoo 2444): diseño DESPUÉS de aplicar SRP
+title DESPUÉS — una razón para cambiar por clase
+
+class ServicioCatalogo <<flujo CU-01..CU-03>> {
+  + registrarSala(sala) : ?string
+  + registrarCama(sala, cama) : ?string
+  + cambiarEstado(sala, cama, nuevo, motivo) : ?string
+}
+class PoliticaEstadosCama <<reglas R-05, R-06>> {
+  + rechazo(actual, nuevo) : ?string
+}
+interface RepositorioCatalogo <<almacenamiento>>
+interface Auditoria <<evidencia R-09>>
+class RespuestaHttp <<contrato API>> {
+  + de(error, exito) : array
+}
+class RepositorioEnMemoria
+class AuditoriaEnMemoria
+
+ServicioCatalogo --> PoliticaEstadosCama
+ServicioCatalogo --> RepositorioCatalogo
+ServicioCatalogo --> Auditoria
+RepositorioEnMemoria ..|> RepositorioCatalogo
+AuditoriaEnMemoria ..|> Auditoria
+RespuestaHttp ..> ServicioCatalogo : traduce su resultado
+@enduml

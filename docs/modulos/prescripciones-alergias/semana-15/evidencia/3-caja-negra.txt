@@ -1,0 +1,13 @@
+$ php tests/ejecutar.php --solo=CN
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Presentación: HTTP ==
+[PASA ] CN-01    Particiones de equivalencia · frecuencia_horas: las 5 clases válidas (4, 6, 8, 12, 24) dan 200; las inválidas (0, 5, 48, "8", null) dan 422 en ese campo
+[PASA ] CN-02    Valores límite · dosis diaria de Paracetamol (máx. 4000 mg): 1000 c/6 h = 4000 → 200; 1000,5 → 422 DOSIS; 0 y −1 → 422 DATOS; 0,001 → 200
+[PASA ] CN-03    Valores límite · días 1 y 90 sí, 0 y 91 no; justificación 19/20 caracteres sin contar espacios; motivo de anulación 9/10
+[PASA ] CN-04    Permisos · tabla de decisión: 3 roles × 5 operaciones (verificar, emitir, emitir con advertencia justificada, consultar, anular)
+[PASA ] CN-05    Permisos / tenant · sin X-Tenant-ID o vacío → 400; de otro hospital → 403; una prescripción o un paciente de otro hospital = inexistente (404 idéntico)
+[PASA ] CN-06    Errores · JSON roto, cuerpo sin paciente, Idempotency-Key ausente/inválida/129, PUT y DELETE, ruta e id desconocidos, sin token y Expediente caído
+[PASA ] CN-07    Idempotencia según el contrato · 201 con Location; la misma clave y contenido → 200 YA_EMITIDA, mismo id, sin Location y SIN volver a verificar; otro contenido → 409
+
+Total: 7  Pasan: 7  Fallan: 0  Omitidas: 0

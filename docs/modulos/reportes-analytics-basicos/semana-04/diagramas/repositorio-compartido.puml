@@ -1,0 +1,47 @@
+@startuml repositorio_compartido_reportes_analytics_basicos
+title Semana 4 · Integración del módulo a un repositorio de datos compartido (base HOSPITAL)
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "Módulos dueños (escriben)" {
+  [Citas médicas] as citas
+  [Salas y camas] as camas
+  [Admisión, traslados y altas] as estancias
+}
+
+database "Base HOSPITAL del tenant (PostgreSQL)" {
+  frame "Tablas de los módulos dueños" {
+    [appointment] as t1
+    [ward · bed] as t2
+    [bed_stay · care_episode] as t3
+  }
+  frame "Esquema reportes (contrato de lectura)" {
+    [v_cita] as v1
+    [v_estancia_cama] as v2
+  }
+}
+
+package "Reportes y analytics básicos (solo lectura)" {
+  [CalcularIndicador] as caso
+  interface "OcupacionRepository" as repo
+  [OcupacionPgRepository] as adaptador
+}
+
+citas --> t1 : escribe
+camas --> t2 : escribe
+estancias --> t3 : escribe
+t1 ..> v1 : publica
+t2 ..> v2 : publica
+t3 ..> v2 : publica
+caso --> repo
+adaptador ..|> repo
+adaptador --> v2 : SELECT con rol\nreportes_lectura
+adaptador --> v1 : SELECT
+
+note right of adaptador
+  Sin INSERT/UPDATE/DELETE (RNF-04)
+  Paciente solo por código (RN-09)
+  REPEATABLE READ: indicador, desglose
+  y registros del mismo instante (RN-07)
+end note
+@enduml
