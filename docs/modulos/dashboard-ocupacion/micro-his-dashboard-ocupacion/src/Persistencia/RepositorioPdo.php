@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace MicroHis\DashboardOcupacion\Persistencia;
 
-use MicroHis\DashboardOcupacion\Aplicacion\{ErrorPersistencia, EscritorCortes, FuenteCamas, LectorCortes};
+use MicroHis\DashboardOcupacion\Aplicacion\{ErrorPersistencia, RepositorioOcupacion};
 use MicroHis\DashboardOcupacion\Dominio\Corte;
 use PDO, PDOException, PDOStatement;
 
-/** Un solo almacén que implementa los tres puertos. Solo sentencias preparadas; sobre las camas, solo SELECT. */
-final class RepositorioPdo implements FuenteCamas, EscritorCortes, LectorCortes
+/** Adaptador PDO de la interfaz Repository (los tres puertos). Solo sentencias preparadas; sobre las camas, solo SELECT. */
+final class RepositorioPdo implements RepositorioOcupacion
 {
     public function __construct(private PDO $db) { $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); }
 
