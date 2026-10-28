@@ -22,6 +22,13 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/*.puml
 ```
 
+## Semana 8
+
+[UX: flujo por rol y seis wireframes anotados](semana-08/semana-08-ux-ordenes-emr.md).
+
+## Semana 9
+
+[Evaluación UX/accesibilidad: checklist, hallazgos y backlog](semana-09/README.md).
 ## Semana 6
 
 [Defensa arquitectónica, presentación y cambio práctico](semana-06/README.md).
