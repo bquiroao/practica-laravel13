@@ -1,0 +1,14 @@
+$ php tests/ejecutar.php --solo=UNI   (después de corregir DEF-07-01)
+Micro-HIS Auditoría - pruebas (PHP 8.4.26)
+
+== Dominio: reglas del movimiento, filtros y sello ==
+[PASA ] UNI-01   [inmutable] sellar o asignar id devuelve OTRA instancia; el original no cambia (R-02)
+[PASA ] UNI-02   [inmutable] el sello depende de CADA campo del contenido, de la secuencia y del sello anterior (R-03)
+[PASA ] UNI-03   [usuario] usuario obligatorio y de 1 a 64 caracteres; 64 se acepta, 65 no (R-01, RF-03)
+[PASA ] UNI-04   [módulo] cada cuenta de servicio solo registra SU módulo; una cuenta no listada no registra nada (fail-closed)
+[PASA ] UNI-05   [acción] la acción debe estar en el catálogo DE SU módulo: una acción válida de otro módulo se rechaza (RF-03)
+[PASA ] UNI-06   [tenant] el hospital del cuerpo debe ser el del token; el alcance de un hospital solo incluye lo suyo (R-05)
+[PASA ] UNI-07   [rango de fechas] hora de Guatemala; «hasta» incluye hasta 23:59:59 local; el día siguiente 00:00 queda fuera (R-06)
+[PASA ] UNI-08   [rango de fechas · DEF-07-01] el cursor rechaza fechas imposibles (mes 13, hora 99) en lugar de desbordarlas
+
+Total: 8  Pasan: 8  Fallan: 0  Omitidas: 0

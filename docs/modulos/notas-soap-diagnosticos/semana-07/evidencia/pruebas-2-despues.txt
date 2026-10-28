@@ -1,0 +1,19 @@
+Semana 7 — pruebas después del refactor (PHP 8.3.6)
+Extracto de las salidas de php tests/ejecutar.php. La salida completa se obtiene ejecutando el mismo comando.
+
+Ejecución 1: sin PostgreSQL
+[PASA ] REF-01   Caracterización: nombre, campos y orden exactos de los eventos de bitácora al registrar, firmar y corregir
+[PASA ] REF-02   Caracterización: orden de las verificaciones (hospital → acceso → versión ya corregida → expediente → reglas)
+[PASA ] REF-03   Caracterización: un error inesperado al verificar el acceso da 500 error_interno en registro y corrección, sin guardar nada
+[PASA ] REF-04   Caracterización: si la base falla dentro de la transacción, registro y corrección responden igual y no queda nota, evento ni clave
+[PASA ] ARQ-12   Los casos de uso dependen de las interfaces Repository, nunca de un adaptador concreto
+[PASA ] ARQ-15   Semana 7: los servicios de Dominio y de Aplicación solo reciben interfaces (puertos), nunca adaptadores ni otros servicios
+Total: 118  Pasan: 117  Fallan: 0  Omitidas: 1
+
+Ejecución 2: con PostgreSQL 16.15 (activa INT-06; credenciales por variables de entorno, no están en el repositorio)
+[PASA ] INT-06   PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb, corrección y reversión con database/schema.sql
+[PASA ] INT-11   Semana 6: corrección con PDO real; la base guarda la cadena (supersedes_id) y su UNIQUE impide dos correcciones de la misma versión
+Total: 118  Pasan: 118  Fallan: 0  Omitidas: 0
+
+Las 4 pruebas de caracterización (REF-01 a REF-04) dan el mismo resultado que sobre el código anterior.
+ARQ-12 se ajustó para aceptar los servicios del módulo y ARQ-15 comprueba que esos servicios solo reciben interfaces.

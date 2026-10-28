@@ -33,6 +33,16 @@ final class RepositorioNotasConEventos implements RepositorioNotas
         return $this->interno->buscar($id);
     }
 
+    public function deExpediente(string $expedienteId): array
+    {
+        return $this->interno->deExpediente($expedienteId);
+    }
+
+    public function correccionDe(string $notaId): ?NotaSoap
+    {
+        return $this->interno->correccionDe($notaId);
+    }
+
     public function registrarFirma(NotaSoap $nota): void
     {
         $this->interno->registrarFirma($nota);

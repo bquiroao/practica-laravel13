@@ -1,0 +1,5 @@
+AR-01  crearKernel(config.php) + «Bearer token-admin-oriente» → asignar rol: HTTP 201 ROL_ASIGNADO
+       tokens estáticos aceptados por config.php: 4 (token-admin-oriente, token-ana, token-marta, token-admin-norte)
+AR-02  misma asignación dos veces (sin fin): HTTP 201 y 409 → membresías activas de laboratorio: 1
+AR-02  misma asignación dos veces (con fin): HTTP 201 y 201 → membresías activas de laboratorio: 2
+AR-03  token de hosp-norte contra hosp-oriente: permisos-efectivos deja 0 evento(s); decisiones deja 1 (TENANT_NO_COINCIDE)

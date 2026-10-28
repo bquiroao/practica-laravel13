@@ -1,0 +1,24 @@
+$ PRESCRIPCIONES_DB_DSN=… php bin/validar-integracion-hospital.php
+aplicada la migración real 2026_08_11_000000_enable_hospital_extensions.php
+aplicada la migración real 2026_08_11_000100_create_local_identity_and_professional_tables.php
+aplicada la migración real 2026_08_11_000200_create_patient_and_care_tables.php
+aplicada la migración real 2026_08_11_000300_create_scheduling_and_bed_tables.php
+aplicada la migración real 2026_08_11_000400_create_medical_record_tables.php
+aplicada la migración real 2026_08_11_000401_create_allergy_and_vital_sign_tables.php
+aplicado database/integracion-hospital.sql
+
+[OK  ] Las tablas H5 se crean con FK reales a local_patients, care_episodes y local_user_refs
+[OK  ] El prescriptor CON asignación activa en el episodio puede emitir
+[OK  ] Un médico SIN asignación en el episodio no puede (misma regla que vital_signs)
+[OK  ] Un episodio de OTRO paciente se rechaza
+[OK  ] Un paciente que no existe en local_patients se rechaza (FK 23503 o trigger)
+[OK  ] UPDATE y DELETE de una prescripción se rechazan (inmutable)
+[OK  ] La misma Idempotency-Key se rechaza (UNIQUE, 23505)
+[OK  ] El Expediente ya impide BORRAR una alergia (trigger real allergies_retention): una alergia no desaparece en silencio
+[OK  ] El rol del módulo lee las alergias por la vista, con las columnas que usa PdoFuenteAlergias
+[OK  ] El rol del módulo NO puede leer la tabla allergies directamente (42501)
+[OK  ] El rol del módulo NO puede escribir alergias (42501)
+[OK  ] El rol del módulo NO puede modificar pacientes (42501)
+[OK  ] PUBLIC no tiene ningún privilegio sobre las prescripciones
+
+Todo lo que afirma el análisis se cumple.

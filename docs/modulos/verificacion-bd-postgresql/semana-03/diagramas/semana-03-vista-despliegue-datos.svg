@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+<title id="title">SHI 2026, semana 3: despliegue y datos federados</title>
+<desc id="desc">Una base CENTRAL mantiene el índice maestro de pacientes y membresías. Cada hospital tiene aplicación, base PostgreSQL y bandeja de salida local. Las bases hospitalarias conservan sus datos clínicos. La sincronización por HTTPS es propuesta y no está demostrada en las migraciones incluidas.</desc>
+<defs>
+ <marker id="arrow" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#35556f"/></marker>
+ <marker id="arrowDash" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#a36b18"/></marker>
+ <style>
+ text{font-family:Arial,Helvetica,sans-serif;fill:#183247}.title{font-size:27px;font-weight:700}.sub{font-size:16px;fill:#526a7a}.boundary{fill:#f5f8fa;stroke:#7690a3;stroke-width:2}.central{fill:#e6f1fa;stroke:#3476a3;stroke-width:2}.hospital{fill:#f0f6ee;stroke:#668b53;stroke-width:2}.box{fill:#fff;stroke:#35556f;stroke-width:1.6}.db{fill:#fff8e9;stroke:#aa7a2b;stroke-width:1.8}.label{font-size:18px;font-weight:700}.body{font-size:15px}.small{font-size:13px;fill:#526a7a}.edge{stroke:#35556f;stroke-width:2;fill:none;marker-end:url(#arrow)}.async{stroke:#a36b18;stroke-width:2.4;stroke-dasharray:9 6;fill:none;marker-end:url(#arrowDash)}.note{fill:#fff6df;stroke:#c7953c;stroke-width:1.5}.legend{font-size:13px;fill:#526a7a}
+ </style>
+</defs>
+<rect width="1500" height="900" fill="#fff"/>
+<text x="44" y="50" class="title">Sistema Hospitalario Integrado 2026 · Semana 3</text>
+<text x="44" y="79" class="sub">Vista UML de despliegue y datos federados · PostgreSQL</text>
+<rect x="35" y="105" width="1430" height="700" rx="18" class="boundary"/>
+<text x="58" y="140" class="label">Red del Sistema Hospitalario Integrado</text>
+<!-- Central -->
+<rect x="485" y="165" width="530" height="230" rx="14" class="central"/>
+<text x="510" y="198" class="label">Centro de datos de la red</text>
+<rect x="535" y="220" width="200" height="105" rx="9" class="box"/>
+<text x="555" y="251" class="label">API identidad</text><text x="555" y="277" class="body">Cuentas y membresías</text><text x="555" y="300" class="small">Resolución de identidad</text>
+<rect x="775" y="213" width="210" height="125" rx="12" class="db"/>
+<text x="795" y="245" class="label">PostgreSQL</text><text x="795" y="271" class="label">CENTRAL</text><text x="795" y="296" class="body">mpi_patients</text><text x="795" y="318" class="body">mpi_identifiers</text>
+<path d="M735 272 L770 272" class="edge"/><text x="737" y="253" class="small">consulta</text>
+<rect x="1040" y="220" width="350" height="105" rx="10" class="note"/>
+<text x="1062" y="250" class="label">Identidad compartida</text><text x="1062" y="276" class="body">CENTRAL no guarda notas clínicas</text><text x="1062" y="299" class="body">ni estancias de cama.</text>
+<!-- Hospital A -->
+<rect x="80" y="450" width="620" height="300" rx="14" class="hospital"/>
+<text x="105" y="484" class="label">Hospital A</text>
+<rect x="115" y="520" width="190" height="85" rx="9" class="box"/>
+<text x="132" y="550" class="label">Aplicación local</text><text x="132" y="577" class="body">Admisión y atención</text>
+<rect x="345" y="510" width="315" height="140" rx="12" class="db"/>
+<text x="365" y="540" class="label">PostgreSQL HOSPITAL A</text><text x="365" y="568" class="body">local_patients · care_episodes</text><text x="365" y="592" class="body">appointments · beds · bed_stays</text><text x="365" y="616" class="body">medical_records · clinical_notes · diagnoses</text>
+<path d="M305 562 L340 562" class="edge"/><text x="308" y="545" class="small">operación local</text>
+<rect x="205" y="675" width="290" height="48" rx="8" class="box"/>
+<text x="225" y="705" class="body">Outbox local · eventos pendientes</text>
+<path d="M420 650 L420 670" class="edge"/>
+<!-- Hospital B -->
+<rect x="800" y="450" width="620" height="300" rx="14" class="hospital"/>
+<text x="825" y="484" class="label">Hospital B</text>
+<rect x="835" y="520" width="190" height="85" rx="9" class="box"/>
+<text x="852" y="550" class="label">Aplicación local</text><text x="852" y="577" class="body">Admisión y atención</text>
+<rect x="1065" y="510" width="315" height="140" rx="12" class="db"/>
+<text x="1085" y="540" class="label">PostgreSQL HOSPITAL B</text><text x="1085" y="568" class="body">Registro y datos clínicos</text><text x="1085" y="592" class="body">propios de la institución</text><text x="1085" y="616" class="small">Sin copia completa hacia CENTRAL</text>
+<path d="M1025 562 L1060 562" class="edge"/>
+<rect x="925" y="675" width="290" height="48" rx="8" class="box"/>
+<text x="945" y="705" class="body">Outbox local · eventos pendientes</text>
+<path d="M1140 650 L1140 670" class="edge"/>
+<!-- sync arrows -->
+<path d="M250 520 C250 420 600 420 620 395" class="async"/>
+<path d="M970 520 C970 425 900 420 880 395" class="async"/>
+<path d="M350 675 C320 560 510 450 570 395" class="async"/>
+<path d="M1070 675 C1110 555 1000 440 940 395" class="async"/>
+<text x="550" y="430" class="small">HTTPS · vínculo de identidad / sincronización reintentable</text>
+<!-- No cross-db FK -->
+<rect x="490" y="530" width="300" height="105" rx="10" class="note"/>
+<text x="510" y="558" class="label">Vínculo lógico</text><text x="510" y="583" class="body">global_id conecta el registro</text><text x="510" y="607" class="body">local con CENTRAL. Sin FK entre DB.</text>
+<path d="M490 575 L465 575" stroke="#8d6d38" stroke-dasharray="5 5" fill="none"/><path d="M790 575 L815 575" stroke="#8d6d38" stroke-dasharray="5 5" fill="none"/>
+<rect x="60" y="825" width="1370" height="48" rx="8" class="note"/>
+<text x="82" y="855" class="body">Línea discontinua = sincronización propuesta. Las semanas 1–2 documentan tablas y referencias, no una implementación de outbox/cola.</text>
+</svg>

@@ -1,0 +1,1 @@
+Abrir index.html local. Ejecutar camino feliz, permiso denegado y error crítico tras lectura previa. Mostrar frescura y notificación separadas, aislamiento de snapshot por ID y rol bloqueado. Cambiar viewport móvil y mostrar evidencia. Explicar que prototipo web no demuestra NativePHP ni permisos reales, y que selección de destino es pendiente.

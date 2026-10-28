@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Notas SOAP · HIS</title>
+<!-- Mismos estilos mobile-first de la semana 10: una sola app para escritorio y teléfono. -->
+<link rel="stylesheet" href="../../semana-10/prototipo/estilos.css">
+<style>
+  .demo { position: absolute; right: .5rem; top: 52px; z-index: 8; background: #fff; border: 1px solid var(--borde); border-radius: 10px; padding: .5rem; width: 260px; box-shadow: 0 6px 20px rgba(0,0,0,.15); }
+  .barra .boton { width: auto; margin: 0; min-height: 44px; background: transparent; color: #fff; border-color: #fff; }
+</style>
+</head><body>
+<div id="fondo">
+  <header class="barra">
+    <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span></span>
+    <span class="usuario" id="usuario"></span>
+    <button type="button" class="boton" id="abrir-demo" aria-expanded="false" aria-controls="demo" hidden>Demo</button>
+  </header>
+  <div class="demo" id="demo" hidden>
+    <p class="secundario">Herramientas de demostración (no son parte del producto)</p>
+    <button type="button" class="boton" id="perder">Perder la próxima respuesta</button>
+    <button type="button" class="boton" id="salir">Cambiar de persona</button>
+  </div>
+  <div class="paciente" id="paciente" hidden>Carlos R. · <span>Expediente exp-carlos · Episodio epi-100 (abierto)</span></div>
+  <main id="vista"></main>
+</div>
+<div id="capa"></div>
+<div aria-live="polite" id="anuncio" style="position:absolute;left:-9999px"></div>
+<script src="api-simulada.js"></script>
+<script src="app.js"></script>
+</body></html>

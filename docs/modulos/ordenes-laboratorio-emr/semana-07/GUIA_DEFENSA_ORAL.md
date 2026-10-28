@@ -1,0 +1,1 @@
+Mostrar ClinicalRules y consumidores reales de semana 3. Explicar por qué Find solo requiere autorización y por qué separar catálogo/contexto/ciclo. Recorrer componentes UI y backend, DTO y errores, SQL aislado en Repository y estado sin edición libre. Mostrar antes/después y regresiones como línea base, sin atribuir implementación al refactor conceptual.

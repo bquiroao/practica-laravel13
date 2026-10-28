@@ -1,0 +1,35 @@
+OK    m1-notas-base-320.png                desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-base-360.png                desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-base-430.png                desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-base-768.png                desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-base-1024.png               desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-carga-360.png               desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-sin-conexion-360.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-enfermeria-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-enf-carga-360.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m1-notas-enf-sin-conexion-360.png    desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-paso1-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-paso2-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-paso3-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-paso4-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-errores-360.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-guardando-320.png      desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-incierto-320.png       desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-guardada-320.png       desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m2-nueva-nota-paso3-320.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-base-360.png              desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-hoja-firma-360.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-hoja-firma-768.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-firmada-360.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-incierto-firma-360.png    desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-reemplazada-360.png       desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m3-detalle-enfermeria-320.png        desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m4-corregir-base-360.png             desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m4-corregir-resumen-360.png          desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m4-corregir-ya-corregida-360.png     desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=sí
+OK    m5-avisos-denegado-360.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=—
+OK    m5-avisos-denegado-320.png           desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=—
+OK    m5-avisos-sesion-360.png             desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=—
+OK    m5-avisos-sin-conexion-360.png       desborde=0px  toque<44=0  fuente<16=0  hospital=sí  paciente=—
+
+Vistas: 33  Fallan: 0

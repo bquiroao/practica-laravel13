@@ -1,0 +1,30 @@
+OK    [memoria] CA-01 abrir p1 (activo) = 201
+OK    [memoria] CA-01 abrir p1 otra vez = 409
+OK    [memoria] CA-01 abrir p3 (inactivo) = 422
+OK    [memoria] CA-02 m1 consulta p1 (asignación activa) = 200
+OK    [memoria] CA-02 m2 consulta p1 (sin asignación) = 403
+OK    [memoria] CA-03 historia externa de p2 (sin vínculo al MPI) = {"status":200,"solo_local":true}
+OK    [memoria] CA-03 historia externa de p1 (con consentimiento) = 200
+OK    [memoria] CA-04 historia externa de p4 (sin consentimiento) = 403
+OK    [memoria] CA-05 emergencia para p4 sin justificación = 422
+OK    [memoria] CA-05 emergencia para p4 con justificación = {"status":200,"vence":4600}
+OK    [memoria] CA-06 consentimiento de p1 vencido (t=6000) = 403
+OK    [memoria] CA-05 acceso de emergencia de 1 hora con revisión pendiente
+OK    [memoria] CA-07 auditoría: 11 eventos, uno por operación, incluidos los rechazos
+OK    [PDO/SQLite] CA-01 abrir p1 (activo) = 201
+OK    [PDO/SQLite] CA-01 abrir p1 otra vez = 409
+OK    [PDO/SQLite] CA-01 abrir p3 (inactivo) = 422
+OK    [PDO/SQLite] CA-02 m1 consulta p1 (asignación activa) = 200
+OK    [PDO/SQLite] CA-02 m2 consulta p1 (sin asignación) = 403
+OK    [PDO/SQLite] CA-03 historia externa de p2 (sin vínculo al MPI) = {"status":200,"solo_local":true}
+OK    [PDO/SQLite] CA-03 historia externa de p1 (con consentimiento) = 200
+OK    [PDO/SQLite] CA-04 historia externa de p4 (sin consentimiento) = 403
+OK    [PDO/SQLite] CA-05 emergencia para p4 sin justificación = 422
+OK    [PDO/SQLite] CA-05 emergencia para p4 con justificación = {"status":200,"vence":4600}
+OK    [PDO/SQLite] CA-06 consentimiento de p1 vencido (t=6000) = 403
+OK    [PDO/SQLite] CA-05 acceso de emergencia de 1 hora con revisión pendiente
+OK    [PDO/SQLite] CA-07 auditoría: 11 eventos, uno por operación, incluidos los rechazos
+OK    ServicioExpediente depende solo de interfaces: ExpedientesHospital, IndiceCentral, Auditoria, Reloj
+OK    ServicioExpedienteAntes no recibe dependencias: las crea
+OK    ServicioExpedienteAntes usa new PDO(), new IndiceCentralHttp() y time()
+RESULTADO: todo correcto

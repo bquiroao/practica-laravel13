@@ -1,0 +1,18 @@
+
+D1 · fuga entre tenants en el detalle
+   ROJO  M1 Pruebas automáticas en verde (calidad) → 77/81 · 17 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL) · las 17 omitidas requieren PostgreSQL (AUDITORIA_DB_DSN)
+   ROJO  M4 Intentos de fuga entre tenants / sin permiso bloqueados (seguridad) → 11/12 · umbral: 100 % · NO bloqueadas: auditor de Oriente lee un movimiento de Norte → 200
+
+D2 · la cadena salta una secuencia al anexar
+   ROJO  M1 Pruebas automáticas en verde (calidad) → 79/81 · 17 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL) · las 17 omitidas requieren PostgreSQL (AUDITORIA_DB_DSN)
+   ROJO  M3 Cadenas íntegras en la verificación (confiabilidad) → 1/3 · 10.5 ms por 1 000 movimientos · umbral: 100 % íntegras; ALTERADA o TRUNCADA = incidente · 282 movimientos verificados en 3 cadenas (2 hospitales + red)
+
+D3 · el contrato agrega un código de error que ninguna prueba afirma
+   ÁMBAR M1 Pruebas automáticas en verde (calidad) → 81/81 · 17 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL) · las 17 omitidas requieren PostgreSQL (AUDITORIA_DB_DSN)
+   ÁMBAR M5 Contrato = código y códigos de error con prueba (trazabilidad) → 4/4 guardas · 16/17 códigos · umbral: 100 % y 100 % · códigos del contrato sin prueba que los afirme: LIMITE_EXCEDIDO
+
+D4 · un emisor puede registrar en otro hospital
+   ROJO  M1 Pruebas automáticas en verde (calidad) → 80/81 · 17 omitidas · umbral: 0 fallan y 0 omitidas en CI (PostgreSQL) · las 17 omitidas requieren PostgreSQL (AUDITORIA_DB_DSN)
+   ROJO  M4 Intentos de fuga entre tenants / sin permiso bloqueados (seguridad) → 11/12 · umbral: 100 % · NO bloqueadas: emisor de Oriente registra en Norte → 201
+
+Defectos inyectados: 4  Sin detectar: 0

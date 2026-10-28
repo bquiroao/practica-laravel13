@@ -1,0 +1,34 @@
+AR-01 · El punto de entrada real (crearKernel) acepta siempre los tokens de demostración
+  crearKernel(config) + «Bearer token-dr-lopez» (texto fijo de config.php) → HTTP 201 EMITIDA: EMITE una prescripción
+  tokens de demostración en config.php: 4 (uno con override) · crearKernel() elige el autenticador según el entorno: NO (siempre AutenticadorTokenDemo)
+
+AR-02 · La clave de idempotencia es del HOSPITAL, no del prescriptor: otro médico recibe «ya emitida» una prescripción ajena
+  dr-lopez emite (con advertencia justificada) con la clave «clave-compartida» → HTTP 201 EMITIDA #1
+  dr-ruiz (SIN permiso override) envía lo mismo con la misma clave       → HTTP 200 YA_EMITIDA #1
+  dr-ruiz con su propia clave                                            → HTTP 409 JUSTIFICACION_REQUERIDA (lo correcto)
+  prescriptor de #1: dr-lopez · trazas a nombre de dr-ruiz: 0
+
+AR-03 · La coincidencia por NOMBRE es exacta: un alérgeno escrito de otra forma no bloquea ni advierte
+  P-005 con alergia GRAVE activa registrada como «Amoxicilina trihidrato»; previa de Amoxicilina 500 mg → SIN_HALLAZGOS
+  P-005 con alergia GRAVE activa registrada como «Amoxicilina (sal sódica)»; previa de Amoxicilina 500 mg → SIN_HALLAZGOS
+  P-005 con alergia GRAVE activa registrada como «Penicilina G»; previa de Amoxicilina 500 mg → SIN_HALLAZGOS
+  control: la misma alergia registrada como «Amoxicilina» → BLOQUEO
+
+AR-04 · El contrato declara «integer» (JSON Schema acepta 7.0) y el código rechaza 7.0
+  ítem con "dias": 7                → HTTP 200 {"codigo":"SIN_HALLAZGOS","hallazgos":[]}
+  ítem con "dias": 7.0              → HTTP 422 {"error":"DATOS_INVALIDOS","campos":["items[0].dias"]}
+  ítem con "frecuencia_horas": 8.0  → HTTP 422 {"error":"DATOS_INVALIDOS","campos":["items[0].frecuencia_horas"]}
+  el contrato: dias: {type: integer, minimum: 1, maximum: 90}
+
+AR-05 · Anular no es idempotente: el reintento de una anulación que SÍ llegó responde 409 sin decir quién anuló
+  1.ª anulación → HTTP 200 ANULADA · el reintento idéntico → HTTP 409 ESTADO_NO_PERMITE_ANULAR
+  claves del cuerpo del 409: [error] (el cliente necesita otra petición para saber si fue suya)
+
+AR-06 · El hallazgo y la consulta devuelven el CÓDIGO del alérgeno sin su nombre
+  previa P-001 (alergia a Amoxicilina, código J01CA04) con Cefalexina → ADVERTENCIA · hallazgo: {"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"J01CA04","severidad":"severe","bloquea":false,"reaccion":"urticaria generalizada"}
+  farmacia consulta #1 → alergenos_evaluados: ["J01CA04"] (sin nombre)
+
+AR-07 · El tipo de la alergia (allergy / intolerance) no participa en ninguna regla
+  P-003 con «allergy» leve (náuseas) a Amoxicilina; previa de Amoxicilina → BLOQUEO
+  P-003 con «intolerance» leve (náuseas) a Amoxicilina; previa de Amoxicilina → BLOQUEO
+  lecturas de Alergia::tipo ($a->tipo o $alergia->tipo) en todo src/: 0

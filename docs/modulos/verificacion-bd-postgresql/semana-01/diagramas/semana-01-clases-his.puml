@@ -1,0 +1,115 @@
+@startuml semana-01-clases-his
+title Modelo de clases de las entidades centrales del HIS vinculado a las tablas PostgreSQL (base HOSPITAL y CENTRAL)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam classBackgroundColor #EEF2F7
+skinparam classBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+skinparam packageStyle rectangle
+hide empty methods
+
+package "CENTRAL" #F5F0FF {
+  class PacienteMaestro <<mpi_patients>> {
+    mpiPatientId: uuid
+    nombreNormalizado: text
+    estado: active | inactive | merged
+  }
+}
+
+package "HOSPITAL" {
+  class Paciente <<local_patients>> #D6E8FF {
+    localPatientId: uuid
+    globalId: uuid
+    codigo: text
+    nombres, apellidos: text
+    fechaNacimiento: date
+    sexo, estado
+  }
+  class EpisodioAtencion <<care_episodes>> {
+    tipo: outpatient | emergency | inpatient
+    estado: open | closed | cancelled
+    inicio, fin: timestamptz
+  }
+  class UsuarioLocal <<local_user_refs>> {
+    nombreVisible: text
+    rol: text
+  }
+  class Profesional <<doctor_profiles>> #D6E8FF {
+    numeroColegiado: text
+    estado: active | inactive | suspended
+    vigenteDesde, vigenteHasta: date
+  }
+  class Especialidad <<specialties>> {
+    codigo, nombre: text
+  }
+  class EspecialidadDelMedico <<doctor_specialties>> {
+    esPrincipal: boolean
+    vigenteDesde, vigenteHasta: date
+  }
+  class AsignacionAtencion <<care_assignments>> {
+    origen, estado
+  }
+  class Cita <<appointments>> #D6E8FF {
+    inicio, fin: timestamptz
+    estado: EstadoCita
+    motivo: text
+  }
+  class Sala <<wards>> {
+    codigo, nombre, ubicacion
+  }
+  class Cama <<beds>> #D6E8FF {
+    codigo, tipo: text
+    estado: EstadoCama
+  }
+  class EstanciaEnCama <<bed_stays>> {
+    inicio, fin: timestamptz
+    motivo: text
+  }
+  class Expediente <<medical_records>> #D6E8FF {
+    numeroExpediente: text
+    estado: open | closed
+  }
+  class NotaClinica <<clinical_notes>> {
+    estado: draft | signed
+    version: integer
+  }
+  class Diagnostico <<diagnoses>> {
+    codigo, tipo, estado
+  }
+  enum EstadoCita {
+    scheduled
+    confirmed
+    completed
+    cancelled
+  }
+  enum EstadoCama {
+    available
+    occupied
+    maintenance
+    inactive
+  }
+}
+
+PacienteMaestro "1" ..> "0..*" Paciente : globalId\n(referencia lógica, sin FK)
+Paciente "1" -- "0..1" Expediente
+Paciente "1" -- "0..*" EpisodioAtencion
+Paciente "1" -- "0..*" Cita
+UsuarioLocal "1" -- "0..*" Profesional
+Profesional "1" -- "0..*" EspecialidadDelMedico
+Especialidad "1" -- "0..*" EspecialidadDelMedico
+Profesional "1" -- "0..*" Cita
+Especialidad "1" -- "0..*" Cita
+EpisodioAtencion "1" -- "0..*" AsignacionAtencion
+Profesional "1" -- "0..*" AsignacionAtencion
+Sala "1" *-- "0..*" Cama
+Cama "1" -- "0..*" EstanciaEnCama
+EpisodioAtencion "1" -- "0..*" EstanciaEnCama : máx. 1 abierta
+Expediente "1" *-- "0..*" NotaClinica
+EpisodioAtencion "1" -- "0..*" NotaClinica
+NotaClinica "0..1" -- "0..1" NotaClinica : reemplaza
+EpisodioAtencion "1" -- "0..*" Diagnostico
+NotaClinica "0..1" -- "0..*" Diagnostico
+Cita ..> EstadoCita
+Cama ..> EstadoCama
+@enduml

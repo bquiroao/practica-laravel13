@@ -1,0 +1,98 @@
+@startuml semana-01-secuencia
+title Módulo Prescripciones — Secuencia\n«Creación de prescripción con verificación previa de alergias»
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+skinparam DatabaseBackgroundColor #F5F9FF
+autonumber "S-00"
+
+actor "Médico\nprescriptor" as MED
+actor "Farmacéutico" as FAR
+participant "Interfaz\n(Vue)" as UI
+participant "API Prescripciones\n(controlador)" as API
+participant "Servicio RBAC\n(PDP)" as RBAC
+participant "Caso de uso\nPrescripciones" as CU
+participant "Catálogo de\nmedicamentos" as CAT
+participant "Fuente de alergias\n(Expediente)" as ALG
+database "prescriptions\n(base del hospital)" as BD
+participant "Módulo\nAuditoría" as AUD
+
+== 1 · Verificación previa, consultiva (CU-02, CU-03, CU-04) ==
+MED -> UI : Elige paciente, medicamento, dosis, unidad,\nfrecuencia, vía y duración
+UI -> UI : ¿campos obligatorios y formato? (usabilidad)
+UI -> API : POST /api/v1/prescripciones/verificaciones\nBearer + X-Tenant-ID {paciente, ítems}
+API -> RBAC : decidir(prescripcion.emitir, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : verificar(solicitud, hospital del token)
+CU -> CAT : obtener(medicamento)
+CAT --> CU : activo · principio activo · grupo · dosis máxima · vías
+CU -> ALG : alergiasActivas(paciente, hospital) [límite 2 s]
+ALG --> CU : alergias activas (código o nombre, tipo, severidad)\n+ ¿alergias evaluadas?
+CU -> CU : ¿dosis diaria ≤ máxima? [R-02]\n¿principio activo = alérgeno? [R-04] ¿mismo grupo? [R-05]
+CU --> API : SIN_HALLAZGOS | ADVERTENCIA | BLOQUEO | CONFIRMACION_REQUERIDA
+API --> UI : 200 resultado (no crea ni guarda nada)
+UI --> MED : Muestra cada hallazgo: alérgeno, reacción y severidad
+
+== 2 · Emisión con verificación obligatoria en el servidor (CU-01..CU-06, CU-08) ==
+MED -> UI : Firma y emite (justificación si hubo advertencia;\nconfirmación si no hay alergias evaluadas)
+UI -> API : POST /api/v1/prescripciones\nIdempotency-Key + Bearer + X-Tenant-ID
+API -> RBAC : decidir(prescripcion.emitir, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : emitir(solicitud, hospital del token)
+CU -> BD : buscar(Idempotency-Key)
+BD --> CU : no existe (si existe: 200 la misma o 409)
+CU -> CAT : obtener(medicamento)
+CAT --> CU : activo · dosis máxima · vías
+CU -> CU : ¿completa? ¿dosis diaria ≤ máxima? [R-01, R-02]
+CU -> ALG : alergiasActivas(paciente, hospital)\nSE VUELVE A CONSULTAR: no se confía en el paso 1 [R-03]
+alt la fuente no responde (E-07)
+  ALG --> CU : tiempo agotado / error
+  CU -> AUD : VERIFICACION_NO_DISPONIBLE
+  CU --> API : bloqueo seguro [R-07]
+  API --> UI : 503 VERIFICACION_NO_DISPONIBLE
+else coincidencia directa, o cruzada grave (E-09, E-10)
+  ALG --> CU : alergia activa: penicilina, severe
+  CU -> AUD : PRESCRIPCION_BLOQUEADA (sin datos clínicos)
+  CU --> API : bloqueo [R-04]
+  API --> UI : 422 BLOQUEO_ALERGIA
+else cruzada no grave y sin justificación (E-11)
+  ALG --> CU : alergia activa del mismo grupo, moderate
+  CU --> API : advertencia sin justificar [R-05]
+  API --> UI : 409 JUSTIFICACION_REQUERIDA
+  UI --> MED : Muestra la advertencia y pide justificación (≥ 20)
+else sin hallazgos, o advertencia justificada (F-01)
+  ALG --> CU : alergias activas sin conflicto, o cruzada justificada
+  CU -> RBAC : decidir(prescripcion.override) [solo si hay advertencia]
+  RBAC --> CU : PERMITIDO
+  CU -> BD : BEGIN · INSERT prescripción EMITIDA\n+ verificación (alergias evaluadas, resultado,\njustificación) · COMMIT
+  BD --> CU : id de la prescripción y de la verificación
+  CU -> AUD : PRESCRIPCION_EMITIDA (id de la verificación)
+  CU --> API : emitida
+  API --> UI : 201 + Location
+  UI --> MED : Prescripción emitida
+end
+
+== 3 · Anulación con motivo (CU-07, CU-04, CU-08) ==
+MED -> UI : Anula con motivo
+UI -> API : POST /api/v1/prescripciones/{id}/anulacion {motivo}
+API -> RBAC : decidir(prescripcion.anular, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : anular(id, motivo, hospital del token)
+CU -> BD : buscar(id, hospital)
+BD --> CU : EMITIDA (otro hospital o inexistente: 404 idéntico)
+CU -> BD : INSERT anulación (motivo, autor, fecha)\nla prescripción no se modifica [R-10]
+CU -> AUD : PRESCRIPCION_ANULADA
+CU --> API : anulada
+API --> UI : 200 ANULADA
+
+== 4 · Consulta por farmacia (CU-09, CU-04) ==
+FAR -> API : GET /api/v1/prescripciones/{id}
+API -> RBAC : decidir(prescripcion.consultar, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : consultar(id, hospital del token)
+CU -> BD : buscar(id, hospital)
+BD --> CU : prescripción + verificación + anulación
+CU --> API : vista sin datos de otros pacientes
+API --> FAR : 200 prescripción y su verificación
+@enduml

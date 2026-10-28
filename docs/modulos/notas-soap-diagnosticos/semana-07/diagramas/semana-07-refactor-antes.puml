@@ -1,0 +1,59 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title Semana 7 · ANTES: los casos de uso que escriben mezclaban las 6 preocupaciones del módulo
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #4A6FA5
+}
+hide empty members
+left to right direction
+
+class RegistrarNotaConDiagnostico <<caso de uso · 9 dependencias · Ce 18 · P 6>> #FFE3D6 {
+  + ejecutar(RegistrarNotaComando)
+  -- copia 1 --
+  R-01/R-02 hospital + asignación
+  R-03 expediente
+  transacción { nota · diagnóstico · 'NOTA_REGISTRADA' · clave }
+}
+class CorregirNota <<caso de uso · 8 dependencias · Ce 19 · P 6>> #FFE3D6 {
+  + ejecutar(CorregirNotaComando)
+  -- copia 2 --
+  R-01/R-02 hospital + asignación
+  R-03 expediente
+  transacción { nota · diagnóstico · 'NOTA_CORREGIDA' }
+}
+class FirmarNota <<caso de uso · 5 dependencias · P 5>> #FFF6E5 {
+  + ejecutar(FirmarNotaComando)
+  transacción { firma · 'NOTA_FIRMADA' }
+}
+
+interface VerificadorAcceso
+interface RepositorioExpedientes
+interface RepositorioNotas
+interface RepositorioDiagnosticos
+interface RegistroAuditoria
+interface Transaccion
+
+RegistrarNotaConDiagnostico --> VerificadorAcceso
+RegistrarNotaConDiagnostico --> RepositorioExpedientes
+RegistrarNotaConDiagnostico --> RepositorioNotas
+RegistrarNotaConDiagnostico --> RepositorioDiagnosticos
+RegistrarNotaConDiagnostico --> RegistroAuditoria
+RegistrarNotaConDiagnostico --> Transaccion
+CorregirNota --> VerificadorAcceso
+CorregirNota --> RepositorioExpedientes
+CorregirNota --> RepositorioNotas
+CorregirNota --> RepositorioDiagnosticos
+CorregirNota --> RegistroAuditoria
+CorregirNota --> Transaccion
+FirmarNota --> RegistroAuditoria
+FirmarNota --> Transaccion
+FirmarNota --> RepositorioNotas
+
+legend bottom
+  El formato de la bitácora estaba escrito a mano en 3 casos de uso, la transacción en 3 y las reglas R-01/R-02/R-03 en 2.
+  Agregar un evento o cambiar una regla de acceso obligaba a tocar varios casos de uso y era fácil que quedaran distintos.
+endlegend
+@enduml

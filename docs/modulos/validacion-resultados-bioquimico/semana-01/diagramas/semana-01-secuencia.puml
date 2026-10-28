@@ -1,0 +1,95 @@
+@startuml
+title Módulo de laboratorio — Secuencia\n«Revisión, validación o rechazo de un resultado por bioquímico»
+hide footbox
+skinparam shadowing false
+
+actor "Bioquímico/a" as Bio
+boundary "Interfaz de validación" as UI
+control "Autorización HIS" as Auth
+control "Servicio de validación" as Servicio
+database "Persistencia clínica HOSPITAL" as Repo
+actor "Personal de laboratorio" as Lab
+
+Bio -> UI : S-01 solicitar cola pendiente
+UI -> Auth : S-02 comprobar sesión,\npermiso y hospital
+Auth --> UI : S-03 autorización
+alt E-01 no autorizado
+  UI --> Bio : S-04 denegar acceso;\nno revelar información clínica
+else autorizado [R-01]
+  UI -> Servicio : S-05 consultar pendientes del hospital
+  Servicio -> Repo : S-06 cargar elementos pendientes
+  Repo --> Servicio : S-07 lista y versiones
+  Servicio --> UI : S-08 presentar cola
+  alt E-02 cola vacía
+    UI --> Bio : S-09 informar que no hay pendientes
+  else hay resultados
+    Bio -> UI : S-10 seleccionar resultado
+    UI -> Servicio : S-11 solicitar contexto y versión actual
+    Servicio -> Repo : S-12 obtener resultado, orden,\nítem y muestra
+    Repo --> Servicio : S-13 datos y estado actuales
+      alt contexto no disponible o incompatible [E-03]
+        Servicio --> UI : S-13A informar que no se puede decidir
+        UI --> Bio : S-13B impedir decisión; mantener estado
+      else contexto disponible y asociado [D-03, R-03]
+        Servicio --> UI : S-14 presentar versión y contexto
+        Bio -> UI : S-15 revisar y elegir decisión [D-05]
+        alt CU-02 validar
+          Bio -> UI : S-16 confirmar validación [R-04]
+          UI -> Servicio : S-17 validar versión y hospital
+          Servicio -> Auth : S-18 revalidar permiso [R-01]
+          Auth --> Servicio : S-19 autorización vigente o denegada
+          alt autorización revocada [E-01]
+            Servicio --> UI : S-19A denegar; no cambiar resultado
+            UI --> Bio : informar que la autorización ya no es válida
+          else permiso vigente
+            Servicio -> Repo : S-20 comprobar versión vigente,\npendiente y guardar decisión,\nactor y fecha/hora [D-06, R-02, R-05]
+            alt decisión guardada [D-08]
+              Repo --> Servicio : S-21 validada; versión inmutable [R-08]
+              Servicio --> UI : S-22 resultado validado
+              UI --> Bio : S-23 confirmar validación
+            else versión cambió o ya fue decidida [E-04]
+              Repo --> Servicio : S-24 conflicto; no aplicar decisión
+              Servicio --> UI : S-25 solicitar recarga
+              UI --> Bio : S-26 informar que debe revisar la versión actual
+            else error de persistencia [E-06]
+              Repo --> Servicio : S-27 error; no confirmar estado
+              Servicio --> UI : S-28 informar falla técnica
+              UI --> Bio : S-29 indicar que la decisión no se confirmó
+            end
+          end
+        else CU-03 rechazar
+          Bio -> UI : S-30 seleccionar rechazo e ingresar motivo
+          UI -> Servicio : S-31 validar motivo no vacío [D-07, R-06]
+          alt falta motivo [E-05]
+            Servicio --> UI : S-32 solicitar motivo; no guardar
+            UI --> Bio : S-33 mostrar validación pendiente
+          else motivo presente
+            UI -> Servicio : S-34 registrar rechazo para versión actual
+            Servicio -> Auth : S-35 revalidar permiso [R-01]
+            Auth --> Servicio : S-36 autorización vigente o denegada
+            alt autorización revocada [E-01]
+              Servicio --> UI : S-36A denegar; no cambiar resultado
+              UI --> Bio : informar que la autorización ya no es válida
+            else permiso vigente
+              Servicio -> Repo : S-37 comprobar versión vigente,\npendiente y guardar motivo,\ndecisión, actor y fecha/hora [D-06, R-02, R-05, R-06]
+              alt rechazo guardado [D-08]
+                Repo --> Servicio : S-38 conservar resultado; rechazo registrado
+                Servicio --> UI : S-39 confirmar rechazo [R-07]
+                UI --> Bio : S-40 mostrar rechazo registrado
+                Servicio -> Lab : S-41 dejar rechazo para seguimiento
+              else versión cambió o ya fue decidida [E-04]
+                Repo --> Servicio : S-42 conflicto; no aplicar decisión
+                Servicio --> UI : S-43 solicitar recarga
+                UI --> Bio : S-44 informar que debe revisar la versión actual
+              else error de persistencia [E-06]
+                Repo --> Servicio : S-45 error; no confirmar estado
+                Servicio --> UI : S-46 informar falla técnica
+                UI --> Bio : S-47 indicar que el rechazo no se confirmó
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  @enduml
