@@ -1,0 +1,1 @@
+IA utilizada para inspeccionar código local, identificar agregación de ClinicalRules, diseñar componentes/contratos/refactor conceptual y ejecutar regresiones previas. La estudiante revisa y defiende decisiones. No se implementan UI/API ni puertos nuevos, no hay datos clínicos ni revisión independiente.

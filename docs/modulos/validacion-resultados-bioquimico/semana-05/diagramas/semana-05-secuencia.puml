@@ -1,0 +1,39 @@
+@startuml
+title Semana 5 - Secuencia: decisión del bioquímico con idempotencia y versión
+autonumber
+actor "Bioquímico/a" as U
+participant Cliente as C
+participant "API Validación" as A
+participant Auth
+participant ReviewPendingLabResult as UC
+database "BD Validación" as DB
+
+U -> C : valida o rechaza
+C -> A : POST /results/{id}/decisions\nIdempotency-Key, If-Match: versión
+A -> Auth : sesión, rol, hospital
+Auth --> A : actor (de la sesión)
+alt sin sesión / sin clave / sin If-Match
+  A --> C : 401 / 400 / 428
+else clave ya usada
+  A --> C : respuesta original, o 409 si cambió el contenido
+else clave nueva
+  A -> UC : execute(resultId, versión, actor, hospital, decisión, motivo)
+  UC -> DB : findById
+  alt otro hospital o inexistente
+    A --> C : 404
+  else versión distinta
+    A --> C : 409 version-conflict
+  else ya decidido
+    A --> C : 409 already-decided
+  else rechazo sin motivo
+    A --> C : 422
+  else válido
+    UC -> DB : decideAtomically (estado + decisión + outbox)
+    alt falla la base
+      A --> C : 503 (no se guarda la clave)
+    else guardado
+      A --> C : 201
+    end
+  end
+end
+@enduml

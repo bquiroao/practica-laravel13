@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">WF-02 — Verificar correspondencia e integridad</title>
+  <desc id="desc">Wireframe de revisión de orden, paciente, examen, tipo de muestra y recipiente, con ayuda contextual y bloqueo de decisión ante discrepancias.</desc>
+  <rect width="1280" height="820" fill="#f3f6fa"/>
+  <rect width="1280" height="74" fill="#12304a"/>
+  <text x="34" y="46" fill="#fff" font-family="Arial,sans-serif" font-size="24" font-weight="700">Sistema Hospitalario Integrado</text>
+  <text x="1040" y="44" fill="#d8e6f1" font-family="Arial,sans-serif" font-size="15">Hospital activo: Central</text>
+  <rect y="74" width="222" height="746" fill="#e8eef4"/>
+  <text x="26" y="126" fill="#25445e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Recepción</text>
+  <rect x="12" y="145" width="198" height="44" rx="7" fill="#d2e5f4"/>
+  <text x="30" y="173" fill="#123b59" font-family="Arial,sans-serif" font-size="15" font-weight="700">Nueva recepción</text>
+  <text x="250" y="120" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">Verificar muestra</text>
+  <text x="250" y="151" fill="#50677b" font-family="Arial,sans-serif" font-size="16">Paso 2 de 3 · compara los datos autorizados con el recipiente físico.</text>
+  <rect x="250" y="177" width="980" height="97" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="276" y="211" fill="#526a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">ORDEN</text>
+  <text x="276" y="240" fill="#213d53" font-family="Arial,sans-serif" font-size="18" font-weight="700">ORD-00482 · Ítem 01</text>
+  <text x="619" y="211" fill="#526a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">PACIENTE</text>
+  <text x="619" y="240" fill="#213d53" font-family="Arial,sans-serif" font-size="17">Paciente de ejemplo</text>
+  <text x="909" y="211" fill="#526a7e" font-family="Arial,sans-serif" font-size="13" font-weight="700">EXAMEN / TIPO</text>
+  <text x="909" y="240" fill="#213d53" font-family="Arial,sans-serif" font-size="17">Química · suero</text>
+  <rect x="250" y="294" width="605" height="266" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="276" y="332" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Inspección del recipiente</text>
+  <text x="276" y="369" fill="#536a7e" font-family="Arial,sans-serif" font-size="14">Referencia/código visible en recipiente</text>
+  <rect x="276" y="382" width="550" height="43" rx="6" fill="#fff" stroke="#9aabba"/>
+  <text x="294" y="410" fill="#728697" font-family="Arial,sans-serif" font-size="15">Introducir o confirmar referencia externa</text>
+  <rect x="276" y="445" width="22" height="22" rx="4" fill="#fff" stroke="#748b9d" stroke-width="2"/>
+  <text x="310" y="462" fill="#29475f" font-family="Arial,sans-serif" font-size="15">Identidad y etiqueta concuerdan con la orden</text>
+  <rect x="276" y="484" width="22" height="22" rx="4" fill="#fff" stroke="#748b9d" stroke-width="2"/>
+  <text x="310" y="501" fill="#29475f" font-family="Arial,sans-serif" font-size="15">Integridad y condición revisadas según procedimiento</text>
+  <text x="276" y="537" fill="#526a7e" font-family="Arial,sans-serif" font-size="13">Marca solo lo que verificaste físicamente.</text>
+  <rect x="875" y="294" width="355" height="266" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="899" y="332" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Ayuda contextual</text>
+  <circle cx="916" cy="371" r="13" fill="#e8f4fb" stroke="#7db2d0"/>
+  <text x="912" y="377" fill="#12608a" font-family="Arial,sans-serif" font-size="16" font-weight="700">i</text>
+  <text x="942" y="369" fill="#38556c" font-family="Arial,sans-serif" font-size="14">Consulta el procedimiento vigente</text>
+  <text x="942" y="391" fill="#38556c" font-family="Arial,sans-serif" font-size="14">para criterios por tipo de muestra.</text>
+  <line x1="899" y1="414" x2="1205" y2="414" stroke="#dce4ea"/>
+  <text x="899" y="447" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">El código interno identifica el recipiente.</text>
+  <text x="899" y="471" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">No sustituye paciente, orden, ítem ni</text>
+  <text x="899" y="495" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">código externo.</text>
+  <rect x="250" y="583" width="980" height="74" rx="9" fill="#fff4dc" stroke="#e8c675"/>
+  <text x="276" y="614" fill="#77520c" font-family="Arial,sans-serif" font-size="15" font-weight="700">Si hay discrepancia o no puedes verificar un criterio</text>
+  <text x="276" y="639" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Detén la decisión y solicita revisión. No confirmes aceptación por defecto ni conviertas una falla técnica en rechazo.</text>
+  <rect x="250" y="681" width="148" height="44" rx="7" fill="#fff" stroke="#8ba0b0"/>
+  <text x="285" y="709" fill="#29475f" font-family="Arial,sans-serif" font-size="15">Volver</text>
+  <rect x="1000" y="681" width="230" height="44" rx="7" fill="#12608a"/>
+  <text x="1030" y="709" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">Continuar a decisión</text>
+  <text x="250" y="770" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Anotación: mantener Continuar bloqueado hasta completar verificaciones requeridas; asociar errores al campo y conservar entradas al reintentar.</text>
+</svg>

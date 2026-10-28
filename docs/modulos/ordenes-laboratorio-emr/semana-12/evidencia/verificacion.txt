@@ -1,0 +1,5 @@
+Edge headless + Playwright; 2026-10-28
+PASS desktop 1366px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.
+PASS movil 375px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.
+PASS movil-320 320px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.
+PASS movil-430 430px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.

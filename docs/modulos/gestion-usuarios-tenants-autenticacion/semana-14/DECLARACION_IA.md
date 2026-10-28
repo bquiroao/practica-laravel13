@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar los artefactos y hallazgos locales y redactar este plan SQA. Los umbrales son propuestas del proyecto. No se atribuyen integración JWT, revocación persistente, tres corridas ni revisión independiente no realizadas. La estudiante debe revisar y comprender las decisiones antes de defender la entrega.

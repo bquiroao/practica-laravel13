@@ -1,0 +1,14 @@
+@startsalt
+title W3 — Revisa y confirma la cita
+{+
+  <b>¿Agendar esta cita?</b>
+  Paciente: <b>P-0012 · A. Pérez</b>
+  Médico: <b>M-03 · Dra. Ruiz</b> (Cardiología)
+  Horario: <b>28/10/2026, 08:30–09:00</b>
+  Motivo: control de presión
+  <i>Al confirmar se vuelve a validar la disponibilidad: otra persona pudo tomar el horario.</i>
+  [Volver y editar] | [Confirmar cita]
+  ---
+  <color:green>✓ Cita programada para el 28/10 a las 08:30.</color> | [Ver en la agenda]
+}
+@endsalt

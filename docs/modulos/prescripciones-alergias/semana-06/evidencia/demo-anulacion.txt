@@ -1,0 +1,42 @@
+$ php bin/demo-anulacion.php   (sin base)
+Micro-HIS Prescripciones · demo del cambio práctico de la semana 6 (anular con motivo)
+
+1. Se emite cefalexina a P-002 (alérgico a penicilina) con advertencia justificada
+   POST /api/v1/prescripciones → HTTP/1.1 201 Created
+   {"codigo":"EMITIDA","id":1,"verificacion":"ADVERTENCIA"}
+
+2. Motivo demasiado corto
+   POST /api/v1/prescripciones/1/anulacion → HTTP/1.1 422 Unprocessable Content
+   {"error":"MOTIVO_REQUERIDO"}
+
+3. Farmacia no puede anular
+   POST /api/v1/prescripciones/1/anulacion → HTTP/1.1 403 Forbidden
+   {"error":"PERMISO_DENEGADO"}
+
+4. Otro hospital: igual que inexistente
+   POST /api/v1/prescripciones/1/anulacion → HTTP/1.1 404 Not Found
+   {"error":"NO_ENCONTRADO"}
+
+5. El médico anula con motivo
+   POST /api/v1/prescripciones/1/anulacion → HTTP/1.1 200 OK
+   {"codigo":"ANULADA","id":1,"anulacion":{"motivo":"Se registró una alergia a cefalosporinas después de emitir","anulada_por":"dr-lopez","anulada_en":"…"}}
+
+6. Farmacia consulta: ANULADA, con la anulación; lo emitido no cambió
+   GET /api/v1/prescripciones/1 → HTTP/1.1 200 OK
+   {"codigo":"PRESCRIPCION","id":1,"paciente":"P-002","prescriptor":"dr-lopez","estado":"ANULADA","verificacion":{"resultado":"ADVERTENCIA","alergenos_evaluados":["Penicilina"],"justificacion":"Sin alternativa: cultivo sensible solo a cefalosporinas","confirma_sin_alergias":false},"anulacion":{"motivo":"Se registró una alergia a cefalosporinas después de emitir","anulada_por":"dr-lopez","anulada_en":"…"}}
+
+7. Una segunda anulación se rechaza
+   POST /api/v1/prescripciones/1/anulacion → HTTP/1.1 409 Conflict
+   {"error":"ESTADO_NO_PERMITE_ANULAR"}
+
+8. Se emite paracetamol a P-005
+   POST /api/v1/prescripciones → HTTP/1.1 201 Created
+   {"codigo":"EMITIDA","id":2,"verificacion":"SIN_HALLAZGOS"}
+
+9. Cae el Expediente: emitir se BLOQUEA (fail-closed)
+   POST /api/v1/prescripciones → HTTP/1.1 503 Service Unavailable
+   {"error":"VERIFICACION_NO_DISPONIBLE"}
+
+10. … pero anular SIGUE funcionando: no depende del Expediente
+   POST /api/v1/prescripciones/2/anulacion → HTTP/1.1 200 OK
+   {"codigo":"ANULADA","id":2,"anulacion":{"motivo":"Paciente refiere reacción previa al paracetamol","anulada_por":"dr-lopez","anulada_en":"…"}}

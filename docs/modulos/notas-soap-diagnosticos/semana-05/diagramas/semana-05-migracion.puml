@@ -1,0 +1,31 @@
+@startuml semana-05-migracion
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+
+title Semana 5 · Migración razonada (strangler fig, cada fase con compuerta y vuelta atrás)
+
+rectangle "Fase 0 · Hoy\nMicro-HIS en capas, contrato OpenAPI,\ncliente, idempotencia, medición\nCompuerta: 101 pruebas en verde" as f0 #EAF7EA
+rectangle "Fase 1 · Módulo en el HIS (sem. 16)\nDominio + Aplicación a Laravel;\nadaptadores sobre HOSPITAL; rutas con x-permiso\nCompuerta: API-01 a 04 contra routes/api.php" as f1
+rectangle "Fase 2 · Consumidores por contrato\nExpediente usa ClienteNotasSoap o la interfaz;\nnadie lee clinical_notes directamente\nCompuerta: búsqueda en el código sin SQL ajeno" as f2
+rectangle "Fase 3 · Revisión de frontera\n4 semanas de registro de acceso\nCompuerta: ¿se cumple C1–C5\ny p95 remoto ≤ 150 ms?" as f3 #FFF6E5
+rectangle "Fase 4 · Extraer servicio (condicional)\nAPI propia con su base; el Gateway enruta;\nreglas R-02/R-03 por contrato con Expediente\nCompuerta: mismas pruebas de contrato" as f4 #F3ECF9
+rectangle "Fase 5 · Retirar el camino viejo\ntráfico 10 % → 50 % → 100 %\nCompuerta: errores y p95 en objetivo" as f5 #F3ECF9
+
+f0 --> f1
+f1 --> f2
+f2 --> f3
+f3 --> f4 : sí
+f3 --> f2 : no: se queda como módulo
+f4 --> f5
+f5 ..> f4 : bajar el porcentaje
+f4 ..> f2 : bandera: volver al adaptador en proceso
+
+legend bottom
+  Las fases 1 y 2 se justifican solas: mejoran el monolito aunque nunca se llegue a la fase 4.
+endlegend
+@enduml

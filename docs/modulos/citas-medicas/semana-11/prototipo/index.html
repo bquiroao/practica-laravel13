@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citas · Hospital HIS</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="barra">
+    <strong>Agenda</strong>
+    <span>H. Central · <span id="rol-actual"></span></span>
+  </header>
+  <p id="estado" role="status" class="estado"></p>
+  <main id="contenido" tabindex="-1"></main>
+  <footer class="panel">
+    <strong>Panel del prototipo</strong> (datos ficticios, sin conexión a la API)
+    <label>Rol <select id="rol"><option value="recepcion">Recepcionista</option><option value="medico">Médica (Dra. Ruiz)</option></select></label>
+    <label><input type="checkbox" id="simular-conflicto"> Al confirmar, otra persona toma el horario antes (error E4)</label>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

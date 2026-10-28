@@ -1,0 +1,100 @@
+@startuml semana-01-secuencia
+title Órdenes de laboratorio desde EMR\nEmisión y seguimiento
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam shadowing false
+
+actor "Profesional clínico" as Clinico
+boundary "EMR / interfaz" as EMR
+control "Autorización HIS" as Auth
+control "Servicio de órdenes" as Servicio
+participant "Catálogo de pruebas" as Catalogo
+database "Repositorio HOSPITAL\n(lab_order / lab_order_item)" as Ordenes
+participant "Proceso de laboratorio" as Laboratorio
+
+== Emitir orden desde el expediente [CU-01] ==
+Clinico -> EMR: S-01 Iniciar solicitud desde paciente y episodio
+EMR -> Auth: S-02 Validar actor y acceso al expediente [R-01]
+Auth --> EMR: S-03 Acceso permitido / denegado
+alt E-01: Acceso denegado
+  EMR --> Clinico: S-04 Informar denegación sin datos clínicos
+else Acceso permitido
+  EMR -> Servicio: S-05 emitir(paciente, episodio, solicitante) [R-02]
+  Servicio -> Auth: S-06 Confirmar contexto y permisos del paciente/episodio
+  Auth --> Servicio: S-07 Contexto válido / inválido
+  alt E-02: Paciente o episodio inconsistente
+    Servicio --> EMR: S-08 Error de contexto; no emitir
+    EMR --> Clinico: S-09 Solicitar corrección del expediente
+  else Contexto válido
+    Servicio -> Catalogo: S-10 Consultar pruebas vigentes
+    Catalogo --> Servicio: S-11 Pruebas disponibles
+    Servicio --> EMR: S-12 Presentar pruebas seleccionables [R-03]
+    EMR --> Clinico: S-13 Mostrar catálogo disponible
+    Clinico -> EMR: S-14 Seleccionar pruebas y confirmar
+    EMR -> Servicio: S-15 Enviar selección
+    Servicio -> Catalogo: S-16 Revalidar vigencia de cada prueba
+    Catalogo --> Servicio: S-17 Selección válida / inválida
+    alt E-03: Sin pruebas válidas
+      Servicio --> EMR: S-18 Error de validación
+      EMR --> Clinico: S-19 Solicitar corrección de selección
+    else Pruebas válidas
+      Servicio -> Ordenes: S-20 Guardar orden y partidas en una transacción [R-04]
+      alt E-04: Error de persistencia
+        Ordenes --> Servicio: S-21 Fallo; operación revertida
+        Servicio --> EMR: S-22 Error; emisión no confirmada
+        EMR --> Clinico: S-23 Informar que no se creó la orden
+      else Persistencia confirmada
+        Ordenes --> Servicio: S-24 Identificador y estado inicial
+        Servicio --> EMR: S-25 Confirmar orden y partidas guardadas
+        EMR --> Clinico: S-26 Mostrar confirmación e identificador
+      end
+    end
+  end
+end
+
+== Consultar seguimiento [CU-02] ==
+Clinico -> EMR: S-27 Abrir seguimiento de órdenes
+EMR -> Auth: S-28 Validar permiso sobre expediente [R-01]
+Auth --> EMR: S-29 Acceso permitido / denegado
+alt E-01: Acceso denegado
+  EMR --> Clinico: S-30 Informar denegación
+else Acceso permitido
+  EMR -> Servicio: S-31 Consultar órdenes del paciente y episodio [R-02]
+  Servicio -> Ordenes: S-32 Buscar órdenes y partidas
+  Ordenes --> Servicio: S-33 Estado persistido / sin órdenes
+  alt E-05: Consulta no disponible
+    Servicio --> EMR: S-34 Error de consulta
+    EMR --> Clinico: S-35 Informar que el estado no pudo actualizarse
+  else Consulta disponible
+    alt Hay órdenes
+      Servicio --> EMR: S-36 Órdenes con último estado confirmado [R-05]
+      EMR --> Clinico: S-37 Mostrar seguimiento
+    else No hay órdenes
+      Servicio --> EMR: S-38 Resultado vacío
+      EMR --> Clinico: S-39 Mostrar que no hay órdenes para el episodio
+    end
+  end
+end
+
+== Actualización posterior de estado [CU-03] ==
+Laboratorio -> Servicio: S-40 Notificar cambio de estado para orden existente
+Servicio -> Servicio: S-41 Validar origen, referencia y transición acordada
+alt E-06: Orden desconocida, origen no autorizado o transición no admitida
+  Servicio --> Laboratorio: S-42 Rechazar cambio y registrar motivo
+else Actualización válida
+  Servicio -> Ordenes: S-43 Persistir actualización aceptada [R-05]
+  alt E-07: Falla de persistencia
+    Ordenes --> Servicio: S-44 Error; estado no actualizado
+    Servicio --> Laboratorio: S-45 Informar que el cambio no se aplicó
+  else Persistencia confirmada
+    Ordenes --> Servicio: S-46 Estado actualizado
+    Servicio --> Laboratorio: S-47 Confirmar cambio aplicado
+  end
+end
+note over Laboratorio,Servicio
+  Los estados y transiciones específicos quedan pendientes
+  de contrato con los módulos de laboratorio relacionados.
+  R-06: recepción de muestras y captura/validación de resultados
+  permanecen fuera del alcance de este módulo.
+end note
+@enduml

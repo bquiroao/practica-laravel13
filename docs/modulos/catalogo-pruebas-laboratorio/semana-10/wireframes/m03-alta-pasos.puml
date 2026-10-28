@@ -1,0 +1,19 @@
+@startsalt m03-alta-pasos
+title M-03 Alta en móvil: tres pasos cortos
+{+
+  {[<] | <b>Nueva prueba</b> | Paso 2 de 3 }
+  ==
+  <b>Requisitos de muestra</b>
+  Tipo de muestra
+  ^Plasma          ^
+  Contenedor
+  "Tubo tapa gris  "
+  Volumen mínimo (mL)
+  "0               "
+  <&circle-x> Debe ser mayor que 0 mL.
+  Ayuno (h)
+  "8               "
+  ..
+  [Atrás] | [Siguiente: vigencia]
+}
+@endsalt

@@ -1,0 +1,69 @@
+@startuml semana-01-secuencia
+title Secuencia — CU-03 Exportar y CU-05 Reproducir (con CU-02, CU-04 y CU-06)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber "S00"
+
+actor "Jefatura /\nAuditor" as U
+participant "Pantalla de\nreportes" as UI
+participant "Controlador\nReportes" as Ctl
+participant "Identidad y\npermisos (RBAC)" as Rbac
+participant "Caso de uso\nExportarReporte" as CU
+participant "Catálogo de\nreportes" as Cat
+database "Vistas de solo\nlectura (fuentes)" as V
+database "Registro de\nexportaciones" as Reg
+participant "Bitácora\n(M22)" as Bit
+
+U -> UI : elige reporte, filtros y formato
+UI -> UI : valida fechas y campos (ayuda inmediata)
+UI -> Ctl : GET /api/v1/reportes/{codigo}/exportar?desde&hasta&servicio&formato=csv\n(o POST /api/v1/exportaciones/{id}/reproducir)
+Ctl -> Rbac : verificar(token, rol, hospital)
+alt D1 sin sesión o sin permiso
+  Ctl --> UI : E1 401 / 403
+else autorizado
+  Ctl -> CU : ejecutar(peticion, usuario)
+  CU -> Cat : definicion(codigo) o Reg: exportacion(id)
+  alt D2 no existe
+    CU --> Ctl : E2 reporte_no_encontrado
+    Ctl --> UI : 404
+  else existe
+    CU -> CU : D3 normalizar y validar filtros [CU-02]
+    alt filtros inválidos
+      CU --> Ctl : E3 filtro_invalido {campo}
+      Ctl --> UI : 422
+    else válidos
+      CU -> V : SELECT ... WHERE hospital = ? AND fecha BETWEEN ? AND ?\nAND registrado_en <= :corte ORDER BY clave (preparado)
+      alt D4 más de 30 s
+        V --> CU : tiempo agotado
+        CU --> Ctl : E4 consulta_lenta
+        Ctl --> UI : 504
+      else filas (o 0 filas = E5 vacío)
+        V --> CU : filas
+        opt D6 rol sin permiso de datos personales
+          CU -> CU : enmascarar nombre y documento [CU-06]
+        end
+        CU -> CU : generar CSV/PDF y SHA-256
+        alt D7 exportación nueva
+          CU -> Reg : guardar(filtros, corte, versión, formato, filas, hash, usuario) [CU-04]
+          alt D9 falla el registro
+            Reg --> CU : error
+            CU --> Ctl : E7 error_persistencia
+            Ctl --> UI : 500 (sin archivo)
+          else registrado
+            CU -> Bit : evento «exportacion_generada»
+            CU --> Ctl : archivo + id + hash
+            Ctl --> UI : R1 200 archivo\nX-Exportacion-Id, X-Reporte-Sha256
+          end
+        else reproducción [CU-05]
+          CU -> CU : D8 comparar hash con el original
+          CU -> Bit : evento «exportacion_reproducida» (coincide / difiere)
+          Ctl --> UI : R2 200 coincide  ·  E6 200 con aviso: difiere
+        end
+      end
+    end
+  end
+end
+UI --> U : descarga o resultado de la comparación
+@enduml

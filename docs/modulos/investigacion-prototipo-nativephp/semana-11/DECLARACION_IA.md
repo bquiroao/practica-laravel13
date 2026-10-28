@@ -1,0 +1,1 @@
+IA utilizada para reutilizar prototipo propio de evaluación, adaptar entrega de semana 11, documentar mapa/escenarios y ejecutar recorrido de navegador. La estudiante revisa y defiende decisiones. Fuente simulada, notificación/roles/red simulados; sin runtime NativePHP, datos clínicos, seguridad real o revisión independiente.

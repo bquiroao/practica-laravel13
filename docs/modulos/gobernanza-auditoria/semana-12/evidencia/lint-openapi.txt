@@ -1,0 +1,16 @@
+
+    [33m╔[33m═══════════════════════════════════════════════════════[33m╗[39m
+    [33m║                                                       ║[39m
+    [33m║[39m  A new version of [36mRedocly CLI[39m ([32m2.71.1[39m) is available.  [33m║[39m
+    [33m║[39m  Update now: `[36mnpm i -g @redocly/cli@latest[39m`.          [33m║[39m
+    [33m║[39m  Changelog: https://redocly.com/docs/cli/changelog/   [33m║[39m
+    [33m║                                                       ║[39m
+    [33m╚[33m═══════════════════════════════════════════════════════[33m╝[39m
+
+No configurations were provided -- using built in [34mrecommended[39m configuration by default.
+
+[90mvalidating api\openapi.yaml...
+[39m[90mapi\openapi.yaml: validated in 42ms
+
+[39m[32mWoohoo! Your API description is valid. 🎉
+[39m

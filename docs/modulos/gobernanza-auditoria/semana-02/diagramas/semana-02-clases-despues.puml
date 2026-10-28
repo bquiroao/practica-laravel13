@@ -1,0 +1,107 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title Diseño DESPUÉS de OCP — servicios cerrados, reglas y filtros abiertos a extensión
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #F5F9FF
+skinparam classBorderColor #2F5D8A
+
+package "Servicios (cerrados a modificación)" {
+  class ServicioRegistro {
+    + registrar(SolicitudRegistro) : Resultado
+    + anexar(Movimiento) : Movimiento
+  }
+  class ServicioConsulta {
+    + consultar(actor, hospital, alcance, p) : Resultado
+    + detalle(actor, hospital, alcance, id) : Resultado
+  }
+  class VerificadorIntegridad {
+    + verificar(actor, hospital) : Resultado
+  }
+}
+
+package "Contratos" {
+  interface ReglaMovimiento <<punto de extensión>> {
+    + evaluar(SolicitudRegistro) : ?Rechazo
+  }
+  interface FiltroMovimiento <<punto de extensión>> {
+    + parametros() : list
+    + obligatorio() : bool
+    + activo(p) : bool
+    + validar(p) : array
+    + coincide(Movimiento, p) : bool
+    + sql(p) : [where, params]
+  }
+  interface Bitacora <<puerto>> {
+    + agregar(Movimiento)
+    + porEvento(emisor, eventId)
+    + porId(id)
+    + ultimo(hospital)
+    + buscar(ConsultaMovimientos)
+    + cadena(hospital)
+    .. sin actualizar() ni eliminar() ..
+  }
+  interface Transaccion <<puerto>>
+  interface PoliticaAcceso <<puerto RBAC>>
+}
+
+package "Reglas" {
+  class ReglaTenantDelEmisor
+  class ReglaCamposObligatorios
+  class ReglaAccionEnCatalogo
+  class ReglaResultadoValido
+  class ReglaFechaNoFutura
+  class ReglaSinDatosProhibidos
+}
+
+package "Filtros" {
+  class FiltroRangoFechas <<obligatorio>>
+  abstract class FiltroPorCampo
+  class FiltroUsuario
+  class FiltroModulo
+  class FiltroAccion
+}
+
+package "extension (requerimientos nuevos)" #E8F5E9 {
+  class ReglaModuloDelEmisor
+  class FiltroResultado
+}
+
+package "Dominio" {
+  class Movimiento <<inmutable>>
+  class Sello
+  class ConsultaMovimientos
+}
+
+ServicioRegistro o--> "*" ReglaMovimiento : iterable
+ServicioConsulta o--> "*" FiltroMovimiento : iterable
+ServicioRegistro --> Bitacora
+ServicioRegistro --> Transaccion
+ServicioRegistro --> PoliticaAcceso
+ServicioConsulta --> Bitacora
+ServicioConsulta --> ServicioRegistro : anexar() (meta-auditoría)
+VerificadorIntegridad --> Bitacora
+ServicioRegistro ..> Sello
+VerificadorIntegridad ..> Sello
+ServicioConsulta ..> ConsultaMovimientos
+
+ReglaMovimiento <|.. ReglaTenantDelEmisor
+ReglaMovimiento <|.. ReglaCamposObligatorios
+ReglaMovimiento <|.. ReglaAccionEnCatalogo
+ReglaMovimiento <|.. ReglaResultadoValido
+ReglaMovimiento <|.. ReglaFechaNoFutura
+ReglaMovimiento <|.. ReglaSinDatosProhibidos
+ReglaMovimiento <|.. ReglaModuloDelEmisor
+
+FiltroMovimiento <|.. FiltroRangoFechas
+FiltroMovimiento <|.. FiltroPorCampo
+FiltroPorCampo <|-- FiltroUsuario
+FiltroPorCampo <|-- FiltroModulo
+FiltroPorCampo <|-- FiltroAccion
+FiltroMovimiento <|.. FiltroResultado
+
+note bottom of ServicioConsulta
+  Fijo en el servicio (NO es un filtro intercambiable):
+  permiso, alcance hospital/red (R-05), meta-auditoría (R-08), página de 50 (R-09).
+  Un parámetro que ningún filtro reclama → 422 FILTRO_NO_SOPORTADO.
+end note
+@enduml

@@ -1,0 +1,33 @@
+@startuml repositorio-compartido
+title Integración mediante un repositorio de datos compartido (base HOSPITAL)
+skinparam componentStyle rectangle
+
+package "SHI — Laravel 12" {
+  [Catálogo de pruebas\nde laboratorio] as CAT
+  [Órdenes de\nlaboratorio] as ORD
+  [Recepción de\nmuestras] as MUE
+  [Validación de\nresultados] as RES
+}
+
+database "HOSPITAL (PostgreSQL, por tenant)" {
+  [lab_test] as T
+  [lab_order / lab_order_item] as O
+  [specimen] as S
+  [lab_result_version] as R
+}
+
+CAT --> T : escribe y lee\n(dueño)
+ORD ..> T : lee vigentes\n(solo lectura)
+ORD --> O : escribe
+O ..> T : lab_order_item → lab_test.id\n(versión vigente al ordenar)
+MUE ..> T : lee requisitos\n(contenedor, volumen, estabilidad)
+MUE --> S
+RES --> R
+
+note bottom of T
+  Regla de convivencia: solo el Catálogo escribe en lab_test.
+  Una versión usada en órdenes no se borra (RN-06); un cambio
+  crea otra versión (RN-05), así las órdenes viejas conservan
+  los requisitos con los que se pidieron.
+end note
+@enduml

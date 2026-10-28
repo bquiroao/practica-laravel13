@@ -1,0 +1,18 @@
+@startuml semana-03-c4-componentes
+' Semana 3 — Contratos API / centro de documentación por rol (tarea Odoo 2475): C4 nivel 3
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Contratos API (documentación por rol)
+Person(usr, "Autor, responsable o lector", "Envía, revisa o consulta documentos")
+Container_Boundary(micro, "Micro-HIS Contratos API (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorDocumentacion", "Presentación", "Entrada, traducción E2..E8 a HTTP")
+  Component(svc, "ServicioPublicacion, ServicioRevision, ServicioConsulta", "Aplicación", "CU-01 a CU-05, un servicio por cliente")
+  Component(dom, "EstadoVersion, VersionNueva, Audiencia", "Dominio", "R-01 a R-03, R-05 a R-08")
+  Component(repo, "RepositorioPdo", "Persistencia", "PDO con sentencias preparadas")
+}
+ContainerDb(db, "Base del centro", "PostgreSQL (SQLite en pruebas)", "doc_versions, doc_audiences")
+Rel(usr, ctrl, "enviar, aprobar, rechazar, obsoleta, consultar")
+Rel(ctrl, svc, "llama")
+Rel(svc, dom, "valida y filtra audiencia")
+Rel(svc, repo, "EscritorVersiones, RevisionPublicaciones, LectorDocumentos")
+Rel(repo, db, "SQL preparado")
+@enduml

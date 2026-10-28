@@ -1,0 +1,36 @@
+@startuml semana-04-capas-repository
+title Semana 4 — Capas, MVC y Repository del Micro-HIS Signos vitales
+skinparam defaultFontName Arial
+hide empty members
+package "Presentación (MVC)" #EEF2F7 {
+  class Enrutador
+  class TomasControlador <<Controlador>>
+  class VistaJson <<Vista>>
+}
+package "Aplicación" #E8F5E9 {
+  class RegistrarToma
+  class ConsultarTomas
+  interface RepositorioTomas <<Repository>>
+  interface FuenteClinica <<solo lectura>>
+}
+package "Dominio" #FFF8E1 {
+  class "Toma · Medicion · EvaluadorUmbrales · ReglaDeUmbral" as Dom <<Modelo>>
+}
+package "Persistencia" #FCE4EC {
+  class TomasPdo
+  class EnMemoria
+}
+Enrutador -right-> TomasControlador
+TomasControlador -down-> RegistrarToma
+TomasControlador -down-> ConsultarTomas
+TomasControlador .right.> VistaJson
+RegistrarToma -down-> RepositorioTomas
+RegistrarToma -down-> FuenteClinica
+ConsultarTomas -down-> RepositorioTomas
+RegistrarToma .left.> Dom
+TomasPdo .up.|> RepositorioTomas
+TomasPdo .up.|> FuenteClinica
+EnMemoria .up.|> RepositorioTomas
+EnMemoria .up.|> FuenteClinica
+note right of EnMemoria : TomasPdo: SQL preparado + transacción\nEnMemoria: pruebas y doble que falla
+@enduml

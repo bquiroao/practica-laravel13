@@ -1,0 +1,22 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title C4 (contexto → contenedor → componentes) — Micro-HIS Signos vitales y alertas, semana 3
+Person(enf, "Enfermero(a)", "Registra la toma de signos vitales")
+System_Ext(rbac, "Identidad y permisos (RBAC)", "Otro módulo; hoy se simula con usuarios de demostración")
+System_Ext(m21, "Alertas críticas (M21)", "Recibirá las críticas pendientes (semana 5)")
+System_Boundary(his, "Micro-HIS Signos vitales (PHP 8.2+, sin framework)") {
+  Component(pre, "Presentación", "TomasControlador", "HTTP ↔ caso de uso: ruta, método, JSON y estado HTTP")
+  Component(app, "Aplicación", "RegistrarToma, Usuario", "Orquesta CU-01: permiso, episodio, edad, guardar")
+  Component(dom, "Dominio", "Toma, Medicion, ReglaDeUmbral, EvaluadorUmbrales", "Reglas: límite físico, clasificación, alertas (LSP, S2)")
+  Component(per, "Persistencia", "TomasPdo", "PDO con sentencias preparadas y transacción")
+}
+ContainerDb(bd, "Base del módulo", "SQLite (demo) / PostgreSQL del grupo", "tomas_signos_vitales, mediciones_signo, alertas_signos_vitales, rangos_signos_vitales")
+Rel(enf, pre, "POST /api/v1/signos-vitales/tomas", "JSON")
+Rel(pre, app, "ejecutar(entrada, usuario)")
+Rel(app, dom, "Toma::registrar(...)")
+Rel(app, per, "episodioActivo, rangosPara, guardar", "dependencia directa: se invierte en S4")
+Rel(per, dom, "lee Toma y RangoSigno")
+Rel(per, bd, "SQL preparado", "PDO")
+Rel_L(pre, rbac, "identidad (pendiente)")
+Rel(bd, m21, "críticas «pendiente_envio» (envío en S5)", "bandeja de salida")
+@enduml
