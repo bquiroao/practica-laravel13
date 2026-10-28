@@ -1,0 +1,15 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Salas
+Salas : &#35;salas · hora y fuente del corte; aviso si pasa de 15 min (error crítico, R-06)
+Filtro : &#35;salas/disponible
+Sala : &#35;sala/A
+Corte : &#35;corte (solo administrador)
+Salas --> Filtro : «Estado de cama»
+Filtro --> Salas : «Todos»
+Salas --> Sala : «Ver sala A»
+Sala --> Salas : «‹ Ocupación»
+Salas --> Corte : «Generar un corte ahora»
+Corte --> Salas : corte guardado, o falla (E2) con el corte anterior
+@enduml

@@ -1,0 +1,24 @@
+@startuml c4-componentes
+!include <C4/C4_Component>
+title C4 nivel 3 — Componentes del Micro-HIS (semana 3)
+
+Person(usuario, "Usuario del laboratorio")
+ContainerDb(db, "PostgreSQL 16", "Docker, puerto 55441", "micro_lab / micro_lab_test, tabla lab_test")
+
+Container_Boundary(micro, "Micro-HIS Catálogo de pruebas de laboratorio (PHP 8.2+ vanilla)") {
+  Component(cli, "ConsolaCatalogo", "Presentation", "Lee argumentos y muestra resultados")
+  Component(casos, "RegistrarPrueba / ConsultarPruebasVigentes / VerDetallePrueba", "Application", "Coordinan CU-01 a CU-05")
+  Component(dominio, "LabTest, RequisitoMuestra, Vigencia", "Domain", "Reglas RN-02 a RN-06")
+  Component(puerto, "LabTestRepository", "Domain (interfaz)", "Puerto de persistencia")
+  Component(pdo, "PdoLabTestRepository", "Persistence", "prepare() + execute(), transacción RN-07")
+  Component(root, "bootstrap.php", "Composition Root", "Elige las implementaciones concretas")
+}
+
+Rel(usuario, cli, "php cli.php ...")
+Rel(cli, casos, "Invoca")
+Rel(casos, dominio, "Valida y crea versiones")
+Rel(casos, puerto, "Usa")
+Rel(pdo, puerto, "Implementa")
+Rel(pdo, db, "SQL parametrizado", "PDO pgsql")
+Rel_U(root, cli, "Construye")
+@enduml

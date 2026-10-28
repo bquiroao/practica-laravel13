@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Expedientes · Hospital HIS</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="barra">
+    <strong>Expedientes</strong>
+    <span>H. Central · <span id="rol-actual"></span></span>
+  </header>
+  <p id="estado" role="status" class="estado"></p>
+  <main id="contenido" tabindex="-1"></main>
+  <footer class="panel">
+    <strong>Panel del prototipo</strong> (datos ficticios, sin conexión a la API)
+    <label>Rol <select id="rol"><option value="tratante">Profesional tratante (Dra. Ruiz)</option><option value="admision">Personal de admisión</option></select></label>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

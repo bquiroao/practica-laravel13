@@ -1,0 +1,7 @@
+ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
+
+H-01  reproducido     entrada atender(accion, d); códigos: E2 E3 E4 E5 E6 E7 NF
+H-02  reproducido     bed_status_history: id, ward_code, bed_code, from_status, to_status, reason, changed_at
+H-03  reproducido     registrar «A» = 201; registrar « A» = 201 (se esperaba 409 E3)
+H-04  reproducido     faltan en el esquema: location, type
+H-05  reproducido     disponible -> ocupada = 422 E6

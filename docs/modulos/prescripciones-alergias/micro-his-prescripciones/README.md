@@ -33,7 +33,7 @@ micro-his-prescripciones/
 │   ├── Dominio/                  ← Modelo, Reglas, Puertos (RepositorioPrescripciones, Reloj), Excepciones
 │   ├── Persistencia/             ← Pdo/* y EnMemoria/* (6 + 6), Http/HttpFuenteAlergias + CircuitoInterruptor, FabricaAdaptadores
 │   └── Cliente/                  ← ClientePrescripciones (reintento idempotente, sin bandeja) y transporte HTTP
-└── tests/                        ← arnés propio, decoradores de prueba, suite de contrato, 111 pruebas y 35 mutaciones
+└── tests/                        ← arnés propio, decoradores de prueba, suite de contrato, 129 pruebas (más 7 de defectos abiertos, con --defectos) y 36 mutaciones
 ```
 
 ## API
@@ -56,8 +56,8 @@ php bin/demo.php                                         # demo sin base (adapta
 
 export PRESCRIPCIONES_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_prescripciones"
 export PRESCRIPCIONES_DB_USUARIO=postgres
-php tests/ejecutar.php                                   # 111/111 con PostgreSQL
-php tests/mutaciones.php                                 # 35/35 mutaciones detectadas
+php tests/ejecutar.php                                   # 129/129 con PostgreSQL
+php tests/mutaciones.php                                 # 36/36 mutaciones detectadas
 php bin/medir.php 200                                    # medición de la frontera (semana 5)
 php bin/validar-integracion-hospital.php                 # 13/13 sobre las migraciones reales del hospital
 bash bin/demo-http.sh                                    # recorrido HTTP con php -S

@@ -1,0 +1,1 @@
+IA utilizada para continuar el ejemplo ISP, implementar capas PHP/PDO, generar arquitectura y ejecutar pruebas/lint. La estudiante revisa y defiende decisiones. Se demuestra SQLite temporal real con dobles HIS/OS, no aplicación NativePHP ni datos clínicos. No se atribuye aprobación independiente.
