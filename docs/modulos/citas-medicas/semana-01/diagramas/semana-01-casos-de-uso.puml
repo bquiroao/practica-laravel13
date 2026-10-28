@@ -1,0 +1,39 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Citas médicas y agenda (tarea Odoo 2458)
+title Casos de uso — solicitud, validación de disponibilidad y confirmación o cancelación de cita
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Recepcionista" as Rec
+actor "Médico" as Med
+
+rectangle "Citas médicas y agenda" {
+  usecase "CU-01\nSolicitar cita" as CU01
+  usecase "CU-02\nConfirmar cita" as CU02
+  usecase "CU-03\nCancelar cita" as CU03
+  usecase "CU-04\nValidar disponibilidad" as CU04
+  usecase "CU-05\nAutorizar operación" as CU05
+}
+
+Rec --> CU01
+Rec --> CU02
+Rec --> CU03
+Med --> CU03
+
+CU01 ..> CU04 : <<include>>
+CU01 ..> CU05 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU05 : <<include>>
+
+note right of CU04
+  «Disponible» = sin cita activa
+  cruzada del médico ni del paciente,
+  con perfil y especialidad vigentes
+  (R-02 a R-05).
+end note
+
+note bottom of Rec
+  Actúa en nombre del paciente,
+  que no usa el sistema.
+end note
+@enduml

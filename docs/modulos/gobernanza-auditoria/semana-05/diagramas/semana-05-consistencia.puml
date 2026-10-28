@@ -1,0 +1,32 @@
+@startuml semana-05-consistencia
+title Consistencia: qué es fuerte y qué es eventual
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+
+|Emisor (hospital)|
+start
+:La operación clínica termina
+(p. ej. se abre la ficha);
+:Movimiento con event_id estable;
+|#E8F5E9|Transporte (asíncrono)|
+:BandejaLocal o central_inbox_messages
+(entrega «al menos una vez»);
+note right
+  EVENTUAL: la bitácora puede ir
+  segundos atrás del hecho.
+  Se mide el retraso (semana 14).
+end note
+|Servicio de auditoría|
+:Reglas → idempotencia por (emisor, event_id);
+:BEGIN · candado de la cadena · último sello
+· sello · INSERT · COMMIT;
+note right
+  FUERTE dentro del servicio:
+  cadena sin huecos ni duplicados,
+  todo o nada (R-10).
+end note
+:Consulta = lo confirmado
++ su propia meta-auditoría en la misma transacción;
+stop
+@enduml

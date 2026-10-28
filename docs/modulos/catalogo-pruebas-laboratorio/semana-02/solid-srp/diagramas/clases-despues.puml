@@ -1,0 +1,31 @@
+@startuml clases-despues
+title SRP — Después: una responsabilidad por clase
+skinparam classAttributeIconSize 0
+
+class RegistrarPrueba {
+  + ejecutar(datos, hoy) : array
+}
+class Requisitos <<regla>> {
+  + {static} errores(datos, hoy) : string[]
+}
+class PoliticaVersionado <<regla>> {
+  + {static} decidir(ultima, nuevoDesde) : [versión, cierre]
+}
+interface RepositorioPruebas {
+  + ultimaVersion(codigo) : ?array
+  + guardar(nueva, cierreAnterior) : void
+}
+class RepositorioEnMemoria
+class "Pantalla de alta" as UI
+
+UI --> RegistrarPrueba : ejecutar()
+RegistrarPrueba ..> Requisitos : valida
+RegistrarPrueba ..> PoliticaVersionado : decide versión
+RegistrarPrueba --> RepositorioPruebas : guarda
+RepositorioEnMemoria ..|> RepositorioPruebas
+
+note bottom of UI
+  El texto para el usuario
+  lo arma la presentación
+end note
+@enduml

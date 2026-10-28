@@ -51,7 +51,7 @@ CREATE UNIQUE INDEX membresias_activa_abierta_unica
 CREATE TABLE eventos_auditoria (
     evento_id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     correlation_id text NOT NULL UNIQUE,
-    tipo           text NOT NULL CHECK (tipo IN ('ROL_ASIGNADO', 'ACCESO_DENEGADO')),
+    tipo           text NOT NULL CHECK (tipo IN ('ROL_ASIGNADO', 'ROL_REVOCADO', 'ACCESO_DENEGADO')),
     actor_id       text NOT NULL,
     hospital_id    text NOT NULL,
     datos          jsonb NOT NULL CHECK (jsonb_typeof(datos) = 'object'),

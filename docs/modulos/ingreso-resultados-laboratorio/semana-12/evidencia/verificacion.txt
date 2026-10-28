@@ -1,0 +1,5 @@
+Edge headless + Playwright; 2026-10-27
+PASS desktop 1366px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.
+PASS movil 375px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.
+PASS movil-320 320px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.
+PASS movil-430 430px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.

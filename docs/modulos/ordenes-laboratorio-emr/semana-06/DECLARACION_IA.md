@@ -1,0 +1,1 @@
+IA utilizada para inspeccionar semana 2, preparar defensa, proponer cambio acotado, escribir pruebas y ejecutar evidencia. La estudiante revisa y defiende decisiones. No hay aprobación docente ni política clínica confirmada, implementación HTTP/PDO ni pruebas de identidad real.

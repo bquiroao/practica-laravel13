@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 3 - Secuencia de autenticación y revocación</title>
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="450" y="24" text-anchor="middle" font-size="16" font-weight="bold">Autenticación y revocación de sesión</text>
+  <g font-weight="bold" text-anchor="middle" fill="#eef5ff" stroke="#333">
+    <rect x="20" y="40" width="110" height="30"/><rect x="230" y="40" width="150" height="30"/><rect x="480" y="40" width="150" height="30"/><rect x="730" y="40" width="150" height="30"/>
+  </g>
+  <g text-anchor="middle" font-weight="bold"><text x="75" y="60">Usuario</text><text x="305" y="60">AuthController</text><text x="555" y="60">Authenticate</text><text x="805" y="60">Repositorios PDO</text></g>
+  <g stroke="#999" stroke-dasharray="4,4"><path d="M75,70 V500"/><path d="M305,70 V500"/><path d="M555,70 V500"/><path d="M805,70 V500"/></g>
+  <g stroke="#333" fill="none" marker-end="url(#a)">
+    <path d="M75,100 H305"/><path d="M305,120 H555"/><path d="M555,140 H805"/><path d="M555,250 H805"/><path d="M75,330 H305"/><path d="M305,350 H805"/><path d="M305,400 H805"/>
+  </g>
+  <g stroke="#333" fill="none" stroke-dasharray="5,3" marker-end="url(#a)">
+    <path d="M805,160 H555"/><path d="M305,200 H75"/><path d="M305,280 H75"/><path d="M305,420 H75"/><path d="M305,450 H75"/>
+  </g>
+  <text x="85" y="94" font-size="12">login(tenant, correo, contraseña)</text>
+  <text x="565" y="134" font-size="12">findByEmail</text>
+  <text x="565" y="176" font-size="12">User o null</text>
+  <text x="85" y="194" font-size="12" fill="#721c24">401 mismo mensaje (inexistente, inactivo o clave errónea)</text>
+  <text x="565" y="244" font-size="12">add(Session, sha256(token))</text>
+  <text x="85" y="274" font-size="12">200 + token (se entrega una sola vez)</text>
+  <text x="85" y="324" font-size="12">logout(token)</text>
+  <text x="315" y="344" font-size="12">findByTokenHash(sha256)</text>
+  <text x="315" y="394" font-size="12">revoke(id, ahora) si está activa</text>
+  <text x="85" y="414" font-size="12">204 revocada</text>
+  <text x="85" y="444" font-size="12" fill="#721c24">401 si expiró o ya estaba revocada</text>
+  <rect x="20" y="468" width="860" height="40" fill="#fff8dc" stroke="#333"/>
+  <text x="30" y="493">Si la base falla: PersistenceFailure y el controlador responde 503 sin filtrar SQL.</text>
+</svg>

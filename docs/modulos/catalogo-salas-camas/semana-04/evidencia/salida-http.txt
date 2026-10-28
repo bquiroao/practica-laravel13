@@ -1,0 +1,6 @@
+POST /salas {"codigo":"A","nombre":"Medicina interna"} -> 201 {}
+POST /salas/A/camas {"codigo":"101"} -> 201 {}
+PATCH /salas/A/camas/101/estado {"estado":"maintenance","motivo":"limpieza profunda"} -> 200 {}
+POST /salas {"codigo":"A","nombre":"Otra"} -> 409 {"error":"E3","mensaje":"La sala A ya existe."}
+PATCH /salas/A/camas/101/estado {"estado":"occupied","motivo":"x"} -> 422 {"error":"E6","mensaje":"Transición no permitida: maintenance -> occupied."}
+GET /salas  -> 404 {}

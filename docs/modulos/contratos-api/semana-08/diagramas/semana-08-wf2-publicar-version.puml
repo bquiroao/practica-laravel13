@@ -1,0 +1,12 @@
+@startsalt
+title W2 — Publicar una versión (autor técnico)
+{+
+  <b>Publicar versión</b> | . | [?] Ayuda
+  Documento * | ^guia-citas^ | <i>Vigente: 1.0.0</i>
+  Tipo * | { () OpenAPI | () Postman | (X) Manual } | <i>R-01</i>
+  Versión * | "1.1.0    " | <i>x.y.z y mayor que la vigente (R-02)</i>
+  Audiencia * | { [X] médico | [X] enfermería | [ ] farmacia } | <i>Al menos un rol (R-01)</i>
+  Archivo * | [Elegir archivo…] guia-citas-1.1.0.pdf | <i>Sin datos reales de pacientes (R-09)</i>
+  [Cancelar] | . | [Enviar a revisión]
+}
+@endsalt

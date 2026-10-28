@@ -1,0 +1,14 @@
+@startsalt w04-confirmacion
+title W-04 Confirmación antes de guardar
+{+
+  <b>Confirmar nueva versión de GLU-001</b>
+  ==
+  Versión nueva: 2 · Vigente desde 2027-02-01 sin fecha de fin
+  Cambios respecto a la versión 1: Volumen mínimo 2 mL → 1 mL
+  ..
+  <&warning> La versión 1 quedará vigente hasta el 2027-01-31.
+  Las órdenes ya hechas conservan la versión 1.
+  ..
+  [Volver a editar] | [Confirmar y guardar]
+}
+@endsalt

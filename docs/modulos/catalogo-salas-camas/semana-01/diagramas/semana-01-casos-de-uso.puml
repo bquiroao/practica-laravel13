@@ -1,0 +1,37 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Catálogo de salas, wards y camas (tarea Odoo 2443)
+title Casos de uso — creación de sala y cama con control de estado operativo
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrador\nde hospital" as Admin
+actor "Supervisor\nde enfermería" as Sup
+
+rectangle "Catálogo de salas, wards y camas" {
+  usecase "CU-01\nRegistrar sala" as CU01
+  usecase "CU-02\nRegistrar cama" as CU02
+  usecase "CU-03\nCambiar estado\noperativo de cama" as CU03
+  usecase "CU-04\nDesactivar o\nreactivar sala" as CU04
+  usecase "CU-05\nAutorizar operación" as CU05
+}
+
+actor "Módulo de\nadmisión" <<sistema>> as Adm
+
+Admin --> CU01
+Admin --> CU02
+Admin --> CU03
+Admin --> CU04
+Sup --> CU03
+CU03 -- Adm
+
+CU01 ..> CU05 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU05 : <<include>>
+CU04 ..> CU05 : <<include>>
+
+note right of Adm
+  Único que marca una cama
+  como «ocupada» y la libera
+  al alta (R-05, R-06).
+end note
+@enduml

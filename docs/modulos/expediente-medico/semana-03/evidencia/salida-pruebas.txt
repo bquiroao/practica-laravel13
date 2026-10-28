@@ -1,0 +1,15 @@
+OK    feliz: abrir el expediente de p1 = 201 EXP-p1 (CU-01)
+OK    feliz: m1, asignado a p1, lo consulta = 200 (CU-02)
+OK    feliz: con consentimiento vigente ve también el expediente de h2 (CU-03, longitudinal)
+OK    regla: abrir otra vez = 409 E3 y abrir a un paciente inactivo = 422 E2 (R-01, R-03)
+OK    regla: m2, sin asignación activa, consulta p1 = 403 E4 (R-05)
+OK    regla: p2 sin vínculo MPI = 200 solo con la historia local (R-06)
+OK    regla: p4 sin consentimiento = 403 E5 (R-06)
+OK    regla: con el consentimiento de p1 vencido = 403 E5 (R-10)
+OK    regla: las 11 operaciones quedan auditadas, también los rechazos (R-08)
+OK    persistencia (doble): CENTRAL caída = 503 E8 sin detalles técnicos
+OK    persistencia (doble): con CENTRAL caída la consulta local sigue = 200
+OK    persistencia (PDO real): PDOException en HOSPITAL se traduce a 503 E8
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

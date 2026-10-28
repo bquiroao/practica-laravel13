@@ -1,0 +1,11 @@
+$ php bin/demo-correccion.php
+Cambio práctico · corrección trazable (sin base de datos)
+------------------------------------------------------------------------------------------------------------------------
+1. Pacientes registra una consulta con el usuario EQUIVOCADO → 201 {"id":1,"secuencia":1,"sello":"95fe2d97c398c68c417e48bb704102a4fc5dce45babad33d2ddffadf29bac689"}
+2. Corrige sin motivo                                        → 422 {"error":"DATOS_INVALIDOS","campos":{"motivo_correccion":"Obligatorio en una corrección: de 10 a 500 caracteres."}}
+3. Corrige con motivo (el original NO se toca)               → 201 {"id":2,"secuencia":2,"sello":"6b38b759343a1c8c332fce8c334c1e19ad9548347dd9d3ffe7b8d54d376ef3cd"}
+4. Reintento de la misma corrección (idempotente)           → 200 {"codigo":"YA_REGISTRADO","id":2,"secuencia":2,"sello":"6b38b759343a1c8c332fce8c334c1e19ad9548347dd9d3ffe7b8d54d376ef3cd"}
+5. Otra corrección del mismo original                       → 409 {"error":"YA_CORREGIDO"}
+6. Norte intenta corregir el evento de oriente               → 422 {"error":"DATOS_INVALIDOS","campos":{"corrige_evento":"No hay un movimiento de este emisor en este hospital con ese event_id."}}
+7. El auditor consulta el día: el original avisa corregido_por → 200 {"movimientos":[{"id":2,"ocurrido_en":"2026-10-26T15:00:00Z","hospital":"hosp-oriente","usuario":"u-correcto","modulo":"pacientes","accion":"PACIENTE_CONSULTADO","resultado":"exito","recurso":"paciente:P-000001","corrige_a":1,"corregido_por":null},{"id":1,"ocurrido_en":"2026-10-26T14:00:00Z","hospital":"hosp-oriente","usuario":"u-equivocado","modulo":"pacientes","accion":"PACIENTE_CONSULTADO","re…
+8. La cadena sigue íntegra                                  → 200 {"estado":"INTEGRA","verificados":3}

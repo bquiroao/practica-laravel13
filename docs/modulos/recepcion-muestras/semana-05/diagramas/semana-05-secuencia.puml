@@ -1,0 +1,39 @@
+@startuml
+title Semana 5 - Secuencia POST /specimen-receptions con idempotencia y falla de Órdenes
+autonumber
+actor "Técnico/a" as U
+participant "Cliente" as C
+participant "API Recepción" as A
+participant "Auth" as Au
+participant "ReceiveSpecimen" as UC
+participant "Órdenes" as O
+database "BD Recepción" as DB
+
+U -> C : confirma decisión
+C -> A : POST /specimen-receptions\nIdempotency-Key: K1
+A -> Au : validar sesión, rol, hospital
+Au --> A : ok (hospital desde la sesión)
+A -> DB : ¿existe K1?
+alt K1 existe con el mismo contenido
+  DB --> A : recepción original
+  A --> C : 200 + recepción original
+else K1 existe con contenido distinto
+  A --> C : 409 conflicto de idempotencia
+else K1 nueva
+  A -> UC : ReceiveSpecimen
+  UC -> O : GET orden e ítem (timeout corto)
+  alt Órdenes no responde
+    O --> UC : timeout / error
+    UC --> A : no verificable
+    A --> C : 503 + Retry-After (no se guarda nada)
+  else Orden no existe o es de otro hospital
+    O --> UC : 404
+    A --> C : 404 sin revelar datos
+  else Orden válida
+    O --> UC : orden, ítem, paciente (referencia)
+    UC -> DB : guardar recepción + custodia + outbox (1 transacción)
+    DB --> UC : ok
+    A --> C : 201 + specimenId
+  end
+end
+@enduml

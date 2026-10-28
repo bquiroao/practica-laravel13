@@ -1,0 +1,37 @@
+Micro-HIS Pacientes - demo sin base de datos (PACIENTES_PERSISTENCIA=memoria)
+
+1. Registrar un paciente nuevo
+   POST /api/v1/pacientes -> 201  ETag "1"
+   {"codigo":"P-000005","version":1,"identidad_provisional":false}
+
+2. Registrar otra vez el DPI de Ana (ya existe)
+   POST /api/v1/pacientes -> 409
+   {"error":"PACIENTE_EXISTENTE","codigo":"P-000001","identificador":"*********0101"}
+
+3. El clínico intenta registrar
+   POST /api/v1/pacientes -> 403
+   {"error":"ACCESO_DENEGADO"}
+
+4. Buscar «lopez»
+   GET /api/v1/pacientes -> 200
+   {"resultados":[{"codigo":"P-000001","nombre":"Ana Lucía López Pérez","nacimiento":"1985-03-14","identificador":"*********0101"}],"total":1}
+
+5. Ver el detalle de P-000001
+   GET /api/v1/pacientes/P-000001 -> 200  ETag "1"
+   {"paciente":{"codigo":"P-000001","nombre":"Ana Lucía López Pérez","nacimiento":"1985-03-14","identificador":"*********0101","sexo":"female","telefono":"+502 5555 1234","tipo_documento":"DPI","estado":"active","identidad_provisional":false,"version":1}}
+
+6. Actualizar sin If-Match
+   PUT /api/v1/pacientes/P-000001 -> 428
+   {"error":"VERSION_REQUERIDA"}
+
+7. Actualizar con If-Match "1"
+   PUT /api/v1/pacientes/P-000001 -> 200  ETag "2"
+   {"codigo":"P-000001","version":2}
+
+8. Otro usuario actualiza con la versión vieja "1"
+   PUT /api/v1/pacientes/P-000001 -> 409
+   {"error":"VERSION_DESACTUALIZADA","version_vigente":2}
+
+9. Token de Norte con X-Tenant-ID de Oriente
+   GET /api/v1/pacientes/P-000001 -> 403
+   {"error":"TENANT_NO_COINCIDE"}

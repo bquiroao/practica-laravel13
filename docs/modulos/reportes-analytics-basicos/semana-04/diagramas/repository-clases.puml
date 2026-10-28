@@ -1,0 +1,51 @@
+@startuml repository_clases_reportes_analytics_basicos
+title Semana 4 · Patrón Repository con adaptadores PDO e InMemory
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+package Domain {
+  interface OcupacionRepository {
+    +camasHabilitadas(): int
+    +ocupadasPorSala(f: Filtros): array<string,int>
+    +registrosDeSala(f: Filtros, sala: string): RegistroOrigen[]
+  }
+  class ReporteOcupacion {
+    -repositorio: OcupacionRepository
+    +calcular(f: Filtros): Indicador
+    +desglosar(f: Filtros, dimension): Desglose
+    +registros(f: Filtros, dimension, parte): RegistroOrigen[]
+  }
+  class DatosNoDisponibles <<excepción>>
+}
+package Persistence {
+  class OcupacionPdoRepository {
+    -conexion: ConexionPdo
+    -consultar(sql, parametros): array
+  }
+  class OcupacionInMemoryRepository {
+    -camas: array
+    -estancias: array
+    -estanciasEnPeriodo(f): array
+  }
+  class ConexionPdo {
+    +pdo(): PDO
+  }
+}
+package pruebas {
+  class RepositorioQueFalla <<Test Double>>
+}
+
+ReporteOcupacion --> OcupacionRepository : depende solo\nde la interfaz
+OcupacionPdoRepository ..|> OcupacionRepository
+OcupacionInMemoryRepository ..|> OcupacionRepository
+RepositorioQueFalla ..|> OcupacionRepository
+OcupacionPdoRepository --> ConexionPdo
+OcupacionPdoRepository ..> DatosNoDisponibles : traduce PDOException
+RepositorioQueFalla ..> DatosNoDisponibles : siempre lanza
+
+note bottom of OcupacionInMemoryRepository
+  Misma regla de período que el SQL:
+  la prueba compara los resultados
+  de los dos adaptadores
+end note
+@enduml

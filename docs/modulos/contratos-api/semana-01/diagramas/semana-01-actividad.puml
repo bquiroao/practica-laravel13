@@ -1,0 +1,53 @@
+@startuml semana-01-actividad
+' Semana 1 — Contratos API: centro de documentación por rol (tarea Odoo 2473)
+title Actividad — publicación y consulta de documentación y manuales diferenciados por rol
+
+start
+:Usuario elige una operación del centro de documentación;
+if (D1 ¿Autorizado para esta operación\nen este hospital? (CU-06)) then (no)
+  :E1 Operación rechazada (403);
+  :F6 Rechazo con mensaje claro;
+  stop
+endif
+switch (D2 ¿Qué operación?)
+case (Enviar versión)
+  :Sube el documento con tipo, versión y audiencia;
+  if (D3 ¿Metadatos completos? (R-01)) then (no)
+    :E2 Metadatos incompletos (422) → F6;
+    stop
+  elseif (D4 ¿Versión nueva y mayor\nque la vigente? (R-02)) then (no)
+    :E3 Versión repetida o menor (409) → F6;
+    stop
+  elseif (D5 ¿Pasa lint OpenAPI y no trae\ndatos reales? (R-04, R-09)) then (no)
+    :E4 Documento inválido, con reporte (422) → F6;
+    stop
+  endif
+  :Guarda la versión «en revisión» y audita (R-10);
+  :F1 Versión en revisión;
+case (Revisar)
+  if (D6 ¿Revisor distinto del autor? (R-05)) then (no)
+    :E5 No puede aprobar lo propio (403) → F6;
+    stop
+  endif
+  if (D7 ¿Lo aprueba?) then (sí)
+    :Pasa a «publicada» y queda vigente; audita;
+    :F2 Versión publicada;
+  else (no)
+    :Registra el motivo y audita;
+    :F3 Versión rechazada con motivo;
+  endif
+case (Consultar)
+  if (D8 ¿Audiencia incluye uno de\nsus role_code activos? (R-06)) then (no)
+    :E6 No encontrado (404, R-07) → F6;
+    stop
+  endif
+  if (D9 ¿Versión obsoleta? (R-08)) then (sí)
+    :Muestra aviso y enlace a la vigente;
+  endif
+  :F4 Documento consultado;
+case (Marcar obsoleta)
+  :Indica la versión que la reemplaza; audita (R-08, R-10);
+  :F5 Versión marcada obsoleta;
+endswitch
+stop
+@enduml

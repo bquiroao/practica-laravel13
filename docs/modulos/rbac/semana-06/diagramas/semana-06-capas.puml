@@ -1,0 +1,56 @@
+@startuml semana-06-capas
+!pragma layout smetana
+title Micro-HIS RBAC hoy (semana 6): capas, MVC y Repository
+skinparam packageStyle rectangle
+skinparam defaultFontSize 13
+skinparam package {
+  BorderColor #3D4F6B
+}
+top to bottom direction
+
+package "Presentación (MVC)" as Pres #EEF3F4 {
+  [Kernel + Rutas\n(permiso por ruta)] as K
+  [Controladores\nAsignación · Revocación ·\nAutorización · Auditoría] as CT
+  [Formularios · Vistas] as FV
+}
+
+package "Aplicación" as Apl #FFF4E8 {
+  [AutorizarOperacion] as UA
+  [AsignarRol · RevocarRol] as UR
+  [ConsultarEventoAuditoria] as UC
+  [Puerto Transaccion] as TX
+}
+
+package "Dominio" as Dom #E3F1F0 {
+  [Políticas\nAutorización · Asignación · Revocación] as POL
+  [Reglas (OCP)] as RE
+  [Puertos Repository\nMembresías · Catálogo ·\nUsuarios · Auditoría] as PR
+}
+
+package "Persistencia" as Per #F7E6E1 {
+  [Pdo (PostgreSQL)] as PDO
+  [EnMemoria] as MEM
+}
+
+package "Cliente (otros módulos)" as Cli #F2F2F2 {
+  [ClienteRbac\ntimeout · reintento ·\ncircuit breaker] as CR
+}
+
+K --> CT
+CT --> FV
+CT --> UA
+CT --> UR
+CT --> UC
+UR --> UA : roles.asignar /\nroles.revocar
+UA --> POL
+UR --> POL
+POL --> RE
+UA --> PR
+UR --> PR
+UR --> TX
+PDO ..|> PR
+MEM ..|> PR
+PDO ..|> TX
+MEM ..|> TX
+CR ..> K : HTTP · contrato OpenAPI\n(no conoce clases del servidor)
+@enduml

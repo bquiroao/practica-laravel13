@@ -22,6 +22,7 @@ INSERT INTO roles (codigo, nombre) VALUES
 
 INSERT INTO permisos (codigo, descripcion) VALUES
     ('roles.asignar', 'Asignar roles a usuarios del hospital'),
+    ('roles.revocar', 'Revocar roles de usuarios del hospital'),
     ('auditoria.consultar', 'Consultar eventos de auditoría'),
     ('prescripciones.crear', 'Crear prescripciones'),
     ('signos_vitales.registrar', 'Registrar signos vitales'),
@@ -30,6 +31,7 @@ INSERT INTO permisos (codigo, descripcion) VALUES
 
 INSERT INTO rol_permiso (rol_codigo, permiso_codigo) VALUES
     ('admin_hospital', 'roles.asignar'),
+    ('admin_hospital', 'roles.revocar'),
     ('admin_hospital', 'auditoria.consultar'),
     ('medico', 'prescripciones.crear'),
     ('medico', 'signos_vitales.registrar'),

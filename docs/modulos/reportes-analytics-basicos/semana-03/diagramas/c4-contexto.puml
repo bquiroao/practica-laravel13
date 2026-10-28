@@ -1,0 +1,41 @@
+@startuml
+!include <C4/C4_Context>
+
+title Semana 3 · C4 nivel 1: contexto del módulo Reportes y analytics básicos
+
+Person(admin, "Administrador", "Consulta los 10 reportes y sus tres niveles")
+Person(jefe, "Jefe de área", "Consulta los 10 reportes y sus tres niveles")
+Person(medico, "Médico", "Consulta solo sus propias citas (RN-08)")
+
+System(modulo, "Reportes y analytics básicos", "Calcula indicadores agregados y los traza: indicador → desglose → registros de origen. Solo lectura.")
+
+System_Ext(auth, "Autenticación y RBAC (M1, M2)", "Sesión, roles y permisos")
+System_Ext(pacientes, "Pacientes (M3)", "local_patient")
+System_Ext(citas, "Citas médicas (M5)", "appointment")
+System_Ext(camas, "Salas y camas (M6)", "ward, bed")
+System_Ext(estancias, "Admisión, traslados y altas (M7, M8)", "bed_stay, care_episode")
+System_Ext(otros, "Otros módulos fuente", "Médicos (M4), diagnósticos (M10, M11), alergias (M12), signos vitales (M13), medicamentos (M14, M15), laboratorio (M16–M20)")
+
+Rel(admin, modulo, "Consulta indicadores, desglose y registros")
+Rel(jefe, modulo, "Consulta indicadores, desglose y registros")
+Rel(medico, modulo, "Consulta sus citas")
+
+Rel(modulo, auth, "Valida sesión y permiso del rol (RN-01)")
+Rel(modulo, pacientes, "Lee", "solo lectura")
+Rel(modulo, citas, "Lee", "solo lectura")
+Rel(modulo, camas, "Lee", "solo lectura")
+Rel(modulo, estancias, "Lee", "solo lectura")
+Rel(modulo, otros, "Lee", "solo lectura")
+
+note right of modulo
+  El módulo cubre 10 reportes; no escribe en
+  tablas de otros módulos (RNF-04).
+  No exporta PDF/CSV (Reportes exportables)
+  ni muestra ocupación en tiempo real
+  (Dashboard de ocupación).
+  En el Micro-HIS solo se implementa
+  el reporte de Ocupación (M6 + M7/M8).
+end note
+
+SHOW_LEGEND()
+@enduml

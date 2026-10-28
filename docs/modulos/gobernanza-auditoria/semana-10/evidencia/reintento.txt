@@ -1,0 +1,9 @@
+Caso (la misma petición dos veces)      1.ª 2.ª  Respuesta                                     Emisores   Meta
+------------------------------------------------------------------------------------------------------------------
+Repetir la consulta (primera página)     200  200  1 fila nueva arriba: #61 AUDITORIA_CONSULTADA        60      2
+Repetir «Cargar más» (mismo cursor)    200  200  mismas 10 filas, sin duplicar ni saltar             60      3
+Repetir el detalle                        200  200  mismo detalle                                       60      2
+Repetir la verificación de integridad    200  200  INTEGRA / INTEGRA                                   60      2
+------------------------------------------------------------------------------------------------------------------
+Emisores = movimientos de los módulos (60 al empezar): un reintento nunca los cambia.
+Meta = AUDITORIA_CONSULTADA / INTEGRIDAD_VERIFICADA: cada lectura que LLEGA al servidor deja la suya (R-08).

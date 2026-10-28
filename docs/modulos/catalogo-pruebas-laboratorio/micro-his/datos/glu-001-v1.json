@@ -1,0 +1,6 @@
+{
+  "codigo": "GLU-001", "nombre": "Glucosa en ayunas", "seccion": "quimica-clinica",
+  "tiempo_respuesta_horas": 2, "tipo_muestra": "plasma", "contenedor": "Tubo tapa gris (fluoruro)",
+  "volumen_minimo_ml": 2, "horas_ayuno": 8, "instrucciones_preparacion": "Solo agua durante el ayuno.",
+  "conservacion": "refrigerada", "estabilidad_horas": 24, "vigente_desde": "2027-01-04", "vigente_hasta": ""
+}

@@ -1,0 +1,75 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+left to right direction
+title Trazabilidad de punta a punta: actor → caso de uso → regla/RF → SOLID → capa → Repository → API → prueba
+skinparam defaultFontSize 10
+skinparam rectangleRoundCorner 8
+
+rectangle "Actores (S1)" as A #F5F9FF {
+  rectangle "Médico prescriptor" as A1
+  rectangle "Farmacia / enfermería" as A2
+}
+rectangle "Casos de uso (S1)" as U #F5F9FF {
+  rectangle "CU-02 Verificar alergias" as U2
+  rectangle "CU-01 Emitir" as U1
+  rectangle "CU-07 Anular con motivo\n«cambio S6»" as U7 #E1EFE8
+  rectangle "CU-09 Consultar" as U9
+}
+rectangle "Reglas → RF (S1, S2)" as R #FFF8E1 {
+  rectangle "R-03/RF-04 reverificar" as R3
+  rectangle "R-04,05/RF-05,06 bloqueo y advertencia" as R4
+  rectangle "R-07/RF-08 fail-closed" as R7
+  rectangle "R-10/RF-11,15 inmutable; anular\ncomo hecho nuevo" as R10 #E1EFE8
+  rectangle "R-11/RF-12 idempotencia" as R11
+}
+rectangle "SOLID: DIP (S2)" as D #FFF8E1 {
+  rectangle "FuenteAlergias: contrato\n«nunca vacío ante una falla»" as D1
+  rectangle "Puertos del alto nivel;\ncomposicion.php" as D2
+}
+rectangle "Capas (S3, S4, S7)" as C #EEF7EE {
+  rectangle "Dominio: PoliticaEmision,\nPoliticaAnulacion «S6»" as C1
+  rectangle "Aplicación: Emitir, Previa,\nConsultar, Anular «S6»" as C2
+  rectangle "Presentación MVC" as C3
+}
+rectangle "Repository (S4)" as P #EEF7EE {
+  rectangle "RepositorioPrescripciones\n+ anular() «S6»\nPDO e InMemory" as P1
+}
+rectangle "Contrato API (S5) 1.1.0" as API #F5F9FF {
+  rectangle "POST /verificaciones" as AP2
+  rectangle "POST /prescripciones" as AP1
+  rectangle "POST /{id}/anulacion «S6»" as AP7 #E1EFE8
+  rectangle "GET /{id}" as AP9
+}
+rectangle "Evidencia" as T #EEEEEE {
+  rectangle "APP-10 · CAR-01" as T3
+  rectangle "DOM-03,04,09 · APP-05..07" as T4
+  rectangle "PER-01 · APP-13 · INT-06 · HFA-02" as T7
+  rectangle "ANU-01..07 · CON-*-08 · INT-10" as T10 #E1EFE8
+  rectangle "APP-12,17 · CON-*-03 · CLI-02" as T11
+}
+
+A1 --> U1
+A1 --> U2
+A1 --> U7
+A2 --> U9
+U2 --> R3
+U1 --> R4
+U1 --> R7
+U1 --> R11
+U7 --> R10
+R7 --> D1
+R4 --> C1
+R10 --> C1
+D1 --> D2
+D2 --> C2
+C2 --> P1
+C3 --> AP1
+C3 --> AP2
+C3 --> AP7
+C3 --> AP9
+R3 --> T3
+R4 --> T4
+R7 --> T7
+R10 --> T10
+R11 --> T11
+@enduml

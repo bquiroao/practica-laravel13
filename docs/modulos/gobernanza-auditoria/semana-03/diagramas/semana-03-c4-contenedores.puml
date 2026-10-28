@@ -1,0 +1,26 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS Gobernanza y auditoría
+
+Person(usuario, "Super administrador / auditor", "Consulta la bitácora.")
+System_Ext(emisores, "Módulos emisores", "Cuentas de servicio svc-*.")
+System_Ext(identidad, "Proveedor de identidad", "JWT (simulado con tokens demo).")
+
+System_Boundary(sistema, "Micro-HIS Gobernanza y auditoría") {
+    Container(cliente, "Cliente HTTP", "curl / SPA Vue (semana 8+)", "Envía Authorization: Bearer y X-Tenant-ID («*» = red).")
+    Container(app, "Aplicación PHP", "PHP 8.2+ vanilla, servidor embebido", "Front controller public/index.php. Cuatro capas: Presentación, Aplicación, Dominio y Persistencia.")
+    ContainerDb(db, "Base central — audit_logs", "PostgreSQL 15+ (probado en 18)", "Solo inserción por trigger; sello encadenado por hospital; únicos (emisor, event_id) y (cadena, secuencia); índices por fecha.")
+    Container(config, "Configuración", "Variables de entorno + config.php", "DSN y credenciales de la base; catálogo de acciones; mapa cuenta → módulo.")
+}
+
+Rel(usuario, cliente, "Usa")
+Rel(emisores, app, "POST movimientos", "HTTP/JSON")
+Rel(cliente, app, "GET movimientos, GET detalle, POST verificaciones", "HTTP/JSON")
+Rel(app, identidad, "Valida el token", "Bearer")
+Rel(app, db, "INSERT y SELECT (nunca UPDATE ni DELETE)", "PDO pdo_pgsql, sentencias preparadas")
+Rel(app, config, "Lee al arrancar", "getenv()")
+
+SHOW_LEGEND()
+@enduml

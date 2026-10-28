@@ -1,0 +1,1 @@
+Se utilizó IA para revisar artefactos locales, preparar ocho diapositivas, diagrama, matriz y cambio simulado, y ejecutar las regresiones disponibles. No se atribuye CH-01 al docente/usuario ni se afirman API/JWT desplegados o una evaluación oral ya realizada. La estudiante debe revisar y comprender el material.
