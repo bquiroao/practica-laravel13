@@ -28,3 +28,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr
 ## Semana 4
 
 [MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
+
+## Semana 5
+
+[API cliente-servidor, frontera y plan de integración](semana-05/README.md).
