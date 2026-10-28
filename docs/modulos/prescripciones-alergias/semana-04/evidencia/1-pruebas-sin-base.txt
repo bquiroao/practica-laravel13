@@ -1,0 +1,114 @@
+$ php tests/ejecutar.php   (sin base)
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Dominio: reglas de prescripción, dosis y alergias ==
+[PASA ] DOM-01   R-01: el validador informa cada campo inválido y acepta un ítem completo
+[PASA ] DOM-02   R-02: la dosis diaria máxima es inclusiva (4000 sí, 4000,5 no)
+[PASA ] DOM-03   R-04: coincidencia directa por código y por nombre normalizado; bloquea
+[PASA ] DOM-04   R-05: cruzada no grave = advertencia; life_threatening o unknown = bloqueo
+[PASA ] DOM-05   Solo cuentan las alergias activas; sin grupo conocido no hay cruzada
+[PASA ] DOM-06   Una alergia sin código ni nombre, o con severidad fuera del esquema, no se puede construir
+[PASA ] DOM-07   R-11: la huella distingue el contenido y no depende de la clave
+[PASA ] DOM-08   R-10: la prescripción es readonly y no tiene métodos que la cambien
+
+== Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles) ==
+[PASA ] APP-01   Camino feliz: emite, guarda la verificación y la traza en UNA transacción
+[PASA ] APP-02   Camino feliz con advertencia justificada: guarda la justificación y los alérgenos evaluados
+[PASA ] APP-03   Consulta: devuelve la prescripción con su verificación; otro hospital = inexistente
+[PASA ] APP-04   Verificación previa: informa sin guardar ni trazar
+[PASA ] APP-05   R-04: coincidencia directa bloquea aun con justificación y override; traza el bloqueo
+[PASA ] APP-06   R-05: advertencia sin justificación, con 19 caracteres o sin override → 409
+[PASA ] APP-07   R-05: cruzada life_threatening / unknown bloquea aunque se justifique
+[PASA ] APP-08   R-06: sin alergias evaluadas exige la confirmación y la guarda
+[PASA ] APP-09   R-01/R-02: datos inválidos y dosis excedida se rechazan sin consultar alergias
+[PASA ] APP-10   R-03: la emisión vuelve a consultar; una alergia nueva tras la previa bloquea
+[PASA ] APP-11   R-08 y R-09: sin permiso → denegado; paciente de otro hospital → no encontrado
+[PASA ] APP-12   R-11: reintento igual → la misma; distinto → conflicto; carrera concurrente → la ganadora
+[PASA ] APP-13   R-07: fuente de alergias caída → no disponible, nada emitido, traza aparte
+[PASA ] APP-14   La traza falla dentro de la transacción → nada queda guardado (todo o nada)
+[PASA ] APP-15   El COMMIT falla → 503 y nada guardado
+[PASA ] APP-16   La base caída en cualquier paso (búsqueda, paciente, consulta) → no disponible, sin excepción
+[PASA ] APP-17   R-11: un reintento NO vuelve a verificar (sin consultar el expediente, aunque esté caído) y la clave manda sobre los datos
+
+== Persistencia: PDO con sentencias preparadas (dobles de PDO) ==
+[PASA ] PER-01   R-07: con la base caída, PdoFuenteAlergias lanza FuenteAlergiasNoDisponible (nunca vacío)
+[PASA ] PER-02   Cada adaptador PDO traduce PDOException a ErrorPersistencia sin filtrar datos de conexión
+[PASA ] PER-03   Error de persistencia de punta a punta: emitir con PDO caído → 503 sin excepción
+[PASA ] PER-04   Sentencias preparadas: ningún adaptador concatena valores en el SQL ni usa query()/exec() con datos
+[PASA ] PER-05   La transacción revierte y relanza si el trabajo falla (sin base: doble de PDO en memoria)
+[PASA ] PER-06   La política estática decide por «usuario|hospital» (stand-in de RBAC)
+
+== Repository y demás puertos: la misma suite de contrato para InMemory y PDO ==
+[PASA ] CON-MEM-01 [MEM] guardar asigna ids crecientes y lo leído es idéntico a lo guardado (ítems, verificación, fecha)
+[PASA ] CON-MEM-02 [MEM] porClave busca por (hospital, clave); otro hospital no la ve
+[PASA ] CON-MEM-03 [MEM] la misma clave en el mismo hospital → ClaveEnUso; en otro hospital se acepta
+[PASA ] CON-MEM-04 [MEM] porId fuera del hospital o inexistente → null (R-08)
+[PASA ] CON-MEM-05 [MEM] la transacción revierte lo guardado si el trabajo falla, y confirma si no
+[PASA ] CON-MEM-06 [MEM] FuenteAlergias devuelve el expediente de database/datos-demo (activas, resueltas, sin código, no evaluado)
+[PASA ] CON-MEM-07 [MEM] CatalogoMedicamentos: medicamentos y grupo del alérgeno por código o por nombre
+[OMITE] CON-PDO-01 [PDO] guardar asigna ids crecientes y lo leído es idéntico a lo guardado (ítems, verificación, fecha)
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-02 [PDO] porClave busca por (hospital, clave); otro hospital no la ve
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-03 [PDO] la misma clave en el mismo hospital → ClaveEnUso; en otro hospital se acepta
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-04 [PDO] porId fuera del hospital o inexistente → null (R-08)
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-05 [PDO] la transacción revierte lo guardado si el trabajo falla, y confirma si no
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-06 [PDO] FuenteAlergias devuelve el expediente de database/datos-demo (activas, resueltas, sin código, no evaluado)
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] CON-PDO-07 [PDO] CatalogoMedicamentos: medicamentos y grupo del alérgeno por código o por nombre
+         -> sin PRESCRIPCIONES_DB_DSN
+
+== MVC: formulario, controlador y vistas ==
+[PASA ] MVC-01   Formulario: usuario y hospital salen de la Identidad; lo que diga el cuerpo se ignora
+[PASA ] MVC-02   Vista: Location solo en 201; «codigo» en éxito y «error» en fallo; cada tipo con su estado
+[PASA ] MVC-03   Controlador: recibe solo casos de uso (Model), nada de persistencia ni de otras capas
+[PASA ] MVC-04   Formato frente a regla: JSON roto → 400 del formulario; dosis 0 → 422 del Dominio, en el mismo endpoint
+[PASA ] MVC-05   Modo «memoria» de producción: crearKernel funciona de punta a punta sin base de datos
+
+== Presentación: HTTP ==
+[PASA ] HTTP-01  POST /prescripciones: 201 con Location; el reintento con la misma Idempotency-Key da 200 y el mismo id
+[PASA ] HTTP-02  Códigos de las reglas: 422 bloqueo, 409 justificación, 422 confirmación, 404 paciente ajeno
+[PASA ] HTTP-03  Fuente de alergias caída: 503 VERIFICACION_NO_DISPONIBLE
+[PASA ] HTTP-04  Autenticación y tenant: 401 sin token, 400 sin X-Tenant-ID, 403 si no coincide con el token
+[PASA ] HTTP-05  Entrada mal formada: sin Idempotency-Key, JSON inválido, cuerpo sin paciente o con tipos erróneos → 400
+[PASA ] HTTP-06  Rutas: 404 ruta desconocida, 405 método no permitido, id no numérico → 404
+[PASA ] HTTP-07  GET /prescripciones/{id}: farmacia ve la verificación; otro hospital recibe 404
+[PASA ] HTTP-08  POST /verificaciones: 200 con los hallazgos y sin efectos
+[PASA ] HTTP-10  H-1: cada código que responde el kernel tiene su frase de estado (el servidor embebido no conoce la del 422)
+[PASA ] HTTP-09  Una excepción inesperada se responde 500 sin detalles
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de Aplicacion, Persistencia, Presentacion
+[PASA ] ARQ-02   Aplicacion no depende de Persistencia, Presentacion
+[PASA ] ARQ-03   Persistencia no depende de Presentacion
+[PASA ] ARQ-04   Presentacion no depende de Persistencia
+[PASA ] ARQ-05   PDO y SQL solo existen en Persistencia
+[PASA ] ARQ-07   Controlador MVC: sin SQL, sin new, sin códigos de negocio ni HTTP escritos a mano, sin armar respuestas
+[PASA ] ARQ-08   Solo las Vistas (y el Kernel para sus propios 4xx/500) arman respuestas HTTP
+[PASA ] ARQ-09   Cada puerto de datos tiene adaptador PDO e InMemory
+[PASA ] ARQ-06   Sin framework: ningún archivo usa Composer ni namespaces de terceros
+
+== Integración con PostgreSQL real ==
+[OMITE] INT-01   Camino feliz por HTTP con PostgreSQL: 201, ítems, verificación y traza en la bandeja; consulta idéntica
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-02   R-10 en la base: el trigger rechaza UPDATE y DELETE de prescripciones e ítems
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-03   R-04 con datos reales: el bloqueo no crea prescripción y deja PRESCRIPCION_BLOQUEADA en la bandeja
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-04   R-11 en la base: la restricción UNIQUE convierte la carrera en ClaveEnUso
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-05   Todo o nada con PostgreSQL: si la traza falla, la prescripción y sus ítems se revierten
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-06   R-07 con la base real: si la tabla allergies no responde → 503 y nada emitido
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-07   Las restricciones de la base respaldan las reglas (justificación < 20, dosis ≤ 0, frecuencia inválida)
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-08   El catálogo PDO resuelve vías como lista y el grupo del alérgeno por código o por nombre
+         -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] INT-09   Mismo comportamiento que los dobles: 11 escenarios dan la misma respuesta con PDO y en memoria
+         -> sin PRESCRIPCIONES_DB_DSN
+
+Total: 78  Pasan: 62  Fallan: 0  Omitidas: 16

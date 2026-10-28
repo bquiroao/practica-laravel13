@@ -1,0 +1,23 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS Gobernanza y auditoría
+
+Person(superadmin, "Super administrador", "Gobierna la red: consulta cualquier hospital o la red completa y verifica la integridad.")
+Person(auditor, "Auditor del hospital", "Consulta la bitácora de SU hospital.")
+System_Ext(emisores, "Módulos emisores del HIS", "Pacientes, RBAC, Citas…: registran sus movimientos con una cuenta de servicio.")
+
+System(auditoria, "Micro-HIS Gobernanza y auditoría", "Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas.")
+
+System_Ext(rbac, "Módulo RBAC", "Decide permisos y alcance (simulado: permisos en la configuración).")
+System_Ext(identidad, "Proveedor de identidad", "JWT (simulado: tokens de demostración).")
+
+Rel(emisores, auditoria, "Registra movimientos", "POST /api/v1/auditoria/movimientos")
+Rel(superadmin, auditoria, "Consulta, ve el detalle y verifica")
+Rel(auditor, auditoria, "Consulta y ve el detalle")
+Rel(auditoria, rbac, "¿Tiene el permiso en ese alcance?", "puerto PoliticaAcceso")
+Rel(auditoria, identidad, "Valida el token", "Bearer")
+
+SHOW_LEGEND()
+@enduml

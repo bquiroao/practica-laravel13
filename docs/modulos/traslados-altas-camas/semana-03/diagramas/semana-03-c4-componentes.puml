@@ -1,0 +1,26 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title C4 (contexto → contenedor → componentes) — Micro-HIS Traslados, altas y liberación de camas, semana 3
+Person(enf, "Enfermería / Admisión", "Ejecuta el traslado o el alta que el médico ordenó")
+System_Ext(medico, "Médico tratante", "Registra la orden de traslado o alta (CU-01, fuera de este Micro-HIS)")
+System_Ext(rbac, "Identidad y permisos (RBAC)", "Otro módulo; hoy se simula con usuarios de demostración")
+System_Ext(catalogo, "Catálogo de salas y camas", "Dueño de wards y beds; aquí solo se lee y actualiza beds.status")
+System_Ext(limpieza, "Limpieza / Gestión de camas", "Avisa de la cama en 'maintenance' (CU-07, pendiente)")
+System_Boundary(his, "Micro-HIS Traslados y altas (PHP 8.2+, sin framework)") {
+  Component(pre, "Presentación", "MovimientosControlador", "HTTP ↔ caso de uso: ruta, método, JSON y estado HTTP")
+  Component(app, "Aplicación", "RegistrarMovimiento, Usuario", "Orquesta CU-02/CU-03: permiso, episodio, orden vigente, cama origen/destino, guardar")
+  Component(dom, "Dominio", "MovimientoDeCama, Traslado, Alta, Resultado", "Reglas de traslado y alta (contrato LSP de la semana 2)")
+  Component(per, "Persistencia", "MovimientosPdo", "PDO con sentencias preparadas y una sola transacción")
+}
+ContainerDb(bd, "Base del grupo", "SQLite (demo) / PostgreSQL del grupo", "beds, bed_stays, care_episodes (reales) + ordenes_movimiento (propia)")
+Rel(medico, bd, "registra la orden (CU-01)", "ordenes_movimiento")
+Rel(enf, pre, "POST /api/v1/traslados-altas/movimientos", "JSON")
+Rel(pre, app, "ejecutar(entrada, usuario)")
+Rel(app, dom, "Traslado/Alta::aplicar(origen, destino)")
+Rel(app, per, "episodioAbierto, ordenVigente, estanciaAbierta, cama, aplicar", "dependencia directa: se invierte en S4")
+Rel(per, dom, "lee Resultado para decidir el UPDATE")
+Rel(per, bd, "SQL preparado; sincroniza beds.status con bed_stays (corrige H-01)", "PDO")
+Rel_L(pre, rbac, "identidad (pendiente)")
+Rel_R(catalogo, bd, "wards, beds (datos base)")
+Rel(bd, limpieza, "cama en 'maintenance' (aviso en semana futura)", "CU-07")
+@enduml

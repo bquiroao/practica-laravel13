@@ -1,0 +1,18 @@
+$ phpdbg -qrr herramientas/cobertura-caja-blanca.php
+Pruebas de caja blanca
+[PASA ] CB-01  Caminos básicos de RegistrarPaciente::ejecutar (V(G) = 7): permiso, idempotencia (3 decisiones), revisión, transacción
+[PASA ] CB-02  Ramas y ORDEN de RevisionDeFicha::paraEdicion: visibilidad → datos → protección/documento ausentes → estado y motivo → protección → documento ajeno
+[PASA ] CB-03  MC/DC de dos condiciones compuestas: coincideCon() por nombre «(P o no Q) y R y (S o T)» y cambiaIdentidadRespectoDe() «A o B o C»
+[PASA ] CB-04  Todos los puntos de salida de ActualizarPaciente::ejecutar: permiso → carga → revisión → versión → transacción
+
+Cobertura de líneas lograda por CB-01..CB-04
+------------------------------------------------------------------------------------------------
+src/Aplicacion/CasosDeUso/RegistrarPaciente.php       16/16   100.0 %
+src/Aplicacion/CasosDeUso/ActualizarPaciente.php      10/10   100.0 %
+src/Dominio/Servicios/RevisionDeFicha.php             16/16   100.0 %
+src/Dominio/Servicios/PoliticaEdicion.php              4/4    100.0 %
+src/Dominio/Servicios/PoliticaConfidencialidad.php     9/10    90.0 %
+      sin cubrir  l.21   $this->exigirPermisoYMotivo($puedeProteger, $motivo);
+------------------------------------------------------------------------------------------------
+TOTAL                                                 55/56    98.2 %
+(código de salida: 0)

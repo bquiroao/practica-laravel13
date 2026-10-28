@@ -1,0 +1,100 @@
+openapi: 3.1.0
+info:
+  title: Reportes y analytics básicos · API v1
+  version: 1.0.0
+  description: Cálculo y visualización trazable de un indicador hospitalario (solo lectura).
+servers:
+  - url: http://localhost:8000
+    description: Prototipo Micro-HIS (php -S localhost:8000 -t public public/index.php)
+security:
+  - jwt: []
+paths:
+  /api/v1/reportes/{tipo}:
+    get:
+      summary: Nivel 1 · indicador con su ficha de trazabilidad
+      parameters: [{ $ref: '#/components/parameters/tipo' }, { $ref: '#/components/parameters/desde' }, { $ref: '#/components/parameters/hasta' }, { $ref: '#/components/parameters/correlacion' }]
+      responses: { '200': { $ref: '#/components/responses/Exito' }, '403': { $ref: '#/components/responses/Error' }, '404': { $ref: '#/components/responses/Error' }, '422': { $ref: '#/components/responses/Error' }, '503': { $ref: '#/components/responses/Error' } }
+  /api/v1/reportes/{tipo}/desglose:
+    get:
+      summary: Nivel 2 · desglose por una dimensión (la suma coincide con el numerador)
+      parameters: [{ $ref: '#/components/parameters/tipo' }, { $ref: '#/components/parameters/desde' }, { $ref: '#/components/parameters/hasta' }, { $ref: '#/components/parameters/dimension' }, { $ref: '#/components/parameters/correlacion' }]
+      responses: { '200': { $ref: '#/components/responses/Exito' }, '403': { $ref: '#/components/responses/Error' }, '422': { $ref: '#/components/responses/Error' }, '503': { $ref: '#/components/responses/Error' } }
+  /api/v1/reportes/{tipo}/registros:
+    get:
+      summary: Nivel 3 · registros de origen de una parte, con datos mínimos
+      parameters:
+        - { $ref: '#/components/parameters/tipo' }
+        - { $ref: '#/components/parameters/desde' }
+        - { $ref: '#/components/parameters/hasta' }
+        - { $ref: '#/components/parameters/dimension' }
+        - { name: parte, in: query, required: true, schema: { type: string }, example: Medicina }
+        - { $ref: '#/components/parameters/correlacion' }
+      responses: { '200': { $ref: '#/components/responses/Exito' }, '403': { $ref: '#/components/responses/Error' }, '422': { $ref: '#/components/responses/Error' }, '503': { $ref: '#/components/responses/Error' } }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT, description: 'SHI: rol y tenant en los claims. El prototipo usa la cabecera X-Rol.' }
+  parameters:
+    tipo:
+      name: tipo
+      in: path
+      required: true
+      schema: { type: string, enum: [pacientes, citas, ocupacion, laboratorio, medicamentos, mortalidad, diagnosticos, medicos, alergias, signos_vitales] }
+    desde: { name: desde, in: query, required: true, schema: { type: string, format: date }, example: '2026-10-01' }
+    hasta: { name: hasta, in: query, required: true, schema: { type: string, format: date }, example: '2026-10-31' }
+    dimension: { name: dimension, in: query, required: false, schema: { type: string }, example: sala }
+    correlacion: { name: X-Correlation-Id, in: header, required: false, schema: { type: string } }
+  responses:
+    Exito:
+      description: Éxito o «Sin datos» (RN-06)
+      headers: { X-Correlation-Id: { schema: { type: string } } }
+      content: { application/json: { schema: { $ref: '#/components/schemas/Resultado' } } }
+    Error:
+      description: Error con forma común
+      headers: { X-Correlation-Id: { schema: { type: string } } }
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  schemas:
+    Resultado:
+      type: object
+      required: [estado]
+      properties:
+        estado: { type: string, enum: [exito, sin_datos] }
+        mensaje: { type: string }
+        datos:
+          type: [object, 'null']
+          properties:
+            indicador:
+              type: object
+              properties:
+                nombre: { type: string }
+                valor: { type: number, description: 'Si unidad es %, entre 0 y 100' }
+                unidad: { type: string, enum: ['%', cantidad, dias] }
+                numerador: { type: integer }
+            trazabilidad:
+              type: object
+              required: [formula, periodo, filtros, fuente, calculado_en]
+              additionalProperties: { type: string }
+            desglose:
+              type: object
+              properties:
+                dimension: { type: string }
+                partes: { type: object, additionalProperties: { type: integer, minimum: 0 } }
+                total: { type: integer, description: 'Igual a indicador.numerador (RN-07)' }
+            registros:
+              type: array
+              items:
+                type: object
+                properties:
+                  cama: { type: string }
+                  paciente: { type: string, pattern: '^PAC-[0-9]{5}$' }
+                  ingreso: { type: string, format: date }
+                  egreso: { type: [string, 'null'], format: date }
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [codigo, mensaje, correlationId]
+          properties:
+            codigo: { type: string, enum: [NO_AUTENTICADO, SIN_PERMISO, NO_EXISTE, VALIDACION, DATOS_NO_DISPONIBLES] }
+            mensaje: { type: string }
+            correlationId: { type: string }

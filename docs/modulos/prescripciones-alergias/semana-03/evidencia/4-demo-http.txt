@@ -1,0 +1,51 @@
+$ PRESCRIPCIONES_DB_DSN=… bash bin/demo-http.sh   (php -S + PostgreSQL 18)
+Esquema «prescripciones» creado y datos de demostración cargados.
+
+### 1. Verificación previa (P-002, alérgico a penicilina): advertencia, no guarda nada
+> POST /api/v1/prescripciones/verificaciones
+HTTP/1.1 200 OK
+{"codigo":"ADVERTENCIA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}]}
+
+
+### 2. Emitir sin justificación: 409
+> POST /api/v1/prescripciones
+HTTP/1.1 409 Conflict
+{"error":"JUSTIFICACION_REQUERIDA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}]}
+
+
+### 3. Emitir con justificación y override: 201 + Location
+> POST /api/v1/prescripciones
+HTTP/1.1 201 Created
+Location: /api/v1/prescripciones/1
+{"codigo":"EMITIDA","id":1,"verificacion":"ADVERTENCIA"}
+
+
+### 4. Reintento con la misma Idempotency-Key: 200, el mismo id
+> POST /api/v1/prescripciones
+HTTP/1.1 200 OK
+{"codigo":"YA_EMITIDA","id":1,"verificacion":"ADVERTENCIA"}
+
+
+### 5. Amoxicilina a P-001 (alergia directa): 422 bloqueo
+> POST /api/v1/prescripciones
+HTTP/1.1 422 Unprocessable Content
+{"error":"BLOQUEO_ALERGIA","hallazgos":[{"tipo":"DIRECTA","medicamento":"AMOX500","alergeno":"J01CA04","severidad":"severe","bloquea":true,"reaccion":"urticaria generalizada"}]}
+
+
+### 6. Paracetamol 1000 mg cada 4 h: 422 dosis
+> POST /api/v1/prescripciones
+HTTP/1.1 422 Unprocessable Content
+{"error":"DOSIS_EXCEDE_MAXIMO","items":["items[0]"]}
+
+
+### 7. Farmacia consulta la prescripción 1 con su verificación
+> GET /api/v1/prescripciones/1
+HTTP/1.1 200 OK
+{"codigo":"PRESCRIPCION","id":1,"paciente":"P-002","prescriptor":"dr-lopez","estado":"EMITIDA","emitida_en":"2026-10-27T17:30:58+00:00","items":[{"medicamento":"CEFA500","dosis":500.0,"unidad":"mg","frecuencia_horas":6,"via":"oral","dias":7}],"verificacion":{"resultado":"ADVERTENCIA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}],"alergenos_evaluados":["Penicilina"],"justificacion":"Sin alternativa: cultivo sensible solo a cefalosporinas","confirma_sin_alergias":false}}
+
+
+### 8. Sin token válido: 401
+> GET /api/v1/prescripciones/1
+HTTP/1.1 401 Unauthorized
+{"error":"NO_AUTENTICADO"}
+

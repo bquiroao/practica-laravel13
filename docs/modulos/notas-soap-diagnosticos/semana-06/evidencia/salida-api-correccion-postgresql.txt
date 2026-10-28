@@ -1,0 +1,80 @@
+Demostración del cambio práctico de la semana 6 contra PostgreSQL 16 (php -S + adaptadores PDO).
+Base: database/schema.sql + database/datos-demo.sql. Fecha: 2026-10-13 19:10
+
+## 1. La Dra. Méndez registra la nota de Carlos
+$ curl -X POST /api/v1/notas-soap -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 201 Created
+{"clinical_note_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "medical_record_id": "exp-carlos", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "draft", "version_no": 1, "signed_at": null, "supersedes_id": null, "correction_reason": null, "soap": {"objetivo": "T 38.6 °C, estertores en base derecha", "...": "(resto de secciones)"}, "diagnoses": [{"id": "4c0bf0f2-9a93-4737-90b4-9e73efc8bfb6", "code": "J18.9", "description": "Neumonía no especificada", "type": "primary"}]}
+
+## 2. La firma (desde aquí la nota no se puede modificar)
+$ curl -X POST /api/v1/notas-soap/ab67848c-39be-4999-bf8a-daf4cfe176e5/firma -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 200 OK
+{"clinical_note_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "medical_record_id": "exp-carlos", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "signed", "version_no": 1, "signed_at": "2026-10-13T19:10:43-06:00", "supersedes_id": null, "correction_reason": null, "soap": {"objetivo": "T 38.6 °C, estertores en base derecha", "...": "(resto de secciones)"}, "diagnoses": [{"id": "4c0bf0f2-9a93-4737-90b4-9e73efc8bfb6", "code": "J18.9", "description": "Neumonía no especificada", "type": "primary"}]}
+
+## 3. Descubre un error en la temperatura y la corrige: versión 2 en borrador, apunta a la original
+$ curl -X POST /api/v1/notas-soap/ab67848c-39be-4999-bf8a-daf4cfe176e5/correcciones -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 201 Created
+{"clinical_note_id": "92bbfba7-9a94-47f0-b820-6a8f7c05ff9e", "medical_record_id": "exp-carlos", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "draft", "version_no": 2, "signed_at": null, "supersedes_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "correction_reason": "Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C", "soap": {"objetivo": "T 37.6 °C, estertores en base derecha", "...": "(resto de secciones)"}, "diagnoses": [{"id": "beb20a86-2e28-41f4-b581-acee4c70becb", "code": "J18.9", "description": "Neumonía no especificada", "type": "primary"}]}
+
+## 4. La nota original sigue firmada y sin cambios (R-07)
+$ curl -X GET /api/v1/notas-soap/ab67848c-39be-4999-bf8a-daf4cfe176e5 -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 200 OK
+{"clinical_note_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "medical_record_id": "exp-carlos", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "signed", "version_no": 1, "signed_at": "2026-10-14T01:10:43+00:00", "supersedes_id": null, "correction_reason": null, "soap": {"objetivo": "T 38.6 °C, estertores en base derecha", "...": "(resto de secciones)"}, "diagnoses": [{"id": "4c0bf0f2-9a93-4737-90b4-9e73efc8bfb6", "code": "J18.9", "description": "Neumonía no especificada", "type": "primary"}]}
+
+## 5. Intentar corregir otra vez la misma versión: 409
+$ curl -X POST /api/v1/notas-soap/ab67848c-39be-4999-bf8a-daf4cfe176e5/correcciones -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 409 Conflict
+{"error": {"code": "nota_ya_corregida", "message": "Esta versión ya tiene una corrección: corrija la versión más reciente."}}
+
+## 6. La versión 2 todavía es borrador: no se corrige, se firma
+$ curl -X POST /api/v1/notas-soap/92bbfba7-9a94-47f0-b820-6a8f7c05ff9e/correcciones -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 409 Conflict
+{"error": {"code": "nota_no_firmada", "message": "Solo se corrige una nota firmada; un borrador todavía se puede firmar."}}
+
+## 7. Enfermería no tiene el permiso notas_soap.corregir: 403 en la ruta
+$ curl -X POST /api/v1/notas-soap/ab67848c-39be-4999-bf8a-daf4cfe176e5/correcciones -H 'Authorization: Bearer token-ana' ...
+HTTP/1.1 403 Forbidden
+{"error": {"code": "acceso_denegado", "message": "No tiene permiso para esta operación."}}
+
+## 8. La Dra. Méndez firma la versión 2
+$ curl -X POST /api/v1/notas-soap/92bbfba7-9a94-47f0-b820-6a8f7c05ff9e/firma -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 200 OK
+{"clinical_note_id": "92bbfba7-9a94-47f0-b820-6a8f7c05ff9e", "medical_record_id": "exp-carlos", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "signed", "version_no": 2, "signed_at": "2026-10-13T19:10:43-06:00", "supersedes_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "correction_reason": "Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C", "soap": {"objetivo": "T 37.6 °C, estertores en base derecha", "...": "(resto de secciones)"}, "diagnoses": [{"id": "beb20a86-2e28-41f4-b581-acee4c70becb", "code": "J18.9", "description": "Neumonía no especificada", "type": "primary"}]}
+
+## 9. Corregir la versión 2 con un motivo insuficiente: 422
+$ curl -X POST /api/v1/notas-soap/92bbfba7-9a94-47f0-b820-6a8f7c05ff9e/correcciones -H 'Authorization: Bearer token-mendez' ...
+HTTP/1.1 422 Unknown Status Code
+{"error": {"code": "motivo_insuficiente", "message": "Explique el motivo de la corrección (al menos 10 caracteres)."}}
+
+## 10. Línea de tiempo del expediente (enfermería): las dos versiones, sin texto clínico
+$ curl -X GET /api/v1/expedientes/exp-carlos/notas-soap -H 'Authorization: Bearer token-ana' ...
+HTTP/1.1 200 OK
+{"medical_record_id": "exp-carlos", "items": [{"clinical_note_id": "92bbfba7-9a94-47f0-b820-6a8f7c05ff9e", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "signed", "version_no": 2, "supersedes_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "created_at": "2026-10-14T01:10:43+00:00", "signed_at": "2026-10-14T01:10:43+00:00", "diagnosis_codes": ["J18.9"]}, {"clinical_note_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "care_episode_id": "epi-100", "author_user_ref_id": "dra-mendez", "status": "signed", "version_no": 1, "supersedes_id": null, "created_at": "2026-10-14T01:10:43+00:00", "signed_at": "2026-10-14T01:10:43+00:00", "diagnosis_codes": ["J18.9"]}]}
+
+## 11. Filas en PostgreSQL
+   nota   | version_no | status | corrige_a |                      correction_reason                      
+----------+------------+--------+-----------+-------------------------------------------------------------
+ ab67848c |          1 | signed |           | 
+ 92bbfba7 |          2 | signed | ab67848c  | Se anotó la temperatura equivocada: era 37.6 °C, no 38.6 °C
+(2 rows)
+
+      event      |                                                                 data                                                                 
+-----------------+--------------------------------------------------------------------------------------------------------------------------------------
+ NOTA_REGISTRADA | {"nota_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "autor_id": "dra-mendez"}
+ NOTA_FIRMADA    | {"nota_id": "ab67848c-39be-4999-bf8a-daf4cfe176e5", "autor_id": "dra-mendez"}
+ NOTA_CORREGIDA  | {"nota_id": "92bbfba7-9a94-47f0-b820-6a8f7c05ff9e", "autor_id": "dra-mendez", "reemplaza_a": "ab67848c-39be-4999-bf8a-daf4cfe176e5"}
+ NOTA_FIRMADA    | {"nota_id": "92bbfba7-9a94-47f0-b820-6a8f7c05ff9e", "autor_id": "dra-mendez"}
+(4 rows)
+
+ diagnosticos 
+--------------
+            2
+(1 row)
+
+## 12. La base también protege la cadena (aunque alguien salte la aplicación)
+$ INSERT de otra corrección de la nota 1 directo en SQL
+ERROR:  duplicate key value violates unique constraint "clinical_notes_supersedes_id_key"
+DETAIL:  Key (supersedes_id)=(ab67848c-39be-4999-bf8a-daf4cfe176e5) already exists.
+$ UPDATE directo del contenido de la nota 1 firmada
+ERROR:  clinical_notes_signed_immutable
+CONTEXT:  PL/pgSQL function notas_soap_proteger() line 7 at RAISE

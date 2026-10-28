@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+actor Evaluador
+package Presentation {
+ component CLI
+}
+package Application {
+ component Evaluate
+}
+package Domain {
+ class Evaluation
+ interface EvaluationRepository
+ interface DemoOrderGateway
+ interface Notifier
+}
+package Persistence {
+ component PdoEvaluationRepository
+}
+database "SQLite temporal\nevaluations + evaluation_events" as DB
+Evaluador --> CLI
+CLI --> Evaluate
+Evaluate --> Evaluation
+Evaluate --> EvaluationRepository
+Evaluate --> DemoOrderGateway
+Evaluate --> Notifier
+PdoEvaluationRepository ..|> EvaluationRepository
+PdoEvaluationRepository --> DB : prepare / execute / transacción
+note bottom of Evaluate
+Persistir evidencia antes de notificar.
+No transacción distribuida con el SO.
+end note
+@enduml

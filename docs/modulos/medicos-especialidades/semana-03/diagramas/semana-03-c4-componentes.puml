@@ -1,0 +1,20 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title C4 (contexto → contenedor → componentes) — Micro-HIS Médicos, especialidades y disponibilidad, semana 3
+Person(adm, "Administración", "Registra médicos y asocia especialidades")
+Person(rec, "Recepción / Citas (M05)", "Consulta franjas libres")
+System_Boundary(his, "Micro-HIS Médicos (PHP 8.2+, sin framework)") {
+  Component(pre, "Presentación", "MedicosControlador", "Rutas, método, JSON y estado HTTP")
+  Component(app, "Aplicación", "RegistrarMedico, AsociarEspecialidad, ConsultarDisponibilidad", "Rol, datos únicos, especialidad activa, rango, guardar")
+  Component(dom, "Dominio", "Vigencia, Asignacion, ReglasEspecialidad, Agenda", "Cruces de vigencia, una principal, franjas de 30 min")
+  Component(per, "Persistencia", "MedicosPdo", "PDO con sentencias preparadas y transacción")
+}
+ContainerDb(bd, "Base HOSPITAL", "SQLite (demo) / PostgreSQL del grupo", "doctor_profiles, doctor_specialties, specialties, local_user_refs, appointments (reales) + horarios_medico (propia)")
+Rel(adm, pre, "POST /api/v1/medicos y /medicos/{id}/especialidades", "JSON")
+Rel(rec, pre, "GET /api/v1/disponibilidad", "JSON")
+Rel(pre, app, "ejecutar(...)")
+Rel(app, dom, "exigirAsignable, exigirRango, franjas")
+Rel(app, per, "consultas y guardar", "dependencia directa: se invierte en S4")
+Rel(per, dom, "arma Vigencia y Asignacion")
+Rel(per, bd, "SQL preparado", "PDO")
+@enduml

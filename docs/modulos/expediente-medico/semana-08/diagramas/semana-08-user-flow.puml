@@ -1,0 +1,40 @@
+@startuml semana-08-user-flow
+title User flow por rol — «apertura y consulta autorizada del expediente longitudinal»
+|Personal de admisión|
+start
+:Busca al paciente en «Abrir expediente» (W1);
+if (¿El paciente está activo? (R-03)) then (no)
+  :«Solo se abre para pacientes activos» (E2);
+  stop
+endif
+if (¿Ya tiene expediente en este hospital? (R-01)) then (sí)
+  :«Ya tiene el expediente HC-000123» y enlace a ese (E3);
+else (no)
+  :Revisa el resumen y confirma «Abrir expediente»;
+  :«Expediente HC-000124 abierto» (éxito, auditado R-08);
+endif
+stop
+|Profesional tratante|
+start
+:Abre el expediente de su paciente (W2);
+if (¿Tiene una asignación de atención activa? (R-05)) then (no)
+  :W5: «No tienes una atención activa con este paciente» (E1, auditado);
+  stop
+endif
+:W2: episodios dentro de su alcance (R-09); carga → vacío o línea de tiempo;
+if (¿Necesita la historia de otros hospitales?) then (sí)
+  if (¿Paciente vinculado al índice maestro? (R-10)) then (sí)
+    if (¿Consentimiento vigente para este hospital? (R-06)) then (sí)
+      :W3: episodios externos con su hospital de origen (éxito);
+    else (no)
+      :W4: ¿emergencia? escribe la justificación y confirma (R-07);
+      :Acceso de 1 hora con revisión pendiente (éxito, auditado);
+    endif
+  else (no)
+    :Aviso «Solo hay historia local» (E4);
+  endif
+else (no)
+  :Sigue con la historia local;
+endif
+stop
+@enduml

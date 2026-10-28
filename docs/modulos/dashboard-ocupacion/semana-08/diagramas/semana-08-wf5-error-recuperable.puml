@@ -1,0 +1,12 @@
+@startsalt
+title W5 — Errores recuperables de la ocupación
+{+
+  <b>No pudimos leer la ocupación</b> (E2)
+  Se conserva el corte de las 10:35; las cifras que ves siguen siendo válidas para esa hora. | [Reintentar]
+  ---
+  <b>Datos de las 10:20: pueden estar desactualizados</b> (más de 15 min, R-06)
+  La consolidación automática no ha guardado cortes nuevos: actualiza o avisa al administrador. | [Actualizar]
+  ---
+  <b>Ese estado de cama no existe</b> · Elige disponible, ocupada, mantenimiento o inactiva. | [Quitar filtro]
+}
+@endsalt

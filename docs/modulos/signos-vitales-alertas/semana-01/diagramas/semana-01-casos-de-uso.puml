@@ -1,0 +1,44 @@
+@startuml semana-01-casos-de-uso
+left to right direction
+title Casos de uso — «captura de signos vitales, evaluación de umbrales y generación de alerta»
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #EEF2F7
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+actor "Enfermero(a)\n(actor principal)" as Enf
+actor "Médico tratante" as Med
+actor "Servicio de identidad\ny permisos (RBAC)\n<<sistema>>" as Rbac
+actor "Alertas críticas (M21)\n<<sistema>>" as M21
+
+rectangle "Módulo Signos vitales y alertas por valores anormales" {
+  usecase "CU-01\nRegistrar toma de\nsignos vitales" as CU01 #D6E8FF
+  usecase "CU-02\nValidar mediciones\n(rango físicamente posible)" as CU02
+  usecase "CU-03\nEvaluar umbrales\nsegún edad" as CU03
+  usecase "CU-04\nGenerar alerta\n(anormal o crítica)\n--\npunto de extensión:\nmedición fuera del rango normal" as CU04
+  usecase "CU-05\nConsultar tomas\ny alertas del paciente" as CU05
+  usecase "CU-06\nReconocer alerta" as CU06
+}
+
+Enf --> CU01
+Enf --> CU05
+Enf --> CU06
+Med --> CU05
+Med --> CU06
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU04 ..> CU03 : <<extend>>\n[valor fuera de rango]
+CU01 --> Rbac : CU-01 verifica\nsesión y permiso
+CU04 --> M21 : CU-04 envía\nsolo críticas
+
+note bottom of CU01
+  Objetivo: dejar registrada la toma completa
+  y avisar a tiempo cuando un valor es anormal.
+  Fuera del límite: configurar rangos, admitir
+  pacientes, atender la alerta en M21.
+end note
+@enduml

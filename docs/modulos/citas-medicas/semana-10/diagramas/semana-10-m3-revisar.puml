@@ -1,0 +1,15 @@
+@startsalt
+title M3 — Nueva cita, paso 3 de 3: revisar
+{+
+  [< Paso 2] | <b>Nueva cita · 3 de 3</b>
+  <b>Motivo *</b>
+  "control de presión   "
+  ---
+  <b>P-0012 · A. Pérez</b>
+  Dra. Ruiz · Cardiología
+  <b>Mié 28/10 · 08:30–09:00</b>
+  <i>Al confirmar se vuelve a revisar el horario.</i>
+  ---
+  [Agendar cita]
+}
+@endsalt

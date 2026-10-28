@@ -1,0 +1,19 @@
+@startuml semana-05-migracion
+!pragma layout smetana
+title Migración razonada por fases (cada una reversible)
+skinparam defaultFontSize 11
+
+rectangle "Fase 0 · hoy\nMicro-HIS: módulo con puertos,\ncontrato 1.0.0, cliente" as F0 #EEF7EE
+rectangle "Fase 1 · T1–T3\nDentro de la app Laravel:\nesquema H5, núcleo y API\n(base del hospital)" as F1 #EEF7EE
+rectangle "Fase 2 · T4\nTraza por outbox_event (H8)\nhacia Auditoría; vista de alergias\nacordada con ASII-12" as F2 #F5F9FF
+rectangle "Fase 3 · solo si C-1..C-5\nExpediente o Prescripciones como\nservicio aparte; HttpFuenteAlergias\ny el mismo contrato" as F3 #FFF8E1
+
+F0 -right-> F1 : sin cambiar el contrato
+F1 -right-> F2 : sin cambiar los casos de uso
+F2 -right-> F3 : cambia SOLO un adaptador\n(composición) y el despliegue
+
+note bottom of F3
+  Reversible: volver a FuenteAlergias sobre la base
+  es cambiar una línea de configuración (fuente_alergias=base).
+end note
+@enduml

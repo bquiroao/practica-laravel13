@@ -1,0 +1,8 @@
+Control de la regla de desborde: el MISMO prototipo sin el arreglo de las fechas (bloque «Fechas en dos columnas» quitado).
+FALLA m1-consultar-base-320.png              desborde=42  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+FALLA m1-consultar-base-360.png              desborde=2  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+FALLA m1-consultar-error-360.png             desborde=2  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+FALLA m1-consultar-sin-conexion-360.png      desborde=2  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+FALLA m1-consultar-red-320.png               desborde=42  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+FALLA m1-consultar-confirmar-red-320.png     desborde=42  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0
+Vistas: 39  Fallan: 6

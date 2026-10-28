@@ -1,0 +1,50 @@
+@startuml semana-08-flujo-medico-registrar
+!pragma layout smetana
+title User flow · Médico tratante — registrar nota SOAP con diagnóstico
+skinparam ActivityBackgroundColor #F2F8F7
+skinparam ActivityBorderColor #1F6F6B
+skinparam ActivityDiamondBackgroundColor #FFF4E5
+skinparam defaultFontSize 12
+
+|Médico tratante|
+start
+:Abre el expediente del paciente · W1;
+:Elige «+ Nueva nota»;
+|Interfaz|
+:VACÍO: formulario S · O · A · P
+y diagnóstico, con ayudas · W2;
+|Médico tratante|
+:Escribe las cuatro secciones
+y el diagnóstico (código, descripción, tipo);
+|Interfaz|
+if (¿Pasa la validación del cliente?) then (no)
+  :M-01..M-04 junto al campo
+  (lo escrito se conserva);
+  detach
+else (sí)
+endif
+:CARGA: «Guardando…», botón deshabilitado
+(una Idempotency-Key por guardado);
+|Servidor Notas SOAP|
+:POST /api/v1/notas-soap
+verifica hospital, asignación, expediente y reglas;
+|Interfaz|
+if (¿Resultado?) then (201)
+  :ÉXITO M-20 «Nota guardada como borrador»
+  [Firmar ahora] [Seguir después];
+  :El médico decide: «Firmar ahora» → flujo firmar (W3)
+  o «Seguir después» → queda en borrador en W1;
+  stop
+elseif (409 / 422) then (reglas)
+  :M-05 expediente cerrado, M-01..M-04 del servidor
+  (el borrador sigue en pantalla);
+  detach
+elseif (5xx / red) then (falla)
+  :M-14 / M-15 con «Reintentar»
+  (reintenta con la MISMA clave: no duplica);
+  detach
+else (403)
+  :W5 acceso denegado con referencia (M-11);
+  stop
+endif
+@enduml

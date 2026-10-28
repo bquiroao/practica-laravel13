@@ -1,0 +1,24 @@
+Copias extraídas con: git archive HEAD docs/modulos/rbac/micro-his-rbac (el repositorio no se modifica)
+
+== MUTANTE 1: PoliticaAutorizacion — una regla que lanza excepción deja PASAR ($motivo = null en vez de 'ERROR_EVALUACION') ==
+ROJO   M1  Pruebas automáticas en verde                    98.7 % (77/78)
+ROJO   M2  Cobertura de códigos de decisión               88.9 % (16/18)
+VERDE  M3  Conformidad contrato ↔ código                 100 % (7/7 operaciones)
+VERDE  M4  Trazabilidad de denegaciones                     100 % (6/6 intentos) · ruido: 0
+ROJO   M5  Confiabilidad fail-closed ante fallas inyectadas 85.7 % (6/7)
+       fallan: regla que lanza excepción
+ROJO   M6  Hallazgos de revisión Crítico/Mayor sin verificar 3 (Crítico 0 · Mayor 3) · Menor 2
+ÁMBAR M7  Tiempo de decisión p95 (RNF-09)                 0.007 ms (n = 3000, en memoria)
+VERDE: 2  ÁMBAR: 1  ROJO: 4
+
+== MUTANTE 2: AutorizarOperacion — se comenta $this->auditoria->registrar($evento) ==
+ROJO   M1  Pruebas automáticas en verde                    82.1 % (64/78)
+ROJO   M2  Cobertura de códigos de decisión               88.9 % (16/18)
+VERDE  M3  Conformidad contrato ↔ código                 100 % (7/7 operaciones)
+ROJO   M4  Trazabilidad de denegaciones                     0 % (0/6 intentos) · ruido: 0
+       incompletos: POST /api/v1/prescripciones, POST /api/v1/roles/asignaciones, POST /api/v1/roles/revocaciones, GET /api/v1/auditoria/eventos/x-123, POST /api/v1/signos-vitales, POST /api/v1/autorizaciones/decisiones
+ROJO   M5  Confiabilidad fail-closed ante fallas inyectadas 85.7 % (6/7)
+       fallan: bitácora principal caída → sigue denegando
+ROJO   M6  Hallazgos de revisión Crítico/Mayor sin verificar 3 (Crítico 0 · Mayor 3) · Menor 2
+ÁMBAR M7  Tiempo de decisión p95 (RNF-09)                 0.005 ms (n = 3000, en memoria)
+VERDE: 1  ÁMBAR: 1  ROJO: 5
