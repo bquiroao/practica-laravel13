@@ -1,0 +1,44 @@
+@startuml semana-03-dinamica-emision
+title Vista dinámica — una emisión a través de las cuatro capas (S-15..S-46 de la semana 1)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+autonumber "D-00"
+
+participant "Kernel\n(Presentación)" as K
+participant "AccionesPrescripciones\n(Presentación)" as A
+participant "EmitirPrescripcion\n(Aplicación)" as E
+participant "EvaluacionClinica\n(Aplicación)" as EV
+participant "Validador / Verificador\n(Dominio)" as D
+participant "PdoTransaccion" as T
+participant "PdoRepositorioPrescripciones\nPdoFuenteAlergias · PdoCatalogo…\n(Persistencia)" as P
+database "PostgreSQL" as BD
+
+K -> K : ruta · token · X-Tenant-ID = hospital del token
+K -> A : emitir(solicitud, identidad)
+A -> A : Idempotency-Key · JSON · tipos (400)
+A -> E : ejecutar(SolicitudEmision)
+E -> P : permite(emitir) · porClave(hospital, clave) · existeEnHospital
+P -> BD : SELECT … WHERE hospital = :hospital AND idempotency_key = :clave
+E -> EV : evaluar(paciente, hospital, items)
+EV -> P : buscar(medicamento)
+EV -> D : validar(items, catálogo)  [R-01, R-02]
+EV -> P : alergiasDe(paciente)  [R-03]
+P -> BD : SELECT … FROM allergies WHERE local_patient_id = :paciente
+alt PDOException
+  P --> EV : FuenteAlergiasNoDisponible  [R-07]
+  EV --> E : (propaga)
+  E -> T : ejecutar(traza VERIFICACION_NO_DISPONIBLE)
+  E --> A : NO_DISPONIBLE → 503
+else alergias leídas
+  EV -> D : verificar(medicamentos, expediente, grupos)  [R-04, R-05]
+  EV --> E : expediente + resultado
+  E -> T : ejecutar { guardar + registrar }
+  T -> BD : BEGIN
+  T -> P : guardar(prescripción) → INSERT prescriptions, prescription_items
+  T -> P : registrar(PRESCRIPCION_EMITIDA) → INSERT prescription_audit_outbox
+  T -> BD : COMMIT (o ROLLBACK: nada a medias)
+  E --> A : CREADO
+end
+A -> A : TraductorResultado → 201 + Location
+A --> K : Respuesta
+@enduml

@@ -1,0 +1,133 @@
+@startuml semana-01-actividad
+!pragma layout smetana
+title Módulo Pacientes — Actividad\n«Registro, búsqueda y actualización segura de un paciente»
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:A-01 Recibir la solicitud con token y hospital (X-Tenant-ID);
+if (D-01 ¿Hospital indicado?) then (no)
+  #FDECEC:E-01 Rechazar: 400 «indique el hospital»;
+  stop
+else (sí)
+endif
+:A-02 Pedir autorización al Servicio RBAC
+(pacientes.registrar | buscar | leer | editar);
+if (D-02 ¿Permiso concedido en este hospital?) then (no)
+  #FDECEC:E-02 403 genérico + referencia
+(la denegación la audita RBAC);
+  stop
+else (sí)
+endif
+
+switch (D-03 ¿Qué operación?)
+case (Registrar)
+  :A-03 Validar datos obligatorios
+(nombres, apellidos, fecha de nacimiento, sexo, identificador);
+  if (D-04 ¿Datos válidos?) then (no)
+    #FDECEC:E-03 422 con los campos inválidos
+(se conserva lo escrito);
+    stop
+  else (sí)
+  endif
+  :A-04 Normalizar nombre y calcular el hash del identificador;
+  :A-05 Consultar posibles duplicados (MPI);
+  if (D-05 ¿Mismo identificador ya registrado?) then (sí)
+    #FDECEC:E-04 409 «ya existe» + código del paciente
+(identificador enmascarado);
+    stop
+  elseif (D-06 ¿Coincidencia probable por nombre + fecha?) then (sí)
+    :A-06 Mostrar candidatos con datos mínimos;
+    if (D-07 ¿El supervisor confirma que es otra persona, con motivo?) then (no)
+      #FDECEC:E-05 Registro cancelado: se usa el paciente existente;
+      stop
+    else (sí)
+    endif
+  else (no)
+  endif
+  :A-07 En UNA transacción: generar código local, guardar paciente
+(estado activo, vínculo MPI pendiente, identificador cifrado)
+y evento PACIENTE_REGISTRADO;
+  if (D-08 ¿Se guardó?) then (no)
+    #FDECEC:E-06 500: no queda nada a medias;
+    stop
+  else (sí)
+  endif
+  :A-08 Solicitar el vínculo con el MPI (pendiente → vinculado);
+  #E7F4EC:F-01 201 con el código del paciente;
+  stop
+case (Buscar / ver detalle)
+  :A-09 Validar criterios
+(código, identificador completo,
+o nombre ≥ 3 letras + fecha opcional);
+  if (D-09 ¿Criterio válido?) then (no)
+    #FDECEC:E-07 422 «afine la búsqueda»;
+    stop
+  else (sí)
+  endif
+  :A-10 Buscar solo en el hospital activo
+(identificador por hash exacto; máximo 20 resultados);
+  :A-11 Registrar PACIENTE_BUSCADO
+(criterios sin datos personales en claro);
+  if (D-10 ¿Elige un resultado para ver el detalle?) then (no)
+    #E7F4EC:F-02 200 lista con datos mínimos
+(o lista vacía);
+    stop
+  else (sí)
+  endif
+  :A-12 Cargar el detalle (requiere pacientes.leer)
+y registrar PACIENTE_CONSULTADO;
+  #E7F4EC:F-03 200 detalle con su versión;
+  stop
+case (Actualizar)
+  :A-13 Cargar el paciente del hospital activo;
+  if (D-11 ¿Existe en este hospital?) then (no)
+    #FDECEC:E-08 404 (igual si es de otro hospital);
+    stop
+  else (sí)
+  endif
+  if (D-12 ¿Estado permite editar?\n(fallecido o inactivo → solo supervisor)) then (no)
+    #FDECEC:E-09 403 «requiere supervisor»;
+    stop
+  else (sí)
+  endif
+  if (D-13 ¿La versión enviada es la vigente?) then (no)
+    #FDECEC:E-10 409 conflicto: otro usuario lo modificó
+(recargar y volver a aplicar);
+    stop
+  else (sí)
+  endif
+  :A-14 Validar los cambios;
+  if (D-14 ¿Cambios válidos?) then (no)
+    #FDECEC:E-11 422 con los campos inválidos;
+    stop
+  else (sí)
+  endif
+  if (D-15 ¿Cambia un dato de identidad?\n(identificador, nombres, fecha de nacimiento)) then (sí)
+    if (D-16 ¿Trae motivo?) then (no)
+      #FDECEC:E-12 422 «indique el motivo»;
+      stop
+    else (sí)
+    endif
+    if (D-17 ¿El nuevo identificador ya es de otro paciente?) then (sí)
+      #FDECEC:E-13 409 identificador en uso;
+      stop
+    else (no)
+    endif
+  else (no)
+  endif
+  :A-15 En UNA transacción: guardar, versión + 1 y evento
+PACIENTE_ACTUALIZADO con valores antes/después
+(identificador enmascarado);
+  if (D-18 ¿Se guardó?) then (no)
+    #FDECEC:E-14 500: sin cambios;
+    stop
+  else (sí)
+  endif
+  :A-16 Si cambió la identidad, avisar al MPI;
+  #E7F4EC:F-04 200 con la nueva versión;
+  stop
+endswitch
+@enduml

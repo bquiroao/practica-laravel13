@@ -1,0 +1,27 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS Pacientes
+
+Person(admision, "Personal de admisión", "Registra, busca y corrige pacientes.")
+Person(clinico, "Personal clínico", "Busca y consulta el detalle.")
+Person(supervisor, "Supervisor de registros", "Confirma homónimos y edita fallecidos o inactivos.")
+
+System(pacientes, "Micro-HIS Pacientes", "Registro, búsqueda, detalle y actualización segura de pacientes por hospital (tenant).")
+
+System_Ext(identidad, "Proveedor de identidad", "JWT del HIS (aquí: tokens de demostración).")
+System_Ext(rbac, "Módulo RBAC", "Decide los permisos pacientes.* (aquí: permisos en configuración).")
+System_Ext(mpi, "Índice maestro de pacientes (MPI)", "Detecta duplicados en toda la red (aquí: consulta sobre todos los hospitales).")
+System_Ext(consumidores, "Otros módulos del HIS", "Admisión, citas, expediente, laboratorio: usan el código del paciente.")
+
+Rel(admision, pacientes, "Registra, busca, actualiza", "HTTPS/JSON")
+Rel(clinico, pacientes, "Busca y consulta", "HTTPS/JSON")
+Rel(supervisor, pacientes, "Confirma y edita casos restringidos", "HTTPS/JSON")
+Rel(pacientes, identidad, "Obtiene actor y hospital del token")
+Rel(pacientes, rbac, "¿Tiene el permiso en este hospital?")
+Rel(pacientes, mpi, "¿Documento o persona ya registrados?")
+Rel(consumidores, pacientes, "Consultan por código")
+
+SHOW_LEGEND()
+@enduml

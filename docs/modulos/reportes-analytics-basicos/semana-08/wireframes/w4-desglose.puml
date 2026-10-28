@@ -1,0 +1,16 @@
+@startsalt w4_desglose
+{+
+  <b>Desglose por sala</b> · Ocupación 78,0 % (39 camas)
+  --
+  {#
+    Sala | Camas ocupadas | % del total | .
+    Medicina | 18 | 46,2 % | [Ver registros]
+    Cirugía | 14 | 35,9 % | [Ver registros]
+    Pediatría | 7 | 17,9 % | [Ver registros]
+    <b>Total</b> | <b>39</b> | <b>100,0 %</b> | <&check> suma = total
+  }
+  --
+  <&info> Los grupos con menos de 3 casos se muestran como «Otro»
+  [Volver al indicador]
+}
+@endsalt

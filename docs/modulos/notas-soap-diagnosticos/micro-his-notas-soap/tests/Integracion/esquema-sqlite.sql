@@ -28,7 +28,11 @@ CREATE TABLE clinical_notes (
     signed_at          text,
     version_no         integer NOT NULL CHECK (version_no > 0),
     created_at         text NOT NULL,
-    CHECK ((status = 'draft' AND signed_at IS NULL) OR (status = 'signed' AND signed_at IS NOT NULL))
+    supersedes_id      text UNIQUE REFERENCES clinical_notes (clinical_note_id),
+    correction_reason  text,
+    CHECK ((status = 'draft' AND signed_at IS NULL) OR (status = 'signed' AND signed_at IS NOT NULL)),
+    CHECK ((supersedes_id IS NULL AND correction_reason IS NULL)
+        OR (supersedes_id IS NOT NULL AND trim(correction_reason) <> '' AND version_no > 1))
 );
 CREATE TABLE diagnoses (
     diagnosis_id       text PRIMARY KEY,
@@ -56,6 +60,16 @@ CREATE TABLE outbox_events (
     occurred_at     text NOT NULL,
     published_at    text,
     attempts        integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
+);
+
+CREATE TABLE idempotency_keys (
+    hospital_id      text NOT NULL,
+    user_ref_id      text NOT NULL,
+    idempotency_key  text NOT NULL,
+    request_hash     text NOT NULL CHECK (length(request_hash) = 64),
+    clinical_note_id text NOT NULL REFERENCES clinical_notes (clinical_note_id),
+    created_at       text NOT NULL,
+    PRIMARY KEY (hospital_id, user_ref_id, idempotency_key)
 );
 
 CREATE TRIGGER clinical_notes_firmada BEFORE UPDATE ON clinical_notes WHEN OLD.status = 'signed'

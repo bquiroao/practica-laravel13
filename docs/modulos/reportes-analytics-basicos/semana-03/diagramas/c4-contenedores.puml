@@ -1,0 +1,36 @@
+@startuml c4_contenedores_reportes_analytics_basicos
+!include <C4/C4_Container>
+
+title Semana 3 · C4 nivel 2: contenedores del Micro-HIS Reportes y analytics básicos
+
+Person(usuario, "Administrador / Jefe de área / Médico", "Consulta indicadores trazables según su rol (RN-01)")
+
+System_Boundary(microhis, "Micro-HIS Reportes y analytics básicos") {
+  Container(navegador, "Navegador web", "HTML", "Muestra el indicador con su ficha, el desglose y los registros de origen")
+  Container(app, "Aplicación PHP", "PHP 8.2+ vanilla, servidor integrado php -S", "Presentation, Application, Domain y Persistence. Calcula y traza el indicador. DSN en config/app.ini")
+  ContainerDb(bd, "Base micro_his", "PostgreSQL 16 en Docker, puerto 55440", "ward, bed, bed_stay y appointment con UUID, timestamptz y datos ficticios")
+  ContainerDb(bdtest, "Base micro_his_test", "PostgreSQL 16 en Docker, puerto 55440", "Misma estructura, usada solo por las pruebas")
+}
+
+Rel(usuario, navegador, "Usa")
+Rel(navegador, app, "Pide reporte, período, nivel y dimensión", "HTTP GET")
+Rel(app, bd, "Lee con sentencias preparadas (solo lectura)", "PDO pgsql")
+Rel(app, bdtest, "Pruebas de camino feliz", "PDO pgsql")
+
+note right of bd
+  Mismos nombres de tabla que la
+  base HOSPITAL del SHI, para que
+  las consultas se puedan llevar
+  al proyecto real.
+end note
+
+note bottom of app
+  En el SHI la aplicación PHP pasa a ser la API
+  Laravel (/api/v1/reportes/{tipo}, /desglose,
+  /registros) y el navegador usa la interfaz Vue 3.
+  El error de persistencia se prueba con un doble,
+  sin tocar la base.
+end note
+
+SHOW_LEGEND()
+@enduml

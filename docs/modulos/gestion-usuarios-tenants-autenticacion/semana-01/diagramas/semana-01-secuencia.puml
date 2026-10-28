@@ -1,0 +1,123 @@
+@startuml semana-01-secuencia
+title Módulo de identidad — Secuencia\n«Alta por tenant, autenticación segura y revocación de sesión»
+hide footbox
+skinparam shadowing false
+
+actor "Administrador\nautorizado" as Admin
+actor "Usuario" as Usuario
+boundary "SPA HIS" as UI
+control "API /api/v1" as API
+control "Resolver de tenant" as Tenant
+control "Servicio de identidad" as Identidad
+control "Verificador de credenciales\n(proveedor pendiente)" as Cred
+control "Limitador de intentos" as Rate
+control "Emisor JWT" as JWT
+database "CENTRAL\ncentral_users /\nhospital_memberships" as Repo
+database "Almacén de revocación\n(blacklist jti)" as Rev
+control "Middleware JWT" as MW
+
+== CU-01 — Alta de usuario en tenant ==
+Admin -> UI : S-01 Capturar identidad,\ntenant y rol inicial
+UI -> API : S-02 Enviar solicitud de alta\ncon contexto tenant
+API -> Tenant : S-03 Resolver y validar tenant activo [R-01]
+Tenant --> API : S-04 Contexto válido / error
+alt Tenant inválido o inactivo [E-01]
+  API --> UI : S-05 Denegar sin escribir
+  UI --> Admin : Mostrar error de contexto
+else Tenant activo
+  API -> Identidad : S-06 Autorizar alta y validar campos [R-11]
+  Identidad --> API : S-07 Permiso válido / denegado
+  alt Administrador no autorizado [E-02]
+    API --> UI : S-08 Denegar solicitud
+    UI --> Admin : Mostrar acceso denegado
+  else Autorizado
+    API -> Repo : S-09 Buscar identidad/membresía existente [R-03]
+    Repo --> API : S-10 Datos existentes / no existe
+    alt Conflicto de identidad o membresía [E-04]
+      API --> UI : S-11 No duplicar; respuesta controlada
+      UI --> Admin : Mostrar conflicto sin datos ajenos
+    else Alta válida
+      group Transacción de identidad y membresía
+        API -> Repo : S-12 Crear/vincular central_user y\nhospital_membership con vigencia [R-02, R-03]
+        Repo --> API : S-13 Guardado / error
+      end
+      alt Error al persistir [E-08]
+        API --> UI : S-14 No confirmar alta incompleta
+        UI --> Admin : Informar que no se completó
+      else Alta completada
+        API --> UI : S-15 Confirmar identidad y tenant;\nno se crean credenciales aquí [R-04]
+        UI --> Admin : Mostrar alta sin secreto
+      end
+    end
+  end
+end
+
+== CU-02 — Autenticación contextualizada ==
+Usuario -> UI : S-16 Ingresar tenant, identificador y secreto
+UI -> API : S-17 Enviar credenciales por TLS [R-04]
+API -> Tenant : S-18 Resolver y comprobar tenant [R-01]
+Tenant --> API : S-19 Contexto activo / error
+alt Tenant inválido o inactivo [E-01]
+  API --> UI : S-20 Respuesta controlada; sin JWT
+  UI --> Usuario : Mostrar error genérico
+else Contexto activo
+  API -> Rate : S-21 Comprobar límite de intentos [R-05]
+  Rate --> API : S-22 Permitido / límite alcanzado
+  alt Límite alcanzado [E-06]
+    API --> UI : S-23 Denegar intento sin verificar secreto
+    UI --> Usuario : Mostrar fallo de autenticación
+  else Intento permitido
+    API -> Cred : S-24 Verificar secreto sin exponerlo [R-04, R-05]
+    Cred --> API : S-25 Credencial válida / inválida / indisponible
+    alt Credenciales inválidas o proveedor no disponible [E-05, E-08]
+      API --> UI : S-26 Respuesta genérica; sin token
+      UI --> Usuario : Mostrar fallo de autenticación
+    else Credenciales válidas
+      API -> Repo : S-27 Consultar estado de identidad y membresía [R-02]
+      Repo --> API : S-28 Identidad activa y membresía vigente / error
+      alt Identidad o membresía no válida [E-05]
+        API --> UI : S-29 Respuesta genérica; sin token
+        UI --> Usuario : Mostrar fallo de autenticación
+      else Acceso vigente
+        API -> JWT : S-30 Emitir JWT con sub, tenant, jti y exp [R-06]
+        JWT --> API : S-31 Token firmado / error
+        alt Emisión fallida [E-08]
+          API --> UI : S-32 No iniciar sesión
+          UI --> Usuario : Informar error técnico
+        else Emisión correcta
+          API --> UI : S-33 Entregar JWT y datos mínimos
+          UI --> Usuario : Mostrar sesión iniciada
+        end
+      end
+    end
+  end
+end
+
+== CU-03 — Revocación de sesión actual ==
+Usuario -> UI : S-34 Cerrar sesión
+UI -> API : S-35 Enviar JWT actual para revocación
+API -> MW : S-36 Validar firma, exp, jti y tenant [R-06]
+MW -> Rev : S-37 Consultar revocación vigente [R-08]
+Rev --> MW : S-38 Válido / revocado / error
+alt Token inválido o ya revocado [E-07]
+  MW --> API : S-39 Denegar solicitud
+  API --> UI : S-40 No afirmar una nueva revocación
+  UI --> Usuario : Limpiar credencial local e informar
+else Token vigente
+  API -> Rev : S-41 Persistir jti hasta su expiración [R-07]
+  Rev --> API : S-42 Confirmado / error
+  alt Revocación no persistida [E-08]
+    API --> UI : S-43 No confirmar logout exitoso
+    UI --> Usuario : Informar fallo del cierre
+  else Revocación confirmada
+    API --> UI : S-44 Confirmar cierre de sesión
+    UI --> Usuario : Eliminar token local
+    Usuario -> API : S-45 Solicitud posterior con el mismo JWT
+    API -> MW : S-46 Validar JWT y estado blacklist [R-08]
+    MW -> Rev : S-47 Consultar jti revocado
+    Rev --> MW : Revocado
+    MW --> API : S-48 Rechazar antes del controlador [E-07]
+    API --> Usuario : S-49 401; sesión no reutilizable
+  end
+end
+@enduml

@@ -1,0 +1,7 @@
+ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
+
+H-01  reproducido     consultar con roles = [medico] escritos por el cliente = 200; códigos: E2 E3 E5 E6 E7 NF
+H-02  reproducido     enviar un openapi inválido = 201 (se esperaba 422 E4); columnas: id, slug, doc_type, version, author, status, reviewed_by, reason
+H-03  reproducido     1.0.0 aprobada por luis y marcada obsoleta por marta: reviewed_by = marta
+H-04  reproducido     la solicitud que empezó primero = 503 E8 (se esperaba 409 E3)
+H-05  reproducido     enfermería consulta guia-citas sin versión = 404 E6, sin aviso de la 1.0.0 obsoleta

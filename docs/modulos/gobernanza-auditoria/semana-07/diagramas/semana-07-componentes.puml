@@ -1,0 +1,112 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Componentes de Gobernanza y auditoría: frontend (Vue, diseño) y backend (Micro-HIS PHP, implementado) por capa
+skinparam componentStyle uml2
+skinparam defaultFontSize 11
+skinparam package {
+  BorderColor #2F5D8A
+}
+left to right direction
+
+package "FRONTEND · Vue 3 + Pinia + vue-router (diseño)" as FE {
+  package "UI" as FUI #EEF4FB {
+    [BitacoraPage\n/auditoria/movimientos] as PBI
+    [FiltrosBitacora\n(rango obligatorio · usuario ·\nmódulo · acción · resultado)] as FIL
+    [SelectorAlcance\n(solo con consultar_red)] as SAL
+    [TablaMovimientos\n(sin editar ni borrar)] as TAB
+    [PaginadorCursor] as PAG
+    [DetalleMovimiento\n(sello · corrige_a · corregido_por)] as DET
+    [EstadoConsulta\n(vacío · carga · error + request_id)] as EST
+    [VerificacionPage\n(INTEGRA · ALTERADA · TRUNCADA)] as VER
+  }
+  package "Aplicación (cliente)" as FAP #F3F8EE {
+    [useBitacoraStore\n(Pinia: filtros, páginas, estado)] as STO
+    [useVerificacionStore] as SVE
+    [permisoGuard\n(meta.permiso de la ruta)] as GRD
+  }
+  package "Dominio (cliente)" as FDO #FFF8E1 {
+    [filtrosBitacora.js\n(rango, parámetros permitidos)] as FDF
+  }
+  package "Acceso a datos" as FPE #FDF0F0 {
+    [auditoriaApi.js] as API
+    [axios compartido\nBearer · X-Tenant-ID] as AX
+  }
+}
+
+interface "Contrato HTTP\nOpenAPI 3.1 · v1.1.0" as HTTP
+
+package "BACKEND · Micro-HIS Auditoría (implementado)" as BE {
+  package "Presentación (MVC)" as BUI #EEF4FB {
+    [Kernel + Rutas\n(token, X-Tenant-ID, X-Request-ID)] as KER
+    [AuditoriaControlador] as CTL
+    [FormularioMovimientos] as FOR
+    [MovimientosVista · ErrorVista] as VIS
+  }
+  package "Aplicación" as BAP #F3F8EE {
+    [RegistrarMovimiento] as REG
+    [ConsultarMovimientos] as CON
+    [VerDetalleMovimiento] as VDE
+    [VerificarIntegridad · ObtenerAncla] as VIN
+    [AutorizacionLectura] as AUT #C8E6C9
+    [ProyeccionMovimientos] as PRO #C8E6C9
+    [CursorPaginacion] as CUR #C8E6C9
+    [CadenaSellada] as CAD
+  }
+  package "Dominio" as BDO #FFF8E1 {
+    [Alcance] as ALC #C8E6C9
+    [CatalogoFiltros + 5 filtros] as CAT #C8E6C9
+    [9 reglas de registro] as REGL
+    [Movimiento · Sello] as MOV
+    [«puerto» Bitacora] as BIT
+  }
+  package "Persistencia" as BPE #FDF0F0 {
+    [PdoBitacora · PdoTransaccion] as PDO
+    [BitacoraEnMemoria · TransaccionEnMemoria] as MEM
+  }
+}
+
+database "PostgreSQL\naudit_logs (solo inserción)" as DB
+
+PBI --> FIL
+PBI --> SAL
+PBI --> TAB
+PBI --> PAG
+PBI --> EST
+TAB --> DET
+PBI --> STO
+VER --> SVE
+STO --> FDF
+STO --> API
+SVE --> API
+API --> AX
+AX --> HTTP
+HTTP --> KER
+KER --> CTL
+CTL --> FOR
+CTL --> VIS
+CTL --> CON
+CTL --> VDE
+CTL --> REG
+CTL --> VIN
+CON --> AUT
+CON --> CAT
+CON --> CUR
+CON --> PRO
+CON --> CAD
+VDE --> AUT
+VDE --> PRO
+AUT --> ALC
+CON --> ALC
+REG --> REGL
+REG --> CAD
+CAD --> BIT
+PRO --> BIT
+BIT <|.. PDO
+BIT <|.. MEM
+PDO --> DB
+
+legend right
+  En verde: piezas que el refactor de la semana 7 sacó de ConsultarMovimientos.
+  El frontend NO tiene acción de editar ni borrar: la API tampoco la tiene (R-02).
+endlegend
+@enduml

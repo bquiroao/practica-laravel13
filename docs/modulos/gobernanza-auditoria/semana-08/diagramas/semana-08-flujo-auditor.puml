@@ -1,0 +1,54 @@
+@startuml semana-08-flujo-auditor
+!pragma layout smetana
+title User flow — Auditor del hospital: consultar la bitácora y revisar un movimiento
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #EEF4FB
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityBorderColor #2F5D8A
+
+start
+:Menú «Auditoría» → /auditoria/movimientos;
+if (¿Sesión vigente?) then (no)
+  :Inicio de sesión (M-09);
+  :Vuelve a la página;
+endif
+if (¿Tiene auditoria.consultar en su hospital?) then (no)
+  #FDECEC:403 · M-08: a quién pedir el permiso;
+  stop
+endif
+:W1 · Filtros con el rango de HOY precargado\naviso «su consulta queda registrada» (M-06);
+repeat
+  :Elige rango y, si quiere, usuario · módulo · acción · resultado;
+  backward:Marca el campo y mueve el foco (M-01/M-02);
+repeat while (¿Rango completo y desde ≤ hasta?) is (no)
+->sí;
+:Buscar → estado CARGA (M-04)\nBuscar deshabilitado;
+switch (Respuesta)
+case (200 con filas)
+  :W2 · Lista, más recientes primero;
+case (200 sin filas)
+  #F2F3F5:Estado VACÍO (M-03)\n→ ajustar filtros;
+  stop
+case (503 / sin conexión)
+  #FDECEC:Error recuperable (M-10/M-11)\ncódigo de soporte · Reintentar;
+  stop
+case (422)
+  #FDECEC:Campo marcado con el texto del servidor;
+  stop
+endswitch
+while (¿Necesita más filas?) is (sí)
+  :«Cargar 50 más» (cursor);
+endwhile (no)
+:Abre una fila → W3 · Detalle (también se audita);
+if (¿200?) then (sí)
+  if (¿Es una corrección o fue corregido?) then (sí)
+    :Sigue el enlace «Corrige a #n» / «Corregido por #n»\n(M-13/M-14);
+  endif
+  :Copia el sello si debe compararlo con un ancla;
+else (404)
+  #FDECEC:M-12 «no existe o no pertenece a su hospital»\n→ vuelve a la lista;
+endif
+:Cierra el panel: la lista conserva la posición\n(sin una consulta nueva);
+#E7F4EC:Fin: encontró y entendió los movimientos;
+stop
+@enduml

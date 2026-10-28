@@ -1,0 +1,29 @@
+@startuml semana-03-paquetes-dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorExpediente
+}
+package Aplicacion {
+  class ServicioExpediente
+  interface ExpedientesHospital <<puerto>>
+  interface IndiceCentral <<puerto>>
+  interface Auditoria <<puerto>>
+  interface Reloj <<puerto>>
+}
+package Dominio {
+  class "Paciente, Consentimiento" as Reglas
+}
+package Persistencia {
+  class HospitalPdo
+  class CentralPdo
+}
+ControladorExpediente ..> ServicioExpediente
+ServicioExpediente ..> Reglas
+ServicioExpediente --> ExpedientesHospital
+ServicioExpediente --> IndiceCentral
+ServicioExpediente --> Auditoria
+ServicioExpediente --> Reloj
+HospitalPdo ..|> ExpedientesHospital
+HospitalPdo ..|> Auditoria
+CentralPdo ..|> IndiceCentral
+@enduml

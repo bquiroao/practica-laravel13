@@ -1,0 +1,43 @@
+@startuml componentes_backend_reportes_analytics_basicos
+title Semana 7 · Componentes backend (Laravel 12) del módulo Reportes y analytics básicos
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "UI / entrada HTTP" {
+  [ReporteController] as ctrl
+  [FiltrosReporteRequest] as req
+  [IndicadorResource] as recurso
+}
+package "Aplicación" {
+  [CalcularIndicadorAction] as accion
+  [ReportePolicy] as policy
+}
+package "Dominio" {
+  interface ContratoReporte as contrato
+  [ReportRegistry] as registro
+  [ReporteOcupacion · ReporteCitas · …] as reportes
+  [Filtros · Indicador · Desglose\nRegistroOrigen · Precision] as valores
+  interface "OcupacionRepository\nCitasRepository · …" as repos
+}
+package "Persistencia" {
+  [OcupacionPgRepository · CitasPgRepository · …] as pg
+}
+[ReportesServiceProvider] as provider
+database "Base HOSPITAL\n(vistas reportes.*)" as bd
+[Spatie Permission + JWT] as auth
+
+ctrl --> req : valida (422)
+ctrl --> accion : ejecuta
+ctrl --> recurso : JSON v1
+accion --> policy : autoriza (403)
+policy --> auth
+accion --> registro
+registro --> contrato
+reportes ..|> contrato
+reportes --> valores
+reportes --> repos
+pg ..|> repos
+pg --> bd : SELECT (rol reportes_lectura)
+provider ..> registro : registra reportes
+provider ..> pg : enlaza interfaz → adaptador
+@enduml

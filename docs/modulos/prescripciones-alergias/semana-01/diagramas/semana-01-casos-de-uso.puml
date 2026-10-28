@@ -1,0 +1,68 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo Prescripciones electrónicas con validación de alergias — Casos de uso\n«Creación de prescripción con verificación previa de alergias»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Médico prescriptor" as Medico
+actor "Farmacéutico\n(revisión y dispensación)" as Farmaceutico
+actor "Enfermería\n(administración)" as Enfermeria
+actor "Fuente de alergias\n(Expediente: tabla allergies)" as Alergias <<sistema>>
+actor "Catálogo de\nmedicamentos" as Catalogo <<sistema>>
+actor "Servicio RBAC\n(autorización)" as RBAC <<sistema>>
+actor "Módulo Auditoría\n(bitácora)" as Auditoria <<sistema>>
+
+rectangle "Sistema Hospitalario Integrado — Módulo Prescripciones (base del hospital, tenant = hospital)" {
+  usecase "CU-01\nEmitir prescripción" as CU01
+  usecase "CU-02\nVerificar alergias\n(previa y obligatoria)" as CU02
+  usecase "CU-03\nValidar medicamento,\ndosis y completitud" as CU03
+  usecase "CU-04\nAutorizar operación\n(permiso + tenant)" as CU04
+  usecase "CU-05\nJustificar advertencia\nde reactividad cruzada" as CU05
+  usecase "CU-06\nConfirmar «sin alergias\nconocidas»" as CU06
+  usecase "CU-07\nAnular prescripción\ncon motivo" as CU07
+  usecase "CU-08\nRegistrar traza\nen Auditoría" as CU08
+  usecase "CU-09\nConsultar prescripción\ny su verificación" as CU09
+}
+
+Medico --> CU01
+Medico --> CU02
+Medico --> CU07
+Medico --> CU09
+Farmaceutico --> CU09
+Enfermeria --> CU09
+
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU01 ..> CU04 : <<include>>
+CU01 ..> CU08 : <<include>>
+CU02 ..> CU04 : <<include>>
+CU07 ..> CU04 : <<include>>
+CU07 ..> CU08 : <<include>>
+CU09 ..> CU04 : <<include>>
+CU05 ..> CU01 : <<extend>>\n[reactividad cruzada\nno potencialmente mortal]
+CU06 ..> CU01 : <<extend>>\n[alergias sin evaluar]
+
+CU02 --> Alergias
+CU03 --> Catalogo
+CU04 --> RBAC
+CU08 --> Auditoria
+
+note right of CU01
+  No hay «editar prescripción»: una prescripción
+  emitida es inmutable (R-10). Se anula con motivo
+  y, si hace falta, se emite otra.
+  No hay «omitir verificación»: CU-02 se incluye
+  siempre y se repite en el servidor (R-03).
+end note
+
+note bottom of CU02
+  Fail-closed (R-07): si la fuente de alergias
+  no responde, NO se emite. Nunca se interpreta
+  como «sin alergias».
+end note
+@enduml

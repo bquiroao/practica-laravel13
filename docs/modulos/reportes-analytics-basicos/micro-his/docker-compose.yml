@@ -1,0 +1,24 @@
+# PostgreSQL 16 del Micro-HIS Reportes y analytics básicos.
+# Puerto 55440 para no chocar con 5433 (otro proyecto) ni con 55431 y 55433 (repositorio del grupo).
+# Credenciales solo de desarrollo local; todos los datos son ficticios.
+services:
+  postgres:
+    image: postgres:16
+    container_name: micro-his-postgres
+    environment:
+      POSTGRES_USER: micro_his
+      POSTGRES_PASSWORD: micro_his_local
+      POSTGRES_DB: micro_his
+    ports:
+      - "55440:5432"
+    volumes:
+      - micro_his_datos:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U micro_his -d micro_his"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  micro_his_datos:

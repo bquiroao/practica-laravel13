@@ -1,0 +1,18 @@
+OK    feliz: solicitar m1/p1 en [2000,3000) = 201 con id
+OK    feliz: confirmar la cita 1 = 200
+OK    feliz: cancelar la cita 1 con motivo = 200
+OK    feliz: el motivo queda registrado (R-10)
+OK    feliz: el horario liberado se puede volver a usar (R-08)
+OK    regla: cita en el pasado = 422 E2 (R-01)
+OK    regla: médico sin especialidad vigente = 422 E3 (R-04, R-05)
+OK    regla: médico ocupado = 409 E4 (R-02)
+OK    regla: paciente ocupado = 409 E5 (R-03)
+OK    regla: cancelar una cita ya cancelada = 422 E7 (R-07)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException se traduce a 503 E8
+OK    dependencias: Dominio no usa Aplicacion, Persistencia, Presentacion
+OK    dependencias: Aplicacion no usa Persistencia, Presentacion
+OK    dependencias: Persistencia no usa Presentacion
+OK    dependencias: Presentacion no usa Persistencia
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

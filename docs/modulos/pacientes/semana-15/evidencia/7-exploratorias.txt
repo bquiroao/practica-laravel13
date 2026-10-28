@@ -1,0 +1,24 @@
+$ php herramientas/exploratorias.php
+Teléfono
+  «1      2» (2 dígitos + 6 espacios)          → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "1      2", documento *********0101
+  «12 34 56 7» (7 dígitos)                     → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "12 34 56 7", documento *********0101
+  «1234567» (7 dígitos, sin espacios)          → HTTP 422 {"error":"DATOS_INVALIDOS","campos":{"telefono":"De 8 a 15 dígitos."}}
+Nombres
+  «!!!»                                        → HTTP 201 · guardado: nombre «!!! López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento *********0101
+  «123»                                        → HTTP 201 · guardado: nombre «123 López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento *********0101
+Fecha de nacimiento
+  0001-01-01                                   → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 0001-01-01, teléfono "+502 5555 1234", documento *********0101
+  1850-01-01                                   → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1850-01-01, teléfono "+502 5555 1234", documento *********0101
+Documento
+  pasaporte del país «ZZZ»                     → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento ***2345
+  DPI 1234567800101 (verificador incorrecto)   → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento *********0101
+  DPI 1234567890199 (municipio 99)             → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento *********0199
+  DPI de los datos de prueba (2547896320101)   → HTTP 201 · guardado: nombre «Ana Lucía López Pérez», nacimiento 1985-03-14, teléfono "+502 5555 1234", documento *********0101
+Motivo
+  5 000 caracteres al proteger (supervisión)   → HTTP 201 · motivo guardado en la bitácora: 5000 caracteres
+
+Dígito verificador de los DPI ficticios de las pruebas
+  DPI_ANA   2547896320101 → esperado 3, tiene 2
+  DPI_LUIS  1876543210901 → esperado 8, tiene 1
+  DPI_NUEVO 4455667780105 → esperado 9, tiene 8
+(código de salida: 0)

@@ -1,0 +1,31 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+title Diagrama trazable — de los actores a la prueba ejecutable (Pacientes, semanas 1–6)
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+  RoundCorner 12
+}
+
+rectangle "**Actores** (S1)\nAdmisión · Clínico\nSupervisor\nRBAC · MPI" as ACT
+rectangle "**UML** (S1)\nCU-01..CU-08\nD-01..D-18 · E-01..E-14\nS-01..S-70" as UML
+rectangle "**Reglas y RF/RNF** (S1–S2)\nR-01..R-10 → RF-01..RF-11\nRNF-01..RNF-09\nCA-01..CA-12" as REQ
+rectangle "**SOLID: LSP** (S2)\nContratos Identificador,\nConsultaPacientes ⊂\nRepositorioPacientes" as LSP
+rectangle "**Capas + MVC** (S3–S4)\nPresentación → Aplicación\n→ Dominio ← Persistencia\nARQ-01..ARQ-08" as CAP
+rectangle "**Repository** (S4)\n6 puertos × 2 adaptadores\n(PDO, InMemory)\nCON-MEM-01..08" as REP
+rectangle "**Contrato API** (S5)\nOpenAPI 3.1 v1.1.0\nIdempotency-Key · ETag\nAPI-01..03" as API
+rectangle "**Pruebas** (S3–S6)\n80 pruebas · 0 fallan\n22/22 mutaciones" as PRU
+
+ACT -right-> UML : objetivo\npor actor
+UML -right-> REQ : CU → RF\nD/E → regla
+REQ -right-> LSP : RNF-01\nsustituibilidad
+LSP -down-> CAP : los contratos\nson los puertos
+CAP -left-> REP : interfaces\nen el Dominio
+REP -left-> API : servidor\ncon contrato
+API -left-> PRU : conformidad\nverificada
+
+rectangle "**Cambio práctico (S6): identidad protegida — R-11 · RF-12..RF-16**\nActor: Supervisor (pacientes.proteger, pacientes.leer_protegido) · UML: CU-09 «Proteger identidad» extiende CU-01/CU-04\nDominio: PoliticaConfidencialidad (nueva) · Puerto: IndiceDuplicados.protegidos() · API: v1.1.0 (compatible)\nPruebas: PROT-01..06, DOM-09, CON-MEM-08 (rojo 6 → verde 0) · Mutaciones M19..M22" as CAMBIO #E8F5E9
+
+PRU -[hidden]down-> CAMBIO
+@enduml

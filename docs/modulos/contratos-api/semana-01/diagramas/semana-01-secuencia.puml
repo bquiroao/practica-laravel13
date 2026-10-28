@@ -1,0 +1,56 @@
+@startuml semana-01-secuencia
+' Semana 1 — Contratos API: centro de documentación por rol (tarea Odoo 2473)
+title Secuencia — enviar versión a publicación (CU-01 con CU-05) y consultarla por rol (CU-03)
+
+actor "Autor técnico" as A
+actor "Lector" as L
+participant "UI del centro\n(Vue)" as UI
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Autorización\n(RBAC y membresías)" as RBAC
+participant "Servicio de\ndocumentación" as SVC
+participant "Validador\nOpenAPI" as VAL
+database "Repositorio\nde documentos" as DB
+participant "Auditoría" as AUD
+
+== CU-01 Enviar versión a publicación ==
+A -> UI : S1 Documento, tipo, versión y audiencia
+UI -> API : S2 POST /docs/{slug}/versions (JWT, X-Tenant-ID)
+API -> RBAC : S3 ¿Puede publicar?
+alt sin permiso
+  API --> UI : 403 (E1)
+else autorizado
+  API -> SVC : S4 enviarVersion(datos)
+  SVC -> DB : S5 Lee la versión vigente (R-01, R-02)
+  alt metadatos incompletos
+    API --> UI : 422 (E2)
+  else versión repetida o menor
+    API --> UI : 409 (E3)
+  else válidos
+    SVC -> VAL : S6 Lint OpenAPI y búsqueda de datos reales (R-04, R-09)
+    alt falla la validación
+      VAL --> SVC : reporte de errores
+      API --> UI : 422 con reporte (E4)
+    else pasa
+      SVC -> DB : S7 Guarda la versión «en revisión»
+      SVC -> AUD : S8 Registra el envío (R-10)
+      API --> UI : S9 201 En revisión (F1)
+    end
+  end
+end
+
+== CU-03 Consultar documentación de mi rol ==
+L -> UI : S10 Abre un documento
+UI -> API : S11 GET /docs/{slug}?version=... (JWT, X-Tenant-ID)
+API -> RBAC : S12 role_code activos del lector en este hospital (R-06)
+RBAC --> API : roles
+API -> SVC : S13 consultar(slug, version, roles)
+alt la audiencia no incluye ninguno de sus roles
+  API --> UI : 404 (E6, R-07)
+else visible
+  SVC -> DB : S14 Lee la versión pedida o la vigente
+  opt versión obsoleta (R-08)
+    SVC -> SVC : agrega aviso y enlace a la vigente
+  end
+  API --> UI : S15 200 Documento (F4)
+end
+@enduml

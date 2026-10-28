@@ -1,0 +1,21 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Expediente médico electrónico base
+Person(med, "Profesional clínico", "Abre y consulta expedientes de sus pacientes")
+Container_Boundary(micro, "Micro-HIS Expediente (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorExpediente", "Presentación", "Entrada, traducción E2..E8 a HTTP")
+  Component(svc, "ServicioExpediente", "Aplicación", "CU-01 a CU-03, auditado; «ahora» por el puerto Reloj")
+  Component(dom, "Paciente, Consentimiento", "Dominio", "R-01, R-03, R-06, R-10")
+  Component(hosp, "HospitalPdo", "Persistencia", "Pacientes, asignaciones, expedientes y auditoría")
+  Component(cen, "CentralPdo", "Persistencia", "Consentimientos e índice MPI")
+}
+ContainerDb(dbh, "Base HOSPITAL (tenant)", "PostgreSQL (SQLite en pruebas)", "local_patients, care_assignments, medical_records, audit_events")
+ContainerDb(dbc, "Base CENTRAL", "PostgreSQL (SQLite en pruebas)", "consents, mpi_records")
+Rel(med, ctrl, "abrir, consultar")
+Rel(ctrl, svc, "llama")
+Rel(svc, dom, "valida reglas")
+Rel(svc, hosp, "ExpedientesHospital, Auditoria")
+Rel(svc, cen, "IndiceCentral")
+Rel(hosp, dbh, "SQL preparado")
+Rel(cen, dbc, "SQL preparado")
+@enduml

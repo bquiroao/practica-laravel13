@@ -1,0 +1,1 @@
+Se utilizó IA para revisar artefactos locales y preparar plan, checklist, hallazgos y formatos. La regresión PHP se ejecutó durante preparación. No se atribuyen reunión, revisores, aprobación técnica, JWT real ni persistencia entre procesos no demostrados. La estudiante debe revisar y comprender los límites.

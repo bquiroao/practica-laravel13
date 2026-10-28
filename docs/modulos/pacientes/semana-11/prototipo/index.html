@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIS · Pacientes (prototipo)</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+  <!-- Todo lo que no es el diálogo vive en #app: así el diálogo puede volver inerte al resto. -->
+  <div id="app">
+    <button type="button" class="saltar" data-accion="saltar">Saltar al contenido</button>
+    <header class="barra" id="barra" hidden></header>
+    <div id="red"></div>
+    <main id="contenido" tabindex="-1"></main>
+    <div class="accion-fija" id="accion" hidden></div>
+    <nav class="nav-inferior" id="nav" aria-label="Secciones" hidden></nav>
+  </div>
+  <div id="capa-dialogo"></div>
+  <div id="vivo" class="oculto-visual" aria-live="polite"></div>
+  <div id="alerta" class="oculto-visual" aria-live="assertive"></div>
+
+  <noscript>Este prototipo necesita JavaScript.</noscript>
+  <script src="datos.js"></script>
+  <script src="api-simulada.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

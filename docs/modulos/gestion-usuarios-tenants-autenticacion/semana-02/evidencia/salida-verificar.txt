@@ -1,0 +1,34 @@
+PASS: CA-01 registra identidad y membresía autorizadas
+PASS: CA-01 crea una identidad global
+PASS: CA-01 crea una membresía del tenant
+PASS: CA-02 evita membresía duplicada
+PASS: CA-02 conserva una sola membresía
+PASS: CA-03 deniega alta sin permiso administrativo
+PASS: CA-03 no crea identidad ante denegación
+PASS: CA-04 no permite asignar un rol no autorizado
+PASS: CA-04 no crea membresía con rol no autorizado
+PASS: CA-05 rechaza tenant inactivo
+PASS: CA-06 valida campos antes de persistir
+PASS: CA-07 expone falla de transacción
+PASS: CA-07 no deja identidad parcial
+PASS: CA-07 no deja membresía parcial
+PASS: CA-08 autentica identidad con membresía vigente
+PASS: CA-08 liga la sesión al sujeto autenticado
+PASS: CA-08 limita la sesión al tenant elegido
+PASS: CA-08 aplica expiración acotada de demostración
+PASS: CA-09 usa error genérico para credencial incorrecta
+PASS: CA-09 no revela si existe la identidad
+PASS: CA-09 no emite token ante autenticación fallida
+PASS: CA-10 no autentica sin membresía del tenant
+PASS: CA-10 no emite token sin membresía vigente
+PASS: CA-11 permite una sesión vigente no revocada
+PASS: CA-12 confirma revocación persistida
+PASS: CA-12 rechaza el token revocado en comprobaciones posteriores
+PASS: CA-13 rechaza reutilizar la sesión en otro tenant
+PASS: CA-14 no confirma cierre si falla la revocación
+PASS: CA-14 informa que la sesión sigue válida si no se pudo revocar
+PASS: CA-15 la alta depende de colaboraciones separadas por responsabilidad
+PASS: CA-16 autenticación no maneja alta ni revocación
+PASS: CA-17 revocación no maneja credenciales ni alta
+PASS: CA-18 verificación de sesión tiene responsabilidad propia
+OK: 33 aserciones.
