@@ -1,0 +1,56 @@
+[
+  {
+    "file": "01-inicio.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "02-destino.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "03-confirmacion.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "04-resultado.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "05-recuperacion.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  },
+  {
+    "file": "06-evidencia.svg",
+    "headerFill": "rgb(255, 255, 255)",
+    "numberFill": "rgb(25, 60, 70)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "11.56",
+    "annotationContrast": "10.87"
+  }
+]
