@@ -1,0 +1,9 @@
+﻿[captura] exit=0
+Resultado capturado como pendiente.
+id=RES-E6A326CEB6276F5792430BA2DE1A735A item=ITEM-DEMO version=1 state=pending value=5.4 entered_by=TECH-01 entered_at=2026-10-27T17:21:41+00:00
+[corrección] exit=0
+Corrección guardada como nueva versión pendiente.
+id=RES-48695A8CBCA1E4F477E65F87FBFAFDF4 item=ITEM-DEMO version=2 state=pending value=5.6 entered_by=TECH-02 entered_at=2026-10-27T17:21:41+00:00
+[obsoleta] exit=3
+La versión cambió; vuelve a cargar el resultado.
+id=RES-48695A8CBCA1E4F477E65F87FBFAFDF4 item=ITEM-DEMO version=2 state=pending value=5.6 entered_by=TECH-02 entered_at=2026-10-27T17:21:41+00:00
