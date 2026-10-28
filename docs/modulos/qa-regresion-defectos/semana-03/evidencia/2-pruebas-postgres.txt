@@ -1,0 +1,15 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php --solo=INT   # PostgreSQL 18
+Micro-HIS QA funcional y regresión - pruebas (PHP 8.4.26)
+
+== Integración con PostgreSQL real ==
+[PASA ] INT-01   Camino feliz en PostgreSQL: la campaña, sus intentos, la evidencia, el defecto y su historial quedan guardados
+[PASA ] INT-02   R-03 con la matriz real: faltan los críticos de «expediente» y «agenda-camas»
+[PASA ] INT-03   R-11 en la base: UPDATE o DELETE de un intento, una evidencia o el historial se rechazan aunque se salten la aplicación
+[PASA ] INT-04   R-02 en la base: una versión aprobada no cambia, el autor no puede figurar como aprobador y nada se borra
+[PASA ] INT-05   R-12: la clave de idempotencia es única en la base; el reintento devuelve el mismo intento
+[PASA ] INT-06   Atomicidad real: si la traza falla, PostgreSQL deshace el defecto y el intento (ROLLBACK)
+[PASA ] INT-07   Tenant: la campaña de hosp-norte no existe para hosp-sur, ni por id ni en la trazabilidad
+[PASA ] INT-08   Concurrencia: dos cierres sobre la misma campaña, solo uno escribe (UPDATE condicionado al estado anterior)
+[PASA ] INT-09   La traza de auditoría va a la bandeja en la misma transacción, sin datos clínicos (solo identificadores)
+
+Total: 9  Pasan: 9  Fallan: 0  Omitidas: 0
