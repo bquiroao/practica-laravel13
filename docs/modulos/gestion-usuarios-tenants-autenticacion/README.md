@@ -24,6 +24,9 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/diagramas/*.puml
 ```
 
+## Semana 12
+
+[Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
 ## Semana 14
 
 [Plan SQA: métricas, riesgos, controles y calendario](semana-14/semana-14-plan-sqa-usuarios-tenants.md).
