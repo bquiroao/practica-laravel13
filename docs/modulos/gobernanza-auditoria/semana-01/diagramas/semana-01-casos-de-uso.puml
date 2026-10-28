@@ -1,0 +1,59 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo Gobernanza y auditoría — Casos de uso\n«Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+actor "Módulo emisor del HIS\n(Pacientes, RBAC, Citas…)" as Emisor <<sistema>>
+actor "Super administrador\n(gobernanza de la red)" as SuperAdmin
+actor "Auditor del hospital\n(cumplimiento local)" as Auditor
+actor "Servicio RBAC\n(autorización)" as RBAC <<sistema>>
+actor "Servicio de identidad\n(JWT)" as IdP <<sistema>>
+
+rectangle "Sistema Hospitalario Integrado — Módulo Gobernanza y auditoría (base central, tenant = hospital)" {
+  usecase "CU-01\nRegistrar movimiento" as CU01
+  usecase "CU-02\nConsultar movimientos\npor usuario, módulo y fechas" as CU02
+  usecase "CU-03\nVer detalle de\nun movimiento" as CU03
+  usecase "CU-04\nVerificar integridad\nde la bitácora" as CU04
+  usecase "CU-05\nAutorizar operación\n(permiso + tenant)" as CU05
+  usecase "CU-06\nAuditar la consulta\n(meta-auditoría)" as CU06
+  usecase "CU-07\nConsultar todos\nlos hospitales" as CU07
+}
+
+Emisor --> CU01
+SuperAdmin --> CU02
+SuperAdmin --> CU03
+SuperAdmin --> CU04
+Auditor --> CU02
+Auditor --> CU03
+
+CU01 ..> CU05 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU05 : <<include>>
+CU04 ..> CU05 : <<include>>
+CU02 ..> CU06 : <<include>>
+CU03 ..> CU06 : <<include>>
+CU07 ..> CU02 : <<extend>>\n[alcance = red]
+CU03 ..> CU02 : <<extend>>\n[elige un resultado]
+
+CU05 --> RBAC
+CU05 --> IdP
+
+note right of CU01
+  Append-only: no existe caso de uso
+  para editar ni borrar un movimiento.
+  Una corrección es OTRO movimiento
+  que referencia al original (R-02).
+end note
+
+note right of CU07
+  Solo el super administrador
+  (auditoria.consultar_red).
+  El auditor ve solo su hospital (R-05).
+end note
+@enduml

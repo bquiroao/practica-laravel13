@@ -1,0 +1,36 @@
+$ php bin/demo-en-memoria.php
+Micro-HIS Notas SOAP - demostración con adaptadores EN MEMORIA (PHP 8.3.6)
+
+## 1. Registrar nota (Dra. Méndez)
+POST /api/v1/notas-soap
+{"clinical_note_id":"bf3dacd5-d3d7-4985-b15d-14b0443fb394","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"9b6bc53b-de2b-4121-b39b-81d5c89d634d","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 201]
+
+## 2. Médico no asignado (Dr. López)
+POST /api/v1/notas-soap
+{"error":{"code":"acceso_denegado","message":"No tiene permiso para escribir en este expediente."}}
+[HTTP 403]
+
+## 3. Firmar
+POST /api/v1/notas-soap/bf3dacd5-d3d7-4985-b15d-14b0443fb394/firma
+{"clinical_note_id":"bf3dacd5-d3d7-4985-b15d-14b0443fb394","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"signed","version_no":1,"signed_at":"2026-10-10T14:53:22-06:00","soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"9b6bc53b-de2b-4121-b39b-81d5c89d634d","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+[HTTP 200]
+
+## 4. Firmar otra vez
+POST /api/v1/notas-soap/bf3dacd5-d3d7-4985-b15d-14b0443fb394/firma
+{"error":{"code":"nota_firmada","message":"La nota ya está firmada y no se puede modificar."}}
+[HTTP 409]
+
+## 5. Consultar con Accept: text/html (vista HTML)
+GET /api/v1/notas-soap/bf3dacd5-d3d7-4985-b15d-14b0443fb394
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8...
+[HTTP 200]
+
+## 6. Lo que quedó en los almacenes en memoria
+Notas: 1 (estado: signed)
+Diagnósticos de la nota: 1
+Auditoría: NOTA_REGISTRADA, NOTA_FIRMADA
+Bandeja de salida: NotaSoapFirmada {"clinical_note_id":"bf3dacd5-d3d7-4985-b15d-14b0443fb394","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","version_no":1,"signed_at":"2026-10-10T14:53:22-06:00"}

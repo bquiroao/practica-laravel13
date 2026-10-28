@@ -1,0 +1,79 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+left to right direction
+title Diagrama trazable RBAC: actor → UML → requisito → diseño → capa → Repository → contrato API → prueba
+skinparam defaultFontSize 12
+skinparam rectangle {
+  RoundCorner 12
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+rectangle "**Actor**" as cA #EEF2F7 {
+  actor "Administrador" as Admin
+  actor "Usuario clínico" as Clin
+}
+rectangle "**UML (S1)**\ncasos de uso" as cU #EEF2F7 {
+  rectangle "CU-01\nAsignar rol" as CU01
+  rectangle "CU-03/04\nAutorizar ·\ndenegar trazable" as CU03
+  rectangle "CU-07\nRevocar rol\n(cambio S6)" as CU07 #FFE3D6
+}
+rectangle "**RF/RNF (S2)**" as cR #EEF2F7 {
+  rectangle "RF-01..04\nasignación\n+ evidencia" as RF01
+  rectangle "RF-05..09\nRNF-01 fail-closed\nRNF-04 sin detalles" as RF05
+  rectangle "RF-11 revocar\ncon motivo\n(nuevo)" as RF11 #FFE3D6
+}
+rectangle "**SOLID (S2)**\nOCP" as cS #EEF2F7 {
+  rectangle "PoliticaAsignacion\n+ ReglaAsignacion" as P1
+  rectangle "PoliticaAutorizacion\n+ ReglaAutorizacion" as P2
+  rectangle "PoliticaRevocacion\n+ ReglaRevocacion\n(extensión)" as P3 #FFE3D6
+}
+rectangle "**Capas (S3/S4)**\nAplicación + MVC" as cC #EEF2F7 {
+  rectangle "AsignarRol\nAsignacionRolControlador" as C1
+  rectangle "AutorizarOperacion\nMiddlewareAutorizacion" as C2
+  rectangle "RevocarRol\nRevocacionRolControlador" as C3 #FFE3D6
+}
+rectangle "**Repository (S4)**\nPDO · InMemory" as cP #EEF2F7 {
+  rectangle "guardar()\nexisteActiva()" as R1
+  rectangle "membresiasDe()\nRegistroAuditoria" as R2
+  rectangle "revocar()\n(puerto ampliado)" as R3 #FFE3D6
+}
+rectangle "**Contrato API (S5)**" as cK #EEF2F7 {
+  rectangle "POST /roles/asignaciones\nx-permiso: roles.asignar" as K1
+  rectangle "POST /autorizaciones/decisiones\n+ 403 con correlation_id" as K2
+  rectangle "POST /roles/revocaciones\nx-permiso: roles.revocar" as K3 #FFE3D6
+}
+rectangle "**Prueba / evidencia**" as cT #EEF2F7 {
+  rectangle "APP-01, HTTP-01\nCON-MEM-03, INT-01" as T1
+  rectangle "APP-03, HTTP-03\nCLI-07, OBS-02" as T2
+  rectangle "REV-01..06\nCON-MEM-07, API-01/03" as T3 #FFE3D6
+}
+
+Admin --> CU01
+Clin --> CU03
+Admin --> CU07
+CU01 --> RF01
+CU03 --> RF05
+CU07 --> RF11
+RF01 --> P1
+RF05 --> P2
+RF11 --> P3
+P1 --> C1
+P2 --> C2
+P3 --> C3
+C1 --> R1
+C2 --> R2
+C3 --> R3
+R1 --> K1
+R2 --> K2
+R3 --> K3
+K1 --> T1
+K2 --> T2
+K3 --> T3
+C3 ..> C2 : reutiliza\n(roles.revocar)
+R3 ..> R2 : cambia la decisión\n(MEMBRESIA_NO_VIGENTE)
+
+legend bottom
+  Naranja = cambio práctico defendido (semana 6). Cada eslabón tiene un archivo y una prueba en la matriz decisión→evidencia.
+endlegend
+@enduml

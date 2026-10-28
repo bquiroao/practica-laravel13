@@ -1,0 +1,66 @@
+Micro-HIS Notas SOAP - semana 5: API contra PostgreSQL 16.15
+Servidor: php -S 127.0.0.1:8080 -t public   (PHP 8.3.6)
+Fecha: 2026-10-10 16:34
+Se muestran el estado HTTP, las cabeceras X-Request-ID / Idempotent-Replayed / Allow y el cuerpo.
+
+## 1. Registrar con Idempotency-Key y X-Request-ID propios
+$ curl -X POST /api/v1/notas-soap -H 'X-Tenant-ID: hosp-oriente' -H 'Authorization: Bearer token-mendez' -H 'Idempotency-Key: registro-carlos-0001' -H 'X-Request-ID: traza-expediente-0001' --data @ejemplos/nota.json
+HTTP/1.1 201 Created
+X-Request-ID: traza-expediente-0001
+{"clinical_note_id":"cce465f7-d678-4ef4-8c27-261094c17c37","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"902e1b7c-4ca8-49e8-ae4e-e9b66b214ce2","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+
+## 2. El mismo registro repetido (la respuesta anterior se perdió): misma nota, Idempotent-Replayed: true
+$ curl -X POST /api/v1/notas-soap ... -H 'Idempotency-Key: registro-carlos-0001' --data @ejemplos/nota.json
+HTTP/1.1 201 Created
+X-Request-ID: 3b1eef68-8dbd-46bc-affe-e825e2615ea0
+Idempotent-Replayed: true
+{"clinical_note_id":"cce465f7-d678-4ef4-8c27-261094c17c37","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"signed_at":null,"soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"902e1b7c-4ca8-49e8-ae4e-e9b66b214ce2","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+
+## 3. La misma clave con otro contenido: 422
+$ curl -X POST /api/v1/notas-soap ... -H 'Idempotency-Key: registro-carlos-0001' --data @ejemplos/nota-codigo-invalido.json
+HTTP/1.1 422 Unknown Status Code
+X-Request-ID: bf6de1dd-b9e4-44f3-81cf-e3d5acacd4af
+{"error":{"code":"idempotency_key_reutilizada","message":"La Idempotency-Key ya se usó con otro contenido. Genere una clave nueva para una nota nueva."}}
+
+## 4. Enfermería intenta registrar: 403 por el permiso de la ruta
+$ curl -X POST /api/v1/notas-soap -H 'Authorization: Bearer token-ana' ...
+HTTP/1.1 403 Forbidden
+X-Request-ID: 911af0e9-b16d-4102-b64d-1e3544fb0332
+{"error":{"code":"acceso_denegado","message":"No tiene permiso para esta operación."}}
+
+## 5. Enfermería consulta el listado del expediente: 200 con resúmenes (sin texto clínico)
+$ curl /api/v1/expedientes/exp-carlos/notas-soap -H 'Authorization: Bearer token-ana' ...
+HTTP/1.1 200 OK
+X-Request-ID: 1b34f2e8-4c84-4cd6-838c-7254d640910f
+{"medical_record_id":"exp-carlos","items":[{"clinical_note_id":"cce465f7-d678-4ef4-8c27-261094c17c37","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"draft","version_no":1,"created_at":"2026-10-10T16:34:59-06:00","signed_at":null,"diagnosis_codes":["J18.9"]}]}
+
+## 6. Firmar
+$ curl -X POST /api/v1/notas-soap/cce465f7-d678-4ef4-8c27-261094c17c37/firma ...
+HTTP/1.1 200 OK
+X-Request-ID: ebc45435-a52e-48d3-8ec2-e54b76acdc43
+{"clinical_note_id":"cce465f7-d678-4ef4-8c27-261094c17c37","medical_record_id":"exp-carlos","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"signed","version_no":1,"signed_at":"2026-10-10T16:35:00-06:00","soap":{"subjetivo":"Tos productiva y fiebre de 3 días","objetivo":"T 38.6 °C, estertores en base derecha","analisis":"Probable neumonía adquirida en la comunidad","plan":"Radiografía de tórax y antibiótico"},"diagnoses":[{"id":"902e1b7c-4ca8-49e8-ae4e-e9b66b214ce2","code":"J18.9","description":"Neumonía no especificada","type":"primary"}]}
+
+## 7. Listado filtrado por estado firmado
+$ curl /api/v1/expedientes/exp-carlos/notas-soap?estado=signed ...
+HTTP/1.1 200 OK
+X-Request-ID: b2204753-8a47-4e65-95d3-237ee0f5aa6f
+{"medical_record_id":"exp-carlos","items":[{"clinical_note_id":"cce465f7-d678-4ef4-8c27-261094c17c37","care_episode_id":"epi-100","author_user_ref_id":"dra-mendez","status":"signed","version_no":1,"created_at":"2026-10-10T16:34:59-06:00","signed_at":"2026-10-10T16:35:00-06:00","diagnosis_codes":["J18.9"]}]}
+
+## 8. Método no permitido: 405 con Allow
+$ curl -X DELETE /api/v1/notas-soap/cce465f7-d678-4ef4-8c27-261094c17c37 ...
+HTTP/1.1 405 Method Not Allowed
+X-Request-ID: 103648ae-b97e-4560-ab5a-b86911c4b3b1
+Allow: GET
+{"error":{"code":"metodo_no_permitido","message":"Use GET."}}
+
+## 9. Filas en PostgreSQL: una nota, una clave de idempotencia y un evento en la bandeja de salida
+ notas | claves | eventos_salida | auditoria 
+-------+--------+----------------+-----------
+     1 |      1 |              1 |         2
+(1 row)
+
+## 10. Servidor sin conexión a la base: 503 con Retry-After (el cliente lo trata como NO_DISPONIBLE)
+$ curl -X POST /api/v1/notas-soap ...   (NOTASSOAP_DB_DSN apuntando a un puerto sin PostgreSQL)
+HTTP/1.1 503 Service Unavailable
+Retry-After: 5
+{"error":{"code":"servicio_no_disponible","message":"No hay conexión con la base de datos."}}

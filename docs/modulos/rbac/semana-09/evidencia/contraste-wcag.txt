@@ -1,0 +1,26 @@
+ID    Uso                                             Actual  Mín. Estado   Propuesto  Nuevo Estado  
+--------------------------------------------------------------------------------------------------------
+C-01  Etiquetas de campo (10 pt negrita)                3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-02  Encabezados de tabla (10.5 pt negrita)            2.93   4.5 FALLA      #5F6670   5.22 CUMPLE  
+C-03  Pistas y texto secundario (10-10.5 pt)            3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-04  Títulos de estado VACÍO/CARGA (10 pt negrita)     2.93   4.5 FALLA      #5F6670   5.22 CUMPLE  
+C-05  Ícono de ayuda «?» (11 pt negrita)                3.26   4.5 FALLA      #5F6670   5.80 CUMPLE  
+C-06  Borde de campo de texto                           2.64   3.0 FALLA      #7D838A   3.83 CUMPLE  
+C-07  Borde de casilla de verificación                  2.64   3.0 FALLA      #7D838A   3.83 CUMPLE  
+C-08  «Copiado ✓» (9.5 pt)                              4.25   4.5 FALLA      #1F6B3A   6.52 CUMPLE  
+C-09  Indicador de pestaña activa (hoy: relleno)        1.11   3.0 FALLA      #3D4F6B   7.48 CUMPLE  
+C-10  Texto general (11 pt)                            13.49   4.5 CUMPLE           —                
+C-11  Cabecera: hospital activo (12 pt negrita)         8.30   4.5 CUMPLE           —                
+C-12  Botón primario (11 pt negrita)                    8.30   4.5 CUMPLE           —                
+C-13  Mensaje de error junto al campo (10 pt)           6.51   4.5 CUMPLE           —                
+C-14  Borde de campo con error                          6.51   3.0 CUMPLE           —                
+C-15  Título del aviso 403 (13 pt negrita)              5.70   4.5 CUMPLE           —                
+C-16  Ayuda del aviso 403 (11 pt)                       9.17   4.5 CUMPLE           —                
+C-17  Etiqueta ACCESO_DENEGADO (9.5 pt negrita)         5.70   4.5 CUMPLE           —                
+C-18  Aviso de éxito (11.5 pt negrita)                  5.76   4.5 CUMPLE           —                
+C-19  Anillo de foco (2 pt)                             8.30   3.0 CUMPLE           —                
+C-20  Botón «Revocar rol» deshabilitado                 1.53   0.0 EXENTO           —                
+C-21  Botón deshabilitado genérico                      2.11   0.0 EXENTO           —                
+--------------------------------------------------------------------------------------------------------
+Propuestas que no cumplen: 0
+exit=0

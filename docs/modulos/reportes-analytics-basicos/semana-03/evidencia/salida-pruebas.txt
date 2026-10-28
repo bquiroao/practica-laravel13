@@ -1,0 +1,18 @@
+Ejecutado: 2026-10-20 05:40 · PHP 8.4.26
+
+== 1. Camino feliz (base de prueba micro_his_test) ==
+  OK    [camino feliz] responde 200
+  OK    [camino feliz] ocupación = 78 % (39 de 50 camas habilitadas)
+  OK    [camino feliz] ficha de trazabilidad completa (RN-05)
+  OK    [camino feliz] desglose suma 39 = numerador (RN-07)
+  OK    [camino feliz] Medicina: 18 registros = su parte del desglose (RN-07)
+  OK    [camino feliz] pacientes solo con código PAC-NNNNN (RN-09)
+== 2. Reglas de dominio ==
+  OK    [regla de dominio] rechaza un período invertido (RN-02)
+  OK    [regla de dominio] el Médico no puede ver Ocupación: 403 (RN-01)
+  OK    [regla de dominio] período sin datos informa «Sin datos», no cero (RN-06)
+== 3. Error de persistencia (doble LectorQueFalla) ==
+  OK    [error de persistencia] responde 503 controlado
+  OK    [error de persistencia] el mensaje no expone detalles técnicos
+
+RESULTADO: 11 pruebas, todas correctas

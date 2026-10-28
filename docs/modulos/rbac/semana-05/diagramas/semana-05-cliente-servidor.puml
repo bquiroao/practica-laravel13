@@ -1,0 +1,26 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Diseño cliente-servidor recomendado (hoy): RBAC como módulo del HIS con contrato HTTP
+
+Person(usuario, "Personal del hospital", "Administrador, clínico, auditor")
+
+System_Boundary(his, "Sistema Hospitalario Integrado") {
+    Container(spa, "SPA Vue", "Vue 3 + Axios", "Cliente: envía Bearer, X-Tenant-ID y X-Request-ID")
+    Container(gw, "API Gateway", "Módulo ASII-30", "Enrutamiento, rate limiting, reenvío de identidad, X-Request-ID")
+    Container(app, "Aplicación HIS (monolito modular)", "PHP / Laravel", "Módulos clínicos + módulo RBAC detrás de su interfaz (PDP)")
+    Container(rbac, "Módulo RBAC", "Micro-HIS RBAC (4 capas)", "Asignación, decisión /autorizaciones/decisiones, auditoría")
+    ContainerDb(central, "CENTRAL", "PostgreSQL", "central_users, hospital_memberships, catálogo de permisos")
+    ContainerDb(hosp, "HOSPITAL", "PostgreSQL (1 por hospital)", "local_user_refs (réplica), local_access_audit")
+}
+
+Rel(usuario, spa, "Usa", "HTTPS")
+Rel(spa, gw, "REST /api/v1", "HTTPS + JSON")
+Rel(gw, app, "Reenvía", "HTTP interno")
+Rel(app, rbac, "Decisión en proceso (0,006 ms p50)", "llamada PHP vía interfaz")
+Rel(rbac, central, "Escribe asignaciones", "PDO, sentencias preparadas")
+Rel(rbac, hosp, "Lee réplica · registra auditoría", "PDO")
+
+SHOW_LEGEND()
+@enduml

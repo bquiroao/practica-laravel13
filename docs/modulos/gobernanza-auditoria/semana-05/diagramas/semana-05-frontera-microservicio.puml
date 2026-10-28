@@ -1,0 +1,34 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+title Frontera de microservicio evaluada: qué queda dentro y qué cruza
+skinparam defaultFontSize 11
+skinparam rectangleBorderColor #2F5D8A
+
+rectangle "Frontera candidata: SERVICIO DE AUDITORÍA" as F #E8F5E9 {
+  rectangle "Datos propios:\naudit_logs (único escritor)" as D
+  rectangle "Lógica propia:\nreglas, filtros, sello,\nverificación y anclas" as L
+  rectangle "API: 5 operaciones\n(openapi.yaml)" as A
+}
+rectangle "Fuera (otros dueños)" as O #FDF0F0 {
+  rectangle "Identidad (JWT)" as I
+  rectangle "RBAC: permisos y alcance" as R
+  rectangle "hospitals, central_users\n(base central)" as H
+  rectangle "Módulos emisores" as E
+}
+
+E -down-> A : eventos (async por bandeja)\nHTTP como alternativa
+A -right-> I : valida token (por petición)
+A -right-> R : decide permiso (por petición)
+D .right.> H : FK hospital_id\n(usuario_id SIN FK)
+
+legend right
+  <b>¿Por qué es buena candidata?</b>
+  • Datos que nadie más escribe (append-only)
+  • Carga distinta: escritura constante, lectura rara
+  • Requisitos de seguridad propios (inmutabilidad, separación)
+  <b>¿Por qué NO se extrae hoy?</b>
+  • Medido: llamar por HTTP cuesta ≈ 68 ms más por movimiento (php -S)
+  • En llamada síncrona, la caída de auditoría tumbaría la atención
+  • Sin SLA ni volumen que lo justifique todavía → criterios C-1..C-5
+endlegend
+@enduml

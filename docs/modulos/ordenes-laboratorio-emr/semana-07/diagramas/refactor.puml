@@ -1,0 +1,26 @@
+@startuml
+package "Antes: semana 3 real" {
+ component "Issue" as I0
+ component "Find" as F0
+ interface "ClinicalRules\nauthorized\ncontextValid\ntestsAvailable\ninitialStatus" as RULES
+ I0 --> RULES
+ F0 --> RULES : usa solo authorized
+}
+package "Después: propuesta R07-01" {
+ component "Issue" as I1
+ component "Find" as F1
+ interface ClinicalAuthorization as AUTH
+ interface ClinicalContextValidator as CTX
+ interface LabCatalog as CAT
+ interface OrderLifecyclePolicy as LIFE
+ I1 --> AUTH
+ F1 --> AUTH
+ I1 --> CTX
+ I1 --> CAT
+ I1 --> LIFE
+}
+note bottom of F1
+No requiere catálogo ni ciclo para consultar.
+Repository y entidad de orden se conservan.
+end note
+@enduml

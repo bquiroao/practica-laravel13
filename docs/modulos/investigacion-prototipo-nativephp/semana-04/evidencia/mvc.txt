@@ -1,0 +1,25 @@
+PASS: memory: mismo controlador registra
+PASS: memory: identificador generado
+PASS: memory: capacidad separada
+PASS: memory: segunda escritura no sobrescribe primera
+PASS: memory: regla en dominio
+PASS: memory: tipo inválido no invoca aplicación
+PASS: memory: falla consulta explícita
+PASS: memory: errores no notifican
+PASS: memory: vista etiqueta alcance
+PASS: memory: vista no altera resultado
+PASS: pdo: mismo controlador registra
+PASS: pdo: identificador generado
+PASS: pdo: capacidad separada
+PASS: pdo: segunda escritura no sobrescribe primera
+PASS: pdo: regla en dominio
+PASS: pdo: tipo inválido no invoca aplicación
+PASS: pdo: falla consulta explícita
+PASS: pdo: errores no notifican
+PASS: pdo: vista etiqueta alcance
+PASS: pdo: vista no altera resultado
+PASS: InMemory conserva ambas evaluaciones
+PASS: PDO conserva ambas evaluaciones
+PASS: controlador conserva error de persistencia sin falso éxito
+PASS: rollback real intacto
+OK: 24 aserciones MVC/Repository. PDO SQLite temporal y SO/HIS dobles.

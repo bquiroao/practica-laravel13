@@ -1,0 +1,73 @@
+@startuml
+title Módulo de laboratorio — Actividad\n«Revisión, validación o rechazo de un resultado por bioquímico»
+skinparam shadowing false
+
+start
+:A-01 Bioquímico solicita cola de resultados pendientes;
+:A-02 HIS verifica autenticación,\npermiso y hospital [R-01];
+if (¿Autorizado? [D-01, R-01]) then (sí)
+  :A-03 HIS carga cola pendiente;
+  if (¿Hay resultados? [D-02]) then (sí)
+    :A-04 Bioquímico selecciona un resultado;
+    :A-05 HIS carga versión y contexto:\norden, examen y muestra [R-03];
+    if (¿Contexto disponible y asociado? [D-03, R-03]) then (sí)
+      :A-06 HIS verifica versión vigente\ny estado pendiente [R-02];
+      if (¿Sigue pendiente y vigente? [D-04, R-02]) then (sí)
+        :A-07 Bioquímico revisa el resultado\nsegún procedimiento aplicable;
+        if (¿Revisión satisfactoria? [D-05]) then (sí)
+          :A-08 Bioquímico confirma validación [R-04];
+          :A-09 HIS revalida autorización,\nhospital, estado y versión [R-01, R-02];
+          if (¿Se mantiene válida? [D-06, R-01, R-02]) then (sí)
+            :A-10 HIS persiste la decisión,\nactor y fecha/hora en una transacción;\nconserva la versión [R-04, R-05, R-08];
+            if (¿Persistencia correcta? [D-08, R-09]) then (sí)
+              :A-11 Bioquímico recibe confirmación de validación;
+              stop
+            else (no)
+              :E-06 HIS informa error;\nno confirma decisión;
+              stop
+            endif
+          else (no)
+            :E-04 HIS cancela decisión y solicita recarga;
+            stop
+          endif
+        else (rechazar)
+          :A-13 Bioquímico elige rechazo e ingresa motivo [R-06];
+          if (¿Motivo no vacío? [D-07, R-06]) then (sí)
+            :A-14 HIS revalida autorización,\nhospital, estado y versión [R-01, R-02];
+            if (¿Se mantiene válida? [D-06, R-01, R-02]) then (sí)
+              :A-14 HIS persiste rechazo, motivo,\nactor y fecha/hora en una transacción;\nconserva el resultado [R-05, R-06];
+              if (¿Persistencia correcta? [D-08, R-09]) then (sí)
+                :A-15 HIS deja el rechazo para seguimiento [R-07];
+                :A-16 Bioquímico recibe confirmación de rechazo;
+                :A-17 Personal de laboratorio recibe aviso;\ncorrección fuera de este proceso;
+                stop
+              else (no)
+                :E-06 HIS informa error;\nno confirma decisión;
+                stop
+              endif
+            else (no)
+              :E-04 HIS cancela decisión y solicita recarga;
+              stop
+            endif
+          else (no)
+            :E-05 HIS solicita motivo;\nno guarda decisión;
+            stop
+          endif
+        endif
+      else (no)
+        :E-04 HIS detecta cambio;\nsolicita recarga;
+        stop
+      endif
+    else (no)
+      :E-03 HIS detecta contexto no disponible;\nimpide la decisión;
+      stop
+    endif
+  else (no)
+    :E-02 HIS informa que no hay pendientes;
+    stop
+  endif
+else (no)
+  :E-01 HIS deniega acceso sin revelar datos clínicos;
+  stop
+endif
+@enduml

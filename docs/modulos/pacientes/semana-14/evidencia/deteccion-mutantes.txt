@@ -1,0 +1,38 @@
+Detección de defectos inyectados · cada mutante se aplica en una copia (git archive HEAD), nunca en el repositorio
+Uso: SQA_MICROHIS=<copia mutada> php herramientas/medir-sqa.php
+
+== Mutante 1 · PoliticaDuplicados::visibles() deja de reservar el código de un protegido
+ROJO   M1  Pruebas automáticas en verde                      97.6 % (83/85)
+VERDE  M2  Cobertura de códigos de error del dominio         100 % (13/13)
+VERDE  M3  Trazabilidad de escrituras y consultas             100 % (5/5 escenarios)
+VERDE  M4  Integridad de la identidad (anti-duplicados)       100 % (8/8 intentos bloqueados)
+ROJO   M5  Respuestas sin datos de protegidos ni de otro hospital 62.5 % (5/8 respuestas limpias)
+       fugas: admisión la registra otra vez (409) (P-000002); otro hospital registra su DPI (409) (P-000001, 0101); otro hospital registra a su homónima (409) (P-000001)
+VERDE  M6  Confiabilidad ante fallas inyectadas               100 % (6/6)
+ROJO   M7  Hallazgos de revisión Crítico/Mayor sin verificar 4 (Crítico 1 · Mayor 3) · Menor 3
+VERDE: 4  ÁMBAR: 0  ROJO: 3
+
+== Mutante 2 · RegistrarPaciente guarda la ficha FUERA de la transacción (R-09)
+ROJO   M1  Pruebas automáticas en verde                      97.6 % (83/85)
+VERDE  M2  Cobertura de códigos de error del dominio         100 % (13/13)
+VERDE  M3  Trazabilidad de escrituras y consultas             100 % (5/5 escenarios)
+VERDE  M4  Integridad de la identidad (anti-duplicados)       100 % (8/8 intentos bloqueados)
+ROJO   M5  Respuestas sin datos de protegidos ni de otro hospital 75 % (6/8 respuestas limpias)
+       fugas: otro hospital registra su DPI (409) (P-000001, 0101); otro hospital registra a su homónima (409) (P-000001)
+ROJO   M6  Confiabilidad ante fallas inyectadas               66.7 % (4/6)
+       fallan: bitácora caída al registrar → 503 y la ficha se deshace (R-09); falla con Idempotency-Key → la clave no queda guardada y el reintento crea 1 ficha
+ROJO   M7  Hallazgos de revisión Crítico/Mayor sin verificar 4 (Crítico 1 · Mayor 3) · Menor 3
+VERDE: 3  ÁMBAR: 0  ROJO: 4
+
+== Mutante 3 · El evento PACIENTE_ACTUALIZADO pierde el «antes»
+ROJO   M1  Pruebas automáticas en verde                      94.1 % (80/85)
+VERDE  M2  Cobertura de códigos de error del dominio         100 % (13/13)
+ROJO   M3  Trazabilidad de escrituras y consultas             80 % (4/5 escenarios)
+       fallan: edición → 1 PACIENTE_ACTUALIZADO con antes/después
+VERDE  M4  Integridad de la identidad (anti-duplicados)       100 % (8/8 intentos bloqueados)
+ROJO   M5  Respuestas sin datos de protegidos ni de otro hospital 75 % (6/8 respuestas limpias)
+       fugas: otro hospital registra su DPI (409) (P-000001, 0101); otro hospital registra a su homónima (409) (P-000001)
+VERDE  M6  Confiabilidad ante fallas inyectadas               100 % (6/6)
+ROJO   M7  Hallazgos de revisión Crítico/Mayor sin verificar 4 (Crítico 1 · Mayor 3) · Menor 3
+VERDE: 3  ÁMBAR: 0  ROJO: 4
+

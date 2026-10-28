@@ -1,0 +1,20 @@
+Micro-HIS RBAC — acoplamiento por clase (96 clases en src/)
+--------------------------------------------------------------------------------------------------------------
+Clase                          Capa            Ce   Ca  P   Preocupaciones RBAC que mezcla
+ConjuntoAdaptadores            Persistencia     5    2  4   roles · permisos · auditoria · persistencia
+AsignarRol                     Aplicacion       8    1  3   roles · permisos · decision
+AutorizarOperacion             Aplicacion       8    4  3   roles · decision · auditoria
+RevocarRol                     Aplicacion       8    1  3   roles · permisos · decision
+RegistradorDeCambios           Aplicacion       6    2  3   roles · auditoria · persistencia
+CambioDeMembresia              Dominio          3    3  3   roles · auditoria · persistencia
+AutorizacionControlador        Presentacion     7    1  2   rutas · decision
+Rutas                          Presentacion     6    0  2   permisos · rutas
+AsignacionDeRol                Dominio          5    1  2   roles · auditoria
+PdoRepositorioMembresias       Persistencia     5    1  2   roles · persistencia
+RevocacionDeRol                Dominio          4    1  2   roles · auditoria
+ReglaRolEnCatalogo             Dominio          4    0  2   roles · permisos
+PoliticaAsignacion             Dominio          4    1  2   roles · persistencia
+PoliticaRevocacion             Dominio          4    1  2   roles · persistencia
+--------------------------------------------------------------------------------------------------------------
+Líneas duplicadas entre archivos de Aplicación: 29
+Ce total: 237 · Ce medio: 2.47 · Clases que mezclan ≥ 4 preocupaciones: 1

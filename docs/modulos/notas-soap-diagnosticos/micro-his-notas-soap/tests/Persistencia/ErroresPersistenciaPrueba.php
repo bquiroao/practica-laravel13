@@ -12,6 +12,7 @@ use NotasSoap\Persistencia\Pdo\PdoVerificadorAcceso;
 use NotasSoap\Pruebas\Dobles\Escenario;
 use NotasSoap\Pruebas\Dobles\PdoEspia;
 use NotasSoap\Pruebas\Dobles\PdoQueFalla;
+use NotasSoap\Pruebas\Dobles\RepositorioDiagnosticosQueFalla;
 
 $notaDePrueba = static fn (): NotaSoap => NotaSoap::registrar('n-1', 'exp-carlos', 'epi-100', 'dra-mendez',
     new SeccionesSoap('S', 'O', 'A', 'P'), new DateTimeImmutable('2026-10-12T09:30:00-06:00'));
@@ -48,16 +49,14 @@ prueba('PER-04', 'Si el COMMIT falla, se revierte y se informa ErrorPersistencia
 });
 
 prueba('PER-05', 'Error al guardar el diagnóstico: la nota tampoco queda guardada (R-06, CA-10)', function (): void {
-    $e = new Escenario();
-    $e->diagnosticos->fallar = true;
+    $e = new Escenario(diagnosticos: new RepositorioDiagnosticosQueFalla());
     lanza(ErrorPersistencia::class, fn () => $e->registrar->ejecutar(Escenario::comando()), 'diagnóstico que falla');
-    igual([], $e->notas->notas, 'sin nota huérfana');
-    igual([], $e->auditoria->eventos, 'sin auditoría');
+    igual([], $e->notas->todas(), 'sin nota huérfana');
+    igual([], $e->auditoria->eventos(), 'sin auditoría');
 });
 
 prueba('PER-06', 'Por HTTP el error de persistencia es 500 genérico, sin SQL ni SQLSTATE en la respuesta (RNF-03)', function (): void {
-    $e = new Escenario();
-    $e->diagnosticos->fallar = true;
+    $e = new Escenario(diagnosticos: new RepositorioDiagnosticosQueFalla());
     $r = $e->kernel->manejar(Escenario::peticion());
     igual(500, $r->estado, 'estado');
     igual('error_persistencia', $r->cuerpo['error']['code'], 'código');

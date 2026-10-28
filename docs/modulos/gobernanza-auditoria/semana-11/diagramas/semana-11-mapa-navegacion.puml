@@ -1,0 +1,55 @@
+@startuml semana-11-mapa-navegacion
+!pragma layout smetana
+title Mapa de navegación del prototipo de Auditoría (la URL solo lleva la pantalla y, en el detalle, el id)
+skinparam defaultFontSize 11
+skinparam state {
+  BackgroundColor #EEF4FB
+  BorderColor #2F5D8A
+}
+
+[*] --> Ingresar
+state "Ingresar\nruta ~#/ingresar" as Ingresar
+state "Bitácora · filtros (M1)\nruta ~#/bitacora" as Filtros
+state "Movimientos (M2)\nruta ~#/bitacora/resultados" as Resultados
+state "Detalle (M3)\nruta ~#/bitacora/{id}" as Detalle
+state "Verificar integridad (M4)\nruta ~#/integridad\n(solo auditoria.verificar)" as Integridad #FFF8E1
+state "Más\nruta ~#/mas" as Mas
+
+state "Diálogo: ¿Consultar toda la red?" as DRed #FFF4E5
+state "Diálogo: Su sesión venció" as DSesion #FFF4E5
+state "Diálogo: ¿Verificar la cadena?" as DVer #FFF4E5
+state "Veredicto\nÍNTEGRA · ALTERADA · TRUNCADA\n«No sabemos si terminó»" as Veredicto #FDECEC
+
+Ingresar --> Filtros : elige persona
+Filtros --> Resultados : Buscar (hospital)
+Filtros --> DRed : Buscar en toda la red
+DRed --> Resultados : Consultar la red
+DRed --> Filtros : Cancelar / Esc
+Resultados --> Detalle : Ver · «Corrige a #n» · «Corregido por #n»
+Detalle --> Detalle : Ver #n (corrección ↔ original)
+Detalle --> Resultados : ‹ (misma lista, sin consultar otra vez)
+Resultados --> Filtros : ‹ Filtros
+Resultados --> Resultados : Cargar 50 más (mismo cursor)
+Resultados --> DSesion : 401 en cualquier petición
+DSesion --> Resultados : Renovar sesión (se reintenta; nada se pierde)
+DSesion --> Ingresar : Salir
+Filtros --> Integridad : nav «Integridad»
+Integridad --> Integridad : ancla inválida → resumen de errores
+Integridad --> DVer : Verificar
+DVer --> Veredicto : Verificar
+DVer --> Integridad : Cancelar / Esc
+Veredicto --> Integridad : Verificar de nuevo / otra cadena
+Filtros --> Mas : nav «Más»
+Mas --> Ingresar : Cerrar sesión
+
+note right of Resultados
+  Camino feliz (auditor): 01 → 08
+  Ingresar → Filtros → Resultados → Cargar más
+  → Detalle #55 → Detalle #56 → ‹ Resultados
+end note
+note right of Veredicto
+  Error crítico (super admin): 11 → 17
+  Norte: ALTERADA desde la secuencia 2
+  → «Copiar informe» + contacto de seguridad
+end note
+@enduml

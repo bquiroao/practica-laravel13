@@ -1,0 +1,33 @@
+@startuml semana-06-capas
+!pragma layout smetana
+title Capas del Micro-HIS Auditoría y lo que tocó el cambio práctico (en verde)
+skinparam defaultFontSize 11
+skinparam rectangleBorderColor #2F5D8A
+
+rectangle "Presentación (MVC)" as P #EEF4FB {
+  rectangle "Kernel · Rutas · AuditoriaControlador\nFormularioMovimientos · Vistas\n(SIN cambios)" as P1
+}
+rectangle "Aplicación" as A #F3F8EE {
+  rectangle "RegistrarMovimiento:\nresuelve la corrección en la transacción" as A1 #C8E6C9
+  rectangle "ConsultarMovimientos / VerDetalle:\n+ corregido_por" as A2 #C8E6C9
+  rectangle "CadenaSellada · VerificarIntegridad · ObtenerAncla\n(SIN cambios)" as A3
+}
+rectangle "Dominio" as D #FFF8E1 {
+  rectangle "ReglaCorreccion (regla NUEVA, OCP)" as D1 #C8E6C9
+  rectangle "Movimiento: corrigeA + motivo (sellados)" as D2 #C8E6C9
+  rectangle "Bitacora: + correccionDe / correccionesDe" as D3 #C8E6C9
+  rectangle "8 reglas · 5 filtros · Sello\n(SIN cambios)" as D4
+}
+rectangle "Persistencia" as R #FDF0F0 {
+  rectangle "PdoBitacora / BitacoraEnMemoria:\n+ 2 columnas, + 2 consultas, único por original" as R1 #C8E6C9
+  rectangle "PdoTransaccion · TransaccionEnMemoria\n(SIN cambios)" as R2
+}
+rectangle "Cliente" as CL #F5F5F5 {
+  rectangle "ClienteAuditoria · BandejaLocal\n(SIN cambios: contrato 1.1.0 compatible)" as CL1
+}
+
+P -down-> A
+A -down-> D
+R -up-> D : implementa
+CL ..> P : HTTP (contrato)
+@enduml

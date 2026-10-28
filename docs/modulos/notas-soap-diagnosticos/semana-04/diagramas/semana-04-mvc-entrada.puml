@@ -1,0 +1,44 @@
+@startuml semana-04-mvc-entrada
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign left
+autonumber "<b>M-00"
+
+title Semana 4 · MVC en la entrada · POST /api/v1/notas-soap
+
+actor "Cliente\n(frontend, curl\no navegador)" as Cli
+box "Presentación (C y V)" #EAF2FB
+    participant "Kernel\n(front controller)" as K
+    participant "NotasSoapController\n«C»" as C
+    participant "FormularioRegistroNota\n«modelo de entrada»" as F
+    participant "SelectorVista" as SV
+    participant "VistaJson / VistaHtml\n«V»" as V
+end box
+box "Modelo (Aplicación + Dominio)" #EAF7EA
+    participant "RegistrarNotaConDiagnostico\n«M»" as UC
+    participant "NotaSoap · Diagnostico" as D
+end box
+box "Persistencia" #F3ECF9
+    participant "RepositorioNotas\n(PDO o en memoria)" as R
+end box
+
+Cli -> K : POST /api/v1/notas-soap\nX-Tenant-ID, Bearer, Accept, JSON
+K -> SV : para(solicitud)
+SV --> K : vista según Accept (JSON por defecto)
+K -> K : ruta · tenant (400) · token (401)
+K -> C : registrar(solicitud, identidad, hospital)
+C -> F : comando(solicitud, identidad, hospital)
+F -> F : ¿objeto JSON? ¿diagnostico es objeto?\n¿cada campo es texto? (si no → CuerpoInvalido)
+F --> C : RegistrarNotaComando\n(autor y hospital salen del TOKEN)
+C -> UC : ejecutar(comando)
+UC -> D : registrar(...) — reglas R-04, R-05
+UC -> R : guardar(nota), guardar(diagnóstico) en una transacción
+UC --> C : NotaResultado (datos planos)
+C -> SV : para(solicitud)
+C -> V : nota(resultado, 201)
+V --> C : Respuesta (JSON o HTML escapado)
+C --> K : Respuesta
+K --> Cli : 201
+note over C : El controlador no tiene if, SQL ni reglas:\nsolo M-06 (armar el comando), M-09 (llamar al Modelo) y M-14 (entregar a la Vista).\nLo comprueba ARQ-09.
+@enduml
