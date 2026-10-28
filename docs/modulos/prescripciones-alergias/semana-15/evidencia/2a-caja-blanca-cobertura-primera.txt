@@ -1,0 +1,16 @@
+$ phpdbg -qrr herramientas/cobertura-caja-blanca.php      # PRIMERA medición
+Pruebas de caja blanca
+[PASA ] CB-01  Caminos básicos de EmitirPrescripcion: V(G) = 14, 14 caminos independientes C1..C14, cada uno con su salida
+[PASA ] CB-02  MC/DC: «!evaluado && !confirma», «justificación < 20 || !override» y «misma huella && mismo prescriptor»: cada condición cambia la salida sola
+[PASA ] CB-03  Caminos y ramas de AnularPrescripcion: sin permiso, inexistente, ya anulada, motivo corto, anulada, carrera (YaAnulada), base caída y traza que falla
+
+Cobertura de líneas lograda solo por CB-01..CB-03
+------------------------------------------------------------------------------------------------
+src/Aplicacion/CasosDeUso/EmitirPrescripcion.php      34/34   100.0 %
+src/Dominio/Reglas/PoliticaEmision.php                11/13    84.6 %
+      sin cubrir  l.55   return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;
+      sin cubrir  l.61   return $expediente->evaluado ? $verificacion->estado : self::CONFIRMACION_REQUERIDA;
+src/Aplicacion/CasosDeUso/AnularPrescripcion.php      13/13   100.0 %
+src/Dominio/Reglas/PoliticaAnulacion.php               3/3    100.0 %
+------------------------------------------------------------------------------------------------
+TOTAL                                                 61/63    96.8 %

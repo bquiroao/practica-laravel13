@@ -1,0 +1,7 @@
+ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
+
+H-01  reproducido     entrada atender(accion, d); consultar sin permisos = 200
+H-02  reproducido     estado inexistente = 422 E3; falla de lectura = 503 E8
+H-03  reproducido     A1 ocupada con 2 estancias abiertas; inconsistentes de A: []
+H-04  reproducido     C1 ocupada con estancia abierta en la sala inactiva C; salas del corte: A
+H-05  reproducido     consultar con la tabla de cortes caída = 503 E8 «No pudimos leer la ocupación. Se conserva el corte anterior.», sin salas

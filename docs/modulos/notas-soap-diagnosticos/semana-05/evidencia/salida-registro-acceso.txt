@@ -1,0 +1,7 @@
+Registro de acceso emitido por el servidor (NOTASSOAP_ALMACEN=memoria php -S 127.0.0.1:8082 -t public).
+Peticiones: registro de la Dra. Méndez, listado de enfermería y un registro de enfermería con un X-Request-ID inválido.
+Cada línea: request_id, método, ruta, estado, duración, usuario y tenant. Sin tokens, cuerpos ni texto clínico.
+
+{"tipo":"acceso","request_id":"traza-expediente-0002","metodo":"POST","ruta":"/api/v1/notas-soap","estado":201,"duracion_ms":2.419,"usuario":"dra-mendez","tenant":"hosp-oriente","repetida":false}
+{"tipo":"acceso","request_id":"traza-expediente-0003","metodo":"GET","ruta":"/api/v1/expedientes/exp-carlos/notas-soap","estado":200,"duracion_ms":0.533,"usuario":"enf-ana","tenant":"hosp-oriente","repetida":false}
+{"tipo":"acceso","request_id":"b6e4680f-f085-4563-b164-108abf70e259","metodo":"POST","ruta":"/api/v1/notas-soap","estado":403,"duracion_ms":0.058,"usuario":"enf-ana","tenant":"hosp-oriente","repetida":false}

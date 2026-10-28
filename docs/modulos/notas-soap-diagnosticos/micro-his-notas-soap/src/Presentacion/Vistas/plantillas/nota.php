@@ -33,6 +33,9 @@
     · Expediente <?= $e($nota->expedienteId) ?> · Episodio <?= $e($nota->episodioId) ?>
     <?php if ($nota->firmadaEn !== null): ?> · Firmada: <?= $e($nota->firmadaEn) ?><?php endif; ?>
   </p>
+  <?php if ($nota->reemplazaA !== null): ?>
+  <p class="meta">Corrige la nota <?= $e($nota->reemplazaA) ?>. Motivo: <?= $e($nota->motivoCorreccion) ?></p>
+  <?php endif; ?>
   <dl>
     <dt>Subjetivo</dt><dd><?= $e($nota->soap['subjetivo']) ?></dd>
     <dt>Objetivo</dt><dd><?= $e($nota->soap['objetivo']) ?></dd>

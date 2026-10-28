@@ -1,0 +1,27 @@
+$ php tests/ejecutar.php --defectos --solo=DEF
+Micro-HIS RBAC - pruebas (PHP 8.4.26)
+
+== Defectos abiertos (fallan hasta que se corrijan) ==
+[FALLA] DEF-01   [Mayor · nuevo S15] Una fecha imposible (2026-02-30, 2026-00-10) debe rechazarse con 422; hoy se «corrige» y se guarda otra fecha
+         -> fechas imposibles aceptadas: esperado array (
+), obtenido array (
+  0 => '2026-02-30 → HTTP 201 guardada como 2026-03-02',
+  1 => '2026-04-31 → HTTP 201 guardada como 2026-05-01',
+  2 => '2026-00-10 → HTTP 201 guardada como 2025-12-10',
+) (Arnes.php:41)
+[FALLA] DEF-02   [Mayor · AR-02] La misma asignación CON fecha de fin, enviada dos veces, debe dar 409; hoy crea dos membresías activas
+         -> estados del primer y segundo envío: esperado array (
+  0 => 201,
+  1 => 409,
+), obtenido array (
+  0 => 201,
+  1 => 201,
+) (Arnes.php:41)
+[FALLA] DEF-03   [Mayor · AR-01] Fuera de desarrollo, el punto de entrada real NO debe aceptar tokens de demostración (401); hoy asigna roles
+         -> token de demostración en un arranque sin MICROHIS_ENTORNO=desarrollo: esperado 401, obtenido 201 (Arnes.php:41)
+[FALLA] DEF-04   [Mayor · AR-04] Si fallan la bitácora Y el respaldo, debe quedar rastro en error_log con la referencia; hoy no queda nada
+         -> error_log no menciona la denegación perdida corr-def04 (Arnes.php:48)
+[FALLA] DEF-05   [Menor · AR-03] Un token usado contra otro hospital en permisos-efectivos debe dejar TENANT_NO_COINCIDE; hoy no deja rastro
+         -> eventos ACCESO_DENEGADO tras el sondeo entre hospitales: esperado 1, obtenido 0 (Arnes.php:41)
+
+Total: 5  Pasan: 0  Fallan: 5  Omitidas: 0

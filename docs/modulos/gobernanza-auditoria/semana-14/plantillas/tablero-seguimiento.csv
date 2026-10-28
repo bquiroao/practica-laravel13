@@ -1,0 +1,5 @@
+fecha,medicion,M1_pruebas,M2_mutaciones,M3_cadenas,M4_fugas_bloqueadas,M5_contrato,M6_hallazgos_abiertos,M7_capacidad_MB,rojos,no_conformidades_abiertas,responsable,observaciones
+2026-10-26,linea-base,98/98 VERDE,26/26 VERDE,3/3 VERDE,12/12 VERDE,4/4 · 16/16 VERDE,1 crit · 2 may · 2 men ROJO,588 ROJO,2,"NC-01 (M6, AR-01), NC-02 (M7, AR-02)",QA (por designar),Línea base del plan; acciones en el plan §7
+2026-11-02,semanal,,,,,,,,,,QA (por designar),
+2026-11-09,semanal,,,,,,,,,,QA (por designar),
+2026-11-16,mensual,,,,,,,,,,QA y líder técnico,Revisión de la matriz de riesgos

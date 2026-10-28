@@ -1,0 +1,12 @@
+== ANTES (HEAD, git archive) ==
+Micro-HIS RBAC — acoplamiento por clase (96 clases en src/)
+AutorizacionControlador        Presentacion     7    1  2   rutas · decision
+Líneas duplicadas entre archivos de Aplicación: 29
+Ce total: 237 · Ce medio: 2.47 · Clases que mezclan ≥ 4 preocupaciones: 1
+
+== DESPUÉS (con el cambio B-6) ==
+Micro-HIS RBAC — acoplamiento por clase (99 clases en src/)
+AutorizacionControlador        Presentacion    10    1  2   rutas · decision
+ConsultarPermisosEfectivos     Aplicacion       4    1  2   roles · decision
+Líneas duplicadas entre archivos de Aplicación: 30
+Ce total: 247 · Ce medio: 2.49 · Clases que mezclan ≥ 4 preocupaciones: 1

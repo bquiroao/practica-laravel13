@@ -1,0 +1,27 @@
+@startuml semana-04-repositorio-compartido
+title Integración con el repositorio de datos compartido (PostgreSQL del grupo, un esquema por hospital con RLS)
+skinparam defaultFontName Arial
+component "Micro-HIS Signos vitales\n(M13)" as M13
+component "Pacientes / Admisiones\n(M03, M07)" as ADT
+component "Alertas críticas\n(M21)" as M21
+component "Expediente / Reportes\n(M10, M23)" as EXP
+database "Base compartida" {
+  folder "Propias de M13 (escribe solo M13)" {
+    [tomas_signos_vitales]
+    [mediciones_signo]
+    [alertas_signos_vitales]
+  }
+  folder "De otros módulos (M13 solo lee)" {
+    [episodios]
+    [rangos_signos_vitales]
+  }
+  [alertas_criticas]
+}
+M13 --> [tomas_signos_vitales] : RepositorioTomas\n(TomasPdo)
+M13 ..> [episodios] : FuenteClinica\n(SELECT)
+M13 ..> [rangos_signos_vitales] : FuenteClinica
+ADT --> [episodios] : dueño
+[alertas_signos_vitales] ..> M21 : críticas «pendiente_envio»\n(bandeja de salida, S5)
+M21 --> [alertas_criticas] : dueño
+EXP ..> [tomas_signos_vitales] : lectura por vista\n(vw_signos_vitales)
+@enduml

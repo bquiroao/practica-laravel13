@@ -1,0 +1,42 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+title Frontera de microservicio evaluada: ¿separar Pacientes de la base del hospital?
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+skinparam database {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Opción A — Monolito modular (DECISIÓN)" #E8F5E9 {
+  [Pacientes] as PA
+  [Admisión / Citas / Expediente] as CA
+  database "HOSPITAL\nlocal_patients ← FK ← care_episodes,\nappointments, medical_records, allergies\n(ON DELETE RESTRICT)" as DBA
+  PA --> DBA : escribe local_patients
+  CA --> DBA : escribe lo clínico
+  CA ..> PA : llamada en proceso\np50 0,003 ms
+}
+
+package "Opción B — Servicio Pacientes separado (DESCARTADA hoy)" #FFF3E0 {
+  [Servicio Pacientes] as PB
+  database "BD Pacientes\nlocal_patients" as DBP
+  [Admisión / Citas / Expediente] as CB
+  database "HOSPITAL clínico\nsin FK a pacientes" as DBC
+  PB --> DBP
+  CB --> DBC
+  CB ..> PB : HTTP\np50 ≈ 18 ms, p95 ≈ 36 ms
+}
+
+note bottom of DBC
+  Se pierden 4 FK que protegen a 9 de las otras 15
+  tablas del hospital: un episodio podría apuntar
+  a un paciente inexistente o inactivado.
+end note
+
+package "Frontera física que YA existe" {
+  database "CENTRAL — MPI\nmpi_patients · mpi_identifiers\npatient_hospital_links" as MPI
+  [Sincronización\n(outbox → inbox)] as SYNC
+  SYNC --> MPI
+}
+PA ..> SYNC : outbox_event\n(asíncrono)
+@enduml

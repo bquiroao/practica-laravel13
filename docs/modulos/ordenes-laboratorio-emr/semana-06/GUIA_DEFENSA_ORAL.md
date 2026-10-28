@@ -1,0 +1,1 @@
+Usar las ocho diapositivas. Abrir diagrama y relacionar cada actor con RF/RNF. Mostrar contratos reales y distinguir PDO/API propuestos. Ejecutar regresión y cambio antes/después; explicar por qué rechazar duplicados y por qué no deduplicar silenciosamente. Señalar límites de dobles, política clínica pendiente e idempotencia no implementada.

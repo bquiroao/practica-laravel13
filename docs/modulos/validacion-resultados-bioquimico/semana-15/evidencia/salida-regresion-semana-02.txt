@@ -1,0 +1,40 @@
+﻿Validación de resultados por bioquímico — evidencia de prueba
+Rama: semana-15-validacion-resultados-bioquimico-mercedes-lopez
+Comando: php docs/modulos/validacion-resultados-bioquimico/semana-02/ejemplo-dip/verificar.php
+
+PASS: CA-01 valida una versión pendiente
+PASS: CA-01 cambia solo el estado
+PASS: CA-01 conserva el valor revisado
+PASS: CA-01 conserva la autoría
+PASS: CA-01 registra el momento de la decisión
+PASS: CA-02 rechaza con motivo
+PASS: CA-02 conserva el motivo del rechazo
+PASS: CA-02 conserva el resultado rechazado
+PASS: CA-03 exige motivo no vacío
+PASS: CA-03 no persiste un rechazo sin motivo
+PASS: CA-03 mantiene pendiente el resultado
+PASS: CA-04 deniega a quien no está autorizado
+PASS: CA-04 no registra decisiones ante denegación
+PASS: CA-04 no modifica el resultado
+PASS: CA-05 impide decidir sin contexto de orden, examen y muestra
+PASS: CA-05 no persiste una decisión sin contexto
+PASS: CA-06 informa resultado inexistente sin decidir
+PASS: CA-07 no vuelve a decidir un resultado validado
+PASS: CA-07 no crea una segunda decisión
+PASS: CA-08 detecta una versión obsoleta
+PASS: CA-08 no persiste decisiones obsoletas
+PASS: CA-08 conserva el estado vigente
+PASS: CA-09 detecta el cambio ocurrido durante la decisión
+PASS: CA-09 el adaptador revalida antes de persistir
+PASS: CA-09 conserva el valor actualizado concurrentemente
+PASS: CA-10 expone la falla de persistencia
+PASS: CA-10 no registra auditoría parcial
+PASS: CA-10 no deja un cambio parcial
+PASS: CA-11 no revela resultados de otro hospital
+PASS: CA-11 no registra decisiones fuera del hospital
+PASS: CA-12 rechaza una versión esperada inválida
+PASS: CA-12 no persiste entradas inválidas
+PASS: CA-13 el caso de uso depende de abstracciones sustituibles
+OK: 33 aserciones.
+
+Exit code: 0

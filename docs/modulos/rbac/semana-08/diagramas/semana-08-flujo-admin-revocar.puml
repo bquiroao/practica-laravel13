@@ -1,0 +1,51 @@
+@startuml semana-08-flujo-admin-revocar
+title User flow · Administrador — revocar rol (roles.revocar)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Administrador|
+start
+:Busca al usuario en «Roles del hospital» · W1;
+:Pulsa «Revocar» en una fila ACTIVA
+(no aparece en sus propias filas ni sin roles.revocar);
+|Interfaz|
+:DIÁLOGO de confirmación · W3
+consecuencias (permisos que perderá) + motivo;
+|Administrador|
+:Escribe el motivo y marca
+«Entiendo que el cambio es inmediato»;
+|Interfaz|
+if (¿Motivo ≥ 10 caracteres y casilla marcada?) then (no)
+  :Botón «Revocar» deshabilitado
+  contador de caracteres · M-06;
+  detach
+else (sí)
+endif
+|Administrador|
+if (¿Confirma?) then (Cancelar · Esc)
+  :Cierra el diálogo sin cambios
+  (el foco vuelve al botón «Revocar»);
+  detach
+else (Revocar rol)
+endif
+|Servidor RBAC|
+:POST /api/v1/roles/revocaciones;
+|Interfaz|
+if (¿Resultado?) then (200)
+  :ÉXITO «Rol revocado» + referencia · M-21
+  la fila pasa a «Revocado»;
+  stop
+elseif (404) then (recuperable)
+  :M-07 «Este rol ya no está activo»
+  y se recarga la lista;
+  detach
+elseif (422) then (regla)
+  :M-06 (motivo) o M-08 (autorrevocación);
+  detach
+else (403 · 500)
+  :M-10 (sin motivo) o M-12 [Reintentar];
+  detach
+endif
+@enduml

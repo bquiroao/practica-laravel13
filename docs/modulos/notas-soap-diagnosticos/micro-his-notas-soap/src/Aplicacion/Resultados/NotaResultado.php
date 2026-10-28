@@ -27,7 +27,17 @@ final class NotaResultado
         public readonly ?string $firmadaEn,
         public readonly array $soap,
         public readonly array $diagnosticos,
+        public readonly bool $repetida = false,
+        public readonly ?string $reemplazaA = null,
+        public readonly ?string $motivoCorreccion = null,
     ) {
+    }
+
+    /** La misma nota, marcada como respuesta repetida de una Idempotency-Key ya usada. */
+    public function comoRepetida(): self
+    {
+        return new self($this->notaId, $this->expedienteId, $this->episodioId, $this->autorId, $this->estado,
+            $this->version, $this->firmadaEn, $this->soap, $this->diagnosticos, true, $this->reemplazaA, $this->motivoCorreccion);
     }
 
     /** @param list<Diagnostico> $diagnosticos */
@@ -50,6 +60,9 @@ final class NotaResultado
             array_map(static fn (Diagnostico $d): array => [
                 'id' => $d->id, 'code' => $d->codigo, 'description' => $d->descripcion, 'type' => $d->tipo->value,
             ], $diagnosticos),
+            false,
+            $nota->reemplazaA,
+            $nota->motivoCorreccion,
         );
     }
 
@@ -64,6 +77,8 @@ final class NotaResultado
             'status' => $this->estado,
             'version_no' => $this->version,
             'signed_at' => $this->firmadaEn,
+            'supersedes_id' => $this->reemplazaA,
+            'correction_reason' => $this->motivoCorreccion,
             'soap' => $this->soap,
             'diagnoses' => $this->diagnosticos,
         ];

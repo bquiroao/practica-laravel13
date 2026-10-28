@@ -1,0 +1,53 @@
+@startuml trazabilidad_reportes_analytics_basicos
+title Semana 6 · Diagrama trazable: del actor a la evidencia
+skinparam shadowing false
+left to right direction
+
+rectangle "Actores\n(semana 1)" as A {
+  actor "Jefe de área" as jefe
+  actor "Médico" as medico
+}
+rectangle "Casos de uso\n(semana 1)" as CU {
+  usecase "CU-03 Calcular" as cu3
+  usecase "CU-07 Desglosar" as cu7
+  usecase "CU-08 Registros" as cu8
+  usecase "CU-05 Validar permiso" as cu5
+}
+rectangle "Requerimientos\n(semana 2)" as RQ {
+  card "RF-01 · RF-03" as rf1
+  card "RF-04 · RF-05 · RN-07" as rf4
+  card "RF-07 · RNF-02" as rf7
+}
+rectangle "Diseño\n(semanas 2 a 5)" as DIS {
+  card "LSP: ContratoReporte" as lsp
+  card "Domain: Indicador, Desglose,\nRegistroOrigen" as dom
+  card "Application:\nPoliticaPermisos" as pol
+  card "Repository PDO / InMemory" as repo
+  card "API v1: /reportes/{tipo}\n/desglose /registros" as api
+}
+rectangle "Evidencia" as EV {
+  card "Pruebas de contrato\n(semana 2: 16 OK)" as e2
+  card "Pruebas Micro-HIS\n(semana 5: 29 OK)" as e5
+  card "C4 y diagramas\n(semanas 3 a 5)" as ed
+}
+
+jefe --> cu3
+jefe --> cu7
+jefe --> cu8
+medico --> cu5
+cu3 --> rf1
+cu7 --> rf4
+cu8 --> rf4
+cu5 --> rf7
+rf1 --> dom
+rf4 --> lsp
+rf4 --> dom
+rf7 --> pol
+lsp --> e2
+dom --> repo
+repo --> e5
+pol --> e5
+dom --> api
+api --> e5
+lsp --> ed
+@enduml

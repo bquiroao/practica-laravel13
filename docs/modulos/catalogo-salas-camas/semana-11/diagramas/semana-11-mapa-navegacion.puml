@@ -1,0 +1,20 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Salas
+Salas : &#35;salas
+Sala : &#35;sala/A
+Cambiar : &#35;cambiar/A101
+Guardado : &#35;hecho/A101/m
+Conflicto : &#35;conflicto/A101 (error crítico E7)
+Salas --> Sala : «Ver camas de la sala A»
+Sala --> Salas : «‹ Salas»
+Sala --> Cambiar : «Cambiar estado de A/101»
+Cambiar --> Sala : «Volver sin cambiar»
+Cambiar --> Cambiar : motivo vacío → error junto al campo
+Cambiar --> Guardado : «Pasar a mantenimiento»
+Cambiar --> Conflicto : confirmar con admisión ocupando la cama
+Guardado --> Cambiar : «Cambiar estado» de otra cama
+Conflicto --> Sala : «Ver la sala A actualizada»
+Conflicto --> Salas : «Volver a las salas»
+@enduml

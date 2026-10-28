@@ -1,0 +1,27 @@
+@startuml semana-03-paquetes-dependencias
+' Semana 3 — Dashboard base UI/UX (tarea Odoo 2430): regla de dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorDashboard
+}
+package Aplicacion {
+  class ServicioDashboard
+  interface FuenteConteos <<puerto>>
+  interface Reloj <<puerto>>
+}
+package Dominio {
+  enum EstadoTarjeta
+  class Tarjeta
+  class Catalogo
+}
+package Persistencia {
+  class RepositorioPdo
+}
+ControladorDashboard ..> ServicioDashboard
+ControladorDashboard ..> EstadoTarjeta
+ServicioDashboard ..> Catalogo
+ServicioDashboard ..> Tarjeta
+ServicioDashboard --> FuenteConteos
+ServicioDashboard --> Reloj
+RepositorioPdo ..|> FuenteConteos
+@enduml

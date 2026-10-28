@@ -1,0 +1,16 @@
+OK    feliz: sin corte todavía, la consulta muestra el estado vacío (CA-04)
+OK    feliz: consolidar = 201 con la hora y 2 salas activas (CU-01, R-03, R-05)
+OK    feliz: sala A = 50.0 % con 2 disponibles, 2 ocupadas y 1 en mantenimiento aparte (CA-01, R-01)
+OK    feliz: filtrar por «available» deja solo la sala A (CA-06, CU-03)
+OK    regla: B sin camas operativas = «no aplica» y la sala inactiva C no aparece (CA-02, R-02, R-03)
+OK    regla: A2 y A4 quedan marcadas como inconsistentes (CA-03, R-04)
+OK    regla: consolidar no cambia ningún estado de cama (R-09)
+OK    regla: sin aviso a los 5 minutos y con aviso a los 20 (CA-05, R-06)
+OK    regla: filtrar por un estado que no existe = 422 E3
+OK    regla: el corte solo guarda cifras por sala (R-07)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException al leer = 503 E8
+OK    persistencia: tras ambos fallos se conserva el corte anterior (CA-07, R-09)
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto
