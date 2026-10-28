@@ -1,0 +1,42 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 7 - Componentes y refactorización en ingreso de resultados</title>
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="490" y="24" text-anchor="middle" font-size="16" font-weight="bold">Diseño de componentes (continuo: existe, discontinuo: propuesto)</text>
+
+  <rect x="20" y="50" width="180" height="50" fill="#fff" stroke="#333"/><text x="110" y="80" text-anchor="middle">Técnico/a</text>
+  <rect x="20" y="130" width="180" height="64" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="110" y="158" text-anchor="middle">CaptureResultForm</text><text x="110" y="176" text-anchor="middle" font-size="11">(propuesta)</text>
+  <rect x="20" y="220" width="180" height="64" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="110" y="248" text-anchor="middle">ResultEntryApiClient</text><text x="110" y="266" text-anchor="middle" font-size="11">(propuesto)</text>
+
+  <rect x="240" y="50" width="220" height="154" fill="#eef5ff" stroke="#5b8bd0"/><text x="250" y="70" font-weight="bold">Presentation</text>
+  <rect x="260" y="84" width="180" height="34" fill="#fff" stroke="#333"/><text x="350" y="106" text-anchor="middle">ResultController (existe)</text>
+  <rect x="260" y="130" width="180" height="30" fill="#fff" stroke="#333"/><text x="350" y="150" text-anchor="middle">ResultForm (existe)</text>
+  <rect x="260" y="170" width="180" height="30" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="350" y="190" text-anchor="middle">OutcomeView (propuesta)</text>
+
+  <rect x="490" y="50" width="230" height="220" fill="#f1fbf1" stroke="#5aa55a"/><text x="500" y="70" font-weight="bold">Application</text>
+  <rect x="510" y="84" width="190" height="42" fill="#fff" stroke="#333"/><text x="605" y="104" text-anchor="middle">CaptureOrCorrectResult</text><text x="605" y="120" text-anchor="middle" font-size="11">antes (acoplado)</text>
+  <rect x="510" y="138" width="190" height="42" fill="#fff" stroke="#333"/><text x="605" y="158" text-anchor="middle">EntryService</text><text x="605" y="174" text-anchor="middle" font-size="11">después (orquestador)</text>
+  <rect x="510" y="192" width="190" height="30" fill="#fff" stroke="#333"/><text x="605" y="212" text-anchor="middle">Capture/CorrectCommand</text>
+  <rect x="510" y="232" width="190" height="30" fill="#fff" stroke="#333"/><text x="605" y="252" text-anchor="middle">ReferenceRangeProvider</text>
+
+  <rect x="750" y="50" width="210" height="170" fill="#fdf2e9" stroke="#d98c3b"/><text x="760" y="70" font-weight="bold">Domain</text>
+  <rect x="770" y="84" width="170" height="30" fill="#fff" stroke="#333"/><text x="855" y="104" text-anchor="middle">PendingLabResult</text>
+  <rect x="770" y="120" width="170" height="30" fill="#fff" stroke="#333"/><text x="855" y="140" text-anchor="middle">ResultVersion</text>
+  <rect x="770" y="156" width="170" height="30" fill="#fff" stroke="#333" stroke-dasharray="6,3"/><text x="855" y="176" text-anchor="middle">ResultValue + Range</text>
+
+  <rect x="240" y="300" width="460" height="130" fill="#f7eefb" stroke="#9a5bb5"/><text x="250" y="320" font-weight="bold">Persistence</text>
+  <rect x="260" y="334" width="170" height="30" fill="#fff" stroke="#333"/><text x="345" y="354" text-anchor="middle">LabResultRepository</text>
+  <rect x="445" y="334" width="235" height="30" fill="#fff" stroke="#333"/><text x="562" y="354" text-anchor="middle">PdoLabResultRepository + InMemory</text>
+  <rect x="260" y="374" width="420" height="40" fill="#fff8dc" stroke="#333"/><text x="470" y="398" text-anchor="middle">lab_result_versions (versiones, estado, corrección)</text>
+
+  <g stroke="#333" fill="none" marker-end="url(#a)">
+    <path d="M110,100 V130"/><path d="M110,194 V220"/><path d="M200,252 H240 V100 H260" stroke-dasharray="6,3"/>
+    <path d="M350,118 V130"/><path d="M440,102 H510"/><path d="M440,102 H510 V158" stroke-dasharray="6,3"/>
+    <path d="M605,180 V192"/><path d="M700,158 H770"/><path d="M605,180 H770 V176" stroke-dasharray="6,3"/>
+    <path d="M605,222 V334 H430"/><path d="M605,126 V334"/><path d="M560,364 V374"/>
+  </g>
+
+  <text x="20" y="470" font-weight="bold">Punto de acoplamiento refactorizado: valor, unidad, rango, estado y corrección.</text>
+  <text x="20" y="492">Antes: CaptureOrCorrectResult recibía 8 parámetros escalares y devolvía mensajes de UI.</text>
+  <text x="20" y="514">Después: EntryService recibe comandos, usa tipos de dominio (ResultValue/ReferenceRange) y deja los mensajes en OutcomeView.</text>
+  <text x="20" y="536">No se amplía el módulo: se conserva el agregado PendingLabResult y el repositorio existente.</text>
+</svg>

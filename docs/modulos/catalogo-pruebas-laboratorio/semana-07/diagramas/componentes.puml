@@ -1,0 +1,43 @@
+@startuml componentes
+title Componentes backend y frontend — Catálogo de pruebas de laboratorio
+skinparam componentStyle rectangle
+
+package "Frontend (Vue 3 + Pinia)" {
+  [CatalogoPruebasView] as V1
+  [DetallePruebaView] as V2
+  [AltaPruebaView] as V3
+  [FiltrosCatalogo] as F1
+  [TablaPruebas] as F2
+  [FormularioRequisitos] as F3
+  [AvisoVigencia] as F4
+  [useCatalogoStore\n(Pinia)] as ST
+  [catalogoApi\n(cliente HTTP)] as CL
+}
+package "Backend (Laravel 12)" {
+  [LabTestApiController] as C
+  [RegistrarPruebaRequest\n(validación de forma)] as RQ
+  [RegistrarPrueba\nConsultarPruebasVigentes\nVerDetallePrueba] as UC
+  [LabTest / RequisitoMuestra / Vigencia] as DM
+  interface "LabTestRepository" as IR
+  [EloquentLabTestRepository] as ER
+  [LabTestResource\n(JSON)] as RS
+}
+database "HOSPITAL.lab_test" as DB
+
+V1 --> F1
+V1 --> F2
+V2 --> F4
+V3 --> F3
+V1 --> ST
+V2 --> ST
+V3 --> ST
+ST --> CL
+CL --> C : HTTP JSON\n(contrato v1)
+C --> RQ
+C --> UC
+C --> RS
+UC --> DM
+UC --> IR
+ER ..|> IR
+ER --> DB
+@enduml

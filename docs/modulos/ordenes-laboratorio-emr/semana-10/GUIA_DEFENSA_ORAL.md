@@ -1,0 +1,1 @@
+Abrir las cinco pantallas a 320 y 430. Explicar tarjetas por orden, contexto de lectura, contador de selección y revisión completa antes de emitir. Demostrar conceptualmente respuesta desconocida con comprobación e idempotencia; catálogo cambia sin emisión parcial; seguimiento fallido no inventa estado. Son bocetos, no API ni persistencia probadas.

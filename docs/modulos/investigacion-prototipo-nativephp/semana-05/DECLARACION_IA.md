@@ -1,0 +1,1 @@
+Se utilizó IA para revisar el prototipo local, consultar la especificación OpenAPI oficial y preparar contrato, diagramas, decisiones y plan de issues. Se valida el contrato y se ejecuta la regresión del ejemplo; no se atribuyen API desplegada, soporte NativePHP, microservicio ni aprobaciones de terceros. La estudiante debe revisar alcance y riesgos.

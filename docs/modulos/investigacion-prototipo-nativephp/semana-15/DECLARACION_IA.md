@@ -1,0 +1,1 @@
+Se utilizó IA para diseñar y ejecutar pruebas sobre el prototipo de contrato de semana 2, agregar políticas exploratorias de viabilidad/sincronización, documentar trazabilidad y reproducir defectos. Las pruebas y salidas son de PHP CLI con dobles; no son ejecución nativa de NativePHP. La estudiante debe revisar el código y comprender los límites antes de la defensa.

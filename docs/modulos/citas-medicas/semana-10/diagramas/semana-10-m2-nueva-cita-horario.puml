@@ -1,0 +1,15 @@
+@startsalt
+title M2 — Nueva cita, paso 2 de 3: horario
+{+
+  [< Paso 1] | <b>Nueva cita · 2 de 3</b>
+  Paciente: <b>P-0012 · A. Pérez</b>
+  <b>Especialidad *</b>
+  ^Cardiología^
+  <b>Médico *</b>
+  ^Dra. Ruiz^
+  <b>Horario libre *</b>
+  [ 28/10 · 08:30–09:00 ]
+  [ 28/10 · 11:00–11:30 ]
+  <i>2 horarios libres (ya sin cruces).</i>
+}
+@endsalt
