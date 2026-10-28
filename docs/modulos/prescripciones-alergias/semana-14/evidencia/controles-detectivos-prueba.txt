@@ -1,0 +1,67 @@
+Prueba de herramientas/controles-detectivos.sql sobre una base temporal con database/schema.sql (PostgreSQL 18)
+
+== 1. Base vacía: ningún control debe devolver filas
+SET
+ prescription_id | hospital | prescriber 
+-----------------+----------+------------
+(0 filas)
+
+ alerta 
+--------
+(0 filas)
+
+ allergen_name | severity | pacientes | coincide_con_catalogo 
+---------------+----------+-----------+-----------------------
+(0 filas)
+
+ prescriber | con_advertencia | emitidas | porcentaje 
+------------+-----------------+----------+------------
+(0 filas)
+
+ hospital | emisiones_detenidas | primera | ultima 
+----------+---------------------+---------+--------
+(0 filas)
+
+ action | pendientes | mas_antigua 
+--------+------------+-------------
+(0 filas)
+
+
+== 2. Con controles-detectivos-datos-prueba.sql: cada control devuelve SU caso
+SET
+ prescription_id |  hospital  | prescriber 
+-----------------+------------+------------
+               3 | hosp-norte | dr-lopez
+(1 fila)
+
+ alerta 
+--------
+(0 filas)
+
+     allergen_name      | severity | pacientes | coincide_con_catalogo 
+------------------------+----------+-----------+-----------------------
+ Amoxicilina trihidrato | severe   |         1 | f
+ Amoxicilina            | moderate |         1 | t
+(2 filas)
+
+ prescriber | con_advertencia | emitidas | porcentaje 
+------------+-----------------+----------+------------
+ dr-ruiz    |               2 |        2 |      100.0
+(1 fila)
+
+  hospital  | emisiones_detenidas |           primera            |            ultima            
+------------+---------------------+------------------------------+------------------------------
+ hosp-norte |                   1 | 2026-10-27 22:19:57.65225-06 | 2026-10-27 22:19:57.65225-06
+(1 fila)
+
+         action         | pendientes |         mas_antigua          
+------------------------+------------+------------------------------
+ PRESCRIPCION_BLOQUEADA |          1 | 2026-10-27 20:49:57.65225-06
+(1 fila)
+
+
+== 3. Alguien deshabilita el trigger de prescriptions: C-D3 debe alertar
+                     alerta                     
+------------------------------------------------
+ FALTA o DESHABILITADO: prescriptions_inmutable
+(1 fila)

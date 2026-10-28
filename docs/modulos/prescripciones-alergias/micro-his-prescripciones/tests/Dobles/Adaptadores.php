@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-// Dobles en memoria de los puertos. Solo para pruebas: producción usa los adaptadores PDO.
+/*
+ * Dobles de prueba. Desde la semana 4 NO reimplementan los puertos: DECORAN los adaptadores InMemory de
+ * producción (src/Persistencia/EnMemoria) y solo agregan la inyección de fallas que las pruebas necesitan.
+ * Así las pruebas ejercitan el código real de producción.
+ */
 
-use Prescripciones\Aplicacion\Puertos\CatalogoMedicamentos;
 use Prescripciones\Aplicacion\Puertos\FuenteAlergias;
 use Prescripciones\Aplicacion\Puertos\FuenteAlergiasNoDisponible;
 use Prescripciones\Aplicacion\Puertos\Pacientes;
@@ -13,82 +16,69 @@ use Prescripciones\Aplicacion\Puertos\Transaccion;
 use Prescripciones\Dominio\Excepciones\ClaveEnUso;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
 use Prescripciones\Dominio\Modelo\Alergia;
+use Prescripciones\Dominio\Modelo\Anulacion;
 use Prescripciones\Dominio\Modelo\ExpedienteAlergias;
-use Prescripciones\Dominio\Modelo\Medicamento;
 use Prescripciones\Dominio\Modelo\Prescripcion;
 use Prescripciones\Dominio\Puertos\Reloj;
 use Prescripciones\Dominio\Puertos\RepositorioPrescripciones;
-use Prescripciones\Dominio\Reglas\VerificadorAlergias;
+use Prescripciones\Persistencia\EnMemoria\FuenteAlergiasEnMemoria;
+use Prescripciones\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use Prescripciones\Persistencia\EnMemoria\RepositorioPrescripcionesEnMemoria;
+use Prescripciones\Persistencia\EnMemoria\TransaccionEnMemoria;
 
-/** Participa en TransaccionEnMemoria: guarda y restaura su estado para simular el rollback. */
-interface ParticipanteTransaccion
+final class RepositorioConFallas implements RepositorioPrescripciones
 {
-    public function instantanea(): mixed;
-
-    public function restaurar(mixed $estado): void;
-}
-
-final class RepositorioEnMemoria implements RepositorioPrescripciones, ParticipanteTransaccion
-{
-    /** @var list<Prescripcion> */
-    public array $guardadas = [];
     public bool $fallar = false;
     /** Simula una emisión concurrente que gana la carrera con la misma clave. */
     public ?Prescripcion $ganadoraConcurrente = null;
     /** @var list<Prescripcion> confirmadas por OTRA transacción: nuestro rollback no las toca */
-    public array $deOtrasTransacciones = [];
+    private array $deOtrasTransacciones = [];
 
-    public function total(): int
+    public function __construct(private readonly RepositorioPrescripcionesEnMemoria $interno)
     {
-        return count($this->guardadas) + count($this->deOtrasTransacciones);
     }
 
     public function porClave(string $hospital, string $clave): ?Prescripcion
     {
         $this->revisar();
-        foreach ([...$this->guardadas, ...$this->deOtrasTransacciones] as $p) {
+        foreach ($this->deOtrasTransacciones as $p) {
             if ($p->hospital === $hospital && $p->clave === $clave) {
                 return $p;
             }
         }
 
-        return null;
+        return $this->interno->porClave($hospital, $clave);
     }
 
     public function porId(string $hospital, int $id): ?Prescripcion
     {
         $this->revisar();
-        foreach ($this->guardadas as $p) {
-            if ($p->hospital === $hospital && $p->id === $id) {
-                return $p;
-            }
-        }
 
-        return null;
+        return $this->interno->porId($hospital, $id);
     }
 
     public function guardar(Prescripcion $prescripcion): Prescripcion
     {
         $this->revisar();
         if ($this->ganadoraConcurrente !== null) {
-            $this->deOtrasTransacciones[] = $this->ganadoraConcurrente->conId($this->total() + 1);
+            $this->deOtrasTransacciones[] = $this->ganadoraConcurrente->conId(count($this->todas()) + 1);
             $this->ganadoraConcurrente = null;
             throw new ClaveEnUso('carrera');
         }
-        $guardada = $prescripcion->conId(count($this->guardadas) + 1);
-        $this->guardadas[] = $guardada;
 
-        return $guardada;
+        return $this->interno->guardar($prescripcion);
     }
 
-    public function instantanea(): mixed
+    public function anular(Anulacion $anulacion): void
     {
-        return $this->guardadas;
+        $this->revisar();
+        $this->interno->anular($anulacion);
     }
 
-    public function restaurar(mixed $estado): void
+    /** @return list<Prescripcion> */
+    public function todas(): array
     {
-        $this->guardadas = $estado;
+        return [...$this->interno->todas(), ...$this->deOtrasTransacciones];
     }
 
     private function revisar(): void
@@ -99,137 +89,71 @@ final class RepositorioEnMemoria implements RepositorioPrescripciones, Participa
     }
 }
 
-final class AuditoriaEnMemoria implements RegistroAuditoria, ParticipanteTransaccion
+final class AuditoriaConFallas implements RegistroAuditoria
 {
-    /** @var list<array{accion: string, hospital: string, usuario: string, recurso: string, resultado: string}> */
-    public array $movimientos = [];
     public bool $fallar = false;
+
+    public function __construct(private readonly RegistroAuditoriaEnMemoria $interno)
+    {
+    }
 
     public function registrar(string $accion, string $hospital, string $usuario, string $recurso, string $resultado): void
     {
         if ($this->fallar) {
             throw new ErrorPersistencia('bandeja caída');
         }
-        $this->movimientos[] = compact('accion', 'hospital', 'usuario', 'recurso', 'resultado');
+        $this->interno->registrar($accion, $hospital, $usuario, $recurso, $resultado);
     }
 
     /** @return list<string> */
     public function acciones(): array
     {
-        return array_column($this->movimientos, 'accion');
+        return $this->interno->acciones();
     }
 
-    public function instantanea(): mixed
+    /** @return list<array<string, string>> */
+    public function movimientos(): array
     {
-        return $this->movimientos;
-    }
-
-    public function restaurar(mixed $estado): void
-    {
-        $this->movimientos = $estado;
+        return $this->interno->movimientos();
     }
 }
 
-final class TransaccionEnMemoria implements Transaccion
+final class TransaccionConFallas implements Transaccion
 {
     public int $confirmadas = 0;
     public int $revertidas = 0;
     public bool $fallarAlConfirmar = false;
 
-    /** @param list<ParticipanteTransaccion> $participantes */
-    public function __construct(private readonly array $participantes)
+    public function __construct(private readonly TransaccionEnMemoria $interna)
     {
     }
 
     public function ejecutar(callable $trabajo): mixed
     {
-        $estados = array_map(static fn (ParticipanteTransaccion $p): mixed => $p->instantanea(), $this->participantes);
         try {
-            $resultado = $trabajo();
-            if ($this->fallarAlConfirmar) {
-                throw new ErrorPersistencia('COMMIT falló');
-            }
+            $resultado = $this->interna->ejecutar(function () use ($trabajo): mixed {
+                $r = $trabajo();
+                if ($this->fallarAlConfirmar) {
+                    throw new ErrorPersistencia('COMMIT falló');
+                }
+
+                return $r;
+            });
             $this->confirmadas++;
 
             return $resultado;
         } catch (\Throwable $e) {
-            foreach ($this->participantes as $i => $p) {
-                $p->restaurar($estados[$i]);
-            }
             $this->revertidas++;
             throw $e;
         }
     }
 }
 
-final class FuenteAlergiasEnMemoria implements FuenteAlergias
-{
-    public int $consultas = 0;
-
-    /** @param array<string, list<Alergia>> $porPaciente */
-    public function __construct(private array $porPaciente = [])
-    {
-    }
-
-    public function agregar(string $paciente, Alergia $alergia): void
-    {
-        $this->porPaciente[$paciente][] = $alergia;
-    }
-
-    public function alergiasDe(string $paciente, string $hospital): ExpedienteAlergias
-    {
-        $this->consultas++;
-        $alergias = $this->porPaciente[$paciente] ?? [];
-
-        return new ExpedienteAlergias($alergias !== [], $alergias);
-    }
-}
-
-final class FuenteAlergiasCaida implements FuenteAlergias
-{
-    public function alergiasDe(string $paciente, string $hospital): ExpedienteAlergias
-    {
-        throw new FuenteAlergiasNoDisponible('tiempo agotado');
-    }
-}
-
-final class CatalogoEnMemoria implements CatalogoMedicamentos
-{
-    /** @var array<string, Medicamento> */
-    private array $medicamentos = [];
-
-    /** @param list<Medicamento> $medicamentos @param array<string, string> $grupos clave en minúsculas => grupo */
-    public function __construct(array $medicamentos, private readonly array $grupos)
-    {
-        foreach ($medicamentos as $m) {
-            $this->medicamentos[$m->codigo] = $m;
-        }
-    }
-
-    public function buscar(string $codigo): ?Medicamento
-    {
-        return $this->medicamentos[$codigo] ?? null;
-    }
-
-    public function grupoDelAlergeno(Alergia $alergia): ?string
-    {
-        foreach ([$alergia->codigo !== null ? strtolower(trim($alergia->codigo)) : null,
-            $alergia->nombre !== null ? VerificadorAlergias::normalizar($alergia->nombre) : null] as $clave) {
-            if ($clave !== null && isset($this->grupos[$clave])) {
-                return $this->grupos[$clave];
-            }
-        }
-
-        return null;
-    }
-}
-
-final class PacientesEnMemoria implements Pacientes
+final class PacientesConFallas implements Pacientes
 {
     public bool $fallar = false;
 
-    /** @param array<string, list<string>> $porHospital */
-    public function __construct(private readonly array $porHospital)
+    public function __construct(private readonly Pacientes $interno)
     {
     }
 
@@ -239,7 +163,36 @@ final class PacientesEnMemoria implements Pacientes
             throw new ErrorPersistencia('base caída');
         }
 
-        return in_array($paciente, $this->porHospital[$hospital] ?? [], true);
+        return $this->interno->existeEnHospital($paciente, $hospital);
+    }
+}
+
+final class FuenteAlergiasContada implements FuenteAlergias
+{
+    public int $consultas = 0;
+
+    public function __construct(private readonly FuenteAlergiasEnMemoria $interna)
+    {
+    }
+
+    public function agregar(string $paciente, Alergia $alergia): void
+    {
+        $this->interna->agregar($paciente, $alergia);
+    }
+
+    public function alergiasDe(string $paciente, string $hospital): ExpedienteAlergias
+    {
+        $this->consultas++;
+
+        return $this->interna->alergiasDe($paciente, $hospital);
+    }
+}
+
+final class FuenteAlergiasCaida implements FuenteAlergias
+{
+    public function alergiasDe(string $paciente, string $hospital): ExpedienteAlergias
+    {
+        throw new FuenteAlergiasNoDisponible('tiempo agotado');
     }
 }
 

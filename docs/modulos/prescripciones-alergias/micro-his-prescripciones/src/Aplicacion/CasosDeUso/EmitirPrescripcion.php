@@ -13,21 +13,22 @@ use Prescripciones\Aplicacion\Resultados\Resultado;
 use Prescripciones\Aplicacion\Servicios\EvaluacionClinica;
 use Prescripciones\Dominio\Excepciones\ClaveEnUso;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
-use Prescripciones\Dominio\Modelo\Alergia;
+use Prescripciones\Dominio\Modelo\DecisionEmision;
 use Prescripciones\Dominio\Modelo\Prescripcion;
 use Prescripciones\Dominio\Modelo\ResultadoVerificacion;
 use Prescripciones\Dominio\Modelo\SolicitudEmision;
 use Prescripciones\Dominio\Puertos\Reloj;
 use Prescripciones\Dominio\Puertos\RepositorioPrescripciones;
+use Prescripciones\Dominio\Reglas\PoliticaEmision;
 
 /**
- * CU-01 «creación de prescripción con verificación previa de alergias».
- * Orden (actividad de la semana 1): permiso → idempotencia → tenant → catálogo y dosis → alergias →
- * confirmación → bloqueo / advertencia → guardar con su traza en una transacción.
+ * CU-01 «creación de prescripción con verificación previa de alergias». ORQUESTA; no decide reglas clínicas:
+ * permiso → idempotencia → tenant → evaluación → decisión del Dominio (PoliticaEmision) → guardar con su traza.
  */
 final class EmitirPrescripcion
 {
-    public const MIN_JUSTIFICACION = 20;
+    public const PERMISO = 'prescripcion.emitir';
+    public const PERMISO_OVERRIDE = 'prescripcion.override';
 
     public function __construct(
         private readonly PoliticaAcceso $acceso,
@@ -37,6 +38,7 @@ final class EmitirPrescripcion
         private readonly RegistroAuditoria $auditoria,
         private readonly Transaccion $transaccion,
         private readonly Reloj $reloj,
+        private readonly PoliticaEmision $politica = new PoliticaEmision(),
     ) {
     }
 
@@ -51,7 +53,7 @@ final class EmitirPrescripcion
 
     private function emitir(SolicitudEmision $s): Resultado
     {
-        if (!$this->acceso->permite($s->usuario, 'prescripcion.emitir', $s->hospital)) {
+        if (!$this->acceso->permite($s->usuario, self::PERMISO, $s->hospital)) {
             return new Resultado(Resultado::DENEGADO, 'PERMISO_DENEGADO');
         }
 
@@ -67,7 +69,7 @@ final class EmitirPrescripcion
         try {
             $evaluada = $this->evaluacion->evaluar($s->paciente, $s->hospital, $s->items);
         } catch (FuenteAlergiasNoDisponible) {
-            $this->trazarAparte('VERIFICACION_NO_DISPONIBLE', $s, 'paciente:' . $s->paciente, 'error');
+            $this->trazarAparte('VERIFICACION_NO_DISPONIBLE', $s, 'error');
 
             return new Resultado(Resultado::NO_DISPONIBLE, 'VERIFICACION_NO_DISPONIBLE');
         }
@@ -76,27 +78,31 @@ final class EmitirPrescripcion
         }
         [$expediente, $verificacion] = $evaluada;
 
-        if (!$expediente->evaluado && !$s->confirmaSinAlergias) {
-            return new Resultado(Resultado::RECHAZADO, 'CONFIRMACION_REQUERIDA');
+        $decision = $this->politica->decidir($verificacion, $expediente, $s,
+            fn (): bool => $this->acceso->permite($s->usuario, self::PERMISO_OVERRIDE, $s->hospital));
+        if (!$decision->permiteEmitir()) {
+            return $this->rechazo($decision, $verificacion, $s);
         }
 
-        if ($verificacion->estado === ResultadoVerificacion::BLOQUEO) {
-            $this->trazarAparte('PRESCRIPCION_BLOQUEADA', $s, 'paciente:' . $s->paciente, 'denegado');
+        return $this->guardar(Prescripcion::emitir($s, $expediente, $verificacion, $decision, $this->reloj->ahora()), $s);
+    }
 
-            return new Resultado(Resultado::RECHAZADO, $verificacion->codigoBloqueo(), ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
+    /** Traduce una decisión negativa del Dominio a un resultado; solo el bloqueo deja traza. */
+    private function rechazo(DecisionEmision $decision, ResultadoVerificacion $verificacion, SolicitudEmision $s): Resultado
+    {
+        if ($decision->tipo === DecisionEmision::BLOQUEADA) {
+            $this->trazarAparte('PRESCRIPCION_BLOQUEADA', $s, 'denegado');
+
+            return new Resultado(Resultado::RECHAZADO, (string) $decision->codigoBloqueo, ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
         }
 
-        if ($verificacion->estado === ResultadoVerificacion::ADVERTENCIA
-            && (mb_strlen(trim((string) $s->justificacion)) < self::MIN_JUSTIFICACION
-                || !$this->acceso->permite($s->usuario, 'prescripcion.override', $s->hospital))) {
-            return new Resultado(Resultado::CONFLICTO, 'JUSTIFICACION_REQUERIDA', ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
-        }
+        return $decision->tipo === DecisionEmision::REQUIERE_CONFIRMACION
+            ? new Resultado(Resultado::RECHAZADO, PoliticaEmision::CONFIRMACION_REQUERIDA)
+            : new Resultado(Resultado::CONFLICTO, 'JUSTIFICACION_REQUERIDA', ['hallazgos' => $verificacion->hallazgosComoArreglo()]);
+    }
 
-        $prescripcion = new Prescripcion(null, $s->hospital, $s->paciente, $s->usuario, $s->clave, $s->huella(), $s->items, $verificacion,
-            array_map(static fn (Alergia $a): string => $a->alergeno(), $expediente->activas()),
-            $verificacion->estado === ResultadoVerificacion::ADVERTENCIA ? trim((string) $s->justificacion) : null,
-            !$expediente->evaluado && $s->confirmaSinAlergias, $this->reloj->ahora());
-
+    private function guardar(Prescripcion $prescripcion, SolicitudEmision $s): Resultado
+    {
         try {
             // La prescripción, sus ítems y su traza: todo o nada (R-12).
             $guardada = $this->transaccion->ejecutar(function () use ($prescripcion, $s): Prescripcion {
@@ -112,19 +118,23 @@ final class EmitirPrescripcion
             return $ganadora !== null ? $this->reintento($ganadora, $s) : new Resultado(Resultado::CONFLICTO, 'CLAVE_REUTILIZADA');
         }
 
-        return new Resultado(Resultado::CREADO, 'EMITIDA', ['id' => $guardada->id, 'verificacion' => $verificacion->estado]);
+        return new Resultado(Resultado::CREADO, 'EMITIDA', ['id' => $guardada->id, 'verificacion' => $prescripcion->verificacion->estado]);
     }
 
+    /**
+     * Es un reintento solo si es la MISMA intención: mismo contenido y mismo prescriptor. Semana 15 (DEF-02, AR-02 de la
+     * semana 13): antes bastaba la huella, y otro médico con la misma clave recibía «ya emitida» una prescripción ajena.
+     */
     private function reintento(Prescripcion $previa, SolicitudEmision $s): Resultado
     {
-        return $previa->huella === $s->huella()
+        return $previa->huella === $s->huella() && $previa->prescriptor === $s->usuario
             ? new Resultado(Resultado::OK, 'YA_EMITIDA', ['id' => $previa->id, 'verificacion' => $previa->verificacion->estado])
             : new Resultado(Resultado::CONFLICTO, 'CLAVE_REUTILIZADA');
     }
 
-    /** La traza de un bloqueo no depende de una prescripción: va en su propia transacción. */
-    private function trazarAparte(string $accion, SolicitudEmision $s, string $recurso, string $resultado): void
+    /** La traza de un bloqueo o de la fuente caída no depende de una prescripción: va en su propia transacción. */
+    private function trazarAparte(string $accion, SolicitudEmision $s, string $resultado): void
     {
-        $this->transaccion->ejecutar(fn () => $this->auditoria->registrar($accion, $s->hospital, $s->usuario, $recurso, $resultado));
+        $this->transaccion->ejecutar(fn () => $this->auditoria->registrar($accion, $s->hospital, $s->usuario, 'paciente:' . $s->paciente, $resultado));
     }
 }

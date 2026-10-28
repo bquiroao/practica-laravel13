@@ -1,0 +1,32 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Cliente-servidor del módulo Prescripciones (semana 5)
+
+Person(medico, "Médico", "Verifica y emite.")
+Person(farmacia, "Farmacia / enfermería", "Consulta.")
+
+System_Boundary(cli, "Clientes") {
+    Container(spa, "SPA Vue (semana 8+)", "JavaScript", "Programa contra api/openapi.yaml.")
+    Container(cliente, "ClientePrescripciones", "PHP · src/Cliente", "Misma Idempotency-Key en los reintentos; CONFIRMADO / RECHAZADO / INCIERTO; sin bandeja local.")
+}
+
+System_Boundary(srv, "Servidor: Micro-HIS Prescripciones (monolito modular)") {
+    Container(api, "API /api/v1/prescripciones", "PHP · Kernel + MVC", "X-Request-ID, registro de acceso, 401/400/403 antes de la acción.")
+    Container(nucleo, "Aplicación + Dominio", "PHP", "Verificación obligatoria, bloqueo seguro, idempotencia.")
+    ContainerDb(bd, "Base del hospital", "PostgreSQL", "prescriptions, prescription_items, bandeja; allergies (ASII-12) por vista.")
+}
+
+System_Ext(expediente, "Expediente como servicio (solo en la evaluación)", "bin/expediente-simulado.php · HttpFuenteAlergias (2 s, circuit breaker)")
+System_Ext(auditoria, "Auditoría (ASII-22)", "Recibe la traza por la bandeja.")
+
+Rel(medico, spa, "Usa")
+Rel(farmacia, spa, "Usa")
+Rel(spa, api, "HTTPS/JSON", "Bearer · X-Tenant-ID · Idempotency-Key")
+Rel(cliente, api, "HTTP/JSON", "TransporteHttpStream")
+Rel(api, nucleo, "casos de uso")
+Rel(nucleo, bd, "PDO, sentencias preparadas")
+Rel(nucleo, expediente, "solo si fuente_alergias = http", "medición D/E")
+Rel(bd, auditoria, "bandeja → outbox_event (H8)", "asíncrono")
+@enduml

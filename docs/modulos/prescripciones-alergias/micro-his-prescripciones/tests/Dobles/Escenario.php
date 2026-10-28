@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 use Prescripciones\Aplicacion\Puertos\FuenteAlergias;
 use Prescripciones\Dominio\Modelo\Alergia;
-use Prescripciones\Dominio\Modelo\Medicamento;
 use Prescripciones\Dominio\Modelo\SolicitudEmision;
-use Prescripciones\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Prescripciones\Persistencia\EnMemoria\CatalogoEnMemoria;
+use Prescripciones\Persistencia\FabricaAdaptadores;
 use Prescripciones\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Prescripciones\Presentacion\Http\Kernel;
 use Prescripciones\Presentacion\Http\Solicitud;
 
 /**
- * Arma el Micro-HIS completo con dobles en memoria y los mismos datos que database/datos-demo.sql.
- * Usa la MISMA raíz de composición que producción (construirCasosDeUso, construirKernel).
+ * Arma el Micro-HIS completo con los adaptadores InMemory DE PRODUCCIÓN (FabricaAdaptadores::memoria y
+ * database/datos-demo.php) más decoradores que inyectan fallas. Usa la MISMA raíz de composición que producción.
  */
 final class Escenario
 {
-    public readonly RepositorioEnMemoria $repositorio;
-    public readonly AuditoriaEnMemoria $auditoria;
-    public readonly TransaccionEnMemoria $transaccion;
-    public readonly PacientesEnMemoria $pacientes;
+    public readonly RepositorioConFallas $repositorio;
+    public readonly AuditoriaConFallas $auditoria;
+    public readonly TransaccionConFallas $transaccion;
+    public readonly PacientesConFallas $pacientes;
     public readonly FuenteAlergias $fuente;
     /** @var array{previa: \Prescripciones\Aplicacion\CasosDeUso\VerificarAlergiasPrevia, emitir: \Prescripciones\Aplicacion\CasosDeUso\EmitirPrescripcion, consultar: \Prescripciones\Aplicacion\CasosDeUso\ConsultarPrescripcion} */
     public readonly array $casos;
@@ -28,19 +28,16 @@ final class Escenario
 
     public function __construct(?FuenteAlergias $fuente = null)
     {
-        $config = require dirname(__DIR__, 2) . '/config/config.php';
-        $this->repositorio = new RepositorioEnMemoria();
-        $this->auditoria = new AuditoriaEnMemoria();
-        $this->transaccion = new TransaccionEnMemoria([$this->repositorio, $this->auditoria]);
-        $this->pacientes = new PacientesEnMemoria([
-            'hosp-norte' => ['P-001', 'P-002', 'P-003', 'P-004', 'P-005', 'P-006', 'P-007'],
-            'hosp-sur' => ['P-900'],
-        ]);
-        $this->fuente = $fuente ?? new FuenteAlergiasEnMemoria(self::alergias());
+        $p = FabricaAdaptadores::memoria(self::datos(), self::config());
+        $this->repositorio = new RepositorioConFallas($p['repositorio']);
+        $this->auditoria = new AuditoriaConFallas($p['auditoria']);
+        $this->transaccion = new TransaccionConFallas($p['transaccion']);
+        $this->pacientes = new PacientesConFallas($p['pacientes']);
+        $this->fuente = $fuente ?? new FuenteAlergiasContada($p['alergias']);
         $this->casos = construirCasosDeUso([
-            'acceso' => new PoliticaAccesoEstatica($config['permisos']),
+            'acceso' => $p['acceso'],
             'pacientes' => $this->pacientes,
-            'catalogo' => self::catalogo(),
+            'catalogo' => $p['catalogo'],
             'alergias' => $this->fuente,
             'repositorio' => $this->repositorio,
             'auditoria' => $this->auditoria,
@@ -51,33 +48,35 @@ final class Escenario
 
     public function kernel(): Kernel
     {
-        $config = require dirname(__DIR__, 2) . '/config/config.php';
+        return construirKernel($this->casos, new AutenticadorTokenDemo(self::config()['tokens_demo']));
+    }
 
-        return construirKernel($this->casos, new AutenticadorTokenDemo($config['tokens_demo']));
+    /** @return array<string, mixed> */
+    public static function config(): array
+    {
+        return require dirname(__DIR__, 2) . '/config/config.php';
+    }
+
+    /** @return array<string, mixed> */
+    public static function datos(): array
+    {
+        return require dirname(__DIR__, 2) . '/database/datos-demo.php';
     }
 
     public static function catalogo(): CatalogoEnMemoria
     {
-        return new CatalogoEnMemoria([
-            new Medicamento('AMOX500', 'Amoxicilina 500 mg', 'J01CA04', 'Amoxicilina', 'betalactamicos', 'mg', 3000, ['oral'], true),
-            new Medicamento('CEFA500', 'Cefalexina 500 mg', 'J01DB01', 'Cefalexina', 'betalactamicos', 'mg', 4000, ['oral'], true),
-            new Medicamento('PARA500', 'Paracetamol 500 mg', 'N02BE01', 'Paracetamol', 'anilidas', 'mg', 4000, ['oral', 'rectal'], true),
-            new Medicamento('IBU400', 'Ibuprofeno 400 mg', 'M01AE01', 'Ibuprofeno', 'aines', 'mg', 2400, ['oral'], true),
-            new Medicamento('RANI150', 'Ranitidina 150 mg', 'A02BA02', 'Ranitidina', 'antih2', 'mg', 300, ['oral'], false),
-        ], ['j01ca04' => 'betalactamicos', 'j01ce01' => 'betalactamicos', 'penicilina' => 'betalactamicos', 'n02ba01' => 'aines', 'm01ae01' => 'aines']);
+        return FabricaAdaptadores::memoria(self::datos(), self::config())['catalogo'];
     }
 
     /** @return array<string, list<Alergia>> */
     public static function alergias(): array
     {
-        return [
-            'P-001' => [new Alergia('J01CA04', 'Amoxicilina', 'allergy', 'severe', 'active', 'urticaria generalizada')],
-            'P-002' => [new Alergia(null, 'Penicilina', 'allergy', 'moderate', 'active', 'exantema')],
-            'P-004' => [new Alergia('N02BA01', 'Ácido acetilsalicílico', 'allergy', 'life_threatening', 'active', 'anafilaxia')],
-            'P-005' => [new Alergia('J01CA04', 'Amoxicilina', 'allergy', 'mild', 'resolved', null)],
-            'P-006' => [new Alergia(null, 'penicilina', 'unknown', 'unknown', 'active', null)],
-            'P-007' => [new Alergia(null, '  AMOXICILINA ', 'allergy', 'moderate', 'active', 'prurito')],
-        ];
+        return array_map(static fn (array $lista): array => array_map(static fn (array $a): Alergia => new Alergia(...$a), $lista), self::datos()['alergias']);
+    }
+
+    public static function fuenteContada(): FuenteAlergiasContada
+    {
+        return new FuenteAlergiasContada(FabricaAdaptadores::memoria(self::datos(), self::config())['alergias']);
     }
 
     /** @return array<string, mixed> */

@@ -1,0 +1,1 @@
+Se utilizó IA para preparar la defensa, el prototipo navegable web, matriz de decisiones, cambio simulado CH-01 y verificación en navegador. No se atribuye CH-01 al usuario ni al docente. No se presenta ejecución NativePHP, permisos del SO ni API HIS real. La estudiante debe comprender y revisar el contenido antes de defenderlo.

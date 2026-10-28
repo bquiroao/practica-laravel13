@@ -1,0 +1,12 @@
+@startsalt
+title W5 — Errores recuperables del expediente
+{+
+  <b>No tienes una atención activa con este paciente</b> (E1)
+  Si lo estás atendiendo, pide a admisión o a tu jefatura que registre la asignación. | [Volver]
+  ---
+  <b>Este paciente ya tiene expediente</b> (E3) · HC-000123 | [Abrir HC-000123]
+  ---
+  <b>No pudimos consultar otros hospitales</b>
+  La historia local sigue disponible; no se perdió nada. | [Reintentar]
+}
+@endsalt

@@ -1,0 +1,13 @@
+@startsalt
+title W5 — Errores recuperables (concurrencia y servicio no disponible)
+{+
+  <b>La cama A/101 cambió mientras la editabas</b>
+  Ahora está: <b>Ocupada</b> (admisión la asignó a las 10:42).
+  Tu cambio no se guardó. Tu motivo se conserva: "limpieza profunda".
+  [Recargar la cama] | [Volver a la lista]
+  ---
+  <b>El catálogo no está disponible en este momento</b>
+  No perdiste lo que escribiste. Intenta de nuevo en unos segundos.
+  [Reintentar] | [Cancelar]
+}
+@endsalt

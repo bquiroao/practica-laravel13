@@ -12,30 +12,11 @@ use Prescripciones\Aplicacion\Puertos\RegistroAuditoria;
 use Prescripciones\Aplicacion\Resultados\Resultado;
 use Prescripciones\Dominio\Excepciones\ClaveEnUso;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
-use Prescripciones\Persistencia\Pdo\FabricaConexion;
 use Prescripciones\Persistencia\Pdo\PdoFuenteAlergias;
 use Prescripciones\Persistencia\Pdo\PdoRepositorioPrescripciones;
 use Prescripciones\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 
-/** @return array{0: \PDO, 1: array<string, mixed>} conexión a una base recién instalada y la configuración */
-function baseLimpia(): array
-{
-    $dsn = getenv('PRESCRIPCIONES_DB_DSN');
-    if ($dsn === false || $dsn === '') {
-        omitir('sin PRESCRIPCIONES_DB_DSN');
-    }
-    $config = require dirname(__DIR__, 2) . '/config/config.php';
-    $pdo = FabricaConexion::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave']);
-    $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/schema.sql'));
-    $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/datos-demo.sql'));
-
-    return [$pdo, $config];
-}
-
-function contar(\PDO $pdo, string $tabla): int
-{
-    return (int) $pdo->query("SELECT count(*) FROM $tabla")->fetchColumn();
-}
+// baseLimpia() y contar() están en tests/Dobles/BaseDePrueba.php (también las usa la suite de contrato).
 
 prueba('INT-01', 'Camino feliz por HTTP con PostgreSQL: 201, ítems, verificación y traza en la bandeja; consulta idéntica', function (): void {
     [$pdo, $config] = baseLimpia();
@@ -92,7 +73,7 @@ prueba('INT-04', 'R-11 en la base: la restricción UNIQUE convierte la carrera e
 
 prueba('INT-05', 'Todo o nada con PostgreSQL: si la traza falla, la prescripción y sus ítems se revierten', function (): void {
     [$pdo, $config] = baseLimpia();
-    $puertos = puertosPdo($pdo, $config);
+    $puertos = \Prescripciones\Persistencia\FabricaAdaptadores::pdo($pdo, $config);
     $puertos['auditoria'] = new class implements RegistroAuditoria {
         public function registrar(string $accion, string $hospital, string $usuario, string $recurso, string $resultado): void
         {
@@ -142,7 +123,7 @@ prueba('INT-08', 'El catálogo PDO resuelve vías como lista y el grupo del alé
 
 prueba('INT-09', 'Mismo comportamiento que los dobles: 11 escenarios dan la misma respuesta con PDO y en memoria', function (): void {
     [$pdo, $config] = baseLimpia();
-    $conPdo = construirKernel(construirCasosDeUso(puertosPdo($pdo, $config)), new AutenticadorTokenDemo($config['tokens_demo']));
+    $conPdo = construirKernel(construirCasosDeUso(\Prescripciones\Persistencia\FabricaAdaptadores::pdo($pdo, $config)), new AutenticadorTokenDemo($config['tokens_demo']));
     $enMemoria = (new Escenario())->kernel();
     $escenarios = [
         ['P-005', [Escenario::item('PARA500')], null, false, 'token-dr-lopez'],
@@ -163,4 +144,26 @@ prueba('INT-09', 'Mismo comportamiento que los dobles: 11 escenarios dan la mism
         $b = $enMemoria->manejar(Escenario::http('POST', '/api/v1/prescripciones', $cuerpo, $token, cabeceras: ['idempotency-key' => "par-$i"]));
         igual([$b->estado, $b->cuerpo], [$a->estado, $a->cuerpo], "escenario $i ($paciente)");
     }
+    // Semana 4 (H-4): también la CONSULTA debe ser idéntica; solo la hora de emisión depende del reloj de cada composición.
+    foreach ([1, 2, 3] as $id) {
+        $a = $conPdo->manejar(Escenario::http('GET', "/api/v1/prescripciones/$id", token: 'token-farmacia-norte'));
+        $b = $enMemoria->manejar(Escenario::http('GET', "/api/v1/prescripciones/$id", token: 'token-farmacia-norte'));
+        $sinHora = static fn (array $c): array => array_diff_key($c, ['emitida_en' => true]);
+        igual([$b->estado, $sinHora($b->cuerpo)], [$a->estado, $sinHora($a->cuerpo)], "consulta $id");
+    }
+});
+
+prueba('INT-10', 'Semana 6 en la base: la anulación es inmutable (trigger), única por prescripción y con motivo ≥ 10; la traza queda en la bandeja', function (): void {
+    [$pdo, $config] = baseLimpia();
+    $kernel = crearKernel($config);
+    $id = $kernel->manejar(Escenario::http('POST', '/api/v1/prescripciones', ['paciente' => 'P-005', 'items' => [Escenario::item('PARA500')]],
+        cabeceras: ['idempotency-key' => 'int-10']))->cuerpo['id'];
+    $r = $kernel->manejar(Escenario::http('POST', "/api/v1/prescripciones/$id/anulacion", ['motivo' => 'Paciente refiere reacción previa']));
+    igual([200, 'ANULADA'], [$r->estado, $kernel->manejar(Escenario::http('GET', "/api/v1/prescripciones/$id"))->cuerpo['estado']], 'anulada por HTTP');
+    foreach (["UPDATE prescription_voids SET reason = 'otro motivo cualquiera'", 'DELETE FROM prescription_voids'] as $sql) {
+        afirmar(str_contains((string) lanza(\PDOException::class, static fn () => $pdo->exec($sql), $sql)->getMessage(), 'prescripcion_inmutable'), $sql);
+    }
+    lanza(\PDOException::class, static fn () => $pdo->exec("INSERT INTO prescription_voids VALUES ($id, 'segundo motivo largo', 'dr-ruiz', now())"), 'segunda anulación');
+    igual(['PRESCRIPCION_EMITIDA', 'PRESCRIPCION_ANULADA'], $pdo->query('SELECT action FROM prescription_audit_outbox ORDER BY outbox_id')->fetchAll(\PDO::FETCH_COLUMN), 'bandeja');
+    igual('EMITIDA', $pdo->query("SELECT status FROM prescriptions WHERE prescription_id = $id")->fetchColumn(), 'la fila de la prescripción no cambió');
 });

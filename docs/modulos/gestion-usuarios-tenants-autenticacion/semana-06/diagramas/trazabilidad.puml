@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+actor Administrador as A
+actor "Usuario / invitado" as U
+rectangle "RF01-04 Alta tenant" as R
+rectangle "RF05-07 Autenticar" as L
+rectangle "RF08-10 Revocar" as O
+component "SRP / Casos de uso" as C
+component "Presentation" as P
+component "Domain" as D
+interface "Tenant/User/Session Repository" as I
+component "Persistence PDO" as DB
+artifact "OpenAPI semana 5 (propuesto)" as API
+artifact "Pruebas y CH-01" as E
+A --> R
+U --> L
+U --> O
+R --> C
+L --> C
+O --> C
+P --> C
+C --> D
+C --> I
+DB ..|> I
+API ..> P : contrato futuro
+E ..> C : evidencia
+note bottom of API
+Invitación es diseño posterior al alta directa.
+No es una API desplegada ni prueba JWT real.
+end note
+@enduml

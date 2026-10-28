@@ -1,0 +1,16 @@
+@startsalt
+title M3 — Cambiar estado de A/101 (pantalla completa)
+{+
+  [< Sala A] | <b>Cama A/101</b>
+  Estado actual: <b>Disponible</b>
+  <b>Nuevo estado *</b>
+  (X) Mantenimiento
+  () Inactiva
+  <b>Motivo *</b>
+  "limpieza profunda   "
+  <i>La sala A pasará de 5 a 4 camas disponibles.</i>
+  ---
+  [Pasar a mantenimiento]
+  [Volver sin cambiar]
+}
+@endsalt

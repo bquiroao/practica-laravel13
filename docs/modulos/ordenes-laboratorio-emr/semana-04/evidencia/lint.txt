@@ -1,0 +1,6 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\cli.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\Persistence\InMemoryRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\Presentation\JsonView.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\Presentation\OrderController.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ordenes-emr-mvc-mercedes-lopez\docs\modulos\ordenes-laboratorio-emr\semana-04\mvc\tests\run.php

@@ -1,0 +1,16 @@
+@startsalt
+title M5 — Conexión limitada y concurrencia
+{+
+  <b>No sabemos si se agendó</b>
+  La conexión se cortó al enviar la cita de A. Pérez.
+  [Comprobar la agenda de A. Pérez]
+  ---
+  <b>Ese horario se ocupó</b>
+  La Dra. Ruiz ya tiene cita a las 08:30.
+  [ 11:00–11:30 ] | [ 11:30–12:00 ]
+  ---
+  <b>Esta cita ya fue cancelada</b>
+  Recepción la canceló a las 08:50.
+  [Volver a la agenda]
+}
+@endsalt

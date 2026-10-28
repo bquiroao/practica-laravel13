@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace MicroHis\ContratosApi\Persistencia;
 
-use MicroHis\ContratosApi\Aplicacion\{ErrorPersistencia, EscritorVersiones, LectorDocumentos, RevisionPublicaciones};
+use MicroHis\ContratosApi\Aplicacion\{ErrorPersistencia, RepositorioDocumentos};
 use MicroHis\ContratosApi\Dominio\VersionNueva;
 use PDO, PDOException, PDOStatement;
 
-/** Un solo almacén que implementa los tres puertos. Solo sentencias preparadas; PDOException -> ErrorPersistencia. */
-final class RepositorioPdo implements EscritorVersiones, RevisionPublicaciones, LectorDocumentos
+/** Adaptador PDO de la interfaz Repository (los tres puertos). Solo sentencias preparadas; PDOException -> ErrorPersistencia. */
+final class RepositorioPdo implements RepositorioDocumentos
 {
     public function __construct(private PDO $db) { $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); }
 

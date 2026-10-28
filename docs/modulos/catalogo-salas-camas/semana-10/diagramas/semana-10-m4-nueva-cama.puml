@@ -1,0 +1,15 @@
+@startsalt
+title M4 — Nueva cama (formulario de una columna)
+{+
+  [< Salas] | <b>Nueva cama</b>
+  <i>* Obligatorio</i>
+  <b>Sala *</b>
+  ^A · Medicina interna^
+  <b>Código de cama *</b>
+  "101   "
+  <b>Error:</b> ya existe la cama A/101 en esta sala.
+  Estado inicial: <b>Disponible</b> (fijo)
+  ---
+  [Crear cama]
+}
+@endsalt

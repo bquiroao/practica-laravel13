@@ -1,0 +1,11 @@
+@startsalt
+title W4 — Cambiar estado de la cama A/101 (confirmación)
+{+
+  <b>Cama A/101</b> · estado actual: <b>Disponible</b> | . | [?] Ayuda
+  Nuevo estado * | () Mantenimiento | <i>Solo destinos permitidos (R-05)</i>
+  . | () Inactiva | .
+  Motivo * | "limpieza profunda      " | <i>Queda en el historial (R-09)</i>
+  . | <i>«Ocupada» no aparece: la asigna admisión (R-06)</i> | .
+  [Cancelar] | . | [Confirmar cambio]
+}
+@endsalt

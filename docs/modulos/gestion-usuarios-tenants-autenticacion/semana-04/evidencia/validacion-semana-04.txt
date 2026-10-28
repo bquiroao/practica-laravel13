@@ -1,0 +1,32 @@
+Semana 4 - MVC, Repository y repositorio compartido
+Fecha: 2026-10-27
+Base: origin/develop c525b3d9ec36aafd744edda94f5786d2118f28f2
+Entorno: PHP 8.2.33, PDO SQLite disponible.
+Datos: ficticios; no se usaron credenciales ni datos reales.
+
+Comando:
+php docs/modulos/gestion-usuarios-tenants-autenticacion/semana-04/ejemplo/tests/run.php
+Resultado: PASSED - 26 comprobaciones, 0 fallidas (exit code 0).
+
+Cobertura:
+- Contrato Repository ejecutado contra ambos adaptadores (PDO SQLite en memoria e InMemory):
+  alta 201, login 200 con token de 64 caracteres, unicidad de correo por tenant (409),
+  mismo correo permitido en otro tenant (201), tenant inactivo/inexistente (404),
+  contrasena debil (422), credenciales invalidas (401), revocacion (204) y doble revocacion (401).
+- MVC: router registra (201), autentica (200), revoca (204), token revocado (401),
+  ruta desconocida (404), metodo incorrecto (405), JsonView genera JSON valido.
+- Comprobacion estatica: el controlador MVC no contiene SQL ni PDO.
+- Simulacion de fallas: failNext() en repositorio de usuarios durante el alta produce 503;
+  failNext() en repositorio de sesiones durante el login produce 503; sin exito falso.
+
+Comandos de sintaxis:
+php -l sobre los 9 archivos PHP del ejemplo: todos sin errores (exit code 0).
+
+Comando:
+git diff --check
+Resultado: PASSED (exit code 0; sin salida).
+
+Limites:
+- PDO verificado con SQLite en memoria, no PostgreSQL.
+- No se ejecuto un servidor HTTP real ni JWT firmado.
+- La integracion con el repositorio compartido central es analisis, no implementacion.

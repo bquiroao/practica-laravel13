@@ -12,6 +12,8 @@ use Prescripciones\Dominio\Puertos\RepositorioPrescripciones;
 /** CU-09: farmacia, enfermería y el médico ven la prescripción con su verificación. */
 final class ConsultarPrescripcion
 {
+    public const PERMISO = 'prescripcion.consultar';
+
     public function __construct(
         private readonly PoliticaAcceso $acceso,
         private readonly RepositorioPrescripciones $repositorio,
@@ -20,7 +22,7 @@ final class ConsultarPrescripcion
 
     public function ejecutar(string $usuario, string $hospital, int $id): Resultado
     {
-        if (!$this->acceso->permite($usuario, 'prescripcion.consultar', $hospital)) {
+        if (!$this->acceso->permite($usuario, self::PERMISO, $hospital)) {
             return new Resultado(Resultado::DENEGADO, 'PERMISO_DENEGADO');
         }
         try {

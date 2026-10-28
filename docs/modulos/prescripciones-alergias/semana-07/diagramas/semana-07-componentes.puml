@@ -1,0 +1,80 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Componentes frontend (diseño) y backend (implementado) de Prescripciones, por capa
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+
+package "Frontend · resources/js/modules/prescripciones (Vue 3, diseño)" #F5F9FF {
+  package "UI" {
+    [PrescribirPage] as P1
+    [FormularioItems] as P2
+    [PanelVerificacion] as P3
+    [DialogoJustificacion] as P4
+    [ConfirmacionSinAlergias] as P5
+    [ResultadoEmision] as P6
+    [PrescripcionDetallePage] as P7
+  }
+  package "Aplicación (estado)" {
+    [usePrescripcionStore\n(Pinia; clave de idempotencia)] as S1
+    [guards.js\n(meta.permiso)] as S2
+  }
+  package "Dominio (ayuda)" {
+    [validacionLocal.js] as V1
+  }
+  package "Acceso a datos" {
+    [prescripcionesApi.js\n(axios compartido)] as A1
+  }
+}
+
+package "Backend · micro-his-prescripciones (PHP, implementado)" #EEF7EE {
+  package "Presentación (MVC)" {
+    [Kernel + Rutas] as K
+    [FormularioPrescripcion] as F
+    [PrescripcionesControlador] as C
+    [PrescripcionVista · ErrorVista] as VI
+  }
+  package "Aplicación" {
+    [EmitirPrescripcion] as E
+    [VerificarAlergiasPrevia] as VP
+    [ConsultarPrescripcion] as CP
+    [EvaluacionClinica] as EV
+  }
+  package "Dominio" {
+    [PoliticaEmision\n«nuevo»] as PE
+    [DecisionEmision\n«nuevo»] as DE
+    [VerificadorAlergias · ValidadorPrescripcion] as R
+    [Prescripcion (readonly)\n+ emitir() «nuevo»] as M
+  }
+  package "Persistencia" {
+    [Pdo/* · EnMemoria/* · Http/*] as PDO
+  }
+}
+
+interface "api/openapi.yaml 1.0.0" as API
+
+P1 --> P2
+P1 --> P3
+P1 --> P4
+P1 --> P5
+P1 --> P6
+P1 --> S1
+P7 --> S1
+S1 --> V1
+S1 --> A1
+A1 --> API
+API --> K
+K --> C
+C --> F
+C --> VI
+C --> E
+C --> VP
+C --> CP
+E --> EV
+VP --> EV
+E --> PE
+VP --> PE
+PE --> DE
+E --> M
+EV --> R
+E --> PDO
+@enduml

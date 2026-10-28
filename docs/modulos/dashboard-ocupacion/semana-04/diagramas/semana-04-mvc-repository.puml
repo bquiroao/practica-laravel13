@@ -1,0 +1,38 @@
+@startuml semana-04-mvc-repository
+title MVC y Repository — Micro-HIS Dashboard de ocupación hospitalaria
+package "Entrada" {
+  class "public/index.php" as Front <<front controller>>
+}
+package Presentacion {
+  class Rutas
+  class ControladorOcupacion <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class ConsolidadorOcupacion
+  class ConsultaOcupacion
+  interface "FuenteCamas\nEscritorCortes" as Escritura <<puertos del consolidador>>
+  interface LectorCortes <<puerto de la consulta>>
+  interface RepositorioOcupacion <<repository>>
+  class "OcupacionSala, Corte" as Reglas
+}
+package Persistencia {
+  class RepositorioPdo
+  class RepositorioEnMemoria
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorOcupacion : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorOcupacion --> ConsolidadorOcupacion
+ControladorOcupacion --> ConsultaOcupacion
+ControladorOcupacion --> VistaJson
+ConsolidadorOcupacion --> Escritura
+ConsultaOcupacion --> LectorCortes
+ConsolidadorOcupacion ..> Reglas
+ConsultaOcupacion ..> Reglas
+RepositorioOcupacion --|> Escritura : extends
+RepositorioOcupacion --|> LectorCortes : extends
+RepositorioPdo ..|> RepositorioOcupacion
+RepositorioEnMemoria ..|> RepositorioOcupacion
+note bottom of ControladorOcupacion : sin SQL ni reglas de negocio
+@enduml

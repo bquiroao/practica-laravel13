@@ -40,7 +40,7 @@ prueba('PER-02', 'Cada adaptador PDO traduce PDOException a ErrorPersistencia si
 
 prueba('PER-03', 'Error de persistencia de punta a punta: emitir con PDO caído → 503 sin excepción', function (): void {
     $config = require dirname(__DIR__, 2) . '/config/config.php';
-    $casos = construirCasosDeUso(puertosPdo(new PdoQueFalla(), $config));
+    $casos = construirCasosDeUso(\Prescripciones\Persistencia\FabricaAdaptadores::pdo(new PdoQueFalla(), $config));
     $r = $casos['emitir']->ejecutar(Escenario::solicitud('P-005', [Escenario::item('PARA500')]));
     igual([Resultado::NO_DISPONIBLE, 'ERROR_PERSISTENCIA'], [$r->tipo, $r->codigo], 'resultado');
 });
