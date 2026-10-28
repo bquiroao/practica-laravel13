@@ -1,0 +1,40 @@
+@startuml semana-08-user-flow
+title User flow por rol — «publicación y consulta de documentación y manuales diferenciados por rol»
+|Autor técnico|
+start
+:Abre «Centro de documentación» → «Publicar versión» (W2);
+if (¿Puede publicar en este hospital? (CU-06)) then (no)
+  :«No tienes permiso para publicar»;
+  stop
+endif
+:Elige documento, tipo, versión x.y.z y audiencia (R-01);
+:Adjunta el OpenAPI, la colección Postman o el manual;
+if (¿Metadatos completos, versión mayor y sin datos reales? (R-02, R-04, R-09)) then (sí)
+  :Confirma → «guia-citas 1.1.0 enviada a revisión» (éxito);
+else (no)
+  :Error junto al campo, con el reporte de validación; conserva el archivo;
+endif
+stop
+|Responsable de integración|
+start
+:Abre «Pendientes de revisión» (W3): carga → vacío o lista;
+:Elige una versión; ve diferencias con la vigente;
+if (¿Es su propia versión? (R-05)) then (sí)
+  :Aprobar deshabilitado: «Debe aprobarla otra persona»;
+  stop
+endif
+if (¿Aprueba? ) then (sí)
+  :Confirma → «Publicada y vigente»;
+else (no)
+  :Rechaza con motivo obligatorio;
+endif
+stop
+|Lector por rol|
+start
+:Abre «Mi documentación» (W1): solo lo de sus roles (R-06);
+:W4: lee la versión vigente o elige una anterior;
+if (¿La versión está obsoleta? (R-08)) then (sí)
+  :Aviso «Hay una versión más nueva» con enlace;
+endif
+stop
+@enduml
