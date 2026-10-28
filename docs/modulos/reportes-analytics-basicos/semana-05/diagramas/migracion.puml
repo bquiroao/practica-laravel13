@@ -1,0 +1,26 @@
+@startuml migracion_reportes_analytics_basicos
+title Semana 5 · Migración razonada (strangler fig): cada fase solo con su disparador
+skinparam shadowing false
+
+start
+:Fase 0 · Módulo dentro del monolito\ncon contrato API v1;
+:Fase 1 · Vistas reportes.* y rol reportes_lectura;
+if (¿p95 > 2 s o carga del módulo > 30 % de la base?) then (sí)
+  :Fase 2 · Réplica de lectura\n(solo cambia el DSN);
+  if (¿La réplica no alcanza o se necesitan históricos?) then (sí)
+    :Fase 3 · Proyecciones desde outbox_event;
+    if (¿Hace falta escalar o desplegar por separado?) then (sí)
+      :Fase 4 · Extraer el servicio de analítica\ndetrás de la misma API v1;
+    else (no)
+    endif
+  else (no)
+  endif
+else (no)
+  :Seguir en la fase 1\ny medir cada mes;
+endif
+stop
+note right
+  Cada fase se puede revertir:
+  el cliente siempre usa /api/v1
+end note
+@enduml

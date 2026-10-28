@@ -1,0 +1,97 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Componentes de Pacientes: frontend (Vue) y backend (Micro-HIS PHP) separados por capa
+skinparam componentStyle uml2
+skinparam defaultFontSize 12
+skinparam package {
+  BorderColor #3D4F6B
+}
+left to right direction
+
+package "FRONTEND · Vue 3 + Pinia (diseño)" as FE {
+  package "UI" as FUI #EEF3F4 {
+    [BusquedaPacientesPage] as PBU
+    [PacienteDetallePage] as PDE
+    [PacienteFormularioPage\n(registrar · editar)] as PFO
+    [FormularioPaciente] as FPA
+    [ResultadosPacientes] as RES
+    [FichaPaciente\n(completa o reducida)] as FIC
+    [AvisoDuplicado] as ADU
+    [MotivoDialog] as MOT
+    [ConflictoVersionDialog] as CVD
+  }
+  package "Aplicación (cliente)" as FAP #FFF4E8 {
+    [useBusquedaPacientes] as UBU
+    [useFichaPaciente\n(guarda la versión)] as UFI
+    [useGuardarPaciente\n(Idempotency-Key · If-Match)] as UGU
+    [permisoGuard\n(vue-router)] as GRD
+  }
+  package "Acceso a datos" as FPE #F7E6E1 {
+    [pacientesApi] as API
+    [axios + interceptores\nBearer · X-Tenant-ID ·\nX-Request-ID] as AX
+  }
+}
+
+interface "Contrato HTTP\nOpenAPI 3.1 v1.1.0" as HTTP
+
+package "BACKEND · Micro-HIS Pacientes (implementado)" as BE {
+  package "Presentación (MVC)" as BUI #EEF3F4 {
+    [Kernel + Rutas] as KER
+    [PacientesControlador] as CTL
+    [FormularioPaciente (formato)\nPacienteVista · ErrorVista] as FV
+  }
+  package "Aplicación" as BAP #FFF4E8 {
+    [RegistrarPaciente · ActualizarPaciente\nBuscarPacientes · ConsultarPaciente] as UCS
+    [ControlAcceso\n(permiso → Capacidades)] as ACC
+  }
+  package "Dominio" as BDO #E3F1F0 {
+    [RevisionDeFicha\n(nuevo, semana 7)] as REV #FFE3D6
+    [Capacidades\n(nuevo, semana 7)] as CAP #FFE3D6
+    [PoliticaEdicion · PoliticaDuplicados\nPoliticaConfidencialidad] as POL
+    [Paciente · Identificador\nCriterioBusqueda] as MOD
+    [EventoAuditoria\n(formato de eventos)] as EVT
+    interface "Puertos Repository" as PR
+  }
+  package "Persistencia" as BPE #F7E6E1 {
+    [Adaptadores PDO] as PDO
+    [Adaptadores InMemory] as MEM
+  }
+}
+
+PBU --> RES
+PBU --> UBU
+PDE --> FIC
+PDE --> UFI
+PFO --> FPA
+PFO --> UGU
+PFO --> ADU
+PFO --> MOT
+PFO --> CVD
+UBU --> API
+UFI --> API
+UGU --> API
+API --> AX
+AX --( HTTP
+
+KER -( HTTP
+KER --> CTL
+CTL --> FV
+CTL --> UCS
+UCS --> ACC : capacidades()
+UCS --> REV : paraAlta() · paraEdicion()
+UCS --> EVT
+UCS --> PR
+ACC ..> CAP
+REV --> POL
+REV --> MOD
+REV ..> CAP
+PDO ..|> PR
+MEM ..|> PR
+
+note bottom of FAP
+  El frontend NO aplica reglas de la ficha:
+  no decide qué se oculta de un protegido ni
+  qué es duplicado. Muestra lo que responde
+  el backend y traduce los códigos de error.
+end note
+@enduml

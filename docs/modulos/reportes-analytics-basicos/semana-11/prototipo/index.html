@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo · Reportes y analytics básicos</title>
+<style>
+  :root { --tinta: #1f2a30; --suave: #4a5a62; --fondo: #ffffff; --panel: #eef3f2; --acento: #0b6e78;
+          --borde: #767676; --error: #b3261e; --aviso: #6b4e00; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--tinta); background: var(--fondo); }
+  header { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; padding: .75rem 1.25rem; background: var(--panel); border-bottom: 1px solid var(--borde); }
+  header h1 { font-size: 1.05rem; margin: 0; flex: 1 1 14rem; }
+  main { max-width: 62rem; margin: 0 auto; padding: 1.25rem; display: grid; gap: 1.5rem; grid-template-columns: 17rem 1fr; }
+  form { display: grid; gap: .9rem; align-content: start; }
+  label { display: grid; gap: .25rem; font-weight: 600; font-size: .95rem; }
+  input, select, button { font: inherit; min-height: 44px; }
+  input, select { padding: .35rem .5rem; border: 1px solid var(--borde); border-radius: 4px; }
+  fieldset { border: 1px solid var(--borde); border-radius: 4px; padding: .5rem .75rem; }
+  fieldset label { display: flex; gap: .5rem; align-items: center; font-weight: 400; min-height: 32px; }
+  .primario { background: var(--acento); color: #fff; border: 0; border-radius: 4px; padding: 0 1rem; cursor: pointer; }
+  .secundario { background: none; border: 1px solid var(--acento); color: var(--acento); border-radius: 4px; padding: 0 .9rem; cursor: pointer; }
+  .campo-error { color: var(--error); font-size: .9rem; margin: 0; }
+  :focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+  nav.migas ol { list-style: none; display: flex; flex-wrap: wrap; gap: .25rem; padding: 0; margin: 0 0 .75rem; }
+  nav.migas li + li::before { content: "›"; margin-right: .25rem; color: var(--suave); }
+  nav.migas button { background: none; border: 0; color: var(--acento); text-decoration: underline; min-height: 32px; cursor: pointer; padding: 0; }
+  .valor { font-size: clamp(2.8rem, 9vw, 4.2rem); font-weight: 700; line-height: 1; margin: .25rem 0; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .contexto { color: var(--suave); margin: 0 0 1rem; }
+  details { border-left: 4px solid var(--acento); background: var(--panel); padding: .5rem .9rem; margin: 1rem 0; }
+  summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: .2rem 1rem; margin: .5rem 0 0; }
+  dt { color: var(--suave); }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  caption { text-align: left; font-weight: 600; padding-bottom: .4rem; }
+  th, td { border: 1px solid var(--borde); padding: .45rem .6rem; text-align: left; }
+  td.n, th.n { text-align: right; }
+  .cuadra { color: var(--acento); font-weight: 600; }
+  .estado { padding: 1rem; border-radius: 4px; background: var(--panel); }
+  .estado.error { border-left: 4px solid var(--error); }
+  .estado.vacio { border-left: 4px solid var(--aviso); color: var(--aviso); }
+  .simulador { font-size: .9rem; color: var(--suave); }
+  @media (max-width: 767px) {
+    main { grid-template-columns: 1fr; padding: 1rem; }
+    table.tarjetas thead { position: absolute; left: -9999px; }
+    table.tarjetas tr { display: grid; grid-template-columns: 1fr auto; border: 1px solid var(--borde); border-radius: 4px; margin-bottom: .5rem; padding: .4rem .6rem; }
+    table.tarjetas td, table.tarjetas th { border: 0; padding: .1rem 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) { #resultado { transition: opacity .2s; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Reportes y analytics básicos · Hospital (datos ficticios)</h1>
+  <label class="simulador">Rol
+    <select id="rol"><option value="jefe_area">Jefe de área</option><option value="administrador">Administrador</option><option value="medico">Médico (DOC-001)</option></select>
+  </label>
+  <label class="simulador" style="display:flex;gap:.4rem;align-items:center"><input type="checkbox" id="caida"> Simular caída de la fuente de datos</label>
+</header>
+<main>
+  <form id="filtros" novalidate>
+    <label>Reporte <select id="reporte"></select></label>
+    <fieldset><legend>Período</legend>
+      <label><input type="radio" name="rapido" value="mes" checked> Octubre 2026</label>
+      <label><input type="radio" name="rapido" value="anterior"> Septiembre 2026</label>
+      <label><input type="radio" name="rapido" value="otro"> Personalizado</label>
+    </fieldset>
+    <label>Desde <input type="date" id="desde" value="2026-10-01" aria-describedby="error-fechas"></label>
+    <label>Hasta <input type="date" id="hasta" value="2026-10-31" aria-describedby="error-fechas"></label>
+    <p id="error-fechas" class="campo-error" aria-live="polite"></p>
+    <button class="primario" id="calcular" type="submit">Calcular</button>
+  </form>
+  <section aria-labelledby="titulo-resultado">
+    <nav class="migas" aria-label="Nivel de trazabilidad"><ol id="migas"></ol></nav>
+    <div id="anuncio" role="status" aria-live="polite" class="contexto"></div>
+    <div id="resultado"><p class="contexto">Elija un reporte y un período, y presione «Calcular».</p></div>
+  </section>
+</main>
+<script>
+const SALAS = { Cirugía: ['CIR', 14], Medicina: ['MED', 18], Pediatría: ['PED', 7] };
+const REPORTES = {
+  ocupacion: { nombre: 'Ocupación de camas', precision: 1, unidad: '%', roles: ['administrador', 'jefe_area'],
+    formula: 'camas ocupadas / camas habilitadas × 100', fuente: 'ward, bed, bed_stay', dimension: 'sala',
+    calcular: (p) => p === 'anterior' ? { numerador: 1, denominador: 50, partes: { Medicina: 1 } }
+      : { numerador: 39, denominador: 50, partes: { Medicina: 18, Cirugía: 14, Pediatría: 7 } } },
+  citas: { nombre: 'Asistencia a citas', precision: 1, unidad: '%', roles: ['administrador', 'jefe_area', 'medico'],
+    formula: 'citas atendidas / citas del período × 100', fuente: 'appointment', dimension: 'estado',
+    calcular: (p) => p === 'anterior' ? null : { numerador: 1, denominador: 3, partes: { Atendidas: 1, 'No asistió': 1, Programadas: 1 } } },
+};
+const $ = (id) => document.getElementById(id);
+const estado = { nivel: 'inicio', parte: null, resultado: null, pagina: 1 };
+
+// Formateador único (H-04): misma precisión y unidad en todas las vistas.
+const formatear = (valor, decimales, unidad = '') =>
+  new Intl.NumberFormat('es-GT', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(valor) + (unidad ? ' ' + unidad : '');
+
+function registrosDe(parte) {
+  if (estado.resultado.tipo === 'citas') {
+    const filas = { Atendidas: ['06/10/2026', 'PAC-00451'], 'No asistió': ['07/10/2026', 'PAC-00452'], Programadas: ['10/10/2026', 'PAC-00455'] };
+    return [{ a: filas[parte][0], b: filas[parte][1], c: parte }];
+  }
+  if (estado.resultado.periodoClave === 'anterior') return [{ a: 'MED-19', b: 'PAC-00490', c: '05/09/2026', d: '20/09/2026' }];
+  const [codigo, total] = SALAS[parte];
+  const base = { CIR: 0, MED: 14, PED: 32 }[codigo];
+  return Array.from({ length: total }, (_, i) => {
+    const n = base + i + 1, ingreso = 1 + (n % 20);
+    return { a: `${codigo}-${String(i + 1).padStart(2, '0')}`, b: `PAC-${String(450 + n).padStart(5, '0')}`,
+             c: `${String(ingreso).padStart(2, '0')}/10/2026`, d: n % 3 === 0 ? `${String(ingreso + 4).padStart(2, '0')}/10/2026` : 'en curso' };
+  });
+}
+
+function cargarReportes() {
+  const rol = $('rol').value;
+  $('reporte').innerHTML = Object.entries(REPORTES).filter(([, r]) => r.roles.includes(rol))
+    .map(([clave, r]) => `<option value="${clave}">${r.nombre}</option>`).join('');
+  Object.assign(estado, { nivel: 'inicio', resultado: null });
+  pintar();
+}
+
+function validarFechas() {   // H-06: validación junto al campo, antes de enviar (RN-02)
+  const malo = $('desde').value > $('hasta').value;
+  $('error-fechas').textContent = malo ? 'La fecha inicial no puede ser mayor que la final.' : '';
+  $('desde').setAttribute('aria-invalid', malo); $('hasta').setAttribute('aria-invalid', malo);
+  return !malo;
+}
+
+function calcular() {
+  if (!validarFechas()) return;
+  const tipo = $('reporte').value, periodo = document.querySelector('[name=rapido]:checked').value;
+  $('anuncio').textContent = 'Calculando…';
+  $('resultado').style.opacity = .4;
+  setTimeout(() => {
+    $('resultado').style.opacity = 1;
+    $('anuncio').textContent = '';
+    if ($('caida').checked) { Object.assign(estado, { nivel: 'error', resultado: null }); return pintar(); }
+    const datos = REPORTES[tipo].calcular(periodo);
+    Object.assign(estado, { nivel: datos ? 'indicador' : 'vacio', parte: null, pagina: 1,
+      resultado: datos && { tipo, ...datos, periodoClave: periodo, periodo: `${$('desde').value} a ${$('hasta').value}`, hora: new Date().toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }) } });
+    pintar();
+  }, 700);
+}
+
+function pintar() {
+  const r = estado.resultado, rep = r && REPORTES[r.tipo];
+  const pasos = r ? [['indicador', 'Indicador'], ['desglose', 'Desglose'], ...(estado.parte ? [['registros', estado.parte]] : [])] : [];
+  const visibles = pasos.slice(0, pasos.findIndex(([n]) => n === estado.nivel) + 1);
+  $('migas').innerHTML = visibles.map(([n, t], i) => i === visibles.length - 1
+    ? `<li aria-current="page">${t}</li>` : `<li><button type="button" data-ir="${n}">${t}</button></li>`).join('');
+  let html = '';
+  if (estado.nivel === 'inicio') html = '<p class="contexto">Elija un reporte y un período, y presione «Calcular».</p>';
+  if (estado.nivel === 'error') html = `<div class="estado error" role="alert"><h2 id="titulo-resultado" tabindex="-1">No se pudieron obtener los datos</h2>
+    <p>La fuente de datos no respondió. Sus filtros se conservaron. Código de seguimiento: <strong>8f3a1c20</strong></p>
+    <button class="primario" type="button" data-accion="reintentar">Reintentar</button></div>`;
+  if (estado.nivel === 'vacio') html = `<div class="estado vacio"><h2 id="titulo-resultado" tabindex="-1">Sin datos para este período</h2>
+    <p>No hay registros entre esas fechas. Pruebe con un período más amplio.</p></div>`;
+  if (r && estado.nivel === 'indicador') {
+    html = `<h2 id="titulo-resultado" tabindex="-1">${rep.nombre}</h2>
+      <p class="valor">${formatear(r.numerador / r.denominador * 100, rep.precision, rep.unidad)}</p>
+      <p class="contexto">${r.numerador} de ${r.denominador} · ${r.periodo}</p>
+      <button class="primario" type="button" data-ir="desglose">¿De dónde sale? Ver desglose</button>
+      <details open><summary>Ficha de trazabilidad</summary><dl>
+        <dt>Fórmula</dt><dd>${rep.formula}</dd><dt>Período</dt><dd>${r.periodo}</dd>
+        <dt>Filtros</dt><dd>ninguno adicional</dd><dt>Fuente</dt><dd>${rep.fuente}</dd><dt>Calculado</dt><dd>${r.hora}</dd></dl></details>`;
+  }
+  if (r && estado.nivel === 'desglose') {
+    const total = Object.values(r.partes).reduce((a, b) => a + b, 0);
+    html = `<h2 id="titulo-resultado" tabindex="-1">Desglose por ${rep.dimension}</h2>
+      <table class="tarjetas"><caption>${rep.nombre}: ${formatear(r.numerador / r.denominador * 100, rep.precision, rep.unidad)} (${r.numerador})</caption>
+      <thead><tr><th scope="col">${rep.dimension}</th><th scope="col" class="n">Cantidad</th><th scope="col" class="n">% del total</th></tr></thead><tbody>`
+      + Object.entries(r.partes).map(([p, n]) => `<tr><th scope="row"><button class="secundario" type="button" data-parte="${p}">${p}</button></th>
+        <td class="n">${n}</td><td class="n">${formatear(n / total * 100, 1, '%')}</td></tr>`).join('')
+      + `</tbody><tfoot><tr><th scope="row">Total</th><td class="n">${total}</td><td class="n ${total === r.numerador ? 'cuadra' : ''}">
+        ${total === r.numerador ? 'La suma coincide con el total' : 'Revisar fuente'}</td></tr></tfoot></table>`;
+  }
+  if (r && estado.nivel === 'registros') {
+    const filas = registrosDe(estado.parte), vistas = filas.slice(0, estado.pagina * 10);
+    const cab = r.tipo === 'citas' ? ['Fecha', 'Paciente', 'Estado'] : ['Cama', 'Paciente', 'Ingreso', 'Egreso'];
+    html = `<h2 id="titulo-resultado" tabindex="-1">Registros de origen: ${estado.parte} (${filas.length})</h2>
+      <table class="tarjetas"><caption>Solo datos mínimos: el paciente aparece con su código</caption>
+      <thead><tr>${cab.map((c) => `<th scope="col">${c}</th>`).join('')}</tr></thead><tbody>`
+      + vistas.map((f) => `<tr>${[f.a, f.b, f.c, f.d].slice(0, cab.length).map((v) => `<td>${v}</td>`).join('')}</tr>`).join('') + '</tbody></table>'
+      + (vistas.length < filas.length ? `<p><button class="secundario" type="button" data-accion="mas">Cargar más (${vistas.length} de ${filas.length})</button></p>` : '');
+  }
+  $('resultado').innerHTML = html;
+  $('titulo-resultado')?.focus();   // H-07: el foco pasa al resultado
+}
+
+$('filtros').addEventListener('submit', (e) => { e.preventDefault(); calcular(); });
+['desde', 'hasta'].forEach((id) => $(id).addEventListener('change', () => { document.querySelector('[value=otro]').checked = true; validarFechas(); }));
+document.querySelectorAll('[name=rapido]').forEach((radio) => radio.addEventListener('change', () => {
+  const rangos = { mes: ['2026-10-01', '2026-10-31'], anterior: ['2026-09-01', '2026-09-30'] }[radio.value];
+  if (rangos) { [$('desde').value, $('hasta').value] = rangos; validarFechas(); }
+}));
+$('rol').addEventListener('change', cargarReportes);
+document.body.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.ir) { estado.nivel = b.dataset.ir; if (b.dataset.ir !== 'registros') estado.parte = estado.nivel === 'desglose' ? estado.parte : null; pintar(); }
+  if (b.dataset.parte) Object.assign(estado, { nivel: 'registros', parte: b.dataset.parte, pagina: 1 }) && pintar();
+  if (b.dataset.accion === 'reintentar') calcular();
+  if (b.dataset.accion === 'mas') { estado.pagina++; pintar(); }
+});
+cargarReportes();
+</script>
+</body>
+</html>

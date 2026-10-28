@@ -1,0 +1,36 @@
+IGUAL   1. Camino feliz: admin asigna Enfermería a Luis         PHP: 201 ROL_ASIGNADO ref                    
+IGUAL   2. Camino feliz: Luis consulta el PDP                   PHP: 200 PERMITIDO                           
+IGUAL   3. Camino feliz: Luis registra signos vitales           PHP: 201                                     
+IGUAL   4. Reintento idéntico de la asignación                  PHP: 409 ASIGNACION_DUPLICADA                
+IGUAL   5. Asignar a cuenta inactiva                            PHP: 422 USUARIO_INACTIVO                    
+IGUAL   6. Asignar a persona inexistente                        PHP: 404 USUARIO_NO_ENCONTRADO               
+IGUAL   7. Asignar rol fuera del catálogo                       PHP: 422 ROL_INVALIDO                        
+IGUAL   8. Autoasignación                                       PHP: 422 AUTOASIGNACION                      
+IGUAL   9. Vigencia invertida                                   PHP: 422 VIGENCIA_INVALIDA                   
+IGUAL  10. Formulario vacío                                     PHP: 422 DATOS_INVALIDOS usuario_id,rol,valido_desde
+IGUAL  11. Fecha con formato inválido                           PHP: 422 DATOS_INVALIDOS valido_desde        
+IGUAL  12. Enfermería intenta asignar (ruta protegida)          PHP: 403 ref                                 
+IGUAL  13. Auditor ve la denegación de ruta                     PHP: 200 ACCESO_DENEGADO PERMISO_NO_ASIGNADO ref
+IGUAL  14. Error crítico: Ana registra signos (aún con rol)     PHP: 201                                     
+IGUAL  15. Revocar con motivo corto                             PHP: 422 MOTIVO_INSUFICIENTE                 
+IGUAL  16. Autorrevocación                                      PHP: 422 AUTORREVOCACION                     
+IGUAL  17. Revocar sin motivo                                   PHP: 422 DATOS_INVALIDOS motivo              
+IGUAL  18. Error crítico: admin revoca Enfermería a Ana         PHP: 200 ROL_REVOCADO ref                    
+IGUAL  19. Reintento idéntico de la revocación                  PHP: 404 MEMBRESIA_NO_ENCONTRADA             
+IGUAL  20. Error crítico: Ana intenta registrar signos          PHP: 403 ref                                 
+IGUAL  21. Error crítico: el auditor localiza la referencia     PHP: 200 ACCESO_DENEGADO MEMBRESIA_NO_VIGENTE ref
+IGUAL  22. Otro hospital no ve el evento                        PHP: 404                                     
+IGUAL  23. Ana no puede consultar la auditoría                  PHP: 403 ref                                 
+IGUAL  24. PDP para Ana tras la revocación                      PHP: 200 DENEGADO ref                        
+IGUAL  25. Marta (médico) prescribe                             PHP: 201                                     
+IGUAL  26. Luis (enfermería) no puede prescribir                PHP: 403 ref                                 
+IGUAL  27. Motivo PERMISO_NO_ASIGNADO                           PHP: 200 ACCESO_DENEGADO PERMISO_NO_ASIGNADO ref
+IGUAL  28. Token de otro hospital contra Oriente                PHP: 403 ref                                 
+IGUAL  29. PDP con permiso malformado                           PHP: 422 DATOS_INVALIDOS permiso,recurso     
+IGUAL  30. Sin hospital                                         PHP: 400                                     
+IGUAL  31. Token inválido                                       PHP: 401                                     
+IGUAL  32. Ruta inexistente                                     PHP: 404                                     
+IGUAL  33. Método no permitido                                  PHP: 405                                     
+
+Pasos: 33  Iguales: 33  Difieren: 0
+exit=0

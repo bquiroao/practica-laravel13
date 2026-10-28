@@ -1,0 +1,100 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title Diseño DESPUÉS de LSP — contratos que todos los subtipos cumplen
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam nodesep 25
+skinparam ranksep 50
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Servicios (solo conocen contratos)" {
+  class ServicioRegistroPacientes {
+    + registrar(SolicitudRegistro) : Respuesta
+  }
+  class ServicioBusquedaPacientes {
+    + buscar(actor, hospital, criterios) : Respuesta
+    + detalle(actor, hospital, codigo) : Respuesta
+  }
+  class ServicioActualizacionPacientes {
+    + actualizar(SolicitudActualizacion) : Respuesta
+  }
+  class ControlAcceso
+}
+
+package "Contratos" {
+  interface ConsultaPacientes {
+    + porCodigo(hospital, codigo) : ?Paciente
+    + buscar(hospital, CriterioBusqueda) : list<Paciente>
+  }
+  interface RepositorioPacientes {
+    + registrar(Paciente) : Paciente
+    + actualizar(Paciente, versionEsperada) : Paciente
+  }
+  interface IndiceMaestro
+  interface RegistroAuditoria
+  interface Transaccion
+  interface PoliticaAcceso
+}
+
+package "Dominio" {
+  class Paciente {
+    + identificador : ?Identificador
+    + identidadProvisional() : bool
+  }
+  interface Identificador {
+    + claveBusqueda() : string
+    + enmascarado() : string
+  }
+  class Dpi
+  class Pasaporte
+}
+
+package "Adaptadores e implementaciones" {
+  class RepositorioPacientesEnMemoria
+  class ReplicaLecturaPacientes #E7F4EC
+  class RepositorioPacientesConCache #E7F4EC
+}
+
+ConsultaPacientes <|-- RepositorioPacientes
+ConsultaPacientes <|.. ReplicaLecturaPacientes
+RepositorioPacientes <|.. RepositorioPacientesEnMemoria
+RepositorioPacientes <|.. RepositorioPacientesConCache
+RepositorioPacientesConCache o--> RepositorioPacientes : envuelve y delega\nla escritura
+
+Identificador <|.. Dpi
+Identificador <|.. Pasaporte
+Paciente o--> "0..1" Identificador
+
+ServicioBusquedaPacientes --> ConsultaPacientes
+ServicioRegistroPacientes --> RepositorioPacientes
+ServicioActualizacionPacientes --> RepositorioPacientes
+ServicioRegistroPacientes --> IndiceMaestro
+ServicioActualizacionPacientes --> IndiceMaestro
+ServicioRegistroPacientes --> RegistroAuditoria
+ServicioRegistroPacientes --> Transaccion
+ServicioRegistroPacientes --> ControlAcceso
+ControlAcceso --> PoliticaAcceso
+
+note right of ReplicaLecturaPacientes
+  **V2 corregida:** solo implementa
+  lo que puede cumplir (lectura).
+  Inyectarla en un servicio que
+  escribe da TypeError.
+end note
+note bottom of RepositorioPacientesConCache
+  **V3 corregida:** decorador.
+  La versión la compara el
+  repositorio envuelto; la caché
+  solo invalida su entrada.
+end note
+note bottom of Paciente
+  **V1 corregida:** sin documento =
+  identificador null (identidad
+  provisional), no un objeto falso.
+  El estado (fallecido) es un dato,
+  no una subclase.
+end note
+@enduml

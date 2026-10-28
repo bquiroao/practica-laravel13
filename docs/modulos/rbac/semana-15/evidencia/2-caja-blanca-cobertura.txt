@@ -1,0 +1,16 @@
+$ phpdbg -qrr herramientas/cobertura-caja-blanca.php
+Pruebas de caja blanca
+[PASA ] CB-01  AutorizarOperacion: los 5 caminos básicos de ejecutar()/denegar() (V(G) = 5)
+[PASA ] CB-02  PoliticaAutorizacion::evaluar(): rama sin reglas, rama «todas pasan», rama «regla lanza» y rama «regla da motivo»
+[PASA ] CB-03  Membresia::estaVigenteEn(): MC/DC de A = activa, B = desde ≤ ahora, C1 = sin fin, C2 = ahora < hasta
+[PASA ] CB-04  Kernel::procesar()/manejar(): cada decisión en su orden (ruta → método → tenant → token → permiso → controlador → errores)
+
+Cobertura de líneas lograda por CB-01..CB-04
+------------------------------------------------------------------------------------------------
+src/Aplicacion/CasosDeUso/AutorizarOperacion.php      17/18    94.4 %
+      sin cubrir  l.40   return $this->ejecutar(new ComandoAutorizar($usuarioId, $tenantToken, $hospitalId, $permiso, 'membresias', $ip));
+src/Dominio/Servicios/PoliticaAutorizacion.php        12/12   100.0 %
+src/Dominio/Modelo/Membresia.php                       3/3    100.0 %
+src/Presentacion/Http/Kernel.php                      42/42   100.0 %
+------------------------------------------------------------------------------------------------
+TOTAL                                                 74/75    98.7 %

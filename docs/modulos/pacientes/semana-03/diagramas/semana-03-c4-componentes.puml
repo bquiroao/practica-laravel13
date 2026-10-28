@@ -1,0 +1,46 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes de la Aplicación PHP
+
+Container(cliente, "Cliente HTTP", "curl / SPA Vue")
+ContainerDb(db, "PostgreSQL", "pacientes, eventos_auditoria")
+
+Container_Boundary(app, "Aplicación PHP") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "Front controller", "Ruta → 400 hospital → 401 token → 403 tenant → acción; 500 genérico.")
+        Component(acciones, "Acciones", "Registrar, Buscar, Consultar, Actualizar", "JSON ↔ comando; ETag / If-Match (428 si falta).")
+        Component(traductor, "TraductorResultado", "", "Resultado → código HTTP (201, 200, 422, 409, 404, 403, 503).")
+    }
+    Boundary(apl, "Aplicación") {
+        Component(casos, "Casos de uso", "RegistrarPaciente, BuscarPacientes, ConsultarPaciente, ActualizarPaciente", "Orquestan: permiso, dominio, transacción y auditoría.")
+        Component(acceso, "ControlAcceso", "", "R-05: permiso por operación vía puerto PoliticaAcceso.")
+    }
+    Boundary(dom, "Dominio") {
+        Component(modelo, "Modelo", "Paciente, Identificador (Dpi, Pasaporte), CriterioBusqueda", "R-01 validación, R-10 criterio, cambio de identidad.")
+        Component(politicas, "Políticas", "PoliticaDuplicados, PoliticaEdicion", "R-02, R-03, R-07, R-08.")
+        Component(puertos, "Puertos", "ConsultaPacientes, RepositorioPacientes, IndiceDuplicados, RegistroAuditoria", "Contratos que implementa Persistencia.")
+    }
+    Boundary(per, "Persistencia") {
+        Component(pdo, "Adaptadores PDO", "PdoRepositorioPacientes, PdoIndiceDuplicados, PdoRegistroAuditoria, PdoTransaccion", "Solo sentencias preparadas; PDOException → ErrorPersistencia.")
+        Component(proteccion, "ProteccionDocumentos", "HMAC-SHA256 + libsodium", "R-04: hash de búsqueda y cifrado del documento.")
+        Component(politicaCfg, "PoliticaAccesoEstatica", "", "Permisos de configuración (provisional hasta RBAC).")
+    }
+}
+
+Rel(cliente, kernel, "HTTP/JSON")
+Rel(kernel, acciones, "Despacha")
+Rel(acciones, casos, "Comando")
+Rel(acciones, traductor, "Resultado")
+Rel(casos, acceso, "Exige permiso")
+Rel(casos, politicas, "Aplica reglas")
+Rel(casos, modelo, "Crea / modifica")
+Rel(politicas, puertos, "IndiceDuplicados")
+Rel(casos, puertos, "Repositorio, auditoría")
+Rel_U(pdo, puertos, "Implementa")
+Rel(pdo, proteccion, "Hash y cifrado")
+Rel(pdo, db, "PDO, sentencias preparadas")
+
+SHOW_LEGEND()
+@enduml

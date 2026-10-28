@@ -1,0 +1,51 @@
+@startuml semana-01-secuencia
+' Semana 1 — Dashboard base UI/UX e implementación transversal (tarea Odoo 2428)
+title Secuencia — ingresar al dashboard (CU-01) y cargar el resumen inicial (CU-02, CU-04)
+
+actor "Usuario" as U
+participant "Router\n(guardián)" as R
+participant "Store de sesión\n(Pinia)" as ST
+participant "Página del\ndashboard (Vue)" as P
+participant "Cliente HTTP\n(Axios)" as AX
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Servicio de\nresumen" as SVC
+participant "Módulo\nproveedor" as MOD
+
+U -> R : S1 Abre /dashboard
+R -> ST : S2 ¿Hay token y tenant_id? (R-01)
+alt sin sesión
+  R --> U : S3 Redirige a /login (E1, F4)
+else con sesión
+  R -> P : S4 Monta layout y menú filtrado por rol (R-02)
+  P -> P : S5 Tarjetas en «cargando» (R-04)
+  par por cada tarjeta, por su cuenta (R-03)
+    P -> AX : S6 GET /dashboard/cards/{tarjeta}
+    AX -> API : S7 Agrega Authorization y X-Tenant-ID
+    alt token o tenant no válidos
+      API --> AX : S8 401
+      AX --> P : 401
+      P -> ST : S13 clearSession() (R-07)
+      P -> R : Redirige a /login (E3, F4)
+    else válidos
+      API -> SVC : S9 conteo(tarjeta, usuario)
+      alt sin permiso para la tarjeta
+        API --> P : 403 → oculta la tarjeta (E4)
+      else permitido
+        SVC -> MOD : S10 Pide el conteo agregado (R-06)
+        alt respuesta correcta
+          MOD --> SVC : conteo
+          API --> P : S11 200 {total}
+          P -> P : S12 Muestra resumen (F1) o vacío si total = 0 (F2, R-05)
+        else 5xx, red o más de 10 s
+          API --> P : error
+          P -> P : S14 Estado de error con «Reintentar» (E2 / E5, R-09)
+        end
+      end
+    end
+  end
+end
+opt el usuario pulsa «Reintentar» en una tarjeta (CU-04)
+  U -> P : S15 Reintentar
+  P -> AX : Repite S6–S14 solo para esa tarjeta (R-08)
+end
+@enduml

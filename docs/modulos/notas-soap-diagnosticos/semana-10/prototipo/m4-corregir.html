@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corregir nota · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="volver" href="m3-detalle.html?estado=firmada" aria-label="Volver a la nota">←</a>
+  <span class="hospital" aria-label="Hospital Regional de Oriente"><span class="abreviado">H. R. Oriente</span><span class="completo">Hospital Regional de Oriente</span> ▾</span>
+  <span class="usuario">dra-mendez <span class="rol">· Médico</span></span>
+</header>
+<div class="paciente">Carlos R. · <span>Expediente exp-carlos · Episodio epi-100 (abierto)</span></div>
+<main>
+  <h1>Corregir nota</h1>
+  <div class="aviso info">La versión 1 (firmada) no cambia. Al guardar se crea la versión 2 en borrador.</div>
+  <div class="aviso error" role="alert" tabindex="-1" data-estado="ya-corregida" hidden>
+    Esta versión ya tiene una corrección: abrimos la más reciente.
+    <p>Su texto queda abajo para copiarlo si lo necesita.</p>
+  </div>
+
+  <section data-estado="base ya-corregida">
+    <label for="motivo">Motivo de la corrección * <span class="secundario">(queda en la nota)</span></label>
+    <textarea id="motivo">Temperatura mal anotada: era 37.6 °C</textarea>
+    <p class="ayuda">37 / 10 caracteres mínimos ✓</p>
+    <label for="o">O · Objetivo * <span class="cambiado">Cambiado</span></label>
+    <textarea id="o">T 37.6 °C, estertores en base derecha</textarea>
+    <label for="s">S · Subjetivo *</label>
+    <textarea id="s">Tos productiva y fiebre de 3 días</textarea>
+    <details class="extra-detalles">
+      <summary style="min-height:44px;display:flex;align-items:center">A, P y diagnóstico (sin cambios)</summary>
+      <label for="a">A · Análisis *</label>
+      <textarea id="a">Probable neumonía adquirida en la comunidad</textarea>
+      <label for="p">P · Plan *</label>
+      <textarea id="p">Radiografía de tórax y antibiótico</textarea>
+    </details>
+  </section>
+
+  <section data-estado="resumen" hidden>
+    <h2>Revise antes de guardar</h2>
+    <dl class="resumen">
+      <dt>Cambia</dt><dd>O · Objetivo: «T 38.6 °C» → «T 37.6 °C»</dd>
+      <dt>Sin cambios</dt><dd>S, A, P y diagnóstico J18.9</dd>
+      <dt>Motivo</dt><dd>Temperatura mal anotada: era 37.6 °C</dd>
+    </dl>
+  </section>
+</main>
+<div class="accion-fija" data-estado="base">
+  <a class="boton primario" href="m4-corregir.html?estado=resumen">Revisar cambios</a>
+</div>
+<div class="accion-fija" data-estado="resumen" hidden>
+  <a class="boton" href="m4-corregir.html">Volver</a>
+  <button type="button" class="boton primario">Guardar corrección</button>
+</div>
+<div class="accion-fija" data-estado="ya-corregida" hidden>
+  <a class="boton primario" href="m3-detalle.html?estado=firmada">Abrir la versión vigente</a>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

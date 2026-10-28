@@ -1,0 +1,14 @@
+@startsalt
+title M5 — Conexión limitada
+{+
+  <b>Sin conexión</b>
+  Por seguridad, el expediente no se guarda
+  en el teléfono. | [Reintentar]
+  ---
+  <b>No sabemos si se concedió el acceso</b>
+  [Comprobar mi acceso]
+  ---
+  <b>Tu acceso de emergencia termina en 5 min</b>
+  (a las 11:40) | [Entendido]
+}
+@endsalt

@@ -1,0 +1,39 @@
+@startuml
+title C4 - Componentes del Micro-HIS de recepción
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Técnico/a" as Tech
+database "Base de datos" as DB
+
+package "Micro-HIS Recepción" {
+  package "Presentation" {
+    [ReceiveSpecimenCommand\n(CLI)] as CLI
+  }
+  package "Application" {
+    [ReceiveSpecimen\n(caso de uso)] as UseCase
+    interface "SpecimenRepository" as RepositoryPort
+    interface "SpecimenIdentifierGenerator" as IdentifierPort
+  }
+  package "Domain" {
+    [SpecimenAcceptancePolicy] as Policy
+    [ReceptionRequest / Decision /\nSpecimenReception] as Model
+  }
+  package "Persistence" {
+    [PdoSpecimenRepository] as PdoRepository
+  }
+  package "Infrastructure / Identity" {
+    [RandomSpecimenIdentifierGenerator] as RandomId
+  }
+}
+
+Tech --> CLI
+CLI --> UseCase
+UseCase --> Policy
+UseCase --> Model
+UseCase --> RepositoryPort
+UseCase --> IdentifierPort
+PdoRepository ..|> RepositoryPort
+RandomId ..|> IdentifierPort
+PdoRepository --> DB : PDO + prepared statement
+@enduml

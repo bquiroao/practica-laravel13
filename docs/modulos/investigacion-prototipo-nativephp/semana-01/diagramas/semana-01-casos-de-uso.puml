@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Operador clínico o administrativo" as Op
+actor "Administrador del sistema" as Admin
+actor "Laravel / HIS" as Laravel
+actor "NativePHP runtime" as Native
+
+rectangle "Evaluación del prototipo NativePHP" {
+  usecase "CU-01: Definir flujo a evaluar\n(R-01)" as CU1
+  usecase "CU-02: Ejecutar prototipo nativo\n(R-02, R-03, R-04)" as CU2
+  usecase "CU-03: Decidir viabilidad técnica\n(R-05, R-06)" as CU3
+}
+
+Op --> CU1
+Op --> CU2
+Admin --> CU3
+Native --> CU2
+Laravel --> CU2
+Laravel --> CU3
+
+note right of CU2
+  La app nativa consume la lógica
+  del HIS sin duplicar reglas de negocio.
+end note
+@enduml

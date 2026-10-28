@@ -17,9 +17,20 @@ final class VistaHtml implements Vista
 
     public function nota(NotaResultado $nota, int $estado): Respuesta
     {
-        return Respuesta::html($estado, $this->pintar('nota', [
+        $r = Respuesta::html($estado, $this->pintar('nota', [
             'nota' => $nota,
             'estadoTexto' => self::ETIQUETAS_ESTADO[$nota->estado] ?? $nota->estado,
+        ]));
+
+        return $nota->repetida ? $r->conCabecera('Idempotent-Replayed', 'true') : $r;
+    }
+
+    public function lista(string $expedienteId, array $resumenes, int $estado): Respuesta
+    {
+        return Respuesta::html($estado, $this->pintar('lista', [
+            'expedienteId' => $expedienteId,
+            'resumenes' => $resumenes,
+            'etiquetas' => self::ETIQUETAS_ESTADO,
         ]));
     }
 

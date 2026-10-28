@@ -1,0 +1,33 @@
+Micro-HIS Pacientes - demo del cambio practico: identidad protegida (PACIENTES_PERSISTENCIA=memoria)
+
+1. Admisión intenta registrar a Sofía como protegida
+   POST /api/v1/pacientes -> 403
+   {"error":"ACCESO_DENEGADO"}
+
+2. El supervisor la registra protegida, con motivo
+   POST /api/v1/pacientes -> 201
+   {"codigo":"P-000005","version":1,"identidad_provisional":false}
+
+3. El clínico la busca por nombre
+   GET /api/v1/pacientes -> 200
+   {"resultados":[],"total":0}
+
+4. El clínico la busca por código
+   GET /api/v1/pacientes -> 200
+   {"resultados":[{"codigo":"P-000005","nombre":"Identidad protegida","nacimiento":null,"identificador":null,"identidad_protegida":true}],"total":1}
+
+5. El clínico abre su detalle (para atenderla)
+   GET /api/v1/pacientes/P-000005 -> 200
+   {"paciente":{"codigo":"P-000005","nombre":"Identidad protegida","nacimiento":null,"identificador":null,"identidad_protegida":true,"sexo":"female","telefono":null,"tipo_documento":null,"estado":"active","identidad_provisional":false,"version":1}}
+
+6. Admisión intenta registrarla otra vez con su DPI
+   POST /api/v1/pacientes -> 409
+   {"error":"PACIENTE_EXISTENTE","codigo":"RESERVADO"}
+
+7. Admisión intenta editarla
+   PUT /api/v1/pacientes/P-000005 -> 403
+   {"error":"ACCESO_DENEGADO"}
+
+8. El supervisor ve el detalle completo
+   GET /api/v1/pacientes/P-000005 -> 200
+   {"paciente":{"codigo":"P-000005","nombre":"Sofía Morales Díaz","nacimiento":"1994-08-09","identificador":"*********0101","identidad_protegida":true,"sexo":"female","telefono":"+502 5123 4567","tipo_documento":"DPI","estado":"active","identidad_provisional":false,"version":1}}
