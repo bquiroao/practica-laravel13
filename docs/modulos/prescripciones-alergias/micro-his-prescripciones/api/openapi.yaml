@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API de Prescripciones electrónicas con validación de alergias — Sistema Hospitalario Integrado
-  version: 1.1.0
+  version: 1.2.0
   summary: Creación de prescripción con verificación previa de alergias y bloqueo seguro.
   description: |
     El médico VERIFICA una prescripción antes de firmar (sin efectos) y la EMITE; el servidor vuelve a
@@ -20,6 +20,10 @@ info:
     1.1.0 (semana 6, compatible con 1.0.0): ANULACIÓN CON MOTIVO. `POST /api/v1/prescripciones/{id}/anulacion`
     registra la anulación como un hecho nuevo; la prescripción emitida no cambia. La consulta devuelve `estado: ANULADA`
     y el objeto `anulacion` (que solo aparece si la hay). Anular NO consulta el Expediente: funciona aunque esté caído.
+
+    1.2.0 (semana 12, compatible con 1.1.0): la verificación previa con resultado ADVERTENCIA agrega `puede_justificar`:
+    si el usuario tiene el permiso `prescripcion.override` y podría emitirla con una justificación. Sin advertencia la
+    clave no aparece y no se consulta el permiso. Es la misma condición que aplica la emisión, que sigue decidiendo.
   contact:
     name: Boris Alexander Quiroa Orellana (@bquiroao)
   license:
@@ -307,6 +311,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Hallazgo'
+        puede_justificar: {type: boolean, description: 'Solo con codigo ADVERTENCIA (1.2.0). true si el usuario tiene prescripcion.override y puede emitirla con una justificación de 20 caracteres o más.'}
     Emision:
       type: object
       required: [codigo, id, verificacion]

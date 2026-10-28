@@ -100,6 +100,12 @@ $mutaciones = [
         'if (isset($this->anulaciones[$anulacion->prescripcionId])) {', 'if (false) {'],
     'M33 la anulación no deja traza' => ['src/Aplicacion/CasosDeUso/AnularPrescripcion.php',
         "\$this->auditoria->registrar('PRESCRIPCION_ANULADA'", "if (false) \$this->auditoria->registrar('PRESCRIPCION_ANULADA'"],
+    // Semana 12: «puede_justificar» en la previa
+    'M34 la previa promete que siempre se puede justificar' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        '=== ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;', '=== ResultadoVerificacion::ADVERTENCIA ? true : null;'],
+    'M35 la previa pregunta a RBAC por override aunque no haya advertencia' => ['src/Dominio/Reglas/PoliticaEmision.php',
+        'return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;',
+        '$t = $tieneOverride(); return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $t : null;'],
 ];
 
 $origen = dirname(__DIR__);

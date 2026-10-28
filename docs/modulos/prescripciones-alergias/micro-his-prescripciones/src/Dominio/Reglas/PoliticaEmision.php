@@ -44,6 +44,17 @@ final class PoliticaEmision
         return DecisionEmision::permitida($texto, $confirmacion);
     }
 
+    /**
+     * Semana 12 (RF-19): ¿este usuario podría emitir la advertencia con una justificación? Es la MISMA condición de permiso
+     * que decidir() exige; null cuando no hay advertencia, y entonces no se pregunta a RBAC (igual que en decidir()).
+     *
+     * @param \Closure(): bool $tieneOverride
+     */
+    public function puedeJustificar(ResultadoVerificacion $verificacion, ExpedienteAlergias $expediente, \Closure $tieneOverride): ?bool
+    {
+        return $this->resultadoPrevio($verificacion, $expediente) === ResultadoVerificacion::ADVERTENCIA ? $tieneOverride() : null;
+    }
+
     /** Lo que la verificación previa informa: el resultado, salvo que falte evaluar las alergias. */
     public function resultadoPrevio(ResultadoVerificacion $verificacion, ExpedienteAlergias $expediente): string
     {
