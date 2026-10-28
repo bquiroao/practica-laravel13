@@ -88,9 +88,27 @@ function contratoRepositorios(string $prefijo, ConjuntoAdaptadores $a): void
     });
 }
 
+/** Semana 6 — cambio práctico: el puerto RepositorioMembresias gana revocar(); ambos adaptadores deben cumplirlo. */
+function contratoRevocacion(string $prefijo, ConjuntoAdaptadores $a): void
+{
+    prueba("$prefijo-07", 'RepositorioMembresias::revocar marca como revocadas las membresías activas del rol (no las vencidas)', function () use ($a): void {
+        $ahora = new DateTimeImmutable(Escenario::AHORA);
+        igual(1, $a->membresias->revocar('marta', 'hosp-oriente', 'medico', $ahora), 'revocadas');
+        afirmar(!$a->membresias->existeActiva('marta', 'hosp-oriente', 'medico'), 'sigue activa');
+        igual('revoked', $a->membresias->membresiasDe('marta', 'hosp-oriente')[0]->estado ?? null, 'estado');
+        igual(0, $a->membresias->revocar('pedro', 'hosp-oriente', 'medico', $ahora), 'una vencida no se revoca');
+        igual(0, $a->membresias->revocar('marta', 'hosp-oriente', 'medico', $ahora), 'segunda revocación: nada que revocar');
+    });
+}
+
+contratoRevocacion('CON-MEM', FabricaEnMemoria::crear(Escenario::datosDemo()));
+
 contratoRepositorios('CON-MEM', FabricaEnMemoria::crear(Escenario::datosDemo()));
 
 if (PostgresTemporal::disponible()) {
+    PostgresTemporal::ejecutar(static function (PDO $pdo): void {
+        contratoRevocacion('CON-PDO', FabricaPdo::crear($pdo));
+    });
     PostgresTemporal::ejecutar(static fn (PDO $pdo) => contratoRepositorios('CON-PDO', FabricaPdo::crear($pdo)));
 } else {
     prueba('CON-PDO', 'El mismo contrato contra los adaptadores PDO (PostgreSQL)', static fn () => omitir('defina MICROHIS_DB_DSN para ejecutarlo'));

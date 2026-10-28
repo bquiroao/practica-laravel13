@@ -1,0 +1,35 @@
+$ bash bin/demo-http.sh   (php -S + PostgreSQL 18)
+
+### 1. Pacientes registra un movimiento (201) y lo reintenta (200 YA_REGISTRADO)
+-> POST /movimientos  (token: token-svc-pacientes-oriente, X-Tenant-ID: hosp-oriente)
+{"id":1,"secuencia":1,"sello":"42d277d3c769ddd8ea4eee12bc84f5e4b40f0a1a2210886424eca1699e6b2831"}
+<- HTTP 201
+-> POST /movimientos  (token: token-svc-pacientes-oriente, X-Tenant-ID: hosp-oriente)
+{"codigo":"YA_REGISTRADO","id":1,"secuencia":1,"sello":"42d277d3c769ddd8ea4eee12bc84f5e4b40f0a1a2210886424eca1699e6b2831"}
+<- HTTP 200
+
+### 2. Regla de dominio: Pacientes intenta escribir a nombre de RBAC (403) y con fecha futura (422)
+-> POST /movimientos  (token: token-svc-pacientes-oriente, X-Tenant-ID: hosp-oriente)
+{"error":"MODULO_NO_PERMITIDO"}
+<- HTTP 403
+-> POST /movimientos  (token: token-svc-pacientes-oriente, X-Tenant-ID: hosp-oriente)
+{"error":"DATOS_INVALIDOS","campos":{"ocurrido_en":"No puede ser futura."}}
+<- HTTP 422
+
+### 3. El auditor consulta su hospital con filtros (200) y sin rango (422)
+-> GET /movimientos?desde=2026-10-21&hasta=2026-10-21&usuario=u-ana&modulo=pacientes  (token: token-auditor-oriente, X-Tenant-ID: hosp-oriente)
+{"movimientos":[{"id":1,"ocurrido_en":"2026-10-21T15:15:00Z","hospital":"hosp-oriente","usuario":"u-ana","modulo":"pacientes","accion":"PACIENTE_REGISTRADO","resultado":"exito","recurso":"paciente:P-000001"}],"cursor_siguiente":null}
+<- HTTP 200
+-> GET /movimientos?usuario=u-ana  (token: token-auditor-oriente, X-Tenant-ID: hosp-oriente)
+{"error":"DATOS_INVALIDOS","campos":{"desde":"Indique desde y hasta (AAAA-MM-DD)."}}
+<- HTTP 422
+
+### 4. Tenant: el auditor pide la red (403)
+-> GET /movimientos?desde=2026-10-21&hasta=2026-10-21  (token: token-auditor-oriente, X-Tenant-ID: *)
+{"error":"TENANT_NO_COINCIDE"}
+<- HTTP 403
+
+### 5. El super administrador verifica la cadena de oriente (registro + 1 consulta auditada; la del 422 nunca consultó)
+-> POST /verificaciones  (token: token-superadmin, X-Tenant-ID: *)
+{"estado":"INTEGRA","verificados":2}
+<- HTTP 200

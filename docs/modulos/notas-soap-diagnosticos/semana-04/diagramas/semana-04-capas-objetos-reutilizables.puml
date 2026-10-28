@@ -1,0 +1,60 @@
+@startuml semana-04-capas-objetos-reutilizables
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #4A6FA5
+}
+skinparam packageStyle rectangle
+
+title Semana 4 · Capas, responsabilidades y objetos reutilizables
+
+package "Quién reutiliza" as Q #F2F2F2 {
+    rectangle "API JSON\n(php -S + PostgreSQL)" as api
+    rectangle "Navegador\n(vista HTML)" as nav
+    rectangle "bin/demo-en-memoria.php" as demo
+    rectangle "Pruebas\n(69 casos)" as pru
+    rectangle "HIS Laravel\n(semanas siguientes)" as his
+}
+
+package "Presentación — recibir y mostrar" as P #EAF2FB {
+    rectangle "Kernel · NotasSoapController\nFormularioRegistroNota" as pc
+    rectangle "Vista: VistaJson · VistaHtml\nSelectorVista" as pv
+}
+package "Aplicación — coordinar" as A #EAF7EA {
+    rectangle "RegistrarNotaConDiagnostico\nFirmarNota · ConsultarNota" as auc
+    rectangle "Comandos · NotaResultado\nRepositorioNotasConEventos" as aobj
+}
+package "Dominio — reglas" as D #FFF6E5 {
+    rectangle "NotaSoap · SeccionesSoap\nDiagnostico · EventoClinico" as dm
+    rectangle "Interfaces Repository\n(RepositorioNotas, RepositorioDiagnosticos ...)" as dp
+}
+package "Persistencia — guardar" as Per #F3ECF9 {
+    rectangle "Adaptadores Pdo: sentencias preparadas\nPostgreSQL / SQLite" as ppdo
+    rectangle "Adaptadores EnMemoria: arreglos PHP\nTransaccionEnMemoria" as pmem
+}
+
+api --> pc
+nav --> pv
+demo --> pc
+pru --> auc
+his --> auc
+his --> dm
+pc --> auc
+pc --> pv
+pv --> aobj
+auc --> dm
+auc --> dp
+ppdo ..|> dp
+pmem ..|> dp
+pru --> pmem
+demo --> pmem
+api --> ppdo
+
+legend bottom
+  Las flechas desde "Quién reutiliza" muestran qué objeto usa cada consumidor SIN modificarlo.
+  El mismo controlador sirve a JSON y HTML; los mismos casos de uso sirven a PDO y a memoria;
+  Dominio y Aplicación no dependen de nada, por eso se pueden llevar al HIS en Laravel.
+endlegend
+@enduml

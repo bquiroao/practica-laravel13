@@ -1,0 +1,15 @@
+@startsalt m2_filtros
+{+
+  <b>Filtros</b> | [Cerrar]
+  --
+  Reporte | ^Ocupación^
+  --
+  Período rápido
+  (X) Este mes
+  () Mes anterior
+  () Últimos 7 días
+  () Personalizado
+  --
+  [ Calcular · 01/10 a 31/10 ]
+}
+@endsalt

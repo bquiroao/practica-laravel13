@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">WF-05 — Confirmación y cadena de custodia</title>
+  <desc id="desc">Wireframe de recepción guardada con identificador del recipiente, estado de etiqueta separado y línea de tiempo de custodia append-only.</desc>
+  <rect width="1280" height="820" fill="#f3f6fa"/>
+  <rect width="1280" height="74" fill="#12304a"/>
+  <text x="34" y="46" fill="#fff" font-family="Arial,sans-serif" font-size="24" font-weight="700">Sistema Hospitalario Integrado</text>
+  <text x="1040" y="44" fill="#d8e6f1" font-family="Arial,sans-serif" font-size="15">Hospital activo: Central</text>
+  <rect y="74" width="222" height="746" fill="#e8eef4"/>
+  <text x="26" y="126" fill="#25445e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Recepción</text>
+  <rect x="12" y="145" width="198" height="44" rx="7" fill="#d2e5f4"/>
+  <text x="30" y="173" fill="#123b59" font-family="Arial,sans-serif" font-size="15" font-weight="700">Nueva recepción</text>
+  <text x="250" y="120" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">Recepción registrada</text>
+  <rect x="250" y="148" width="980" height="88" rx="10" fill="#e8f5ec" stroke="#a3cdb0"/>
+  <circle cx="286" cy="192" r="18" fill="#2e7d4b"/>
+  <path d="M277 192 l7 7 l13 -15" fill="none" stroke="#fff" stroke-width="3"/>
+  <text x="319" y="184" fill="#215b38" font-family="Arial,sans-serif" font-size="18" font-weight="700">La decisión y la custodia inicial se guardaron.</text>
+  <text x="319" y="211" fill="#3c684b" font-family="Arial,sans-serif" font-size="14">La impresión es independiente y puede quedar pendiente sin duplicar la recepción.</text>
+  <rect x="250" y="256" width="392" height="182" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="277" y="292" fill="#647b8c" font-family="Arial,sans-serif" font-size="13" font-weight="700">IDENTIFICADOR INTERNO</text>
+  <text x="277" y="332" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">SP-2026-000184</text>
+  <text x="277" y="365" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Código del recipiente; distinto de la orden.</text>
+  <text x="277" y="396" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Orden ORD-00482 · Ítem 01</text>
+  <text x="277" y="420" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Estado: recepción aceptada</text>
+  <rect x="662" y="256" width="568" height="182" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="690" y="292" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Etiqueta</text>
+  <rect x="690" y="312" width="182" height="38" rx="18" fill="#fff4dc"/>
+  <text x="710" y="337" fill="#77520c" font-family="Arial,sans-serif" font-size="14" font-weight="700">Pendiente de imprimir</text>
+  <text x="690" y="377" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">La muestra ya está registrada. No vuelvas a crearla.</text>
+  <rect x="690" y="391" width="205" height="34" rx="6" fill="#12608a"/>
+  <text x="725" y="414" fill="#fff" font-family="Arial,sans-serif" font-size="14" font-weight="700">Reintentar impresión</text>
+  <rect x="250" y="460" width="980" height="247" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="278" y="499" fill="#29475f" font-family="Arial,sans-serif" font-size="19" font-weight="700">Cadena de custodia</text>
+  <text x="278" y="525" fill="#62798b" font-family="Arial,sans-serif" font-size="14">Eventos asociados a este recipiente; los eventos anteriores no se editan desde esta vista.</text>
+  <line x1="304" y1="568" x2="304" y2="672" stroke="#8cb5cb" stroke-width="3"/>
+  <circle cx="304" cy="573" r="9" fill="#12608a"/>
+  <text x="330" y="571" fill="#213d53" font-family="Arial,sans-serif" font-size="15" font-weight="700">Recepción registrada</text>
+  <text x="330" y="594" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">Actor autorizado · recepción · 25 oct 2026, 14:32</text>
+  <circle cx="304" cy="626" r="9" fill="#fff" stroke="#7e9caf" stroke-width="3"/>
+  <text x="330" y="624" fill="#62798b" font-family="Arial,sans-serif" font-size="15">Próximo traspaso</text>
+  <text x="330" y="647" fill="#718594" font-family="Arial,sans-serif" font-size="14">Se añadirá como nuevo evento cuando ocurra.</text>
+  <rect x="250" y="730" width="980" height="59" rx="8" fill="#eaf5fb" stroke="#a9cee2"/>
+  <text x="276" y="756" fill="#1d536e" font-family="Arial,sans-serif" font-size="14" font-weight="700">Anotación: limitar el historial a roles autorizados. La etiqueta presenta solo campos mínimos aprobados y reutiliza el mismo specimenId al reimprimir.</text>
+</svg>

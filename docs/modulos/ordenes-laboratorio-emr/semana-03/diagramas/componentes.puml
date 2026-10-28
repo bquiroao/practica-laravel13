@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+actor "Profesional demo / EMR" as M
+package Presentation {
+ component CLI
+ component "DemoRules (doble)" as DEMO
+}
+package Application {
+ component "Issue RF01-04" as I
+ component "Find RF05-06" as F
+}
+package Domain {
+ class Order
+ interface Repository as R
+ interface ClinicalRules as C
+}
+package Persistence {
+ component PdoRepository as PDO
+}
+database "SQLite temporal\nlab_orders + lab_order_tests" as DB
+M --> CLI
+CLI --> I
+CLI --> F
+I --> Order
+I --> C
+F --> C
+I --> R
+F --> R
+DEMO ..|> C
+PDO ..|> R
+PDO --> DB : prepare / execute / transacción
+note bottom of DB
+RNF03: rollback cabecera y partidas.
+RNF04: paciente, episodio, actor, pruebas y estado.
+end note
+@enduml

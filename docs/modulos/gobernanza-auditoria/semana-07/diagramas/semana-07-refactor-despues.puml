@@ -1,0 +1,79 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title DESPUÉS: cada decisión tiene un dueño en su capa; los casos de uso solo orquestan
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Aplicación" #F3F8EE {
+  class ConsultarMovimientos #E3F2FD {
+    +PAGINA = 50
+    +ejecutar(ComandoConsultar): Resultado
+    --
+    78 líneas · 10 ramas · 0 decisiones $red
+  }
+  class VerDetalleMovimiento #E3F2FD {
+    +ejecutar(ComandoDetalle): Resultado
+    --
+    51 líneas · 4 ramas · 0 decisiones $red
+  }
+  class AutorizacionLectura #C8E6C9 {
+    +PERMISO · +PERMISO_RED
+    +permite(actor, Alcance): bool
+  }
+  class CursorPaginacion #C8E6C9 {
+    +de(Movimiento): string
+    +leer(string): ?array
+  }
+  class ProyeccionMovimientos #C8E6C9 {
+    +resumenes(list<Movimiento>): list
+    +completo(Movimiento): array
+  }
+  interface PoliticaAcceso {
+    +RED = Alcance::RED
+  }
+  class CadenaSellada
+}
+package "Dominio" #FFF8E1 {
+  class Alcance #C8E6C9 {
+    +hospital: ?string
+    +desdeTenant(string): Alcance
+    +esRed() · tenant() · etiqueta()
+    +incluye(Movimiento): bool
+  }
+  class CatalogoFiltros #C8E6C9 {
+    +interpretar(parametros): list<FiltroMovimiento>
+  }
+  class ConsultaInvalida <<excepción>> #C8E6C9 {
+    +codigo · +campos
+  }
+  interface FiltroMovimiento
+  class ConsultaMovimientos {
+    +en(Alcance, …): ConsultaMovimientos
+  }
+  interface Bitacora
+}
+
+ConsultarMovimientos --> AutorizacionLectura
+ConsultarMovimientos --> CatalogoFiltros
+ConsultarMovimientos --> CursorPaginacion
+ConsultarMovimientos --> ProyeccionMovimientos
+ConsultarMovimientos --> CadenaSellada
+ConsultarMovimientos ..> Alcance : desdeTenant
+VerDetalleMovimiento --> AutorizacionLectura
+VerDetalleMovimiento --> ProyeccionMovimientos
+VerDetalleMovimiento --> CadenaSellada
+VerDetalleMovimiento ..> Alcance : desdeTenant · incluye
+AutorizacionLectura --> PoliticaAcceso
+AutorizacionLectura ..> Alcance
+CatalogoFiltros --> FiltroMovimiento
+CatalogoFiltros ..> ConsultaInvalida : lanza
+ConsultaMovimientos ..> Alcance
+ProyeccionMovimientos --> Bitacora
+
+note bottom of ConsultarMovimientos
+  Flujo: Alcance → AutorizacionLectura → CursorPaginacion → CatalogoFiltros
+  → transacción { buscar · auditarLectura · ProyeccionMovimientos }
+  VerDetalle ya NO depende de ConsultarMovimientos.
+end note
+@enduml

@@ -1,0 +1,22 @@
+@startuml semana-04-repositorio-compartido
+title Repositorio de datos compartido — base CENTRAL (común a todos los hospitales)
+component "Centro de documentación" as doc
+component "RBAC y membresías" as rbac
+component "Módulos autores\n(Pacientes, Citas, Camas…)" as aut
+component "Lectores por rol" as lec
+interface "RepositorioDocumentos" as rd
+interface "Repositorio de membresías" as rm
+database "Base CENTRAL" {
+  [doc_versions]
+  [doc_audiences]
+  [hospital_memberships]
+}
+aut --> doc : enviar(versión) — nunca SQL directo
+lec --> doc : consultar(slug, roles)
+doc --> rd
+rbac --> rm
+rd --> [doc_versions] : escribe (dueño)
+rd --> [doc_audiences] : escribe (dueño)
+rm --> [hospital_memberships] : escribe (dueño)
+doc ..> [hospital_memberships] : lee role_code
+@enduml

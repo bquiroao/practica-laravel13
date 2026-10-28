@@ -1,0 +1,1 @@
+Mostrar los ocho hallazgos y distinguir medición real de brecha de implementación. Explicar CSS text fill que invalida la intención de blanco, contraste 1.18/2.07 y recorte medido. Priorizar contexto, unidad/rango, confirmación de corrección y error sin duplicado. Checklist de 15 puntos completo no significa conformidad WCAG; teclado/lector requieren interfaz real.

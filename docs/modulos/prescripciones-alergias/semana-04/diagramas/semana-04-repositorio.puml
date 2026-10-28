@@ -1,0 +1,58 @@
+@startuml semana-04-repositorio
+!pragma layout smetana
+title Patrón Repository: el puerto en el Dominio, dos adaptadores y una suite de contrato
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+
+package "Dominio\\Puertos" #FFF8E1 {
+  interface RepositorioPrescripciones {
+    + porClave(hospital, clave) : ?Prescripcion
+    + porId(hospital, id) : ?Prescripcion
+    + guardar(Prescripcion) : Prescripcion
+    .. sin actualizar() ni eliminar() (R-10) ..
+    .. lanza ClaveEnUso / ErrorPersistencia ..
+  }
+}
+package "Aplicacion\\Puertos" #F5F9FF {
+  interface Transaccion {
+    + ejecutar(callable) : mixed
+  }
+}
+package "Persistencia\\Pdo" #EEF7EE {
+  class PdoRepositorioPrescripciones {
+    SELECT / INSERT preparados
+    UNIQUE (hospital, idempotency_key) → ClaveEnUso
+  }
+  class PdoTransaccion {
+    BEGIN · COMMIT · ROLLBACK
+  }
+}
+package "Persistencia\\EnMemoria" #EEF7EE {
+  interface Restaurable {
+    + instantanea()
+    + restaurar(estado)
+  }
+  class RepositorioPrescripcionesEnMemoria {
+    reproduce el UNIQUE y el alcance por hospital
+  }
+  class TransaccionEnMemoria {
+    instantánea y restauración
+  }
+}
+class "tests/Contratos/ContratoAdaptadoresPrueba\n7 verificaciones × 2 adaptadores\n(CON-MEM-01..07 · CON-PDO-01..07)" as Contrato <<suite de contrato>>
+class "tests/Dobles: RepositorioConFallas,\nTransaccionConFallas… (decoradores)" as Deco <<prueba>>
+
+PdoRepositorioPrescripciones ..|> RepositorioPrescripciones
+RepositorioPrescripcionesEnMemoria ..|> RepositorioPrescripciones
+RepositorioPrescripcionesEnMemoria ..|> Restaurable
+PdoTransaccion ..|> Transaccion
+TransaccionEnMemoria ..|> Transaccion
+TransaccionEnMemoria --> Restaurable : participantes
+Contrato ..> PdoRepositorioPrescripciones : misma suite
+Contrato ..> RepositorioPrescripcionesEnMemoria : misma suite
+Deco --> RepositorioPrescripcionesEnMemoria : decora (inyecta fallas)
+
+note bottom of Contrato
+  Encontró H-4: la dosis volvía 500 (InMemory) y 500.0 (PDO).
+end note
+@enduml

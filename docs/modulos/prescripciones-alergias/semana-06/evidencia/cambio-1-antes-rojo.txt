@@ -1,0 +1,79 @@
+$ php tests/ejecutar.php --solo=ANU   (ANTES de implementar el cambio: deben fallar)
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Cambio práctico de la semana 6: anular con motivo ==
+[FALLA] ANU-01   Anular una prescripción emitida → 200 ANULADA; la consulta muestra la anulación y la prescripción original intacta
+         -> respuesta: esperado array (
+  0 => 200,
+  1 => 'ANULADA',
+  2 => 1,
+), obtenido array (
+  0 => 404,
+  1 => NULL,
+  2 => NULL,
+) (Arnes.php:41)
+[FALLA] ANU-02   Motivo de menos de 10 caracteres (sin contar espacios) → 422 MOTIVO_REQUERIDO y nada anulado
+         -> respuesta: esperado array (
+  0 => 422,
+  1 => 'MOTIVO_REQUERIDO',
+), obtenido array (
+  0 => 404,
+  1 => 'RUTA_NO_ENCONTRADA',
+) (Arnes.php:41)
+[FALLA] ANU-03   Una prescripción ya anulada no se vuelve a anular → 409 ESTADO_NO_PERMITE_ANULAR
+         -> respuesta: esperado array (
+  0 => 409,
+  1 => 'ESTADO_NO_PERMITE_ANULAR',
+), obtenido array (
+  0 => 404,
+  1 => 'RUTA_NO_ENCONTRADA',
+) (Arnes.php:41)
+[FALLA] ANU-04   Tenant y permisos: otro hospital o inexistente → el mismo 404; sin prescripcion.anular (farmacia) → 403
+         -> otro hospital: esperado array (
+  0 => 404,
+  1 => 'NO_ENCONTRADO',
+), obtenido array (
+  0 => 404,
+  1 => 'RUTA_NO_ENCONTRADA',
+) (Arnes.php:41)
+[FALLA] ANU-05   Todo o nada: la anulación y su traza PRESCRIPCION_ANULADA van juntas; si la traza falla, no queda anulada
+         -> trazas: esperado array (
+  0 => 'PRESCRIPCION_EMITIDA',
+  1 => 'PRESCRIPCION_ANULADA',
+), obtenido array (
+  0 => 'PRESCRIPCION_EMITIDA',
+) (Arnes.php:41)
+[FALLA] ANU-06   Bloqueo seguro asimétrico: con el Expediente caído no se emite (503), pero SÍ se puede anular
+         -> emitir falla cerrado; anular no depende del Expediente: esperado array (
+  0 => 503,
+  1 => 200,
+), obtenido array (
+  0 => 503,
+  1 => 404,
+) (Arnes.php:41)
+[FALLA] ANU-07   Entrada mal formada: sin «motivo» o no texto → 400 CUERPO_INVALIDO; id no numérico → 404
+         -> respuestas: esperado array (
+  0 => 
+  array (
+    0 => 400,
+    1 => 'CUERPO_INVALIDO',
+  ),
+  1 => 
+  array (
+    0 => 400,
+    1 => 'CUERPO_INVALIDO',
+  ),
+), obtenido array (
+  0 => 
+  array (
+    0 => 404,
+    1 => 'RUTA_NO_ENCONTRADA',
+  ),
+  1 => 
+  array (
+    0 => 404,
+    1 => 'RUTA_NO_ENCONTRADA',
+  ),
+) (Arnes.php:41)
+
+Total: 7  Pasan: 0  Fallan: 7  Omitidas: 0

@@ -41,6 +41,13 @@ final class RepositorioMembresiasConFallas implements RepositorioMembresias
         $this->interno->guardar($membresia);
     }
 
+    public function revocar(string $usuarioId, string $hospitalId, string $rol, \DateTimeImmutable $momento): int
+    {
+        $this->fallarSi($this->fallarEscritura);
+
+        return $this->interno->revocar($usuarioId, $hospitalId, $rol, $momento);
+    }
+
     public function total(): int
     {
         return count($this->interno->instantanea());

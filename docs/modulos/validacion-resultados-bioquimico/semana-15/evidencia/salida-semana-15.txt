@@ -1,0 +1,23 @@
+﻿Validación de resultados por bioquímico — evidencia de prueba
+Rama: semana-15-validacion-resultados-bioquimico-mercedes-lopez
+Comando: php docs/modulos/validacion-resultados-bioquimico/semana-15/pruebas/run.php
+
+PASS [UNIT U-01] validar conserva el valor y la unidad revisados
+PASS [UNIT U-02] la revisión consulta autorización con actor y hospital
+PASS [UNIT U-03] el rechazo exige y conserva un motivo normalizado
+PASS [UNIT U-04] la firma de auditoría identifica actor, hospital, versión y momento
+PASS [UNIT U-05] fallo de escritura no deja cambio de estado ni auditoría parcial
+PASS [UNIT U-06] un valor del fixture fuera de referencia no se interpreta automáticamente
+PASS [WHITEBOX WB-01] cubre ramas de precondiciones, acceso, contexto y estado
+PASS [WHITEBOX WB-02] cubre salidas del repositorio SAVED, CONFLICT, NOT_FOUND y FAILED
+PASS [BLACKBOX BB-01] clases equivalentes de decisión válida producen validar o rechazar
+PASS [BLACKBOX BB-02] límites de versión 1, cero y versión desactualizada
+PASS [BLACKBOX BB-03] omisiones de motivo, contexto y actor no confirman decisiones
+PASS [BLACKBOX BB-04] errores de hospital, concurrencia y persistencia permanecen distinguibles
+
+UNIT: 6 pruebas
+WHITEBOX: 2 pruebas
+BLACKBOX: 4 pruebas
+RESULTADO: 12/12 pruebas aprobadas; 0 pruebas fallidas.
+
+Exit code: 0

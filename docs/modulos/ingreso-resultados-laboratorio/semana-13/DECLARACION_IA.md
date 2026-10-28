@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar artefactos locales y preparar plan, checklist y formatos. Se ejecutó la regresión de semana 4. No se atribuyen reunión formal, participantes, correcciones, aprobación técnica ni autorización hospitalaria real no demostradas. La estudiante debe revisar y defender las observaciones.

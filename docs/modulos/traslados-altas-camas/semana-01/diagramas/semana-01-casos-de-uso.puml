@@ -1,0 +1,50 @@
+@startuml semana-01-casos-de-uso
+left to right direction
+title Casos de uso — «traslado o alta del paciente con liberación consistente de cama»
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #EEF2F7
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+actor "Médico tratante" as Med
+actor "Enfermería / Admisión\n(actor principal)" as Enf
+actor "Identidad y permisos\n(RBAC) <<sistema>>" as Rbac
+actor "Catálogo de salas\ny camas <<sistema>>" as Cat
+actor "Limpieza / Gestión\nde camas" as Lim
+
+rectangle "Módulo Traslados, altas y liberación de camas" {
+  usecase "CU-01\nOrdenar traslado o alta" as CU01
+  usecase "CU-02\nRegistrar traslado\nde cama" as CU02 #D6E8FF
+  usecase "CU-03\nRegistrar alta\ndel paciente" as CU03 #D6E8FF
+  usecase "CU-04\nValidar cama destino" as CU04
+  usecase "CU-05\nLiberar cama de origen\n(misma transacción)" as CU05
+  usecase "CU-06\nConsultar historial\nde camas del paciente" as CU06
+  usecase "CU-07\nAvisar cama por limpiar\n--\npunto de extensión:\ncama liberada" as CU07
+}
+
+Med --> CU01
+Enf --> CU02
+Enf --> CU03
+Enf --> CU06
+Med --> CU06
+CU02 ..> CU04 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU05 : <<include>>
+CU07 ..> CU05 : <<extend>>
+CU02 ..> CU01 : requiere orden
+CU03 ..> CU01 : requiere orden
+CU02 --> Rbac : sesión y permiso
+CU04 --> Cat : estado de la cama
+CU07 --> Lim : aviso
+
+note bottom of CU05
+  Objetivo: que el paciente nunca quede en dos camas
+  ni la cama de origen quede «ocupada» sin paciente.
+  Fuera del límite: crear camas o cambiar su estado
+  operativo (catálogo), facturar el egreso.
+end note
+@enduml

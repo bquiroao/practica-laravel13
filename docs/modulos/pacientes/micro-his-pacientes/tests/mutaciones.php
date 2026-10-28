@@ -1,0 +1,130 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * Comprobación por mutación: introduce UN defecto a la vez en una copia temporal del
+ * micro-HIS, ejecuta las pruebas y verifica que alguna falle. El código original no se toca.
+ *   php tests/mutaciones.php
+ * Sale con 1 si alguna mutación sobrevive (las pruebas no la detectan) o no se pudo aplicar.
+ */
+
+$raiz = dirname(__DIR__);
+
+$mutaciones = [
+    'M1' => ['El UPDATE deja de comparar la versión (R-06)', 'src/Persistencia/Pdo/PdoRepositorioPacientes.php',
+        ' AND version = :version', ''],
+    'M2' => ['El hash del documento pasa a ser el número en claro (R-04)', 'src/Persistencia/Seguridad/ProteccionDocumentos.php',
+        "return hash_hmac('sha256', \$documento->canonico(), \$this->claveHash);", 'return $documento->numero();'],
+    'M3' => ['La política deja de bloquear el documento repetido (R-02)', 'src/Dominio/Servicios/PoliticaDuplicados.php',
+        "            if (\$titular !== null) {\n                \$codigo = \$this->visibles(",
+        "            if (false) {\n                \$codigo = \$this->visibles("],
+    'M4' => ['Registrar responde «creado» aunque la base falle', 'src/Aplicacion/CasosDeUso/RegistrarPaciente.php',
+        "        } catch (ErrorPersistencia) {\n            return Resultado::noDisponible();",
+        "        } catch (ErrorPersistencia) {\n            return Resultado::creado([]);"],
+    'M5' => ['El controlador importa una clase del Dominio (rompe la regla de capas)', 'src/Presentacion/Http/Controladores/PacientesControlador.php',
+        "use Pacientes\\Aplicacion\\CasosDeUso\\ActualizarPaciente;", "use Pacientes\\Aplicacion\\CasosDeUso\\ActualizarPaciente;\nuse Pacientes\\Dominio\\Modelo\\Paciente;"],
+    'M6' => ['La vista traduce los datos inválidos a 400 en vez de 422', 'src/Presentacion/Http/Vistas/ErrorVista.php',
+        "'invalido' => 422,", "'invalido' => 400,"],
+    'M7' => ['La búsqueda deja de escapar los comodines del usuario', 'src/Persistencia/Pdo/PdoRepositorioPacientes.php',
+        "strtr((string) \$criterio->nombre, ['!' => '!!', '%' => '!%', '_' => '!_'])", '(string) $criterio->nombre'],
+    'M8' => ['El dato y su evento ya no se guardan en una transacción (R-09)', 'src/Aplicacion/CasosDeUso/ActualizarPaciente.php',
+        '$guardado = $this->transaccion->ejecutar(function ()', '$guardado = (function ()'],
+    'M9' => ['El adaptador InMemory deja de comparar la versión', 'src/Persistencia/EnMemoria/RepositorioPacientesEnMemoria.php',
+        'if ($actual->version !== $versionEsperada) {', 'if (false) {'],
+    'M10' => ['El controlador toma una decisión de negocio y crea el comando', 'src/Presentacion/Http/Controladores/PacientesControlador.php',
+        "            \$comando = FormularioPaciente::registro(\$solicitud, \$identidad);\n",
+        "            \$comando = FormularioPaciente::registro(\$solicitud, \$identidad);\n            if (\$comando->datos['tipo_documento'] === 'DPI') {\n                \$comando = new \\Pacientes\\Aplicacion\\Comandos\\ComandoRegistrar(\$comando->actor, \$comando->hospital, \$comando->datos);\n            }\n"],
+    'M11' => ['El Kernel arma una respuesta sin pasar por las Vistas', 'src/Presentacion/Http/Kernel.php',
+        'return ErrorVista::hospitalRequerido();', "return Respuesta::json(400, ['error' => 'HOSPITAL_REQUERIDO']);"],
+    'M12' => ['El adaptador InMemory deja de exigir el documento único', 'src/Persistencia/EnMemoria/RepositorioPacientesEnMemoria.php',
+        'if ($canonico === null) {', 'if (true) {'],
+    // Semana 5: cliente-servidor, contrato, observabilidad e idempotencia.
+    'M13' => ['El cliente reintenta los PUT (puede pisar datos o dar 409 engañoso)', 'src/Cliente/ClientePacientes.php',
+        '$r = $this->llamar($peticion, $requestId ?? $this->nuevoId(), false);', '$r = $this->llamar($peticion, $requestId ?? $this->nuevoId(), true);'],
+    'M14' => ['El cliente importa una clase del servidor', 'src/Cliente/ClientePacientes.php',
+        "namespace Pacientes\\Cliente;\n", "namespace Pacientes\\Cliente;\n\nuse Pacientes\\Presentacion\\Http\\Kernel;\n"],
+    'M15' => ['El contrato declara otro permiso para la búsqueda', 'api/openapi.yaml',
+        'x-permiso: pacientes.buscar', 'x-permiso: pacientes.leer'],
+    'M16' => ['El contrato deja de documentar el 428 del PUT', 'api/openapi.yaml',
+        "        '428':\n          \$ref: '#/components/responses/VersionRequerida'\n", ''],
+    'M17' => ['El registro de acceso incluye la query (nombres de pacientes)', 'src/Presentacion/Http/Kernel.php',
+        "'ruta' => \$solicitud->ruta,", "'ruta' => \$solicitud->ruta . '?' . http_build_query(\$solicitud->consulta),"],
+    'M18' => ['El registro deja de consultar la Idempotency-Key', 'src/Aplicacion/CasosDeUso/RegistrarPaciente.php',
+        '$previa = $this->idempotencia->buscar($comando->hospital, $comando->actor, $comando->claveIdempotencia);', '$previa = null;'],
+    // Semana 6: cambio práctico «identidad protegida» (R-11).
+    'M19' => ['La búsqueda por nombre incluye a los protegidos por defecto', 'src/Dominio/Modelo/CriterioBusqueda.php',
+        'public readonly bool $incluirProtegidos = false,', 'public readonly bool $incluirProtegidos = true,'],
+    'M20' => ['El detalle deja de ocultar la demografía del protegido', 'src/Dominio/Modelo/Paciente.php',
+        'return $this->identidadProtegida && !$puedeVerProtegidos;', 'return false;'],
+    'M21' => ['Se puede editar a un protegido sin poder verlo', 'src/Dominio/Servicios/RevisionDeFicha.php',
+        '$this->confidencialidad->exigirVisibilidad($actual, $puede->verProtegidos);', '// sin verificar visibilidad'],
+    'M22' => ['El 409 de duplicados vuelve a mostrar el código del protegido', 'src/Dominio/Servicios/PoliticaDuplicados.php',
+        'if ($puedeVerProtegidos) {', 'if (true) {'],
+    // Semana 7 — piezas nuevas del refactor
+    'M23' => ['El evento de registro deja de guardar el motivo de la protección', 'src/Dominio/Modelo/EventoAuditoria.php',
+        "'motivo_proteccion' => \$registrado->identidadProtegida ? \$motivo : null,", "'motivo_proteccion' => null,"],
+    'M24' => ['Cualquier actor obtiene la capacidad de ver protegidos', 'src/Aplicacion/Servicios/ControlAcceso.php',
+        'verProtegidos: $this->tiene($actor, $hospital, self::LEER_PROTEGIDO),', 'verProtegidos: true,'],
+    // Semana 12 — cambio solicitado B-4
+    'M25' => ['Un PUT sin «documento» vuelve a quitar el documento', 'src/Presentacion/Http/Formularios/FormularioPaciente.php',
+        "'documento_enviado' => array_key_exists('documento', \$cuerpo),", "'documento_enviado' => true,"],
+    'M26' => ['El detalle de un protegido deja ver nombres y apellidos', 'src/Dominio/Modelo/Paciente.php',
+        "'nombres' => \$reducido ? null : \$this->nombres,", "'nombres' => \$this->nombres,"],
+];
+// M8: sin la transacción, el closure se invoca directamente.
+$ajustes = ['M8' => ['            });' . "\n\n" . "            return Resultado::ok(['codigo'", '            })();' . "\n\n" . "            return Resultado::ok(['codigo'"]];
+
+function copiar(string $origen, string $destino): void
+{
+    $iterador = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($origen, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+    foreach ($iterador as $item) {
+        $ruta = $destino . substr($item->getPathname(), strlen($origen));
+        $item->isDir() ? @mkdir($ruta, 0777, true) : copy($item->getPathname(), $ruta);
+    }
+}
+
+function borrar(string $directorio): void
+{
+    $iterador = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directorio, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($iterador as $item) {
+        $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+    }
+    rmdir($directorio);
+}
+
+$sobreviven = 0;
+echo 'Comprobacion por mutacion del Micro-HIS Pacientes (PHP ' . PHP_VERSION . ')' . PHP_EOL;
+foreach ($mutaciones as $id => [$descripcion, $archivo, $buscar, $reemplazo]) {
+    $copia = sys_get_temp_dir() . '/micro-his-mutacion-' . $id . '-' . bin2hex(random_bytes(3));
+    copiar($raiz, $copia);
+    $codigo = (string) file_get_contents("$copia/$archivo");
+    $mutado = str_replace($buscar, $reemplazo, $codigo, $veces);
+    if (isset($ajustes[$id])) {
+        $mutado = str_replace($ajustes[$id][0], $ajustes[$id][1], $mutado, $vecesAjuste);
+        $veces = min($veces, $vecesAjuste);
+    }
+    if ($veces !== 1) {
+        echo PHP_EOL . "$id - $descripcion" . PHP_EOL . '   NO SE PUDO APLICAR (el texto a reemplazar no aparece exactamente una vez)' . PHP_EOL;
+        $sobreviven++;
+        borrar($copia);
+        continue;
+    }
+    file_put_contents("$copia/$archivo", $mutado);
+
+    exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg("$copia/tests/ejecutar.php"), $salida, $codigoSalida);
+    $fallas = array_values(array_filter($salida, static fn (string $l): bool => str_starts_with($l, '[FALLA]')));
+    echo PHP_EOL . "$id - $descripcion" . PHP_EOL;
+    foreach ($fallas as $linea) {
+        echo '   ' . $linea . PHP_EOL;
+    }
+    if ($fallas === []) {
+        echo '   SOBREVIVE: ninguna prueba la detecta' . PHP_EOL;
+        $sobreviven++;
+    }
+    $salida = [];
+    borrar($copia);
+}
+
+echo PHP_EOL . sprintf('Mutaciones: %d  Detectadas: %d  Sobreviven: %d', count($mutaciones), count($mutaciones) - $sobreviven, $sobreviven) . PHP_EOL;
+exit($sobreviven === 0 ? 0 : 1);

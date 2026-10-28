@@ -1,0 +1,57 @@
+@startuml semana-01-secuencia
+' Semana 1 — Expediente médico electrónico base (tarea Odoo 2503)
+title Secuencia — consulta local (CU-02), historia externa (CU-03) y acceso de emergencia (CU-04)
+
+actor "Profesional\ntratante" as P
+participant "UI del expediente\n(Vue)" as UI
+participant "API /api/v1\n(tenant + JWT)" as API
+participant "Servicio de\nexpediente" as SVC
+database "Base HOSPITAL" as H
+participant "Índice central\n(MPI y accesos)" as C
+participant "Auditoría\n(inmutable)" as AUD
+
+== CU-02 Consultar expediente local ==
+P -> UI : S1 Abre el expediente de su paciente
+UI -> API : S2 GET /patients/{id}/record (JWT, X-Tenant-ID)
+API -> SVC : consultar(paciente, profesional)
+SVC -> H : S3 ¿Asignación de atención activa? (R-05)
+alt sin asignación activa
+  SVC -> AUD : registra el rechazo (R-08)
+  API --> UI : 403 (E1, F5)
+else asignación activa
+  SVC -> H : S4 Lee episodios, notas y diagnósticos dentro del alcance (R-09)
+  SVC -> AUD : registra el acceso (R-08)
+  API --> UI : S5 200 Expediente local (F2)
+end
+
+== CU-03 Consultar historia de otros hospitales ==
+P -> UI : S6 Pide la historia externa
+UI -> API : S7 GET /patients/{id}/record/external
+API -> SVC : historiaExterna(paciente, profesional)
+SVC -> H : S8 ¿mpi_link_status = linked? (R-10)
+alt no vinculado
+  API --> UI : 200 solo local, con aviso (E4)
+else vinculado
+  SVC -> C : S9 ¿Acceso normal con consentimiento activo para este hospital? (R-06)
+  alt hay consentimiento
+    C --> SVC : S10 datos permitidos por data_scope
+    SVC -> AUD : registra el acceso
+    API --> UI : 200 Historia longitudinal (F3)
+  else sin consentimiento
+    API --> UI : 403 sin consentimiento: se ofrece acceso de emergencia (E5)
+  end
+end
+
+== CU-04 Acceso de emergencia ==
+P -> UI : S11 Escribe la justificación
+UI -> API : S12 POST /patients/{id}/record/break-glass (justificación)
+alt sin justificación
+  API --> UI : 422 (E6)
+else con justificación
+  API -> SVC : emergencia(paciente, profesional, justificación)
+  SVC -> C : S13 Crea acceso break_glass de 1 hora y revisión pendiente (R-07)
+  C --> SVC : datos permitidos
+  SVC -> AUD : S14 Registra el acceso de emergencia (R-08)
+  API --> UI : S15 200 Historia con aviso de acceso de emergencia (F4)
+end
+@enduml

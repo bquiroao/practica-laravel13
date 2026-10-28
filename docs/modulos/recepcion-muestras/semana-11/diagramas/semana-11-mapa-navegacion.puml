@@ -1,0 +1,27 @@
+@startuml
+title Semana 11 - Mapa de navegación del prototipo
+left to right direction
+skinparam shadowing false
+
+[*] --> BuscarOrden
+BuscarOrden --> Verificacion : orden e ítem coinciden
+BuscarOrden --> ErrorBusqueda : orden no encontrada
+ErrorBusqueda --> BuscarOrden : corregir dato
+Verificacion --> Decision : datos físicos completos
+Verificacion --> BloqueoDuplicado : código ya asociado
+BloqueoDuplicado --> Verificacion : volver a revisar
+BloqueoDuplicado --> Escalacion : informar a jefatura
+Decision --> Custodia : aceptar conforme o rechazo con motivo
+Decision --> Verificacion : revisar nuevamente
+Custodia --> Confirmacion : guardar decisión + primer evento
+Confirmacion --> BuscarOrden : nueva recepción
+
+state BuscarOrden
+state Verificacion
+state Decision
+state Custodia
+state Confirmacion
+state ErrorBusqueda
+state BloqueoDuplicado
+state Escalacion
+@enduml

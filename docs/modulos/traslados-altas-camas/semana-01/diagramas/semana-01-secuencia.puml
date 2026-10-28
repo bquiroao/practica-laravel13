@@ -1,0 +1,65 @@
+@startuml semana-01-secuencia
+title Secuencia — CU-02 Registrar traslado / CU-03 Registrar alta (con CU-04, CU-05 y CU-07)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber "S00"
+
+actor "Enfermería /\nAdmisión" as Enf
+participant "Pantalla" as UI
+participant "Controlador\nMovimientos" as Ctl
+participant "Identidad y\npermisos (RBAC)" as Rbac
+participant "Caso de uso\nRegistrarMovimiento" as CU
+participant "Episodios y\nórdenes" as Epi
+participant "Catálogo de\ncamas" as Cat
+database "BD del hospital" as BD
+participant "Aviso a\nlimpieza" as Lim
+
+Enf -> UI : elige cama destino o confirma alta
+UI -> Ctl : POST /api/v1/traslados  o  POST /api/v1/altas\n{episodio, cama_destino | tipo_alta, motivo} + token
+Ctl -> Rbac : verificar(token, rol, hospital)
+alt D1 sin sesión o sin permiso
+  Ctl --> UI : E1 401 / 403
+else autorizado
+  Ctl -> CU : ejecutar(peticion, usuario del token)
+  CU -> Epi : episodioActivo(episodio) y ordenVigente(tipo)
+  alt D2 sin episodio o sin cama · D3 sin orden
+    CU --> Ctl : E2 episodio_no_disponible · E3 orden_requerida
+    Ctl --> UI : 409
+  else episodio activo con orden
+    alt D4 traslado
+      CU -> Cat : estado(cama_destino)
+      Cat --> CU : disponible / ocupada / mantenimiento / inactiva
+      CU -> CU : D5 validar destino [CU-04]
+    else alta
+      CU -> CU : D6 validar tipo de alta y motivo
+    end
+    alt destino no disponible · alta inválida
+      CU --> Ctl : E4 cama_no_disponible · E5 alta_invalida
+      Ctl --> UI : 409 / 422
+    else válido
+      CU -> BD : BEGIN; SELECT ... FOR UPDATE (cama origen y destino)
+      alt D7 la cama destino ya la tomó otra persona
+        BD --> CU : estado cambió → ROLLBACK
+        CU --> Ctl : E6 conflicto
+        Ctl --> UI : 409
+      else camas como se leyeron
+        CU -> BD : sp_trasladar_paciente(...) o sp_registrar_alta(...)\norigen → «mantenimiento» (limpieza) [CU-05]; COMMIT
+        alt D8 falla el COMMIT
+          BD --> CU : error → ROLLBACK
+          CU --> Ctl : E7 error_persistencia
+          Ctl --> UI : 500
+        else guardado
+          BD --> CU : movimiento registrado
+          CU -> Lim : avisar(cama origen por limpiar) [CU-07]
+          note right : si falla, queda pendiente\ny se reintenta
+          CU --> Ctl : movimiento
+          Ctl --> UI : R 201 {movimiento, cama_origen, cama_destino}
+        end
+      end
+    end
+  end
+end
+UI --> Enf : resultado o error con su motivo
+@enduml

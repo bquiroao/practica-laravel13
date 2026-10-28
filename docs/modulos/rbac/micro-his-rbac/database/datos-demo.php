@@ -15,7 +15,7 @@ return [
         'jorge' => 'inactive',
     ],
     'permisos_por_rol' => [
-        'admin_hospital' => ['roles.asignar', 'auditoria.consultar'],
+        'admin_hospital' => ['roles.asignar', 'roles.revocar', 'auditoria.consultar'],
         'medico' => ['prescripciones.crear', 'signos_vitales.registrar', 'expediente.leer'],
         'enfermeria' => ['signos_vitales.registrar', 'expediente.leer'],
         'laboratorio' => ['resultados.registrar'],

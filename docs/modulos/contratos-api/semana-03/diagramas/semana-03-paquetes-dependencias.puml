@@ -1,0 +1,28 @@
+@startuml semana-03-paquetes-dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorDocumentacion
+}
+package Aplicacion {
+  class ServicioPublicacion
+  class ServicioRevision
+  class ServicioConsulta
+  interface EscritorVersiones <<puerto>>
+  interface RevisionPublicaciones <<puerto>>
+  interface LectorDocumentos <<puerto>>
+}
+package Dominio {
+  class "EstadoVersion, VersionNueva, Audiencia" as Reglas
+}
+package Persistencia {
+  class RepositorioPdo
+}
+Presentacion ..> Aplicacion
+Aplicacion ..> Dominio
+ServicioPublicacion --> EscritorVersiones
+ServicioRevision --> RevisionPublicaciones
+ServicioConsulta --> LectorDocumentos
+RepositorioPdo ..|> EscritorVersiones
+RepositorioPdo ..|> RevisionPublicaciones
+RepositorioPdo ..|> LectorDocumentos
+@enduml

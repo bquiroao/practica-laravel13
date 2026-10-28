@@ -1,0 +1,49 @@
+@startuml
+title Semana 6 - Arquitectura propuesta trazable (Validación bioquímica)
+left to right direction
+skinparam shadowing false
+
+actor "Bioquímico/a" as Bioq
+rectangle "UI de revisión\n(propuesta)" as UI
+component "ReviewController\n(propuesto)" as Controller
+component "ReviewPendingLabResult\n(existe)" as UseCase
+component "Policy Firma + TraceId\n(cambio práctico propuesto)" as SignaturePolicy
+interface "ReviewerAuthorization" as Authz
+interface "Clock" as Clock
+interface "LabResultDecisionRepository" as Repo
+component "InMemoryAdapter\n(existe)" as Memory
+component "PdoAdapter\n(futuro)" as Pdo
+database "Resultados + decisiones\n(futuro persistente)" as DB
+cloud "Auth/Sesión\n(actor,hospital)" as Auth
+cloud "Ingreso de resultados\n(origen)" as Ingreso
+component "API REST /api/v1\n(propuesta)" as Api
+
+Bioq --> UI
+UI --> Api : DEC-01
+Api --> Auth : DEC-02
+Api --> Controller : DEC-01
+Controller --> SignaturePolicy : DEC-04
+SignaturePolicy --> UseCase : DEC-03
+UseCase --> Authz
+UseCase --> Clock
+UseCase --> Repo : DEC-05
+Memory ..|> Repo
+Pdo ..|> Repo
+Pdo --> DB
+Ingreso ..> DB : resultado pendiente
+
+note bottom of Api
+DEC-01: cliente-servidor con contrato API
+DEC-02: actor/hospital salen de sesión
+end note
+
+note bottom of SignaturePolicy
+DEC-03: decisión VALIDATE/REJECT existente
+DEC-04: firma obligatoria + traceId (cambio práctico)
+end note
+
+note bottom of UseCase
+DEC-05: versión y estado mandan (conflicto/invalid_state)
+end note
+@enduml
+

@@ -1,0 +1,5 @@
+Edge headless + Playwright; 2026-10-28
+PASS desktop 1366px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.
+PASS movil 375px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.
+PASS movil-320 320px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.
+PASS movil-430 430px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.

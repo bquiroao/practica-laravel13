@@ -1,0 +1,32 @@
+@startuml
+title Semana 5 - Cliente-servidor y frontera del módulo de ingreso de resultados
+left to right direction
+skinparam shadowing false
+
+actor "Técnico/a de laboratorio" as User
+rectangle "Cliente web/móvil\n(propuesto)" as Client
+
+package "Módulo Ingreso de resultados (monolito modular)" {
+  component "API REST /api/v1\n(adaptador HTTP, propuesto)" as Api
+  component "CaptureOrCorrectResult\n(existe)" as UseCase
+  component "PendingLabResult / ValidatedLabResult\n(existe)" as Domain
+  component "LabResultRepository\nPDO e InMemory (existen)" as Repo
+  database "lab_result_versions\n+ idempotency_keys, outbox (propuestos)" as Db
+}
+
+cloud "Órdenes (otro equipo)" as Orders
+cloud "Usuarios / Auth" as Auth
+cloud "Validación de resultados\n(consumidor)" as Validation
+queue "Bus de eventos (futuro)" as Bus
+
+User --> Client
+Client --> Api : HTTPS + JSON
+Api --> Auth : sesión, rol, hospital
+Api --> UseCase
+UseCase --> Domain
+UseCase --> Repo
+Repo --> Db
+UseCase --> Orders : verificar ítem (propuesto)
+Db ..> Bus : outbox: ResultCaptured, ResultCorrected
+Bus ..> Validation
+@enduml

@@ -1,0 +1,6 @@
+GET /dashboard [tenant=h1 permisos=citas.ver,camas.ver] -> 200 {"menu":[{"ruta":"\/citas","titulo":"Citas"},{"ruta":"\/camas","titulo":"Camas"}],"tarjetas":[{"id":"citas_hoy","estado":"cargando","texto":"Cargando las citas de hoy…"},{"id":"camas_disponibles","estado":"cargando","texto":"Cargando las camas disponibles…"}]}
+GET /dashboard/tarjetas/citas_hoy [tenant=h1 permisos=citas.ver] -> 200 {"id":"citas_hoy","estado":"resumen","texto":"1 cita hoy"}
+GET /dashboard/tarjetas/camas_disponibles [tenant=h1 permisos=camas.ver] -> 200 {"id":"camas_disponibles","estado":"vacio","texto":"No hay camas disponibles ahora."}
+GET /dashboard/tarjetas/pacientes [tenant=h1 permisos=citas.ver] -> 403 {"error":"E4","mensaje":"Esta tarjeta no está disponible para tu rol."}
+GET /dashboard [tenant= permisos=citas.ver] -> 401 {"error":"E1","mensaje":"Tu sesión terminó. Vuelve a iniciar sesión."}
+GET /pacientes [tenant=h1 permisos=citas.ver] -> 404 {}
