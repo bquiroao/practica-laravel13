@@ -1,0 +1,45 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam shadowing false
+
+actor "Operador" as Op
+participant "NativePHP app" as Native
+participant "Laravel API" as API
+participant "Base de datos HIS" as DB
+participant "Administrador" as Admin
+
+Op -> Native: S-01 / R-01: Inicia flujo acotado
+Native -> Native: S-02 / R-01: Valida que el flujo sea acotado
+alt E-01: Flujo no representativo o fuera de alcance
+  Native --> Op: S-03: Solicita redefinir o descartar el caso
+else Flujo definido
+  Native -> API: S-04 / R-02: Solicita operación con credencial y datos
+  API -> API: S-05 / R-04: Valida autenticación y autorización
+  alt E-02: Autenticación o autorización inválida
+    API --> Native: S-06: Error 401/403; operación no ejecutada
+    Native --> Op: S-07: Informa acceso denegado
+  else Acceso autorizado
+    API -> API: S-08 / R-03: Valida solicitud y reglas de negocio
+    alt E-03: Solicitud o regla de negocio inválida
+      API --> Native: S-09: Error de validación; detalle seguro
+      Native --> Op: S-10: Muestra rechazo y permite corregir
+    else Solicitud válida
+      API -> DB: S-11: Consulta o registra datos del flujo
+      alt E-04: Falla de persistencia
+        DB --> API: S-12: Error técnico
+        API --> Native: S-13: Error de operación; no confirma éxito
+        Native --> Op: S-14: Informa falla técnica
+      else Persistencia correcta
+        DB --> API: S-15: Resultado persistido
+        API --> Native: S-16: Respuesta de éxito validada
+        Native --> Op: S-17: Muestra resultado del flujo
+      end
+    end
+  end
+end
+opt CU-03: Evaluar viabilidad con evidencia de la ejecución
+  Native -> Admin: S-18 / R-05: Envía evidencia del prototipo
+  Admin -> Admin: S-19: Evalúa seguridad y mantenibilidad
+  Admin --> Native: S-20 / R-06: Decisión viable / parcial / no viable
+end
+@enduml

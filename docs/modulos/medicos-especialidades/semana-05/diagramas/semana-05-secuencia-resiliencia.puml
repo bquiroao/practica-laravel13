@@ -1,0 +1,31 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia: respuesta perdida con reintento idempotente, y Citas caído
+skinparam defaultFontName Arial
+autonumber
+actor "Administrador" as A
+actor "Recepción" as R
+participant "Cliente" as C
+participant "API Médicos" as P
+database "Base" as B
+participant "Citas (M05)" as M
+== Registro con reintento (RN-02) ==
+A -> C : registra médico, colegiado 12345
+C -> P : POST /medicos\nIdempotency-Key: alta-0001, X-Request-Id: r1
+P -> B : BEGIN; médico + clave; COMMIT
+P --x C : 201 (se pierde la respuesta)
+C -> P : reintento con la MISMA clave (X-Request-Id: r2)
+P -> B : existe la clave alta-0001
+B --> P : sí, med-1
+P --> C : 200 {medico_id: med-1, repetida: true}
+note right of C : sin la clave habría llegado\n409 medico_duplicado y\nel cliente no sabría si fue suyo
+== Consulta con Citas caído (RN-08) ==
+R -> C : disponibilidad de Cardiologia, 14 días
+C -> P : GET /disponibilidad?especialidad=Cardiologia
+P -> B : horarios, ausencias y especialidades vigentes
+P -> M : citas activas (timeout 2 s)
+M --x P : sin respuesta
+P -> M : un reintento a los 200 ms
+M --x P : sin respuesta
+P --> C : 503 citas_no_disponible, Retry-After: 5
+note right of C : no se muestran franjas: es mejor\nun 503 que ofrecer una hora ocupada
+@enduml

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha del paciente · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="atras btn texto" href="m1-buscar.html" aria-label="Volver a los resultados" style="color:#fff">‹</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual" data-estado="base carga sin-conexion">Admisión</span>
+  <span class="rol-actual" data-estado="reducida">Enfermería</span>
+  <span class="avatar" role="img" aria-label="Usuario actual">ML</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Datos cargados a las 10:12; puede haber cambios. Editar requiere conexión.
+  <button>Reintentar</button>
+</div>
+
+<main>
+  <!-- FICHA COMPLETA (admisión). Prioridad 1: quién es y en qué estado está -->
+  <section data-estado="base sin-conexion" aria-labelledby="nombre">
+    <h1 id="nombre" style="margin-bottom:4px">Ana Lucía López Pérez</h1>
+    <div class="fila" style="margin-bottom:12px"><span class="estado activo">● Activo</span><span class="meta">P-000001 · versión 3</span></div>
+    <div class="dos-columnas">
+      <div class="tarjeta">
+        <h2>Identidad</h2>
+        <dl class="datos">
+          <dt>Nacimiento</dt><dd>14/03/1985 (41 años)</dd>
+          <dt>Sexo</dt><dd>Femenino</dd>
+          <dt>Documento</dt><dd>DPI •••• 0101</dd>
+        </dl>
+      </div>
+      <div class="tarjeta">
+        <h2>Contacto</h2>
+        <dl class="datos"><dt>Teléfono</dt><dd>+502 5555 1234</dd></dl>
+        <p class="meta extra">Cada cambio queda en la bitácora del hospital.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FICHA REDUCIDA (clínico, paciente protegido): el servidor manda null; la UI muestra «Reservado» -->
+  <section data-estado="reducida" aria-labelledby="nombre-r">
+    <h1 id="nombre-r" style="margin-bottom:4px">Identidad protegida</h1>
+    <div class="fila" style="margin-bottom:12px"><span class="etiqueta-protegida">◆ Protegida</span><span class="meta">P-000005</span></div>
+    <div class="aviso atencion"><p style="margin:0">Puedes atender a esta paciente. Sus datos personales están protegidos.</p></div>
+    <div class="tarjeta">
+      <dl class="datos">
+        <dt>Sexo</dt><dd>Femenino</dd>
+        <dt>Estado</dt><dd><span class="estado activo">● Activo</span></dd>
+        <dt>Nacimiento</dt><dd class="reservado">Reservado</dd>
+        <dt>Teléfono</dt><dd class="reservado">Reservado</dd>
+        <dt>Documento</dt><dd class="reservado">Reservado</dd>
+      </dl>
+    </div>
+    <p class="meta">No la encontrarás por nombre: búscala por el código de la pulsera.</p>
+  </section>
+
+  <div data-estado="carga" aria-busy="true">
+    <div class="esq" style="width:70%;height:24px"></div><div class="esq" style="width:40%"></div>
+    <div class="tarjeta"><div class="esq" style="width:50%"></div><div class="esq" style="width:60%"></div><div class="esq" style="width:45%"></div></div>
+    <p class="meta" role="status">Cargando la ficha…</p>
+  </div>
+</main>
+
+<!-- Editar solo con pacientes.editar y si la ficha no está restringida; sin conexión, deshabilitado -->
+<div class="accion-fija" data-estado="base carga sin-conexion">
+  <a class="btn primario" href="m4-editar.html" data-estado="base carga">Editar datos</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">Editar · requiere conexión</span>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-buscar.html" aria-current="page"><span class="ico" aria-hidden="true">🔎</span>Pacientes</a>
+  <a href="m2-registrar.html?estado=paso1" data-estado="base carga sin-conexion"><span class="ico" aria-hidden="true">＋</span>Registrar</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

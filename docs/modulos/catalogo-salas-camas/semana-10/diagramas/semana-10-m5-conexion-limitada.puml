@@ -1,0 +1,13 @@
+@startsalt
+title M5 — Conexión limitada al guardar
+{+
+  <b>No sabemos si se guardó</b>
+  La conexión se cortó al enviar «A/101 a mantenimiento».
+  Tu motivo se conserva: "limpieza profunda".
+  [Comprobar el estado de A/101]
+  ---
+  <b>Sin conexión</b>
+  El cambio no se envió y no se guarda para después.
+  [Reintentar] | [Volver a la sala]
+}
+@endsalt

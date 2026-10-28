@@ -1,0 +1,76 @@
+@startuml semana-01-actividad
+title Actividad — CU-02 Registrar traslado y CU-03 Registrar alta (incluyen CU-04 y CU-05)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam ActivityBackgroundColor #EEF2F7
+skinparam ActivityBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+
+|Médico tratante|
+start
+:A1 Ordena el traslado (servicio destino)
+o el alta (tipo y motivo) [CU-01];
+|Enfermería / Admisión|
+:A2 Abre al paciente y elige
+la cama destino o confirma el alta;
+|Sistema (módulo)|
+if (D1 ¿Sesión válida, rol permitido\ny mismo hospital del paciente?) then (no)
+  #FFE3D6:E1 401 sin sesión o 403 sin permiso.
+  Nada cambia;
+  stop
+else (sí)
+endif
+if (D2 ¿Episodio activo y el paciente\nocupa una cama?) then (no)
+  #FFE3D6:E2 409 episodio_no_disponible.
+  Nada cambia;
+  stop
+else (sí)
+endif
+if (D3 ¿Hay orden médica vigente\npara ese movimiento?) then (no)
+  #FFE3D6:E3 409 orden_requerida;
+  stop
+else (sí)
+endif
+if (D4 ¿Traslado o alta?) then (traslado)
+  if (D5 ¿Cama destino distinta, del mismo hospital,\nactiva y «disponible»? [CU-04]) then (no)
+    #FFE3D6:E4 409 cama_no_disponible.
+    La enfermera elige otra;
+    stop
+  else (sí)
+  endif
+else (alta)
+  if (D6 ¿Tipo de alta válido\n(médica, voluntaria, referencia,\ndefunción) y motivo? ) then (no)
+    #FFE3D6:E5 422 alta_invalida;
+    stop
+  else (sí)
+  endif
+endif
+:A3 Abre la transacción y bloquea
+la cama de origen y la de destino;
+if (D7 ¿Las camas siguen como se leyeron?\n(nadie tomó la cama destino)) then (no)
+  #FFE3D6:E6 409 conflicto: recargar
+  y elegir otra cama;
+  stop
+else (sí)
+endif
+:A4 Traslado: destino «ocupada», paciente movido
+Alta: episodio cerrado con tipo y hora;
+:A5 Libera la cama de origen → «mantenimiento»
+con motivo «limpieza» y registra el movimiento [CU-05];
+if (D8 ¿COMMIT correcto?) then (no)
+  #FFE3D6:E7 500 error_persistencia.
+  Rollback: ni doble cama ni cama huérfana;
+  stop
+else (sí)
+endif
+|Limpieza / Gestión de camas|
+:A6 [CU-07] Recibe aviso de cama por limpiar
+(si el aviso falla, queda pendiente y se reintenta);
+|Sistema (módulo)|
+:R Responde 201 con el movimiento y el estado
+de la cama de origen y de destino;
+|Enfermería / Admisión|
+:A7 Ve el resultado y lo comunica al servicio;
+stop
+@enduml

@@ -66,3 +66,25 @@ prueba('DOM-08', 'Las secciones se guardan en un solo campo content y se reconst
     igual([$s->subjetivo, $s->objetivo, $s->analisis, $s->plan], [$r->subjetivo, $r->objetivo, $r->analisis, $r->plan], 'secciones');
     afirmar(str_contains($s->comoContenido(), '°C'), 'conserva acentos y símbolos sin escapar');
 });
+
+prueba('DOM-09', 'El evento NotaSoapFirmada solo se crea de una nota firmada y lleva identificadores, no el texto clínico', function () use ($nota): void {
+    lanza(LogicException::class, fn () => NotasSoap\Dominio\Eventos\EventoClinico::notaFirmada('ev-1', $nota()), 'nota en borrador');
+    $ev = NotasSoap\Dominio\Eventos\EventoClinico::notaFirmada('ev-1', $nota()->firmar(new DateTimeImmutable('2026-10-12T10:00:00-06:00')));
+    igual(['NotaSoapFirmada', 'n-1'], [$ev->tipo, $ev->agregadoId], 'tipo y agregado');
+    igual(['clinical_note_id', 'medical_record_id', 'care_episode_id', 'author_user_ref_id', 'version_no', 'signed_at'], array_keys($ev->datos), 'campos del payload mínimo');
+    $texto = (string) json_encode($ev->datos, JSON_UNESCAPED_UNICODE);
+    afirmar(!str_contains($texto, 'Tos') && !str_contains($texto, 'neumonía'), 'no lleva contenido clínico');
+});
+
+prueba('DOM-10', 'Semana 6: corregir solo se puede sobre una nota firmada, con motivo suficiente; crea la versión siguiente y no toca la original', function () use ($nota, $secciones): void {
+    $firmada = $nota()->firmar(new DateTimeImmutable('2026-10-12T10:00:00-06:00'));
+    $ahora = new DateTimeImmutable('2026-10-12T11:00:00-06:00');
+    $v2 = NotaSoap::corregir($firmada, 'n-2', $secciones(['O' => 'T 37.6 °C']), '  Temperatura mal anotada  ', $ahora);
+    igual(['n-2', 2, NotaSoap::BORRADOR, 'n-1', 'Temperatura mal anotada'], [$v2->id, $v2->version, $v2->estado, $v2->reemplazaA, $v2->motivoCorreccion], 'versión nueva');
+    igual(['exp-carlos', 'epi-100', 'dra-mendez'], [$v2->expedienteId, $v2->episodioId, $v2->autorId], 'hereda expediente, episodio y autor');
+    igual([NotaSoap::FIRMADA, 1, null], [$firmada->estado, $firmada->version, $firmada->reemplazaA], 'la original no cambia');
+    lanza(NotasSoap\Dominio\Excepciones\NotaNoFirmada::class, fn () => NotaSoap::corregir($nota(), 'n-3', $secciones(), 'Temperatura mal anotada', $ahora), 'borrador');
+    lanza(NotasSoap\Dominio\Excepciones\MotivoCorreccionInsuficiente::class, fn () => NotaSoap::corregir($firmada, 'n-3', $secciones(), ' error   ', $ahora), 'motivo corto');
+    igual(['n-1', 'Temperatura mal anotada'], [$v2->firmar($ahora)->reemplazaA, $v2->firmar($ahora)->motivoCorreccion], 'la firma conserva la cadena de versiones');
+});
+

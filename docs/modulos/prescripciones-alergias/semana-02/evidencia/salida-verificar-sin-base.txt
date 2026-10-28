@@ -1,0 +1,30 @@
+$ php ejemplo-dip/verificar.php   (sin base de datos)
+[PASA ] CA-01   Camino feliz: emite, guarda la verificación y deja la traza
+[PASA ] CA-02   Sin prescripcion.emitir en ese hospital: 403 y nada guardado
+[PASA ] CA-03   Paciente de otro hospital: 404 igual a «no existe» (R-08)
+[PASA ] CA-04   Incompleta: 422 con cada campo inválido (R-01)
+[PASA ] CA-05   Dosis diaria: 4000 mg pasa (límite), 6000 mg bloquea (R-02)
+[PASA ] CA-06   Coincidencia directa: bloqueo absoluto, ni con justificación y override (R-04)
+[PASA ] CA-07   Alérgeno solo con nombre («  AMOXICILINA »): coincide por nombre normalizado
+[PASA ] CA-08   Reactividad cruzada no grave: exige justificación ≥ 20 y override (R-05)
+[PASA ] CA-09   Cruzada con severidad life_threatening o unknown: bloqueo aunque se justifique
+[PASA ] CA-10   Alergias no evaluadas: exige confirmar «sin alergias conocidas» (R-06)
+[PASA ] CA-11   Fuente de alergias caída: 503, nada emitido y traza (R-07, fail-closed)
+[PASA ] CA-12   Solo cuentan las alergias activas; una resuelta no bloquea ni pide confirmación
+[PASA ] CA-13   Idempotencia: mismo contenido → la misma; otro contenido → 409 (R-11)
+[PASA ] CA-14   La base no confirma: 503 y sin traza de emisión
+[PASA ] CA-15   Verificación previa: informa sin guardar ni trazar
+[PASA ] CA-16   La emisión vuelve a verificar: una alergia registrada después de la previa bloquea (R-03)
+[PASA ] CA-17   Inmutable: el repositorio no puede actualizar ni borrar; la prescripción es readonly (R-10)
+[PASA ] DIP-01  La política (Aplicacion, Dominio) no menciona ningún detalle de bajo nivel
+[PASA ] DIP-02  Las abstracciones son del alto nivel y los detalles dependen de ellas
+[PASA ] DIP-03  Sustitución: otra fuente (formato FHIR AllergyIntolerance) sin tocar el caso de uso
+[PASA ] ANT-01  El ANTES no se puede probar sin base: hasta la regla de dosis exige PostgreSQL
+[OMITE] DIP-04  Adaptador PDO sobre `allergies`: mismo expediente y mismas decisiones que en memoria
+          -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] DIP-05  Expediente inaccesible: el DESPUÉS bloquea (503); el ANTES emite amoxicilina a un alérgico
+          -> sin PRESCRIPCIONES_DB_DSN
+[OMITE] PAR-01  Paridad: en el camino normal ANTES y DESPUÉS responden igual en los 15 escenarios
+          -> sin PRESCRIPCIONES_DB_DSN
+
+Total: 24  Pasan: 21  Fallan: 0  Omitidas: 3

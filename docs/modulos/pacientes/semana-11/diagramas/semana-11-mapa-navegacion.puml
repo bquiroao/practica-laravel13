@@ -1,0 +1,45 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo de Pacientes (escritorio y móvil: las mismas rutas)
+skinparam defaultFontSize 12
+skinparam state {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+hide empty description
+
+state "Ingresar\nruta #/ingresar\n(elige rol)" as ING
+state "Buscar paciente\nruta #/pacientes\n(inicio de todos los roles)" as BUS
+state "Registrar paciente\nruta #/pacientes/nuevo\npasos 1 → 2 → 3\n[pacientes.registrar]" as REG
+state "Ficha\nruta #/pacientes/P-…\ncompleta o reducida" as FIC
+state "Editar\nruta #/pacientes/P-…/editar\n[pacientes.editar]" as EDI
+state "Confirmar cambios\n(hoja inferior / diálogo)" as CONF
+state "Más\nruta #/mas\n(sesión y red simulada)" as MAS
+state "Acceso denegado" as DEN #FDECEC
+
+state "Resultado incierto\n(reintentar con la\nmisma Idempotency-Key)" as INC #FFF4E5
+state "Ya existe / Reservado\n(error crítico)" as EXI #FDECEC
+state "Coincidencia probable\n(supervisión confirma\ncon motivo)" as COI #FFF4E5
+state "Conflicto de versión\n(reaplicar en memoria)" as CON #FFF4E5
+
+[*] --> ING
+ING --> BUS : elige rol
+BUS --> FIC : abre un resultado
+BUS --> REG : «Registrar paciente nuevo»\n(solo con resultados vacíos o desde la barra)
+REG --> FIC : 201 (P-…)
+REG --> INC : sin respuesta
+INC --> FIC : reintento → 201 repetido
+REG --> EXI : 409 PACIENTE_EXISTENTE
+EXI --> BUS : volver (código real → abrir ficha)
+REG --> COI : 409 POSIBLE_DUPLICADO
+COI --> FIC : abrir candidato / confirmar
+FIC --> EDI : «Editar datos»\n(no si reducida o restringida)
+EDI --> CONF : «Revisar cambios»
+CONF --> EDI : «Volver a editar» / Esc
+CONF --> FIC : 200 «Datos actualizados»
+CONF --> CON : 409 VERSION_DESACTUALIZADA
+CON --> EDI : versión nueva + cambios marcados
+BUS --> MAS
+MAS --> ING : cerrar sesión
+REG --> DEN : sin permiso
+EDI --> DEN : sin permiso
+@enduml

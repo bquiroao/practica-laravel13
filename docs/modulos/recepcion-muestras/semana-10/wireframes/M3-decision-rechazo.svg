@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="700" viewBox="0 0 720 700" font-family="Segoe UI, Arial, sans-serif" font-size="14">
+  <title>Pantalla M3 - Decisión y rechazo (360 px)</title>
+  <rect width="720" height="700" fill="#f6f7f9"/>
+  <text x="20" y="28" font-size="16" font-weight="bold">M3 - Decisión: aceptar o rechazar</text>
+  <rect x="20" y="44" width="360" height="640" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+  <rect x="20" y="44" width="360" height="52" rx="14" fill="#1f4e79"/>
+  <text x="36" y="76" fill="#fff" font-weight="bold">‹ Decisión</text>
+  <text x="300" y="76" fill="#fff" font-size="12">Paso 3 de 3</text>
+  <rect x="36" y="108" width="328" height="84" rx="8" fill="#f8d7da" stroke="#721c24"/>
+  <text x="48" y="130" font-weight="bold">Resultado de la revisión: RECHAZO</text>
+  <text x="48" y="152">• El sello del tubo de sangre no está íntegro.</text>
+  <text x="48" y="172" font-size="12">Motivo generado por la regla; no se puede aceptar.</text>
+  <text x="36" y="216" font-weight="bold">Motivo adicional (opcional)</text>
+  <rect x="36" y="224" width="328" height="64" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="48" y="252" fill="#555">Observación libre, separada del motivo</text>
+  <text x="48" y="272" fill="#555" font-size="12">0 / 200 caracteres</text>
+  <rect x="36" y="308" width="328" height="64" rx="8" fill="#eef5ff" stroke="#1f4e79"/>
+  <text x="48" y="330" font-weight="bold">Se guardará:</text>
+  <text x="48" y="350" font-size="13">orden ORD-0000 · recipiente nuevo · rechazo + motivo</text>
+  <text x="48" y="366" font-size="13">+ primer evento de custodia</text>
+  <rect x="36" y="392" width="328" height="52" rx="6" fill="#721c24"/>
+  <text x="200" y="424" text-anchor="middle" fill="#fff" font-weight="bold">Confirmar rechazo</text>
+  <rect x="36" y="456" width="328" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="200" y="486" text-anchor="middle" font-weight="bold">Volver y corregir</text>
+  <text x="36" y="532" font-size="12" fill="#555">Acción destructiva separada del botón de volver (&gt; 16 px).</text>
+  <text x="36" y="552" font-size="12" fill="#555">Si todo cumple, la pantalla muestra «Confirmar aceptación».</text>
+
+  <g font-size="13">
+    <text x="410" y="80" font-weight="bold">Decisiones de contenido</text>
+    <text x="410" y="104">1. Se muestra primero el resultado de la</text>
+    <text x="410" y="124">   revisión y su causa, después la acción.</text>
+    <text x="410" y="148">2. El motivo del sistema no se edita; la</text>
+    <text x="410" y="168">   observación libre es opcional y aparte</text>
+    <text x="410" y="188">   (hallazgo 4 de la Semana 9).</text>
+    <text x="410" y="212">3. Resumen de lo que se va a guardar antes</text>
+    <text x="410" y="232">   de confirmar.</text>
+    <text x="410" y="256">4. Confirmar y volver, separados.</text>
+    <text x="410" y="290" font-weight="bold">Reducción de carga cognitiva</text>
+    <text x="410" y="312">Una decisión por pantalla; el sistema</text>
+    <text x="410" y="332">calcula el resultado, la persona confirma.</text>
+    <text x="410" y="374" font-weight="bold">Límite</text>
+    <text x="410" y="396">Rechazo clínico solo por una no conformidad</text>
+    <text x="410" y="416">real. Una falla técnica no es rechazo.</text>
+    <text x="410" y="458" fill="#721c24" font-weight="bold">Catálogo de motivos: lo define el laboratorio;</text>
+    <text x="410" y="478" fill="#721c24">no se inventa aquí.</text>
+  </g>
+</svg>

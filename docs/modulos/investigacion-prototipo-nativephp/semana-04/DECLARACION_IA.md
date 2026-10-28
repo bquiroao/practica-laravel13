@@ -1,0 +1,1 @@
+IA utilizada para continuar el mismo Micro-HIS, añadir MVC e InMemory, ejecutar pruebas y elaborar análisis de repositorio compartido. La estudiante revisa y defiende decisiones. PDO real temporal; HIS/SO dobles; no runtime NativePHP, servidor compartido, identidad clínica ni revisión independiente.

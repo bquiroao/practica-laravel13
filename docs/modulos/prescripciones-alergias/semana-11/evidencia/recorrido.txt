@@ -1,0 +1,84 @@
+OK    escritorio 01-ingresar                    axe=0
+OK    escritorio 02-paciente                    axe=0
+OK    escritorio 03-borrador                    axe=0
+OK    escritorio 04-quitar-deshacer             axe=0
+OK    escritorio WCAG 2.4.11 tras quitar, el foco («+ Agregar medicamento») no queda oculto
+OK    escritorio B-08 «Deshacer» restaura el ítem con sus valores (dosis 1500)
+OK    escritorio 05-dosis-excedida              axe=0
+OK    escritorio el foco va al resumen de errores, que enlaza al campo
+OK    escritorio 06-advertencia                 axe=0
+OK    escritorio B-12 el resultado recibe el foco y se anuncia
+OK    escritorio 07-justificar                  axe=0
+OK    escritorio 08-sesion-vencida              axe=0
+OK    escritorio B-02 el foco inicial del diálogo está en «Renovar sesión»
+OK    escritorio 09-emitida                     axe=0
+OK    escritorio B-02/B-10 tras renovar se repite la MISMA petición: 1 prescripción
+OK    escritorio nada clínico en localStorage ni sessionStorage (0 claves)
+OK    escritorio 10-detalle-medico              axe=0
+OK    escritorio 11-farmacia-consultar          axe=0
+OK    escritorio 12-farmacia-detalle            axe=0
+OK    escritorio 13-farmacia-sin-permiso        axe=0
+OK    escritorio 14-sin-conflictos              axe=0
+OK    escritorio 15-alergia-registrada          axe=0
+OK    escritorio la pantalla abierta sigue con la foto anterior del Expediente (la carrera es real)
+OK    escritorio 16-bloqueo-al-emitir           axe=0
+OK    escritorio el foco va al veredicto (se anuncia como alerta)
+OK    escritorio no se guardó ninguna prescripción (1) y el bloqueo quedó trazado
+OK    escritorio 17-borrador-intacto            axe=0
+OK    escritorio el borrador conserva lo escrito (dosis, frecuencia y días: 500 8 7)
+OK    escritorio 18-incierto                    axe=0
+OK    escritorio 19-borrador-bloqueado          axe=0
+OK    escritorio 20-ya-emitida                  axe=0
+OK    escritorio B-10 el reintento con la misma Idempotency-Key no duplicó: 2 prescripciones en total
+OK    escritorio 21-motivo-corto                axe=0
+OK    escritorio 22-anular-incierto             axe=0
+OK    escritorio el foco inicial está en «Reintentar»
+OK    escritorio 23-anulacion-reconciliada      axe=0
+OK    escritorio una sola anulación trazada aunque se envió dos veces
+OK    escritorio 24-sin-override                axe=0
+OK    escritorio B-11 la hoja no tiene área de texto; el foco inicial está en «Volver»
+OK    escritorio Esc cierra la hoja y el foco vuelve al botón que la abrió
+OK    escritorio 25-expediente-caido            axe=0
+OK    movil      01-ingresar                    axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      02-paciente                    axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      03-borrador                    axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      04-quitar-deshacer             axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      WCAG 2.4.11 tras quitar, el foco («+ Agregar medicamento») no queda oculto
+OK    movil      B-08 «Deshacer» restaura el ítem con sus valores (dosis 1500)
+OK    movil      05-dosis-excedida              axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      el foco va al resumen de errores, que enlaza al campo
+OK    movil      06-advertencia                 axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      B-12 el resultado recibe el foco y se anuncia
+OK    movil      07-justificar                  axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      08-sesion-vencida              axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      B-02 el foco inicial del diálogo está en «Renovar sesión»
+OK    movil      09-emitida                     axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      B-02/B-10 tras renovar se repite la MISMA petición: 1 prescripción
+OK    movil      nada clínico en localStorage ni sessionStorage (0 claves)
+OK    movil      10-detalle-medico              axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      11-farmacia-consultar          axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      12-farmacia-detalle            axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      13-farmacia-sin-permiso        axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      14-sin-conflictos              axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      15-alergia-registrada          axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      la pantalla abierta sigue con la foto anterior del Expediente (la carrera es real)
+OK    movil      16-bloqueo-al-emitir           axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      el foco va al veredicto (se anuncia como alerta)
+OK    movil      no se guardó ninguna prescripción (1) y el bloqueo quedó trazado
+OK    movil      17-borrador-intacto            axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      el borrador conserva lo escrito (dosis, frecuencia y días: 500 8 7)
+OK    movil      18-incierto                    axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      19-borrador-bloqueado          axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      20-ya-emitida                  axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      B-10 el reintento con la misma Idempotency-Key no duplicó: 2 prescripciones en total
+OK    movil      21-motivo-corto                axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      22-anular-incierto             axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      el foco inicial está en «Reintentar»
+OK    movil      23-anulacion-reconciliada      axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      una sola anulación trazada aunque se envió dos veces
+OK    movil      24-sin-override                axe=0 desborde=0 toque<44=0 tapados=0
+OK    movil      B-11 la hoja no tiene área de texto; el foco inicial está en «Volver»
+OK    movil      Esc cierra la hoja y el foco vuelve al botón que la abrió
+OK    movil      25-expediente-caido            axe=0 desborde=0 toque<44=0 tapados=0
+
+Comprobaciones: 82  Fallan: 0

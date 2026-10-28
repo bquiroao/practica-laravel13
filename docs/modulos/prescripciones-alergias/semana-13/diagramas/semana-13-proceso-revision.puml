@@ -1,0 +1,42 @@
+@startuml semana-13-proceso-revision
+!pragma layout smetana
+title Revisión técnica formal (inspección) del Micro-HIS Prescripciones
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #EDF4F5
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityBorderColor #0F4C5C
+
+|Autor|
+start
+:Prepara el paquete\n(commit congelado);
+:Autorrevisión con el checklist\nAR-01..AR-07 (E-6);
+|Moderador|
+:criterios-entrada.php\nE-1..E-6 automáticos;
+if (¿E-1..E-8 se cumplen?) then (no)
+  #FDECEC:No hay reunión:\nse reprograma con el motivo;
+  stop
+endif
+:Envía el material ≥ 48 h antes (E-7);
+|Revisores|
+:Preparación individual por perspectiva\nR1 S · R2 C · R3 D (clínico) · R4 I/A\n150–200 LOC/h;
+:Hallazgos preliminares\n(registro-preparacion.csv);
+|Moderador|
+repeat :Reunión S1 / S2 / S3 (≤ 90 min)\nlector · registrador · sin soluciones;
+  :Registro de hallazgos y acta;
+repeat while (¿quedan sesiones?) is (sí)
+->no;
+|Autor|
+:Retrabajo: cada corrección\ncon su prueba y su mutación;
+|Moderador|
+:Seguimiento: verifica cada cierre\nS-1..S-6;
+if (¿Críticos abiertos o densidad > 15/KLOC?) then (sí)
+  #FDECEC:Re-revisión;
+  stop
+elseif (¿Mayores con plazo?) then (sí)
+  #FFF4E5:Aceptado con condiciones;
+  stop
+else (no)
+  #E7F4EC:Aceptado;
+  stop
+endif
+@enduml

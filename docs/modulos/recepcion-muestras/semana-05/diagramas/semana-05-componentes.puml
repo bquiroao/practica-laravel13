@@ -1,0 +1,32 @@
+@startuml
+title Semana 5 - Cliente-servidor y frontera del módulo de recepción
+left to right direction
+skinparam shadowing false
+
+actor "Técnico/a de recepción" as User
+rectangle "Cliente móvil/web\n(propuesto)" as Client
+
+package "Módulo Recepción (monolito modular)" {
+  component "API REST /api/v1\n(adaptador HTTP, propuesto)" as Api
+  component "ReceiveSpecimen\n(existe)" as UseCase
+  component "SpecimenAcceptancePolicy\n(existe)" as Policy
+  component "PdoSpecimenRepository\n(existe)" as Repo
+  database "specimen_receptions\n+ custody_events (propuesto)" as Db
+  component "Outbox de eventos\n(propuesto)" as Outbox
+}
+
+cloud "Módulo Órdenes (otro equipo)" as Orders
+cloud "Módulo Usuarios / Auth" as Auth
+queue "Bus de eventos\n(futuro)" as Bus
+
+User --> Client
+Client --> Api : HTTPS + JSON
+Api --> Auth : valida sesión, rol y hospital
+Api --> UseCase
+UseCase --> Policy
+UseCase --> Repo
+Repo --> Db
+UseCase --> Orders : GET orden e ítem (propuesto)
+UseCase --> Outbox : SpecimenReceived / SpecimenRejected
+Outbox ..> Bus : publicación asíncrona
+@enduml

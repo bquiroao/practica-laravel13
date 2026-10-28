@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+actor "Clínico / EMR" as U
+component "Cliente HTTP" as C
+component "API propuesta" as API
+component "Issue / Find reutilizados" as APP
+interface "Repository de órdenes" as R
+component "Adaptador servidor" as PDO
+database "Orden / partidas / idempotencia futura" as DB
+component "Identidad y ámbito tenant" as AUTH
+component "Contexto EMR" as EMR
+component "Catálogo" as CAT
+U --> C
+C --> API : HTTPS / sesión / clave
+API --> AUTH
+API --> APP
+APP --> EMR
+APP --> CAT
+APP --> R
+PDO ..|> R
+PDO --> DB : transacción
+note bottom of API
+Contrato diseñado, no desplegado.
+Mantener módulo en HIS por ahora.
+end note
+@enduml

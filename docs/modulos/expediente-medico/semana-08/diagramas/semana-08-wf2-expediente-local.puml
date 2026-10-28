@@ -1,0 +1,14 @@
+@startsalt
+title W2 — Expediente longitudinal local (profesional tratante)
+{+
+  {* Inicio | <b>Expediente HC-000123</b> | Ayuda }
+  M. López Ruiz (ficticio) · 54 años | Tu atención: episodio E-77 (activa) | [Ver otros hospitales]
+  {#
+    <b>Fecha</b> | <b>Episodio</b> | <b>Servicio</b> | <b>Resumen</b>
+    12/10/2026 | E-77 (en curso) | Medicina interna | Nota de ingreso
+    03/04/2025 | E-41 | Consulta externa | Control
+  }
+  <i>Solo lo que tu asignación permite ver (R-09). Este acceso queda en la auditoría (R-08).</i>
+  <i>Vacío: «Sin episodios anteriores en este hospital».</i>
+}
+@endsalt

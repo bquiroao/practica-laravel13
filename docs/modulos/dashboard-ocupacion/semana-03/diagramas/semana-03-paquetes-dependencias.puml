@@ -1,0 +1,34 @@
+@startuml semana-03-paquetes-dependencias
+' Semana 3 — Dashboard de ocupación hospitalaria (tarea Odoo 2490): regla de dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorOcupacion
+}
+package Aplicacion {
+  class ConsolidadorOcupacion
+  class ConsultaOcupacion
+  interface FuenteCamas <<puerto>>
+  interface EscritorCortes <<puerto>>
+  interface LectorCortes <<puerto>>
+  interface Reloj <<puerto>>
+}
+package Dominio {
+  class OcupacionSala
+  class Corte
+}
+package Persistencia {
+  class RepositorioPdo
+}
+ControladorOcupacion ..> ConsolidadorOcupacion
+ControladorOcupacion ..> ConsultaOcupacion
+ConsolidadorOcupacion ..> OcupacionSala
+ConsultaOcupacion ..> Corte
+ConsolidadorOcupacion --> FuenteCamas
+ConsolidadorOcupacion --> EscritorCortes
+ConsultaOcupacion --> LectorCortes
+ConsolidadorOcupacion --> Reloj
+ConsultaOcupacion --> Reloj
+RepositorioPdo ..|> FuenteCamas
+RepositorioPdo ..|> EscritorCortes
+RepositorioPdo ..|> LectorCortes
+@enduml

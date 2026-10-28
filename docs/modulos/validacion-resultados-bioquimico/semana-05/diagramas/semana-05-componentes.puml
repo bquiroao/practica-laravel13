@@ -1,0 +1,32 @@
+@startuml
+title Semana 5 - Cliente-servidor y frontera del módulo de validación
+left to right direction
+skinparam shadowing false
+
+actor "Bioquímico/a" as User
+rectangle "Cliente web\n(propuesto)" as Client
+
+package "Módulo Validación (monolito modular)" {
+  component "API REST /api/v1\n(adaptador HTTP, propuesto)" as Api
+  component "ReviewPendingLabResult\n(existe)" as UseCase
+  component "LabResultDecisionRepository\nInMemory (existe) / PDO (falta)" as Repo
+  database "resultados + decisiones\n+ idempotencia, outbox (propuestos)" as Db
+}
+
+cloud "Auth (sesión, rol)" as Auth
+cloud "Ingreso de resultados\n(origen del resultado)" as Ingreso
+cloud "Órdenes / Muestras" as Orders
+queue "Bus de eventos (futuro)" as Bus
+cloud "Informe / Notificación" as Report
+
+User --> Client
+Client --> Api : HTTPS + JSON
+Api --> Auth : actor, rol, hospital
+Api --> UseCase
+UseCase --> Repo
+Repo --> Db : estado + decisión en 1 transacción
+Ingreso ..> Db : crea resultado PENDING (dato compartido)
+UseCase ..> Orders : referencias ítem, examen, muestra
+Db ..> Bus : outbox ResultValidated / ResultRejected
+Bus ..> Report
+@enduml

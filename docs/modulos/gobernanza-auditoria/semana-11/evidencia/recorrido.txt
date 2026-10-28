@@ -1,0 +1,50 @@
+OK    escritorio 01-ingresar                    axe=0
+OK    escritorio 02-filtros                     axe=0
+OK    escritorio 03-filtro-modulo               axe=0
+OK    escritorio 04-resultados                  axe=0
+OK    escritorio 05-cargar-mas                  axe=0
+OK    escritorio 06-detalle-original            axe=0
+OK    escritorio 07-detalle-correccion          axe=0
+OK    escritorio 08-vuelve-a-la-lista           axe=0
+OK    escritorio 09-sesion-vencida              axe=0
+OK    escritorio B-02 el foco inicial del diálogo está en «Renovar sesión»
+OK    escritorio 10-sesion-renovada             axe=0
+OK    escritorio B-02 nada de la bitácora en localStorage ni sessionStorage (0 claves)
+OK    escritorio 11-superadmin-filtros          axe=0
+OK    escritorio B-01 recorrer el grupo de alcance con ↓ NO abre ningún diálogo
+OK    escritorio 12-confirmar-red               axe=0
+OK    escritorio B-01 el foco inicial está en «Cancelar»
+OK    escritorio Esc cierra el diálogo y el foco vuelve al botón que lo abrió
+OK    escritorio 13-integridad                  axe=0
+OK    escritorio 14-ancla-invalida              axe=0
+OK    escritorio B-07 «Verificar» no se deshabilita: el foco va al resumen de errores
+OK    escritorio 15-confirmar-verificacion      axe=0
+OK    escritorio 16-cadena-alterada             axe=0
+OK    escritorio el foco va al veredicto (se anuncia como alerta)
+OK    escritorio 17-oriente-integra             axe=0
+OK    movil      01-ingresar                    axe=0 desborde=0 toque<44=0
+OK    movil      02-filtros                     axe=0 desborde=0 toque<44=0
+OK    movil      03-filtro-modulo               axe=0 desborde=0 toque<44=0
+OK    movil      04-resultados                  axe=0 desborde=0 toque<44=0
+OK    movil      05-cargar-mas                  axe=0 desborde=0 toque<44=0
+OK    movil      06-detalle-original            axe=0 desborde=0 toque<44=0
+OK    movil      07-detalle-correccion          axe=0 desborde=0 toque<44=0
+OK    movil      08-vuelve-a-la-lista           axe=0 desborde=0 toque<44=0
+OK    movil      09-sesion-vencida              axe=0 desborde=0 toque<44=0
+OK    movil      B-02 el foco inicial del diálogo está en «Renovar sesión»
+OK    movil      10-sesion-renovada             axe=0 desborde=0 toque<44=0
+OK    movil      B-02 nada de la bitácora en localStorage ni sessionStorage (0 claves)
+OK    movil      11-superadmin-filtros          axe=0 desborde=0 toque<44=0
+OK    movil      B-01 recorrer el grupo de alcance con ↓ NO abre ningún diálogo
+OK    movil      12-confirmar-red               axe=0 desborde=0 toque<44=0
+OK    movil      B-01 el foco inicial está en «Cancelar»
+OK    movil      Esc cierra el diálogo y el foco vuelve al botón que lo abrió
+OK    movil      13-integridad                  axe=0 desborde=0 toque<44=0
+OK    movil      14-ancla-invalida              axe=0 desborde=0 toque<44=0
+OK    movil      B-07 «Verificar» no se deshabilita: el foco va al resumen de errores
+OK    movil      15-confirmar-verificacion      axe=0 desborde=0 toque<44=0
+OK    movil      16-cadena-alterada             axe=0 desborde=0 toque<44=0
+OK    movil      el foco va al veredicto (se anuncia como alerta)
+OK    movil      17-oriente-integra             axe=0 desborde=0 toque<44=0
+
+Comprobaciones: 48  Fallan: 0

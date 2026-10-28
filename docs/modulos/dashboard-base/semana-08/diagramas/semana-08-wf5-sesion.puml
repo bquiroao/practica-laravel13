@@ -1,0 +1,12 @@
+@startsalt
+title W5 — Sesión expirada y cierre de sesión confirmado
+{+
+  <b>Tu sesión expiró</b>
+  Por seguridad cerramos la sesión en este equipo. No se perdió ningún dato.
+  [Iniciar sesión de nuevo]
+  ---
+  <b>¿Cerrar sesión?</b>
+  Se borrarán el token y el hospital guardados en este equipo.
+  [Cancelar] | [Cerrar sesión]
+}
+@endsalt

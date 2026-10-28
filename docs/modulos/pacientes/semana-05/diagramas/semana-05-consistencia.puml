@@ -1,0 +1,35 @@
+@startuml semana-05-consistencia
+title Consistencia: fuerte dentro del hospital, eventual hacia el MPI (outbox → inbox)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+
+participant "Pacientes" as P
+database "HOSPITAL\nlocal_patients · local_access_audit\noutbox_event · idempotencia" as H
+participant "Sincronización\n(relay)" as R
+database "CENTRAL\ncentral_inbox_messages" as I
+participant "Procesador MPI" as MP
+database "CENTRAL\nmpi_patients · mpi_identifiers\npatient_hospital_links · identity_match_candidates" as M
+
+== Transacción local (ACID) ==
+P -> H : BEGIN
+P -> H : UPDATE local_patients … WHERE version = :v
+P -> H : INSERT local_access_audit (antes/después)
+P -> H : INSERT outbox_event «pacientes.paciente.actualizado» v1
+P -> H : COMMIT
+note right of H : o todo o nada (R-06, R-09)
+
+== Entrega asíncrona (al menos una vez) ==
+R -> H : SELECT outbox_event pendientes
+R -> I : INSERT … ON CONFLICT (source_node_id, event_id) DO NOTHING
+R -> H : marcar entregado
+MP -> I : tomar pendiente
+MP -> M : actualizar identidad · vincular\n(pending → linked) · proponer candidatos
+MP -> I : processed_at
+note over R, M
+  Idempotente por (source_node_id, event_id): un reenvío no duplica.
+  Retraso visible en sync_checkpoints.lag_seconds (objetivo ≤ 60 s).
+  DPI duplicado entre hospitales → identity_match_candidates (revisión humana).
+end note
+@enduml

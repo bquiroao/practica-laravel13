@@ -1,0 +1,13 @@
+@startsalt
+title W3 — Historia de otros hospitales (con consentimiento)
+{+
+  <b>Historia de otros hospitales</b> · consentimiento vigente hasta 31/12/2026 (R-06)
+  {#
+    <b>Fecha</b> | <b>Hospital de origen</b> | <b>Episodio</b> | <b>Alcance</b>
+    20/08/2025 | Hospital Regional Norte | Urgencias | Diagnósticos y alergias
+  }
+  <i>Solo el alcance que el paciente consintió; lo demás no se lista.</i>
+  <i>Sin vínculo con el índice maestro (E4): «Solo hay historia local de este paciente».</i>
+  [Volver al expediente local]
+}
+@endsalt

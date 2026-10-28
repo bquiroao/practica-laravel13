@@ -1,0 +1,22 @@
+@startsalt
+title M1 — Agenda del día (320 px)
+{+
+  [≡ Menú] | <b>Agenda · H. Central</b>
+  [< 27/10] | <b>Mié 28/10</b> | [29/10 >]
+  ---
+  {+
+    <b>08:00–08:30</b> · Programada
+    P-0012 · A. Pérez
+    Cardiología · Dra. Ruiz | [Ver cita >]
+  }
+  {+
+    <b>09:00–09:30</b> · Confirmada
+    P-0047 · L. Gómez
+    Cardiología · Dra. Ruiz | [Ver cita >]
+  }
+  ---
+  1 cita cancelada | [Mostrar]
+  [+ Nueva cita]
+  <i>Sin conexión: «Agenda de las 08:40» y [Reintentar].</i>
+}
+@endsalt

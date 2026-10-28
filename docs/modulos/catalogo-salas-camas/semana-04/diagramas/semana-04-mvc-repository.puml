@@ -1,0 +1,31 @@
+@startuml semana-04-mvc-repository
+' Semana 4 — Catálogo de salas, wards y camas (tarea Odoo 2446): entrada MVC e interfaz Repository
+title MVC y Repository — Micro-HIS Catálogo de salas, wards y camas
+package "Entrada" {
+  class "public/index.php" as Front <<front controller>>
+}
+package Presentacion {
+  class Rutas
+  class ControladorCatalogo <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class ServicioCatalogo
+  interface RepositorioCatalogo <<repository>>
+  enum EstadoCama
+}
+package Persistencia {
+  class RepositorioPdo
+  class RepositorioEnMemoria
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorCatalogo : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorCatalogo --> ServicioCatalogo
+ControladorCatalogo --> VistaJson
+ServicioCatalogo --> RepositorioCatalogo
+ServicioCatalogo ..> EstadoCama
+RepositorioPdo ..|> RepositorioCatalogo
+RepositorioEnMemoria ..|> RepositorioCatalogo
+note bottom of ControladorCatalogo : sin SQL ni reglas de negocio
+@enduml

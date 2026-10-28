@@ -1,0 +1,1 @@
+Presentar checklist de 15 puntos y ocho hallazgos. Explicar que contraste/recorte medidos no fallan en los pares revisados; los problemas están en contexto de plataforma, recuperaciones, evidencia, exportación, roles y especificación accesible. Priorizar efectos y reproducibilidad, no ampliar a datos clínicos. SVG no equivale a app NativePHP operable ni a conformidad WCAG.

@@ -1,0 +1,28 @@
+@startuml semana-01-actividad-revocacion
+title Módulo de identidad — Actividad de revocación de sesión
+skinparam shadowing false
+
+start
+:A-21 Usuario solicita cerrar\nsesión actual con JWT;
+:A-22 Verificar firma, expiración,\njti y contexto [R-06];
+if (¿Token vigente y contexto válido? [D-06]) then (sí)
+  :A-23 Comprobar que el token no\nesté ya revocado [R-08];
+  if (¿Token todavía utilizable? [D-06]) then (sí)
+    :A-24 Registrar jti revocado hasta\nexpiración en almacén confiable [R-07];
+    if (¿Revocación persistida? [D-07]) then (sí)
+      :A-25 Confirmar cierre de sesión;
+      :A-26 Rutas protegidas rechazan\nel token revocado [R-08];
+      stop
+    else (no)
+      :E-08 No confirmar cierre;\nno aparentar revocación exitosa;
+      stop
+    endif
+  else (no)
+    :E-07 Rechazar token ya revocado;
+    stop
+  endif
+else (no)
+  :E-07 Rechazar token ausente,\nvencido o no válido;
+  stop
+endif
+@enduml

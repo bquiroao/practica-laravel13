@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">WF-04 — Registrar un rechazo con motivo</title>
+  <desc id="desc">Wireframe de rechazo controlado con motivo requerido, observación opcional y confirmación final que conserva el registro.</desc>
+  <rect width="1280" height="820" fill="#f3f6fa"/>
+  <rect width="1280" height="74" fill="#12304a"/>
+  <text x="34" y="46" fill="#fff" font-family="Arial,sans-serif" font-size="24" font-weight="700">Sistema Hospitalario Integrado</text>
+  <text x="1040" y="44" fill="#d8e6f1" font-family="Arial,sans-serif" font-size="15">Hospital activo: Central</text>
+  <rect y="74" width="222" height="746" fill="#e8eef4"/>
+  <text x="26" y="126" fill="#25445e" font-family="Arial,sans-serif" font-size="16" font-weight="700">Recepción</text>
+  <rect x="12" y="145" width="198" height="44" rx="7" fill="#d2e5f4"/>
+  <text x="30" y="173" fill="#123b59" font-family="Arial,sans-serif" font-size="15" font-weight="700">Nueva recepción</text>
+  <text x="250" y="120" fill="#17354e" font-family="Arial,sans-serif" font-size="28" font-weight="700">Registrar rechazo</text>
+  <text x="250" y="151" fill="#50677b" font-family="Arial,sans-serif" font-size="16">El rechazo requiere una no conformidad confirmada y un motivo.</text>
+  <rect x="250" y="179" width="980" height="75" rx="9" fill="#fff1ef" stroke="#e2a49c"/>
+  <circle cx="282" cy="216" r="16" fill="#b83a32"/>
+  <text x="277" y="222" fill="#fff" font-family="Arial,sans-serif" font-size="18" font-weight="700">!</text>
+  <text x="311" y="212" fill="#762b25" font-family="Arial,sans-serif" font-size="16" font-weight="700">No conformidad observada</text>
+  <text x="311" y="236" fill="#762b25" font-family="Arial,sans-serif" font-size="14">Verifica el vínculo con la orden y registra solo información pertinente.</text>
+  <rect x="250" y="275" width="590" height="318" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="277" y="314" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Motivo del rechazo <tspan fill="#b83a32">*</tspan></text>
+  <rect x="277" y="333" width="536" height="48" rx="6" fill="#fff" stroke="#9aabba"/>
+  <text x="296" y="364" fill="#526a7e" font-family="Arial,sans-serif" font-size="15">Selecciona el motivo del procedimiento vigente</text>
+  <path d="M782 352 l10 10 l10 -10" fill="none" stroke="#526a7e" stroke-width="2"/>
+  <text x="277" y="414" fill="#536a7e" font-family="Arial,sans-serif" font-size="14">Observación (opcional; evita datos no necesarios)</text>
+  <rect x="277" y="426" width="536" height="91" rx="6" fill="#fff" stroke="#9aabba"/>
+  <text x="296" y="455" fill="#8798a5" font-family="Arial,sans-serif" font-size="14">Describe brevemente la condición observada</text>
+  <text x="277" y="548" fill="#526a7e" font-family="Arial,sans-serif" font-size="13">El motivo y la observación quedan disponibles solo a roles autorizados.</text>
+  <rect x="861" y="275" width="369" height="318" rx="9" fill="#fff" stroke="#cbd7e1"/>
+  <text x="887" y="314" fill="#29475f" font-family="Arial,sans-serif" font-size="18" font-weight="700">Verifica el recipiente</text>
+  <text x="887" y="356" fill="#647b8c" font-family="Arial,sans-serif" font-size="13" font-weight="700">ORDEN / ÍTEM</text>
+  <text x="887" y="380" fill="#213d53" font-family="Arial,sans-serif" font-size="15">ORD-00482 · Ítem 01</text>
+  <text x="887" y="420" fill="#647b8c" font-family="Arial,sans-serif" font-size="13" font-weight="700">PACIENTE</text>
+  <text x="887" y="444" fill="#213d53" font-family="Arial,sans-serif" font-size="15">Paciente de ejemplo</text>
+  <line x1="887" y1="465" x2="1203" y2="465" stroke="#e0e7ec"/>
+  <text x="887" y="495" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">No se elimina el registro ni se</text>
+  <text x="887" y="518" fill="#526a7e" font-family="Arial,sans-serif" font-size="14">marca como apto para procesar.</text>
+  <rect x="887" y="538" width="316" height="38" rx="6" fill="#fff" stroke="#9aabba"/>
+  <text x="930" y="563" fill="#29475f" font-family="Arial,sans-serif" font-size="14">Volver a verificar</text>
+  <rect x="250" y="617" width="980" height="76" rx="9" fill="#fff5df" stroke="#edcc80"/>
+  <text x="276" y="649" fill="#77520c" font-family="Arial,sans-serif" font-size="15" font-weight="700">Error de consulta o guardado ≠ rechazo</text>
+  <text x="276" y="675" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Si falta evidencia o falla el servicio, deja la decisión pendiente y recupera el flujo técnico.</text>
+  <rect x="250" y="715" width="155" height="44" rx="7" fill="#fff" stroke="#8ba0b0"/>
+  <text x="286" y="743" fill="#29475f" font-family="Arial,sans-serif" font-size="15">Cancelar</text>
+  <rect x="990" y="715" width="240" height="44" rx="7" fill="#a6332e"/>
+  <text x="1020" y="743" fill="#fff" font-family="Arial,sans-serif" font-size="15" font-weight="700">Revisar y rechazar</text>
+  <text x="250" y="791" fill="#77520c" font-family="Arial,sans-serif" font-size="14">Anotación: botón deshabilitado sin motivo válido; la confirmación final vuelve a resumir muestra, orden e impacto.</text>
+</svg>

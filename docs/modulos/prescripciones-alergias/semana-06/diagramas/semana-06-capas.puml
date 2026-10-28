@@ -1,0 +1,30 @@
+@startuml semana-06-capas
+!pragma layout smetana
+left to right direction
+title Capas del Micro-HIS: en verde, lo que tocó el cambio práctico (anular con motivo)
+skinparam defaultFontSize 10
+skinparam packageStyle rectangle
+
+package "Presentación (MVC)" #F5F9FF {
+  rectangle "Kernel · Autenticación · Observabilidad\n(sin cambios)" as K
+  rectangle "Rutas + 1 ruta\nControlador.anular()\nFormulario.anulacion()\nVista.anulacion()" as M #E1EFE8
+}
+package "Aplicación" #F5F9FF {
+  rectangle "EmitirPrescripcion · VerificarAlergiasPrevia\nConsultarPrescripcion · EvaluacionClinica\n(sin cambios)" as A
+  rectangle "AnularPrescripcion «nuevo»" as AN #E1EFE8
+}
+package "Dominio" #FFF8E1 {
+  rectangle "PoliticaEmision · Verificador · Validador\n(sin cambios)" as D
+  rectangle "Anulacion · PoliticaAnulacion «nuevos»\nPrescripcion: estado DERIVADO + conAnulacion()\nRepositorioPrescripciones + anular()" as DN #E1EFE8
+}
+package "Persistencia" #EEF7EE {
+  rectangle "FuenteAlergias · Catálogo · Pacientes\nTransacción · Bandeja (sin cambios)" as P
+  rectangle "Pdo/InMemory Repositorio + anular()\nprescription_voids (trigger inmutable)" as PN #E1EFE8
+}
+K --> M
+M --> AN
+AN --> DN
+PN ..|> DN
+A --> D
+P ..|> A
+@enduml

@@ -11,6 +11,9 @@ declare(strict_types=1);
 use Rbac\Aplicacion\CasosDeUso\AsignarRol;
 use Rbac\Aplicacion\CasosDeUso\AutorizarOperacion;
 use Rbac\Aplicacion\CasosDeUso\ConsultarEventoAuditoria;
+use Rbac\Aplicacion\CasosDeUso\ConsultarPermisosEfectivos;
+use Rbac\Aplicacion\CasosDeUso\RevocarRol;
+use Rbac\Aplicacion\Servicios\RegistradorDeCambios;
 use Rbac\Dominio\Puertos\RegistroAuditoria;
 use Rbac\Dominio\Reglas\Asignacion\ReglaNoAutoasignacion;
 use Rbac\Dominio\Reglas\Asignacion\ReglaRolEnCatalogo;
@@ -22,6 +25,10 @@ use Rbac\Dominio\Reglas\Autorizacion\ReglaRolConcedePermiso;
 use Rbac\Dominio\Reglas\Autorizacion\ReglaTenantCoincide;
 use Rbac\Dominio\Servicios\PoliticaAsignacion;
 use Rbac\Dominio\Servicios\PoliticaAutorizacion;
+use Rbac\Dominio\Servicios\PoliticaRevocacion;
+use Rbac\Dominio\Reglas\Revocacion\ReglaMembresiaRevocable;
+use Rbac\Dominio\Reglas\Revocacion\ReglaMotivoSuficiente;
+use Rbac\Dominio\Reglas\Revocacion\ReglaNoAutorrevocacion;
 use Rbac\Persistencia\Archivo\RegistroAuditoriaArchivo;
 use Rbac\Persistencia\ConjuntoAdaptadores;
 use Rbac\Persistencia\EnMemoria\FabricaEnMemoria;
@@ -31,7 +38,9 @@ use Rbac\Presentacion\Http\Autenticacion\Autenticador;
 use Rbac\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Rbac\Presentacion\Http\Controladores\AsignacionRolControlador;
 use Rbac\Presentacion\Http\Controladores\AuditoriaControlador;
+use Rbac\Presentacion\Http\Controladores\AutorizacionControlador;
 use Rbac\Presentacion\Http\Controladores\OperacionClinicaControlador;
+use Rbac\Presentacion\Http\Controladores\RevocacionRolControlador;
 use Rbac\Presentacion\Http\Kernel;
 use Rbac\Presentacion\Http\MiddlewareAutorizacion;
 use Rbac\Presentacion\Http\Rutas;
@@ -55,7 +64,7 @@ function crearAdaptadores(array $config): ConjuntoAdaptadores
 /**
  * Dominio + Aplicación (el «Modelo» de MVC) sobre cualquier conjunto de adaptadores.
  *
- * @return array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria}
+ * @return array{autorizar: AutorizarOperacion, permisosEfectivos: ConsultarPermisosEfectivos, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria, revocarRol: RevocarRol}
  */
 function construirCasosDeUso(
     ConjuntoAdaptadores $adaptadores,
@@ -85,18 +94,26 @@ function construirCasosDeUso(
         $reloj,
     );
 
+    // Semana 7: un solo servicio aplica cualquier cambio de membresía con su evidencia (R-07).
+    $cambios = new RegistradorDeCambios($adaptadores->transaccion, $adaptadores->membresias, $adaptadores->auditoria);
+
     return [
         'autorizar' => $autorizar,
-        'asignarRol' => new AsignarRol(
+        // Semana 12 (B-6): misma política que el PDP, sin auditoría, para lo que la interfaz muestra.
+        'permisosEfectivos' => new ConsultarPermisosEfectivos($politicaAutorizacion, $adaptadores->membresias, $reloj),
+        'asignarRol' => new AsignarRol($autorizar, $politicaAsignacion, $cambios, $generarCorrelacion, $reloj),
+        'consultar' => new ConsultarEventoAuditoria($adaptadores->auditoria),
+        'revocarRol' => new RevocarRol(
             $autorizar,
-            $politicaAsignacion,
-            $adaptadores->membresias,
-            $adaptadores->auditoria,
-            $adaptadores->transaccion,
+            new PoliticaRevocacion([
+                new ReglaNoAutorrevocacion(),
+                new ReglaMotivoSuficiente(),
+                new ReglaMembresiaRevocable($adaptadores->membresias),
+            ]),
+            $cambios,
             $generarCorrelacion,
             $reloj,
         ),
-        'consultar' => new ConsultarEventoAuditoria($adaptadores->auditoria),
     ];
 }
 
@@ -105,17 +122,38 @@ function construirCasosDeUso(
  *
  * @param array{autorizar: AutorizarOperacion, asignarRol: AsignarRol, consultar: ConsultarEventoAuditoria} $casos
  */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+function construirKernel(array $casos, Autenticador $autenticador, ?\Closure $registrarAcceso = null): Kernel
 {
     return new Kernel(
-        Rutas::definir(
-            new AsignacionRolControlador($casos['asignarRol']),
-            new AuditoriaControlador($casos['consultar']),
-            new OperacionClinicaControlador(),
-        ),
+        construirRutas($casos),
         $autenticador,
         new MiddlewareAutorizacion($casos['autorizar']),
+        $registrarAcceso,
+        generarUuid(...),
     );
+}
+
+/**
+ * Controladores y tabla de rutas sobre los casos de uso (la usan el Kernel y las pruebas de contrato).
+ *
+ * @param array<string, object> $casos
+ * @return list<\Rbac\Presentacion\Http\Ruta>
+ */
+function construirRutas(array $casos): array
+{
+    return Rutas::definir(
+        new AsignacionRolControlador($casos['asignarRol']),
+        new AuditoriaControlador($casos['consultar']),
+        new OperacionClinicaControlador(),
+        new AutorizacionControlador($casos['autorizar'], $casos['permisosEfectivos']),
+        new RevocacionRolControlador($casos['revocarRol']),
+    );
+}
+
+/** Registro de acceso estructurado (una línea JSON por petición) hacia el log de PHP / stderr. */
+function registrarAccesoEnLog(array $registro): void
+{
+    error_log((string) json_encode(['tipo' => 'acceso'] + $registro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
 /**
@@ -137,7 +175,7 @@ function crearKernel(array $config): Kernel
         static fn (): \DateTimeImmutable => new \DateTimeImmutable(),
     );
 
-    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel($casos, new AutenticadorTokenDemo($config['tokens_demo']), registrarAccesoEnLog(...));
 }
 
 /** UUID v4 para el correlation_id. */

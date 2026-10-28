@@ -1,0 +1,47 @@
+@startuml
+title Semana 6 - Arquitectura propuesta trazable (Ingreso de resultados)
+left to right direction
+skinparam shadowing false
+
+actor "Técnico/a de laboratorio" as Tech
+actor "Bioquímico/a" as Bioq
+
+rectangle "UI Ingreso (propuesta)" as UI
+component "ResultController + ResultForm\n(existe)" as Controller
+component "CaptureOrCorrectResult\n(existe)" as UseCase
+component "Policy: Value+Unit+Range\n(propuesta de cambio)" as Policy
+interface "LabResultRepository" as Repo
+component "PdoLabResultRepository / InMemory\n(existe)" as RepoImpl
+database "lab_result_versions\n(existe)" as DB
+cloud "Órdenes/LIS\n(referencias)" as Orders
+cloud "Auth/Sesión\n(actor, hospital)" as Auth
+component "API REST /api/v1\n(propuesta)" as Api
+
+Tech --> UI
+UI --> Api
+Api --> Auth : DEC-02
+Api --> Controller : DEC-01
+Controller --> UseCase : DEC-01
+UseCase --> Policy : DEC-04
+UseCase --> Repo : DEC-03
+RepoImpl ..|> Repo
+RepoImpl --> DB : DEC-03
+UseCase ..> Orders : DEC-05
+Bioq ..> Api : DEC-06
+
+note bottom of Api
+DEC-01: capas UI-Application-Domain-Persistence
+DEC-02: actor/hospital de sesión
+DEC-06: contrato API con idempotencia y errores tipados
+end note
+
+note bottom of UseCase
+DEC-04: cambio práctico de valor+unidad+rango
+DEC-05: corrección controlada solo en estado pendiente
+end note
+
+note bottom of RepoImpl
+DEC-03: Repository + adaptador intercambiable
+end note
+@enduml
+
