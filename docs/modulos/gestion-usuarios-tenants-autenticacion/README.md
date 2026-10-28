@@ -27,6 +27,9 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/gestion-usuarios-tenant
 ## Semana 13
 
 [Plan de revisión técnica, checklist, roles y formatos](semana-13/semana-13-revision-tecnica-usuarios-tenants.md).
+## Semana 12
+
+[Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
 ## Semana 14
 
 [Plan SQA: métricas, riesgos, controles y calendario](semana-14/semana-14-plan-sqa-usuarios-tenants.md).
