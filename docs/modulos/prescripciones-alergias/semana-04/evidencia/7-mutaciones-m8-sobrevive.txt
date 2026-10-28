@@ -1,0 +1,22 @@
+$ PRESCRIPCIONES_DB_DSN=… php tests/mutaciones.php
+[DETECTA  ] M1 el adaptador PDO devuelve vacío si allergies falla (fail-open) falla: PER-01, INT-06
+[DETECTA  ] M2 la aplicación trata la fuente caída como «sin alergias»     falla: APP-04, APP-13, HTTP-03, INT-06
+[DETECTA  ] M3 la coincidencia directa deja de bloquear                    falla: DOM-03, APP-05, APP-10, HTTP-02, HTTP-08, INT-03
+[DETECTA  ] M4 la severidad «unknown» se trata como leve                   falla: DOM-04, APP-07, INT-03
+[DETECTA  ] M5 la dosis máxima se duplica                                  falla: DOM-02, APP-09
+[DETECTA  ] M6 no se exige confirmar «sin alergias conocidas»              falla: APP-08, HTTP-02
+[DETECTA  ] M7 la advertencia no exige el permiso override                 falla: APP-06
+[SOBREVIVE] M8 sin idempotencia                                            
+[DETECTA  ] M9 no se verifica el hospital del paciente                     falla: APP-11, APP-16, HTTP-02
+[DETECTA  ] M10 el bloqueo no deja traza                                   falla: APP-05, INT-03
+[DETECTA  ] M11 el kernel no compara X-Tenant-ID con el token              falla: HTTP-04
+[DETECTA  ] M12 el SQL de la consulta ignora el hospital                   falla: CON-PDO-04, INT-01
+[DETECTA  ] M13 la carrera de idempotencia no se traduce a ClaveEnUso      falla: CON-PDO-03, INT-04
+[DETECTA  ] M14 el esquema sin el trigger de inmutabilidad                 falla: INT-02
+[DETECTA  ] M15 el controlador arma él mismo la respuesta de error         falla: ARQ-07, ARQ-08
+[DETECTA  ] M16 el repositorio InMemory ignora el hospital en porId        falla: APP-03, CON-MEM-04, HTTP-07
+[DETECTA  ] M17 el repositorio InMemory acepta una clave repetida          falla: CON-MEM-03
+[DETECTA  ] M18 regresión de H-4: la dosis no se normaliza                 falla: CON-PDO-01, MVC-05, INT-09
+[DETECTA  ] M19 la vista pone Location también en un reintento (200)       falla: MVC-02
+----------------------------------------------------------------------------------------------------
+Mutaciones: 19  Detectadas: 18  Sobreviven: 1

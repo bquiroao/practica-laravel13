@@ -1,0 +1,26 @@
+$ php docs/modulos/gobernanza-auditoria/semana-02/ejemplo-ocp/verificar.php
+Auditoría semana 2 - verificacion OCP (PHP 8.4.26)
+------------------------------------------------------------------------------
+[PASA] CA-01   Registro válido: 201 con secuencia 1 y sello; el segundo queda encadenado (secuencia 2)
+[PASA] CA-02   Sin «auditoria.registrar»: 403 ACCESO_DENEGADO y no se guarda nada
+[PASA] CA-03   Movimiento de otro hospital: 403 TENANT_NO_COINCIDE, aunque además traiga campos inválidos
+[PASA] CA-04   Campos obligatorios: 422 DATOS_INVALIDOS con TODOS los que faltan
+[PASA] CA-05   Acción fuera del catálogo del módulo y resultado desconocido: 422
+[PASA] CA-06   Fecha: +4 min se acepta (reloj desfasado), +6 min es futura (422), sin zona es inválida (422)
+[PASA] CA-07   Datos prohibidos en el detalle (password, token anidado, diagnóstico): 422
+[PASA] CA-08   Idempotencia: el reintento idéntico da 200 YA_REGISTRADO sin duplicar; con otro contenido, 409
+[PASA] CA-09   Base caída al registrar: 503 y nada a medias; al volver, el reintento crea el movimiento
+[PASA] CA-10   Inmutabilidad: ni la Bitacora ni los servicios ofrecen actualizar o borrar
+[PASA] CA-11   Sello encadenado: INTEGRA; alterar la fila 2 → ALTERADA en 2; si además se recalcula su sello → ALTERADA en 3
+[PASA] CA-12   Consulta sin rango, con un solo extremo, con fecha inexistente o invertida: 422
+[PASA] CA-13   Filtros combinados (usuario + módulo + acción) y «hasta» inclusive en hora local (23:30 sí, 00:10 del día siguiente no)
+[PASA] CA-14   Alcance: el auditor solo ve su hospital y no la red (403); el super administrador ve la red
+[PASA] CA-15   Página de 50 en orden descendente, con «hay_mas»; 50 exactos no tienen página siguiente
+[PASA] CA-16   Meta-auditoría: cada consulta deja AUDITORIA_CONSULTADA; si no se puede registrar, no se entregan resultados (503)
+[PASA] CA-17   Detalle: el de otro hospital da el MISMO 404 que uno inexistente; el propio se audita
+[PASA] OCP-01  Extensiones nuevas sin tocar el núcleo: filtro por resultado y regla «cada cuenta solo su módulo»
+[PASA] OCP-02  Los servicios no conocen reglas ni filtros concretos (análisis del código) y los reciben como iterable
+[PASA] OCP-03  Sin las extensiones (misma clase de servicio): «resultado» pasa a ser FILTRO_NO_SOPORTADO y la regla de módulo desaparece
+[PASA] PAR-01  Antes y después: el MISMO resultado (estado, código, ids, secuencias y sellos) en 16 pasos
+------------------------------------------------------------------------------
+Total: 21  Pasan: 21  Fallan: 0

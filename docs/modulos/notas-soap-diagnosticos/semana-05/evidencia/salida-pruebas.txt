@@ -1,0 +1,249 @@
+Micro-HIS Notas SOAP y diagnósticos - evidencia de pruebas (semana 5)
+Fecha: 2026-10-10 16:47
+
+=== Ejecución 1: sin PostgreSQL (adaptadores en memoria + SQLite en memoria) ===
+$ php tests/ejecutar.php
+Micro-HIS Notas SOAP - pruebas (PHP 8.3.6)
+
+== Reglas de dominio ==
+[PASA ] DOM-01   Una nota nueva nace en borrador, versión 1 y sin fecha de firma (R-07)
+[PASA ] DOM-02   Las cuatro secciones S, O, A y P son obligatorias (R-04, CA-07)
+[PASA ] DOM-03   El código CIE-10 debe tener formato válido (R-05, CA-08)
+[PASA ] DOM-04   El tipo de diagnóstico solo puede ser primary, secondary o differential (R-05, CA-09)
+[PASA ] DOM-05   El diagnóstico hereda nota, episodio y autor de la nota (R-05)
+[PASA ] DOM-06   Firmar cambia el estado y guarda la fecha sin mutar el original (R-07)
+[PASA ] DOM-07   Una nota firmada no se puede volver a firmar ni modificar (R-07, CA-11)
+[PASA ] DOM-08   Las secciones se guardan en un solo campo content y se reconstruyen igual
+[PASA ] DOM-09   El evento NotaSoapFirmada solo se crea de una nota firmada y lleva identificadores, no el texto clínico
+
+== Casos de uso (camino feliz y rechazos) ==
+[PASA ] APP-01   Camino feliz: guarda la nota, su diagnóstico y el evento de auditoría (CU-01, CU-02, CA-01)
+[PASA ] APP-02   Médico sin asignación al episodio: 403 y no se guarda nada (R-02, CA-04)
+[PASA ] APP-03   Enfermería no puede registrar notas SOAP (R-02, CA-03)
+[PASA ] APP-04   Token de un hospital usado contra otro hospital: 403 (R-01, CA-05)
+[PASA ] APP-05   Expediente cerrado o episodio de otro paciente: no se registra (R-03, CA-06)
+[PASA ] APP-06   Regla de dominio en el caso de uso: sección vacía o CIE-10 inválido no tocan la base (R-04, R-05, CA-07, CA-08)
+[PASA ] APP-07   El autor firma su nota y queda evento NOTA_FIRMADA (CU-03, CA-11)
+[PASA ] APP-08   Otro médico no puede firmar; una nota firmada no se firma otra vez (R-07, CA-11)
+[PASA ] APP-09   Consultar devuelve la nota con sus diagnósticos (CU-04)
+[PASA ] APP-10   Registrar deja la nota en borrador y NO publica nada; firmar deja un evento NotaSoapFirmada en la bandeja de salida
+[PASA ] APP-11   Si la bandeja de salida falla, la firma se revierte: la nota sigue en borrador y no hay NOTA_FIRMADA
+[PASA ] APP-12   Firmar devuelve la nota completa: secciones SOAP y diagnósticos
+[PASA ] APP-13   Idempotencia: la misma clave con el mismo contenido devuelve la misma nota y no crea otra
+[PASA ] APP-14   Idempotencia: la misma clave con otro contenido es un error del cliente
+[PASA ] APP-15   Idempotencia: la clave es por usuario; otro médico no puede leer ni reutilizar la nota de otro con su clave
+[PASA ] APP-16   Idempotencia: si la transacción falla, la clave no queda guardada y el reintento crea la nota
+[PASA ] APP-17   Listar notas de un expediente: orden de creación, filtro por estado y hospital del token
+
+== Errores de persistencia (dobles de PDO) ==
+[PASA ] PER-01   Si PDO falla, el repositorio lanza ErrorPersistencia con el SQLSTATE y no deja salir PDOException
+[PASA ] PER-02   Un fallo al verificar el acceso también se traduce a ErrorPersistencia
+[PASA ] PER-03   PdoTransaccion confirma si todo sale bien y revierte si el trabajo falla
+[PASA ] PER-04   Si el COMMIT falla, se revierte y se informa ErrorPersistencia
+[PASA ] PER-05   Error al guardar el diagnóstico: la nota tampoco queda guardada (R-06, CA-10)
+[PASA ] PER-06   Por HTTP el error de persistencia es 500 genérico, sin SQL ni SQLSTATE en la respuesta (RNF-03)
+
+== Contratos: Repository (memoria y PDO) y API (openapi.yaml ↔ código) ==
+[PASA ] API-01   Contrato ↔ código: mismas operaciones (método y ruta) y mismo permiso (x-permiso) en cada una
+[PASA ] API-02   Toda operación documenta 400, 401, 403 y 500, y al menos una respuesta 2xx
+[PASA ] API-03   Cada código HTTP que devuelve el servidor en 24 escenarios reales está documentado en su operación
+[PASA ] API-04   Cada código de error que devuelve el servidor está en el enum Error.code del contrato
+[PASA ] REP-01 memoria guardar y buscar devuelven la misma nota (secciones, estado, versión, autor)
+[PASA ] REP-02 memoria buscar una nota que no existe devuelve null
+[PASA ] REP-03 memoria guardar dos veces el mismo id es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-04 memoria registrarFirma guarda la firma; sobre una nota ya firmada lanza NotaFirmada (R-07)
+[PASA ] REP-05 memoria deNota devuelve solo los diagnósticos de esa nota, ordenados por id
+[PASA ] REP-06 memoria un diagnóstico de una nota inexistente es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-07 memoria deExpediente devuelve solo las notas de ese expediente, en orden de creación y luego por id
+[PASA ] REP-08 memoria RegistroIdempotencia: buscar una clave nueva da null; guardada devuelve huella y nota; repetida es error de integridad
+[PASA ] REP-01 pdo-sqlite guardar y buscar devuelven la misma nota (secciones, estado, versión, autor)
+[PASA ] REP-02 pdo-sqlite buscar una nota que no existe devuelve null
+[PASA ] REP-03 pdo-sqlite guardar dos veces el mismo id es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-04 pdo-sqlite registrarFirma guarda la firma; sobre una nota ya firmada lanza NotaFirmada (R-07)
+[PASA ] REP-05 pdo-sqlite deNota devuelve solo los diagnósticos de esa nota, ordenados por id
+[PASA ] REP-06 pdo-sqlite un diagnóstico de una nota inexistente es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-07 pdo-sqlite deExpediente devuelve solo las notas de ese expediente, en orden de creación y luego por id
+[PASA ] REP-08 pdo-sqlite RegistroIdempotencia: buscar una clave nueva da null; guardada devuelve huella y nota; repetida es error de integridad
+
+== Cliente ↔ servidor (resiliencia e idempotencia) ==
+[PASA ] CLI-01   Camino feliz cliente → servidor: 201 OK, y el cliente envía X-Request-ID e Idempotency-Key
+[PASA ] CLI-02   Respuesta perdida en la red: el cliente reintenta con la MISMA clave y el servidor NO duplica la nota
+[PASA ] CLI-03   Falla de red y luego éxito: un reintento con espera corta
+[PASA ] CLI-04   Un 5xx se reintenta; un 4xx no (es una respuesta válida del servidor)
+[PASA ] CLI-05   La firma no se reintenta sola: una falla de red da NO_DISPONIBLE después de un solo intento
+[PASA ] CLI-06   Circuit breaker: 3 fallas abren el circuito; mientras está abierto no se llama al servidor; después del enfriamiento prueba de nuevo
+[PASA ] CLI-07   Red real: servidor inalcanzable → NO_DISPONIBLE rápido, sin excepción
+[PASA ] CLI-08   El listado por expediente viaja con su filtro y devuelve solo resúmenes (sin texto clínico)
+
+== Presentación HTTP ==
+[PASA ] HTTP-01  POST /api/v1/notas-soap válido responde 201 con la nota en borrador
+[PASA ] HTTP-02  Sin X-Tenant-ID responde 400; sin token o con token desconocido responde 401 (CA-02)
+[PASA ] HTTP-03  Cada error de dominio se traduce a su código HTTP (403, 409, 422)
+[PASA ] HTTP-04  Cuerpo sin objeto diagnostico responde 400 cuerpo_invalido
+[PASA ] HTTP-05  Firmar y consultar por HTTP; firmar dos veces responde 409
+[PASA ] HTTP-06  Ruta inexistente 404, método equivocado 405 y error inesperado 500 sin detalles
+[PASA ] HTTP-07  El autor sale del token, no del cuerpo: enviar author_user_ref_id no cambia la autoría (RF-06, CA-12)
+[PASA ] HTTP-08  MVC: la misma acción con Accept: text/html usa la vista HTML (mismo controlador, mismo modelo)
+[PASA ] HTTP-09  La vista HTML escapa lo que escribió el usuario: un <script> en una sección se muestra como texto
+[PASA ] HTTP-10  Entrada: un campo que no es texto es error de formato (400); los errores también salen en HTML si se pide
+[PASA ] HTTP-11  Idempotency-Key repetida: 201 con Idempotent-Replayed: true y la misma nota
+[PASA ] HTTP-12  Idempotency-Key con formato inválido → 400; reutilizada con otro cuerpo → 422 idempotency_key_reutilizada
+[PASA ] HTTP-13  Permiso por ruta: enfermería consulta (200) pero no registra ni firma (403 antes de llegar al caso de uso)
+[PASA ] HTTP-14  GET /api/v1/expedientes/{id}/notas-soap: resúmenes sin texto clínico, filtro inválido → 400, 405 con cabecera Allow
+[PASA ] OBS-01   X-Request-ID: se devuelve el recibido si es válido; si falta o es inválido (por ejemplo "<script>") se genera uno nuevo
+[PASA ] OBS-02   Registro de acceso: una línea por petición con request_id, ruta, estado y duración; sin token ni texto clínico
+[PASA ] OBS-03   Si el registro de acceso falla, la respuesta al cliente no cambia
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de ninguna otra capa
+[PASA ] ARQ-02   Aplicación solo depende de Dominio
+[PASA ] ARQ-03   Presentación usa casos de uso, comandos, resultados y excepciones; nunca Persistencia, puertos ni entidades
+[PASA ] ARQ-04   Persistencia implementa puertos y no conoce Presentación ni casos de uso
+[PASA ] ARQ-05   PDO y SQL solo aparecen en Persistencia
+[PASA ] ARQ-06   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL armado con variables
+[PASA ] ARQ-07   Dominio y Aplicación no hacen entrada/salida ni leen globales (echo, header, $_SERVER, archivos, getenv)
+[PASA ] ARQ-08   Sin framework: ningún archivo usa Illuminate, Symfony, Laminas ni vendor/autoload
+[PASA ] ARQ-09   El controlador no tiene SQL, PDO ni reglas de negocio: solo arma el comando, llama al caso de uso y entrega a la vista
+[PASA ] ARQ-10   Cada puerto de repositorio tiene dos adaptadores: uno PDO y uno en memoria
+[PASA ] ARQ-11   Las vistas solo pintan: no llaman casos de uso ni conocen Persistencia
+[PASA ] ARQ-12   Los casos de uso dependen de las interfaces Repository, nunca de un adaptador concreto
+[PASA ] ARQ-13   La librería Cliente solo conoce el contrato: no importa clases del servidor, y el servidor no importa el Cliente
+[PASA ] ARQ-14   Toda ruta declara un permiso y no hay dos rutas con el mismo método y plantilla
+
+== Integración con base de prueba (SQLite en memoria y PostgreSQL opcional) ==
+[PASA ] INT-01   Camino feliz con PDO real: la nota, el diagnóstico y el evento quedan en la base
+[PASA ] INT-02   Las reglas de acceso y de expediente se leen de la base (care_assignments, medical_records)
+[PASA ] INT-03   Firmar y consultar contra la base; firmar dos veces responde 409
+[PASA ] INT-04   Error de persistencia real: si falla el INSERT del diagnóstico se revierte la nota (R-06)
+[PASA ] INT-05   La base también protege: no deja modificar una nota firmada ni borrar notas (defensa en profundidad)
+[OMITE] INT-06   PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb y reversión con database/schema.sql
+         -> defina NOTASSOAP_DB_DSN para probar contra PostgreSQL
+[PASA ] INT-07   Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico
+[PASA ] INT-08   Objetos reutilizables: el mismo flujo con adaptadores PDO y en memoria da respuestas idénticas
+[PASA ] INT-09   Idempotencia con PDO real: el reintento con la misma clave devuelve la misma nota y la base guarda una sola
+[PASA ] INT-10   Modo memoria con archivo: lo guardado sobrevive a un proceso nuevo y el reintento con la misma clave no duplica
+
+Total: 101  Pasan: 100  Fallan: 0  Omitidas: 1
+
+=== Ejecución 2: con PostgreSQL 16.15 (activa INT-06) ===
+$ NOTASSOAP_DB_DSN='pgsql:host=127.0.0.1;port=5432;dbname=micro_his_notas_soap' NOTASSOAP_DB_USUARIO=postgres NOTASSOAP_DB_CLAVE=*** php tests/ejecutar.php
+Micro-HIS Notas SOAP - pruebas (PHP 8.3.6)
+
+== Reglas de dominio ==
+[PASA ] DOM-01   Una nota nueva nace en borrador, versión 1 y sin fecha de firma (R-07)
+[PASA ] DOM-02   Las cuatro secciones S, O, A y P son obligatorias (R-04, CA-07)
+[PASA ] DOM-03   El código CIE-10 debe tener formato válido (R-05, CA-08)
+[PASA ] DOM-04   El tipo de diagnóstico solo puede ser primary, secondary o differential (R-05, CA-09)
+[PASA ] DOM-05   El diagnóstico hereda nota, episodio y autor de la nota (R-05)
+[PASA ] DOM-06   Firmar cambia el estado y guarda la fecha sin mutar el original (R-07)
+[PASA ] DOM-07   Una nota firmada no se puede volver a firmar ni modificar (R-07, CA-11)
+[PASA ] DOM-08   Las secciones se guardan en un solo campo content y se reconstruyen igual
+[PASA ] DOM-09   El evento NotaSoapFirmada solo se crea de una nota firmada y lleva identificadores, no el texto clínico
+
+== Casos de uso (camino feliz y rechazos) ==
+[PASA ] APP-01   Camino feliz: guarda la nota, su diagnóstico y el evento de auditoría (CU-01, CU-02, CA-01)
+[PASA ] APP-02   Médico sin asignación al episodio: 403 y no se guarda nada (R-02, CA-04)
+[PASA ] APP-03   Enfermería no puede registrar notas SOAP (R-02, CA-03)
+[PASA ] APP-04   Token de un hospital usado contra otro hospital: 403 (R-01, CA-05)
+[PASA ] APP-05   Expediente cerrado o episodio de otro paciente: no se registra (R-03, CA-06)
+[PASA ] APP-06   Regla de dominio en el caso de uso: sección vacía o CIE-10 inválido no tocan la base (R-04, R-05, CA-07, CA-08)
+[PASA ] APP-07   El autor firma su nota y queda evento NOTA_FIRMADA (CU-03, CA-11)
+[PASA ] APP-08   Otro médico no puede firmar; una nota firmada no se firma otra vez (R-07, CA-11)
+[PASA ] APP-09   Consultar devuelve la nota con sus diagnósticos (CU-04)
+[PASA ] APP-10   Registrar deja la nota en borrador y NO publica nada; firmar deja un evento NotaSoapFirmada en la bandeja de salida
+[PASA ] APP-11   Si la bandeja de salida falla, la firma se revierte: la nota sigue en borrador y no hay NOTA_FIRMADA
+[PASA ] APP-12   Firmar devuelve la nota completa: secciones SOAP y diagnósticos
+[PASA ] APP-13   Idempotencia: la misma clave con el mismo contenido devuelve la misma nota y no crea otra
+[PASA ] APP-14   Idempotencia: la misma clave con otro contenido es un error del cliente
+[PASA ] APP-15   Idempotencia: la clave es por usuario; otro médico no puede leer ni reutilizar la nota de otro con su clave
+[PASA ] APP-16   Idempotencia: si la transacción falla, la clave no queda guardada y el reintento crea la nota
+[PASA ] APP-17   Listar notas de un expediente: orden de creación, filtro por estado y hospital del token
+
+== Errores de persistencia (dobles de PDO) ==
+[PASA ] PER-01   Si PDO falla, el repositorio lanza ErrorPersistencia con el SQLSTATE y no deja salir PDOException
+[PASA ] PER-02   Un fallo al verificar el acceso también se traduce a ErrorPersistencia
+[PASA ] PER-03   PdoTransaccion confirma si todo sale bien y revierte si el trabajo falla
+[PASA ] PER-04   Si el COMMIT falla, se revierte y se informa ErrorPersistencia
+[PASA ] PER-05   Error al guardar el diagnóstico: la nota tampoco queda guardada (R-06, CA-10)
+[PASA ] PER-06   Por HTTP el error de persistencia es 500 genérico, sin SQL ni SQLSTATE en la respuesta (RNF-03)
+
+== Contratos: Repository (memoria y PDO) y API (openapi.yaml ↔ código) ==
+[PASA ] API-01   Contrato ↔ código: mismas operaciones (método y ruta) y mismo permiso (x-permiso) en cada una
+[PASA ] API-02   Toda operación documenta 400, 401, 403 y 500, y al menos una respuesta 2xx
+[PASA ] API-03   Cada código HTTP que devuelve el servidor en 24 escenarios reales está documentado en su operación
+[PASA ] API-04   Cada código de error que devuelve el servidor está en el enum Error.code del contrato
+[PASA ] REP-01 memoria guardar y buscar devuelven la misma nota (secciones, estado, versión, autor)
+[PASA ] REP-02 memoria buscar una nota que no existe devuelve null
+[PASA ] REP-03 memoria guardar dos veces el mismo id es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-04 memoria registrarFirma guarda la firma; sobre una nota ya firmada lanza NotaFirmada (R-07)
+[PASA ] REP-05 memoria deNota devuelve solo los diagnósticos de esa nota, ordenados por id
+[PASA ] REP-06 memoria un diagnóstico de una nota inexistente es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-07 memoria deExpediente devuelve solo las notas de ese expediente, en orden de creación y luego por id
+[PASA ] REP-08 memoria RegistroIdempotencia: buscar una clave nueva da null; guardada devuelve huella y nota; repetida es error de integridad
+[PASA ] REP-01 pdo-sqlite guardar y buscar devuelven la misma nota (secciones, estado, versión, autor)
+[PASA ] REP-02 pdo-sqlite buscar una nota que no existe devuelve null
+[PASA ] REP-03 pdo-sqlite guardar dos veces el mismo id es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-04 pdo-sqlite registrarFirma guarda la firma; sobre una nota ya firmada lanza NotaFirmada (R-07)
+[PASA ] REP-05 pdo-sqlite deNota devuelve solo los diagnósticos de esa nota, ordenados por id
+[PASA ] REP-06 pdo-sqlite un diagnóstico de una nota inexistente es un error de persistencia de integridad (SQLSTATE clase 23)
+[PASA ] REP-07 pdo-sqlite deExpediente devuelve solo las notas de ese expediente, en orden de creación y luego por id
+[PASA ] REP-08 pdo-sqlite RegistroIdempotencia: buscar una clave nueva da null; guardada devuelve huella y nota; repetida es error de integridad
+
+== Cliente ↔ servidor (resiliencia e idempotencia) ==
+[PASA ] CLI-01   Camino feliz cliente → servidor: 201 OK, y el cliente envía X-Request-ID e Idempotency-Key
+[PASA ] CLI-02   Respuesta perdida en la red: el cliente reintenta con la MISMA clave y el servidor NO duplica la nota
+[PASA ] CLI-03   Falla de red y luego éxito: un reintento con espera corta
+[PASA ] CLI-04   Un 5xx se reintenta; un 4xx no (es una respuesta válida del servidor)
+[PASA ] CLI-05   La firma no se reintenta sola: una falla de red da NO_DISPONIBLE después de un solo intento
+[PASA ] CLI-06   Circuit breaker: 3 fallas abren el circuito; mientras está abierto no se llama al servidor; después del enfriamiento prueba de nuevo
+[PASA ] CLI-07   Red real: servidor inalcanzable → NO_DISPONIBLE rápido, sin excepción
+[PASA ] CLI-08   El listado por expediente viaja con su filtro y devuelve solo resúmenes (sin texto clínico)
+
+== Presentación HTTP ==
+[PASA ] HTTP-01  POST /api/v1/notas-soap válido responde 201 con la nota en borrador
+[PASA ] HTTP-02  Sin X-Tenant-ID responde 400; sin token o con token desconocido responde 401 (CA-02)
+[PASA ] HTTP-03  Cada error de dominio se traduce a su código HTTP (403, 409, 422)
+[PASA ] HTTP-04  Cuerpo sin objeto diagnostico responde 400 cuerpo_invalido
+[PASA ] HTTP-05  Firmar y consultar por HTTP; firmar dos veces responde 409
+[PASA ] HTTP-06  Ruta inexistente 404, método equivocado 405 y error inesperado 500 sin detalles
+[PASA ] HTTP-07  El autor sale del token, no del cuerpo: enviar author_user_ref_id no cambia la autoría (RF-06, CA-12)
+[PASA ] HTTP-08  MVC: la misma acción con Accept: text/html usa la vista HTML (mismo controlador, mismo modelo)
+[PASA ] HTTP-09  La vista HTML escapa lo que escribió el usuario: un <script> en una sección se muestra como texto
+[PASA ] HTTP-10  Entrada: un campo que no es texto es error de formato (400); los errores también salen en HTML si se pide
+[PASA ] HTTP-11  Idempotency-Key repetida: 201 con Idempotent-Replayed: true y la misma nota
+[PASA ] HTTP-12  Idempotency-Key con formato inválido → 400; reutilizada con otro cuerpo → 422 idempotency_key_reutilizada
+[PASA ] HTTP-13  Permiso por ruta: enfermería consulta (200) pero no registra ni firma (403 antes de llegar al caso de uso)
+[PASA ] HTTP-14  GET /api/v1/expedientes/{id}/notas-soap: resúmenes sin texto clínico, filtro inválido → 400, 405 con cabecera Allow
+[PASA ] OBS-01   X-Request-ID: se devuelve el recibido si es válido; si falta o es inválido (por ejemplo "<script>") se genera uno nuevo
+[PASA ] OBS-02   Registro de acceso: una línea por petición con request_id, ruta, estado y duración; sin token ni texto clínico
+[PASA ] OBS-03   Si el registro de acceso falla, la respuesta al cliente no cambia
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de ninguna otra capa
+[PASA ] ARQ-02   Aplicación solo depende de Dominio
+[PASA ] ARQ-03   Presentación usa casos de uso, comandos, resultados y excepciones; nunca Persistencia, puertos ni entidades
+[PASA ] ARQ-04   Persistencia implementa puertos y no conoce Presentación ni casos de uso
+[PASA ] ARQ-05   PDO y SQL solo aparecen en Persistencia
+[PASA ] ARQ-06   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL armado con variables
+[PASA ] ARQ-07   Dominio y Aplicación no hacen entrada/salida ni leen globales (echo, header, $_SERVER, archivos, getenv)
+[PASA ] ARQ-08   Sin framework: ningún archivo usa Illuminate, Symfony, Laminas ni vendor/autoload
+[PASA ] ARQ-09   El controlador no tiene SQL, PDO ni reglas de negocio: solo arma el comando, llama al caso de uso y entrega a la vista
+[PASA ] ARQ-10   Cada puerto de repositorio tiene dos adaptadores: uno PDO y uno en memoria
+[PASA ] ARQ-11   Las vistas solo pintan: no llaman casos de uso ni conocen Persistencia
+[PASA ] ARQ-12   Los casos de uso dependen de las interfaces Repository, nunca de un adaptador concreto
+[PASA ] ARQ-13   La librería Cliente solo conoce el contrato: no importa clases del servidor, y el servidor no importa el Cliente
+[PASA ] ARQ-14   Toda ruta declara un permiso y no hay dos rutas con el mismo método y plantilla
+
+== Integración con base de prueba (SQLite en memoria y PostgreSQL opcional) ==
+[PASA ] INT-01   Camino feliz con PDO real: la nota, el diagnóstico y el evento quedan en la base
+[PASA ] INT-02   Las reglas de acceso y de expediente se leen de la base (care_assignments, medical_records)
+[PASA ] INT-03   Firmar y consultar contra la base; firmar dos veces responde 409
+[PASA ] INT-04   Error de persistencia real: si falla el INSERT del diagnóstico se revierte la nota (R-06)
+[PASA ] INT-05   La base también protege: no deja modificar una nota firmada ni borrar notas (defensa en profundidad)
+[PASA ] INT-06   PostgreSQL real (opcional): camino feliz, idempotencia, bandeja de salida en jsonb y reversión con database/schema.sql
+[PASA ] INT-07   Repositorio compartido: al firmar con PDO queda una fila en outbox_events en la misma transacción, sin texto clínico
+[PASA ] INT-08   Objetos reutilizables: el mismo flujo con adaptadores PDO y en memoria da respuestas idénticas
+[PASA ] INT-09   Idempotencia con PDO real: el reintento con la misma clave devuelve la misma nota y la base guarda una sola
+[PASA ] INT-10   Modo memoria con archivo: lo guardado sobrevive a un proceso nuevo y el reintento con la misma clave no duplica
+
+Total: 101  Pasan: 101  Fallan: 0  Omitidas: 0

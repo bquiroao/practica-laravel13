@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123c45">
+  <title>Recepción de muestras | Prototipo Semana 11</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="HIS, inicio">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <span>HIS <small>Laboratorio</small></span>
+    </a>
+    <div class="top-context"><span class="clinic-dot" aria-hidden="true"></span> Hospital Central <span class="separator">/</span> Recepción</div>
+    <div class="profile"><span class="profile-avatar" aria-hidden="true">ML</span><span class="profile-name">María López<small>Técnica de recepción</small></span></div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <p class="nav-label">MÓDULOS</p>
+      <a class="nav-item" href="#"><span aria-hidden="true">▦</span> Inicio</a>
+      <a class="nav-item active" href="#" aria-current="page"><span aria-hidden="true">⌕</span> Recepciones</a>
+      <a class="nav-item" href="#"><span aria-hidden="true">◷</span> Custodia</a>
+      <a class="nav-item" href="#"><span aria-hidden="true">▤</span> Órdenes</a>
+      <div class="sidebar-bottom">
+        <div class="support-card"><span class="help-icon" aria-hidden="true">?</span><div><strong>¿Necesitas ayuda?</strong><small>Guía rápida de recepción</small></div></div>
+        <span class="prototype-tag">PROTOTIPO · DATOS DE DEMO</span>
+      </div>
+    </aside>
+
+    <main id="main" class="main-content">
+      <div class="page-heading">
+        <div>
+          <div class="breadcrumbs">Laboratorio <span>/</span> Recepción de muestras</div>
+          <h1>Recibir una muestra</h1>
+          <p class="subtitle">Verifica la orden, confirma la condición física y registra la cadena de custodia.</p>
+        </div>
+        <button id="restartButton" class="text-button" type="button">Empezar de nuevo</button>
+      </div>
+
+      <div class="progress" aria-label="Progreso de recepción">
+        <div class="progress-step is-current" data-step="1"><span>1</span><b>Orden</b></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="2"><span>2</span><b>Verificación</b></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3"><span>3</span><b>Decisión</b></div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="4"><span>4</span><b>Custodia</b></div>
+      </div>
+
+      <div id="prototypeNotice" class="prototype-notice" role="note">
+        <span aria-hidden="true">ⓘ</span>
+        Prototipo navegable con datos ficticios. No registra información en el sistema clínico.
+      </div>
+
+      <section id="step1" class="step-panel" aria-labelledby="step1Title">
+        <div class="section-title">
+          <div class="step-kicker">PASO 1 DE 4</div>
+          <h2 id="step1Title">Busca la orden de laboratorio</h2>
+          <p>Usa el número de orden o escanea la etiqueta. Confirma la identidad antes de continuar.</p>
+        </div>
+        <form id="searchForm" class="search-form">
+          <label for="orderSearch">Número de orden o código de muestra</label>
+          <div class="search-row">
+            <div class="input-wrap"><span aria-hidden="true">⌕</span><input id="orderSearch" name="orderSearch" value="ORD-2026-0418" autocomplete="off" aria-describedby="searchHelp"></div>
+            <button class="button button-primary" type="submit">Buscar orden</button>
+          </div>
+          <small id="searchHelp" class="field-help">Ejemplo: ORD-2026-0418. Para el escenario de error, selecciona «Probar código duplicado».</small>
+        </form>
+
+        <div id="orderResult" class="order-card">
+          <div class="order-card-head">
+            <div><span class="status status-blue">ORDEN ABIERTA</span><h3>Orden ORD-2026-0418</h3></div>
+            <span class="order-date">27 oct 2026 · 09:14</span>
+          </div>
+          <div class="patient-row">
+            <div class="patient-avatar" aria-hidden="true">AR</div>
+            <div><strong>Andrea R. <span class="muted">·••• 4821</span></strong><small>Identidad visible mínima para recepción</small></div>
+            <span class="status status-neutral">1 ítem pendiente</span>
+          </div>
+          <div class="item-row">
+            <div class="item-main">
+              <span class="item-icon" aria-hidden="true">▧</span>
+              <div><strong>Hemograma completo</strong><small>Ítem OI-74182 · Sangre total · Tubo EDTA (tapa lila)</small></div>
+            </div>
+            <div class="item-side"><span class="status status-neutral">ESPERANDO MUESTRA</span><button id="selectSample" class="button button-outline" type="button">Seleccionar ítem</button></div>
+          </div>
+        </div>
+
+        <div class="demo-actions">
+          <span>ESCENARIOS DE DEMOSTRACIÓN</span>
+          <button id="duplicateScenario" class="demo-link" type="button">Probar código duplicado <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="searchError" class="alert alert-error hidden" role="alert" tabindex="-1">
+          <span class="alert-icon" aria-hidden="true">!</span>
+          <div><strong>No encontramos una orden con ese dato.</strong><p>Verifica el código y vuelve a intentar. No se creó ninguna recepción.</p></div>
+        </div>
+      </section>
+
+      <section id="step2" class="step-panel hidden" aria-labelledby="step2Title">
+        <div class="section-title">
+          <div class="step-kicker">PASO 2 DE 4</div>
+          <h2 id="step2Title">Verifica la muestra recibida</h2>
+          <p>Compara la orden con el recipiente físico. No aceptes discrepancias de identidad o etiqueta.</p>
+        </div>
+        <div class="context-strip"><span class="context-icon" aria-hidden="true">▧</span><div><strong id="sampleExam">Hemograma completo</strong><small id="sampleContext">Andrea R. · OI-74182 · Sangre total</small></div><button id="backToOrder" class="inline-button" type="button">Cambiar orden</button></div>
+
+        <div class="verification-grid">
+          <div class="form-card">
+            <h3>Comprobación física</h3>
+            <p class="card-intro">Marca cada elemento después de revisarlo en el recipiente.</p>
+            <fieldset class="check-list">
+              <legend class="sr-only">Comprobaciones físicas de la muestra</legend>
+              <label class="check-row"><input id="labelMatch" type="checkbox" checked><span class="check-custom" aria-hidden="true"></span><span><strong>Etiqueta coincide con la orden</strong><small>Paciente e ítem corresponden</small></span><span class="check-state">Verificado</span></label>
+              <label class="check-row"><input id="containerMatch" type="checkbox" checked><span class="check-custom" aria-hidden="true"></span><span><strong>Recipiente correcto</strong><small>Tubo EDTA · tapa lila</small></span><span class="check-state">Verificado</span></label>
+              <label class="check-row"><input id="integrityOk" type="checkbox" checked><span class="check-custom" aria-hidden="true"></span><span><strong>Integridad del recipiente</strong><small>Sin fugas ni daño visible</small></span><span class="check-state">Verificado</span></label>
+              <label id="sealRow" class="check-row"><input id="sealOk" type="checkbox" checked><span class="check-custom" aria-hidden="true"></span><span><strong>Sello íntegro</strong><small>Aplicable a esta muestra de sangre</small></span><span class="check-state">Verificado</span></label>
+            </fieldset>
+          </div>
+          <div class="form-card code-card">
+            <h3>Identificador único</h3>
+            <p class="card-intro">Escanea o confirma el código legible de la etiqueta.</p>
+            <label for="specimenCode">Código externo de la muestra <span class="required">*</span></label>
+            <div class="input-wrap code-input"><span aria-hidden="true">▣</span><input id="specimenCode" value="SP-2026-008472" autocomplete="off"><span class="scan-badge">DEMO</span></div>
+            <div class="hint-box"><span aria-hidden="true">✓</span><span>El código se valida antes de crear la recepción. No se reutiliza el identificador de otra muestra.</span></div>
+            <label for="observation" class="observation-label">Observación <span class="optional">(opcional)</span></label>
+            <textarea id="observation" rows="3" placeholder="Solo información útil para la recepción"></textarea>
+          </div>
+        </div>
+        <div class="bottom-actions"><button id="cancelVerification" class="button button-quiet" type="button">Volver a la orden</button><button id="toDecision" class="button button-primary" type="button">Continuar a decisión <span aria-hidden="true">→</span></button></div>
+        <div id="verificationError" class="alert alert-error hidden" role="alert" tabindex="-1"></div>
+      </section>
+
+      <section id="criticalError" class="step-panel hidden" aria-labelledby="criticalTitle">
+        <div class="section-title">
+          <div class="step-kicker">BLOQUEO DE SEGURIDAD</div>
+          <h2 id="criticalTitle">No se puede registrar esta muestra</h2>
+          <p>El identificador detectado ya está asociado a otra recepción.</p>
+        </div>
+        <div class="critical-card" role="alert">
+          <div class="critical-symbol" aria-hidden="true">!</div>
+          <div>
+            <span class="status status-red">CÓDIGO DUPLICADO</span>
+            <h3>SP-2026-008472 ya existe</h3>
+            <p>La recepción asociada pertenece a la orden <strong>ORD-2026-0399</strong> y está en custodia. No se creó una segunda recepción ni se alteró la cadena de custodia.</p>
+            <ul><li>No fuerces el registro ni cambies el código manualmente.</li><li>Separa el recipiente y notifica a la jefatura.</li><li>Confirma físicamente etiqueta, orden e identidad antes de reintentar.</li></ul>
+          </div>
+        </div>
+        <div class="trace-card"><span class="trace-icon" aria-hidden="true">◷</span><div><strong>Intento bloqueado · TRC-RX-2048</strong><small>27 oct 2026 · 10:32 · Hospital Central · María López</small></div><span class="status status-red">SIN RECEPCIÓN</span></div>
+        <div class="bottom-actions"><button id="backFromCritical" class="button button-quiet" type="button">Volver a verificar</button><button id="closeCritical" class="button button-primary" type="button">Cerrar e informar a jefatura</button></div>
+      </section>
+
+      <section id="step3" class="step-panel hidden" aria-labelledby="step3Title">
+        <div class="section-title">
+          <div class="step-kicker">PASO 3 DE 4</div>
+          <h2 id="step3Title">Confirma la decisión de recepción</h2>
+          <p>El sistema propone una decisión con base en los criterios comprobados. Rechaza solo ante una no conformidad confirmada.</p>
+        </div>
+        <div id="decisionSummary" class="decision-summary">
+          <span class="decision-check" aria-hidden="true">✓</span><div><span class="status status-green">PROPUESTA: ACEPTAR</span><h3>La muestra cumple las verificaciones</h3><p>Etiqueta, recipiente, integridad y sello coinciden con la orden.</p></div>
+        </div>
+        <div class="decision-options">
+          <label class="decision-option selected"><input type="radio" name="decision" value="accept" checked><span class="radio-custom"></span><span><strong>Aceptar muestra</strong><small>Continúa a registro de custodia</small></span></label>
+          <label class="decision-option"><input type="radio" name="decision" value="reject"><span class="radio-custom"></span><span><strong>Rechazar muestra</strong><small>Requiere no conformidad confirmada y motivo</small></span></label>
+        </div>
+        <div id="rejectionFields" class="form-card rejection-fields hidden">
+          <h3>Motivo de rechazo <span class="required">*</span></h3>
+          <p class="card-intro">Catálogo ilustrativo para el prototipo. La causa debe estar confirmada.</p>
+          <label for="rejectReason">Selecciona un motivo</label>
+          <select id="rejectReason">
+            <option value="">Seleccionar motivo</option>
+            <option value="Etiqueta no coincide">Etiqueta no coincide con la orden</option>
+            <option value="Recipiente incorrecto">Recipiente incorrecto</option>
+            <option value="Recipiente dañado">Recipiente dañado o con fuga</option>
+            <option value="Sello no íntegro">Sello no íntegro (sangre)</option>
+            <option value="Otro">Otra no conformidad confirmada</option>
+          </select>
+          <label for="rejectObservation" class="observation-label">Observación <span class="optional">(opcional)</span></label>
+          <textarea id="rejectObservation" rows="2" placeholder="Describe el hecho observado, no una suposición"></textarea>
+        </div>
+        <div id="pendingDecision" class="alert alert-info hidden" role="status"><span class="alert-icon" aria-hidden="true">i</span><div><strong>No hay información suficiente para decidir.</strong><p>Deja la recepción pendiente y escala para revisión. Una falla técnica o dato faltante no es un rechazo clínico.</p></div></div>
+        <div class="bottom-actions"><button id="backToVerification" class="button button-quiet" type="button">Volver a verificar</button><button id="toCustody" class="button button-primary" type="button">Continuar a custodia <span aria-hidden="true">→</span></button></div>
+        <div id="decisionError" class="alert alert-error hidden" role="alert" tabindex="-1"></div>
+      </section>
+
+      <section id="step4" class="step-panel hidden" aria-labelledby="step4Title">
+        <div class="section-title">
+          <div class="step-kicker">PASO 4 DE 4</div>
+          <h2 id="step4Title">Registra la primera custodia</h2>
+          <p>La aceptación o rechazo se confirma al guardar la decisión junto con el primer evento de custodia.</p>
+        </div>
+        <div class="custody-card">
+          <div class="custody-top"><span class="custody-emblem" aria-hidden="true">◷</span><div><strong>Primer evento de custodia</strong><small>Este registro es append-only; no modifica eventos previos.</small></div></div>
+          <div class="custody-fields">
+            <div><span>Persona responsable</span><strong>María López · Técnica de recepción</strong></div>
+            <div><span>Ubicación de entrega</span><label for="location">Ubicación</label><select id="location"><option>Recepción central · Ventanilla 2</option><option>Laboratorio central · Mesa de ingreso</option></select></div>
+            <div><span>Fecha y hora</span><strong>27 oct 2026 · 10:35 · UTC−06:00</strong></div>
+            <div><span>Orden / muestra</span><strong>ORD-2026-0418 · SP-2026-008472</strong></div>
+          </div>
+          <div class="custody-rule"><span aria-hidden="true">🔒</span> La decisión y el evento inicial se registran juntos. Si guardar falla, no se mostrará éxito.</div>
+        </div>
+        <div class="bottom-actions"><button id="backToDecision" class="button button-quiet" type="button">Volver a decisión</button><button id="saveReception" class="button button-primary" type="button">Guardar recepción</button></div>
+      </section>
+
+      <section id="successPanel" class="step-panel hidden" aria-labelledby="successTitle">
+        <div class="success-card">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <span id="successStatus" class="status status-green">RECEPCIÓN GUARDADA</span>
+          <h2 id="successTitle">La muestra quedó registrada</h2>
+          <p id="successMessage">La decisión y el primer evento de custodia se guardaron correctamente.</p>
+          <div class="success-reference"><span>Identificador de muestra</span><strong id="successCode">SP-2026-008472</strong><button id="copyCode" class="copy-button" type="button" aria-label="Copiar identificador de muestra">Copiar</button></div>
+          <div class="timeline">
+            <div class="timeline-event"><span class="timeline-dot"></span><div><strong id="timelineTitle">Recepción aceptada</strong><small>María López · Recepción central · Ventanilla 2</small><small>27 oct 2026 · 10:35 · UTC−06:00</small></div><span class="status status-green">REGISTRADO</span></div>
+          </div>
+          <div class="success-note"><span aria-hidden="true">ⓘ</span> Estado de impresión: pendiente. La impresión no cambia el estado de recepción ni crea otra muestra.</div>
+          <button id="newReception" class="button button-primary" type="button">Iniciar otra recepción</button>
+        </div>
+      </section>
+
+      <div class="footer-note"><span>Recepción de muestras</span><span>Datos de demostración · Sin conexión al HIS</span></div>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="Navegación móvil">
+    <a href="#"><span aria-hidden="true">⌂</span>Inicio</a><a href="#" class="active" aria-current="page"><span aria-hidden="true">▣</span>Recepciones</a><a href="#"><span aria-hidden="true">◷</span>Custodia</a><a href="#"><span aria-hidden="true">?</span>Ayuda</a>
+  </nav>
+</body>
+</html>

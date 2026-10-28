@@ -6,22 +6,24 @@ namespace NotasSoap\Aplicacion\CasosDeUso;
 
 use NotasSoap\Aplicacion\Comandos\FirmarNotaComando;
 use NotasSoap\Aplicacion\Puertos\Reloj;
-use NotasSoap\Aplicacion\Puertos\Transaccion;
 use NotasSoap\Aplicacion\Resultados\NotaResultado;
+use NotasSoap\Aplicacion\Servicios\RegistradorClinico;
+use NotasSoap\Dominio\Cambios\FirmaDeNota;
 use NotasSoap\Dominio\Excepciones\AccesoDenegado;
 use NotasSoap\Dominio\Excepciones\NotaNoEncontrada;
-use NotasSoap\Dominio\Puertos\RegistroAuditoria;
 use NotasSoap\Dominio\Puertos\RepositorioDiagnosticos;
 use NotasSoap\Dominio\Puertos\RepositorioNotas;
 
-/** CU-03: solo el autor firma; una nota firmada no cambia (la regla vive en NotaSoap). */
+/**
+ * CU-03: solo el autor firma; una nota firmada no cambia (la regla vive en NotaSoap).
+ * Semana 7: la firma y su evento los guarda RegistradorClinico, igual que el registro y la corrección.
+ */
 final class FirmarNota
 {
     public function __construct(
         private readonly RepositorioNotas $notas,
         private readonly RepositorioDiagnosticos $diagnosticos,
-        private readonly RegistroAuditoria $auditoria,
-        private readonly Transaccion $transaccion,
+        private readonly RegistradorClinico $registrador,
         private readonly Reloj $reloj,
     ) {
     }
@@ -37,10 +39,7 @@ final class FirmarNota
         }
 
         $firmada = $nota->firmar($this->reloj->ahora());
-        $this->transaccion->ejecutar(function () use ($firmada, $c): void {
-            $this->notas->registrarFirma($firmada);
-            $this->auditoria->registrar('NOTA_FIRMADA', ['nota_id' => $firmada->id, 'autor_id' => $c->usuarioId]);
-        });
+        $this->registrador->guardar(new FirmaDeNota($firmada));
 
         return NotaResultado::desde($firmada, $this->diagnosticos->deNota($firmada->id));
     }

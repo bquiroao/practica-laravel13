@@ -1,0 +1,58 @@
+﻿@startuml
+title Semana 7 - Componentes y refactorización en ingreso de resultados
+left to right direction
+skinparam shadowing false
+
+actor "Técnico/a" as Tech
+rectangle "Pantalla CaptureResultForm\n(propuesta)" as UI
+rectangle "ResultEntryApiClient\n(propuesto)" as Client
+
+package "Presentation" {
+  component "ResultController\n(existe)" as Controller
+  component "ResultForm\n(existe)" as Form
+  component "OutcomeView\n(propuesto)" as View
+}
+
+package "Application" {
+  component "CaptureOrCorrectResult\n(antes)" as Before
+  component "EntryService\n(después)" as Service
+  component "CaptureCommand / CorrectCommand\n(después)" as Commands
+}
+
+package "Domain" {
+  component "PendingLabResult / ResultVersion\n(existe)" as Aggregate
+  component "ResultValue\n(después)" as Value
+  component "ReferenceRange + RangeFlag\n(después)" as Range
+}
+
+package "Persistence" {
+  interface "LabResultRepository" as Repo
+  component "PdoLabResultRepository\n(existe)" as PdoRepo
+  component "InMemoryLabResultRepository\n(existe)" as MemRepo
+}
+
+interface "ReferenceRangeProvider\n(después)" as RangePort
+interface "Clock\n(después)" as Clock
+interface "ResultIdentifierGenerator\n(existe)" as Ids
+database "lab_result_versions\n(existe)" as DB
+
+Tech --> UI
+UI --> Client
+Client --> Controller
+Controller --> Form
+Controller ..> Service : propuesta
+Controller --> Before : vigente
+Service --> Commands
+Service --> Value
+Service --> Range
+Service --> Aggregate
+Service --> Repo
+Service --> RangePort
+Service --> Ids
+Service --> Clock
+Before --> Repo
+Before --> Ids
+PdoRepo ..|> Repo
+MemRepo ..|> Repo
+PdoRepo --> DB
+@enduml

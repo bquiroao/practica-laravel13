@@ -1,0 +1,71 @@
+Micro-HIS Pacientes - pruebas (PHP 8.4.26)
+
+== Dominio: reglas de negocio ==
+[PASA ] DOM-01   Datos válidos: paciente activo, sin código ni versión, con DPI
+[PASA ] DOM-02   R-01: nombre vacío, fecha futura, sexo, teléfono y DPI inválidos → DATOS_INVALIDOS con los 5 campos
+[PASA ] DOM-03   DPI: 13 dígitos y departamento 01–22; con espacios o guiones es el mismo; se enmascara
+[PASA ] DOM-04   Contrato Identificador (semana 2): canónico no vacío, igual/distinto, sin el número en el enmascarado
+[PASA ] DOM-05   R-10: criterio con menos de 3 letras → CRITERIO_INSUFICIENTE; fecha mal escrita → DATOS_INVALIDOS
+[PASA ] DOM-06   R-02/R-03: documento existente bloquea; coincidencia exige confirmación, permiso y motivo
+[PASA ] DOM-07   R-08/R-07: fallecido solo con supervisor; cambiar identidad exige motivo; el teléfono no
+[PASA ] DOM-08   Cambio de identidad: tildes y mayúsculas no cuentan; fecha y documento sí
+
+== Aplicación: camino feliz, reglas y errores de persistencia (dobles en memoria) ==
+[PASA ] APP-01   Camino feliz: registrar → buscar → consultar → actualizar, con un evento de auditoría por paso
+[PASA ] APP-02   Regla de dominio al registrar: el mismo DPI → conflicto PACIENTE_EXISTENTE, sin guardar ni auditar
+[PASA ] APP-03   Regla de dominio al actualizar: versión desactualizada → conflicto y el cambio anterior se conserva
+[PASA ] APP-04   Reglas de dominio en la edición: motivo, DPI de otro paciente y paciente fallecido
+[PASA ] APP-05   Acceso (R-05): el clínico busca y consulta, pero no registra ni edita; otro hospital da no_encontrado
+[PASA ] APP-06   Error de persistencia al guardar: no_disponible, sin paciente ni evento
+[PASA ] APP-07   Error de persistencia en la bitácora: la transacción revierte el registro y la actualización
+[PASA ] APP-08   Error de persistencia al leer: búsqueda y detalle responden no_disponible
+
+== Persistencia: PDO con sentencias preparadas (dobles de PDO) ==
+[PASA ] PER-01   Registrar: un INSERT preparado con parámetros con nombre; el DPI no viaja en claro
+[PASA ] PER-02   Búsqueda por nombre: comodines del usuario escapados, límite 20 como parámetro y filas hidratadas
+[PASA ] PER-03   Conexión caída (08006) en cualquier operación → ErrorPersistencia; ninguna PDOException sube
+[PASA ] PER-04   Violación de unicidad (23505) al insertar o actualizar → DocumentoDuplicado (409 DOCUMENTO_EN_USO)
+[PASA ] PER-05   UPDATE … WHERE version: sin filas y versión 8 → ConflictoVersion; sin filas y sin paciente → no encontrado
+[PASA ] PER-06   PdoTransaccion: COMMIT caído → ROLLBACK y ErrorPersistencia; error de dominio → ROLLBACK y se relanza
+[PASA ] PER-07   Protección del documento: HMAC determinista, cifrado con nonce, descifra, y falla con otra clave
+[PASA ] PER-08   Conexión imposible → ErrorPersistencia sin exponer la clave; la bitácora usa CAST(:detalle AS jsonb)
+
+== Repository: la misma suite de contrato para InMemory y PDO ==
+[PASA ] CON-MEM-01 Contrato: registrar asigna código único y versión 1; porCodigo devuelve lo guardado y solo en su hospital
+[PASA ] CON-MEM-02 Contrato: buscar solo en el hospital, máx. 20, ordenado; por documento y código; comodines literales
+[PASA ] CON-MEM-03 Contrato: actualizar con la versión vigente da +1 y se lee; con una vieja, ConflictoVersion sin cambios
+[PASA ] CON-MEM-04 Contrato: el documento es único en toda la red al registrar y al actualizar (DocumentoDuplicado)
+[PASA ] CON-MEM-05 Contrato: el índice ve toda la red y libera el documento anterior cuando cambia
+[PASA ] CON-MEM-06 Contrato: la transacción confirma paciente + evento juntos, o revierte los dos
+[OMITE] CON-PDO  Contrato contra PostgreSQL (las mismas 6 verificaciones)
+         -> defina PACIENTES_DB_DSN para ejecutarla
+
+== Presentación: MVC (controlador, formulario, vistas) y HTTP ==
+[PASA ] HTTP-01  POST /api/v1/pacientes → 201 con Location, ETag y el código
+[PASA ] HTTP-02  Sin X-Tenant-ID → 400; sin token → 401; token de otro hospital → 403
+[PASA ] HTTP-03  Reglas hacia HTTP: cuerpo no JSON 400, datos inválidos 422, DPI repetido 409, clínico 403
+[PASA ] HTTP-04  GET /api/v1/pacientes?nombre=…: 200 con datos mínimos; criterio corto 422
+[PASA ] HTTP-05  GET /api/v1/pacientes/{codigo}: 200 con ETag; desde otro hospital el mismo 404 que uno inexistente
+[PASA ] HTTP-06  PUT: sin If-Match 428; If-Match viejo 409; If-Match vigente 200 con el nuevo ETag
+[PASA ] HTTP-07  Base de datos caída → 503 genérico, sin SQLSTATE ni detalles internos
+[PASA ] HTTP-08  Error inesperado → 500 genérico; ruta inexistente 404; método no permitido 405
+[PASA ] MVC-01   Formulario: valida solo el FORMATO (JSON, tipos, If-Match) y toma actor y hospital del token, no del cuerpo
+[PASA ] MVC-02   Vistas: ÚNICO lugar con códigos HTTP; ETag/Location en el éxito y categoría → código en el error
+[PASA ] MVC-03   El controlador funciona sin Kernel ni rutas: se prueba solo, con el Modelo real en memoria
+[PASA ] MVC-04   Formato válido pero regla rota llega al Dominio: 422 DATOS_INVALIDOS (no 400 del formulario)
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia
+[PASA ] ARQ-02   PDO y SQL solo existen en la capa de Persistencia
+[PASA ] ARQ-03   Persistencia usa solo sentencias preparadas: sin query()/exec() ni SQL concatenado
+[PASA ] ARQ-04   El Dominio no hace E/S ni conoce HTTP: sin superglobales, archivos, salida ni códigos de estado
+[PASA ] ARQ-05   Las claves de cifrado y hash solo existen en Persistencia (el Dominio solo conoce el canónico)
+[PASA ] ARQ-06   Repository: cada puerto de persistencia tiene un adaptador PDO y uno InMemory
+[PASA ] ARQ-07   Controlador: solo recibe casos de uso; sin SQL, sin new, sin códigos de negocio y sin armar respuestas
+[PASA ] ARQ-08   Vistas: Respuesta::json y new Respuesta solo aparecen en Presentacion/Http/Vistas
+
+== Integración con PostgreSQL ==
+[OMITE] INT-00   Integración PostgreSQL (HTTP→tabla, documento cifrado, versión, append-only, rollback)
+         -> defina PACIENTES_DB_DSN para ejecutarla
+
+Total: 52  Pasan: 50  Fallan: 0  Omitidas: 2

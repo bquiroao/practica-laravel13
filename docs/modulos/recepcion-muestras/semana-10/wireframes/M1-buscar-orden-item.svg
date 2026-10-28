@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="700" viewBox="0 0 720 700" font-family="Segoe UI, Arial, sans-serif" font-size="14">
+  <title>Pantalla M1 - Buscar orden e ítem (360 px)</title>
+  <rect width="720" height="700" fill="#f6f7f9"/>
+  <text x="20" y="28" font-size="16" font-weight="bold">M1 - Buscar orden e ítem</text>
+  <rect x="20" y="44" width="360" height="640" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+  <rect x="20" y="44" width="360" height="52" rx="14" fill="#1f4e79"/>
+  <text x="36" y="76" fill="#fff" font-weight="bold">Recepción de muestras</text>
+  <text x="300" y="76" fill="#fff" font-size="12">Hosp. Demo</text>
+  <text x="36" y="124" font-weight="bold">Orden de laboratorio</text>
+  <rect x="36" y="134" width="248" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="48" y="164" fill="#555">ORD-0000 (escribir o escanear)</text>
+  <rect x="292" y="134" width="72" height="48" rx="6" fill="#1f4e79"/>
+  <text x="328" y="164" fill="#fff" text-anchor="middle">Escanear</text>
+  <text x="36" y="204" font-size="12" fill="#555">Texto de ayuda siempre visible. Botón mínimo 48 px.</text>
+  <rect x="36" y="220" width="328" height="44" rx="6" fill="#1f4e79"/>
+  <text x="200" y="248" fill="#fff" text-anchor="middle" font-weight="bold">Buscar</text>
+  <text x="36" y="294" font-weight="bold">Ítems de la orden</text>
+  <rect x="36" y="304" width="328" height="76" rx="8" fill="#fff" stroke="#333"/>
+  <text x="48" y="328" font-weight="bold">Examen EX-HEMO · Sangre</text>
+  <text x="48" y="348">Paciente: P. G*** (iniciales)</text>
+  <rect x="48" y="354" width="150" height="20" rx="10" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="123" y="369" text-anchor="middle" font-size="12">Estado: PENDIENTE</text>
+  <rect x="36" y="392" width="328" height="76" rx="8" fill="#fff" stroke="#333"/>
+  <text x="48" y="416" font-weight="bold">Examen EX-ORINA · Orina</text>
+  <text x="48" y="436">Paciente: P. G*** (iniciales)</text>
+  <rect x="48" y="442" width="170" height="20" rx="10" fill="#d4edda" stroke="#155724"/>
+  <text x="133" y="457" text-anchor="middle" font-size="12">Estado: ACEPTADA (texto)</text>
+  <rect x="36" y="486" width="328" height="64" rx="8" fill="#f8d7da" stroke="#721c24"/>
+  <text x="48" y="510" font-weight="bold">Orden no encontrada</text>
+  <text x="48" y="530" font-size="12">Revise el número o escanee de nuevo. No se crea nada.</text>
+  <text x="48" y="544" font-size="12">(ejemplo del mensaje; no aparece junto a resultados)</text>
+  <rect x="20" y="624" width="360" height="60" fill="#eee" stroke="#333"/>
+  <text x="200" y="660" text-anchor="middle" font-size="12">Barra inferior: Inicio · Recepciones · Ayuda (zona del pulgar)</text>
+
+  <g font-size="13">
+    <text x="410" y="80" font-weight="bold">Decisiones de contenido</text>
+    <text x="410" y="104">1. Una sola columna; un solo campo por fila.</text>
+    <text x="410" y="126">2. Primero la orden, después los ítems.</text>
+    <text x="410" y="148">3. Paciente con datos mínimos (iniciales).</text>
+    <text x="410" y="170">4. Estado con texto, no solo color.</text>
+    <text x="410" y="192">5. Un ítem = una tarjeta (no tabla).</text>
+    <text x="410" y="230" font-weight="bold">Errores distintos</text>
+    <text x="410" y="252">· orden no encontrada</text>
+    <text x="410" y="274">· orden de otro hospital (sin revelar datos)</text>
+    <text x="410" y="296">· sin conexión (ver M4)</text>
+    <text x="410" y="340" font-weight="bold">Reducción de carga cognitiva</text>
+    <text x="410" y="362">Un objetivo por pantalla: elegir el ítem.</text>
+    <text x="410" y="384">Una acción primaria visible.</text>
+    <text x="410" y="440" fill="#721c24" font-weight="bold">Propuesta conceptual: no hay app ni lector</text>
+    <text x="410" y="460" fill="#721c24">implementados. Datos sintéticos.</text>
+  </g>
+</svg>

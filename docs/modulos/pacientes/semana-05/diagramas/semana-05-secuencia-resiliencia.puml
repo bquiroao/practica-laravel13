@@ -1,0 +1,49 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia de ClientePacientes: POST con Idempotency-Key, GET con ETag y degradación
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+
+participant "Admisión\n(módulo consumidor)" as M
+participant "ClientePacientes" as C
+participant "CircuitoInterruptor" as CB
+participant "Servidor Pacientes\n(Kernel → caso de uso)" as S
+database "local_patients +\nidempotencia_registros" as DB
+
+== 1 · Registro seguro ante una respuesta perdida (CLI-03, IDEM-01) ==
+M -> C : registrar(paciente)
+C -> C : Idempotency-Key = k1 · X-Request-ID = r1
+C -> CB : permite()?  → sí
+C -> S : POST /api/v1/pacientes (k1, r1)
+S -> DB : BEGIN · INSERT paciente · INSERT evento · INSERT (k1, huella, respuesta) · COMMIT
+S --x C : 201 … (la respuesta se pierde: timeout)
+C -> CB : falla()
+C -> C : espera 100 ms (1 reintento)
+C -> S : POST /api/v1/pacientes (MISMA k1, MISMO r1)
+S -> DB : SELECT huella, respuesta WHERE clave = k1
+S --> C : 201 mismo código + Idempotent-Replayed: true
+C -> CB : exito()
+C --> M : 201 P-000005 (un solo paciente)
+
+== 2 · Lectura con caché ETag (CLI-05) ==
+M -> C : consultar(P-000001)
+C -> S : GET … If-None-Match: "1"
+S --> C : 304 Not Modified (ETag "1")
+C --> M : copia local · origen CACHE_VALIDADA
+
+== 3 · Servidor caído (CLI-04, CLI-06) ==
+M -> C : consultar(P-000001)
+C -> S : GET …
+S --x C : sin respuesta (×2) → 3.ª falla seguida
+C -> CB : falla() → ABIERTO 30 s
+C --> M : última copia · origen CACHE_DEGRADADA\n(la pantalla debe mostrar «datos sin verificar»)
+M -> C : registrar(otro)
+C -> CB : permite()?  → no
+C --> M : CIRCUITO_ABIERTO (sin llamar al servidor)
+note over M
+  Las escrituras NO se degradan: sin servidor no se registra
+  ni se edita. Un PUT sin respuesta → RESULTADO_INCIERTO:
+  recargar el paciente antes de reintentar (CLI-07).
+end note
+@enduml

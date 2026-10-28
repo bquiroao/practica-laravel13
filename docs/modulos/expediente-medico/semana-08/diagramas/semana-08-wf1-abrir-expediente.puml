@@ -1,0 +1,15 @@
+@startsalt
+title W1 — Abrir expediente (personal de admisión)
+{+
+  {* Inicio | <b>Expedientes</b> | Ayuda }
+  Buscar paciente activo: | "López    " | [Buscar]
+  {#
+    <b>Paciente</b> | <b>Documento</b> | <b>Estado</b> | <b>Expediente</b>
+    M. López (ficticio) | ••••-••••-4521 | activo | —
+    M. López Ruiz (ficticio) | ••••-••••-0987 | activo | HC-000123 [Abrir]
+  }
+  [Abrir expediente para M. López]
+  <i>Confirmación: «¿Abrir el expediente de M. López? Se crea con un número único y no se puede borrar» → [Cancelar] [Abrir].</i>
+  <i>Cargando: filas de esqueleto. Vacío: «No hay pacientes activos con ese nombre».</i>
+}
+@endsalt

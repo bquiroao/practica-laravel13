@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar wireframes, consultar fuentes oficiales W3C y documentar hallazgos/backlog. Se calculó contraste desde colores fuente y se renderizaron capturas de los SVG. No se atribuyen pruebas de usuario, teclado de controles reales ni certificación WCAG. La estudiante debe revisar las prioridades antes de defenderlas.

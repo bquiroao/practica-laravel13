@@ -1,0 +1,16 @@
+@startsalt
+title M5 — Conexión limitada
+{+
+  <b>Sin conexión: copia guardada</b>
+  guia-citas 1.1.0, guardada el 26/10.
+  No se puede comprobar si hay una más nueva.
+  ---
+  <b>No sabemos si se publicó</b>
+  La conexión se cortó al aprobar citas-api 2.1.0.
+  [Comprobar el estado]
+  ---
+  <b>La subida se interrumpió</b>
+  El archivo no se envió; los datos se conservan.
+  [Reintentar la subida]
+}
+@endsalt

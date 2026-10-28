@@ -1,0 +1,15 @@
+@startuml semana-02-clases-antes
+' Semana 2 — Dashboard base UI/UX (tarea Odoo 2429): diseño ANTES de aplicar SRP
+title ANTES — una función con cuatro razones para cambiar
+class "cargarTarjetaAntes()" as F <<función>> {
+  llama a la API con límite de tiempo
+  decide el estado de la tarjeta
+  redacta el texto
+  limpia la sesión ante un 401
+}
+note right of F
+  Razones para cambiar: contrato HTTP (backend),
+  reglas de estados (UX), textos (redacción),
+  manejo de sesión (autenticación)
+end note
+@enduml

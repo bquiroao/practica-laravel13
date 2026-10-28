@@ -1,0 +1,1 @@
+Se utilizó IA para implementar el prototipo local, documentar navegación, preparar escenarios y ejecutar comprobaciones asistidas con Edge headless y Playwright. Las verificaciones y capturas se incluyen en evidencia. La estudiante debe revisar el código y comprender sus límites; no se atribuyen pruebas personales ni estudios de usuarios no realizados.

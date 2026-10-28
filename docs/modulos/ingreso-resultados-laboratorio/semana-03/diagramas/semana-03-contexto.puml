@@ -1,0 +1,23 @@
+@startuml
+title Semana 3 - Contexto del Micro-HIS de ingreso de resultados
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Personal autorizado\nde laboratorio" as Operator
+rectangle "Micro-HIS de ingreso\nde resultados\nPHP 8.2 CLI" as ResultModule
+database "SQLite\nPDO" as ResultStore
+rectangle "Orden e ítem\nreferenciados\n(fuera del prototipo)" as OrderContext
+rectangle "Validación bioquímica\nposterior\n(fuera del prototipo)" as Validation
+
+Operator --> ResultModule : Captura o corrige resultado pendiente
+ResultModule --> ResultStore : Persiste versiones append-only
+ResultModule ..> OrderContext : Referencia de ítem asumida\nsin consulta externa
+ResultModule ..> Validation : Resultado pendiente\nsin publicar ni validar
+
+note bottom of ResultModule
+  Prototipo académico CLI.
+  El contexto de orden y la validación posterior
+  son límites externos, no integraciones implementadas.
+end note
+@enduml

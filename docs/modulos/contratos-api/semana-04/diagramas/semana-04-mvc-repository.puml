@@ -1,0 +1,32 @@
+@startuml semana-04-mvc-repository
+title MVC y Repository — Micro-HIS Contratos API (documentación por rol)
+package "Entrada" {
+  class "public/index.php" as Front <<front controller>>
+}
+package Presentacion {
+  class Rutas
+  class ControladorDocumentacion <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class "ServicioPublicacion\nServicioRevision\nServicioConsulta" as Servicios
+  interface "EscritorVersiones\nRevisionPublicaciones\nLectorDocumentos" as Puertos <<puertos por cliente>>
+  interface RepositorioDocumentos <<repository>>
+  class "VersionNueva, EstadoVersion, Audiencia" as Reglas
+}
+package Persistencia {
+  class RepositorioPdo
+  class RepositorioEnMemoria
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorDocumentacion : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorDocumentacion --> Servicios
+ControladorDocumentacion --> VistaJson
+Servicios --> Puertos : cada servicio, solo el suyo
+Servicios ..> Reglas
+RepositorioDocumentos --|> Puertos : extends
+RepositorioPdo ..|> RepositorioDocumentos
+RepositorioEnMemoria ..|> RepositorioDocumentos
+note bottom of ControladorDocumentacion : sin SQL ni reglas de negocio
+@enduml

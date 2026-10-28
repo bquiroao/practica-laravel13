@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Médicos, especialidades y disponibilidad (Micro-HIS)
+  version: 1.0.0
+  description: Registro de médicos, especialidades con vigencia, horario, ausencias y consulta de disponibilidad. Citas (M05) consulta y no escribe. El hospital y el rol salen del token, nunca del cuerpo.
+servers: [{ url: http://localhost:8080 }]
+security: [{ bearerAuth: [] }]
+paths:
+  /api/v1/medicos:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }]
+    post:
+      summary: "Registrar médico (CU-01, CU-02). Rol: admin_personal_medico"
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MedicoNuevo" } } } }
+      responses:
+        "201": { description: "Médico creado", content: { application/json: { schema: { $ref: "#/components/schemas/MedicoCreado" } } } }
+        "200": { description: "Clave ya usada: mismo médico, nada nuevo", content: { application/json: { schema: { $ref: "#/components/schemas/MedicoCreado" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+    get:
+      summary: "Listar médicos del hospital. Rol: admin_personal_medico"
+      responses:
+        "200": { description: "Médicos activos e inactivos", content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Medico" } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/medicos/{medicoId}:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }, { $ref: "#/components/parameters/MedicoId" }]
+    patch:
+      summary: "Desactivar médico, nunca se borra (RN-09). Rol: admin_personal_medico"
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [activo], properties: { activo: { type: boolean, enum: [false] } } } } } }
+      responses:
+        "200": { description: "Médico desactivado, su historial se conserva", content: { application/json: { schema: { $ref: "#/components/schemas/Medico" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/medicos/{medicoId}/especialidades:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }, { $ref: "#/components/parameters/MedicoId" }]
+    post:
+      summary: "Asociar especialidad con vigencia (CU-03). Rol: admin_personal_medico"
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [especialidad, desde, principal], properties: { especialidad: { type: string }, desde: { type: string, format: date }, hasta: { type: string, format: date, nullable: true }, principal: { type: boolean } } }
+            example: { especialidad: Cardiologia, desde: "2026-11-01", hasta: null, principal: true }
+      responses:
+        "201": { description: "Especialidad asociada", content: { application/json: { schema: { $ref: "#/components/schemas/Asociada" } } } }
+        "200": { description: "Clave ya usada: misma asociación", content: { application/json: { schema: { $ref: "#/components/schemas/Asociada" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/medicos/{medicoId}/horario:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }, { $ref: "#/components/parameters/MedicoId" }]
+    post:
+      summary: "Definir un bloque del horario semanal (CU-04). Rol: admin_personal_medico"
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [dia_semana, inicio, fin], properties: { dia_semana: { type: integer, minimum: 1, maximum: 7, description: "1 lunes a 7 domingo" }, inicio: { type: string, example: "08:00" }, fin: { type: string, example: "12:00" } } } } } }
+      responses:
+        "201": { description: "Bloque guardado", content: { application/json: { schema: { $ref: "#/components/schemas/Asociada" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/medicos/{medicoId}/ausencias:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }, { $ref: "#/components/parameters/MedicoId" }]
+    post:
+      summary: "Registrar ausencia (CU-05). Rol: admin_personal_medico, o medico solo con su propio id"
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [fecha], properties: { fecha: { type: string, format: date } } } } } }
+      responses:
+        "201": { description: "Ausencia registrada", content: { application/json: { schema: { $ref: "#/components/schemas/Asociada" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/disponibilidad:
+    parameters: [{ $ref: "#/components/parameters/RequestId" }]
+    get:
+      summary: "Consultar franjas libres (CU-06, CU-07). Rol: recepcion, medico o servicio_citas"
+      description: "Franjas de 30 minutos = horario menos ausencias menos citas activas de M05. Es una sugerencia, no una reserva: Citas debe volver a comprobar al agendar."
+      parameters:
+        - { name: especialidad, in: query, required: true, schema: { type: string } }
+        - { name: desde, in: query, required: true, schema: { type: string, format: date } }
+        - { name: hasta, in: query, required: true, schema: { type: string, format: date }, description: "Máximo 14 días después de desde (RN-07)" }
+        - { name: medico_id, in: query, schema: { type: string }, description: "Opcional: Citas pregunta por un médico concreto" }
+      responses:
+        "200": { description: "Franjas libres, o lista vacía con la próxima fecha que tenga espacio", content: { application/json: { schema: { $ref: "#/components/schemas/Disponibilidad" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { description: "Citas (M05) no responde: no se ofrece disponibilidad (RN-08)", headers: { Retry-After: { schema: { type: integer }, description: "Segundos antes de reintentar" } }, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT, description: "Token del módulo RBAC (M02) con rol y hospital. Citas usa un token de servicio" }
+  parameters:
+    RequestId: { name: X-Request-Id, in: header, schema: { type: string, pattern: "^[A-Za-z0-9-]{8,64}$" }, description: "Correlación; si falta, el servidor genera uno y lo devuelve" }
+    IdempotencyKey: { name: Idempotency-Key, in: header, schema: { type: string, pattern: "^[A-Za-z0-9-]{8,64}$" }, description: "Reintentar con la misma clave no crea otro registro" }
+    MedicoId: { name: medicoId, in: path, required: true, schema: { type: string } }
+  responses:
+    Error: { description: "Error con código estable", content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  schemas:
+    MedicoNuevo: { type: object, required: [colegiado, documento, nombre], properties: { colegiado: { type: string }, documento: { type: string }, nombre: { type: string } } }
+    MedicoCreado: { type: object, properties: { medico_id: { type: string }, repetida: { type: boolean } } }
+    Medico: { type: object, properties: { medico_id: { type: string }, colegiado: { type: string }, documento: { type: string }, nombre: { type: string }, activo: { type: boolean } } }
+    Asociada: { type: object, properties: { id: { type: string }, repetida: { type: boolean } } }
+    Disponibilidad:
+      type: object
+      properties:
+        franjas: { type: array, items: { type: object, properties: { medico_id: { type: string }, especialidad: { type: string }, inicio: { type: string, format: date-time }, fin: { type: string, format: date-time } } } }
+        proxima_fecha_con_espacio: { type: string, format: date, nullable: true }
+    Error:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+          enum: [json_invalido, idempotency_key_invalida, sin_sesion, acceso_denegado, dato_invalido, medico_duplicado, medico_no_encontrado,
+                 especialidad_invalida, especialidad_duplicada, horario_invalido, rango_invalido, citas_no_disponible, error_persistencia]
+        mensaje: { type: string }
+        campos: { type: array, items: { type: string }, description: "Campos con problema (por ejemplo [colegiado])" }

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prescripción #123 · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: base (farmacia) · medico · carga · anulada · no-encontrado · sin-conexion ·
+     anular · anular-error · anular-incierto · anulada-por-usted -->
+<header class="barra">
+  <button class="atras" aria-label="Volver a la cola" onclick="history.back()">‹</button>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. R. Norte</span><span class="largo">Hospital Regional del Norte</span></button>
+  <span class="rol-actual" data-estado="base carga anulada no-encontrado sin-conexion">Farmacia</span>
+  <span class="rol-actual" data-estado="medico anular anular-error anular-incierto anulada-por-usted">Médico</span>
+  <span class="avatar" role="img" aria-label="Farmacia Norte" data-estado="base carga anulada no-encontrado sin-conexion">FN</span>
+  <span class="avatar" role="img" aria-label="Dr. López, médico" data-estado="medico anular anular-error anular-incierto anulada-por-usted">DL</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Lo que ve es la última versión cargada (10:45).
+</div>
+
+<main>
+  <div data-estado="carga" aria-busy="true" role="status">
+    <p class="meta">Cargando la prescripción…</p>
+    <div class="esq" style="width:60%"></div><div class="esq"></div><div class="esq" style="width:80%"></div>
+  </div>
+
+  <div class="veredicto bloqueo" role="alert" data-estado="no-encontrado">
+    <h2>No encontrada</h2>
+    <p>Esta prescripción no existe o no es de su hospital.</p>
+    <a class="btn" href="#">Volver a la cola</a>
+  </div>
+
+  <!-- Anulada: banner arriba con motivo, quién y cuándo; lo emitido sigue visible (M-19) -->
+  <div class="veredicto bloqueo" role="status" data-estado="anulada anulada-por-usted">
+    <h2>ANULADA · no dispensar</h2>
+    <p>Anulada el 27/10 a las 11:30 por el Dr. López. Motivo: «Se registró una alergia a cefalosporinas».</p>
+  </div>
+  <!-- Reconciliación tras un corte: el reintento recibió 409 y la UI consultó la prescripción (medido en evidencia/reintento.txt) -->
+  <div class="aviso ok" role="status" data-estado="anulada-por-usted">
+    <h2>✓ Su anulación quedó registrada</h2>
+    <p>La conexión se cortó, pero la primera solicitud llegó. Al reintentar, el servidor respondió que ya estaba anulada: por usted, a las 11:30.</p>
+  </div>
+
+  <section data-estado="base medico anulada sin-conexion anular anular-error anular-incierto anulada-por-usted">
+    <div class="fila" style="flex-wrap:wrap">
+      <h1 style="margin:0">Prescripción #123</h1>
+      <span class="chip emitida" data-estado="base medico sin-conexion anular anular-error anular-incierto">✓ EMITIDA</span>
+      <span class="chip anulada" data-estado="anulada anulada-por-usted">✕ ANULADA</span>
+    </div>
+    <p class="meta">María E. · P-002 · Dr. López · 27/10/2026 10:42</p>
+    <span class="chip advertencia">⚠ Con advertencia justificada</span>
+
+    <h2 style="margin-top:16px">Medicamentos</h2>
+    <ul class="items-leidos">
+      <li><div class="med"><b>Cefalexina 500 mg</b></div><div class="pauta">500 mg · cada 6 h · oral · 7 días</div></li>
+    </ul>
+
+    <details class="mas" open>
+      <summary>Verificación al emitir</summary>
+      <dl class="datos">
+        <dt>Alergias comparadas</dt><dd>Penicilina (moderada, exantema)</dd>
+        <dt>Resultado</dt><dd>⚠ Advertencia · reactividad cruzada</dd>
+        <dt>Justificación del médico</dt><dd>«Sin alternativa: cultivo sensible solo a cefalosporinas»</dd>
+      </dl>
+    </details>
+  </section>
+</main>
+
+<div class="accion-fija" data-estado="medico">
+  <a class="btn peligro" href="m4-prescripcion.html?estado=anular">Anular</a>
+</div>
+<div class="accion-fija" data-estado="sin-conexion">
+  <span class="btn" aria-disabled="true">Actualizar · requiere conexión</span>
+</div>
+
+<div class="velo" data-estado="anular anular-error anular-incierto"></div>
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-anular" data-estado="anular anular-error">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-anular">Anular prescripción #123</h2>
+  <p>No se borra: queda visible como ANULADA, con su motivo. Farmacia lo verá. No se puede deshacer.</p>
+  <p class="obligatorio">* obligatorio</p>
+  <label for="motivo">Motivo *</label>
+  <textarea id="motivo" aria-required="true" aria-describedby="motivo-cont" autofocus>Se registró una alergia a cefalosporinas</textarea>
+  <!-- semana 9 B-14: el contador es neutro mientras se escribe; el error aparece al pulsar «Anular» -->
+  <p class="contador" id="motivo-cont" data-estado="anular">41 / mínimo 10</p>
+  <p class="error" id="motivo-error" data-estado="anular-error">Escriba al menos 10 caracteres (lleva 8). Describa por qué se anula.</p>
+  <div class="acciones">
+    <a class="btn peligro" href="m4-prescripcion.html?estado=anular-incierto">Anular</a>
+    <a class="btn" href="m4-prescripcion.html?estado=medico">Cancelar</a>
+  </div>
+</div>
+
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-inc" data-estado="anular-incierto">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-inc">No sabemos si se anuló</h2>
+  <p>Se cortó la conexión antes de la respuesta. Reintentar es seguro: si ya estaba anulada, se lo diremos.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m4-prescripcion.html?estado=anulada-por-usted">Reintentar</a>
+    <a class="btn" href="m4-prescripcion.html?estado=medico" autofocus>Cerrar</a>
+  </div>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="#"><span class="ico" aria-hidden="true">👤</span>Pacientes</a>
+  <a href="m4-prescripcion.html" aria-current="page"><span class="ico" aria-hidden="true">℞</span>Prescripciones</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+<script>
+  if (document.body.dataset.estadoActual === 'anular-error') {
+    const m = document.getElementById('motivo');
+    m.value = 'reacción'; m.setAttribute('aria-invalid', 'true'); m.setAttribute('aria-describedby', 'motivo-error'); m.focus();
+  }
+  if (document.body.dataset.estadoActual.startsWith('anulada')) {
+    document.querySelector('.items-leidos .pauta').classList.add('tachada');
+  }
+</script>
+</body>
+</html>

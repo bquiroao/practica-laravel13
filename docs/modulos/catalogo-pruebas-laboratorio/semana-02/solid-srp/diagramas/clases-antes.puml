@@ -1,0 +1,19 @@
+@startuml clases-antes
+title SRP — Antes: una clase con cuatro responsabilidades
+skinparam classAttributeIconSize 0
+
+class CatalogoPruebasService {
+  + tabla : array
+  + registrar(datos, hoy) : string
+}
+note right of CatalogoPruebasService
+  Motivos para cambiar:
+  1. Reglas de validación (RN-02 a RN-04)
+  2. Regla de versiones y vigencia (RN-05)
+  3. Forma de guardar (tabla lab_test)
+  4. Texto que ve el usuario
+end note
+
+class "Pantalla de alta" as UI
+UI --> CatalogoPruebasService : registrar()
+@enduml

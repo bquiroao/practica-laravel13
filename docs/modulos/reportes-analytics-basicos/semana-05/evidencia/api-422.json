@@ -1,0 +1,7 @@
+{
+    "error": {
+        "codigo": "VALIDACION",
+        "mensaje": "La fecha inicial no puede ser mayor que la final (RN-02)",
+        "correlationId": "a353d160eb59171c"
+    }
+}

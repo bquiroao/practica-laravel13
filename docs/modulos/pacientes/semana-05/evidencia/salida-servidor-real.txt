@@ -1,0 +1,41 @@
+Servidor real, una sola sesión: PACIENTES_PERSISTENCIA=memoria php -S 127.0.0.1:8094 -t public (PHP 8.4.26)
+
+1) GET detalle con X-Request-ID del llamador
+HTTP/1.1 200 OK
+X-Request-ID: traza-admision-0001
+ETag: "1"
+
+2) GET condicional con If-None-Match: "1"
+HTTP/1.1 304 Not Modified
+X-Request-ID: traza-admision-0002
+ETag: "1"
+
+3) GET de búsqueda (la query con el nombre NO debe aparecer en el registro de acceso)
+HTTP/1.1 200 OK
+X-Request-ID: traza-admision-0003
+
+4) POST con Idempotency-Key
+HTTP/1.1 201 Created
+X-Request-ID: traza-urgencias-0001
+Location: /api/v1/pacientes/P-000005
+ETag: "1"
+{"codigo":"P-000005","version":1,"identidad_provisional":true}
+
+5) POST con Idempotency-Key mal formada
+HTTP/1.1 400 Bad Request
+{"error":"FORMATO_INVALIDO","campos":{"Idempotency-Key":"De 8 a 64 letras, dígitos o guiones."}}
+
+6) X-Request-ID peligroso: el servidor genera uno nuevo y no lo refleja
+HTTP/1.1 200 OK
+X-Request-ID: f8b1a6b1-a3a9-486d-ba26-4277cd8ed125
+
+Nota: en modo memoria cada petición de php -S es un proceso nuevo, así que un reintento no ve el registro anterior.
+La repetición con Idempotent-Replayed: true se comprueba en IDEM-01 y CLI-03, y contra PostgreSQL en CON-PDO-07.
+
+Registro de acceso emitido por el servidor (stderr), una línea JSON por petición:
+{"tipo":"acceso","request_id":"traza-admision-0001","metodo":"GET","ruta":"/api/v1/pacientes/P-000001","estado":200,"duracion_ms":1.878,"actor":"clinico-01","tenant":"hosp-oriente"}
+{"tipo":"acceso","request_id":"traza-admision-0002","metodo":"GET","ruta":"/api/v1/pacientes/P-000001","estado":304,"duracion_ms":1.198,"actor":"clinico-01","tenant":"hosp-oriente"}
+{"tipo":"acceso","request_id":"traza-admision-0003","metodo":"GET","ruta":"/api/v1/pacientes","estado":200,"duracion_ms":1.787,"actor":"clinico-01","tenant":"hosp-oriente"}
+{"tipo":"acceso","request_id":"traza-urgencias-0001","metodo":"POST","ruta":"/api/v1/pacientes","estado":201,"duracion_ms":1.084,"actor":"admision-01","tenant":"hosp-oriente"}
+{"tipo":"acceso","request_id":"f596322f-233e-44ac-bb63-28e83edbd2b1","metodo":"POST","ruta":"/api/v1/pacientes","estado":400,"duracion_ms":1.436,"actor":"admision-01","tenant":"hosp-oriente"}
+{"tipo":"acceso","request_id":"f8b1a6b1-a3a9-486d-ba26-4277cd8ed125","metodo":"GET","ruta":"/api/v1/pacientes/P-000001","estado":200,"duracion_ms":1.218,"actor":"clinico-01","tenant":"hosp-oriente"}

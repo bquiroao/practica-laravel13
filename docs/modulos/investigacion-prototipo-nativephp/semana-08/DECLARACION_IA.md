@@ -1,0 +1,1 @@
+Se utilizó IA para revisar requisitos locales y diseñar user flow, seis wireframes anotados y reglas UX. Datos y destinos son ficticios. No se atribuyen ejecución NativePHP, permisos del SO, pruebas de usuario ni accesibilidad completa. La estudiante debe revisar y comprender las decisiones.

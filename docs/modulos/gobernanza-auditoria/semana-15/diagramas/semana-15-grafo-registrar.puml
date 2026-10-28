@@ -1,0 +1,59 @@
+@startuml semana-15-grafo-registrar
+!pragma layout smetana
+title Grafo de flujo de RegistrarMovimiento::ejecutar() · V(G) = 11 decisiones + 1 = 12 · CB-01 recorre los 11 caminos factibles
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #EEF4FB
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityBorderColor #2F5D8A
+
+start
+if (D1 · ¿permiso auditoria.registrar?) then (no)
+  #FDECEC:C1 · 403 ACCESO_DENEGADO;
+  stop
+endif
+while (D2 · ¿quedan reglas?) is (sí)
+  if (D3 · ¿la regla rechaza?) then (sí)
+    #FDECEC:C2 · 422 / 403 (Rechazo);
+    stop
+  endif
+endwhile (no)
+:Movimiento::desdeSolicitud;
+partition "transacción" {
+  if (D4 · ¿corrige_evento?) then (sí)
+    :original = porEvento(emisor, corrige_evento);
+  else (no)
+    :original = null;
+  endif
+  if (D5 · ¿original ≠ null Y de otro hospital?) then (sí)
+    :original = null\n(C7: igual que inexistente);
+  endif
+  if (D6 · ¿ya existe (emisor, event_id)?) then (sí)
+    if (D7 · ¿mismo contenido Y misma referencia?) then (sí)
+      #E7F4EC:C4 / C9 · 200 YA_REGISTRADO;
+      stop
+    else (no)
+      #FDECEC:C5 · 409 EVENTO_EN_CONFLICTO;
+      stop
+    endif
+  endif
+  if (D8 · ¿es una corrección?) then (sí)
+    if (D9 · ¿original = null?) then (sí)
+      #FDECEC:C6 / C7 · 422 corrige_evento;
+      stop
+    endif
+    if (D10 · ¿el original ya fue corregido?) then (sí)
+      #FDECEC:C10 · 409 YA_CORREGIDO;
+      stop
+    endif
+    :nuevo = corrigiendo(original);
+  endif
+  :cadena.anexar(nuevo);
+}
+if (D11 · ¿ErrorPersistencia?) then (sí)
+  #FDECEC:C11 · 503;
+  stop
+else (no)
+  #E7F4EC:C3 / C8 · 201 creado;
+  stop
+endif
+@enduml

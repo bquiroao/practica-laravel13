@@ -1,0 +1,56 @@
+@startuml
+ title SHI 2026 — Semana 3: despliegue y datos federados
+ skinparam shadowing false
+ skinparam componentStyle rectangle
+ skinparam defaultFontName Arial
+ skinparam linetype ortho
+
+ actor "Personal clínico y administrativo" as User
+
+ node "Red del Sistema Hospitalario Integrado" as Network {
+   node "Centro de datos de la red" as CentralNode {
+     component "API de identidad\ny membresías" as CentralAPI
+     database "PostgreSQL CENTRAL\nmpi_patients\nmpi_identifiers\ncuentas y membresías" as CentralDB
+     CentralAPI --> CentralDB : consulta / vincula identidad
+   }
+
+   node "Hospital A" as HospitalA {
+     component "Aplicación local\n(admisión y atención)" as AppA
+     database "PostgreSQL HOSPITAL A\nlocal_patients · care_episodes\nappointments · beds · bed_stays\nmedical_records · clinical_notes\ndiagnoses · local_user_refs" as HospitalDBA
+     queue "Outbox local\n(eventos pendientes)" as OutboxA
+     AppA --> HospitalDBA : transacción clínica local
+     HospitalDBA --> OutboxA : registra evento en la transacción
+   }
+
+   node "Hospital B" as HospitalB {
+     component "Aplicación local\n(admisión y atención)" as AppB
+     database "PostgreSQL HOSPITAL B\nregistro y datos clínicos\npropios de la institución" as HospitalDBB
+     queue "Outbox local\n(eventos pendientes)" as OutboxB
+     AppB --> HospitalDBB : transacción clínica local
+     HospitalDBB --> OutboxB : registra evento en la transacción
+   }
+
+   User --> AppA : opera
+   User --> AppB : opera
+   AppA <--> CentralAPI : HTTPS · resolver identidad
+   AppB <--> CentralAPI : HTTPS · resolver identidad
+   OutboxA --> CentralAPI : HTTPS · sincronización reintentable
+   OutboxB --> CentralAPI : HTTPS · sincronización reintentable
+ }
+
+ note bottom of CentralDB
+   Identidad maestra compartida.
+   No almacena notas clínicas
+   ni estancias de cama.
+ end note
+ note bottom of HospitalDBA
+   global_id referencia CENTRAL
+   de forma lógica: no hay FK
+   PostgreSQL entre bases.
+ end note
+ note bottom of OutboxA
+   Diseño propuesto. El bundle
+   no demuestra que outbox o
+   sincronización estén implementados.
+ end note
+@enduml

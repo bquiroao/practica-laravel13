@@ -25,14 +25,18 @@ final class PoliticaRevocacion
         $this->reglas = $lista;
     }
 
-    /** @throws ErrorPersistencia si una regla no puede consultar sus datos */
+    /** Fail-closed (semana 7): si una regla no puede leer sus datos, la revocación se rechaza con 500. */
     public function evaluar(SolicitudRevocacion $solicitud): ?ErrorRevocacion
     {
-        foreach ($this->reglas as $regla) {
-            $error = $regla->evaluar($solicitud);
-            if ($error !== null) {
-                return $error;
+        try {
+            foreach ($this->reglas as $regla) {
+                $error = $regla->evaluar($solicitud);
+                if ($error !== null) {
+                    return $error;
+                }
             }
+        } catch (ErrorPersistencia) {
+            return new ErrorRevocacion('ERROR_PERSISTENCIA', 500);
         }
 
         return null;

@@ -1,0 +1,35 @@
+@startuml
+title Semana 4 - Integracion de un repositorio de datos compartido
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "Micro-HIS ingreso de resultados" {
+  component "ResultController" as Ctl
+  component "CaptureOrCorrectResult" as UC
+  interface "LabResultRepository" as Port
+  component "SharedLabResultRepository\nadaptador futuro" as Shared
+}
+
+package "Otros modulos (mismo puerto de lectura)" {
+  component "Validacion de resultados" as Val
+  component "Entrega de resultados" as Del
+}
+
+database "Repositorio compartido\nPostgreSQL" as Db {
+  [lab_result_versions]
+}
+
+Ctl --> UC
+UC --> Port
+Shared ..|> Port
+Shared --> Db : SQL preparado\nappend condicional
+Val --> Db : lectura / validacion
+Del --> Db : solo lectura
+
+note bottom of Db
+  Contrato: una unica fuente de verdad,
+  versiones solo anexadas, estado
+  y version esperada verificados en la escritura.
+end note
+@enduml

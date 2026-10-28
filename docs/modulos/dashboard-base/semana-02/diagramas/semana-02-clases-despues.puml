@@ -1,0 +1,13 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Dashboard base UI/UX (tarea Odoo 2429): diseño DESPUÉS de aplicar SRP
+title DESPUÉS — una pieza por razón de cambio
+class "cargarTarjeta()" as O <<flujo CU-02>>
+class "crearClienteTarjetas()" as C <<contrato HTTP, R-04>>
+class "estadoDeRespuesta()" as E <<reglas de estados, R-05, R-07 · pura>>
+class "textoDeEstado()" as T <<textos, R-09 · pura>>
+class "sesion.limpiar()" as S <<autenticación (store existente)>>
+O --> C : pide el conteo
+O --> E : decide el estado
+O --> T : redacta el texto
+O --> S : solo si el estado es sesion_expirada
+@enduml

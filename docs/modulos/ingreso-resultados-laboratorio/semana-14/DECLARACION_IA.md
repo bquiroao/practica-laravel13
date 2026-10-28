@@ -1,0 +1,1 @@
+Se utilizó IA para revisar el código y hallazgos locales del módulo y redactar el plan SQA. Los umbrales son criterios propuestos del proyecto; las actividades futuras y la revisión independiente no se presentan como realizadas. No se atribuye autorización hospitalaria implementada ni resolución de defectos abiertos. La estudiante debe revisar el plan antes de su defensa.

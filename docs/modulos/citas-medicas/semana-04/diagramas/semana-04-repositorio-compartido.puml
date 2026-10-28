@@ -1,0 +1,28 @@
+@startuml semana-04-repositorio-compartido
+title Repositorio de datos compartido — base HOSPITAL (una por tenant)
+component "Citas médicas y agenda" as cit
+component "Médicos y especialidades" as med
+component "Pacientes" as pac
+component "Dashboard base" as das
+interface "RepositorioCitas" as rc
+interface "Repositorio de especialidades" as re
+interface "Repositorio de pacientes" as rp
+interface "FuenteConteos (solo lectura)" as fc
+database "Base HOSPITAL" {
+  [appointments]
+  [appointment_cancellations]
+  [doctor_specialties]
+  [local_patients]
+}
+cit --> rc
+med --> re
+pac --> rp
+das --> fc
+rc --> [appointments] : escribe (dueño)
+rc --> [appointment_cancellations] : escribe (dueño)
+rc ..> [doctor_specialties] : lee
+re --> [doctor_specialties] : escribe (dueño)
+rp --> [local_patients] : escribe (dueño)
+fc ..> [appointments] : cuenta citas de hoy
+note bottom of [appointments] : exclusión gist por médico y por paciente: última barrera ante cruces simultáneos
+@enduml
