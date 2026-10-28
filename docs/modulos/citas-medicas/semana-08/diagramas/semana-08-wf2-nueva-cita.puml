@@ -1,0 +1,13 @@
+@startsalt
+title W2 — Nueva cita (validación de disponibilidad)
+{+
+  <b>Nueva cita</b> | . | [?] Ayuda
+  Paciente * | "P-0012 · A. Pérez  " | <i>Busca por código o nombre (mín. 3 letras)</i>
+  Especialidad * | ^Cardiología^ | .
+  Médico * | ^M-03 · Dra. Ruiz^ | <i>Solo con la especialidad vigente (R-04, R-05)</i>
+  Horarios libres * | () 28/10 08:30–09:00 | <i>Ya excluye cruces del médico y del paciente (R-02, R-03)</i>
+  . | () 28/10 11:00–11:30 | <i>Solo horarios futuros (R-01)</i>
+  Motivo * | "control de presión     " | <i>Obligatorio (R-06)</i>
+  [Cancelar] | . | [Revisar y confirmar]
+}
+@endsalt
