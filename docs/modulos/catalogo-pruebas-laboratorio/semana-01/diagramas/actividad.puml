@@ -1,0 +1,61 @@
+@startuml actividad
+title Catálogo de pruebas de laboratorio — Actividad\nAlta y consulta de prueba con requisitos de muestra y vigencia
+
+|Usuario|
+start
+:Iniciar sesión (JWT) en su hospital (tenant);
+|Sistema|
+if ([RN-01] ¿Tiene permiso para la acción?) then (no)
+  :Responder 403 «Sin permiso»;
+  stop
+else (sí)
+endif
+|Usuario|
+if (¿Qué desea hacer?) then (alta — CU-01)
+  repeat
+    :Capturar datos generales\n(código, nombre, sección, tiempo de respuesta);
+    :Capturar requisitos de muestra — CU-02\n(tipo, contenedor, volumen, ayuno,\nconservación, estabilidad);
+    :Capturar vigencia — CU-03\n(vigente desde / hasta);
+    |Sistema|
+    :Validar datos [RN-02, RN-03, RN-04];
+  repeat while (¿Datos inválidos?) is (sí: 422 con errores por campo)
+  ->no;
+  if ([RN-05] ¿El código ya tiene una versión\ncuya vigencia se superpone?) then (sí)
+    if (¿La nueva empieza después\nque la versión vigente?) then (sí)
+      :Cerrar versión anterior\n(hasta = nuevo desde − 1 día);
+    else (no)
+      :Responder 409 «Vigencia superpuesta»;
+      stop
+    endif
+  else (no)
+  endif
+  :Guardar prueba y requisitos\nen una transacción [RN-07];
+  note right
+    Error de base de datos:
+    ROLLBACK, 500 y no se guarda nada
+  end note
+  :Registrar auditoría\n(usuario, fecha, hospital) [RN-08];
+  :Responder 201 con la prueba creada;
+  |Usuario|
+  :Ver confirmación;
+  stop
+else (consulta — CU-04)
+  :Indicar filtros (texto, sección, tipo de muestra)\ny fecha de referencia (por defecto hoy);
+  |Sistema|
+  :Buscar pruebas vigentes en la fecha [RN-06];
+  :Responder 200 con la lista\n(puede venir vacía);
+  |Usuario|
+  if (¿Ver detalle? — CU-05) then (sí)
+    |Sistema|
+    if ([RN-06] ¿Existe y está vigente en la fecha?) then (sí)
+      :Responder 200 con requisitos de muestra;
+    else (no)
+      :Responder 404 «No vigente»\nindicando su vigencia;
+    endif
+  else (no)
+  endif
+  |Usuario|
+  :Usar la información\n(ordenar la prueba o preparar la toma);
+  stop
+endif
+@enduml

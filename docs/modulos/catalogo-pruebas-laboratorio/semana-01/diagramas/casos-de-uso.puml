@@ -1,0 +1,39 @@
+@startuml casos-de-uso
+title Catálogo de pruebas de laboratorio — Casos de uso\nAlta y consulta de prueba con requisitos de muestra y vigencia
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Jefe de laboratorio" as JL
+actor "Médico" as MED
+actor "Laboratorista" as TEC
+actor "Módulo Órdenes\nde laboratorio" as ORD <<sistema>>
+actor "Módulo RBAC" as RBAC <<sistema>>
+
+rectangle "Catálogo de pruebas de laboratorio (por hospital / tenant)" {
+  usecase "CU-01 Registrar prueba\nen el catálogo" as CU01
+  usecase "CU-02 Definir requisitos\nde muestra" as CU02
+  usecase "CU-03 Definir vigencia\nde la prueba" as CU03
+  usecase "CU-04 Consultar pruebas\nvigentes" as CU04
+  usecase "CU-05 Ver detalle y requisitos\nde una prueba" as CU05
+  usecase "CU-06 Verificar permiso\ndel usuario" as CU06
+}
+
+JL --> CU01
+JL --> CU04
+MED --> CU04
+TEC --> CU04
+ORD --> CU04
+
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU01 ..> CU06 : <<include>>
+CU04 ..> CU06 : <<include>>
+CU05 ..> CU04 : <<extend>>
+CU06 -- RBAC
+
+note bottom of CU03
+  [RN-04] desde obligatoria, hasta opcional
+  [RN-05] sin vigencias superpuestas por código
+end note
+@enduml

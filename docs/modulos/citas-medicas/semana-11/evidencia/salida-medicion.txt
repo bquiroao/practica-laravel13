@@ -1,0 +1,16 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-agenda (#agenda) | 320 | 320 | 320 | no | Agenda · Citas · Hospital HIS | H1
+01-agenda (#agenda) | 360 | 360 | 360 | no | Agenda · Citas · Hospital HIS | H1
+01-agenda (#agenda) | 430 | 430 | 430 | no | Agenda · Citas · Hospital HIS | H1
+02-horario (#nueva/P0012) | 320 | 320 | 320 | no | Nueva cita · 2 de 3 · Citas · Hospital HIS | H1
+02-horario (#nueva/P0012) | 360 | 360 | 360 | no | Nueva cita · 2 de 3 · Citas · Hospital HIS | H1
+02-horario (#nueva/P0012) | 430 | 430 | 430 | no | Nueva cita · 2 de 3 · Citas · Hospital HIS | H1
+03-revisar (#nueva/P0012/M03/0830) | 320 | 320 | 320 | no | Nueva cita · 3 de 3 · Citas · Hospital HIS | H1
+03-revisar (#nueva/P0012/M03/0830) | 360 | 360 | 360 | no | Nueva cita · 3 de 3 · Citas · Hospital HIS | H1
+03-revisar (#nueva/P0012/M03/0830) | 430 | 430 | 430 | no | Nueva cita · 3 de 3 · Citas · Hospital HIS | H1
+04-cita-agendada (#nueva/P0012/M03/0830) | 320 | 320 | 320 | no | Cita agendada · Citas · Hospital HIS | H1
+04-cita-agendada (#nueva/P0012/M03/0830) | 360 | 360 | 360 | no | Cita agendada · Citas · Hospital HIS | H1
+04-cita-agendada (#nueva/P0012/M03/0830) | 430 | 430 | 430 | no | Cita agendada · Citas · Hospital HIS | H1
+05-error-horario-ocupado (#nueva/P0012/M03/0830) | 320 | 320 | 320 | no | Horario ocupado · Citas · Hospital HIS | H1
+05-error-horario-ocupado (#nueva/P0012/M03/0830) | 360 | 360 | 360 | no | Horario ocupado · Citas · Hospital HIS | H1
+05-error-horario-ocupado (#nueva/P0012/M03/0830) | 430 | 430 | 430 | no | Horario ocupado · Citas · Hospital HIS | H1

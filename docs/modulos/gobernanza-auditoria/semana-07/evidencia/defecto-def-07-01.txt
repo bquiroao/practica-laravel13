@@ -1,0 +1,6 @@
+DEF-07-01 — CursorPaginacion::leer() acepta una fecha imposible y la desborda (hallado por REF-06, semana 7)
+Existía antes del refactor (mismo código en refactor/antes/ConsultarMovimientos.php::leerCursor). No se corrige en la semana 7: cambiaría el comportamiento.
+
+$ php -r '... CursorPaginacion::leer(base64_encode("2026-13-45T99:00:00Z|1"))[0]->format(DATE_ATOM)'
+string(25) "2027-02-18T03:00:00+00:00"
+Esperado: null (cursor inválido → 422). Obtenido: una posición válida → la consulta responde 200 desde otra fecha.

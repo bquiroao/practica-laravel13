@@ -1,0 +1,14 @@
+@startsalt
+title M5 — Datos viejos y conexión limitada
+{+
+  <b>Datos de las 10:20: pueden estar desactualizados</b>
+  [Ver el último corte]
+  ---
+  <b>Sin conexión</b>
+  Ves el corte de las 10:35 guardado en el teléfono.
+  ---
+  <b>No sabemos si se generó el corte</b>
+  Generar otro no cambia camas: solo agrega un corte.
+  [Ver el último corte] | [Generar de nuevo]
+}
+@endsalt

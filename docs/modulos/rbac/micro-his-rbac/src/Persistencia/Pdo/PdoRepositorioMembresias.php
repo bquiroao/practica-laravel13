@@ -66,4 +66,15 @@ final class PdoRepositorioMembresias extends RepositorioPdo implements Repositor
             throw $e;
         }
     }
+
+    public function revocar(string $usuarioId, string $hospitalId, string $rol, \DateTimeImmutable $momento): int
+    {
+        return $this->ejecutar(
+            "UPDATE membresias
+                SET estado = 'revoked'
+              WHERE usuario_id = :usuario AND hospital_id = :hospital AND rol_codigo = :rol
+                AND estado = 'active' AND (valido_hasta IS NULL OR valido_hasta > :momento)",
+            ['usuario' => $usuarioId, 'hospital' => $hospitalId, 'rol' => $rol, 'momento' => $momento->format(DATE_ATOM)],
+        )->rowCount();
+    }
 }

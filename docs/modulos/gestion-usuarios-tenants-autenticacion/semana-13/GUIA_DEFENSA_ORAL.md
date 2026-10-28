@@ -1,0 +1,1 @@
+Identificar base b32f57b y el flujo alta/login/logout. Recorrer los 15 ítems y explicar roles independientes, entrada, salida y hallazgos. Mostrar inconsistencia de blancos, postcondición del emisor y brecha JWT. Las 33 aserciones son regresión del contrato, no integración productiva. Sesión pendiente hasta asignar moderador/revisores; no inventar acta celebrada.

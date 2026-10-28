@@ -1,0 +1,6 @@
+revisor,rol,sesion,items_asignados,lineas_revisadas,minutos_preparacion,hallazgos_preliminares,fecha
+Autor,autor (autorrevisión),S1+S2+S3,RT-01..RT-15,2946,,6,2026-10-26
+R1,"revisor · permisos y tenant (S)",S1+S2+S3,"RT-05, RT-07, RT-08, RT-09",,,,
+R2,"revisor · contrato y frontera (C)",S3,"RT-04, RT-05, RT-06, RT-13",,,,
+R3,"revisor · integridad y dominio (I, D)",S1+S2,"RT-01, RT-02, RT-03, RT-10, RT-11, RT-12",,,,
+R4,"revisor · arquitectura y dependencias (A)",S1+S2+S3,"RT-14, RT-15",,,,

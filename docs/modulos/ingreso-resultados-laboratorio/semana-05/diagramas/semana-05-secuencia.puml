@@ -1,0 +1,34 @@
+@startuml
+title Semana 5 - Secuencia de corrección con idempotencia y versión esperada
+autonumber
+actor "Técnico/a" as U
+participant "Cliente" as C
+participant "API Ingreso" as A
+participant "Auth" as Au
+participant "CaptureOrCorrectResult" as UC
+database "BD Ingreso" as DB
+
+U -> C : corrige el valor
+C -> A : POST /lab-results/{itemId}/corrections\nIdempotency-Key: K2\nexpectedVersionId
+A -> Au : sesión, rol, hospital
+Au --> A : actor (de la sesión)
+A -> DB : ¿existe K2?
+alt K2 existe, mismo contenido
+  A --> C : respuesta original
+else K2 existe, contenido distinto
+  A --> C : 409
+else K2 nueva
+  A -> UC : correct(item, expectedVersionId, valor, motivo, actor)
+  UC -> DB : currentFor(item)
+  alt no existe
+    A --> C : 404
+  else resultado ya validado
+    A --> C : 409 no se corrige
+  else versión distinta de la esperada
+    A --> C : 409 recargar
+  else vigente y pendiente
+    UC -> DB : appendCorrection + clave + outbox (1 transacción)
+    A --> C : 201 nueva versión pendiente
+  end
+end
+@enduml

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editar paciente · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<header class="barra">
+  <a class="atras btn texto" href="m3-ficha.html" aria-label="Cancelar y volver a la ficha" style="color:#fff">‹</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="avatar" role="img" aria-label="Marta López, admisión">ML</span>
+</header>
+
+<main>
+  <h1>Editar · P-000001</h1>
+  <p class="sub">Versión 3 · los cambios quedan en la bitácora</p>
+
+  <section data-estado="base motivo confirmar">
+    <label for="nombres">Nombres *</label>
+    <input id="nombres" value="Ana Lucía" data-estado="base confirmar" autocomplete="off">
+    <input id="nombres-m" value="Ana María" data-estado="motivo" autocomplete="off" aria-label="Nombres">
+    <label for="apellidos">Apellidos *</label>
+    <input id="apellidos" value="López Pérez" autocomplete="off">
+    <label for="tel">Teléfono</label>
+    <input id="tel" type="tel" value="+502 4444 0001" autocomplete="off" aria-describedby="tel-ayuda">
+    <p class="ayuda" id="tel-ayuda">De 8 a 15 dígitos. Cambiarlo no pide motivo.</p>
+
+    <!-- Aparece solo si cambia la identidad según la MISMA regla del backend (semana 9, BL-01):
+         «Lucía» → «Lucia» no la cambia; «Lucía» → «María» sí. Instrucción en gris, no error (BL-11). -->
+    <div data-estado="motivo" role="status" aria-live="polite">
+      <label for="motivo">Motivo del cambio de nombre *</label>
+      <textarea id="motivo" aria-describedby="motivo-ayuda"></textarea>
+      <p class="ayuda" id="motivo-ayuda">Cambiaste un dato de identidad. Escribe por qué (por ejemplo, «error de digitación»).</p>
+    </div>
+  </section>
+
+  <!-- CONFLICTO 409: nunca sobrescribe; reaplica en memoria, sin portapapeles (semana 9, BL-02) -->
+  <section class="aviso atencion" data-estado="conflicto" role="alert">
+    <h2>Otra persona modificó esta ficha</h2>
+    <p>Ahora está en la versión 4. Tus cambios no se guardaron.</p>
+    <div class="acciones"><a class="btn primario bloque" href="m4-editar.html">Ver la versión nueva y reaplicar mis cambios</a></div>
+    <p class="meta">Tus cambios se marcarán para que los revises; no se guardan fuera de esta pantalla.</p>
+  </section>
+
+  <!-- PUT sin respuesta: NO se reintenta solo (medido: el reintento da 409). Se recarga y compara. -->
+  <section class="aviso atencion" data-estado="incierto" role="alert">
+    <h2>No sabemos si se guardó</h2>
+    <p>Se cortó la conexión. Recarga la ficha para comprobarlo: si tu cambio no está, podrás aplicarlo otra vez.</p>
+    <div class="acciones"><a class="btn primario bloque" href="m3-ficha.html">Recargar la ficha</a></div>
+  </section>
+</main>
+
+<div class="accion-fija" data-estado="base motivo">
+  <a class="btn primario" href="m4-editar.html?estado=confirmar">Revisar cambios</a>
+</div>
+
+<!-- Confirmación en hoja inferior: antes → después, y el botón de guardar donde cae el pulgar -->
+<div data-estado="confirmar">
+  <div class="velo"></div>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="h-conf">
+    <div class="asa" aria-hidden="true"></div>
+    <h2 id="h-conf">Confirmar cambios</h2>
+    <div class="cambio"><span class="meta">Teléfono</span><span class="antes">+502 5555 1234</span><span class="despues">+502 4444 0001</span></div>
+    <p class="meta">Sin cambios de identidad: no hace falta motivo.</p>
+    <div class="acciones">
+      <a class="btn primario" href="m3-ficha.html">Guardar</a>
+      <a class="btn" href="m4-editar.html">Volver a editar</a>
+    </div>
+  </div>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

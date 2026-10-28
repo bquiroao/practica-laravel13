@@ -1,0 +1,16 @@
+$ PRESCRIPCIONES_DB_DSN=… php ejemplo-dip/mutaciones.php   (PostgreSQL 18)
+[DETECTA  ] M1 el adaptador PDO devuelve vacío si la consulta falla (fail-open) falla: DIP-05
+[DETECTA  ] M2 el caso de uso trata la fuente caída como «sin alergias»        falla: CA-11, CA-15, DIP-05
+[DETECTA  ] M3 la coincidencia directa deja de bloquear                        falla: CA-06, CA-07, CA-16, PAR-01
+[DETECTA  ] M4 toda reactividad cruzada se puede justificar                    falla: CA-09, PAR-01
+[DETECTA  ] M5 la severidad «unknown» se trata como leve                       falla: CA-09, PAR-01
+[DETECTA  ] M6 la dosis máxima se duplica                                      falla: CA-05, PAR-01
+[DETECTA  ] M7 no se exige confirmar «sin alergias conocidas»                  falla: CA-10, PAR-01
+[DETECTA  ] M8 la advertencia no exige el permiso override                     falla: CA-08, PAR-01
+[DETECTA  ] M9 sin idempotencia                                                falla: CA-13
+[DETECTA  ] M10 las alergias resueltas también cuentan                         falla: CA-12, CA-16, PAR-01
+[DETECTA  ] M11 no se verifica el hospital del paciente                        falla: CA-03, PAR-01
+[DETECTA  ] M12 el bloqueo no deja traza                                       falla: CA-06
+[DETECTA  ] M13 regresión de DIP: el caso de uso toma la hora del sistema      falla: DIP-01
+----------------------------------------------------------------------------------------------------
+Mutaciones: 13  Detectadas: 13  Sobreviven: 0

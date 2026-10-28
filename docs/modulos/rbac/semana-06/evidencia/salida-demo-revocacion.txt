@@ -1,0 +1,12 @@
+
+▶ 6. El administrador revoca el rol «enfermeria» de la enfermera, con motivo
+  POST /api/v1/roles/revocaciones  (token: token-admin-oriente)
+  ← 200 {"codigo":"ROL_REVOCADO","correlation_id":"142371fa-927f-429e-98be-d0f18af197c9"}
+
+▶ 7. La enfermera intenta registrar signos vitales otra vez (ahora denegado)
+  POST /api/v1/signos-vitales  (token: token-ana)
+  ← 403 {"mensaje":"Acceso denegado.","correlation_id":"0c56479a-1c07-4cb5-a895-75ecaa973bb6"}
+
+▶ 8. El administrador ve el motivo de esa denegación en la bitácora
+  GET /api/v1/auditoria/eventos/0c56479a-1c07-4cb5-a895-75ecaa973bb6  (token: token-admin-oriente)
+  ← 200 {"correlation_id":"0c56479a-1c07-4cb5-a895-75ecaa973bb6","tipo":"ACCESO_DENEGADO","actor":"ana","hospital":"hosp-oriente","datos":{"permiso":"signos_vitales.registrar","recurso":"POST /api/v1/signos-vitales","motivo":"MEMBRESIA_NO_VIGENTE","ip":"10.20.5.14"},"ocurrido_en":"2026-11-15T10:00:00-06:00"}

@@ -1,0 +1,144 @@
+@startuml semana-01-actividad
+!pragma layout smetana
+title Módulo Prescripciones — Actividad\n«Creación de prescripción con verificación previa de alergias»
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:A-01 Recibir la solicitud con token y hospital (X-Tenant-ID);
+if (D-01 ¿Token válido?) then (no)
+  #FDECEC:E-01 401 «sesión no válida»;
+  stop
+else (sí)
+endif
+:A-02 Pedir autorización al Servicio RBAC
+(prescripcion.emitir | anular | consultar);
+if (D-02 ¿Permiso concedido en este hospital?) then (no)
+  #FDECEC:E-02 403 genérico + referencia;
+  stop
+else (sí)
+endif
+
+switch (D-03 ¿Qué operación?)
+case (Emitir prescripción)
+  if (D-04 ¿La Idempotency-Key ya se usó?) then (sí)
+    if (D-05 ¿Mismo contenido?) then (sí)
+      #E8F5E9:F-01b 200 la misma prescripción
+(un reintento no emite dos veces);
+      stop
+    else (no)
+      #FDECEC:E-03 409 CLAVE_REUTILIZADA;
+      stop
+    endif
+  else (no)
+  endif
+  if (D-06 ¿El paciente es del hospital del token?) then (no)
+    #FDECEC:E-04 404 idéntico a «no existe»;
+    stop
+  else (sí)
+  endif
+  :A-03 Validar cada ítem contra el catálogo:
+medicamento activo, dosis > 0, unidad, frecuencia,
+vía permitida y duración de 1 a 90 días;
+  if (D-07 ¿Prescripción completa y medicamento activo?) then (no)
+    #FDECEC:E-05 422 con los campos inválidos;
+    stop
+  else (sí)
+  endif
+  if (D-08 ¿Dosis diaria ≤ máxima del catálogo?) then (no)
+    #FDECEC:E-06 422 DOSIS_EXCEDE_MAXIMO
+(bloqueo, sin anulación posible);
+    stop
+  else (sí)
+  endif
+  :A-04 Consultar alergias ACTIVAS del paciente
+en la fuente de alergias (límite 2 s);
+  if (D-09 ¿La fuente respondió?) then (no)
+    :A-08 Registrar la verificación como NO_DISPONIBLE;
+    #FDECEC:E-07 503 VERIFICACION_NO_DISPONIBLE
+(bloqueo seguro: nunca «sin alergias»);
+    stop
+  else (sí)
+  endif
+  if (D-10 ¿El paciente tiene alergias evaluadas?) then (no)
+    if (D-11 ¿El médico confirmó «sin alergias conocidas»?) then (no)
+      #FDECEC:E-08 422 CONFIRMACION_REQUERIDA;
+      stop
+    else (sí)
+    endif
+  else (sí)
+  endif
+  :A-05 Comparar cada medicamento con cada alergia activa:
+principio activo = alérgeno (directa)
+grupo farmacológico = grupo del alérgeno (cruzada);
+  if (D-12 ¿Coincidencia directa?) then (sí)
+    :A-08 Registrar la verificación como BLOQUEADA;
+    #FDECEC:E-09 422 BLOQUEO_ALERGIA
+(absoluto: ni con justificación);
+    stop
+  else (no)
+  endif
+  if (D-13 ¿Reactividad cruzada?) then (sí)
+    if (D-14 ¿Severidad life_threatening o unknown?) then (sí)
+      :A-08 Registrar la verificación como BLOQUEADA;
+      #FDECEC:E-10 422 BLOQUEO_ALERGIA_CRUZADA;
+      stop
+    else (no)
+    endif
+    if (D-15 ¿Justificación ≥ 20 caracteres y permiso prescripcion.override?) then (no)
+      #FDECEC:E-11 409 JUSTIFICACION_REQUERIDA
+(la interfaz muestra la advertencia);
+      stop
+    else (sí)
+    endif
+  else (no)
+  endif
+  :A-06 Guardar en una transacción la prescripción EMITIDA
+con su verificación (alergias evaluadas, resultado,
+justificación) — desde aquí es inmutable;
+  if (D-16 ¿La base confirmó?) then (no)
+    #FDECEC:E-12 503 sin escritura a medias;
+    stop
+  else (sí)
+  endif
+  :A-07 Registrar la traza en Auditoría
+(PRESCRIPCION_EMITIDA, con el id de la verificación);
+  #E8F5E9:F-01 201 EMITIDA (con o sin advertencia justificada);
+  stop
+
+case (Anular prescripción)
+  if (D-17 ¿Existe en el hospital del token?) then (no)
+    #FDECEC:E-13 404 idéntico a «no existe»;
+    stop
+  else (sí)
+  endif
+  if (D-18 ¿Está EMITIDA (no anulada ni dispensada)?) then (no)
+    #FDECEC:E-14 409 ESTADO_NO_PERMITE_ANULAR;
+    stop
+  else (sí)
+  endif
+  if (D-19 ¿Motivo de al menos 10 caracteres?) then (no)
+    #FDECEC:E-15 422 MOTIVO_REQUERIDO;
+    stop
+  else (sí)
+  endif
+  :A-09 Registrar la anulación como un hecho nuevo
+(la prescripción original no se edita);
+  :A-07 Registrar la traza en Auditoría (PRESCRIPCION_ANULADA);
+  #E8F5E9:F-02 200 ANULADA, con motivo, autor y fecha;
+  stop
+
+case (Consultar prescripción)
+  if (D-20 ¿Existe en el hospital del token?) then (no)
+    #FDECEC:E-13 404 idéntico a «no existe»;
+    stop
+  else (sí)
+  endif
+  :A-10 Devolver la prescripción con su verificación
+y su anulación, si la hay;
+  #E8F5E9:F-03 200 prescripción + verificación;
+  stop
+endswitch
+@enduml

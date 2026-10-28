@@ -1,0 +1,28 @@
+ID    Uso                                                   Actual  Mín. Estado    Propuesto  Nuevo Estado  
+------------------------------------------------------------------------------------------------------------
+C-01  Etiquetas de campo (10 pt negrita)                      3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-02  Encabezados de tabla (10 pt negrita)                    2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-03  Pistas: zona horaria, ancla (10 pt cursiva)             3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-04  Títulos de estado INICIAL/CARGA/VACÍO (10 pt negrita)    2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-05  Títulos de error (10 pt negrita) sobre rosa             2.85   4.5 FALLA       #5F6670   5.08 CUMPLE  
+C-06  Contador «50 movimientos…» (10 pt)                      3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-07  Ícono de ayuda «?» (11 pt negrita)                      3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-08  Borde de campo de texto y de selector                   2.64   3.0 FALLA       #7D838A   3.83 CUMPLE  
+C-09  Borde del radio de alcance                              2.64   3.0 FALLA       #7D838A   3.83 CUMPLE  
+C-10  Texto general (11 pt)                                  13.49   4.5 CUMPLE            —                
+C-11  Cabecera: hospital o red (12 pt negrita)                8.30   4.5 CUMPLE            —                
+C-12  Botón primario «Buscar» (11 pt negrita)                 8.30   4.5 CUMPLE            —                
+C-13  Aviso M-06 de meta-auditoría (10 pt)                    6.82   4.5 CUMPLE            —                
+C-14  Insignia «Corrige a #n» (9 pt negrita)                  7.58   4.5 CUMPLE            —                
+C-15  Insignia «Corregido por #n» (9 pt negrita)              6.82   4.5 CUMPLE            —                
+C-16  Resultado «denegado» (10 pt)                            6.51   4.5 CUMPLE            —                
+C-17  Mensaje de error junto al campo (10 pt)                 6.51   4.5 CUMPLE            —                
+C-18  Borde de campo con error                                6.51   3.0 CUMPLE            —                
+C-19  Texto de resultado ÍNTEGRA (10.5 pt)                   11.91   4.5 CUMPLE            —                
+C-20  Texto de resultado ALTERADA / errores (10.5 pt)        11.81   4.5 CUMPLE            —                
+C-21  Texto de resultado TRUNCADA (10.5 pt)                  12.41   4.5 CUMPLE            —                
+C-22  Anillo de foco (2 pt)                                   8.30   3.0 CUMPLE            —                
+C-23  Título «Protección de datos» (11 pt negrita)            6.51   4.5 CUMPLE            —                
+C-24  Botón deshabilitado «Verificar»                         2.11   0.0 EXENTO            —                
+------------------------------------------------------------------------------------------------------------
+Propuestas que no cumplen: 0

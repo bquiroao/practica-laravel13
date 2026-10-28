@@ -1,0 +1,95 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Componentes de RBAC: frontend (Vue) y backend (Micro-HIS PHP) separados por capa
+skinparam componentStyle uml2
+skinparam defaultFontSize 12
+skinparam package {
+  BorderColor #3D4F6B
+}
+left to right direction
+
+package "FRONTEND · Vue 3 + Pinia (diseño)" as FE {
+  package "UI" as FUI #EEF3F4 {
+    [AdministracionRolesPage] as PAG
+    [FormularioAsignacionRol] as FAR
+    [RevocacionRolDialog] as RRD
+    [SiPermiso] as SIP
+    [AccesoDenegadoAviso] as ADA
+    [EventoAuditoriaDetalle] as EAD
+  }
+  package "Aplicación (cliente)" as FAP #FFF4E8 {
+    [usePermiso] as UPE
+    [permisoGuard\n(vue-router)] as GRD
+    [usePermisosStore\n(Pinia)] as STO
+  }
+  package "Acceso a datos" as FPE #F7E6E1 {
+    [rbacApi] as API
+    [axios + interceptores\nBearer · X-Tenant-ID ·\nX-Request-ID · 403] as AX
+  }
+}
+
+interface "Contrato HTTP\nOpenAPI 3.1 v1.1.0" as HTTP
+
+package "BACKEND · Micro-HIS RBAC (implementado)" as BE {
+  package "Presentación (MVC)" as BUI #EEF3F4 {
+    [Kernel + Rutas\n+ MiddlewareAutorizacion] as KER
+    [Controladores] as CTL
+    [Formularios · Vistas] as FV
+  }
+  package "Aplicación" as BAP #FFF4E8 {
+    [AutorizarOperacion\n(ejecutar · exigir)] as AUT
+    [AsignarRol · RevocarRol] as UCS
+    [ConsultarEventoAuditoria] as CON
+    [RegistradorDeCambios\n(nuevo, semana 7)] as REG #FFE3D6
+  }
+  package "Dominio" as BDO #E3F1F0 {
+    [Políticas + Reglas (OCP)\nfail-closed] as POL
+    [CambioDeMembresia\nAsignacionDeRol · RevocacionDeRol\n(nuevo, semana 7)] as CAM #FFE3D6
+    [EventoAuditoria\n(formato de eventos)] as EVT
+    interface "Puertos Repository" as PR
+  }
+  package "Persistencia" as BPE #F7E6E1 {
+    [Adaptadores PDO] as PDO
+    [Adaptadores InMemory] as MEM
+  }
+}
+
+PAG --> FAR
+PAG --> RRD
+PAG --> SIP
+FAR --> API
+RRD --> API
+EAD --> API
+SIP --> UPE
+UPE --> STO
+GRD --> STO
+STO --> API : decidir()
+API --> AX
+AX ..> ADA : evento «acceso-denegado»
+AX --( HTTP
+
+KER -( HTTP
+KER --> CTL
+CTL --> FV
+CTL --> UCS
+CTL --> AUT
+CTL --> CON
+KER --> AUT : permiso de la ruta
+UCS --> AUT : exigir()
+UCS --> POL
+UCS --> REG : aplicar(cambio)
+REG --> CAM
+CAM --> EVT
+AUT --> POL
+AUT --> EVT
+REG --> PR
+AUT --> PR
+PDO ..|> PR
+MEM ..|> PR
+
+note bottom of FAP
+  El frontend NO tiene reglas de acceso:
+  solo pregunta al PDP para mostrar u ocultar.
+  El backend vuelve a decidir en cada ruta.
+end note
+@enduml

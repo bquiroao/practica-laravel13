@@ -1,0 +1,53 @@
+@startuml semana-08-flujo-medico-corregir
+!pragma layout smetana
+title User flow · Médico autor — corregir una nota firmada (versión nueva)
+skinparam ActivityBackgroundColor #F2F8F7
+skinparam ActivityBorderColor #1F6F6B
+skinparam ActivityDiamondBackgroundColor #FFF4E5
+skinparam defaultFontSize 12
+
+|Médico autor|
+start
+:Abre una nota firmada · W3;
+:Presiona «Corregir»
+(solo visible en la versión más reciente y firmada);
+|Interfaz|
+:Formulario de corrección · W4
+secciones y diagnóstico copiados de la versión anterior;
+:AYUDA: «La versión firmada no cambia:
+se crea la versión N + 1 en borrador»;
+|Médico autor|
+:Corrige el texto y escribe el motivo;
+|Interfaz|
+if (¿Motivo de 10 caracteres o más y secciones completas?) then (no)
+  :M-06 con contador «n / 10»
+  o M-01..M-04 junto al campo;
+  detach
+else (sí)
+endif
+:CARGA: «Guardando corrección…», botón deshabilitado;
+|Servidor Notas SOAP|
+:POST /api/v1/notas-soap/{id}/correcciones
+solo el autor asignado, una corrección por versión;
+|Interfaz|
+if (¿Resultado?) then (201)
+  :ÉXITO M-22 «Corrección guardada como versión N»
+  la línea de tiempo marca la anterior como reemplazada;
+  :Ofrece «Firmar ahora» (flujo firmar);
+  stop
+elseif (409 nota_ya_corregida) then (otra corrección)
+  :M-07 y abre la versión más reciente
+  (el texto escrito se ofrece para copiar);
+  detach
+elseif (409 / 422) then (reglas)
+  :M-05 expediente cerrado, M-06, M-01..M-04;
+  detach
+elseif (5xx / red) then (falla)
+  :M-14 / M-15: vuelve a consultar antes de reintentar
+  (la corrección no lleva Idempotency-Key);
+  detach
+else (403)
+  :W5 acceso denegado (M-11), sin motivo;
+  stop
+endif
+@enduml

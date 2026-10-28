@@ -1,0 +1,11 @@
+Par                                          Color     Fondo      Razón  Mín.  Resultado · origen
+Texto del layout                             #0f172a   #f8fafc    17.06:1   4.5  cumple · AppLayout.vue .layout
+Enlace activo del menú                       #2563eb   #ffffff     5.17:1   4.5  cumple · AppLayout.vue .router-link-active
+Enlace activo frente a enlace normal         #2563eb   #0f172a     3.45:1   3.0  cumple · AppLayout.vue (solo cambia el color)
+Anillo de foco propuesto (2 px)              #2563eb   #ffffff     5.17:1   3.0  cumple · Backlog B-02
+Mensaje de error                             #b91c1c   #ffffff     6.47:1   4.5  cumple · LoginPage.vue .login__error
+Ocupación baja, menos de 70 % (propuesto)    #15803d   #ffffff     5.02:1   4.5  cumple · Backlog B-04
+Ocupación media, 70–89 % (propuesto)         #b45309   #ffffff     5.02:1   4.5  cumple · Backlog B-04
+Ocupación alta, 90 % o más (propuesto)       #b91c1c   #ffffff     6.47:1   4.5  cumple · Backlog B-04
+Semáforo amarillo habitual                   #eab308   #ffffff     1.92:1   4.5  NO cumple · Alternativa descartada
+Semáforo verde habitual                      #22c55e   #ffffff     2.28:1   4.5  NO cumple · Alternativa descartada

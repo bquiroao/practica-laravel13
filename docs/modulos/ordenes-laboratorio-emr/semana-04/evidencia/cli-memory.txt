@@ -1,0 +1,25 @@
+{
+    "scope": "DEMO_ONLY",
+    "result": {
+        "issue": {
+            "status": "CREATED",
+            "id": 1
+        },
+        "followUp": {
+            "status": "FOUND",
+            "orders": [
+                {
+                    "id": 1,
+                    "actor": "MED-DEMO",
+                    "patient": "PAC-DEMO",
+                    "encounter": "EPI-DEMO",
+                    "status": "TEST_INITIAL",
+                    "tests": [
+                        "TEST-A",
+                        "TEST-B"
+                    ]
+                }
+            ]
+        }
+    }
+}

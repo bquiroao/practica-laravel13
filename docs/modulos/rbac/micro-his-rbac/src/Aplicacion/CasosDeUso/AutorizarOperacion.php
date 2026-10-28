@@ -31,6 +31,15 @@ final class AutorizarOperacion
     ) {
     }
 
+    /**
+     * Atajo para los casos de uso administrativos (semana 7): exige un permiso al actor
+     * sin que cada caso de uso tenga que armar el ComandoAutorizar.
+     */
+    public function exigir(string $usuarioId, string $tenantToken, string $hospitalId, string $permiso, string $ip): ResultadoAutorizacion
+    {
+        return $this->ejecutar(new ComandoAutorizar($usuarioId, $tenantToken, $hospitalId, $permiso, 'membresias', $ip));
+    }
+
     public function ejecutar(ComandoAutorizar $comando): ResultadoAutorizacion
     {
         $solicitud = new SolicitudAutorizacion(
@@ -58,20 +67,7 @@ final class AutorizarOperacion
     private function denegar(SolicitudAutorizacion $solicitud, string $motivo): ResultadoAutorizacion
     {
         $correlationId = ($this->generarCorrelacion)();
-
-        $evento = new EventoAuditoria(
-            EventoAuditoria::ACCESO_DENEGADO,
-            $correlationId,
-            $solicitud->usuarioId,
-            $solicitud->tenantSolicitud,
-            [
-                'permiso' => $solicitud->permiso,
-                'recurso' => $solicitud->recurso,
-                'motivo' => $motivo,
-                'ip' => $solicitud->ip,
-            ],
-            $solicitud->ahora,
-        );
+        $evento = EventoAuditoria::accesoDenegado($solicitud, $motivo, $correlationId);
 
         try {
             $this->auditoria->registrar($evento);

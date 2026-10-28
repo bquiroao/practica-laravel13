@@ -1,0 +1,4 @@
+REPRODUCCION: PASS indica defecto observado, no corregido.
+PASS D01 sesion con campos solo blancos aceptada
+PASS D02 emisor devuelve token de otro tenant y login informa exito
+2 casos, 0 fallidos.

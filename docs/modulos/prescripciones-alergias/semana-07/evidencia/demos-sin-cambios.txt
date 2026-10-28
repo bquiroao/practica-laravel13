@@ -1,0 +1,2 @@
+$ diff <(demo de la semana 4, código anterior) <(php bin/demo.php, código refactorizado)   — se ignora solo la hora de emisión
+Sin diferencias: las 8 respuestas del demo son idénticas.

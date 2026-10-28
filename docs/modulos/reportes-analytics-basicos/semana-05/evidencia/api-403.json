@@ -1,0 +1,7 @@
+{
+    "error": {
+        "codigo": "SIN_PERMISO",
+        "mensaje": "El rol «medico» no tiene permiso para el reporte «ocupacion» (RN-01)",
+        "correlationId": "ef79d4062b2bcadf"
+    }
+}

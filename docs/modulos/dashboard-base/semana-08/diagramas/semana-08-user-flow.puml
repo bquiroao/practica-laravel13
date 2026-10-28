@@ -1,0 +1,36 @@
+@startuml semana-08-user-flow
+title User flow por rol — «navegación del dashboard con estados de carga, vacío, error y resumen inicial»
+|Personal clínico|
+start
+:Abre /dashboard;
+if (¿Hay token y hospital seleccionado? (R-01)) then (no)
+  :Va a /login: «Inicia sesión para continuar»;
+  stop
+endif
+:W1: menú y tarjetas solo de su rol (R-02); esqueleto de carga (R-04);
+if (¿Cómo responde cada tarjeta? (R-03)) then (con datos o vacía)
+  :Resumen («5 citas hoy») o vacío con acción sugerida (R-05);
+else (falla o pasan 10 s)
+  :W3: solo esa tarjeta en error; pulsa «Reintentar» si quiere (R-08);
+endif
+if (¿La ruta que abre está permitida para su rol? (E6)) then (sí)
+  :El módulo se abre (éxito);
+else (no, la escribió a mano)
+  :W4: «No tienes acceso a esa sección»; sigue en el dashboard;
+endif
+stop
+|Administrador de hospital|
+start
+:Abre /dashboard con su sesión;
+:W2: menú de administración y las tres tarjetas;
+if (¿La sesión expiró (401)? (R-07)) then (sí)
+  :W5: limpia la sesión y ofrece «Iniciar sesión de nuevo»;
+  stop
+endif
+if (¿Qué decide?) then (abrir un módulo)
+  :Elige Pacientes, Citas o Camas → se abre (éxito);
+else (terminar)
+  :«Cerrar sesión» → confirma en W5 → vuelve a /login;
+endif
+stop
+@enduml

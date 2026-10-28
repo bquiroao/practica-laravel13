@@ -1,0 +1,28 @@
+@startuml mapa_navegacion_reportes_analytics_basicos
+title Semana 11 · Mapa de navegación del prototipo
+skinparam shadowing false
+hide empty description
+
+state "Inicio y filtros" as inicio : reporte según el rol\nperíodo rápido o fechas
+state "Calculando…" as carga
+state "Indicador" as indicador : valor con precisión\nficha de trazabilidad
+state "Desglose" as desglose : conteos por parte\nla suma coincide con el total
+state "Registros de origen" as registros : datos mínimos\ncargar más
+state "Sin datos" as vacio : RN-06
+state "Error crítico:\nfuente no disponible" as error : código de seguimiento\nfiltros conservados
+
+[*] --> inicio
+inicio --> inicio : fechas inválidas\n(mensaje junto al campo)
+inicio --> carga : Calcular
+carga --> indicador : éxito
+carga --> vacio : período sin datos
+carga --> error : la fuente no responde
+error --> carga : Reintentar
+vacio --> inicio : cambiar período
+indicador --> desglose : ¿De dónde sale?
+desglose --> registros : abrir una parte
+registros --> desglose : migas
+desglose --> indicador : migas
+registros --> registros : Cargar más
+indicador --> inicio : cambiar filtros o rol
+@enduml

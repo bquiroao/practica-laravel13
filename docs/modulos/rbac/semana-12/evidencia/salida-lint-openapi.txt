@@ -1,0 +1,17 @@
+
+    ╔═══════════════════════════════════════════════════════╗
+    ║                                                       ║
+    ║  A new version of Redocly CLI (2.64.1) is available.  ║
+    ║  Update now: `npm i -g @redocly/cli@latest`.          ║
+    ║  Changelog: https://redocly.com/docs/cli/changelog/   ║
+    ║                                                       ║
+    ╚═══════════════════════════════════════════════════════╝
+
+No configurations were provided -- using built in recommended configuration by default.
+
+validating api\openapi.yaml...
+api\openapi.yaml: validated in 101ms
+
+Woohoo! Your API description is valid. 🎉
+
+Nota: al terminar, Node 24 en Windows imprime una aserción interna de libuv («UV_HANDLE_CLOSING») al cerrar el proceso; no es parte del resultado del lint y se omitió.

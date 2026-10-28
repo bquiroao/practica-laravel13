@@ -1,0 +1,12 @@
+H-2 · sin SET TIME ZONE 'UTC' en FabricaConexion:
+[FALLA] INT-01   Camino feliz por HTTP con PostgreSQL: 201, ítems, verificación y traza en la bandeja; consulta idéntica
+         -> H-2: la fecha debe salir en UTC, salió 2026-10-27T11:34:09-06:00 (Arnes.php:48)
+Total: 9  Pasan: 8  Fallan: 1  Omitidas: 0
+
+H-1 · sin la frase del 422 en Respuesta::FRASES:
+[FALLA] HTTP-10  H-1: cada código que responde el kernel tiene su frase de estado (el servidor embebido no conoce la del 422)
+         -> sin frase para 422 (Arnes.php:48)
+Total: 10  Pasan: 9  Fallan: 1  Omitidas: 0
+
+Con las dos correcciones:
+Total: 19  Pasan: 19  Fallan: 0  Omitidas: 0

@@ -1,0 +1,6 @@
+POST /citas {"medico":"m1","paciente":"p1","especialidad":"cardio","inicio":<mañana>,"fin":<mañana+30min>,"motivo":"control"} -> 201 {"id":1}
+POST /citas {"medico":"m1","paciente":"p2","especialidad":"cardio","inicio":<mañana>,"fin":<mañana+30min>,"motivo":"control"} -> 409 {"error":"E4","mensaje":"El médico ya tiene una cita en ese horario."}
+POST /citas/1/confirmacion  -> 200 {}
+POST /citas/1/cancelacion {"motivo":"viaje del paciente"} -> 200 {}
+POST /citas/1/cancelacion {"motivo":"otra vez"} -> 422 {"error":"E7","mensaje":"Una cita cancelled no puede pasar a cancelled."}
+GET /citas  -> 404 {}

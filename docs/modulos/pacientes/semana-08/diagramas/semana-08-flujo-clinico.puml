@@ -1,0 +1,41 @@
+@startuml semana-08-flujo-clinico
+title User flow · Clínico — encontrar y consultar a un paciente (pacientes.buscar · pacientes.leer)
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam defaultFontSize 12
+
+|Clínico|
+start
+:Abre «Pacientes» · W1;
+:Busca por código (pulsera / orden),
+documento o nombre;
+|Interfaz|
+:CARGA → resultados · W1;
+if (¿Resultado?) then (sin resultados)
+  :VACÍO «No encontramos pacientes…»
+  sin botón «Registrar» (no tiene el permiso) · M-03b;
+  :Sugerencia: buscar por código o documento
+  (los protegidos no aparecen por nombre);
+  detach
+else (resultados)
+endif
+|Clínico|
+:Abre la ficha · W4;
+|Interfaz|
+if (¿Paciente protegido?) then (sí)
+  :W4 REDUCIDA · W6
+  «Identidad protegida» · sexo y estado visibles
+  nombre, fecha, teléfono y documento: «Reservado» · M-15;
+  note right
+    La auditoría registra el acceso
+    como «acceso limitado».
+  end note
+else (no)
+  :W4 COMPLETA de solo lectura
+  documento enmascarado;
+endif
+:Sin acciones de edición
+(el clínico no tiene pacientes.editar);
+stop
+@enduml

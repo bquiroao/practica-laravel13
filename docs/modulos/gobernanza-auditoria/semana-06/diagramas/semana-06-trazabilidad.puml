@@ -1,0 +1,80 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+left to right direction
+title Diagrama trazable: actor → caso de uso → regla → requisito → diseño → capa → Repository → API → prueba
+skinparam defaultFontSize 10
+skinparam rectangleBorderColor #2F5D8A
+skinparam rectangleBackgroundColor #F5F9FF
+
+rectangle "ACTORES (S1)" as A {
+  rectangle "Módulo emisor" as A1
+  rectangle "Auditor del hospital" as A2
+  rectangle "Super administrador" as A3
+}
+rectangle "CASOS DE USO (S1)" as CU {
+  rectangle "CU-01 Registrar" as CU1
+  rectangle "CU-02 Consultar\n(+CU-06 meta-auditoría)" as CU2
+  rectangle "CU-04 Verificar" as CU4
+}
+rectangle "REGLAS / REQUISITOS (S1–S2)" as R {
+  rectangle "R-02 inmutable · RF-06" as R2
+  rectangle "R-04 idempotencia · RF-05" as R4
+  rectangle "R-05 tenant · RF-02, RF-10" as R5
+  rectangle "R-06 rango obligatorio · RF-08" as R6
+  rectangle "R-03 sello · RF-07" as R3
+  rectangle "R-11 corrección (S6) · RF-14..16" as R11 #E8F5E9
+}
+rectangle "DISEÑO SOLID (S2)" as S {
+  rectangle "OCP: ReglaMovimiento ×9" as S1
+  rectangle "OCP: FiltroMovimiento ×5" as S2
+  rectangle "Invariantes fijos en\nlos casos de uso" as S3
+}
+rectangle "CAPAS (S3–S4)" as C {
+  rectangle "Presentación MVC\nAuditoriaControlador" as C1
+  rectangle "Aplicación\nRegistrar / Consultar / Verificar" as C2
+  rectangle "Dominio\nMovimiento · Sello" as C3
+}
+rectangle "REPOSITORY (S4)" as RP {
+  rectangle "Bitacora (puerto)\nPdoBitacora · BitacoraEnMemoria" as RP1
+}
+rectangle "API 1.1.0 (S5–S6)" as API {
+  rectangle "POST /movimientos" as P1
+  rectangle "GET /movimientos" as P2
+  rectangle "POST /verificaciones\nGET /anclas" as P3
+}
+rectangle "EVIDENCIA" as E {
+  rectangle "APP-01..11 · CORR-01..07" as E1
+  rectangle "CON-MEM/PDO-01..09" as E2
+  rectangle "API-01..03 · INT-01..08" as E3
+}
+
+A1 --> CU1
+A2 --> CU2
+A3 --> CU2
+A3 --> CU4
+CU1 --> R2
+CU1 --> R4
+CU1 --> R5
+CU1 --> R11
+CU2 --> R5
+CU2 --> R6
+CU4 --> R3
+R2 --> S3
+R4 --> S3
+R5 --> S3
+R11 --> S1
+R6 --> S2
+R3 --> S3
+S1 --> C2
+S2 --> C2
+S3 --> C2
+C1 --> C2
+C2 --> C3
+C2 --> RP1
+C1 --> P1
+C1 --> P2
+C1 --> P3
+P1 --> E1
+P2 --> E3
+RP1 --> E2
+@enduml

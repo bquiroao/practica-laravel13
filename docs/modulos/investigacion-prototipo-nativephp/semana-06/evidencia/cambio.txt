@@ -1,0 +1,13 @@
+PASS: antes: adaptador directo invocado
+PASS: permiso denegado conserva consulta registrada
+PASS: denegacion no es enviado
+PASS: denegado no invoca adaptador nativo
+PASS: permiso concedido delega
+PASS: concedido invoca una vez
+PASS: mensaje sin identificador
+PASS: error de persistencia sigue explícito
+PASS: persistencia fallida no agrega efecto
+PASS: rollback sigue íntegro
+PASS: permiso retirado se reevalúa en siguiente ejecución
+PASS: no usa permiso anterior almacenado
+OK: 12 aserciones del cambio. Permiso y SO son dobles, no ejecución nativa.

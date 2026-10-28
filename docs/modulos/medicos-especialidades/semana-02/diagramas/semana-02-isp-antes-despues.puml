@@ -1,0 +1,49 @@
+@startuml semana-02-isp-antes-despues
+title ISP en «registro de médico, especialidad y disponibilidad»: antes (interfaz gorda) y después (una interfaz por cliente)
+skinparam defaultFontName Arial
+skinparam classBackgroundColor #EEF2F7
+hide empty members
+package "ANTES" #FFF6F2 {
+  interface ServicioMedicos #FFE3D6
+  class PantallaRecepcion
+  class IntegracionCitas
+  class PortalMedico
+  class DisponibilidadEnCache #FFE3D6
+  PantallaRecepcion --> ServicioMedicos : ve 7, usa 1
+  IntegracionCitas --> ServicioMedicos : ve 7, usa 1
+  PortalMedico --> ServicioMedicos : ve 7, usa 2
+  ServicioMedicos <|.. DisponibilidadEnCache
+}
+ServicioMedicos : registrarMedico() · desactivarMedico() · listarMedicos()
+ServicioMedicos : asociarEspecialidad() · definirHorario()
+ServicioMedicos : registrarAusencia() · consultarDisponibilidad()
+DisponibilidadEnCache : **6 métodos de relleno que lanzan**
+package "DESPUÉS" #F2FFF5 {
+  interface RegistroDeMedicos
+  interface GestionEspecialidades
+  interface HorarioDeAtencion
+  interface AusenciasDelMedico
+  interface ConsultaDisponibilidad
+  class "ServicioMedicos " as S2 <<implementa las 5>>
+  class "PantallaRecepcion" as R2
+  class "IntegracionCitas (M05)" as C2
+  class "PortalMedico" as P2
+  class "DisponibilidadEnCache" as K2
+  RegistroDeMedicos <|.. S2
+  GestionEspecialidades <|.. S2
+  HorarioDeAtencion <|.. S2
+  AusenciasDelMedico <|.. S2
+  ConsultaDisponibilidad <|.. S2
+  ConsultaDisponibilidad <|.. K2
+  R2 --> ConsultaDisponibilidad : ve 1, usa 1
+  C2 --> ConsultaDisponibilidad : ve 1, usa 1
+  P2 --> AusenciasDelMedico
+  P2 --> ConsultaDisponibilidad : ve 2, usa 2
+}
+RegistroDeMedicos : registrarMedico() · desactivarMedico() · listarMedicos()
+GestionEspecialidades : asociarEspecialidad()
+HorarioDeAtencion : definirHorario()
+AusenciasDelMedico : registrarAusencia()
+ConsultaDisponibilidad : consultarDisponibilidad()
+K2 : solo consultarDisponibilidad()
+@enduml

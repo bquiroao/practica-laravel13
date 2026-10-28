@@ -1,0 +1,80 @@
+@startuml semana-01-actividad
+title Módulo de laboratorio — Actividad\n«Captura y corrección controlada de resultados pendientes»
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Personal de laboratorio|
+start
+:A-01 Iniciar captura para una orden e ítem [CU-01];
+
+|Sistema HIS — resultados|
+if (D-01 ¿Actor autorizado en el hospital?) then (sí)
+else (no)
+  :E-01 Denegar operación sin exponer datos [R-02];
+  stop
+endif
+
+if (D-02 ¿Orden e ítem existen y admiten resultado?) then (sí)
+else (no)
+  :E-02 Informar referencia inexistente o no elegible [R-01];
+  stop
+endif
+
+:A-02 Presentar campos aplicables al tipo de prueba [R-03];
+|Personal de laboratorio|
+:A-03 Ingresar valor y datos requeridos;
+|Sistema HIS — resultados|
+if (D-03 ¿Datos completos y formato aplicable?) then (sí)
+else (no)
+  :E-03 Solicitar corrección de entrada;\nno registrar versión;
+  stop
+endif
+
+:A-04 Guardar primera versión pendiente con autoría [R-04];
+if (D-04 ¿Persistencia exitosa?) then (sí)
+  :A-05 Conservar actor y fecha/hora;
+  :A-06 Enviar versión pendiente a la cola de validación;
+  :A-07 Confirmar captura pendiente [CU-01];
+else (no)
+  :E-04 Informar error sin confirmar éxito [R-08];
+  stop
+endif
+
+|Personal de laboratorio|
+if (D-05 ¿Se detectó un error antes de la validación?) then (sí)
+else (no)
+  stop
+endif
+
+|Sistema HIS — resultados|
+if (D-06 ¿La versión vigente continúa pendiente?) then (sí)
+else (no)
+  :E-05 Rechazar corrección sin alterar la versión [R-07];
+  stop
+endif
+
+|Personal de laboratorio|
+:A-08 Ingresar el dato corregido y el motivo obligatorio;
+
+|Sistema HIS — resultados|
+if (D-07 ¿Motivo presente y datos válidos?) then (sí)
+else (no)
+  :E-03 Solicitar corrección de entrada;\nno crear versión;
+  stop
+endif
+
+:A-09 Crear versión nueva enlazada a la previa [R-06];
+if (D-08 ¿Se guardó y sigue pendiente?) then (sí)
+  :A-10 Conservar la versión anterior e historial [R-06];
+  :A-11 Mantener pendiente y actualizar la cola [R-06];
+  :A-12 Confirmar nueva versión [CU-02];
+else (no)
+  if (D-09 ¿El estado cambió antes de guardar?) then (sí)
+    :E-05 Rechazar sin alterar las versiones [R-05];
+  else (no)
+    :E-04 Informar error sin confirmar éxito;\nconservar la versión previa [R-08];
+  endif
+endif
+stop
+@enduml

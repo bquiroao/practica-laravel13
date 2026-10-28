@@ -1,0 +1,39 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Expediente médico electrónico base (tarea Odoo 2503)
+title Casos de uso — apertura y consulta autorizada del expediente longitudinal
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Personal de\nadmisión" as Adm
+actor "Profesional tratante\n(médico o enfermería)" as Pro
+
+rectangle "Expediente médico electrónico base" {
+  usecase "CU-01\nAbrir expediente" as CU01
+  usecase "CU-02\nConsultar expediente local\n--\npunto de extensión:\nhistoria externa solicitada" as CU02
+  usecase "CU-03\nConsultar historia de\notros hospitales\n--\npunto de extensión:\nsin consentimiento en emergencia" as CU03
+  usecase "CU-04\nAcceso de emergencia" as CU04
+  usecase "CU-05\nAutorizar acceso" as CU05
+  usecase "CU-06\nAuditar acceso" as CU06
+}
+
+actor "Índice maestro y control\nde acceso (base CENTRAL)" <<sistema>> as MPI
+
+Adm --> CU01
+Pro --> CU02
+Pro --> CU03
+Pro --> CU04
+CU03 -- MPI
+CU04 -- MPI
+
+CU03 ..> CU02 : <<extend>>
+CU04 ..> CU03 : <<extend>>
+CU01 ..> CU05 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU01 ..> CU06 : <<include>>
+CU02 ..> CU06 : <<include>>
+
+note bottom of CU04
+  Sin consentimiento, con justificación,
+  máximo 1 hora y revisión pendiente (R-07).
+end note
+@enduml

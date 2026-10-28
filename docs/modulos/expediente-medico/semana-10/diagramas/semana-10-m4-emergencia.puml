@@ -1,0 +1,15 @@
+@startsalt
+title M4 — Acceso de emergencia (pantalla completa)
+{+
+  [< HC-000123] | <b>Emergencia</b>
+  Sin consentimiento para este hospital.
+  Quedará registrado y será revisado.
+  <b>Justificación *</b>
+  "Paciente inconsciente   "
+  <i>21 caracteres · mínimo 20</i>
+  <i>Ej.: «inconsciente, se necesitan alergias»</i>
+  ---
+  [Confirmar acceso por 1 hora]
+  [Volver sin acceder]
+}
+@endsalt
