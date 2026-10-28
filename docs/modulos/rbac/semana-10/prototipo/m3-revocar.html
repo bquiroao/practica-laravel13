@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revocar rol · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Fondo: M1. Con la hoja abierta, TODO el fondo (incluida la barra) queda inerte y bajo el velo (BL-05). -->
+<div inert aria-hidden="true">
+  <header class="barra">
+    <span class="hospital"><span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾</span>
+    <span class="avatar">CM</span>
+  </header>
+  <main>
+    <h1>Roles del hospital</h1>
+    <div class="tarjeta"><strong>Ana Pérez</strong><div class="meta">ana · Enfermería, piso 3</div></div>
+    <div class="tarjeta"><div class="fila"><strong>Enfermería</strong><span class="estado activo derecha">● Activo</span></div><div class="meta">Desde 01/01/2026 · sin fin</div></div>
+  </main>
+  <nav class="nav-inferior"><a aria-current="page"><span class="ico">👥</span>Roles</a><a><span class="ico">🔎</span>Auditoría</a><a><span class="ico">☰</span>Más</a></nav>
+</div>
+<div class="velo"></div>
+
+<section class="hoja" role="dialog" aria-modal="true" aria-labelledby="titulo" aria-describedby="consecuencia">
+  <div class="asa" aria-hidden="true"></div>
+
+  <div data-estado="base sin-conexion enviando">
+    <h1 id="titulo" style="font-size:1.25rem">Revocar Enfermería a Ana Pérez</h1>
+    <p class="meta" style="margin:-6px 0 12px">en Hospital Regional de Oriente</p>
+    <div class="aviso atencion" id="consecuencia">
+      Desde ahora no podrá <strong>registrar signos vitales</strong> ni <strong>leer el expediente</strong>. Sus intentos quedarán registrados.
+    </div>
+
+    <label for="motivo">Motivo <span style="font-weight:400">(queda en la bitácora)</span></label>
+    <textarea id="motivo" aria-describedby="contador">Traslado a consulta exte</textarea>
+    <p class="ayuda" id="contador">24 / 10 mínimo ✓</p>
+
+    <label class="casilla"><input type="checkbox" checked> Entiendo que el cambio es inmediato</label>
+
+    <div class="aviso error" role="status" data-estado="sin-conexion" style="margin-top:12px">
+      <strong>Sin conexión.</strong> No se puede revocar sin conexión. Tu motivo se conserva mientras esta hoja siga abierta.
+    </div>
+
+    <p class="ayuda" id="espera" data-estado="sin-conexion">Se habilita solo cuando vuelva la red. No se envía automáticamente.</p>
+    <div class="acciones">
+      <button class="btn bloque peligro" data-estado="base">Revocar rol</button>
+      <button class="btn bloque" aria-disabled="true" aria-describedby="espera" data-estado="sin-conexion">Revocar rol · esperando conexión</button>
+      <button class="btn bloque peligro" aria-disabled="true" data-estado="enviando"><span aria-hidden="true">◌</span> Revocando…</button>
+      <button class="btn bloque" autofocus>Cancelar</button>
+    </div>
+  </div>
+</section>
+<script src="estado.js"></script>
+</body>
+</html>

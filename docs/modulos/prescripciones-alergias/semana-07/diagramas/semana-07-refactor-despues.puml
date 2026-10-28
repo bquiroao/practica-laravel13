@@ -1,0 +1,47 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title DESPUÉS — la Aplicación orquesta; la decisión clínica es UNA política del Dominio
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+
+package "Aplicación" #EEF7EE {
+  class EmitirPrescripcion {
+    - emitir(SolicitudEmision) : Resultado
+    - rechazo(DecisionEmision, …) : Resultado
+    - guardar(Prescripcion, …) : Resultado
+    .. Ce 16 · 12 ramas · Dc 0 · 3 preocupaciones ..
+  }
+  class VerificarAlergiasPrevia {
+    + ejecutar(...) : Resultado
+    .. Dc 0 ..
+  }
+}
+package "Dominio" #FFF8E1 {
+  class PoliticaEmision <<nuevo>> {
+    + MIN_JUSTIFICACION = 20
+    + decidir(verificación, expediente, solicitud, override: Closure) : DecisionEmision
+    + resultadoPrevio(verificación, expediente) : string
+    .. orden: confirmación → bloqueo → advertencia ..
+  }
+  class DecisionEmision <<nuevo>> {
+    + tipo : PERMITIDA | BLOQUEADA | REQUIERE_JUSTIFICACION | REQUIERE_CONFIRMACION
+    + codigoBloqueo · justificacion · confirmacionRegistrada
+    + permiteEmitir() : bool
+  }
+  class Prescripcion {
+    + {static} emitir(solicitud, expediente, verificación, DecisionEmision, hora) <<nuevo>>
+  }
+}
+
+EmitirPrescripcion --> PoliticaEmision : decidir()
+VerificarAlergiasPrevia --> PoliticaEmision : resultadoPrevio()
+PoliticaEmision --> DecisionEmision
+EmitirPrescripcion --> Prescripcion : emitir(decisión)
+Prescripcion ..> DecisionEmision
+
+note bottom of PoliticaEmision
+  DOM-09: tabla de decisiones, y RBAC (override)
+  se consulta SOLO ante una advertencia.
+  CAR-01: 32 escenarios idénticos antes y después.
+end note
+@enduml

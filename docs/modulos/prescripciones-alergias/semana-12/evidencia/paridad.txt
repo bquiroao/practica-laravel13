@@ -1,0 +1,107 @@
+IGUAL  Datos: pacientes (datos-demo.php / config.php ↔ datos.js)
+IGUAL  Datos: alergias (datos-demo.php / config.php ↔ datos.js)
+IGUAL  Datos: medicamentos (datos-demo.php / config.php ↔ datos.js)
+IGUAL  Datos: grupos (datos-demo.php / config.php ↔ datos.js)
+IGUAL  Datos: tokens (datos-demo.php / config.php ↔ datos.js)
+IGUAL  Datos: permisos (datos-demo.php / config.php ↔ datos.js)
+IGUAL   1. Camino feliz: verificación con la dosis de Paracetamol excedida (1500 mg c/6 h)
+          422 · DOSIS_EXCEDE_MAXIMO · dosis=[items[1]]
+IGUAL   2. Camino feliz: dosis corregida → ADVERTENCIA (Cefalexina ↔ Penicilina, cruzada, moderada)
+          200 · ADVERTENCIA · hallazgos=[CRUZADA CEFA500 Penicilina moderate no-bloquea exantema] · puede_justificar=true
+IGUAL   3. Emitir la advertencia sin justificación → 409
+          409 · JUSTIFICACION_REQUERIDA · hallazgos=[CRUZADA CEFA500 Penicilina moderate no-bloquea exantema]
+IGUAL   4. Camino feliz: emitir con justificación (tras renovar la sesión, la MISMA clave)
+          201 · EMITIDA · Location · #1 · ADVERTENCIA
+IGUAL   5. Reintento con la misma clave y el mismo contenido → YA_EMITIDA
+          200 · YA_EMITIDA · #1 · ADVERTENCIA
+IGUAL   6. La misma clave con otro contenido → CLAVE_REUTILIZADA
+          409 · CLAVE_REUTILIZADA
+IGUAL   7. Camino feliz: el médico abre la prescripción #1
+          200 · PRESCRIPCION · #1 · EMITIDA P-002 por dr-lopez · ADVERTENCIA · justificada
+IGUAL   8. Camino feliz: farmacia abre la prescripción #1
+          200 · PRESCRIPCION · #1 · EMITIDA P-002 por dr-lopez · ADVERTENCIA · justificada
+IGUAL   9. Rol: farmacia intenta verificar
+          403 · PERMISO_DENEGADO
+IGUAL  10. Rol: farmacia intenta anular
+          403 · PERMISO_DENEGADO
+IGUAL  11. Rol: la Dra. Ruiz (sin override) verifica la advertencia: la previa responde puede_justificar=false (antes, brecha M-07)
+          200 · ADVERTENCIA · hallazgos=[CRUZADA CEFA500 Penicilina moderate no-bloquea exantema] · puede_justificar=false
+IGUAL  12. Rol: la Dra. Ruiz emite con justificación → 409 igual
+          409 · JUSTIFICACION_REQUERIDA · hallazgos=[CRUZADA CEFA500 Penicilina moderate no-bloquea exantema]
+IGUAL  13. Error crítico: P-005 con Amoxicilina, verificación previa (la alergia está resuelta)
+          200 · SIN_HALLAZGOS
+IGUAL  14. Error crítico: enfermería registra una alergia nueva y el médico emite → el servidor vuelve a verificar y BLOQUEA
+          422 · BLOQUEO_ALERGIA · hallazgos=[DIRECTA AMOX500 J01CA04 severe bloquea urticaria generalizada]
+IGUAL  15. Error crítico: cambia a Paracetamol y verifica
+          200 · SIN_HALLAZGOS
+IGUAL  16. Error crítico: emite; la respuesta se pierde en la red (el servidor SÍ la procesó)
+          201 · EMITIDA · Location · #2 · SIN_HALLAZGOS
+IGUAL  17. Error crítico: «Reintentar» con la misma clave → YA_EMITIDA, una sola
+          200 · YA_EMITIDA · #2 · SIN_HALLAZGOS
+IGUAL  18. Anular #2 con un motivo corto
+          422 · MOTIVO_REQUERIDO
+IGUAL  19. Anular #2 (la respuesta se pierde)
+          200 · ANULADA · #2 · anulada por dr-lopez: «Se registró una alergia a amoxicilina»
+IGUAL  20. «Reintentar» la anulación → 409 (anular no es idempotente)
+          409 · ESTADO_NO_PERMITE_ANULAR
+IGUAL  21. Reconciliación: la interfaz consulta #2 → ANULADA por dr-lopez
+          200 · PRESCRIPCION · #2 · ANULADA P-005 por dr-lopez · SIN_HALLAZGOS · anulada por dr-lopez: «Se registró una alergia a amoxicilina»
+IGUAL  22. Sin registros de alergias (P-003): la previa pide confirmar
+          200 · CONFIRMACION_REQUERIDA
+IGUAL  23. P-003: emitir sin confirmar → 422
+          422 · CONFIRMACION_REQUERIDA
+IGUAL  24. P-003: emitir confirmando con el paciente
+          201 · EMITIDA · Location · #3 · SIN_HALLAZGOS
+IGUAL  25. Bloqueo cruzado: P-004 (AAS, potencialmente mortal) con Ibuprofeno
+          422 · BLOQUEO_ALERGIA_CRUZADA · hallazgos=[CRUZADA IBU400 N02BA01 life_threatening bloquea anafilaxia]
+IGUAL  26. Bloqueo cruzado: P-006 (penicilina, severidad desconocida) con Cefalexina
+          200 · BLOQUEO · hallazgos=[CRUZADA CEFA500 penicilina unknown bloquea -]
+IGUAL  27. Bloqueo directo por nombre normalizado: P-007 («  AMOXICILINA ») con Amoxicilina
+          422 · BLOQUEO_ALERGIA · hallazgos=[DIRECTA AMOX500   AMOXICILINA  moderate bloquea prurito]
+IGUAL  28. Expediente caído: la previa responde 200 «no disponible» (nunca «sin hallazgos»)
+          200 · VERIFICACION_NO_DISPONIBLE
+IGUAL  29. Expediente caído: emitir → 503, no se emite
+          503 · VERIFICACION_NO_DISPONIBLE
+IGUAL  30. El Expediente vuelve: «Reintentar» con la misma clave → 201
+          201 · EMITIDA · Location · #4 · SIN_HALLAZGOS
+IGUAL  31. Datos inválidos: unidad, vía, frecuencia y días
+          422 · DATOS_INVALIDOS · campos=[items[0].dosis, items[0].unidad, items[0].frecuencia_horas, items[0].via, items[0].dias]
+IGUAL  32. Medicamento inactivo del catálogo (Ranitidina)
+          422 · DATOS_INVALIDOS · campos=[items[0].medicamento]
+IGUAL  33. Sin ítems
+          422 · DATOS_INVALIDOS · campos=[items]
+IGUAL  34. Paciente de otro hospital (P-900)
+          404 · NO_ENCONTRADO
+IGUAL  35. Tenant: el médico del Sur pide la #1 del Norte → igual que inexistente
+          404 · NO_ENCONTRADO
+IGUAL  36. Tenant: token del Norte con X-Tenant-ID del Sur
+          403 · TENANT_NO_COINCIDE
+IGUAL  37. Sin X-Tenant-ID
+          400 · TENANT_REQUERIDO
+IGUAL  38. Sin token
+          401 · NO_AUTENTICADO
+IGUAL  39. Emitir sin Idempotency-Key
+          400 · IDEMPOTENCY_KEY_REQUERIDA
+IGUAL  40. JSON mal formado
+          400 · JSON_INVALIDO
+IGUAL  41. Inmutable: DELETE de una prescripción
+          405 · METODO_NO_PERMITIDO
+IGUAL  42. Ruta inexistente
+          404 · RUTA_NO_ENCONTRADA
+IGUAL  Final: prescripciones (4 en el kernel real)
+          #1 P-002 EMITIDA
+          #2 P-005 ANULADA
+          #3 P-003 EMITIDA
+          #4 P-005 EMITIDA
+IGUAL  Final: trazas (9 en el kernel real)
+          PRESCRIPCION_EMITIDA dr-lopez prescripcion:1 exito
+          PRESCRIPCION_BLOQUEADA dr-lopez paciente:P-005 denegado
+          PRESCRIPCION_EMITIDA dr-lopez prescripcion:2 exito
+          PRESCRIPCION_ANULADA dr-lopez prescripcion:2 exito
+          PRESCRIPCION_EMITIDA dr-lopez prescripcion:3 exito
+          PRESCRIPCION_BLOQUEADA dr-lopez paciente:P-004 denegado
+          PRESCRIPCION_BLOQUEADA dr-lopez paciente:P-007 denegado
+          VERIFICACION_NO_DISPONIBLE dr-lopez paciente:P-005 error
+          PRESCRIPCION_EMITIDA dr-lopez prescripcion:4 exito
+
+Datos: 6  Pasos: 42  Final: 2  Diferencias: 0

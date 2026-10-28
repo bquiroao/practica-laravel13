@@ -1,0 +1,9 @@
+Cambio práctico «Corregir una nota SOAP firmada» — paso 2: código implementado, contrato api/openapi.yaml TODAVÍA sin actualizar
+Fecha: 2026-10-13 19:08
+Las pruebas de contrato (API-01, API-03, API-04) detectan que la ruta, sus respuestas y 3 códigos de error nuevos no están documentados.
+Extracto: solo las pruebas que fallan y el total.
+
+[FALLA] API-01   Contrato ↔ código: mismas operaciones (método y ruta) y mismo permiso (x-permiso) en cada una
+[FALLA] API-03   Cada código HTTP que devuelve el servidor en 31 escenarios reales está documentado en su operación
+[FALLA] API-04   Cada código de error que devuelve el servidor está en el enum Error.code del contrato
+Total: 113  Pasan: 109  Fallan: 3  Omitidas: 1

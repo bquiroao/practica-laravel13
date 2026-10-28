@@ -1,0 +1,1 @@
+Recorrer administrador→invitación→credencial de invitado→login→sesión→cierre. Explicar 202 vs entrega/activación, secreto propio y tenant confiable del servidor. Mostrar fallo de revocación sin cierre falso y variante de respuesta desconocida. Los seis SVG son diseño; API/JWT/contraseñas reales no se prueban con wireframes.

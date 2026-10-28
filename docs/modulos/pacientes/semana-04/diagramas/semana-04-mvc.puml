@@ -1,0 +1,87 @@
+@startuml semana-04-mvc
+!pragma layout smetana
+title MVC en la entrada del Micro-HIS Pacientes
+skinparam classAttributeIconSize 0
+hide empty members
+skinparam class {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+
+package "Front Controller" {
+  class Kernel {
+    + manejar(Solicitud) : Respuesta
+    - resolver(Solicitud)
+  }
+  class Rutas {
+    + {static} definir(PacientesControlador) : list<Ruta>
+  }
+  class Ruta {
+    + metodo
+    + patron
+    + manejador : Closure
+  }
+}
+
+package "C — Controlador" {
+  class PacientesControlador {
+    + registrar(Solicitud, Identidad, params) : Respuesta
+    + buscar(...) : Respuesta
+    + consultar(...) : Respuesta
+    + actualizar(...) : Respuesta
+  }
+}
+
+package "Formulario (formato de entrada)" {
+  class FormularioPaciente {
+    + {static} registro(...) : ComandoRegistrar
+    + {static} actualizacion(...) : ComandoActualizar
+    + {static} busqueda(...) : ComandoBuscar
+    + {static} consulta(...) : ComandoConsultar
+  }
+  class EntradaInvalida <<exception>> {
+    + tipo : CUERPO | FORMATO | VERSION_REQUERIDA | IF_MATCH_INVALIDO
+    + campos
+  }
+}
+
+package "V — Vistas (formato de salida)" #E8F5E9 {
+  class PacienteVista {
+    + {static} registrado(Resultado) : 201 + Location + ETag
+    + {static} lista(Resultado) : 200
+    + {static} detalle(Resultado) : 200 + ETag
+    + {static} actualizado(Resultado) : 200 + ETag
+  }
+  class ErrorVista {
+    + {static} deResultado(Resultado) : 422|409|404|403|503
+    + {static} entradaInvalida(EntradaInvalida) : 400|428
+    + {static} hospitalRequerido() / noAutenticado() / ...
+  }
+}
+
+package "M — Modelo (Aplicación + Dominio)" {
+  class "RegistrarPaciente\nBuscarPacientes\nConsultarPaciente\nActualizarPaciente" as Casos <<casos de uso>>
+  class Resultado {
+    + estado : creado | ok | invalido | conflicto | ...
+    + datos
+    + error
+  }
+}
+
+Kernel --> Rutas
+Rutas --> "*" Ruta
+Ruta ..> PacientesControlador : método
+PacientesControlador --> FormularioPaciente : 1. formato → comando
+FormularioPaciente ..> EntradaInvalida : lanza
+PacientesControlador --> Casos : 2. ejecutar(comando)
+Casos ..> Resultado : devuelve
+PacientesControlador --> PacienteVista : 3. formato de la respuesta
+PacienteVista ..> ErrorVista : si no es éxito
+Kernel ..> ErrorVista : 400/401/403/404/405/500
+
+note bottom of PacientesControlador
+  Sin SQL, sin reglas de negocio, sin «new»,
+  sin códigos HTTP ni JSON (ARQ-07, ARQ-08).
+  Solo recibe casos de uso en el constructor.
+end note
+@enduml

@@ -1,0 +1,19 @@
+﻿Órdenes de laboratorio desde EMR — Evidencia de prueba
+Comando: php docs/modulos/ordenes-laboratorio-emr/semana-15/pruebas/run.php
+
+PASS [UNIT U-01] emisión crea la orden completa con sus referencias y partidas
+PASS [UNIT U-02] consulta devuelve exactamente el estado persistido del episodio
+PASS [UNIT U-03] actualización válida usa el estado leído como precondición
+PASS [WHITEBOX WB-01] emisión recorre entradas, permiso, contexto, catálogo y persistencia en orden
+PASS [WHITEBOX WB-02] actualización cubre permiso, lookup, política y resultados de escritura
+PASS [BLACKBOX BB-01] clases válidas de una prueba o varias generan una orden equivalente
+PASS [BLACKBOX BB-02] valores vacíos y límite mínimo de selección distinguen solicitud inválida
+PASS [BLACKBOX BB-03] permisos clínicos y origen de seguimiento bloquean acceso no autorizado
+PASS [BLACKBOX BB-04] resultados vacíos, fallas técnicas y conflictos no se confunden
+
+UNIT: 3 pruebas
+WHITEBOX: 2 pruebas
+BLACKBOX: 4 pruebas
+RESULTADO: 9/9 pruebas aprobadas; 0 fallidas.
+
+Exit code: 0

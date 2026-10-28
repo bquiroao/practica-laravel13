@@ -1,0 +1,21 @@
+@startsalt w2_carga_error
+{+
+  <b>Estados de la consulta</b>
+  --
+  {+ <b>Carga</b>
+     Calculando… (anunciado al lector de pantalla)
+     . . . . . . . . . . . .
+  }
+  {+ <b>Vacío</b>
+     Sin datos para este período.
+     Pruebe con un período más amplio. | [Cambiar período]
+  }
+  {+ <b>Error recuperable</b>
+     No se pudieron obtener los datos. Intente de nuevo.
+     Código de seguimiento: 8f3a1c20 | [Reintentar]
+  }
+  {+ <b>Sin permiso</b>
+     No tiene permiso para ver este reporte.
+  }
+}
+@endsalt

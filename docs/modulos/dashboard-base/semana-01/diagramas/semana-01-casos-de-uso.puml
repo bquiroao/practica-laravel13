@@ -1,0 +1,35 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Dashboard base UI/UX e implementación transversal (tarea Odoo 2428)
+title Casos de uso — navegación del dashboard con estados de carga, vacío, error y resumen inicial
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario del\nhospital" as U
+actor "Personal clínico" as Cli
+actor "Administrador\nde hospital" as Adm
+Cli -up-|> U
+Adm -up-|> U
+
+rectangle "Dashboard base" {
+  usecase "CU-01\nIngresar al dashboard" as CU01
+  usecase "CU-02\nVer resumen inicial\n--\npunto de extensión:\ntarjeta en error" as CU02
+  usecase "CU-03\nNavegar a un módulo" as CU03
+  usecase "CU-04\nReintentar tarjeta" as CU04
+  usecase "CU-05\nValidar sesión,\nhospital y permisos" as CU05
+}
+
+U --> CU01
+U --> CU02
+U --> CU03
+
+CU01 ..> CU05 : <<include>>
+CU02 ..> CU05 : <<include>>
+CU03 ..> CU05 : <<include>>
+CU04 ..> CU02 : <<extend>>
+
+note right of CU02
+  Cada tarjeta: cargando → resumen,
+  vacío o error, por su cuenta
+  (R-03 a R-05).
+end note
+@enduml

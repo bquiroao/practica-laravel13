@@ -1,0 +1,17 @@
+@startsalt w3_indicador
+{+
+  <b>Ocupación hospitalaria</b> · 01/10/2026 a 31/10/2026
+  --
+  {+ <size:28><b>78,0 %</b></size> | ▲ 3,0 puntos vs. septiembre }
+  39 de 50 camas habilitadas
+  --
+  <b>Ficha de trazabilidad</b> | <&info>
+  Fórmula   | camas ocupadas / camas habilitadas × 100
+  Período   | 01/10/2026 a 31/10/2026
+  Filtros   | ninguno adicional
+  Fuente    | ward, bed, bed_stay
+  Calculado | 19/10/2026 10:30
+  --
+  [¿De dónde sale? Ver desglose] | [Cambiar filtros]
+}
+@endsalt

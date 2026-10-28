@@ -1,0 +1,13 @@
+@startsalt m3_desglose
+{+
+  [<] | Indicador › <b>Desglose</b>
+  --
+  Ocupación 78,0 % · 39 camas
+  --
+  {+ <b>Medicina</b> | 18 · 46,2 % | [>] }
+  {+ <b>Cirugía</b> | 14 · 35,9 % | [>] }
+  {+ <b>Pediatría</b> | 7 · 17,9 % | [>] }
+  --
+  Total 39 <&check> suma = total
+}
+@endsalt

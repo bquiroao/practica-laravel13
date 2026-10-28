@@ -1,0 +1,34 @@
+$ php bin/demo.php   (sin base, PRESCRIPCIONES_PERSISTENCIA=memoria)
+Micro-HIS Prescripciones · demo sin base (PRESCRIPCIONES_PERSISTENCIA=memoria)
+
+1. Verificación previa P-002 (penicilina) + cefalexina
+   POST /api/v1/prescripciones/verificaciones → HTTP/1.1 200 OK
+   {"codigo":"ADVERTENCIA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}]}
+
+2. Emitir sin justificación
+   POST /api/v1/prescripciones → HTTP/1.1 409 Conflict
+   {"error":"JUSTIFICACION_REQUERIDA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}]}
+
+3. Emitir con justificación (dr-ruiz no tiene override)
+   POST /api/v1/prescripciones → HTTP/1.1 409 Conflict
+   {"error":"JUSTIFICACION_REQUERIDA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}]}
+
+4. Emitir con justificación (dr-lopez, con override)
+   POST /api/v1/prescripciones → HTTP/1.1 201 Created · Location: /api/v1/prescripciones/1
+   {"codigo":"EMITIDA","id":1,"verificacion":"ADVERTENCIA"}
+
+5. Reintento con la misma Idempotency-Key
+   POST /api/v1/prescripciones → HTTP/1.1 200 OK
+   {"codigo":"YA_EMITIDA","id":1,"verificacion":"ADVERTENCIA"}
+
+6. Amoxicilina a P-001 (alergia directa)
+   POST /api/v1/prescripciones → HTTP/1.1 422 Unprocessable Content
+   {"error":"BLOQUEO_ALERGIA","hallazgos":[{"tipo":"DIRECTA","medicamento":"AMOX500","alergeno":"J01CA04","severidad":"severe","bloquea":true,"reaccion":"urticaria generalizada"}]}
+
+7. P-003 sin alergias evaluadas y sin confirmar
+   POST /api/v1/prescripciones → HTTP/1.1 422 Unprocessable Content
+   {"error":"CONFIRMACION_REQUERIDA"}
+
+8. Farmacia consulta la prescripción 1
+   GET /api/v1/prescripciones/1 → HTTP/1.1 200 OK
+   {"codigo":"PRESCRIPCION","id":1,"paciente":"P-002","prescriptor":"dr-lopez","estado":"EMITIDA","emitida_en":"2026-10-27T17:47:52+00:00","items":[{"medicamento":"CEFA500","dosis":500.0,"unidad":"mg","frecuencia_horas":8,"via":"oral","dias":5}],"verificacion":{"resultado":"ADVERTENCIA","hallazgos":[{"tipo":"CRUZADA","medicamento":"CEFA500","alergeno":"Penicilina","severidad":"moderate","bloquea":false,"reaccion":"exantema"}],"alergenos_evaluados":["Penicilina"],"justificacion":"Sin alternativa: cultivo sensible solo a cefalosporinas","confirma_sin_alergias":false}}

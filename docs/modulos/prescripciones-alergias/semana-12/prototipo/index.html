@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIS · Prescripciones (prototipo, semana 12)</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+  <!-- Todo lo que no es la hoja/diálogo vive en #app: así la hoja puede volver inerte al resto. -->
+  <div id="app">
+    <a class="saltar" href="#contenido" data-accion="saltar">Saltar al contenido</a>
+    <header class="barra" id="barra" hidden></header>
+    <!-- El aviso de red y la franja de alergias son UN bloque fijo (semana 10, R-P1) -->
+    <div class="fijas"><div id="red"></div><div id="franja"></div></div>
+    <main id="contenido" tabindex="-1"></main>
+    <div class="accion-fija" id="barra-accion" hidden></div>
+    <div id="toast"></div>
+    <nav class="nav-inferior" id="nav" aria-label="Secciones" hidden></nav>
+  </div>
+  <div id="capa-dialogo"></div>
+  <div id="vivo" class="oculto-visual" role="status" aria-live="polite"></div>
+  <div id="alerta" class="oculto-visual" role="alert" aria-live="assertive"></div>
+
+  <noscript>Este prototipo necesita JavaScript.</noscript>
+  <script src="datos.js"></script>
+  <script src="api-simulada.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
