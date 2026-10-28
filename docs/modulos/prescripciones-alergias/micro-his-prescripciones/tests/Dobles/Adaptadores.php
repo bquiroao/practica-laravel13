@@ -16,6 +16,7 @@ use Prescripciones\Aplicacion\Puertos\Transaccion;
 use Prescripciones\Dominio\Excepciones\ClaveEnUso;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
 use Prescripciones\Dominio\Modelo\Alergia;
+use Prescripciones\Dominio\Modelo\Anulacion;
 use Prescripciones\Dominio\Modelo\ExpedienteAlergias;
 use Prescripciones\Dominio\Modelo\Prescripcion;
 use Prescripciones\Dominio\Puertos\Reloj;
@@ -66,6 +67,12 @@ final class RepositorioConFallas implements RepositorioPrescripciones
         }
 
         return $this->interno->guardar($prescripcion);
+    }
+
+    public function anular(Anulacion $anulacion): void
+    {
+        $this->revisar();
+        $this->interno->anular($anulacion);
     }
 
     /** @return list<Prescripcion> */

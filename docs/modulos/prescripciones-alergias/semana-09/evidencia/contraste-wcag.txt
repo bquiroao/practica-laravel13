@@ -1,0 +1,36 @@
+$ python herramientas/contraste.py
+ID    Uso                                                           Actual  Mín. Estado    Propuesto  Nuevo Estado  
+--------------------------------------------------------------------------------------------------------------------
+C-01  Etiquetas de campo y columnas (10 pt negrita)                   3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-02  Encabezados de tabla (10 pt negrita)                            2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-03  Pistas en cursiva (9.5 pt): quién verá, quién confirmó          3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-04  Títulos de estado sobre gris (10 pt negrita)                    2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-05  Títulos de estado sobre ámbar (10 pt negrita)                   3.00   4.5 FALLA       #5F6670   5.34 CUMPLE  
+C-06  Títulos de estado sobre rosa: BLOQUEO, 403 (10 pt negrita)      2.85   4.5 FALLA       #5F6670   5.08 CUMPLE  
+C-07  Título de estado sobre verde: SIN HALLAZGOS (10 pt negrita)     2.88   4.5 FALLA       #5F6670   5.12 CUMPLE  
+C-08  Íconos «?» y «✕ quitar ítem» (11 pt negrita)                    3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-09  Datos de cabecera de la prescripción (10.5 pt)                  3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-10  Chip «EMITIDA» (9 pt negrita)                                   3.75   4.5 FALLA       #1F6B43   5.72 CUMPLE  
+C-11  Contador válido «29 / mínimo 20 ✓» (9.5 pt)                     4.25   4.5 FALLA       #1F6B43   6.48 CUMPLE  
+C-12  Borde de campo de texto, selector y área de texto               2.64   3.0 FALLA       #7D838A   3.83 CUMPLE  
+C-13  Borde de la casilla «sin alergias conocidas»                    2.64   3.0 FALLA       #7D838A   3.83 CUMPLE  
+C-14  Texto general (10.5–11 pt)                                     13.49   4.5 CUMPLE            —                
+C-15  Cabecera: hospital y usuario (12 pt negrita)                    8.30   4.5 CUMPLE            —                
+C-16  Botón primario «Verificar alergias» (11 pt negrita)             8.30   4.5 CUMPLE            —                
+C-17  Alergias activas en la cabecera del paciente (9.5 pt negrita)    5.70   4.5 CUMPLE            —                
+C-18  Mensaje M-03 de dosis (10 pt)                                   5.70   4.5 CUMPLE            —                
+C-19  Error junto al campo (9.5 pt)                                   6.51   4.5 CUMPLE            —                
+C-20  Borde de campo con error                                        6.51   3.0 CUMPLE            —                
+C-21  Hallazgo en el diálogo de advertencia (10 pt)                   6.82   4.5 CUMPLE            —                
+C-22  Chip «CON ADVERTENCIA JUSTIFICADA» (9 pt negrita)               6.82   4.5 CUMPLE            —                
+C-23  Texto de estado sobre verde / ámbar / rosa (10.5 pt)           11.81   4.5 CUMPLE            —                
+C-24  Título «Anular prescripción #123» (14 pt negrita)               6.51   3.0 CUMPLE            —                
+C-25  Enlace «+ Agregar medicamento» (10.5 pt negrita)                8.30   4.5 CUMPLE            —                
+C-26  Botón deshabilitado «Emitir»                                    2.11   0.0 EXENTO            —                
+C-27  Botón deshabilitado «Anular»                                    1.53   0.0 EXENTO            —                
+--------------------------------------------------------------------------------------------------------------------
+Propuestas que no cumplen: 0
+(código de salida: 0)
+
+$ python herramientas/contraste.py --solo-propuestos
+(código de salida: 0)

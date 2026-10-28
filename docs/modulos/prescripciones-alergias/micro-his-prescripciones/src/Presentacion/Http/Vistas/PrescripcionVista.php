@@ -37,6 +37,12 @@ final class PrescripcionVista
         return self::json($r);
     }
 
+    /** Semana 6: la anulación no crea un recurso nuevo direccionable; responde 200 con la anulación. */
+    public static function anulacion(Resultado $r): Respuesta
+    {
+        return self::json($r);
+    }
+
     /** @param array<string, string> $cabeceras */
     private static function json(Resultado $r, array $cabeceras = []): Respuesta
     {

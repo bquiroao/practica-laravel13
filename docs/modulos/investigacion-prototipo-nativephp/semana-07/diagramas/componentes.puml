@@ -1,0 +1,46 @@
+@startuml
+left to right direction
+package "UI" {
+ component OrderStatusView as View
+ component OrderStatusPresenter as Presenter
+ View --> Presenter
+}
+package "Application" {
+ component QueryAndNotifyDemoOrder as Query
+ component EvaluatePrototype as Evaluate
+ interface HisGateway as HISPort
+ interface NotificationPort as NotifyPort
+ interface EvidenceRepository as EvidencePort
+ interface SnapshotRepository as SnapshotPort
+ interface Clock
+ Query --> HISPort
+ Query --> NotifyPort
+ Query --> EvidencePort
+ Query --> SnapshotPort
+ Query --> Clock
+}
+package "Domain" {
+ component FreshnessPolicy as Freshness
+ component ViabilityPolicy as Viability
+}
+package "Persistence / Integration" {
+ component HisGatewayAdapter as HIS
+ component NativeNotificationAdapter as Native
+ component FileEvidenceRepository as Evidence
+ component MemorySnapshotRepository as Snapshot
+}
+Presenter --> Query
+Presenter --> Evaluate
+Query --> Freshness
+Evaluate --> Viability
+HIS ..|> HISPort
+Native ..|> NotifyPort
+Evidence ..|> EvidencePort
+Snapshot ..|> SnapshotPort
+HIS --> [HIS demo externo]
+Native --> [Runtime y SO seleccionados]
+note bottom of Evaluate
+Evidencias declaradas del destino.
+No prueba compatibilidad por sí mismo.
+end note
+@enduml

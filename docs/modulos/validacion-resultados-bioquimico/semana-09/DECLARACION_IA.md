@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar los wireframes, medir CSS/contraste/recorte con Edge y preparar checklist, hallazgos y backlog. Se reutilizan referencias oficiales W3C consultadas en la conversación. No se atribuyen pruebas de usuario, app clínica, firma criptográfica ni certificación WCAG. La estudiante debe revisar las prioridades.

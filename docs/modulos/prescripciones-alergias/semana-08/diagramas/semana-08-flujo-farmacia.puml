@@ -1,0 +1,37 @@
+@startuml semana-08-flujo-farmacia
+!pragma layout smetana
+title User flow · Farmacia y enfermería — consultar la prescripción y su verificación (W5)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #3D4F6B
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · cola de farmacia o tarjeta del paciente
+→ abre la prescripción #id;
+:CARGA · esqueleto «Cargando prescripción…»;
+switch (Respuesta de GET /prescripciones/{id})
+case (200 EMITIDA)
+  if (¿Tiene advertencia justificada?) then (sí)
+    #FFF4E5:Distintivo «⚠ con advertencia justificada»
+    + la justificación del médico, visible sin abrir nada;
+  else (no)
+  endif
+  if (¿Se confirmó «sin alergias conocidas»?) then (sí)
+    :Muestra quién lo confirmó y cuándo;
+  else (no)
+  endif
+  #E8F5E9:DECISIÓN de farmacia: dispensar o consultar al médico
+  (fuera del módulo);
+case (200 ANULADA)
+  #FDECEC:Banner «Anulada: motivo, quién y cuándo» (M-19)
+  lo emitido sigue visible; NO dispensar;
+case (404)
+  #FDECEC:«No existe o no es de su hospital» (M-17);
+case (401)
+  #FFF4E5:Sesión expirada → iniciar sesión y volver a la misma prescripción (M-18);
+case (503 / sin conexión)
+  #FFF4E5:«No disponible» + código de soporte [Reintentar] (M-22);
+endswitch
+stop
+@enduml
