@@ -1,0 +1,9 @@
+{
+    "scope": "DEMO_ONLY",
+    "result": {
+        "status": "RECORDED",
+        "identifier": "SP-69925E0E6D8D94A7D923F53A9F595AD0",
+        "decision": "accepted",
+        "reasons": []
+    }
+}

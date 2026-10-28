@@ -1,0 +1,1 @@
+Ejecutar CLI memory/pdo accept/reject. Mostrar controller sin SQL/política, vista sin efectos, Repository de aplicación existente. Explicar que rechazo guardado es éxito de operación y colisión no sobrescribe. Mostrar 26 aserciones nuevas y 13 regresión. Defender datos compartidos en servidor con dueños por módulo; correspondencia clínica/tenant/custodia completa pendientes.
