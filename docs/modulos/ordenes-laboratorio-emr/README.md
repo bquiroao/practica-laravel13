@@ -22,6 +22,9 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/*.puml
 ```
 
+## Semana 6
+
+[Defensa arquitectónica, presentación y cambio práctico](semana-06/README.md).
 ## Semana 3
 
 [Micro-HIS por capas, PDO y arquitectura C4/UML](semana-03/README.md).
