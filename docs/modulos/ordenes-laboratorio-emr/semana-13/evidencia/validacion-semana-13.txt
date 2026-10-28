@@ -1,0 +1,30 @@
+Validación documental de Semana 13
+==================================
+
+Alcance: inspección de escritorio de los documentos y prototipo de Semana 1/2.
+No se usaron datos clínicos reales.
+También se inspeccionaron routes/api.php y el middleware tenant/JWT existente:
+las rutas actuales corresponden a autenticación; no se encontró endpoint de
+órdenes de laboratorio.
+
+Comando ejecutado desde la raíz del repositorio:
+php docs/modulos/ordenes-laboratorio-emr/semana-02/ejemplo-srp/verificar.php
+
+Resultado:
+OK: 34 aserciones.
+La suite usa dobles en memoria; no valida API HTTP, tenant, transacción de base de
+datos, auditoría productiva ni integración con un EMR real.
+
+Checklist Semana 13:
+15 criterios documentados con estado C/P/NV y evidencia.
+
+Hallazgos iniciales:
+REV13-01 Alta - ámbito hospitalario/tenant no explícito.
+REV13-02 Alta - atomicidad transaccional no demostrada por el fixture.
+REV13-03 Media - contrato API no disponible en el alcance inspeccionado.
+REV13-04 Media - no se conserva historial de eventos de estado.
+REV13-05 Media - idempotencia de reintentos no definida.
+
+Estado de revisión:
+Revisión de escritorio preparada. No es acta de reunión ni aprobación formal de
+revisores; nombres y firmas deben asignarse antes de la aprobación de equipo.

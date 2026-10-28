@@ -1,0 +1,49 @@
+@startuml
+title Semana 7 - Componentes de validacion de resultados por bioquimico
+left to right direction
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "Frontend (propuesto)" {
+  component "ResultReviewScreen\ncontexto y decision" as Screen
+  component "ReviewApiClient\nestados y errores" as Client
+}
+
+package "Backend - Presentation (propuesto)" {
+  component "ReviewController\nHTTP a ReviewCommand" as Controller
+  component "ReviewResponseMapper\nResultado a respuesta" as Mapper
+}
+
+package "Backend - Application (existe)" {
+  component "ReviewPendingLabResult\ncaso de uso" as UseCase
+  interface "ReviewerAuthorization" as Auth
+  interface "Clock" as Clk
+  interface "LabResultDecisionRepository" as Repo
+}
+
+package "Backend - Domain (existe)" {
+  component "LabResult\nLabResultStatus\nReviewDecision\nReviewDecisionRecord" as Domain
+}
+
+package "Persistence e infraestructura" {
+  component "InMemoryLabResultDecisionRepository\n(existe)" as Mem
+  component "PdoLabResultDecisionRepository\n(futuro)" as Pdo
+  component "Adaptador de roles (futuro)" as Roles
+  component "Reloj del sistema (futuro)" as Sys
+}
+
+Screen --> Client
+Client --> Controller : HTTP (propuesto)
+Controller --> UseCase : ReviewCommand
+UseCase --> Controller : ReviewOutcome
+Controller --> Mapper
+UseCase --> Auth
+UseCase --> Clk
+UseCase --> Repo
+UseCase --> Domain
+Mem ..|> Repo
+Pdo ..|> Repo
+Roles ..|> Auth
+Sys ..|> Clk
+@enduml
