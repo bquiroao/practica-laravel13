@@ -1,0 +1,33 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 46b98c4 (rama semana-8-expediente-medico, PR #207). Comando: git show 46b98c4:<archivo> | grep -nE '<patrón>'
+
+[H-01, H-05] semana-08-wf1-abrir-expediente.puml
+5:  Buscar paciente activo: | "López    " | [Buscar]
+8:    M. López (ficticio) | ••••-••••-4521 | activo | —
+9:    M. López Ruiz (ficticio) | ••••-••••-0987 | activo | HC-000123 [Abrir]
+11:  [Abrir expediente para M. López]
+12:  <i>Confirmación: «¿Abrir el expediente de M. López? Se crea con un número único y no se puede borrar» → [Cancelar] [Abrir].</i>
+
+[H-02] semana-08-wf1-abrir-expediente.puml
+9:    M. López Ruiz (ficticio) | ••••-••••-0987 | activo | HC-000123 [Abrir]
+12:  <i>Confirmación: «¿Abrir el expediente de M. López? Se crea con un número único y no se puede borrar» → [Cancelar] [Abrir].</i>
+
+[H-03, H-04] semana-08-wf4-acceso-emergencia.puml
+6:  Justificación * | {+ "Paciente inconsciente; necesito alergias previas    " }
+7:  <i>Obligatoria (E6). Acceso por 1 hora como máximo; luego se cierra solo.</i>
+
+[H-07] semana-08-wf2-expediente-local.puml
+5:  M. López Ruiz (ficticio) · 54 años | Tu atención: episodio E-77 (activa) | [Ver otros hospitales]
+
+[H-07] semana-08-wf5-error-recuperable.puml
+9:  <b>No pudimos consultar otros hospitales</b>
+
+[foco] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-abrir-expediente.puml: 0
+semana-08-wf2-expediente-local.puml: 0
+semana-08-wf3-historia-externa.puml: 0
+semana-08-wf4-acceso-emergencia.puml: 0
+semana-08-wf5-error-recuperable.puml: 0
+semana-08-flujo-ux.md: 0

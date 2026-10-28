@@ -1,0 +1,7 @@
+Verificacion estructural; no prueba de navegador/usuario.
+PASS 01-inicio-expediente.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).
+PASS 02-seleccionar-pruebas.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).
+PASS 03-confirmar-orden.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).
+PASS 04-exito-trazabilidad.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).
+PASS 05-seguimiento.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).
+PASS 06-error-recuperable.svg: XML valido, texto dentro de panel/lienzo (Arial, System.Drawing).

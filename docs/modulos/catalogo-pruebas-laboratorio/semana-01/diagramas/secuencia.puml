@@ -1,0 +1,82 @@
+@startuml secuencia
+title Catálogo de pruebas de laboratorio — Secuencia\nAlta y consulta de prueba con requisitos de muestra y vigencia
+autonumber "S-00"
+
+actor "Jefe de laboratorio" as JL
+actor "Médico / Laboratorista" as MED
+participant "Vista Vue\nCatálogo de pruebas" as UI
+participant "Middleware\nJWT + tenant + permiso" as MW
+participant "LabTestController" as CTRL
+participant "StoreLabTestRequest" as REQ
+participant "LabTestService" as SRV
+participant "LabTestRepository" as REPO
+database "PostgreSQL\nHOSPITAL" as DB
+
+== Alta de prueba (CU-01, CU-02, CU-03) ==
+JL -> UI : Llenar datos, requisitos de muestra y vigencia
+UI -> MW : POST /api/v1/laboratorio/pruebas
+MW -> MW : Validar JWT, resolver hospital y\npermiso lab.catalogo.gestionar [RN-01]
+alt sin permiso
+  MW --> UI : 403 Sin permiso
+else con permiso
+  MW -> CTRL : store(request)
+  CTRL -> REQ : Validar campos [RN-02, RN-03, RN-04]
+  alt datos inválidos
+    REQ --> UI : 422 con errores por campo
+  else datos válidos
+    CTRL -> SRV : registrar(datos)
+    SRV -> REPO : buscarVersionVigente(código)
+    REPO -> DB : SELECT lab_test por código y vigencia
+    DB --> REPO : versión vigente o ninguna
+    REPO --> SRV : versión vigente o null
+    alt vigencia superpuesta y la nueva no empieza después [RN-05]
+      SRV --> CTRL : VigenciaSuperpuesta
+      CTRL --> UI : 409 Vigencia superpuesta
+    else sin superposición o la nueva empieza después
+      SRV -> REPO : guardar(prueba, cerrarAnterior) [RN-07]
+      REPO -> DB : BEGIN; UPDATE versión anterior (si aplica);\nINSERT lab_test con usuario y fecha de alta [RN-08]; COMMIT
+      DB --> REPO : ok
+      REPO --> SRV : prueba creada
+      SRV --> CTRL : prueba creada
+      CTRL --> UI : 201 Created con la prueba
+    end
+    note over SRV, DB
+      Si la base de datos falla: ROLLBACK,
+      500 y no se guarda nada [RN-07]
+    end note
+  end
+end
+UI --> JL : Mensaje de resultado
+
+== Consulta de pruebas vigentes (CU-04) ==
+MED -> UI : Buscar «glucosa» (fecha = hoy)
+UI -> MW : GET /api/v1/laboratorio/pruebas?q=glucosa&fecha=AAAA-MM-DD
+MW -> MW : Validar JWT, hospital y\npermiso lab.catalogo.consultar [RN-01]
+MW -> CTRL : index(filtros)
+CTRL -> SRV : listarVigentes(filtros, fecha)
+SRV -> REPO : buscarVigentes(filtros, fecha) [RN-06]
+REPO -> DB : SELECT lab_test WHERE desde <= fecha\nAND (hasta IS NULL OR hasta >= fecha)
+DB --> REPO : filas
+REPO --> SRV : pruebas vigentes
+SRV --> CTRL : pruebas vigentes
+CTRL --> UI : 200 con la lista (puede venir vacía)
+
+== Detalle de una prueba (CU-05) ==
+opt el usuario abre una prueba
+  UI -> MW : GET /api/v1/laboratorio/pruebas/{código}?fecha=AAAA-MM-DD
+  MW -> CTRL : show(código, fecha)
+  CTRL -> SRV : detalle(código, fecha)
+  SRV -> REPO : buscarPorCódigo(código, fecha)
+  REPO -> DB : SELECT lab_test con requisitos de muestra
+  DB --> REPO : fila o ninguna
+  REPO --> SRV : prueba o null
+  alt vigente en la fecha [RN-06]
+    SRV --> CTRL : prueba con requisitos
+    CTRL --> UI : 200 con requisitos de muestra
+  else no existe o no está vigente
+    SRV --> CTRL : PruebaNoVigente
+    CTRL --> UI : 404 No vigente (indica su vigencia)
+  end
+end
+UI --> MED : Prueba y requisitos de muestra
+@enduml

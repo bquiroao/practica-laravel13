@@ -1,0 +1,1 @@
+Explicar que se evalúan seis wireframes estáticos y no una aplicación operable. Mostrar checklist completado y ocho hallazgos con fuente/captura. Priorizar H-04, H-01, H-06 y H-08 por error de emisión/recuperación/acceso. Mostrar contraste calculado y distinguir observado de no verificable. No declarar conformidad WCAG ni pruebas con usuarios/lector de pantalla realizadas.

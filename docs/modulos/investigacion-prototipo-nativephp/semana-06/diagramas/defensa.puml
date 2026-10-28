@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+actor "Evaluador / operador demo" as E
+actor "Revisor de evidencia" as REVIEW
+package Presentation {
+ component CLI
+}
+package Application {
+ component "Evaluate RF01-05" as U
+}
+package Domain {
+ class Evaluation
+ interface EvaluationRepository as R
+ interface DemoOrderGateway as G
+ interface Notifier as N
+}
+component "PDO existente: semana 3" as PDO
+component "ConsentNotifier C06-01" as CONSENT
+interface "NotificationPermission" as PERM
+component "SO: doble actual" as SO
+component "HTTP propuesto: semana 5" as HTTP
+E --> CLI
+CLI --> U
+U --> Evaluation
+U --> R
+U --> G
+U --> N
+PDO ..|> R
+CONSENT ..|> N
+CONSENT --> PERM
+CONSENT --> SO
+HTTP ..|> G
+REVIEW --> [Evidencia técnica de contrato]
+note bottom of SO
+Permiso/SO reales y soporte NativePHP no probados.
+HIS es fuente del estado; sin escritura clínica.
+end note
+@enduml
