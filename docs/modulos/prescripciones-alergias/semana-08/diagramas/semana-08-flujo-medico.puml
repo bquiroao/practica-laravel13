@@ -1,0 +1,62 @@
+@startuml semana-08-flujo-medico
+!pragma layout smetana
+title User flow · Médico prescriptor — verificar, emitir y anular (W1–W4, W6)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #3D4F6B
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · desde el expediente del paciente: «Prescribir» (W1)
+alergias activas visibles arriba;
+repeat
+  :Agrega o edita ítems (medicamento, dosis, cada, vía, días);
+  if (¿Formato válido? (ayuda en la UI)) then (no)
+    #FDECEC:Error junto al campo; foco al primero (M-02);
+  else (sí)
+    :«Verificar alergias» → CARGA «Verificando…» (M-04);
+    switch (Resultado de la verificación previa (W2))
+    case (SIN_HALLAZGOS)
+      #E8F5E9:«Emitir» habilitado (M-05);
+    case (ADVERTENCIA)
+      :Diálogo: hallazgo + justificación ≥ 20 (W3);
+      if (¿Tiene permiso override?) then (no)
+        #FDECEC:M-07 «pida a un médico con ese permiso»;
+        stop
+      else (sí)
+      endif
+    case (BLOQUEO)
+      #FDECEC:M-08 sin opción de forzar → cambiar el medicamento;
+    case (CONFIRMACION_REQUERIDA)
+      :Diálogo «sin alergias conocidas» (W3)
+      casilla sin marcar; o «Registrar alergia» (Expediente);
+    case (NO DISPONIBLE)
+      #FDECEC:M-11 «no podrá emitir hasta que responda» [Reintentar];
+    case (422 DOSIS / DATOS)
+      #FDECEC:M-03 con cifras; marca el ítem;
+    endswitch
+  endif
+repeat while (¿Listo para emitir?) is (no, corrige)
+->sí;
+:CONFIRMACIÓN · «Emitir» (deshabilitado al pulsar; misma Idempotency-Key);
+switch (Respuesta (W4))
+case (201 / 200 YA_EMITIDA)
+  #E8F5E9:ÉXITO «Prescripción #123 emitida» (M-12);
+case (422 al emitir)
+  #FDECEC:M-08 «se encontró una alergia nueva» (R-03);
+case (503 VERIFICACIÓN)
+  #FDECEC:M-14 «por seguridad no se emitió» [Reintentar];
+case (Sin respuesta)
+  #FFF4E5:INCIERTO M-13 [Reintentar con la misma clave];
+endswitch
+if (¿Más tarde aparece una razón para dejarla sin efecto?) then (sí)
+  :«Anular» → motivo ≥ 10 (W6);
+  if (¿Respuesta?) then (200)
+    #E8F5E9:ANULADA, visible para farmacia (M-19);
+  else (409 / 422 / 403)
+    #FFF4E5:M-21 / M-20 / M-16;
+  endif
+else (no)
+endif
+stop
+@enduml

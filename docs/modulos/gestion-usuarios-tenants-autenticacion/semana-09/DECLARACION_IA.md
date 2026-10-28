@@ -1,0 +1,1 @@
+IA utilizada para inspeccionar artefactos locales, consultar criterios W3C, organizar checklist/hallazgos y automatizar capturas/mediciones. La estudiante revisa conclusiones. No hubo usuarios de prueba, revisión independiente, lector de pantalla, autenticación real ni certificación WCAG.

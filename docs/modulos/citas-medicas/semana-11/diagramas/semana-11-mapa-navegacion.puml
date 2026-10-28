@@ -1,0 +1,21 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Agenda
+Agenda : &#35;agenda
+Paciente : &#35;nueva (paso 1 de 3)
+Horario : &#35;nueva/P0012 (paso 2 de 3)
+Revisar : &#35;nueva/P0012/M03/0830 (paso 3 de 3)
+Agendada : &#35;agendada/P0012/M03/0830
+Ocupado : &#35;ocupado/P0012/M03/0830 (error crítico E4)
+Agenda --> Paciente : «+ Nueva cita» (solo recepción)
+Paciente --> Horario : «Siguiente: horario»
+Horario --> Revisar : «Siguiente: revisar»
+Revisar --> Revisar : motivo vacío → error junto al campo
+Revisar --> Agendada : «Agendar cita»
+Revisar --> Ocupado : otra persona tomó el horario
+Ocupado --> Agendada : «Agendar en el horario elegido»
+Ocupado --> Agenda : «Volver a la agenda»
+Horario --> Paciente : «‹ Paso 1»
+Revisar --> Horario : «‹ Paso 2»
+@enduml

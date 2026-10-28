@@ -1,0 +1,66 @@
+@startuml capas-mvc-repository
+title Micro-HIS — MVC en Presentation y Repository en el límite Domain/Persistence
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Presentation (MVC)" {
+  class Router {
+    + despachar(método, ruta, query, post) : Respuesta
+  }
+  class LabTestController <<Controller>> {
+    + index(query) : Respuesta
+    + mostrar(código, query) : Respuesta
+    + formulario() : Respuesta
+    + guardar(post) : Respuesta
+  }
+  class Respuesta {
+    + estado : int
+    + vista : string
+    + datos : array
+  }
+  class Vista <<View>> {
+    + {static} render(Respuesta) : string
+  }
+}
+package "Application" {
+  class RegistrarPrueba
+  class ConsultarPruebasVigentes
+  class VerDetallePrueba
+}
+package "Domain (Model)" {
+  class LabTest
+  class RequisitoMuestra
+  class Vigencia
+  interface LabTestRepository {
+    + ultimaVersion(tenant, código) : ?LabTest
+    + guardarNuevaVersion(nueva, anteriorCerrada) : void
+    + buscarVigentes(tenant, fecha, texto, sección, tipo) : LabTest[]
+    + buscarVigentePorCodigo(tenant, código, fecha) : ?LabTest
+  }
+}
+package "Persistence" {
+  class PdoLabTestRepository
+  class InMemoryLabTestRepository
+}
+
+Router --> LabTestController
+LabTestController --> RegistrarPrueba
+LabTestController --> ConsultarPruebasVigentes
+LabTestController --> VerDetallePrueba
+LabTestController ..> Respuesta : crea
+Vista ..> Respuesta : lee
+RegistrarPrueba --> LabTestRepository
+ConsultarPruebasVigentes --> LabTestRepository
+VerDetallePrueba --> LabTestRepository
+RegistrarPrueba ..> LabTest
+LabTest *-- RequisitoMuestra
+LabTest *-- Vigencia
+PdoLabTestRepository ..|> LabTestRepository
+InMemoryLabTestRepository ..|> LabTestRepository
+
+note right of LabTestController
+  Sin SQL ni reglas: traduce la petición
+  a un caso de uso y la excepción de
+  dominio a estado HTTP (201, 404, 409, 422, 500).
+end note
+@enduml

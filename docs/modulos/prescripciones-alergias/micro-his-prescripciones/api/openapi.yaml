@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API de Prescripciones electrónicas con validación de alergias — Sistema Hospitalario Integrado
-  version: 1.0.0
+  version: 1.2.0
   summary: Creación de prescripción con verificación previa de alergias y bloqueo seguro.
   description: |
     El médico VERIFICA una prescripción antes de firmar (sin efectos) y la EMITE; el servidor vuelve a
@@ -16,6 +16,14 @@ info:
     - Un paciente o una prescripción de otro hospital responde igual que uno inexistente (404).
     - Bloqueo seguro: si el Expediente no responde, la emisión responde 503 `VERIFICACION_NO_DISPONIBLE` y no emite.
     - Los errores no revelan detalles internos: 500 `ERROR_INTERNO`, 503 `ERROR_PERSISTENCIA` o `SERVICIO_NO_DISPONIBLE`.
+
+    1.1.0 (semana 6, compatible con 1.0.0): ANULACIÓN CON MOTIVO. `POST /api/v1/prescripciones/{id}/anulacion`
+    registra la anulación como un hecho nuevo; la prescripción emitida no cambia. La consulta devuelve `estado: ANULADA`
+    y el objeto `anulacion` (que solo aparece si la hay). Anular NO consulta el Expediente: funciona aunque esté caído.
+
+    1.2.0 (semana 12, compatible con 1.1.0): la verificación previa con resultado ADVERTENCIA agrega `puede_justificar`:
+    si el usuario tiene el permiso `prescripcion.override` y podría emitirla con una justificación. Sin advertencia la
+    clave no aparece y no se consulta el permiso. Es la misma condición que aplica la emisión, que sigue decidiendo.
   contact:
     name: Boris Alexander Quiroa Orellana (@bquiroao)
   license:
@@ -33,6 +41,8 @@ tags:
     description: Emisión con verificación obligatoria en el servidor (idempotente por Idempotency-Key).
   - name: consulta
     description: Lectura para farmacia, enfermería y el médico.
+  - name: anulacion
+    description: Anulación con motivo (1.1.0); la prescripción no se edita.
 paths:
   /api/v1/prescripciones/verificaciones:
     post:
@@ -173,6 +183,58 @@ paths:
           $ref: '#/components/responses/Error500'
         '503':
           $ref: '#/components/responses/Error503'
+  /api/v1/prescripciones/{id}/anulacion:
+    post:
+      operationId: anularPrescripcion
+      tags: [anulacion]
+      summary: Anula una prescripción emitida, con motivo (1.1.0).
+      description: |
+        Solo una prescripción EMITIDA; una ya anulada responde 409 `ESTADO_NO_PERMITE_ANULAR`. El motivo debe tener al menos
+        10 caracteres sin contar los espacios de los extremos (422 `MOTIVO_REQUERIDO`). La anulación y su traza
+        `PRESCRIPCION_ANULADA` se guardan juntas. No depende del Expediente.
+      x-permiso: prescripcion.anular
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - name: id
+          in: path
+          required: true
+          schema: {type: integer, minimum: 1}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [motivo]
+              properties:
+                motivo: {type: string, minLength: 10}
+      responses:
+        '200':
+          description: Anulada.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnulacionRespuesta'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '503':
+          $ref: '#/components/responses/Error503'
 components:
   securitySchemes:
     bearer:
@@ -249,6 +311,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Hallazgo'
+        puede_justificar: {type: boolean, description: 'Solo con codigo ADVERTENCIA (1.2.0). true si el usuario tiene prescripcion.override y puede emitirla con una justificación de 20 caracteres o más.'}
     Emision:
       type: object
       required: [codigo, id, verificacion]
@@ -264,7 +327,7 @@ components:
         id: {type: integer}
         paciente: {type: string}
         prescriptor: {type: string}
-        estado: {type: string, enum: [EMITIDA]}
+        estado: {type: string, enum: [EMITIDA, ANULADA], description: Derivado; ANULADA si existe la anulación (1.1.0).}
         emitida_en: {type: string, format: date-time, description: Siempre en UTC (+00:00).}
         items:
           type: array
@@ -281,6 +344,24 @@ components:
             alergenos_evaluados: {type: array, items: {type: string}}
             justificacion: {type: [string, 'null']}
             confirma_sin_alergias: {type: boolean}
+        anulacion:
+          $ref: '#/components/schemas/Anulacion'
+    Anulacion:
+      type: object
+      description: Solo aparece si la prescripción está anulada (1.1.0).
+      required: [motivo, anulada_por, anulada_en]
+      properties:
+        motivo: {type: string}
+        anulada_por: {type: string}
+        anulada_en: {type: string, format: date-time}
+    AnulacionRespuesta:
+      type: object
+      required: [codigo, id, anulacion]
+      properties:
+        codigo: {type: string, enum: [ANULADA]}
+        id: {type: integer}
+        anulacion:
+          $ref: '#/components/schemas/Anulacion'
     Error:
       type: object
       required: [error]
@@ -290,7 +371,7 @@ components:
           enum: [NO_AUTENTICADO, TENANT_REQUERIDO, TENANT_NO_COINCIDE, PERMISO_DENEGADO, NO_ENCONTRADO, RUTA_NO_ENCONTRADA, METODO_NO_PERMITIDO,
             IDEMPOTENCY_KEY_REQUERIDA, JSON_INVALIDO, CUERPO_INVALIDO, DATOS_INVALIDOS, DOSIS_EXCEDE_MAXIMO, CONFIRMACION_REQUERIDA,
             BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA, JUSTIFICACION_REQUERIDA, CLAVE_REUTILIZADA, VERIFICACION_NO_DISPONIBLE,
-            ERROR_PERSISTENCIA, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE]
+            ERROR_PERSISTENCIA, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE, MOTIVO_REQUERIDO, ESTADO_NO_PERMITE_ANULAR]
         campos: {type: array, items: {type: string}, description: Con DATOS_INVALIDOS.}
         items: {type: array, items: {type: string}, description: Con DOSIS_EXCEDE_MAXIMO.}
         hallazgos:
@@ -345,7 +426,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     Error409:
-      description: JUSTIFICACION_REQUERIDA (advertencia sin justificación o sin override) o CLAVE_REUTILIZADA.
+      description: JUSTIFICACION_REQUERIDA (advertencia sin justificación o sin override), CLAVE_REUTILIZADA o ESTADO_NO_PERMITE_ANULAR.
       headers:
         X-Request-ID:
           $ref: '#/components/headers/XRequestID'
@@ -354,7 +435,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
     Error422:
-      description: Regla clínica (DATOS_INVALIDOS, DOSIS_EXCEDE_MAXIMO, CONFIRMACION_REQUERIDA, BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA).
+      description: Regla clínica (DATOS_INVALIDOS, DOSIS_EXCEDE_MAXIMO, CONFIRMACION_REQUERIDA, BLOQUEO_ALERGIA, BLOQUEO_ALERGIA_CRUZADA, MOTIVO_REQUERIDO).
       headers:
         X-Request-ID:
           $ref: '#/components/headers/XRequestID'

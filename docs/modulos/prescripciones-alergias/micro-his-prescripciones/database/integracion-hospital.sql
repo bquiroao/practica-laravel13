@@ -86,6 +86,16 @@ BEGIN RAISE EXCEPTION 'prescription_items_immutable'; END; $$;
 CREATE TRIGGER prescription_items_retention BEFORE UPDATE OR DELETE ON prescription_items
     FOR EACH ROW EXECUTE FUNCTION preserve_prescription_item();
 
+-- Semana 6: la anulación como hecho aparte, también inmutable.
+CREATE TABLE prescription_voids (
+    prescription_id        uuid PRIMARY KEY REFERENCES prescriptions (prescription_id) ON DELETE RESTRICT,
+    reason                 text NOT NULL CHECK (char_length(btrim(reason)) >= 10),
+    voided_by_user_ref_id  uuid NOT NULL REFERENCES local_user_refs (local_user_ref_id) ON DELETE RESTRICT,
+    voided_at              timestamptz NOT NULL DEFAULT now()
+);
+CREATE TRIGGER prescription_voids_retention BEFORE UPDATE OR DELETE ON prescription_voids
+    FOR EACH ROW EXECUTE FUNCTION preserve_prescription_item();
+
 -- Lectura de alergias: una vista con SOLO las columnas que necesita PdoFuenteAlergias. La tabla sigue siendo del Expediente.
 CREATE VIEW prescripcion_alergias AS
     SELECT local_patient_id, allergen_code, allergen_name, reaction, allergy_type, severity, status, allergy_id
@@ -93,6 +103,6 @@ CREATE VIEW prescripcion_alergias AS
 
 -- Propiedad de los datos: el rol del módulo escribe solo SUS tablas y lee lo compartido por vistas o en solo lectura.
 -- (El validador reemplaza «app_prescripciones» por un rol temporal NOLOGIN.)
-REVOKE ALL ON prescriptions, prescription_items, medications, allergen_groups FROM PUBLIC;
-GRANT SELECT, INSERT ON prescriptions, prescription_items TO app_prescripciones;
+REVOKE ALL ON prescriptions, prescription_items, prescription_voids, medications, allergen_groups FROM PUBLIC;
+GRANT SELECT, INSERT ON prescriptions, prescription_items, prescription_voids TO app_prescripciones;
 GRANT SELECT ON medications, allergen_groups, prescripcion_alergias, local_patients, care_episodes TO app_prescripciones;
