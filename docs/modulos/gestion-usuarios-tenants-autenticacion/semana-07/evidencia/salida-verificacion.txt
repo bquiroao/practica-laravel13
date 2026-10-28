@@ -1,0 +1,35 @@
+Semana 7 - Verificación del prototipo de refactor
+Base inspeccionada: origin/develop 0762576c870a24f3285a667ae743fce446c91db5
+Alcance: ejemplo aislado de aplicación; no integra Laravel, Eloquent ni JWT.
+
+Comando:
+php docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/refactor/prototype/verify.php
+Resultado: PASSED (exit code 0)
+PASS: el caso de uso entrega el contexto tenant y credenciales al puerto
+PASS: el resultado contiene identidad autenticada y metadatos de sesión
+PASS: el token se emite solo para la identidad del tenant solicitado
+PASS: se rechaza una identidad devuelta para otro tenant
+PASS: no se emite token tras una discrepancia de tenant
+PASS: el error de credenciales se propaga al adaptador HTTP
+PASS: no se emite token cuando las credenciales son inválidas
+7 comprobaciones, 0 fallidas.
+
+Comando:
+php -l docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/refactor/prototype/AuthenticateTenantUser.php
+Resultado: PASSED (exit code 0)
+No syntax errors detected in docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/refactor/prototype/AuthenticateTenantUser.php
+
+Comando:
+php -l docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/refactor/prototype/verify.php
+Resultado: PASSED (exit code 0)
+No syntax errors detected in docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/refactor/prototype/verify.php
+
+Comando:
+git diff --check
+Resultado: PASSED (exit code 0, sin salida).
+
+Enlaces relativos Markdown:
+Resultado: PASSED; 22 enlaces revisados en 4 archivos, 0 rotos.
+
+Límite:
+Estos comandos validan el prototipo aislado y la documentación, no el runtime Laravel ni una integración HTTP.

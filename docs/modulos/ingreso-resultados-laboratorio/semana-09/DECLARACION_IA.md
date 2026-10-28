@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar el diseño local, medir color calculado/contraste y cajas de texto con Edge/Playwright y redactar checklist, hallazgos y backlog. Se usan referencias oficiales W3C consultadas en la sesión. No se atribuyen pruebas con usuarios, teclado de controles reales ni certificación WCAG. La estudiante debe revisar las prioridades.

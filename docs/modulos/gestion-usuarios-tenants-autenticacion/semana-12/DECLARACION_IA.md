@@ -1,0 +1,1 @@
+Se utilizó IA para preparar prototipo local, presentación, matriz, cambio simulado y pruebas de navegador. No se atribuyen CH-01 al docente/usuario, JWT firmado, autenticación segura real ni revocación persistente. Se usan exclusivamente datos y clave ficticios. La estudiante debe revisar el alcance antes de defenderlo.

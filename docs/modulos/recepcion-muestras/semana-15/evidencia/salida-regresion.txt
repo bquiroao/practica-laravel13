@@ -1,0 +1,14 @@
+PASS: camino feliz acepta una muestra conforme
+PASS: camino feliz persiste la recepción aceptada
+PASS: el caso de uso asigna un identificador
+PASS: la regla de dominio rechaza una muestra sin etiqueta
+PASS: el rechazo contiene una razón explícita
+PASS: el rechazo controlado también queda persistido
+PASS: la regla de dominio rechaza un recipiente dañado
+PASS: la regla específica rechaza un tubo de sangre sin sello íntegro
+PASS: se conserva el motivo de rechazo informado por el operador
+PASS: el generador produce identificadores de 128 bits con formato y valores distintos
+PASS: un error de persistencia se propaga y no simula éxito
+PASS: no se registra una recepción si falla el guardado
+PASS: el dominio impide un rechazo sin motivo
+OK: 13 aserciones.
