@@ -1,0 +1,41 @@
+Micro-HIS Catálogo de pruebas de laboratorio — 2026-10-28 09:42:31 — PHP 8.4.26
+
+[OK]    CB-01 RegistrarPrueba, rama sin versión previa: versión 1 y sin cierre
+[OK]    CB-02 RegistrarPrueba, rama con versión previa que NO se superpone: versión 2 y la anterior intacta
+[OK]    CB-03 RegistrarPrueba, rama superpuesta con desde ≤ vigente: excepción sin guardar
+[OK]    CB-04 RegistrarPrueba, rama superpuesta con desde posterior: cierre el día previo
+[OK]    CB-05 Vigencia::errores, las cuatro condiciones de fecha
+[OK]    CN-01 Equivalencia de tipo de muestra: clase válida 201, clase inválida 422
+[OK]    CN-02 Límites de volumen mínimo: 0 → 422, 0.01 → 201
+[OK]    CN-03 Límites de fecha desde: hoy → 201, ayer → 422 (RN-04)
+[OK]    CN-04 Permisos por rol: solo el Jefe registra; todos consultan; token inválido 401 (RN-01)
+[OK]    CN-05 Errores de entrada: cuerpo no JSON 400, ruta inexistente 404, fecha inválida 422
+[FALLA] CN-06 [DEFECTO D-02] Volumen de 10000 mL debe dar 422 y no error de persistencia
+        RuntimeException: Se esperaba Lab\Domain\DatosInvalidos y llegó Lab\Domain\ErrorPersistencia: No se pudo guardar la prueba; no se guardó ningún cambio.
+[FALLA] CN-07 [DEFECTO D-03] Nombre de 151 caracteres debe dar 422 y no error de persistencia
+        RuntimeException: Se esperaba Lab\Domain\DatosInvalidos y llegó Lab\Domain\ErrorPersistencia: No se pudo guardar la prueba; no se guardó ningún cambio.
+[FALLA] CN-08 [DEFECTO D-04] Buscar «%» debe dar el mismo resultado con PDO que con InMemory
+        RuntimeException: PDO encontró 1 y InMemory 0
+[OK]    T-01 Camino feliz: alta de HEM-001 crea la versión 1 (CU-01)
+[OK]    T-02 Regla RN-05: versión con el mismo desde se rechaza por vigencia superpuesta
+[OK]    T-03 Regla RN-05: versión que empieza después cierra la anterior el día previo
+[OK]    T-04 Reglas RN-03 y RN-04: devuelve todos los errores por campo
+[OK]    T-05 Error de persistencia (RN-07): la falla del repositorio llega como ErrorPersistencia
+[OK]    T-06 RN-06: detalle de una prueba antes de su vigencia responde no vigente con su vigencia (CU-05)
+[OK]    T-07 PDO: guarda dos pruebas y consulta solo las vigentes en la fecha (RN-06)
+[OK]    T-08 PDO: si el INSERT falla, el cierre de la versión anterior se revierte (RN-07)
+[OK]    T-09 Contrato InMemory: versiones, filtros y vigencia se comportan igual
+[OK]    T-09 Contrato PDO: versiones, filtros y vigencia se comportan igual
+[OK]    T-10 MVC: POST /pruebas válido responde 201 y la vista muestra el detalle
+[OK]    T-11 MVC: datos inválidos 422 y vigencia superpuesta 409 regresan al formulario con errores
+[OK]    T-12 MVC: el controlador no contiene SQL ni acceso a PDO
+[OK]    T-13 API: POST con rol jefe de laboratorio responde 201 con requisitos y vigencia
+[OK]    T-14 API: sin token 401 y médico intentando registrar 403 (RN-01)
+[OK]    T-15 API: 422 con campos y 409 por vigencia superpuesta
+[OK]    T-16 API: GET vigentes para el médico y 404 con vigencia en el detalle
+[OK]    U-01 Vigencia::incluye usa límites inclusivos (RN-06)
+[OK]    U-02 Vigencia::seSuperponeCon distingue vigencias abiertas, cerradas y contiguas (RN-05)
+[OK]    U-03 RequisitoMuestra::errores acepta datos válidos y marca ayuno negativo y estabilidad 0 (RN-03)
+[OK]    U-04 LabTest::validar exige el código AAA-000 en mayúsculas (RN-02)
+
+Resultado: 34 pruebas, 31 correctas, 3 fallidas

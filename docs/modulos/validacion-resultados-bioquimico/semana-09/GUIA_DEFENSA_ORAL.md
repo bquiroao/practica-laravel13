@@ -1,0 +1,1 @@
+Mostrar contraste renderizado y rol cortado, luego ambigüedad de confirmar, firmante genérico y hora sin zona. Explicar recuperación de respuesta desconocida y recibo de rechazo faltante. Checklist completo no significa WCAG aprobado: teclado/foco/anuncios requieren controles reales. Priorizar prevenir decisión errónea/repetida, sin dar consejo clínico.

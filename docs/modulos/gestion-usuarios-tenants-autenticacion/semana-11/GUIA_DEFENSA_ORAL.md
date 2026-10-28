@@ -1,0 +1,1 @@
+Abrir HTML y demostrar alta H1, login con clave ficticia, contexto de sesión y acceso cruzado denegado. Activar falla de revocación: no se anuncia cierre. Recuperar y confirmar cierre: acceso rechazado. Mostrar móvil/escritorio y mapa. Explicar reutilización transparente de semana 12 y que no hay JWT firmado ni autorización de servidor.

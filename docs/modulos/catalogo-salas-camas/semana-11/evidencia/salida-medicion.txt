@@ -1,0 +1,16 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-salas (#salas) | 320 | 320 | 320 | no | Salas · Catálogo de camas · Hospital HIS | H1
+01-salas (#salas) | 360 | 360 | 360 | no | Salas · Catálogo de camas · Hospital HIS | H1
+01-salas (#salas) | 430 | 430 | 430 | no | Salas · Catálogo de camas · Hospital HIS | H1
+02-sala-a (#sala/A) | 320 | 320 | 320 | no | Sala A · Catálogo de camas · Hospital HIS | H1
+02-sala-a (#sala/A) | 360 | 360 | 360 | no | Sala A · Catálogo de camas · Hospital HIS | H1
+02-sala-a (#sala/A) | 430 | 430 | 430 | no | Sala A · Catálogo de camas · Hospital HIS | H1
+03-cambiar-estado (#cambiar/A101) | 320 | 320 | 320 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+03-cambiar-estado (#cambiar/A101) | 360 | 360 | 360 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+03-cambiar-estado (#cambiar/A101) | 430 | 430 | 430 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+04-cambio-guardado (#cambiar/A101) | 320 | 320 | 320 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+04-cambio-guardado (#cambiar/A101) | 360 | 360 | 360 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+04-cambio-guardado (#cambiar/A101) | 430 | 430 | 430 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+05-error-conflicto (#cambiar/A101) | 320 | 320 | 320 | no | Conflicto en A/101 · Catálogo de camas · Hospital HIS | H1
+05-error-conflicto (#cambiar/A101) | 360 | 360 | 360 | no | Conflicto en A/101 · Catálogo de camas · Hospital HIS | H1
+05-error-conflicto (#cambiar/A101) | 430 | 430 | 430 | no | Conflicto en A/101 · Catálogo de camas · Hospital HIS | H1

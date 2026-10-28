@@ -1,0 +1,1 @@
+Ejecutar CLI: emisión CREATED y seguimiento FOUND. Señalar cuatro capas y dependencias invertidas. Explicar dominio (prueba requerida), catálogo de demo, prepare/execute y rollback de segunda partida. Mostrar diferencia EMPTY/UNAVAILABLE y denegación antes de consulta. Aclarar que TEST_INITIAL es ficticio y faltan identidad real, tenant, concurrencia, API e idempotencia.

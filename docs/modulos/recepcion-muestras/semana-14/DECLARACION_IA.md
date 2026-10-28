@@ -1,0 +1,1 @@
+Se utilizó IA para revisar la documentación local y preparar el plan SQA. Se conservan las limitaciones y hallazgos de semana 13; no se afirma ejecución nueva del prototipo histórico, cadena física ni integración clínica. Los umbrales y responsables adicionales son propuestas pendientes de aceptación. La estudiante debe revisar el contenido antes de defenderlo.

@@ -1,0 +1,12 @@
+Inspección de fuentes SVG, 2026-10-28. No prueba de controles HTML ni dictamen WCAG.
+01-inicio-expediente.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+02-seleccionar-pruebas.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+03-confirmar-orden.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+04-exito-trazabilidad.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+05-seguimiento.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+06-error-recuperable.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false
+Contraste #ffffff/#126574: 6.69:1
+Contraste #243f47/#ffffff: 11.19:1
+Contraste #3c5962/#f2f6f7: 6.90:1
+Contraste #526b73/#f2f6f7: 5.20:1
+Contraste #d0e2e6/#153e49: 8.64:1
