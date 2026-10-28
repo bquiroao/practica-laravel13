@@ -1,0 +1,1 @@
+IA utilizada para continuar UX/evaluación previa, diseñar variantes móviles y escenarios y automatizar capturas/encaje. La estudiante revisa y defiende decisiones. No se prueban JWT, identidad real, revocación, correo ni accesibilidad operativa; todas las pantallas y datos son ficticios.
