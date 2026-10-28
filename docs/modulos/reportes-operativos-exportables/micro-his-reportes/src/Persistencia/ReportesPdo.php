@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-// Persistencia: lectura de vistas de solo lectura y registro de exportaciones, siempre con sentencias preparadas.
+// Persistencia: adaptador PDO de los dos puertos (Puertos.php). Lectura de vistas de solo lectura y registro de exportaciones, siempre con sentencias preparadas.
 namespace Reportes\Persistencia;
 
-use Reportes\Aplicacion\ErrorPersistencia;
+use Reportes\Aplicacion\{ErrorPersistencia, FuenteReportes, RepositorioExportaciones};
 use Reportes\Dominio\Filtros;
 
-final class ReportesPdo {
+final class ReportesPdo implements RepositorioExportaciones, FuenteReportes {
     public function __construct(private \PDO $pdo) { $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); }
 
     /** Filas del hospital, del rango y registradas hasta el corte. Vista y columnas vienen del catálogo; los valores van como parámetros. */
