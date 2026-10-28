@@ -25,3 +25,7 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ordenes-laboratorio-emr
 ## Semana 8
 
 [UX: flujo por rol y seis wireframes anotados](semana-08/semana-08-ux-ordenes-emr.md).
+
+## Semana 12
+
+[Defensa, recorrido navegable, matriz y cambio documentado](semana-12/README.md).
