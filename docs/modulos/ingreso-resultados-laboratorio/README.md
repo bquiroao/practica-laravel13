@@ -24,6 +24,9 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/*.puml
 ```
 
+## Semana 14
+
+[Plan SQA: métricas, riesgos, controles y calendario](semana-14/semana-14-plan-sqa-ingreso-resultados.md).
 ## Semana 15
 
 [Pruebas, matriz RF/RNF, capturas y defectos](semana-15/README.md).
