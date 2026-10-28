@@ -1,0 +1,21 @@
+@startsalt
+title M1 — Inicio del personal clínico (320 px)
+{+
+  <i>[Saltar al contenido] (visible al enfocar)</i>
+  [≡ Menú] | <b>H. Central · enfermería</b>
+  ---
+  {+
+    <b>Camas disponibles</b>
+    <b>7</b> camas disponibles | [Ver >]
+  }
+  {+
+    <b>Pacientes</b>
+    <b>42</b> pacientes activos | [Ver >]
+  }
+  {+
+    <b>Citas de hoy</b>
+    ░░░░░░ cargando…
+  }
+  <i>Una tarjeta por fila; el orden sigue el rol.</i>
+}
+@endsalt

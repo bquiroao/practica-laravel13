@@ -1,0 +1,17 @@
+@startsalt w5_registros
+{+
+  <b>Registros de origen</b> · Medicina (18)
+  --
+  {#
+    Cama | Paciente | Ingreso | Egreso
+    MED-01 | PAC-00465 | 16/10/2026 | en curso
+    MED-02 | PAC-00466 | 17/10/2026 | 21/10/2026
+    MED-03 | PAC-00467 | 18/10/2026 | en curso
+    … | … | … | …
+  }
+  Página 1 de 2 | [Anterior] | [Siguiente]
+  --
+  <&lock-locked> Solo datos mínimos: el paciente aparece con su código
+  [Volver al desglose]
+}
+@endsalt

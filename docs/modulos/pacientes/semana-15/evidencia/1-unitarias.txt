@@ -1,0 +1,17 @@
+$ php tests/ejecutar.php --solo=UNI
+Micro-HIS Pacientes - pruebas (PHP 8.4.26)
+
+== Dominio: reglas de negocio ==
+[PASA ] UNI-01   Identidad · Dpi: límites 12/13/14 dígitos y departamento 00/01/22/23; separadores; enmascarado y canónico
+[PASA ] UNI-02   Identidad · Pasaporte: límites 5/6/20/21; país de 3 letras; el mismo número de otro país es otra identidad
+[PASA ] UNI-03   Identidad · FabricaIdentificador: sin tipo ni número = provisional (RF-04); número sin tipo y tipo no admitido se rechazan
+[PASA ] UNI-04   Demografía · R-01 con valores límite: nombres 100/101 (multibyte), nacimiento hoy/mañana/29-feb, sexo, teléfono 7/8/15/16
+[PASA ] UNI-05   Edición · R-07: qué es «cambiar la identidad» (nombre normalizado, nacimiento, documento); el teléfono o una tilde no lo son
+[PASA ] UNI-06   Búsqueda · R-10: prioridad código > documento > nombre; 2/3 letras; formatos de nacimiento; resumen sin datos personales
+[PASA ] UNI-07   Búsqueda + confidencialidad · R-11: por nombre se excluye al protegido salvo permiso; por código o documento se encuentra
+[PASA ] UNI-08   Confidencialidad · resumen/detalle: el protegido sin permiso se reduce (RF-14, RF-19); el documento SIEMPRE va enmascarado (R-04)
+[PASA ] UNI-09   Duplicados · R-02/R-03: documento repetido bloquea (RESERVADO si es protegido); homónimo advierte; confirmar exige permiso y motivo; sin documento no es duplicado
+[PASA ] UNI-10   Edición y confidencialidad · R-08, R-07, R-11: estado restringido, motivo en blanco, visibilidad y cambio de protección
+
+Total: 10  Pasan: 10  Fallan: 0  Omitidas: 0
+(código de salida: 0)

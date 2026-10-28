@@ -1,0 +1,15 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Docs
+Docs : &#35;docs (solo la audiencia del rol, R-06)
+Vigente : &#35;doc/citas-api
+Obsoleta : &#35;doc/citas-api/1.0.0
+NoEncontrado : &#35;doc/inventario-farmacia (error crítico, R-07)
+Docs --> Vigente : enlace «citas-api»
+Vigente --> Obsoleta : selector «Versión» → 1.0.0
+Obsoleta --> Vigente : «Ir a la 2.0.0»
+Vigente --> Docs : «‹ Documentos»
+[*] --> NoEncontrado : enlace directo a un documento ajeno
+NoEncontrado --> Docs : «Volver a mi documentación»
+@enduml

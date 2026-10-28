@@ -1,0 +1,33 @@
+@startuml flujo_administrador_jefe_reportes_analytics_basicos
+title Semana 8 · User flow: Administrador y Jefe de área
+skinparam shadowing false
+
+start
+:Menú → Reportes y analytics básicos;
+:Elige uno de los 10 reportes\n(ayuda contextual con la fórmula);
+repeat
+  :Elige período, dimensión y granularidad;
+repeat while (¿Filtros válidos? RN-02) is (no: mensaje junto al campo)
+->sí;
+:Confirma con «Calcular»\n(resumen del reporte y período);
+:Estado de carga «Calculando…»;
+if (¿Respuesta del servidor?) then (503)
+  :Error recuperable con «Reintentar»\ny código de seguimiento;
+  stop
+elseif (sin datos) then
+  :Estado vacío «Sin datos para este período»\n(sugiere ampliar el período, RN-06);
+  stop
+else (éxito)
+  :Tarjeta con valor, unidad y precisión\n+ ficha de trazabilidad (RN-05);
+endif
+if (¿Quiere saber de dónde sale?) then (sí)
+  :Desglose por la dimensión\n(suma = total, RN-07; «Otro» si < 3, RN-04);
+  if (¿Abre una parte?) then (sí)
+    :Registros de origen con datos mínimos\n(paciente solo con código, RN-09);
+  else (no)
+  endif
+else (no)
+endif
+:Cambia filtros o termina;
+stop
+@enduml

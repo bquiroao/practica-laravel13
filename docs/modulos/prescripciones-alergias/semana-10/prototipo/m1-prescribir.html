@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nueva prescripción · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: base · error · deshacer · salir · sin-conexion -->
+<header class="barra">
+  <button class="atras" aria-label="Volver al expediente" onclick="location.href='m1-prescribir.html?estado=salir'">‹</button>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. R. Norte</span><span class="largo">Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Médico</span>
+  <span class="avatar" role="img" aria-label="Dr. López, médico">DL</span>
+</header>
+
+<!-- El aviso de red y la franja de alergias son UN bloque fijo: la franja nunca se separa ni tapa contenido -->
+<div class="fijas">
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. El borrador sigue aquí; verificar necesita conexión.
+</div>
+
+<!-- P-01: las alergias activas se ven SIEMPRE, antes de elegir el medicamento. Fija bajo la barra. -->
+<div class="alergias" role="region" aria-label="Alergias activas">
+  <span aria-hidden="true">⚠</span>
+  <div>Alergias activas: Penicilina <span class="detalle">· moderada · exantema</span></div>
+</div>
+</div>
+
+<main>
+  <div class="paciente">
+    <div class="nombre">María E. · P-002</div>
+    <div class="meta">44 años · Episodio ambulatorio #A-311</div>
+  </div>
+  <div class="fila">
+    <h1 style="margin:0">Nueva prescripción</h1>
+    <!-- semana 9 B-13: el «?» es un botón con nombre -->
+    <button class="btn icono derecha" aria-label="Ayuda: cómo se verifican las alergias" aria-expanded="false" aria-controls="ayuda">?</button>
+  </div>
+  <p id="ayuda" class="ayuda" hidden>Se comparan los medicamentos con las alergias activas: el mismo principio activo bloquea; el mismo grupo pide justificación.</p>
+  <p class="obligatorio">* obligatorio</p>
+
+  <div class="aviso error" role="alert" data-estado="error">
+    <h2>Revise 2 datos</h2>
+    <p>La dosis diaria de Paracetamol (6000 mg) supera la máxima (4000 mg). Reduzca la dosis o la frecuencia.</p>
+    <a class="btn texto" href="#dias-2">Ir a «Días» del ítem 2</a>
+  </div>
+
+  <form aria-label="Ítems de la prescripción" onsubmit="return false">
+    <fieldset class="item">
+      <legend>Ítem 1: Cefalexina 500 mg</legend>
+      <div class="campos">
+        <div class="ancho"><label for="med-1">Medicamento *</label>
+          <select id="med-1" aria-required="true"><option>Cefalexina 500 mg</option><option>Paracetamol 500 mg</option><option>Ibuprofeno 400 mg</option></select></div>
+        <div><label for="dosis-1">Dosis (mg) *</label><input id="dosis-1" inputmode="decimal" value="500" aria-required="true"></div>
+        <div><label for="cada-1">Cada *</label><select id="cada-1"><option>4 h</option><option selected>6 h</option><option>8 h</option><option>12 h</option><option>24 h</option></select></div>
+        <div><label for="via-1">Vía *</label><select id="via-1"><option>oral</option></select></div>
+        <div><label for="dias-1">Días *</label><input id="dias-1" type="number" inputmode="numeric" min="1" max="90" value="7"></div>
+      </div>
+      <button class="btn texto quitar" aria-label="Quitar ítem 1: Cefalexina 500 mg">Quitar</button>
+    </fieldset>
+
+    <fieldset class="item" data-estado="base error salir sin-conexion">
+      <legend>Ítem 2: Paracetamol 500 mg</legend>
+      <div class="campos">
+        <div class="ancho"><label for="med-2">Medicamento *</label>
+          <select id="med-2"><option>Paracetamol 500 mg</option><option>Cefalexina 500 mg</option></select></div>
+        <div><label for="dosis-2">Dosis (mg) *</label><input id="dosis-2" inputmode="decimal" value="1000"></div>
+        <div><label for="cada-2">Cada *</label><select id="cada-2"><option selected>4 h</option><option>6 h</option><option>8 h</option></select></div>
+        <div><label for="via-2">Vía *</label><select id="via-2"><option>oral</option></select></div>
+        <div><label for="dias-2">Días *</label><input id="dias-2" type="number" inputmode="numeric" min="1" max="90" value="5">
+          <p class="error" id="dias-2-error" data-estado="error">Días: entre 1 y 90.</p></div>
+      </div>
+      <p class="ayuda">Máxima diaria: 4000 mg (dosis × 24 ÷ cada).</p>
+      <!-- semana 9 B-08: «Quitar» con nombre; se puede deshacer -->
+      <a class="btn texto quitar" href="m1-prescribir.html?estado=deshacer" aria-label="Quitar ítem 2: Paracetamol 500 mg">Quitar</a>
+    </fieldset>
+
+    <button class="btn bloque">+ Agregar medicamento</button>
+  </form>
+</main>
+
+<div class="toast" role="status" data-estado="deshacer">
+  Se quitó Paracetamol. <a class="btn" href="m1-prescribir.html">Deshacer</a>
+</div>
+
+<div class="accion-fija">
+  <!-- semana 9 B-01: la razón está escrita, no en un tooltip; «Emitir» sigue siendo alcanzable -->
+  <p class="por-que" id="por-que">Primero verifique las alergias de este borrador para poder emitir.</p>
+  <a class="btn primario" href="m2-verificacion.html?estado=carga" data-estado="base error deshacer salir">Verificar alergias</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">Verificar · requiere conexión</span>
+  <a class="btn" href="#por-que" role="button" aria-disabled="true" aria-describedby="por-que">Emitir</a>
+</div>
+
+<div class="velo" data-estado="salir"></div>
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-salir" data-estado="salir">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-salir">¿Descartar la prescripción sin emitir?</h2>
+  <p>Hay 2 medicamentos cargados. Si sale, se pierden: el borrador no se guarda en el teléfono.</p>
+  <div class="acciones">
+    <a class="btn peligro" href="#">Descartar</a>
+    <a class="btn" href="m1-prescribir.html" autofocus>Seguir editando</a>
+  </div>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="#" aria-current="page"><span class="ico" aria-hidden="true">👤</span>Pacientes</a>
+  <a href="m4-prescripcion.html"><span class="ico" aria-hidden="true">℞</span>Prescripciones</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+<script>
+  if (document.body.dataset.estadoActual === 'error') {
+    const d = document.getElementById('dias-2');
+    d.value = '0'; d.setAttribute('aria-invalid', 'true'); d.setAttribute('aria-describedby', 'dias-2-error');
+    d.closest('fieldset').classList.add('con-error');
+    document.getElementById('dosis-2').setAttribute('aria-invalid', 'true');
+  }
+</script>
+</body>
+</html>

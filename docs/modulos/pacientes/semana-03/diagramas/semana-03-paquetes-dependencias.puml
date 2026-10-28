@@ -1,0 +1,63 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+title UML · Paquetes y regla de dependencias del Micro-HIS Pacientes
+skinparam packageStyle rectangle
+skinparam package {
+  BackgroundColor #F5F9FF
+  BorderColor #2F5D8A
+}
+top to bottom direction
+
+package "bootstrap\\contenedor.php\n(raíz de composición)" as Boot #FFF8E1 {
+}
+
+package "Presentacion\\Http" as Pres {
+  [Kernel · Ruta · TablaRutas] as K
+  [Acciones] as AC
+  [TraductorResultado] as TR
+  [Autenticador] as AU
+}
+
+package "Aplicacion" as Apl {
+  [CasosDeUso] as UC
+  [Comandos · Resultado] as CR
+  [ControlAcceso] as CA
+  [Puertos\\Transaccion · PoliticaAcceso · Reloj] as PA
+}
+
+package "Dominio" as Dom #E8F5E9 {
+  [Modelo\\Paciente · Identificador · CriterioBusqueda] as MO
+  [Servicios\\PoliticaDuplicados · PoliticaEdicion] as POL
+  [Excepciones\\ErrorDominio · ErrorPersistencia] as EX
+  [Puertos\\ConsultaPacientes · RepositorioPacientes\nIndiceDuplicados · RegistroAuditoria] as PD
+}
+
+package "Persistencia" as Per {
+  [Pdo\\PdoRepositorioPacientes · PdoIndiceDuplicados\nPdoRegistroAuditoria · PdoTransaccion] as PDO
+  [Seguridad\\ProteccionDocumentos] as SEG
+  [Configuracion\\PoliticaAccesoEstatica · RelojSistema] as CFG
+}
+
+Pres ..> Apl : «use»\ncomandos y resultados
+Apl ..> Dom : «use»
+PDO ..|> PD : «implementa»
+PDO ..> PA : «implementa» Transaccion
+CFG ..|> PA : «implementa»
+Per ..> Dom : «use» modelo y excepciones
+Boot ..> Pres
+Boot ..> Apl
+Boot ..> Per
+
+note right of Dom
+  El Dominio no depende de nadie:
+  ni HTTP, ni PDO, ni claves.
+  Persistencia depende HACIA el
+  Dominio (inversión de dependencias).
+end note
+note bottom of Pres
+  Presentación solo ve la Aplicación:
+  comandos con tipos primitivos y
+  Resultado (sin códigos HTTP).
+  Verificado por ARQ-01.
+end note
+@enduml

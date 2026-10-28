@@ -1,0 +1,31 @@
+@startuml semana-05-flujo-issue-pr
+title Plan de issue, rama, worktree y PR para integrar el módulo al HIS (flujo del README del proyecto)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2F5D8A
+
+start
+:Issue ASII-22 «Gobernanza y auditoría: audit_logs y API»
+(plantilla del repositorio; criterios de aceptación = CA de la semana 2);
+:git fetch origin;
+:git worktree add ../shi-asii-22-auditoria
+  -b feature/asii-22-auditoria-bquiroao origin/develop ·;
+:Trabajo en commits pequeños
+(migración central → puerto → API → pruebas) ·;
+if (¿Pruebas, lint del contrato y mutaciones en verde?) then (no)
+  :corregir en la misma rama;
+  detach
+else (sí)
+endif
+:git push -u origin feature/asii-22-auditoria-bquiroao;
+:PR → develop con la plantilla
+(evidencia, contrato, riesgos) ·;
+:Revisión de un compañero + CI;
+if (¿Aprobado?) then (sí)
+  :merge a develop;
+  :git worktree remove ../shi-asii-22-auditoria;
+else (cambios)
+  :ajustes en la rama;
+endif
+stop
+@enduml

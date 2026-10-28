@@ -1,0 +1,40 @@
+﻿Órdenes de laboratorio desde EMR — Evidencia de prueba
+Comando: php docs/modulos/ordenes-laboratorio-emr/semana-02/ejemplo-srp/verificar.php
+
+PASS: CA-01 emite orden con pruebas disponibles
+PASS: CA-01 conserva la referencia del paciente
+PASS: CA-01 conserva la referencia del episodio
+PASS: CA-01 conserva la referencia del solicitante
+PASS: CA-01 persiste todas las partidas
+PASS: CA-01 usa estado sintético provisto por la política
+PASS: CA-02 rechaza solicitud sin pruebas
+PASS: CA-02 rechaza código de prueba vacío
+PASS: CA-03 deniega emisión no autorizada
+PASS: CA-03 no escribe al denegar
+PASS: CA-04 rechaza contexto EMR inconsistente
+PASS: CA-04 no persiste contexto inválido
+PASS: CA-05 rechaza prueba no disponible
+PASS: CA-08 encuentra órdenes del episodio autorizado
+PASS: CA-08 devuelve la orden persistida
+PASS: CA-09 distingue episodio sin órdenes
+PASS: CA-06 deniega consulta no autorizada
+PASS: CA-07 comunica falla al persistir
+PASS: CA-07 no confirma orden tras falla de persistencia
+PASS: CA-07 no deja una escritura parcial
+PASS: CA-10 reporta falla de seguimiento
+PASS: CA-10 no sustituye falla con estado inventado
+PASS: CA-12 rechaza origen no autorizado
+PASS: CA-12 rechaza transición no acordada por la política
+PASS: CA-11 persiste transición aceptada por la política
+PASS: CA-11 consulta el último estado persistido
+PASS: CA-13 informa falla al persistir actualización
+PASS: CA-13 conserva estado tras falla de escritura
+PASS: CA-14 emisión depende de contratos cohesionados
+PASS: CA-14 consulta mantiene dependencias propias
+PASS: CA-14 actualización tiene contratos propios
+PASS: CA-15 los casos de uso dependen de interfaces y no de adaptadores concretos
+PASS: CA-16 consulta de seguimiento no depende del ciclo de vida de escritura
+PASS: CA-16 el caso de actualización recibe la política de estados
+OK: 34 aserciones.
+
+Exit code: 0

@@ -1,0 +1,51 @@
+@startuml semana-06-capas
+!pragma layout smetana
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #4A6FA5
+}
+title Semana 6 · Arquitectura vigente del micro-HIS y dónde cayó el cambio práctico
+
+package "Presentación (MVC)" as P #EAF2FB {
+  rectangle "Kernel · Rutas (x-permiso)\n+ ruta …/correcciones" as kp
+  rectangle "NotasSoapController\n+ acción corregir()" as ctl
+  rectangle "FormularioRegistroNota\nFormularioCorreccionNota (nuevo)" as frm #FFE3D6
+  rectangle "VistaJson · VistaHtml" as vis
+}
+package "Aplicación" as A #EAF7EA {
+  rectangle "RegistrarNotaConDiagnostico\nFirmarNota · ConsultarNota\nListarNotasExpediente\n(sin cambios)" as cu
+  rectangle "CorregirNota (nuevo)" as cor #FFE3D6
+  rectangle "Puertos técnicos\nTransaccion · Reloj · GeneradorId" as pt
+}
+package "Dominio" as D #FFF6E5 {
+  rectangle "NotaSoap\n+ corregir() · supersedes · motivo" as nota #FFE3D6
+  rectangle "SeccionesSoap · Diagnostico\n(sin cambios)" as reg
+  rectangle "RepositorioNotas\n+ correccionDe()" as port #FFE3D6
+}
+package "Persistencia" as R #F3ECF9 {
+  rectangle "PdoRepositorioNotas\n+ supersedes_id, correction_reason" as pdo #FFE3D6
+  rectangle "RepositorioNotasEnMemoria\n+ misma regla UNIQUE" as mem #FFE3D6
+}
+database "HOSPITAL\nclinical_notes\n+ supersedes_id UNIQUE" as db
+
+kp --> ctl
+ctl --> frm
+ctl --> cor
+ctl --> cu
+ctl --> vis
+cor --> nota
+cor --> port
+cor --> pt
+cu --> reg
+pdo ..|> port
+mem ..|> port
+pdo --> db
+
+legend bottom
+  Regla de dependencias intacta: Presentación → Aplicación → Dominio ← Persistencia (ARQ-01..14 en verde durante todo el cambio).
+  Naranja = piezas nuevas o ampliadas. Los cuatro casos de uso anteriores, la transacción, la bandeja de salida y el cliente no cambiaron.
+endlegend
+@enduml

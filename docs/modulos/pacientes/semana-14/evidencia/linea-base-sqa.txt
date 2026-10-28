@@ -1,0 +1,26 @@
+Plan SQA Pacientes · medición (PHP 8.4.26)
+----------------------------------------------------------------------------------------------------------------
+VERDE  M1  Pruebas automáticas en verde                      100 % (85/85)
+       umbral: 100 % y omitidas ≤ 2
+       omitidas: 2 (requieren PostgreSQL)
+VERDE  M2  Cobertura de códigos de error del dominio         100 % (13/13)
+       umbral: 100 %
+       todos los códigos están afirmados en alguna prueba
+VERDE  M3  Trazabilidad de escrituras y consultas             100 % (5/5 escenarios)
+       umbral: 100 %
+       eventos completos, sin eventos de escrituras rechazadas ni criterios en claro
+VERDE  M4  Integridad de la identidad (anti-duplicados)       100 % (8/8 intentos bloqueados)
+       umbral: 100 %
+       ningún intento creó una segunda ficha de la misma persona
+ROJO   M5  Respuestas sin datos de protegidos ni de otro hospital 75 % (6/8 respuestas limpias)
+       umbral: 100 %
+       fugas: otro hospital registra su DPI (409) (P-000001, 0101); otro hospital registra a su homónima (409) (P-000001)
+VERDE  M6  Confiabilidad ante fallas inyectadas               100 % (6/6)
+       umbral: 100 %
+       ninguna falla deja fichas, eventos o claves a medias
+ROJO   M7  Hallazgos de revisión Crítico/Mayor sin verificar 4 (Crítico 1 · Mayor 3) · Menor 3
+       umbral: 0 Crítico siempre; 0 Mayor para liberar
+       abiertos: AR-02, AR-01, AR-03, AR-04
+----------------------------------------------------------------------------------------------------------------
+VERDE: 5  ÁMBAR: 0  ROJO: 2
+exit=1
