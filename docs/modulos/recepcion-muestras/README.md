@@ -24,3 +24,7 @@ Las fuentes PlantUML editables y sus imágenes se guardan en `semana-NN/diagrama
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/semana-01/diagramas/*.puml
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/semana-03/diagramas/*.puml
 ```
+
+## Semana 9
+
+[Evaluación UX, checklist y backlog de accesibilidad](semana-09/README.md).
