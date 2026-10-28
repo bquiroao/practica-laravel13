@@ -10,6 +10,8 @@ use MicroHis\DashboardOcupacion\Dominio\{Corte, OcupacionSala};
 interface FuenteCamas { public function camasDeSalasActivas(): array; }
 interface EscritorCortes { public function guardarCorte(Corte $corte): void; }
 interface LectorCortes { public function ultimoCorte(): ?Corte; }
+/** Interfaz Repository del módulo, en el límite de Aplicación: la unión de los tres puertos de datos. La implementan PDO e InMemory. */
+interface RepositorioOcupacion extends FuenteCamas, EscritorCortes, LectorCortes {}
 interface Reloj { public function ahora(): int; }
 
 final class ErrorPersistencia extends \RuntimeException {}   // fallo técnico de la base: no es una regla de negocio
