@@ -1,0 +1,1 @@
+Se utilizó IA para adaptar el UX previo a cinco pantallas móviles en tres anchos, documentar breakpoints y dos escenarios. Los datos son ficticios y la firma significa trazabilidad, no criptografía. No se atribuyen pruebas de interacción, red, lector de pantalla ni persistencia realizadas. La estudiante debe revisar las decisiones.

@@ -1,0 +1,39 @@
+{
+ "openapi":"3.1.0",
+ "info":{"title":"HIS demo order status for NativePHP evaluation","version":"1.0.0","description":"Contrato propuesto, no API desplegada. Consulta de orden ficticia; notificación es capacidad local, fuera del servidor."},
+ "servers":[{"url":"https://his.example.invalid/api/v1","description":"Host ilustrativo sin servicio operativo"}],
+ "security":[{"sessionBearer":[]}],
+ "paths":{"/tenants/{tenantId}/demo-orders/{demoOrderId}/status":{"get":{
+ "operationId":"readDemoOrderStatus","summary":"Consultar estado reconocido de orden ficticia en tenant autorizado",
+ "description":"Servidor valida sesión, tenant activo, membresía y permiso demo-orders:read antes de consultar. No encontrado o recurso fuera de ámbito autorizado usa 404 sin filtrar existencia. No devuelve snapshot obsoleto como 200 actual.",
+ "parameters":[
+ {"name":"tenantId","in":"path","required":true,"schema":{"type":"string","pattern":"^[A-Za-z0-9-]{1,64}$"}},
+ {"name":"demoOrderId","in":"path","required":true,"schema":{"type":"string","pattern":"^DEMO-[A-Za-z0-9-]{1,59}$"}},
+ {"name":"X-Request-ID","in":"header","required":true,"description":"Correlación sin datos personales, eco en todas las respuestas del endpoint","schema":{"type":"string","pattern":"^[A-Za-z0-9-]{1,64}$"}}
+ ],
+ "responses":{
+ "200":{"description":"Lectura confirmada de fuente HIS de demostración","headers":{"Cache-Control":{"schema":{"type":"string","const":"no-store"}},"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DemoStatus"},"example":{"demoOrderId":"DEMO-1","tenantId":"H1","status":"PENDIENTE","observedAt":"2026-10-28T12:00:00-06:00","source":"HIS_DEMO","requestId":"REQ-DEMO-1"}}}},
+ "400":{"$ref":"#/components/responses/Invalid"},
+ "401":{"$ref":"#/components/responses/Unauthenticated"},
+ "403":{"$ref":"#/components/responses/Forbidden"},
+ "404":{"$ref":"#/components/responses/NotFound"},
+ "429":{"$ref":"#/components/responses/RateLimited"},
+ "503":{"$ref":"#/components/responses/Unavailable"}
+ }}}},
+ "components":{
+ "securitySchemes":{"sessionBearer":{"type":"http","scheme":"bearer","description":"Sesión emitida por el módulo de identidad. Este contrato no define formato JWT ni emite credenciales."}},
+ "headers":{"RequestId":{"description":"Correlación de solicitud","schema":{"type":"string"}},"RetryAfter":{"description":"Segundos sugeridos antes de nuevo intento; valor ilustrativo","schema":{"type":"integer","minimum":1},"example":30}},
+ "schemas":{
+ "DemoStatus":{"type":"object","additionalProperties":false,"required":["demoOrderId","tenantId","status","observedAt","source","requestId"],"properties":{"demoOrderId":{"type":"string"},"tenantId":{"type":"string"},"status":{"type":"string","enum":["PENDIENTE","RECIBIDA","EN_PROCESO","COMPLETADA"]},"observedAt":{"type":"string","format":"date-time"},"source":{"type":"string","const":"HIS_DEMO"},"requestId":{"type":"string"}}},
+ "Error":{"type":"object","additionalProperties":false,"required":["code","message","requestId"],"properties":{"code":{"type":"string","enum":["INVALID_REQUEST","UNAUTHENTICATED","FORBIDDEN","NOT_FOUND","RATE_LIMITED","HIS_UNAVAILABLE"]},"message":{"type":"string"},"requestId":{"type":"string"}}}
+ },
+ "responses":{
+ "Invalid":{"description":"Formato o encabezado inválido; sin consulta ni notificación","headers":{"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},
+ "Unauthenticated":{"description":"Sesión ausente, inválida, expirada o revocada","headers":{"WWW-Authenticate":{"schema":{"type":"string"},"example":"Bearer"},"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},
+ "Forbidden":{"description":"Sin permiso o acceso al tenant solicitado; sin lectura de orden","headers":{"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},
+ "NotFound":{"description":"Orden inexistente o fuera de ámbito del tenant autorizado, sin revelar cuál","headers":{"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},
+ "RateLimited":{"description":"Límite de solicitudes; respetar Retry-After","headers":{"Retry-After":{"$ref":"#/components/headers/RetryAfter"},"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},
+ "Unavailable":{"description":"Dependencia no disponible, timeout o respuesta inválida; no estado actual ni éxito falso","headers":{"Retry-After":{"$ref":"#/components/headers/RetryAfter"},"X-Request-ID":{"$ref":"#/components/headers/RequestId"}},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}
+ }
+ }
+}

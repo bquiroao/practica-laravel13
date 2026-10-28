@@ -1,0 +1,9 @@
+Verificación SRP — antes vs después — 2026-10-28 06:42:06
+
+Alta de GLU-001 v1           antes="OK: GLU-001 versión 1 registrada" | después="OK: GLU-001 versión 1 registrada" | IGUAL
+Misma fecha desde (RN-05)    antes="ERROR: vigencia superpuesta" | después="ERROR: vigencia superpuesta" | IGUAL
+Versión 2 desde 2027-02-01  antes="OK: GLU-001 versión 2 registrada" | después="OK: GLU-001 versión 2 registrada" | IGUAL
+Volumen 0 (RN-03)            antes="ERROR: volumen inválido" | después="ERROR: volumen inválido" | IGUAL
+
+Cierre de la versión 1: antes=2027-01-31 | después=2027-01-31
+Resultado: 4 de 4 escenarios iguales; cierre igual

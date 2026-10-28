@@ -1,0 +1,27 @@
+@startuml refactor-antes
+title Antes: la regla de vigencia y las listas de requisitos repetidas en varias capas
+skinparam componentStyle rectangle
+
+[AltaPruebaView.vue] as V
+note right of V
+  - Lista fija de tipos de muestra y conservación
+  - Calcula "vigente" comparando fechas en JS
+  - Llama a la API con fetch directo
+end note
+[LabTestController (Laravel)] as C
+note right of C
+  - Valida campos y regla de superposición
+  - WHERE valid_from <= ? AND (valid_to IS NULL OR valid_to >= ?)
+  - Arma el JSON a mano
+end note
+[Consulta de Órdenes] as O
+note right of O
+  - Repite el WHERE de vigencia
+    sobre lab_test
+end note
+database "lab_test" as DB
+
+V --> C
+C --> DB
+O --> DB
+@enduml
