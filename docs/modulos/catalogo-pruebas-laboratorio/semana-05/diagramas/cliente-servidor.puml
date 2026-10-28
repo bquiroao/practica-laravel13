@@ -1,0 +1,31 @@
+@startuml cliente-servidor
+title Diseño cliente-servidor del Catálogo de pruebas de laboratorio
+skinparam componentStyle rectangle
+
+node "Navegador" {
+  [Vue 3: vistas del catálogo] as VUE
+}
+node "Módulo Órdenes de laboratorio" {
+  [Cliente HTTP] as ORD
+}
+node "Servidor de aplicación (Micro-HIS / Laravel)" {
+  [Autenticación + permiso + tenant] as AUTH
+  [ApiLabTestController] as API
+  [Casos de uso\nRegistrarPrueba / Consultar / Detalle] as UC
+  [LabTestRepository\n(PDO)] as REPO
+}
+database "PostgreSQL HOSPITAL\nlab_test" as DB
+
+VUE --> AUTH : HTTPS + JSON\nAuthorization: Bearer
+ORD --> AUTH : HTTPS + JSON\n(solo GET)
+AUTH --> API
+API --> UC
+UC --> REPO
+REPO --> DB : SQL parametrizado
+
+note right of API
+  Respuestas: 200, 201, 400, 401,
+  403, 404, 409, 422, 500
+  Cabecera X-Request-Id en todas
+end note
+@enduml
