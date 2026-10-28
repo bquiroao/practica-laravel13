@@ -1,0 +1,48 @@
+@startuml semana-05-secuencia-resiliencia
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign left
+autonumber "<b>RS-00"
+
+title Semana 5 · Resiliencia: respuesta perdida, reintento con Idempotency-Key y circuit breaker
+
+participant "Módulo cliente\n(SPA backend o Expediente)" as M
+participant "ClienteNotasSoap" as C
+participant "CircuitoInterruptor" as CB
+participant "Red" as N
+participant "Servidor Notas SOAP" as S
+database "HOSPITAL" as DB
+
+M -> C : registrar(token, hospital, nota)
+C -> C : genera Idempotency-Key y X-Request-ID
+C -> CB : ¿permite llamar?
+CB --> C : sí (CERRADO)
+C -> N : POST /api/v1/notas-soap (clave K)
+N -> S : petición
+S -> DB : BEGIN · INSERT nota · INSERT diagnóstico\nINSERT auditoría · INSERT idempotency_keys(K) · COMMIT
+S --> N : 201
+N -x C : la respuesta se pierde (timeout)
+C -> CB : registrarFalla()
+C -> C : espera 100 ms (un solo reintento)
+C -> N : POST /api/v1/notas-soap (MISMA clave K)
+N -> S : petición repetida
+S -> DB : SELECT idempotency_keys(K) → misma huella
+S --> C : 201 + Idempotent-Replayed: true (misma nota, sin INSERT)
+C -> CB : registrarExito()
+C --> M : OK (intentos: 2, repetida: sí)
+note over S, DB : CLI-02, APP-13, HTTP-11 e INT-09 lo prueban.\nUna sola nota y un solo evento de auditoría.
+
+== servidor caído ==
+M -> C : consultar(id)
+C -> N : GET (falla) · reintento (falla)
+C -> CB : 2 fallas
+M -> C : consultar(id)
+C -> N : GET (falla)
+C -> CB : 3.ª falla → ABIERTO por 30 s
+M -> C : consultar(id)
+C -> CB : ¿permite llamar?
+CB --> C : no (ABIERTO)
+C --> M : NO_DISPONIBLE · origen CIRCUITO_ABIERTO\n(sin tocar la red; la pantalla conserva lo escrito)
+note over C, CB : CLI-06. Pasado el enfriamiento: SEMIABIERTO, una prueba y vuelve a CERRADO.
+@enduml

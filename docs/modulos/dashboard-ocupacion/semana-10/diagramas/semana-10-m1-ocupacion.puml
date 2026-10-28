@@ -1,0 +1,22 @@
+@startsalt
+title M1 — Ocupación por sala (320 px)
+{+
+  [≡ Menú] | <b>Ocupación · H. Central</b>
+  Corte de las <b>10:35</b> · hace 4 min
+  <i>Fuente: catálogo de camas y admisión</i>
+  Orden: más camas libres primero | [Filtrar]
+  ---
+  {+
+    <b>A · Medicina interna</b>
+    <b>5 disponibles</b> de 11 · 54.5 % baja | [Ver >]
+  }
+  {+
+    <b>B · Cirugía</b>
+    <b>0 disponibles</b> de 6 · 100.0 % alta | [Ver >]
+  }
+  {+
+    <b>C · Pediatría</b>
+    Sin camas operativas · no aplica | [Ver >]
+  }
+}
+@endsalt

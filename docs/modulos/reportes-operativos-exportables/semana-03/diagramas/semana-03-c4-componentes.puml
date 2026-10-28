@@ -1,0 +1,22 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title C4 (contexto → contenedor → componentes) — Micro-HIS Reportes operativos exportables, semana 3
+Person(jef, "Jefatura / administración / auditoría", "Filtra y exporta un reporte operativo")
+System_Ext(rbac, "Identidad y permisos (RBAC)", "Otro módulo; hoy se simula con usuarios de demostración")
+System_Ext(fuentes, "Módulos fuente (camas, traslados y altas)", "Publican las vistas de solo lectura")
+System_Boundary(his, "Micro-HIS Reportes (PHP 8.2+, sin framework)") {
+  Component(pre, "Presentación", "ReportesControlador", "HTTP ↔ caso de uso: ruta, método, CSV, cabeceras y estado HTTP")
+  Component(app, "Aplicación", "ExportarReporte, Usuario", "CU-03 exportar y CU-05 reproducir: permiso, catálogo, corte, registro")
+  Component(dom, "Dominio", "Filtros, Archivo, FormatoExportacion, catalogo()", "Reglas: rango ≤ 92 días, filtros permitidos, enmascarado, orden y hash (OCP, S2)")
+  Component(per, "Persistencia", "ReportesPdo", "PDO con sentencias preparadas; vista solo del catálogo")
+}
+ContainerDb(bd, "Base del módulo", "SQLite (demo) / PostgreSQL del grupo", "vw_censo_servicio, vw_egresos, exportaciones_reporte")
+Rel(jef, pre, "GET /api/v1/reportes/{codigo}/exportar · POST /api/v1/exportaciones/{id}/reproducir", "HTTPS")
+Rel(pre, app, "ejecutar(codigo, filtros, formato, usuario)")
+Rel(app, dom, "Filtros::desde, Archivo::generar")
+Rel(app, per, "filas, guardarExportacion, exportacion", "dependencia directa: se invierte en S4")
+Rel(per, dom, "lee Filtros")
+Rel(per, bd, "SQL preparado", "PDO")
+Rel_L(pre, rbac, "identidad (pendiente)")
+Rel_U(fuentes, bd, "vistas de solo lectura (por acordar)")
+@enduml

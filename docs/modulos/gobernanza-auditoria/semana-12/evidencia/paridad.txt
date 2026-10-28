@@ -1,0 +1,55 @@
+IGUAL  Semilla: 63 registros por POST en el kernel real (estado, id y secuencia por registro)
+IGUAL   1. Camino feliz: el auditor consulta hoy, módulo pacientes (1.ª página)
+          200 · 50 filas · corregidos=55→56 · hay más
+IGUAL   2. Camino feliz: «Cargar 50 más» con el cursor recibido
+          200 · 8 filas
+IGUAL   3. Camino feliz: detalle del original corregido (#55)
+          200 · #55 u-equivocado corregido por #56
+IGUAL   4. Camino feliz: detalle de la corrección (#56) con su motivo
+          200 · #56 u-correcto corrige a #55
+IGUAL   5. Solo los denegados de hoy
+          200 · 2 filas
+IGUAL   6. Tenant: el auditor de Oriente pide un movimiento de Norte (#60) → igual que inexistente
+          404 · MOVIMIENTO_NO_ENCONTRADO
+IGUAL   7. Tenant: un id que no existe
+          404 · MOVIMIENTO_NO_ENCONTRADO
+IGUAL   8. Filtro no soportado
+          422 · FILTRO_NO_SOPORTADO · campos=[color]
+IGUAL   9. Rango invertido
+          422 · DATOS_INVALIDOS · campos=[desde]
+IGUAL  10. Sin rango
+          422 · DATOS_INVALIDOS · campos=[desde]
+IGUAL  11. Cursor manipulado
+          422 · DATOS_INVALIDOS · campos=[cursor]
+IGUAL  12. El auditor pide la red (su token es de Oriente)
+          403 · TENANT_NO_COINCIDE
+IGUAL  13. El auditor intenta verificar
+          403 · ACCESO_DENEGADO
+IGUAL  14. Sin token
+          401 · NO_AUTENTICADO
+IGUAL  15. Inmutable: DELETE de un movimiento
+          405 · METODO_NO_PERMITIDO
+IGUAL  16. Super admin: consulta de red, solo verificaciones de hoy (aún ninguna)
+          200 · 0 filas
+IGUAL  17. Super admin: verifica Oriente
+          200 · INTEGRA  64
+IGUAL  18. Error crítico: verifica Norte (falta la fila de secuencia 2)
+          200 · ALTERADA 2 1
+IGUAL  19. Ancla con formato inválido
+          400 · FORMATO_INVALIDO · campos=[ancla]
+IGUAL  20. Norte con un ancla más adelante: la ruptura se informa primero → ALTERADA
+          200 · ALTERADA 2 1
+IGUAL  21. Oriente con un ancla más adelante que la cadena → TRUNCADA
+          200 · TRUNCADA 999 64
+IGUAL  22. Semana 12: ¿quién vio la ficha P-000001? (auditor)
+          200 · 3 filas · corregidos=55→56
+IGUAL  23. Semana 12: recurso vacío
+          422 · DATOS_INVALIDOS · campos=[recurso]
+IGUAL  24. Semana 12: recurso de 129 caracteres
+          422 · DATOS_INVALIDOS · campos=[recurso]
+IGUAL  25. Semana 12: la ficha P-000900 de Norte, vista desde la red (una fila fue borrada)
+          200 · 3 filas
+IGUAL  26. Super admin: ahora la red muestra las verificaciones
+          200 · 4 filas
+
+Pasos: 26 + semilla  Diferencias: 0

@@ -1,0 +1,1 @@
+Mostrar POST/GET y propiedad de datos. Diferenciar invariantes actuales de propuestas de identidad/tenant/idempotencia. Explicar timeout posterior a commit y reintento con misma clave, reautorización y retención. Defender no extraer microservicio sin mediciones y evitar doble escritura. Mostrar OpenAPI validado, regresiones y plan de issues sin atribuir implementación pendiente.

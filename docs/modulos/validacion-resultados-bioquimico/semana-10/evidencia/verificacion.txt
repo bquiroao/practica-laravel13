@@ -1,0 +1,15 @@
+PASS 01-bandeja-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 01-bandeja-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 01-bandeja-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-revision-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-revision-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 02-revision-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-rechazo-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-rechazo-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 03-rechazo-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-confirmacion-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-confirmacion-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 04-confirmacion-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-320.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-375.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.
+PASS 05-recuperacion-430.svg: XML valido; texto dentro del lienzo, Arial/System.Drawing.

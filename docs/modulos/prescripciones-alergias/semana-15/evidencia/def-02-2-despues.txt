@@ -1,0 +1,9 @@
+$ php tests/ejecutar.php --solo=CB      # DESPUÉS de corregir DEF-02 (EmitirPrescripcion::reintento compara también el prescriptor)
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles) ==
+[PASA ] CB-01    Caminos básicos de EmitirPrescripcion: V(G) = 14, 14 caminos independientes C1..C14, cada uno con su salida
+[PASA ] CB-02    MC/DC: «!evaluado && !confirma», «justificación < 20 || !override» y «misma huella && mismo prescriptor»: cada condición cambia la salida sola
+[PASA ] CB-03    Caminos y ramas de AnularPrescripcion: sin permiso, inexistente, ya anulada, motivo corto, anulada, carrera (YaAnulada), base caída y traza que falla
+
+Total: 3  Pasan: 3  Fallan: 0  Omitidas: 0

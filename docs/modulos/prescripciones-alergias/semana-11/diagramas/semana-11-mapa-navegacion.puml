@@ -1,0 +1,69 @@
+@startuml semana-11-mapa-navegacion
+!pragma layout smetana
+title Mapa de navegación del prototipo de Prescripciones (la URL solo lleva la pantalla y, en el detalle, el número)
+skinparam defaultFontSize 11
+skinparam state {
+  BackgroundColor #EEF4FB
+  BorderColor #3D4F6B
+}
+
+[*] --> Ingresar
+state "Ingresar\nruta ~#/ingresar" as Ingresar
+state "Nueva prescripción (W1)\nruta ~#/prescribir\npaciente + franja de alergias + ítems\n(solo prescripcion.emitir)" as Prescribir
+state "Verificación de alergias (W2)\nruta ~#/verificacion\nSIN_HALLAZGOS · ADVERTENCIA · BLOQUEO\nSIN REGISTROS · NO DISPONIBLE" as Verificacion
+state "Emisión (W4)\nruta ~#/emision\nemitida · rechazada (alergia nueva)\nno emitida (503) · INCIERTO" as Emision #FDECEC
+state "Consultar (W5)\nruta ~#/consultar\npor número" as Consultar
+state "Prescripción (W5)\nruta ~#/prescripcion/{n}" as Detalle
+state "Más\nruta ~#/mas\n(sesión y simulación)" as Mas
+
+state "Hoja: Emitir con advertencia\n(con override)" as HJust #FFF4E5
+state "Hoja: No puede autorizar (M-07)\n(sin override)" as HSin #FFF4E5
+state "Hoja: Confirmar con el paciente" as HConf #FFF4E5
+state "Hoja: Anular (W6)" as HAnular #FFF4E5
+state "Hoja: No sabemos si se anuló" as HAnInc #FFF4E5
+state "Diálogo: Su sesión venció\n(sobre cualquier pantalla)" as DSesion #FFF4E5
+
+Ingresar --> Prescribir : médico
+Ingresar --> Consultar : farmacia
+Prescribir --> Prescribir : 422 DATOS_INVALIDOS / DOSIS_EXCEDE_MAXIMO\n→ resumen de errores
+Prescribir --> Verificacion : Verificar alergias
+Verificacion --> Prescribir : ‹ · Cambiar medicamento
+Verificacion --> Emision : Emitir (SIN_HALLAZGOS)
+Verificacion --> HJust : Justificar y emitir
+Verificacion --> HSin : Justificar y emitir
+Verificacion --> HConf : Confirmar con el paciente
+HJust --> Emision : Emitir con justificación
+HJust --> Verificacion : Volver / Esc
+HSin --> Prescribir : Cambiar medicamento
+HSin --> Verificacion : Volver / Esc
+HConf --> Emision : Emitir (marcada)
+Emision --> Emision : Reintentar (la MISMA Idempotency-Key)
+Emision --> Prescribir : Cambiar medicamento (borrador intacto)
+Emision --> Detalle : Ver prescripción
+Prescribir --> Emision : INCIERTO: borrador bloqueado\n→ «Resolver la emisión»
+Consultar --> Detalle : Abrir #n
+Detalle --> Consultar : ‹
+Detalle --> HAnular : Anular (solo prescripcion.anular)
+HAnular --> HAnular : 422 MOTIVO_REQUERIDO
+HAnular --> Detalle : 200 → ANULADA
+HAnular --> HAnInc : la respuesta se pierde
+HAnInc --> Detalle : Reintentar → 409 → consulta\n«Su anulación quedó registrada»
+Prescribir --> Mas : nav «Más»
+Mas --> Ingresar : Cerrar sesión
+Verificacion --> DSesion : 401 en cualquier petición
+DSesion --> Verificacion : Renovar sesión\n(se repite la MISMA petición)
+DSesion --> Ingresar : Salir
+
+note right of HAnInc
+  Camino feliz (01 → 13):
+  Dr. López, P-002: borrador → dosis excedida → ADVERTENCIA
+  → justifica → sesión vence → renueva → #1 emitida
+  → farmacia la abre por número
+  Error crítico (14 → 17):
+  P-005 sin conflictos → enfermería registra una alergia
+  → Emitir: el servidor vuelve a verificar → 422 BLOQUEO_ALERGIA
+  → borrador intacto con el ítem marcado
+  Recuperación (18 → 23): respuesta perdida → INCIERTO
+  → misma clave → YA_EMITIDA (una sola) · anular con corte → reconciliado
+end note
+@enduml

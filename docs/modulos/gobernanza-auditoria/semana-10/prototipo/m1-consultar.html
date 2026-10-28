@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultar la bitácora · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: base (auditor) · red (super admin, «Toda la red» marcada) · confirmar-red · error · sin-conexion -->
+<header class="barra">
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual" data-estado="base error sin-conexion">Auditor</span>
+  <span class="rol-actual" data-estado="red confirmar-red">Super admin</span>
+  <span class="avatar" role="img" aria-label="Auditor de oriente" data-estado="base error sin-conexion">AO</span>
+  <span class="avatar" role="img" aria-label="Super administrador" data-estado="red confirmar-red">SA</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Para consultar la bitácora hace falta conexión.
+</div>
+
+<main>
+  <div class="fila">
+    <h1>Bitácora</h1>
+    <!-- semana 9, B-12: «?» es un botón con nombre y estado -->
+    <button class="btn texto icono derecha" aria-label="Ayuda sobre la bitácora" aria-expanded="false">?</button>
+  </div>
+  <p class="aviso-registro"><span aria-hidden="true">ⓘ</span> Su consulta queda registrada: quién, cuándo y con qué filtros.</p>
+
+  <form aria-label="Filtros de la bitácora" onsubmit="return false">
+    <p class="obligatorio">* obligatorio</p>
+    <!-- Rango obligatorio (R-06): tres atajos para no teclear fechas en el teléfono -->
+    <fieldset class="rangos">
+      <legend>Período *</legend>
+      <label><input type="radio" name="rango" checked> Hoy</label>
+      <label><input type="radio" name="rango"> Ayer</label>
+      <label><input type="radio" name="rango"> 7 días</label>
+      <label><input type="radio" name="rango"> Otro</label>
+    </fieldset>
+    <div class="dos">
+      <div>
+        <label for="desde">Desde *</label>
+        <input id="desde" type="date" value="2026-10-21" aria-required="true" aria-describedby="fechas-ayuda">
+      </div>
+      <div>
+        <label for="hasta">Hasta *</label>
+        <input id="hasta" type="date" value="2026-10-21" aria-required="true" aria-describedby="fechas-ayuda">
+      </div>
+    </div>
+    <p class="error" id="desde-error" data-estado="error">Desde no puede ser posterior a hasta.</p>
+    <p class="ayuda" id="fechas-ayuda">Día/mes/año, hora de Guatemala. «Hasta» incluye el día completo.</p>
+
+    <!-- Solo con auditoria.consultar_red. Marcar NO abre nada (semana 9, B-01). -->
+    <fieldset class="alcance" data-estado="red confirmar-red">
+      <legend>Alcance</legend>
+      <label class="opcion"><input type="radio" name="alcance"> Hospital Regional de Oriente</label>
+      <label class="opcion"><input type="radio" name="alcance" checked> Toda la red</label>
+    </fieldset>
+
+    <!-- Filtros opcionales plegados: carga cognitiva mínima en 320 px -->
+    <details class="mas">
+      <summary>Más filtros (usuario, módulo, acción, resultado)</summary>
+      <label for="usuario">Usuario</label>
+      <input id="usuario" type="text" autocomplete="off" placeholder="Ej. u-ana">
+      <label for="modulo">Módulo</label>
+      <select id="modulo"><option>Todos</option><option>pacientes</option><option>rbac</option></select>
+      <label for="accion">Acción</label>
+      <select id="accion"><option>Todas</option><option>Consulta de paciente</option><option>Registro de paciente</option><option>Asignación de rol</option></select>
+      <label for="resultado">Resultado</label>
+      <select id="resultado"><option>Todos</option><option>Éxito</option><option>Denegado</option><option>Error</option></select>
+    </details>
+  </form>
+</main>
+
+<div class="accion-fija">
+  <button class="btn" data-estado="base red error">Restablecer</button>
+  <a class="btn primario" href="m2-resultados.html" data-estado="base error">Buscar</a>
+  <a class="btn primario" href="m1-consultar.html?estado=confirmar-red" data-estado="red">Buscar en toda la red</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">Buscar · requiere conexión</span>
+</div>
+
+<!-- Confirmación de red al BUSCAR (semana 9, B-01): hoja inferior; Cancelar abajo, donde cae el pulgar -->
+<div class="velo" data-estado="confirmar-red"></div>
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-red" data-estado="confirmar-red">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-red">¿Consultar toda la red?</h2>
+  <p>Va a ver los movimientos de <strong>todos los hospitales</strong> del 21/10/2026. La consulta queda registrada en la cadena de red con su usuario.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m2-resultados.html?estado=red">Consultar la red</a>
+    <a class="btn" href="m1-consultar.html?estado=red" autofocus>Cancelar</a>
+  </div>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-consultar.html" aria-current="page"><span class="ico" aria-hidden="true">📋</span>Bitácora</a>
+  <a href="m4-verificar.html" data-estado="red confirmar-red"><span class="ico" aria-hidden="true">🛡</span>Integridad</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+<script>
+  // Estado «error» (422 del servidor, M-02): un solo campo, marcado y con el foco (semana 9, B-07 y H-09)
+  if (document.body.dataset.estadoActual === 'error') {
+    const d = document.getElementById('desde');
+    d.value = '2026-10-25'; d.setAttribute('aria-invalid', 'true'); d.setAttribute('aria-describedby', 'desde-error fechas-ayuda'); d.focus();
+  }
+</script>
+</body>
+</html>

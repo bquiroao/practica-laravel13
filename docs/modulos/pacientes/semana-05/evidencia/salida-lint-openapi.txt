@@ -1,0 +1,5 @@
+No configurations were provided -- using built in recommended configuration by default.
+validating api\openapi.yaml...
+api\openapi.yaml: validated in 59ms
+Woohoo! Your API description is valid. 🎉
+(Redocly CLI 1.34.3. Al terminar, Node 24 en Windows imprime un aviso interno de libuv «Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)» que no forma parte del resultado del lint.)

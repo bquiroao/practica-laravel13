@@ -1,0 +1,30 @@
+OK    [memoria] CA-01 cita m1/p1 en [2000,3000) = aceptada
+OK    [memoria] CA-02 cita en el pasado = E2
+OK    [memoria] CA-02 fin antes del inicio = E2
+OK    [memoria] CA-02 sin motivo = E2
+OK    [memoria] CA-03 médico ocupado (m1, otro paciente) = E4
+OK    [memoria] CA-04 paciente ocupado (otro médico, p1) = E5
+OK    [memoria] CA-05 m1/p2 justo al terminar [3000,4000) = aceptada
+OK    [memoria] CA-06 cancelar cita 1 sin motivo = E2
+OK    [memoria] CA-06 cancelar cita 1 con motivo = aceptada
+OK    [memoria] CA-07 cancelar otra vez la cita 1 = E7
+OK    [memoria] CA-08 el horario liberado se puede usar = aceptada
+OK    [memoria] CA-07 cancelar cita inexistente = NF
+OK    [memoria] auditoría con el motivo de cancelación
+OK    [PDO/SQLite] CA-01 cita m1/p1 en [2000,3000) = aceptada
+OK    [PDO/SQLite] CA-02 cita en el pasado = E2
+OK    [PDO/SQLite] CA-02 fin antes del inicio = E2
+OK    [PDO/SQLite] CA-02 sin motivo = E2
+OK    [PDO/SQLite] CA-03 médico ocupado (m1, otro paciente) = E4
+OK    [PDO/SQLite] CA-04 paciente ocupado (otro médico, p1) = E5
+OK    [PDO/SQLite] CA-05 m1/p2 justo al terminar [3000,4000) = aceptada
+OK    [PDO/SQLite] CA-06 cancelar cita 1 sin motivo = E2
+OK    [PDO/SQLite] CA-06 cancelar cita 1 con motivo = aceptada
+OK    [PDO/SQLite] CA-07 cancelar otra vez la cita 1 = E7
+OK    [PDO/SQLite] CA-08 el horario liberado se puede usar = aceptada
+OK    [PDO/SQLite] CA-07 cancelar cita inexistente = NF
+OK    [PDO/SQLite] auditoría con el motivo de cancelación
+OK    ServicioCitas depende solo de interfaces: AgendaCitas, Reloj, Auditoria
+OK    ServicioCitasAntes no recibe dependencias: las crea
+OK    ServicioCitasAntes usa new PDO() y time() directamente
+RESULTADO: todo correcto

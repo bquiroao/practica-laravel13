@@ -1,0 +1,18 @@
+@startsalt w6_medico
+{+
+  <b>Mis citas</b> | Rol: Médico
+  --
+  Médico | DOC-001 (usted) <&lock-locked>
+  Desde  | "01/10/2026"
+  Hasta  | "31/10/2026"
+  [Calcular]
+  --
+  {+ <size:22><b>3 citas</b></size> | Asistencia 66,7 % }
+  {#
+    Estado | Citas
+    Atendidas | 1
+    No asistió | 1
+    Programadas | 1
+  }
+}
+@endsalt

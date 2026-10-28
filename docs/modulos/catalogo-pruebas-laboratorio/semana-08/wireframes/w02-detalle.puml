@@ -1,0 +1,23 @@
+@startsalt w02-detalle
+title W-02 Detalle de prueba con requisitos de muestra
+{+
+  {/ <b>Laboratorio</b> | Catálogo › GLU-001 }
+  ==
+  <b>GLU-001 — Glucosa en ayunas</b> (versión 1)
+  Sección: Química clínica · Tiempo de respuesta: 2 h
+  ..
+  {+
+    <b>Requisitos de muestra</b>
+    Tipo de muestra | Plasma
+    Contenedor | Tubo tapa gris (fluoruro)
+    Volumen mínimo | 2 mL
+    Preparación | Ayuno 8 h. Solo agua durante el ayuno.
+    Conservación | Refrigerada 2–8 °C · Estabilidad 24 h
+  }
+  ..
+  Vigencia: desde 2027-01-04 hasta 2027-01-31 (hay versión 2 desde 2027-02-01)
+  [Volver al catálogo] | [Ver versión del 2027-02-01]
+  ..
+  Si no está vigente: <&warning> "GLU-001 no está vigente el 2027-01-03; vigente desde 2027-01-04."
+}
+@endsalt

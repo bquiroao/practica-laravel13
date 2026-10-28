@@ -1,0 +1,80 @@
+@startuml semana-01-actividad
+title Actividad — CU-01 Registrar toma (incluye CU-02, CU-03 y CU-04)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam ActivityBackgroundColor #EEF2F7
+skinparam ActivityBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+
+|Enfermero(a)|
+start
+:A1 Abre la captura del paciente
+y escribe los signos con su unidad;
+:A2 Confirma y envía la toma;
+|Sistema (módulo)|
+if (D1 ¿Sesión válida, rol de enfermería\ny mismo hospital del paciente?) then (no)
+  #FFE3D6:E1 Rechaza: 401 sin sesión
+  o 403 sin permiso. No guarda nada;
+  stop
+else (sí)
+endif
+if (D2 ¿Paciente con episodio\nde atención activo?) then (no)
+  #FFE3D6:E2 Rechaza: 409 episodio
+  no disponible. No guarda nada;
+  stop
+else (sí)
+endif
+if (D3 ¿Cada medición tiene valor, unidad\nválida y es físicamente posible? [CU-02]) then (no)
+  #FFE3D6:E3 Rechaza la toma completa: 422
+  y marca el campo (ej. FC 400 lpm);
+  |Enfermero(a)|
+  :A3 Corrige y vuelve a A1;
+  stop
+else (sí)
+endif
+|Sistema (módulo)|
+:A4 Calcula la edad del paciente
+a la fecha de la toma;
+while (A5 ¿Quedan mediciones por evaluar? [CU-03]) is (sí)
+  if (D4 ¿Hay rango cargado\npara esa edad y signo?) then (no)
+    #FFF4CC:E4 Clasifica «sin rango»
+    y lo avisa (no inventa umbral);
+  elseif (D5 ¿Dentro del rango normal?) then (sí)
+    :Clasifica «normal»;
+  elseif (D6 ¿Fuera del rango crítico?) then (sí)
+    :A6 Clasifica «crítica»
+    y prepara alerta crítica [CU-04];
+  else (no)
+    :A7 Clasifica «anormal»
+    y prepara alerta anormal [CU-04];
+  endif
+endwhile (no)
+:A8 Guarda toma, mediciones y alertas
+en una sola transacción;
+if (D7 ¿Se guardó todo?) then (no)
+  #FFE3D6:E5 Responde 500. No queda
+  ni toma ni alerta a medias;
+  stop
+else (sí)
+endif
+if (D8 ¿Hay alerta crítica?) then (sí)
+  |Alertas críticas (M21)|
+  if (¿M21 recibe el aviso?) then (sí)
+    :A9 Notifica al médico
+    tratante y al servicio;
+  else (no)
+    |Sistema (módulo)|
+    #FFF4CC:E6 Deja la alerta «pendiente de envío»
+    y reintenta. La toma ya está guardada;
+  endif
+else (no)
+endif
+|Sistema (módulo)|
+:R Responde 201 con la clasificación
+de cada medición y las alertas creadas;
+|Enfermero(a)|
+:A10 Ve el resultado resaltado
+(rojo crítica, ámbar anormal);
+stop
+@enduml

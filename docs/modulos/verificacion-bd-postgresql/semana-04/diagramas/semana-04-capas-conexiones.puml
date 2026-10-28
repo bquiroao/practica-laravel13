@@ -1,0 +1,48 @@
+@startuml semana-04-capas-conexiones
+title Semana 4 — Capas del SHI y acceso de la persistencia a cada conexión (hoy y propuesta con Repository)
+hide empty members
+skinparam packageStyle rectangle
+package "Presentación (Laravel 12, develop)" #EEF2F7 {
+  class "routes/api.php" as Rutas
+  class TenantMiddleware <<hoy>>
+  class AuthController <<hoy>>
+}
+package "Aplicación (propuesta)" #E8F5E9 {
+  class "RegistrarPaciente\nBuscarPaciente\nSincronizarConCentral" as Casos
+  interface RepositorioPacientes <<Repository>> {
+    porId · porCodigo · porGlobalId
+    buscarPorApellido · pendientesDeVinculo
+    registrar · marcarVinculo
+  }
+  interface IndiceMaestroPacientes <<puerto>>
+}
+class "PacienteLocal\nEstadoVinculo" as Dom <<Dominio>> #FFF8E1
+package "Persistencia / infraestructura" #FCE4EC {
+  class PdoRepositorioPacientes <<propuesta>>
+  class "Adaptador índice maestro" as AdMpi <<pendiente>>
+  class "App\\Models\\User · App\\Models\\Tenant" as Modelos <<no existen (H-06)>> #FFCDD2
+  class "config/database.php\ncentral · hospital (por defecto)" as Config
+  class "Migraciones\ncentral/ y hospital/: $connection fijo\nframework/: sin $connection" as Mig
+}
+database "his_central (CENTRAL)" as BC {
+  class "hospitals · central_users · hospital_memberships\nmpi_patients · mpi_identifiers · sync" as TC
+}
+database "his_hospital (HOSPITAL)" as BH {
+  class "local_patients · care_episodes · beds · bed_stays …\n+ sessions · cache · jobs (framework)" as TH
+}
+Rutas --> TenantMiddleware
+Rutas --> AuthController
+TenantMiddleware ..> Modelos : Tenant::find
+AuthController ..> Modelos : User::query
+Modelos ..> Config : conexión por defecto
+Casos --> RepositorioPacientes
+Casos --> IndiceMaestroPacientes
+RepositorioPacientes ..> Dom
+PdoRepositorioPacientes .up.|> RepositorioPacientes
+AdMpi .up.|> IndiceMaestroPacientes
+PdoRepositorioPacientes --> Config : DB::connection('hospital')
+AdMpi --> Config : DB::connection('central')
+Mig --> Config
+Config --> BC : central
+Config --> BH : hospital
+@enduml

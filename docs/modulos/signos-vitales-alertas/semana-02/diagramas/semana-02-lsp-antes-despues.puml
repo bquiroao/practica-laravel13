@@ -1,0 +1,55 @@
+@startuml semana-02-lsp-antes-despues
+title LSP en «evaluación de umbrales»: antes (herencia que rompe el contrato) y después (contrato único)
+skinparam defaultFontName Arial
+skinparam classBackgroundColor #EEF2F7
+skinparam classBorderColor #3D4F6B
+skinparam ArrowColor #3D4F6B
+hide empty members
+
+package "DESPUÉS" #F2FFF5 {
+  interface ReglaDeUmbral
+  note right of ReglaDeUmbral
+    Pre: medición físicamente posible; rango puede faltar
+    Post: siempre una Clasificacion; sin rango → SinRango;
+    debajo del crítico → Critica. No lanza, sin efectos.
+  end note
+  class ReglaPorIntervalo
+  class ReglaLimiteInferior
+  class ValidadorLimitesFisicos << CU-02 >>
+  class EvaluadorUmbrales << CU-03 >>
+  class GeneradorAlertas << CU-04 >>
+  enum Clasificacion
+  ReglaDeUmbral <|.. ReglaPorIntervalo
+  ReglaDeUmbral <|.. ReglaLimiteInferior
+  EvaluadorUmbrales o--> "1..*" ReglaDeUmbral : solo la interfaz
+  EvaluadorUmbrales ..> Clasificacion
+  GeneradorAlertas ..> Clasificacion
+}
+ReglaDeUmbral : +clasificar(Medicion, ?RangoSigno): Clasificacion
+ReglaPorIntervalo : PAS, PAD, FC, FR, temperatura
+ReglaLimiteInferior : saturación de oxígeno
+ValidadorLimitesFisicos : +invalidas(mediciones): string[]
+EvaluadorUmbrales : +evaluar(mediciones, rangos)
+GeneradorAlertas : +alertas(clasificaciones)
+Clasificacion : Normal\nAnormal\nCritica\nSinRango
+package "ANTES" #FFF6F2 {
+  class EvaluadorSigno
+  class EvaluadorPresion #FFE3D6
+  class EvaluadorSaturacion #FFE3D6
+  class EvaluadorTemperatura #FFE3D6
+  class "evaluarToma()" as ClienteA << cliente >>
+  EvaluadorSigno <|-- EvaluadorPresion
+  EvaluadorSigno <|-- EvaluadorSaturacion
+  EvaluadorSigno <|-- EvaluadorTemperatura
+  ClienteA ..> EvaluadorPresion : conoce la subclase
+  ClienteA ..> EvaluadorSigno
+}
+EvaluadorSigno : +evaluar(valor): string
+EvaluadorPresion : +evaluar(valor): **lanza LogicException** (V1)
+EvaluadorPresion : +evaluarPresion(s, d)
+EvaluadorSaturacion : +evaluar(valor): **lanza sin rango** (V2)
+EvaluadorTemperatura : +evaluar(valor): **«revisar_termometro»** (V3)
+ClienteA : instanceof + try/catch
+
+EvaluadorTemperatura -[hidden]down- EvaluadorUmbrales
+@enduml

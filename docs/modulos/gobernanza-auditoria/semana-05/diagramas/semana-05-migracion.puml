@@ -1,0 +1,16 @@
+@startuml semana-05-migracion
+!pragma layout smetana
+title Migración razonada (estrangulamiento): solo se avanza de fase si se cumple el criterio medible
+skinparam defaultFontSize 11
+skinparam rectangleBorderColor #2F5D8A
+
+rectangle "Fase 0 — HOY\nMódulo dentro del monolito Laravel\ndetrás del puerto Bitacora\naudit_logs en la base central" as F0 #E8F5E9
+rectangle "Fase 1\nEmisores publican en central_inbox_messages\nconsumidor de auditoría en el mismo despliegue\n(sin llamadas síncronas desde la atención)" as F1 #F5F9FF
+rectangle "Fase 2\nAPI REST del contrato 1.0.0 expuesta\npara herramientas de gobernanza\n(lecturas por HTTP; escrituras siguen asíncronas)" as F2 #F5F9FF
+rectangle "Fase 3 — SOLO SI C-1..C-5\nServicio desplegado aparte, con su base\ny su rol app_auditoria; el monolito ya no toca audit_logs" as F3 #FFF8E1
+
+F0 -right-> F1 : criterio: >1 módulo emisor real\n(evita llamadas síncronas)
+F1 -right-> F2 : criterio: UI de gobernanza (semana 8+)
+F2 -down-> F3 : C-1 volumen > 50 mov/s sostenido\nC-2 p95 de consulta > 500 ms con índices\nC-3 auditoría externa exige separación\nC-4 despliegues frenados por el monolito\nC-5 equipo propio para operarlo
+F3 -[dashed]-> F2 : volver atrás: el puerto y el contrato\nno cambian (reversible)
+@enduml

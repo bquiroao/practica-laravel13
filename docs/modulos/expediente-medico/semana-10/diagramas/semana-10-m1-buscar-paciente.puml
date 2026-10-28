@@ -1,0 +1,19 @@
+@startsalt
+title M1 — Buscar paciente (admisión, 320 px)
+{+
+  [≡ Menú] | <b>Expedientes</b>
+  "López   " | [Buscar]
+  <i>2 pacientes activos</i>
+  ---
+  {+
+    <b>M. López</b> (ficticio) · nac. 1990
+    Documento terminado en 4521
+    [Crear expediente]
+  }
+  {+
+    <b>M. López Ruiz</b> (ficticio) · nac. 1972
+    Documento terminado en 0987
+    [Ver expediente HC-000123]
+  }
+}
+@endsalt

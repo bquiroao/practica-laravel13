@@ -1,0 +1,20 @@
+@startsalt w03-alta
+title W-03 Alta de prueba (Jefe de laboratorio)
+{+
+  {/ <b>Laboratorio</b> | Catálogo › Nueva prueba }
+  ==
+  <b>1. Datos generales</b>
+  { Código (AAA-000) | "GLU-001" | Nombre | "Glucosa en ayunas" }
+  { Sección | ^Química clínica^ | Tiempo de respuesta (h) | "2" }
+  <b>2. Requisitos de muestra</b>
+  { Tipo de muestra | ^Plasma^ | Contenedor | "Tubo tapa gris" }
+  { Volumen mínimo (mL) | "0" | <&circle-x> "Debe ser mayor que 0 mL." }
+  { Ayuno (h) | "8" | Instrucciones | "Solo agua" }
+  { Conservación | ^Refrigerada^ | Estabilidad (h) | "24" | <&info> ¿Qué es? }
+  <b>3. Vigencia</b>
+  { Desde | "2027-02-01" | Hasta (opcional) | "          " | <&info> Un cambio crea una versión nueva }
+  ..
+  "Hay 1 campo con error. Corríjalo para continuar." (resumen al inicio, enlazado al campo)
+  [Cancelar] | [Revisar y confirmar]
+}
+@endsalt

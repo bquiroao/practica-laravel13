@@ -1,0 +1,68 @@
+@startuml semana-04-repositorio
+!pragma layout smetana
+title Patrón Repository: el puerto en el Dominio, dos adaptadores y una suite de contrato
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #F5F9FF
+skinparam classBorderColor #2F5D8A
+
+package "Dominio (define el contrato)" {
+  interface Bitacora <<Repository>> {
+    + agregar(Movimiento) : Movimiento
+    + bloquearCadena(?hospital)
+    + porEvento(emisor, eventId) : ?Movimiento
+    + porId(id) : ?Movimiento
+    + ultimo(?hospital) : ?Movimiento
+    + buscar(ConsultaMovimientos) : list
+    + cadena(?hospital) : list
+    .. sin actualizar() ni eliminar() ..
+  }
+}
+package "Aplicación" {
+  interface Transaccion <<puerto>> {
+    + ejecutar(callable) : mixed
+  }
+  class CadenaSellada
+  class "Casos de uso ×4" as CU
+}
+package "Persistencia" {
+  class PdoBitacora <<adaptador PostgreSQL>>
+  class PdoTransaccion
+  class BitacoraEnMemoria <<adaptador InMemory\nde PRODUCCIÓN>>
+  class TransaccionEnMemoria
+  interface Restaurable
+  class FabricaAdaptadores {
+    + crear(config) : ConjuntoAdaptadores
+    + enMemoria() / pdo(PDO)
+  }
+  class ConjuntoAdaptadores
+}
+package "tests" #FFF8E1 {
+  class "ContratoBitacoraPrueba\nCON-MEM-01..08 · CON-PDO-01..08" as Contrato
+  class BitacoraConFallas <<decorador de prueba>>
+}
+
+CU --> Bitacora
+CU --> Transaccion
+CadenaSellada --> Bitacora
+Bitacora <|.. PdoBitacora
+Bitacora <|.. BitacoraEnMemoria
+Transaccion <|.. PdoTransaccion
+Transaccion <|.. TransaccionEnMemoria
+Restaurable <|.. BitacoraEnMemoria
+TransaccionEnMemoria --> Restaurable
+FabricaAdaptadores ..> ConjuntoAdaptadores
+ConjuntoAdaptadores o-- Bitacora
+ConjuntoAdaptadores o-- Transaccion
+Contrato ..> PdoBitacora : las mismas 8 verificaciones
+Contrato ..> BitacoraEnMemoria : las mismas 8 verificaciones
+BitacoraConFallas ..|> Bitacora
+BitacoraConFallas o-- BitacoraEnMemoria : decora (fallas, candados, alteraciones)
+
+note right of Bitacora
+  ¿Por qué el límite está en el DOMINIO?
+  Lo que la bitácora necesita (cadena, último sello,
+  idempotencia, consulta por alcance) es vocabulario
+  del dominio, no de SQL. El caso de uso no sabe si
+  hay PostgreSQL o memoria detrás.
+end note
+@enduml

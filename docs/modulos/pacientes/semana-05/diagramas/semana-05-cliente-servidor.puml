@@ -1,0 +1,28 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title Cliente-servidor del módulo Pacientes (ASII-03)
+
+Person(personal, "Personal del hospital", "Admisión, clínico, supervisor.")
+
+System_Boundary(his, "HIS — un despliegue (monolito modular)") {
+    Container(spa, "SPA Vue", "Cliente de usuario", "Formularios de registro/búsqueda. Guarda el ETag para enviarlo en If-Match. No decide reglas.")
+    Container(gateway, "API Gateway (ASII-30)", "Intermediario", "TLS, rate limiting, propaga X-Request-ID.")
+    Container(pacientes, "Módulo Pacientes", "PHP · MVC + capas", "Contrato api/openapi.yaml. Idempotency-Key, ETag/If-Match/If-None-Match, X-Request-ID, registro de acceso.")
+    Container(admision, "Admisión · Citas · Laboratorio", "Clientes de servicio", "Usan ClientePacientes: timeout, reintento seguro, circuit breaker, caché ETag.")
+    Container(rbac, "Módulo RBAC (ASII-02)", "PDP", "Decide pacientes.registrar | buscar | leer | editar.")
+    ContainerDb(hosp, "PostgreSQL HOSPITAL", "local_patients + clínico", "Dueño: Pacientes (local_patients). FK desde 4 tablas clínicas.")
+    ContainerDb(central, "PostgreSQL CENTRAL", "MPI", "Dueño: Sincronización (mpi_*). Pacientes solo lee.")
+}
+
+Rel(personal, spa, "Usa")
+Rel(spa, gateway, "REST /api/v1/pacientes", "HTTPS/JSON + Bearer + X-Tenant-ID")
+Rel(gateway, pacientes, "Enruta", "HTTP")
+Rel(admision, pacientes, "GET/POST con ClientePacientes", "en proceso hoy; HTTP si se extrae")
+Rel(pacientes, rbac, "¿Permiso?", "puerto PoliticaAcceso")
+Rel(pacientes, hosp, "Lee y escribe", "PDO, sentencias preparadas")
+Rel(pacientes, central, "Lee duplicados", "solo lectura")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,36 @@
+OK    escritorio 01-ingresar                    axe=0
+OK    escritorio 02-busqueda-vacia              axe=0
+OK    escritorio 03-paso1                       axe=0
+OK    escritorio 03-paso2                       axe=0
+OK    escritorio 05-revision                    axe=0
+OK    escritorio 06-registro-incierto           axe=0
+OK    escritorio 07-ficha-registrada            axe=0
+OK    escritorio 08-editar                      axe=0
+OK    escritorio cambiar el teléfono no pide motivo
+OK    escritorio 09-confirmar                   axe=0
+OK    escritorio Tab ×8 se queda dentro del diálogo
+OK    escritorio 10-ficha-actualizada           axe=0
+OK    escritorio 11-protegida-no-aparece        axe=0
+OK    escritorio 12-ya-registrada-reservado     axe=0
+OK    escritorio 13-supervision-la-encuentra    axe=0
+OK    escritorio 14-ficha-supervision           axe=0
+OK    escritorio 15-ficha-clinico-reducida      axe=0
+OK    movil      01-ingresar                    axe=0 desborde=0 toque<44=0
+OK    movil      02-busqueda-vacia              axe=0 desborde=0 toque<44=0
+OK    movil      03-paso1                       axe=0 desborde=0 toque<44=0
+OK    movil      03-paso2                       axe=0 desborde=0 toque<44=0
+OK    movil      05-revision                    axe=0 desborde=0 toque<44=0
+OK    movil      06-registro-incierto           axe=0 desborde=0 toque<44=0
+OK    movil      07-ficha-registrada            axe=0 desborde=0 toque<44=0
+OK    movil      08-editar                      axe=0 desborde=0 toque<44=0
+OK    movil      cambiar el teléfono no pide motivo
+OK    movil      09-confirmar                   axe=0 desborde=0 toque<44=0
+OK    movil      Tab ×8 se queda dentro del diálogo
+OK    movil      10-ficha-actualizada           axe=0 desborde=0 toque<44=0
+OK    movil      11-protegida-no-aparece        axe=0 desborde=0 toque<44=0
+OK    movil      12-ya-registrada-reservado     axe=0 desborde=0 toque<44=0
+OK    movil      13-supervision-la-encuentra    axe=0 desborde=0 toque<44=0
+OK    movil      14-ficha-supervision           axe=0 desborde=0 toque<44=0
+OK    movil      15-ficha-clinico-reducida      axe=0 desborde=0 toque<44=0
+
+Comprobaciones: 34  Fallan: 0

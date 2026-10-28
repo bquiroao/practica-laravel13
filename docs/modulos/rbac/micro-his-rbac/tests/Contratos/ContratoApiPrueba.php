@@ -96,6 +96,9 @@ prueba('API-03', 'Cada código HTTP que devuelve el servidor en escenarios reale
         ['GET', '/api/v1/auditoria/eventos/' . $cid, 'token-ana', Escenario::H_ORIENTE, null],
         ['POST', '/api/v1/prescripciones', 'token-marta', Escenario::H_ORIENTE, null],
         ['POST', '/api/v1/signos-vitales', 'token-ana', Escenario::H_ORIENTE, null],
+        // Semana 12 — cambio solicitado «permisos efectivos» (B-6)
+        ['POST', '/api/v1/autorizaciones/permisos-efectivos', 'token-ana', Escenario::H_ORIENTE, ['permisos' => ['expediente.leer', 'roles.asignar']]],
+        ['POST', '/api/v1/autorizaciones/permisos-efectivos', 'token-ana', Escenario::H_ORIENTE, ['permisos' => []]],
         // Semana 6 — cambio práctico «revocar rol»
         ['POST', '/api/v1/roles/revocaciones', 'token-ana', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'medico', 'motivo' => 'Traslado a otro hospital']],
         ['POST', '/api/v1/roles/revocaciones', 'token-admin-oriente', Escenario::H_ORIENTE, ['usuario_id' => 'marta', 'rol' => 'enfermeria', 'motivo' => 'Traslado a otro hospital']],
@@ -114,6 +117,6 @@ prueba('API-03', 'Cada código HTTP que devuelve el servidor en escenarios reale
         }
         $vistos++;
     }
-    igual(19, $vistos, 'escenarios ejecutados');
+    igual(21, $vistos, 'escenarios ejecutados');
     afirmar($noDocumentados === [], 'códigos no documentados: ' . implode(', ', $noDocumentados));
 });

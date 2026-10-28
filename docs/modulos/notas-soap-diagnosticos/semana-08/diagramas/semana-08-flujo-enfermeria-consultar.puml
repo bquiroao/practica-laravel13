@@ -1,0 +1,49 @@
+@startuml semana-08-flujo-enfermeria-consultar
+!pragma layout smetana
+title User flow · Enfermería — consultar notas del expediente (solo lectura)
+skinparam ActivityBackgroundColor #F2F8F7
+skinparam ActivityBorderColor #1F6F6B
+skinparam ActivityDiamondBackgroundColor #FFF4E5
+skinparam defaultFontSize 12
+
+|Enfermería|
+start
+:Abre el expediente del paciente · W1;
+|Interfaz|
+:CARGA: filas esqueleto;
+|Servidor Notas SOAP|
+:GET /api/v1/expedientes/{id}/notas-soap
+(resumen: versión, estado, autor, códigos CIE-10);
+|Interfaz|
+if (¿Hay notas?) then (no)
+  :VACÍO M-30 «Este expediente todavía no tiene notas»
+  (sin botón «Nueva nota»);
+  stop
+else (sí)
+endif
+:Línea de tiempo: firmadas y borradores,
+las reemplazadas marcadas «Corregida → vN»;
+note right
+Sin botones de escribir, firmar ni corregir:
+enfermería solo tiene notas_soap.consultar
+end note
+|Enfermería|
+:Filtra por estado o abre una nota;
+|Servidor Notas SOAP|
+:GET /api/v1/notas-soap/{id};
+|Interfaz|
+if (¿Resultado?) then (200)
+  :Detalle de solo lectura · W3
+  con aviso si existe una versión más reciente;
+  stop
+elseif (404) then (no existe)
+  :M-10 y vuelve a la línea de tiempo;
+  detach
+elseif (401 / 400) then (sesión)
+  :M-12 iniciar sesión / M-13 elegir hospital;
+  detach
+else (403)
+  :W5 acceso denegado con referencia (M-11);
+  stop
+endif
+@enduml
