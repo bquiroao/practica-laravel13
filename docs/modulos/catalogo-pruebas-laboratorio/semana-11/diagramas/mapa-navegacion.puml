@@ -1,0 +1,28 @@
+@startuml mapa-navegacion
+title Mapa de navegación del prototipo (rutas #hash)
+hide empty description
+[*] --> Catalogo
+state "#catalogo\nPruebas vigentes" as Catalogo
+state "#detalle/{código}\nDetalle y requisitos" as Detalle
+state "#detalle/{código}\nNo vigente (con enlace a la versión)" as NoVigente
+state "#nueva\nNueva prueba (solo Jefe)" as Nueva
+state "#nueva\nSin permiso (médico / laboratorista)" as SinPermiso
+state "#confirmar\nConfirmación con aviso de cierre" as Confirmar
+state "#exito\nPrueba registrada" as Exito
+state "#nueva + resumen de error\nVigencia superpuesta (error crítico)" as Error409
+
+Catalogo --> Detalle : clic en código (vigente)
+Catalogo --> NoVigente : cambia la fecha antes de la vigencia
+NoVigente --> Detalle : «Ver la versión vigente desde …»
+Catalogo --> Nueva : «Nueva prueba»
+Catalogo --> SinPermiso : rol sin permiso
+Nueva --> Nueva : errores por campo
+Nueva --> Confirmar : «Revisar y confirmar»
+Confirmar --> Nueva : «Volver a editar»
+Confirmar --> Exito : guardado
+Confirmar --> Error409 : fecha desde ≤ la vigente
+Error409 --> Confirmar : corrige la fecha
+Exito --> Detalle : «Ver detalle»
+Exito --> Catalogo
+Detalle --> Catalogo
+@enduml

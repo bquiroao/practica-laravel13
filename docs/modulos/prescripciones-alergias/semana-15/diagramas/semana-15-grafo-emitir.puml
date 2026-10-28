@@ -1,0 +1,64 @@
+@startuml semana-15-grafo-emitir
+!pragma layout smetana
+title Grafo de flujo de EmitirPrescripcion (ejecutar → emitir → reintento / rechazo / guardar) · V(G) = 13 decisiones + 1 = 14
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #EDF4F5
+skinparam ActivityDiamondBackgroundColor #FFF4E5
+skinparam ActivityBorderColor #0F4C5C
+
+start
+if (D1 · ¿base disponible?\n(catch ErrorPersistencia en ejecutar)) then (no)
+  #FDECEC:C14 · 503 ERROR_PERSISTENCIA;
+  stop
+endif
+if (D2 · ¿permiso prescripcion.emitir?) then (no)
+  #FDECEC:C1 · 403 PERMISO_DENEGADO;
+  stop
+endif
+if (D3 · ¿ya existe la clave en el hospital?) then (sí)
+  if (D4 · ¿misma huella?) then (no)
+    #FFF4E5:C3 · 409 CLAVE_REUTILIZADA;
+    stop
+  elseif (D5 · ¿mismo prescriptor?\n(semana 15, DEF-02)) then (no)
+    #FFF4E5:C4 · 409 CLAVE_REUTILIZADA;
+    stop
+  else (sí)
+    #E7F4EC:C2 · 200 YA_EMITIDA;
+    stop
+  endif
+endif
+if (D6 · ¿paciente del hospital?) then (no)
+  #FDECEC:C5 · 404 NO_ENCONTRADO;
+  stop
+endif
+if (D7 · ¿responde el Expediente?) then (no)
+  #FDECEC:C6 · 503 VERIFICACION_NO_DISPONIBLE\n+ traza aparte;
+  stop
+endif
+if (D8 · ¿datos y dosis válidos?) then (no)
+  #FFF4E5:C7 · 422 DATOS_INVALIDOS / DOSIS_EXCEDE_MAXIMO;
+  stop
+endif
+if (D9 · ¿la política permite emitir?) then (no)
+  if (D10 · ¿BLOQUEADA?) then (sí)
+    #FDECEC:C8 · 422 BLOQUEO_ALERGIA(_CRUZADA)\n+ traza aparte;
+    stop
+  elseif (D11 · ¿REQUIERE_CONFIRMACION?) then (sí)
+    #FFF4E5:C9 · 422 CONFIRMACION_REQUERIDA;
+    stop
+  else (requiere justificación)
+    #FFF4E5:C10 · 409 JUSTIFICACION_REQUERIDA;
+    stop
+  endif
+endif
+if (D12 · ¿guardar sin ClaveEnUso?) then (sí)
+  #E7F4EC:C11 · 201 EMITIDA (prescripción + traza);
+  stop
+elseif (D13 · ¿se encuentra la ganadora?) then (sí)
+  #E7F4EC:C12 · se trata como reintento → 200 YA_EMITIDA;
+  stop
+else (no)
+  #FFF4E5:C13 · 409 CLAVE_REUTILIZADA;
+  stop
+endif
+@enduml

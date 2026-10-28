@@ -1,0 +1,1 @@
+IA utilizada para integrar documentación API propia, revisar continuidad, preparar defensa y cambio de permiso, y ejecutar pruebas/regresiones. La estudiante revisa y defiende decisiones. No hay jurado, revisión independiente, API desplegada ni runtime NativePHP ejecutado. Resultados de coordinación provienen de dobles explícitos.

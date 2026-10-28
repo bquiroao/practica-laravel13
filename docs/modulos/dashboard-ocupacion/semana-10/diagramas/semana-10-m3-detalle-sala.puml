@@ -1,0 +1,15 @@
+@startsalt
+title M3 — Sala A en el corte de las 10:35
+{+
+  [< Ocupación] | <b>A · Medicina interna</b>
+  <b>54.5 %</b> ocupación baja
+  <i>ocupadas ÷ (disponibles + ocupadas) = 6 ÷ 11</i>
+  ---
+  Disponibles | <b>5</b>
+  Ocupadas | <b>6</b>
+  Mantenimiento | 1
+  Inactivas | 0
+  ---
+  <i>Mantenimiento e inactivas no cuentan (R-01).</i>
+}
+@endsalt

@@ -1,0 +1,17 @@
+@startuml
+actor Operador
+participant Cliente
+participant "API demo propuesta" as API
+participant "Fuente HIS demo" as HIS
+Operador -> Cliente : Consultar DEMO-1
+Cliente -> API : GET /tenants/H1/demo-orders/DEMO-1/status
+API -> API : validar sesión, tenant, permiso
+alt autorizado
+ API -> HIS : leer estado en tenant
+ HIS --> API : estado / ausencia / error
+ API --> Cliente : 200 o error tipado
+ Cliente -> Cliente : frescura y capacidad por separado
+else no autorizado
+ API --> Cliente : 401/403 sin lectura
+end
+@enduml
