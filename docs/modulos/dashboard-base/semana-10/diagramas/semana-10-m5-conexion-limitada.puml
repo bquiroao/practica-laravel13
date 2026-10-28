@@ -1,0 +1,17 @@
+@startsalt
+title M5 — Sin conexión
+{+
+  <b>Sin conexión</b> · datos de las 08:40
+  [Reintentar]
+  ---
+  {+
+    <b>Camas disponibles</b>
+    <b>7</b> a las 08:40
+  }
+  {+
+    <b>Citas de hoy</b>
+    Sin datos guardados.
+  }
+  <i>Los módulos piden conexión para abrir.</i>
+}
+@endsalt

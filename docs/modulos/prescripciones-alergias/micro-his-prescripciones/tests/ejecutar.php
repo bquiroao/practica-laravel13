@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Ejecuta todas las pruebas del Micro-HIS Prescripciones.
  *   php tests/ejecutar.php
  *   php tests/ejecutar.php --solo=APP,INT     (muestra y cuenta solo esos prefijos)
+ *   php tests/ejecutar.php --defectos         (semana 15: agrega las pruebas de defectos ABIERTOS, que fallan hasta corregirse)
  * Con PRESCRIPCIONES_DB_DSN definido corren también las de integración con PostgreSQL; sin él, se omiten.
  * Código de salida: 0 si no hay fallas, 1 si alguna prueba falla.
  */
@@ -30,8 +31,12 @@ $grupos = [
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
 ];
+$argumentos = array_slice($argv ?? [], 1);
+if (in_array('--defectos', $argumentos, true)) {
+    $grupos['Defectos'] = 'Defectos abiertos (fallan hasta que se corrijan; semana-15/registro-defectos.md)';
+}
 $prefijos = [];
-foreach (array_slice($argv ?? [], 1) as $argumento) {
+foreach ($argumentos as $argumento) {
     if (str_starts_with($argumento, '--solo=')) {
         $prefijos = array_filter(explode(',', substr($argumento, 7)));
     }

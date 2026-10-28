@@ -1,0 +1,1 @@
+Presentar ocho diapositivas. Mostrar UML y cada decisión asociada con RF/RNF. Ejecutar cambio y distinguir 12 aserciones nuevas de 16/14 de regresión. Explicar permiso denegado sin perder lectura y carrera de permiso-SO. Señalar Repository real temporal y API solo propuesta. Defender viabilidad pendiente por destino, no éxito multiplataforma.
