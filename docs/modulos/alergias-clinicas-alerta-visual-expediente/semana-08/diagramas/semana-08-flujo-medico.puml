@@ -1,0 +1,44 @@
+@startuml semana-08-flujo-medico
+title User flow — Médico tratante
+start
+:Abre el expediente de PAC-00451;
+:Estado: cargando alergias (esqueleto, sin datos);
+if (¿Respuesta?) then (error 503)
+  :«Alergias no disponibles: verifique con el paciente antes de indicar» + Reintentar;
+  stop
+endif
+if (¿Hay alergias activas?) then (no)
+  :Franja gris «Sin alergias registradas (no verificado)»\n+ ayuda «¿Qué significa?»;
+else (sí)
+  if (¿Nivel ALTA o CRÍTICA y no reconocida?) then (sí)
+    :Franja destacada fija + lista ordenada\n+ botón «He leído las alergias»;
+    :Pulsa el botón;
+    if (¿409 ALERTA_CAMBIO?) then (sí)
+      :«Se registró otra alergia mientras leía»\nse muestra la lista nueva (resaltada);
+      :Vuelve a leer y reconoce;
+    endif
+    :Franja queda «Reconocida por usted»;
+  else (no)
+    :Franja informativa o moderada sin bloqueo;
+  endif
+endif
+if (¿Quiere registrar una alergia?) then (sí)
+  :Formulario (alérgeno, tipo, severidad,\nreacción, fecha) con ayuda por campo;
+  repeat
+    :Valida formato en el cliente;
+  repeat while (¿Errores de campo?) is (sí: mensaje junto al campo,\nfoco al primero)
+  :Pantalla de confirmación con resumen\n(«Va a registrar Penicilina — Pone en riesgo la vida»);
+  if (¿Confirma?) then (no)
+    :Vuelve al formulario sin perder datos;
+    stop
+  endif
+  if (¿Respuesta del servidor?) then (201)
+    :Éxito: «Alergia registrada» y franja con el nivel nuevo;
+  elseif (409 duplicada) then
+    :«Ya está registrada»: enlace a la alergia existente;
+  else (422 / 503)
+    :Mensaje con el código; datos conservados; Reintentar;
+  endif
+endif
+stop
+@enduml
