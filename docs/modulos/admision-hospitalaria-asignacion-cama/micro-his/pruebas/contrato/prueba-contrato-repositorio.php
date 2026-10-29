@@ -56,6 +56,10 @@ $casos = [
         Afirmar::lanza(PacienteConAdmisionActiva::class, fn () => $repo->registrar(Datos::admision($id2, 'PAC-00451', Datos::cama('B-202'))));
         Afirmar::igual([Datos::B201], $repo->camasOcupadas($h1));
     },
+    'D-04: mismo paciente y misma cama a la vez responden igual (RN-02 primero)' => function ($repo) use ($id1, $id2) {
+        $repo->registrar(Datos::admision($id1, 'PAC-00451', Datos::cama('B-201')));
+        Afirmar::lanza(PacienteConAdmisionActiva::class, fn () => $repo->registrar(Datos::admision($id2, 'PAC-00451', Datos::cama('B-201'))));
+    },
     'otro hospital no ve la admisión; un id mal formado no existe' => function ($repo) use ($h1, $h2, $id1) {
         $repo->registrar(Datos::admision($id1, 'PAC-00451', Datos::cama('B-201')));
         Afirmar::igual([null, [], []], [$repo->buscarPorId($h2, $id1), $repo->eventos($h2, $id1), $repo->camasOcupadas($h2)]);
