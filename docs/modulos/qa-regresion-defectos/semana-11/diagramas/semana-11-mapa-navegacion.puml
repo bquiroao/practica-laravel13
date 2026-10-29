@@ -4,13 +4,13 @@ title Mapa de navegación del prototipo (rutas por hash) · verde: camino feliz 
 skinparam defaultFontSize 11
 skinparam rectangleRoundCorner 10
 
-rectangle "#/ingresar\nElegir usuario (demo)" as I
-rectangle "#/campanas\nMis campañas / Campañas" as C
-rectangle "#/ejecutar/1/TC-107|TC-108\nPasos · Resultado · Evidencia · Defecto" as E
+rectangle "<U+0023>/ingresar\nElegir usuario (demo)" as I
+rectangle "<U+0023>/campanas\nMis campañas / Campañas" as C
+rectangle "<U+0023>/ejecutar/1/TC-107|TC-108\nPasos · Resultado · Evidencia · Defecto" as E
 rectangle "Hoja «¿Registrar?»\n(fondo inerte · foco en Volver · Esc)" as H1 #F5F9FF
-rectangle "#/registro\n✓ Registrado / ⏳ Pendiente / ✕ Rechazado" as R
-rectangle "#/pendientes\nBandeja · Reenviar ahora · región viva" as P
-rectangle "#/trazabilidad/1\nPrevisión GO / NO-GO con sus causas · ⛔ Bloquea" as T
+rectangle "<U+0023>/registro\n✓ Registrado / ⏳ Pendiente / ✕ Rechazado" as R
+rectangle "<U+0023>/pendientes\nBandeja · Reenviar ahora · región viva" as P
+rectangle "<U+0023>/trazabilidad/1\nPrevisión GO / NO-GO con sus causas · ⛔ Bloquea" as T
 rectangle "Hoja «¿Cerrar?»\n(consecuencia · Esc · foco de vuelta)" as H2 #F5F9FF
 
 I --> C : Tester o Líder QA
