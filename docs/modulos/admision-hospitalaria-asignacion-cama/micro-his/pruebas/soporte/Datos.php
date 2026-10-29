@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Pruebas;
 
+use Admision\Application\ContextoUsuario;
+use Admision\Application\SolicitudAdmision;
 use Admision\Domain\Elegibilidad\CriterioAislamiento;
 use Admision\Domain\Elegibilidad\CriterioCamaOperativa;
 use Admision\Domain\Elegibilidad\CriterioElegibilidadCama;
@@ -10,6 +12,7 @@ use Admision\Domain\Elegibilidad\CriterioServicio;
 use Admision\Domain\Elegibilidad\CriterioTipoCama;
 use Admision\Domain\Elegibilidad\EvaluadorElegibilidad;
 use Admision\Domain\Modelo\CamaDisponible;
+use Admision\Domain\Modelo\Rol;
 use Admision\Domain\Modelo\TenantId;
 use Admision\Domain\Modelo\TipoCama;
 
@@ -55,5 +58,16 @@ final class Datos
     public static function evaluador(): EvaluadorElegibilidad
     {
         return new EvaluadorElegibilidad(...self::criterios());
+    }
+
+    public static function contexto(string $usuario, string $solicitud = 'sol-prueba-0001'): ContextoUsuario
+    {
+        [$rol, $hospital] = self::crudos()['usuarios'][$usuario];
+        return new ContextoUsuario($usuario, Rol::from($rol), TenantId::desde($hospital), $solicitud);
+    }
+
+    public static function solicitud(string $paciente = 'PAC-00451', string $camaId = self::B201, bool $aislamiento = false): SolicitudAdmision
+    {
+        return new SolicitudAdmision($paciente, 'MEDICINA_INTERNA', 'GENERAL', $aislamiento, 'EMERGENCIA', $camaId);
     }
 }
