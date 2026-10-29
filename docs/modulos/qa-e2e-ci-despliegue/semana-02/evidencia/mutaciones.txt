@@ -1,0 +1,11 @@
+$ php mutaciones.php
+[DETECTA  ] M1 un crítico INESTABLE cuenta como PASA (R-06)               falla: CA-03
+[DETECTA  ] M2 no se compara el digest (R-03)                              falla: CA-10
+[DETECTA  ] M3 la evidencia no se confirma en el almacén (R-05)           falla: CA-05
+[DETECTA  ] M4 el umbral es estricto (> en vez de ≥)                     falla: CA-06
+[DETECTA  ] M5 los OMITIDOS salen de la tasa                               falla: CA-07
+[DETECTA  ] M6 la antigüedad no tiene límite (R-09e)                     falla: CA-09
+[DETECTA  ] M7 se evalúa una ejecución no completada                     falla: CA-11
+[DETECTA  ] M8 se permite un inestable más que el máximo (R-09c)         falla: CA-08
+
+Mutaciones: 8  Detectadas: 8  Sobreviven: 0
