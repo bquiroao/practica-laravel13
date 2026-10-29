@@ -43,13 +43,33 @@ final class PdoRepositorioDefectos extends ConsultasPdo implements RepositorioDe
             [$tenant, $campanaId])->fetchAll());
     }
 
+    public function abiertosDe(string $tenant, array $casos): array
+    {
+        if ($casos === []) {
+            return [];
+        }
+
+        return array_map(self::defecto(...), $this->consulta("SELECT * FROM defectos WHERE tenant = ? AND estado <> 'CERRADO'
+            AND caso_id IN (" . self::enlaces($casos) . ') ORDER BY id', [$tenant, ...array_values($casos)])->fetchAll());
+    }
+
     public function criticosAbiertos(string $tenant, array $casos): int
     {
         if ($casos === []) {
             return 0;
         }
 
-        return (int) $this->consulta("SELECT count(*) FROM defectos WHERE tenant = ? AND severidad = 'CRITICA' AND estado <> 'CERRADO'
+        return (int) $this->consulta("SELECT count(*) FROM defectos WHERE tenant = ? AND COALESCE(severidad, severidad_propuesta) = 'CRITICA' AND estado <> 'CERRADO'
+            AND caso_id IN (" . self::enlaces($casos) . ')', [$tenant, ...array_values($casos)])->fetchColumn();
+    }
+
+    public function mayoresAbiertos(string $tenant, array $casos): int
+    {
+        if ($casos === []) {
+            return 0;
+        }
+
+        return (int) $this->consulta("SELECT count(*) FROM defectos WHERE tenant = ? AND COALESCE(severidad, severidad_propuesta) = 'MAYOR' AND estado <> 'CERRADO'
             AND caso_id IN (" . self::enlaces($casos) . ')', [$tenant, ...array_values($casos)])->fetchColumn();
     }
 

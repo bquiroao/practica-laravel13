@@ -1,0 +1,9 @@
+Texto general                                  #1f2933 sobre #f5f7fa  13.75:1  mínimo 4.5:1  CUMPLE
+Texto de ayuda .aviso                          #52606d sobre #f5f7fa   6.02:1  mínimo 4.5:1  CUMPLE
+Texto de ayuda .aviso sobre la alerta blanca   #52606d sobre #ffffff   6.46:1  mínimo 4.5:1  CUMPLE
+Texto del botón                                #ffffff sobre #1d4e89   8.39:1  mínimo 4.5:1  CUMPLE
+Texto de la alerta                             #1f2933 sobre #ffffff  14.76:1  mínimo 4.5:1  CUMPLE
+Borde de la alerta (componente)                #b91c1c sobre #ffffff   6.47:1  mínimo 3.0:1  CUMPLE
+Contorno de foco sobre el fondo                #b45309 sobre #f5f7fa   4.68:1  mínimo 3.0:1  CUMPLE
+Texto de error rojo (wireframe W-01)           #b91c1c sobre #ffffff   6.47:1  mínimo 4.5:1  CUMPLE
+Enlace (color por defecto del navegador)       #0000ee sobre #f5f7fa   8.76:1  mínimo 4.5:1  CUMPLE

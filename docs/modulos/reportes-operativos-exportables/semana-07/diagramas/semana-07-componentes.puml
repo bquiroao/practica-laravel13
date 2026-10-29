@@ -1,0 +1,55 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontSize 12
+title Reportes operativos exportables — componentes (semana 7)
+
+package "Frontend (propuesta; aún no hay código)" {
+  [PanelDeFiltros\n(rango de fechas +\nfiltros del catálogo)] as PF
+  [VistaPrevia\n(tabla con las columnas\ndel reporte)] as VP
+  [BarraDeExportacion\n(CSV · PDF · Imprimir)] as BE
+  [VerificarReproduccion\n(hash y coincide)] as VR
+  [ClienteApiReportes] as CLI
+  [TraductorDeErrores\ncódigo → mensaje] as TRA
+}
+package "Backend — Presentación" {
+  [Enrutador + Peticion] as ENR
+  [ReportesControlador] as CTRL
+  [VistaHttp\n(código → HTTP, csv/json)] as VIS
+}
+package "Backend — Aplicación" {
+  [ExportarReporte\n(ejecutar · reproducir)] as EXP
+  [PreparadorDeArchivo\n(NUEVO: filtros → filas → archivo)] as PRE
+  interface "RepositorioExportaciones" as PR
+  interface "FuenteReportes" as PF2
+}
+package "Backend — Dominio" {
+  [Filtros · DefinicionReporte\ncatalogo()] as DOM
+  [Archivo · FormatoExportacion\n(Csv)] as ARC
+}
+package "Backend — Persistencia" {
+  [ReportesPdo] as PDO
+  [EnMemoria] as MEM
+}
+database "Vistas publicadas por otros módulos\n+ exportaciones_reporte (propia)" as DB
+
+PF --> CLI
+BE --> CLI
+VR --> CLI
+VP --> CLI
+BE ..> TRA
+CLI --> ENR : HTTP
+ENR --> CTRL
+CTRL --> VIS
+CTRL --> EXP
+EXP --> PRE : usa en exportar y en reproducir
+EXP --> PR
+PRE --> PF2
+PRE ..> DOM
+PRE ..> ARC
+PDO ..|> PR
+PDO ..|> PF2
+MEM ..|> PR
+MEM ..|> PF2
+PDO --> DB
+@enduml

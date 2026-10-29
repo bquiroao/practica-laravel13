@@ -41,7 +41,7 @@ final class Agenda {
     public static function franjas(string $fecha, array $horario, array $ocupadas): array {
         $libres = [];
         foreach ($horario as [$ini, $fin]) {
-            for ($t = new \DateTimeImmutable("$fecha $ini"); $t->format('H:i') < $fin; $t = $t->modify('+' . self::MINUTOS . ' minutes')) {
+            for ($t = new \DateTimeImmutable("$fecha $ini"); $t->format('H:i') < substr($fin, 0, 5); $t = $t->modify('+' . self::MINUTOS . ' minutes')) {
                 [$a, $b] = [$t->format('Y-m-d H:i'), $t->modify('+' . self::MINUTOS . ' minutes')->format('Y-m-d H:i')];
                 if (!array_filter($ocupadas, fn ($c) => $c[0] < $b && $a < $c[1])) { $libres[] = $a; }
             }

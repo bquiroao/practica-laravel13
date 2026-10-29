@@ -1,0 +1,68 @@
+Fecha: 2026-10-29 07:08:26 | PHP 8.4.26 | --evidencia=../semana-15/evidencia/salida-pruebas-todas.txt
+== semana03-base
+[OK] T-10 camino feliz con PostgreSQL: guarda en allergies y la consulta devuelve CRITICA con 2 alergias
+[OK] T-11 índice único real: dos inserciones equivalentes simultáneas terminan en AlergiaDuplicada (SQLSTATE 23505)
+[OK] T-12 error de persistencia con base de prueba: escritura rechazada → ErrorPersistencia y 0 filas nuevas
+[OK] T-13 error de persistencia: base caída al conectar → ErrorPersistencia (no PDOException)
+[OK] T-14 la base protege lo mismo que el dominio: CHECK de reacción en blanco y prohibición de borrar
+== semana03
+[OK] T-01 camino feliz: registra la alergia y la alerta queda CRITICA pendiente de reconocer
+[OK] T-02 RN-03: rechaza una alergia activa equivalente aunque cambien mayúsculas y espacios
+[OK] T-03 RN-05: rechaza fecha de inicio futura y no guarda nada
+[OK] T-04 RN-06: rechaza registrar en un paciente que no está activo
+[OK] T-05 RN-08: severidad desconocida se muestra como ALTA
+[OK] T-06 RN-08: sin alergias registradas el nivel es SIN_REGISTRO y no pide reconocimiento
+[OK] T-07 error de persistencia (doble): el caso de uso no oculta ErrorPersistencia
+[OK] T-08 paciente inexistente: PacienteNoEncontrado
+[OK] T-09 OCP: reacción con anafilaxia sube una alergia moderada a CRITICA
+== semana04-contrato
+[OK] T-25 [pdo] C-1 porCodigo encuentra al paciente y devuelve null si no existe
+[OK] T-26 [memoria] C-1 porCodigo encuentra al paciente y devuelve null si no existe
+[OK] T-27 [pdo] C-2 guardar y leer devuelve los mismos datos
+[OK] T-28 [memoria] C-2 guardar y leer devuelve los mismos datos
+[OK] T-29 [pdo] C-3 guardar un equivalente activo lanza AlergiaDuplicada; otro tipo sí se acepta
+[OK] T-30 [memoria] C-3 guardar un equivalente activo lanza AlergiaDuplicada; otro tipo sí se acepta
+[OK] T-31 [pdo] C-4 existeActivaEquivalente usa la misma normalización que el índice único
+[OK] T-32 [memoria] C-4 existeActivaEquivalente usa la misma normalización que el índice único
+[OK] T-33 [pdo] C-5 reconocimiento: guardar dos veces es idempotente y existe() distingue usuario
+[OK] T-34 [memoria] C-5 reconocimiento: guardar dos veces es idempotente y existe() distingue usuario
+== semana04-mvc
+[OK] T-19 GET de la alerta responde 200 y muestra el nivel con texto, no solo con color
+[OK] T-20 la vista escapa lo que escribió el usuario (sin <script> en la página)
+[OK] T-21 error de dominio en el formulario: 422, mensaje con código y lo escrito se conserva
+[OK] T-22 controladores y formulario sin SQL ni reglas de negocio (revisión del código fuente)
+[OK] T-23 POST de reconocimiento redirige (303) y la alerta muestra que ya fue reconocida
+[OK] T-24 paciente inexistente → 404 con código; ruta desconocida → 404
+== semana04
+[OK] T-15 RN-09: tras reconocer, la misma huella queda reconocida solo para ese usuario
+[OK] T-16 RN-09: una alergia nueva cambia la huella y el reconocimiento anterior deja de valer
+[OK] T-17 reconocer dos veces la misma huella no duplica filas (idempotente)
+[OK] T-18 una alerta MODERADA no admite reconocimiento (no hay nada que confirmar)
+== semana05
+[OK] T-35 enfermería consulta la alerta: 200, JSON con nivel y X-Request-Id
+[OK] T-36 sin token: 401 con el formato único de error
+[OK] T-37 enfermería intenta registrar: 403 PERMISO_DENEGADO y no se guarda nada
+[OK] T-38 tenant: token de H-02 → 403 aunque el encabezado diga H-01; admisión sin permiso → 403
+[OK] T-39 médico registra: 201, Location y alerta CRITICA que requiere reconocimiento
+[OK] T-40 JSON mal formado → 400 FORMATO_INVALIDO; regla de dominio → 422 con su código
+[OK] T-41 duplicado → 409 ALERGIA_DUPLICADA
+[OK] T-42 reconocer con huella vieja → 409 ALERTA_CAMBIO; con la vigente → 201 reconocida
+[OK] T-43 observabilidad: se respeta el X-Request-Id recibido y el registro no lleva datos clínicos
+[OK] T-44 base que rechaza la escritura → 503 PERSISTENCIA_NO_DISPONIBLE y 0 filas nuevas
+== semana15
+[OK] U-01 [RN-01, RN-03] Alergeno: normaliza mayúsculas y espacios, prefiere el código y exige uno de los dos
+[OK] U-02 [RN-08] ReglaPorSeveridad: las 5 severidades dan el nivel esperado
+[OK] U-03 [RN-04] Reacción: 500 caracteres se aceptan, 501 no; en blanco se rechaza
+[OK] U-04 [RN-09] Solo ALTA y CRITICA exigen reconocimiento
+[DEFECTO] [DEFECTO D-02] U-05 [RN-08] «Reacción anafiláctica» (con tilde) debe subir a CRITICA: nivel con «anafiláctica»: se esperaba 'CRITICA' y se obtuvo NULL
+[OK] CB-01 [RN-05] RegistrarAlergia::fecha(): los 5 caminos de la condición (nula, vacía, válida, desbordada, otro formato)
+[OK] CB-02 [RN-08, RN-09] CalculadorAlerta: ramas lista vacía, regla null, regla que sube, desempate y huella independiente del orden
+[OK] CB-03 [RNF-01] KernelApi: MC/DC de «hospital del token distinto O encabezado distinto»
+[OK] CN-01 [RF-01, RN-02] Equivalencia de severidad: 5 clases válidas → 201; inválidas → 422
+[OK] CN-02 [RF-01, RN-05] Límites de fecha: hoy → 201; mañana → 422; 2026-02-29 (no bisiesto) → 422
+[OK] CN-03 [RF-08, RN-07] Permisos: matriz rol × operación
+[OK] CN-04 [RNF-04, RNF-05] Errores: 401, 400, 404, 409 y 503 con el formato único
+[OK] CN-05 [RN-04] Límite de la reacción por la API: 500 → 201; 501 → 422
+[DEFECTO] [DEFECTO D-01] CN-06 [RF-03, RN-03] El mismo alérgeno por código+nombre y luego solo por nombre debe dar 409: segundo registro de Penicilina: se esperaba 409 y se obtuvo 201
+[DEFECTO] [DEFECTO D-03] CN-07 [RF-01] Un campo con tipo JSON incorrecto («reaccion»: 123) debe dar 400, no guardarse sin él: respuesta: se esperaba '400 FORMATO_INVALIDO' y se obtuvo '201 sin error: se guardó'
+RESULTADO: 59 pruebas, 56 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado

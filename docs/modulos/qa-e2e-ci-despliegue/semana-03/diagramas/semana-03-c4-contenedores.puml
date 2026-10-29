@@ -1,0 +1,26 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS QA E2E
+
+Person(usuarios, "QA, release y desarrollo", "Tres roles humanos.")
+System_Ext(ci, "Pipeline CI", "Token de servicio: versionar, ejecutar, reportar.")
+System_Ext(rbac, "RBAC", "Simulado con PoliticaAccesoEstatica.")
+
+System_Boundary(sistema, "Micro-HIS QA E2E (PHP 8.2+ vanilla, sin framework)") {
+  Container(api, "API HTTP", "PHP, public/index.php + Kernel", "Autentica, enruta, decodifica base64 y traduce Salida → HTTP.")
+  Container(app, "Casos de uso", "PHP, Aplicacion", "8 casos de uso: orquestan, verifican permisos, transacción.")
+  Container(dom, "Dominio", "PHP, Dominio", "Escenario, Versión, Ejecución, Resultado, QualityGate y puertos.")
+  ContainerDb(bd, "Base e2e", "PostgreSQL 14+", "Esquema e2e: triggers de solo agregar, digest y plan congelado.")
+  Container(alm, "Almacén de evidencias", "Disco por contenido", "<dir>/<sha[0..1]>/<sha>, verificado al guardar.")
+}
+
+Rel(usuarios, api, "JSON", "HTTPS")
+Rel(ci, api, "JSON + Idempotency-Key", "HTTPS")
+Rel(api, app, "llama")
+Rel(app, dom, "usa reglas y puertos")
+Rel(app, rbac, "permite(usuario, permiso, tenant)")
+Rel(app, alm, "AlmacenEvidencias (fail-closed)")
+Rel(app, bd, "repositorios PDO", "sentencias preparadas")
+@enduml

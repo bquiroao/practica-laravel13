@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Reportes operativos exportables y filtros administrativos (Micro-HIS)
+  version: 1.0.0
+  description: Exporta un reporte filtrado de forma reproducible (mismos filtros, corte y permisos dan el mismo hash) y permite reproducirlo para auditarlo.
+servers: [{ url: http://localhost:8080 }]
+paths:
+  /api/v1/reportes/{codigo}/exportar:
+    get:
+      summary: Exportar un reporte filtrado (CU-03)
+      parameters:
+        - { name: X-Usuario-Demo, in: header, required: true, schema: { type: string }, description: "Identidad de demostración; se reemplaza por el token del módulo RBAC. Roles: jefatura, administracion, auditor" }
+        - { name: X-Request-Id, in: header, schema: { type: string, pattern: "^[A-Za-z0-9-]{8,64}$" }, description: "Correlación (propuesto en la semana 5)", x-estado: propuesto }
+        - { name: codigo, in: path, required: true, schema: { type: string, enum: [censo, egresos] } }
+        - { name: desde, in: query, required: true, schema: { type: string, format: date }, description: "AAAA-MM-DD" }
+        - { name: hasta, in: query, required: true, schema: { type: string, format: date }, description: "Desde ≤ hasta, máximo 92 días, sin fechas futuras" }
+        - { name: formato, in: query, schema: { type: string, enum: [csv], default: csv } }
+        - { name: servicio, in: query, schema: { type: string, enum: [medicina, cirugia, pediatria] }, description: "Solo censo" }
+        - { name: tipo_alta, in: query, schema: { type: string, enum: [medica, voluntaria, referencia, defuncion] }, description: "Solo egresos" }
+      responses:
+        "200":
+          description: Archivo CSV; la exportación queda registrada antes de entregarse
+          headers:
+            X-Exportacion-Id: { schema: { type: string }, description: "Id para reproducirla después" }
+            X-Reporte-Sha256: { schema: { type: string, pattern: "^[a-f0-9]{64}$" }, description: "Hash del contenido" }
+          content: { text/csv: { schema: { type: string } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+  /api/v1/exportaciones/{id}/reproducir:
+    post:
+      summary: Reproducir una exportación con sus filtros, corte y permiso guardados (CU-05)
+      parameters:
+        - { name: X-Usuario-Demo, in: header, required: true, schema: { type: string } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: "coincide = true si el hash nuevo es igual al guardado"
+          content: { application/json: { schema: { type: object, properties: { id: { type: string }, coincide: { type: boolean }, hash: { type: string } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+components:
+  responses:
+    Error: { description: "Error con código estable", content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  schemas:
+    Error:
+      type: object
+      required: [codigo]
+      properties:
+        codigo: { type: string, enum: [sin_sesion, acceso_denegado, reporte_no_encontrado, exportacion_no_encontrada, formato_no_soportado, filtro_invalido, ruta_no_encontrada, metodo_no_permitido, error_persistencia] }
+        mensaje: { type: string }
+        campo: { type: string, description: "Filtro con problema (por ejemplo hasta)" }

@@ -1,0 +1,42 @@
+@startuml semana-08-flujo-lider
+!pragma layout smetana
+title User flow · Líder QA — planificar, iniciar, clasificar y cerrar con GO / NO-GO (W1, W4, W5)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Campañas» (vacío: «Aún no hay campañas» [Planificar la primera]) (M-01);
+:Planificar · nombre, funcionalidades del build;
+:La matriz PROPONE los casos críticos (marcados, no se pueden quitar) + casos opcionales;
+:CONFIRMACIÓN · «3 casos (2 críticos) · umbral 95 %» [Planificar];
+:Iniciar · escribe el build (1.4.0+abc1234);
+if (Respuesta) then (422 ALCANCE_INCOMPLETO)
+  #FDECEC:ERROR RECUPERABLE · «Faltan TC-107 y TC-108, críticos para expediente»
+  [Agregar los que faltan] (M-03);
+  stop
+else (200)
+endif
+:En curso · progreso por caso (pendiente / pasa / falla / bloqueado);
+repeat
+  :Defecto NUEVO → Clasificar (W4): severidad + prioridad;
+  if (¿Cambia la severidad propuesta?) then (sí)
+    :Motivo obligatorio (M-14);
+  else (no)
+  endif
+repeat while (¿Más defectos sin clasificar?) is (sí)
+:Cerrar · ANTES: trazabilidad con «bloquea el GO» por defecto (W5);
+if (¿Hay casos pendientes?) then (sí)
+  #FFF4E5:«Faltan resultados de TC-109» (409, M-15) → volver;
+  stop
+else (no)
+endif
+:CONFIRMACIÓN · «Cerrar no se puede deshacer» [Cerrar campaña];
+if (Decisión) then (GO)
+  #E8F5E9:ÉXITO · GO, tasa y build;
+else (NO_GO)
+  #FFF4E5:NO_GO con sus causas en palabras (críticos, MAYOR en críticos, tasa) (M-16);
+endif
+stop
+@enduml

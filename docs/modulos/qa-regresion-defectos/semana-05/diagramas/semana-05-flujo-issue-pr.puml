@@ -1,0 +1,19 @@
+@startuml semana-05-flujo-issue-pr
+!pragma layout smetana
+title Plan de integración: issue → rama → worktree → PR
+skinparam defaultFontSize 11
+
+start
+:Issue ASII-QA «Integrar el módulo QA al HIS»\n(criterios de aceptación = pruebas CON, API, INT);
+:git fetch origin && git worktree add ../wt-qa-integracion\n-b feat/qa-integracion origin/develop;
+:Slice 1: migración central qa_* + función de membresía\n(prueba: validar-integracion-central 18/18);
+:Slice 2: módulo Laravel detrás de los mismos puertos\n(suite de contrato CON-01..07 contra el adaptador nuevo);
+:Slice 3: rutas /api/v1/qa + OpenAPI (API-01..03);
+:PR a develop (≤ 400 líneas por PR, uno por slice);
+if (CI verde + revisión?) then (sí)
+  :merge; git worktree remove;
+else (no)
+  :corregir en el mismo worktree;
+endif
+stop
+@enduml

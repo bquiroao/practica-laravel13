@@ -14,6 +14,8 @@ use Qa\Persistencia\EnMemoria\RepositorioCampanasEnMemoria;
 use Qa\Persistencia\EnMemoria\RepositorioCasosEnMemoria;
 use Qa\Persistencia\EnMemoria\RepositorioDefectosEnMemoria;
 use Qa\Persistencia\EnMemoria\TransaccionEnMemoria;
+use Qa\Persistencia\Http\AlmacenEvidenciasHttp;
+use Qa\Persistencia\Http\CircuitoInterruptor;
 use Qa\Persistencia\Pdo\FabricaConexion;
 use Qa\Persistencia\Pdo\PdoRegistroAuditoria;
 use Qa\Persistencia\Pdo\PdoRepositorioCampanas;
@@ -44,7 +46,9 @@ final class FabricaAdaptadores
             'casos' => new PdoRepositorioCasos($pdo),
             'campanas' => new PdoRepositorioCampanas($pdo),
             'defectos' => new PdoRepositorioDefectos($pdo),
-            'almacen' => new AlmacenEvidenciasArchivos($config['evidencias']),
+            'almacen' => ($config['almacen'] ?? 'disco') === 'http'
+                ? new AlmacenEvidenciasHttp($config['almacen_url'], new CircuitoInterruptor(new RelojSistema()))
+                : new AlmacenEvidenciasArchivos($config['evidencias']),
             'auditoria' => new PdoRegistroAuditoria($pdo),
             'transaccion' => new PdoTransaccion($pdo),
             'reloj' => new RelojSistema(),

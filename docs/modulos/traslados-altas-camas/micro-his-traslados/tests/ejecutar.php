@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 // Pruebas sin dependencias:  php tests/ejecutar.php   (usa SQLite en memoria como base de prueba)
 use Traslados\Aplicacion\{ErrorPersistencia, RegistrarMovimiento, Usuario};
-use Traslados\Persistencia\MovimientosPdo;
-use Traslados\Presentacion\MovimientosControlador;
+use Traslados\Persistencia\{EnMemoria, MovimientosPdo};
+use Traslados\Presentacion\{Enrutador, MovimientosControlador, Peticion};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -20,10 +20,17 @@ function errorDe(callable $f): \Throwable { try { $f(); } catch (\Throwable $e) 
 function base(): PDO { $pdo = new PDO('sqlite::memory:'); $pdo->exec((string) file_get_contents(__DIR__ . '/../sql/esquema.sql')); return $pdo; }
 function valor(PDO $pdo, string $sql): mixed { return $pdo->query($sql)->fetchColumn(); }
 function cama(PDO $pdo, string $id): string { return (string) valor($pdo, "SELECT status FROM beds WHERE bed_id = '$id'"); }
-function caso(PDO $pdo): RegistrarMovimiento {
-    return new RegistrarMovimiento(new MovimientosPdo($pdo), fn () => new DateTimeImmutable('2026-10-27 09:00'), fn () => 'stay-nueva');
+function almacen(PDO|EnMemoria $r): MovimientosPdo|EnMemoria { return $r instanceof PDO ? new MovimientosPdo($r) : $r; } // el mismo contrato con cualquiera
+function caso(PDO|EnMemoria $r): RegistrarMovimiento {
+    return new RegistrarMovimiento(almacen($r), almacen($r), fn () => new DateTimeImmutable('2026-10-27 09:00'), fn () => 'stay-nueva');
 }
-function mover(PDO $pdo, string $episodio, string $tipo, ?string $destino = null, ?Usuario $u = null): array {
+const MOV = '/api/v1/traslados-altas/movimientos';
+function http(PDO|EnMemoria $r, string $metodo, string $ruta, string $usuario = 'enf-ana', string $cuerpo = ''): array {
+    $usuarios = ['enf-ana' => new Usuario('enf-ana', 'enfermeria'), 'dr-luis' => new Usuario('dr-luis', 'medico')];
+    $enrutador = new Enrutador(new MovimientosControlador(caso($r), $usuarios));
+    return $enrutador->atender(new Peticion($metodo, $ruta, [], $usuario, $cuerpo));
+}
+function mover(PDO|EnMemoria $pdo, string $episodio, string $tipo, ?string $destino = null, ?Usuario $u = null): array {
     return caso($pdo)->ejecutar(['episodio_id' => $episodio, 'tipo' => $tipo, 'destino_id' => $destino], $u ?? new Usuario('enf-ana', 'enfermeria'));
 }
 $rechazo = fn (string $codigo) => ['aplicado' => false, 'rechazo' => $codigo, 'origen_id' => null, 'destino_id' => null];
@@ -67,20 +74,39 @@ prueba('PER-01', 'Error de persistencia a mitad de la transacción (falla el úl
     igual([1, 'occupied', 'available', 4], [(int) valor($pdo, "SELECT ended_at IS NULL FROM bed_stays WHERE bed_stay_id = 'stay-1'"),
           cama($pdo, 'bed-a1'), cama($pdo, 'bed-a2'), (int) valor($pdo, 'SELECT COUNT(*) FROM bed_stays')], 'nada quedó a medias');
 });
-prueba('HTTP-01', 'Presentación: 201, 401, 400, 404, 405 y 409 con su código', function () {
-    $api = new MovimientosControlador(caso(base()), ['enf-ana' => new Usuario('enf-ana', 'enfermeria')]);
-    $ruta = '/api/v1/traslados-altas/movimientos';
-    $ok = '{"episodio_id":"epi-1","tipo":"traslado","destino_id":"bed-a2"}';
-    igual(201, $api->atender('POST', $ruta, 'enf-ana', $ok)[0], 'registro');
-    igual([401, 400, 404, 405], [$api->atender('POST', $ruta, '', $ok)[0], $api->atender('POST', $ruta, 'enf-ana', '{')[0],
-                                 $api->atender('POST', '/x', 'enf-ana', $ok)[0], $api->atender('GET', $ruta, 'enf-ana', '')[0]], 'errores');
-    $r = $api->atender('POST', $ruta, 'enf-ana', '{"episodio_id":"epi-3","tipo":"traslado","destino_id":"bed-a3"}');
-    igual([409, 'cama_no_disponible'], [$r[0], $r[1]['codigo']], '409');
+prueba('PER-02', 'Doble en memoria que falla al aplicar → 500 por el Enrutador y nada cambia', function () {
+    $m = EnMemoria::demo();
+    $m->fallarAlAplicar = true;
+    $r = http($m, 'POST', MOV, 'enf-ana', '{"episodio_id":"epi-1","tipo":"traslado","destino_id":"bed-a2"}');
+    igual([500, 'error_persistencia'], [$r[0], $r[1]['codigo']], 'respuesta');
+    igual(['occupied', 'available', 'stay-1'], [$m->cama('bed-a1')['status'], $m->cama('bed-a2')['status'], $m->estanciaAbierta('epi-1')['bed_stay_id']], 'nada quedó a medias');
 });
-prueba('ARQ-01', 'Dependencias: Dominio no usa otras capas ni PDO; Aplicación y Presentación no tienen SQL', function () {
+prueba('REP-01', 'Contrato del Repository: PDO y memoria dan los mismos resultados y el mismo estado final', function () {
+    $correr = function (PDO|EnMemoria $r): array {
+        $repo = almacen($r);
+        $resultados = [mover($r, 'epi-1', 'traslado', 'bed-a2'), mover($r, 'epi-2', 'alta'), mover($r, 'epi-3', 'traslado', 'bed-a2'), mover($r, 'epi-4', 'alta')];
+        return [$resultados, array_map(fn ($id) => $repo->cama($id)['status'], ['bed-a1', 'bed-a2', 'bed-a3', 'bed-a4', 'bed-a5', 'bed-u1']),
+                $repo->estanciaAbierta('epi-1')['bed_id'], $repo->estanciaAbierta('epi-2'), $repo->episodioAbierto('epi-2'), $repo->ordenVigente('epi-1', 'traslado'), $repo->ordenVigente('epi-4', 'alta')['orden_id']];
+    };
+    $pdo = $correr(base());
+    igual(['maintenance', 'occupied', 'maintenance', 'occupied', 'occupied', 'available'], $pdo[1], 'estado esperado con PDO');
+    igual($pdo, $correr(EnMemoria::demo()), 'memoria igual a PDO');
+});
+prueba('MVC-01', 'MVC con PDO: Enrutador → controlador → vista (201, 401, 400, 403, 404, 405, 409 y 422)', function () {
+    $pdo = base();
+    $ok = '{"episodio_id":"epi-1","tipo":"traslado","destino_id":"bed-a2"}';
+    $estados = [http($pdo, 'POST', MOV, 'enf-ana', $ok)[0], http($pdo, 'POST', MOV, '', $ok)[0], http($pdo, 'POST', MOV, 'enf-ana', '{')[0], http($pdo, 'POST', MOV, 'dr-luis', $ok)[0],
+                http($pdo, 'POST', '/x')[0], http($pdo, 'DELETE', MOV)[0],
+                http($pdo, 'POST', MOV, 'enf-ana', '{"episodio_id":"epi-3","tipo":"traslado","destino_id":"bed-a3"}')[0],
+                http($pdo, 'POST', MOV, 'enf-ana', '{"episodio_id":"epi-4","tipo":"alta"}')[0]];
+    igual([201, 401, 400, 403, 404, 405, 409, 422], $estados, 'estados');
+});
+prueba('ARQ-01', 'Dependencias: Dominio sin otras capas; Aplicación sin Persistencia ni PDO; sin SQL ni reglas en la Presentación', function () {
     $codigo = fn (string $capa) => implode("\n", array_map('file_get_contents', glob(__DIR__ . "/../src/$capa/*.php")));
     igual(0, preg_match('/Aplicacion|Persistencia|Presentacion|PDO/', $codigo('Dominio')), 'Dominio');
+    igual(0, preg_match('/Traslados\\\\Persistencia|\\bPDO/', $codigo('Aplicacion')), 'Aplicación depende solo de interfaces');
     igual(0, preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b/', $codigo('Aplicacion') . $codigo('Presentacion')), 'SQL fuera de Persistencia');
+    igual(0, preg_match('/\b(Traslado|Alta|CamaOrigen|CamaDestino|RequisitoCama|TipoAlta|MovimientoDeCama)\b/', $codigo('Presentacion')), 'reglas de negocio en la Presentación');
 });
 
 printf("\nTotal: %d  Pasan: %d  Fallan: %d\n", array_sum($conteo), $conteo['PASA'], $conteo['FALLA']);

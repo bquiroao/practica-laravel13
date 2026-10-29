@@ -1,0 +1,827 @@
+openapi: 3.1.0
+info:
+  title: Micro-HIS QA funcional, pruebas manuales y matriz de regresión
+  version: 1.2.0
+  summary: Campañas de regresión manual, resultados con evidencia verificable, defectos con severidad y trazabilidad.
+  description: |
+    Contrato de la API del módulo QA del Sistema Hospitalario Integrado (semana 5).
+
+    Reglas transversales:
+    - El usuario y el tenant salen del token; `X-Tenant-ID` debe coincidir con el del token (si no, 403).
+    - Un recurso de otro tenant responde 404, igual que uno inexistente.
+    - Toda respuesta lleva `X-Request-ID` (el recibido si es válido, o uno nuevo).
+    - Errores de FORMA → 400; reglas de datos → 422; choque con el estado → 409.
+    - No hay `PUT`, `PATCH` ni `DELETE`: un resultado registrado no se cambia ni se borra (R-11); se corrige con otro intento.
+    - Solo `registrarResultado` lleva `Idempotency-Key`: es la única operación que el cliente reintenta y reenvía.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8093
+    description: Servidor local (php -S)
+security:
+  - bearerAuth: []
+tags:
+  - name: Casos
+    description: Casos manuales versionados (CU-01, CU-02)
+  - name: Campañas
+    description: Campañas de regresión, resultados y decisión (CU-03..CU-07, CU-10..CU-12)
+  - name: Defectos
+    description: Clasificación y corrección (CU-08, CU-09)
+paths:
+  /api/v1/qa/casos:
+    post:
+      operationId: disenarCaso
+      tags: [Casos]
+      summary: Diseñar un caso de prueba manual (queda BORRADOR)
+      x-permiso: qa.disenar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CasoNuevo'
+      responses:
+        '201':
+          description: Caso diseñado
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasoGuardado'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/casos/{casoId}/aprobacion:
+    post:
+      operationId: aprobarCaso
+      tags: [Casos]
+      summary: Aprobar la última versión de un caso (por alguien distinto del autor)
+      x-permiso: qa.aprobar
+      parameters:
+        - $ref: '#/components/parameters/CasoId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Caso aprobado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasoAprobado'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/campanas:
+    post:
+      operationId: planificarCampana
+      tags: [Campañas]
+      summary: Planificar una campaña (congela la versión de cada caso)
+      x-permiso: qa.planificar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampanaNueva'
+      responses:
+        '201':
+          description: Campaña planificada
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanaPlanificada'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/campanas/{campanaId}/inicio:
+    post:
+      operationId: iniciarCampana
+      tags: [Campañas]
+      summary: Iniciar la campaña sobre un build (exige los críticos de la matriz, R-03)
+      x-permiso: qa.planificar
+      parameters:
+        - $ref: '#/components/parameters/CampanaId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Build'
+      responses:
+        '200':
+          description: Campaña EN_CURSO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanaIniciada'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/campanas/{campanaId}/resultados:
+    post:
+      operationId: registrarResultado
+      tags: [Campañas]
+      summary: Registrar el resultado de un caso, con evidencia y defecto (idempotente)
+      description: |
+        La evidencia se guarda en el almacén ANTES de registrar (fail-closed, R-05): si el almacén no confirma, 503
+        EVIDENCIA_NO_DISPONIBLE y no se escribe nada. Con la misma `Idempotency-Key` y el mismo contenido responde 200 con el
+        intento original, aunque la campaña ya se haya cerrado; con otro contenido, 409 CLAVE_REUTILIZADA.
+      x-permiso: qa.ejecutar
+      parameters:
+        - $ref: '#/components/parameters/CampanaId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultadoNuevo'
+      responses:
+        '201':
+          description: Resultado registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoRegistrado'
+        '200':
+          description: Repetición con la misma clave (RESULTADO_YA_REGISTRADO); no registra nada nuevo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoRegistrado'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '413':
+          $ref: '#/components/responses/DemasiadoGrande'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/campanas/{campanaId}/cierre:
+    post:
+      operationId: cerrarCampana
+      tags: [Campañas]
+      summary: Cerrar la campaña y calcular GO / NO_GO (R-09, R-15)
+      description: |
+        NO_GO si hay defectos CRÍTICOS abiertos en el alcance, defectos MAYOR abiertos en casos críticos de la matriz para
+        las funcionalidades de la campaña (R-15, desde 1.1.0), o tasa de aprobados bajo el umbral. Con casos pendientes, 409.
+      x-permiso: qa.cerrar
+      parameters:
+        - $ref: '#/components/parameters/CampanaId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Campaña cerrada con su decisión
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanaCerrada'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/campanas/{campanaId}/trazabilidad:
+    get:
+      operationId: consultarTrazabilidad
+      tags: [Campañas]
+      summary: Requisito → caso → último intento → evidencias (solo huellas) → defectos
+      x-permiso: qa.consultar
+      parameters:
+        - $ref: '#/components/parameters/CampanaId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Trazabilidad de la campaña
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trazabilidad'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/defectos/{defectoId}/clasificacion:
+    post:
+      operationId: clasificarDefecto
+      tags: [Defectos]
+      summary: Confirmar o cambiar la severidad (con motivo) y fijar la prioridad (R-07)
+      x-permiso: qa.clasificar
+      parameters:
+        - $ref: '#/components/parameters/DefectoId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Clasificacion'
+      responses:
+        '200':
+          description: Defecto clasificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefectoEstado'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/qa/defectos/{defectoId}/correccion:
+    post:
+      operationId: marcarCorregido
+      tags: [Defectos]
+      summary: Marcar el defecto CORREGIDO en un build (no lo cierra, R-08)
+      x-permiso: qa.corregir
+      parameters:
+        - $ref: '#/components/parameters/DefectoId'
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Build'
+      responses:
+        '200':
+          description: Defecto CORREGIDO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefectoEstado'
+        '400':
+          $ref: '#/components/responses/Formato'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          $ref: '#/components/responses/Conflicto'
+        '422':
+          $ref: '#/components/responses/Invalido'
+        '500':
+          $ref: '#/components/responses/Interno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: En el HIS, el JWT de Identidad. En el Micro-HIS, tokens de demostración.
+  parameters:
+    Tenant:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Debe coincidir con el tenant del token.
+      schema:
+        type: string
+        pattern: '^[a-z0-9-]{1,40}$'
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Se devuelve igual si es válido; si no, el servidor genera uno.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Una por resultado, la misma en cada reintento y reenvío.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{8,64}$'
+    CasoId:
+      name: casoId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^TC-[0-9]{3,6}$'
+    CampanaId:
+      name: campanaId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    DefectoId:
+      name: defectoId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    Formato:
+      description: La solicitud no tiene la forma esperada (JSON, tipos, cabeceras, base64)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoAutenticado:
+      description: Sin token válido
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Prohibido:
+      description: Sin el permiso de la operación, o X-Tenant-ID distinto del del token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoEncontrado:
+      description: No existe en el tenant (incluye «es de otro hospital»), o ruta desconocida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflicto:
+      description: Choca con el estado (aprobación por el autor, campaña no EN_CURSO, doble cierre, clave reutilizada…)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DemasiadoGrande:
+      description: Una evidencia supera 5 MB
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Invalido:
+      description: Los datos no cumplen una regla; detalle dice qué campos o qué casos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Interno:
+      description: Error inesperado, sin detalles
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoDisponible:
+      description: La base (ERROR_PERSISTENCIA, reintentar con la misma clave) o el almacén (EVIDENCIA_NO_DISPONIBLE, no se registró nada) no responden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum: [METODO_NO_PERMITIDO, RUTA_NO_ENCONTRADA, NO_AUTENTICADO, TENANT_REQUERIDO, TENANT_NO_COINCIDE, ERROR_INTERNO,
+            SERVICIO_NO_DISPONIBLE, JSON_INVALIDO, CUERPO_INVALIDO, IDEMPOTENCY_KEY_REQUERIDA, EVIDENCIA_BASE64_INVALIDA,
+            PERMISO_DENEGADO, NO_ENCONTRADO, ERROR_PERSISTENCIA, EVIDENCIA_NO_DISPONIBLE, EVIDENCIA_DEMASIADO_GRANDE,
+            CLAVE_REUTILIZADA, CASO_EXISTENTE, DATOS_INVALIDOS, EVIDENCIA_REQUERIDA, DEFECTO_REQUERIDO, MOTIVO_REQUERIDO,
+            DEFECTO_INCOMPLETO, ALCANCE_INCOMPLETO, TIPO_NO_PERMITIDO, EVIDENCIA_VACIA, URL_INVALIDA, CASO_INEXISTENTE,
+            RESULTADO_NO_VERIFICA, APROBACION_POR_AUTOR, ESTADO_NO_PERMITE_APROBAR, CASO_NO_APROBADO, ESTADO_NO_PERMITE_INICIAR,
+            CAMPANA_NO_ADMITE_RESULTADOS, ESTADO_NO_PERMITE_CLASIFICAR, ESTADO_NO_PERMITE_CORREGIR, ESTADO_NO_PERMITE_VERIFICAR,
+            ESTADO_NO_PERMITE_CERRAR, CASOS_PENDIENTES, ESTADO_CAMBIO_CONCURRENTE, INTENTO_CONCURRENTE]
+        detalle:
+          type: array
+          description: Campos, casos críticos faltantes o casos pendientes. Nunca el valor recibido.
+          items:
+            type: string
+    Paso:
+      type: object
+      required: [accion, esperado]
+      properties:
+        accion:
+          type: string
+        esperado:
+          type: string
+    CasoNuevo:
+      type: object
+      required: [id, titulo, pasos, prioridad, requisitos]
+      properties:
+        id:
+          type: string
+          pattern: '^TC-[0-9]{3,6}$'
+        titulo:
+          type: string
+          maxLength: 200
+        precondiciones:
+          type: string
+        pasos:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Paso'
+        prioridad:
+          type: string
+          enum: [ALTA, MEDIA, BAJA]
+        requisitos:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^RF-[0-9]{2,3}$'
+    CasoGuardado:
+      type: object
+      properties:
+        codigo:
+          const: CASO_DISENADO
+        id:
+          type: string
+        version:
+          type: integer
+        estado:
+          type: string
+          enum: [BORRADOR, APROBADO]
+    CasoAprobado:
+      type: object
+      properties:
+        codigo:
+          const: CASO_APROBADO
+        id:
+          type: string
+        version:
+          type: integer
+        aprobador:
+          type: string
+    CampanaNueva:
+      type: object
+      required: [nombre, funcionalidades, casos]
+      properties:
+        nombre:
+          type: string
+        funcionalidades:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^[a-z][a-z0-9_-]{1,40}$'
+        casos:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: '^TC-[0-9]{3,6}$'
+        umbral:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 1
+          default: 0.95
+    CampanaPlanificada:
+      type: object
+      properties:
+        codigo:
+          const: CAMPANA_PLANIFICADA
+        id:
+          type: integer
+        estado:
+          const: PLANIFICADA
+        alcance:
+          type: object
+          description: caso → versión congelada
+          additionalProperties:
+            type: integer
+    Build:
+      type: object
+      required: [build]
+      properties:
+        build:
+          type: string
+          examples: ['1.4.0+abc1234']
+    CampanaIniciada:
+      type: object
+      properties:
+        codigo:
+          const: CAMPANA_INICIADA
+        id:
+          type: integer
+        estado:
+          const: EN_CURSO
+        build:
+          type: string
+    Evidencia:
+      type: object
+      required: [tipo, contenido_base64]
+      properties:
+        tipo:
+          type: string
+          enum: [captura, registro, junit]
+        contenido_base64:
+          type: string
+          contentEncoding: base64
+          description: Hasta 5 MB decodificado. PNG/JPEG, texto UTF-8 o JUnit XML según el tipo.
+        clasificacion:
+          type: string
+          enum: [GENERAL, DATOS_CLINICOS]
+          default: GENERAL
+    Referencia:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          pattern: '^https://'
+        descripcion:
+          type: string
+    DefectoNuevo:
+      type: object
+      required: [titulo, pasos, severidad]
+      properties:
+        titulo:
+          type: string
+        pasos:
+          type: array
+          items:
+            type: string
+        severidad:
+          type: string
+          enum: [CRITICA, MAYOR, MENOR, TRIVIAL]
+    ResultadoNuevo:
+      type: object
+      required: [caso, resultado]
+      properties:
+        caso:
+          type: string
+          pattern: '^TC-[0-9]{3,6}$'
+        resultado:
+          type: string
+          enum: [PASA, FALLA, BLOQUEADO, NO_APLICA]
+        evidencias:
+          type: array
+          description: Obligatoria (al menos una) para FALLA y BLOQUEADO. Una referencia externa no cuenta.
+          items:
+            $ref: '#/components/schemas/Evidencia'
+        referencias:
+          type: array
+          items:
+            $ref: '#/components/schemas/Referencia'
+        defecto:
+          $ref: '#/components/schemas/DefectoNuevo'
+        verifica_defecto:
+          type: integer
+          description: Re-ejecución que verifica un defecto CORREGIDO; PASA lo cierra y FALLA lo reabre.
+        motivo:
+          type: string
+          description: Obligatorio para NO_APLICA.
+    ResultadoRegistrado:
+      type: object
+      properties:
+        codigo:
+          type: string
+          enum: [RESULTADO_REGISTRADO, RESULTADO_YA_REGISTRADO]
+        intento:
+          type: integer
+        caso:
+          type: string
+        numero:
+          type: integer
+        resultado:
+          type: string
+          enum: [PASA, FALLA, BLOQUEADO, NO_APLICA]
+        evidencias:
+          type: integer
+        defecto:
+          type: [integer, 'null']
+        defecto_verificado:
+          type: [object, 'null']
+          properties:
+            id:
+              type: integer
+            estado:
+              type: string
+              enum: [CERRADO, REABIERTO]
+    CampanaCerrada:
+      type: object
+      properties:
+        codigo:
+          const: CAMPANA_CERRADA
+        id:
+          type: integer
+        decision:
+          type: string
+          enum: [GO, NO_GO]
+        tasa_aprobados:
+          type: number
+        umbral:
+          type: number
+        causas:
+          type: array
+          items:
+            type: string
+    Trazabilidad:
+      type: object
+      properties:
+        codigo:
+          const: TRAZABILIDAD
+        campana:
+          type: integer
+        nombre:
+          type: string
+        estado:
+          type: string
+          enum: [PLANIFICADA, EN_CURSO, CERRADA]
+        build:
+          type: [string, 'null']
+        decision:
+          type: [object, 'null']
+        casos:
+          type: array
+          items:
+            type: object
+            properties:
+              caso:
+                type: string
+              version:
+                type: integer
+              requisitos:
+                type: array
+                items:
+                  type: string
+              intentos:
+                type: integer
+              ultimo_resultado:
+                type: string
+                enum: [PASA, FALLA, BLOQUEADO, NO_APLICA, PENDIENTE]
+              evidencias:
+                type: array
+                description: Solo tipo, huella, tamaño y clasificación; nunca el contenido (R-13).
+                items:
+                  type: object
+                  properties:
+                    tipo:
+                      type: string
+                    huella:
+                      type: string
+                    tamano:
+                      type: integer
+                    clasificacion:
+                      type: string
+              defectos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    campana:
+                      type: integer
+                      description: campaña donde se reportó; puede ser otra si el defecto sigue abierto (desde 1.2.0)
+                    severidad:
+                      type: string
+                      description: la clasificada, o la propuesta mientras no se clasifique (cuenta para el GO desde 1.2.0)
+                    clasificado:
+                      type: boolean
+                    bloquea_go:
+                      type: boolean
+                      description: CRÍTICA abierto, o MAYOR abierto en un caso crítico de la matriz (R-15, desde 1.1.0), con la severidad efectiva (1.2.0)
+                    estado:
+                      type: string
+        requisitos:
+          type: object
+          description: requisito → casos que lo cubren
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Clasificacion:
+      type: object
+      required: [severidad, prioridad]
+      properties:
+        severidad:
+          type: string
+          enum: [CRITICA, MAYOR, MENOR, TRIVIAL]
+        prioridad:
+          type: string
+          enum: [ALTA, MEDIA, BAJA]
+        motivo:
+          type: string
+          description: Obligatorio si la severidad cambia respecto de la propuesta.
+    DefectoEstado:
+      type: object
+      properties:
+        codigo:
+          type: string
+          enum: [DEFECTO_CLASIFICADO, DEFECTO_CORREGIDO]
+        id:
+          type: integer
+        estado:
+          type: string
+          enum: [NUEVO, ABIERTO, CORREGIDO, CERRADO, REABIERTO]
+        severidad:
+          type: string
+        prioridad:
+          type: string

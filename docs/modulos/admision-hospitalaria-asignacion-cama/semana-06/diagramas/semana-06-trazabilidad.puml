@@ -1,0 +1,57 @@
+@startuml semana-06-trazabilidad
+' Admisión hospitalaria y asignación de cama — Semana 6
+' Diagrama trazable: actor -> caso de uso -> requisito -> regla -> diseño -> código -> API -> prueba.
+left to right direction
+skinparam rectangle {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+}
+skinparam defaultTextAlignment center
+title Trazabilidad de «admisión de paciente y asignación de una cama disponible» (semana 6)
+
+actor "Admisionista" as A
+actor "Médico" as M
+
+rectangle "S1 · UML" {
+  rectangle "CU-01 Admitir y asignar\n(A-11, A-12, S-13..S-16)" as CU01
+  rectangle "CU-05 Elegir otra cama\n(E-06, S-27..S-30)" as CU05
+  rectangle "CU-06 Consultar" as CU06
+}
+rectangle "S2 · Requisitos" {
+  rectangle "RF-04 todo o nada\nRF-05 conflicto recuperable" as RF
+  rectangle "RNF-01 integridad concurrente\nRNF-02 rol y tenant" as RNF
+  rectangle "RN-01 una cama, una asignación\nRN-06 roles" as RN
+  rectangle "OCP: CriterioElegibilidadCama" as OCP
+}
+rectangle "S3-S4 · Capas y Repository" {
+  rectangle "Domain: Admision,\nEvaluadorElegibilidad,\nAdmisionRepository (interfaz)" as DOM
+  rectangle "Application:\nAdmitirPacienteYAsignarCama\nContextoUsuario::exigirRol" as APP
+  rectangle "Persistence:\nPdoAdmisionRepository +\nux_asignacion_cama_activa\nInMemoryAdmisionRepository" as PER
+}
+rectangle "S5 · API" {
+  rectangle "POST /api/v1/admisiones\n201 | 409 CAMA_YA_ASIGNADA\n409 CONFLICTO_CONCURRENCIA" as API
+  rectangle "GET /api/v1/admisiones/{id}\n(MEDICO: solo consulta)" as API2
+}
+rectangle "Evidencia ejecutable" {
+  rectangle "CA-07 ->\nprueba-pdo-admision: «RN-01…»\nprueba-contrato: RN-01 ×2 adaptadores" as P1
+  rectangle "CA-08 ->\nprueba-api: «MEDICO…»" as P2
+}
+
+A --> CU01
+M --> CU06
+CU01 --> RF
+CU05 --> RF
+RF --> RN
+RNF --> RN
+CU01 --> OCP
+RN --> DOM
+OCP --> DOM
+DOM --> APP
+DOM --> PER
+APP --> API
+CU06 --> API2
+API --> P1
+PER --> P1
+API2 --> P2
+APP --> P2
+@enduml

@@ -1,0 +1,46 @@
+@startuml semana-08-flujo-tester
+!pragma layout smetana
+title User flow · Tester — ejecutar un caso y registrar el resultado con evidencia (W2, W3)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Mis campañas en curso» → elige campaña → caso pendiente;
+:CARGA · esqueleto «Cargando caso…» (pasos, versión, build);
+if (¿Hay pendientes en la bandeja de este equipo?) then (sí)
+  #FFF4E5:Aviso «2 resultados sin confirmar» [Reenviar ahora] (M-12);
+else (no)
+endif
+:Ejecuta los pasos en el build y marca cada esperado ✓ / ✕;
+switch (DECISIÓN · resultado)
+case (PASA)
+  if (¿El caso tiene un defecto CORREGIDO?) then (sí)
+    :Sugerencia «¿Esta ejecución verifica el defecto #12?» [Sí, verifica] (M-07);
+  else (no)
+  endif
+case (FALLA)
+  :Adjunta evidencia (captura / log / JUnit) + clasificación GENERAL o DATOS CLÍNICOS;
+  :Describe el defecto: título, pasos, severidad propuesta (ayuda «?»);
+case (BLOQUEADO)
+  :Adjunta evidencia del bloqueo;
+case (NO_APLICA)
+  :Escribe el motivo;
+endswitch
+:CONFIRMACIÓN · resumen «TC-107 · FALLA · 1 captura (clínica) · defecto MAYOR» [Registrar];
+:CARGA · «Registrando…» (botón deshabilitado; misma clave si se reintenta);
+switch (Respuesta)
+case (201 / 200 repetido)
+  #E8F5E9:ÉXITO · «Registrado como intento #1» (+ defecto #12) → siguiente caso (M-08);
+case (422 / 413)
+  #FDECEC:ERROR RECUPERABLE · el campo marcado + qué falta (M-09, M-10)
+  se conserva lo escrito y los archivos;
+case (409)
+  #FFF4E5:«La campaña ya no admite resultados» (cerrada o el caso salió del alcance) (M-11);
+case (503 / sin conexión)
+  #FFF4E5:PENDIENTE · «Guardado en este equipo, se reenviará» (M-12)
+  la bandeja reenvía con la MISMA clave;
+endswitch
+stop
+@enduml

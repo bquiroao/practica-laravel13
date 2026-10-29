@@ -1,0 +1,14 @@
+@startuml semana-05-migracion
+!pragma layout smetana
+title Migración razonada (por pasos reversibles)
+skinparam defaultFontSize 11
+
+rectangle "Paso 0 · hoy\nMicro-HIS: esquema qa + almacén en disco" as P0
+rectangle "Paso 1\nslice QA en la base central (integracion-central.sql)\nmembresías en vez de config" as P1
+rectangle "Paso 2\nalmacén de evidencias como servicio\n(QA_ALMACEN=http), ya implementado" as P2
+rectangle "Paso 3 (solo si C-1..C-5)\nQA como servicio con base propia\n+ API de Identidad con caché corta" as P3 #FDECEC
+
+P0 --> P1 : bandera de despliegue
+P1 --> P2 : QA_ALMACEN=http (vuelta atrás: =disco)
+P2 ..> P3 : NO ahora: sin justificación medible
+@enduml

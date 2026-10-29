@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-// Persistencia: SQL con sentencias preparadas. Cerrar la estancia de origen, sincronizar beds.status de origen y destino,
+// Persistencia: adaptador PDO de los dos puertos (Puertos.php). SQL con sentencias preparadas. Cerrar la estancia de origen, sincronizar beds.status de origen y destino,
 // abrir la estancia nueva y marcar la orden aplicada van en UNA transacción (RNF-01). No hay trigger que sincronice
 // beds.status con bed_stays (hallazgo H-01 del módulo Verificación BD): este módulo lo hace aquí.
 namespace Traslados\Persistencia;
 
-use Traslados\Aplicacion\ErrorPersistencia;
+use Traslados\Aplicacion\{ErrorPersistencia, FuenteClinica, RepositorioMovimientos};
 use Traslados\Dominio\Resultado;
 
-final class MovimientosPdo {
+final class MovimientosPdo implements RepositorioMovimientos, FuenteClinica {
     public function __construct(private \PDO $pdo) { $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); }
 
     public function episodioAbierto(string $id): ?array {

@@ -1,0 +1,21 @@
+$ php bin/acoplamiento.php 14   # ANTES del refactor
+Micro-HIS QA — acoplamiento por clase (90 clases en src/)
+------------------------------------------------------------------------------------------------------------------------------------
+Clase                        Capa            Ce   Ca  Ramas   Dq   LOC  P  Preocupaciones que mezcla
+RegistrarResultado           Aplicacion      22    1     67    8   181  5  campañas · defectos · severidad · evidencia · trazabilidad
+CerrarCampana                Aplicacion       9    1      4    0    56  5  campañas · matriz · defectos · severidad · trazabilidad
+ConsultarTrazabilidad        Aplicacion       9    1     14    0    78  5  campañas · matriz · defectos · severidad · trazabilidad
+ClasificarDefecto            Aplicacion       8    1      8    1    48  3  defectos · severidad · trazabilidad
+IniciarCampana               Aplicacion       8    1      6    0    52  3  campañas · matriz · trazabilidad
+PdoRepositorioCampanas       Persistencia    11    1     18    0   109  2  campañas · evidencia
+PlanificarCampana            Aplicacion       9    1     14    0    59  2  campañas · trazabilidad
+MarcarCorregido              Aplicacion       7    1      4    0    44  2  defectos · trazabilidad
+Defecto                      Dominio          5    5     20    1   120  2  defectos · severidad
+RepositorioDefectosEnMemoria Persistencia     5    1     11    0    70  2  defectos · severidad
+PdoRepositorioDefectos       Persistencia     5    1      6    0    66  2  defectos · severidad
+RepositorioCasosEnMemoria    Persistencia     4    1     14    0    77  2  matriz · trazabilidad
+PdoRepositorioCasos          Persistencia     4    1      7    0    74  2  matriz · trazabilidad
+RepositorioCasos             Dominio          2    8      0    0    21  2  matriz · trazabilidad
+------------------------------------------------------------------------------------------------------------------------------------
+Ce total: 282 · LOC total de src/: 3310 · Clases que mezclan ≥ 4 preocupaciones: 3
+Decisiones de QA (Dq) en Aplicación y Presentación: 9 · en el Dominio: 6

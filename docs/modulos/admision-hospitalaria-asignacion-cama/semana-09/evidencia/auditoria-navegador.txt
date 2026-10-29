@@ -1,0 +1,15 @@
+titulo: Nueva admisión · Admisión hospitalaria | lang: es
+orden de tabulacion W-01: select#usuario[name=usuario] > input#paciente[name=paciente] > select#servicio[name=servicio] > select#tipo[name=tipo] > input[name=aislamiento] > select#origen[name=origen] > button > body > select#usuario[name=usuario] > input#paciente[name=paciente]
+outline del boton con foco (teclado): solid rgb(180, 83, 9)
+controles sin etiqueta: []
+codigo PAC-451 -> pantalla: Elegir cama · Admisión hospitalaria | radios de cama: 2
+al confirmar con PAC-451 -> titulo: No se pudo completar · Admisión hospitalaria
+  foco activo: BODY | input aria-invalid: None | aria-describedby: ayuda-paciente
+botones en lista de camas: ['Confirmar admisión y asignar cama']
+tras un clic -> titulo: Admisión registrada · Admisión hospitalaria
+otra pestaña confirmo: Admisión registrada · Admisión hospitalaria
+conflicto -> titulo: No se pudo completar · Admisión hospitalaria | alerta: La cama ya fue asignada a otra admisión. Elija otra cama.
+  foco activo tras conflicto: BODY | codigo tecnico visible: (CAMA_YA_ASIGNADA)
+textos de servicio en la lista: []
+doble envio: boton deshabilitado al enviar? None
+errores JavaScript: []

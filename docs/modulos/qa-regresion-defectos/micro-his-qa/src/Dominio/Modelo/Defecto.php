@@ -109,7 +109,7 @@ final class Defecto
         if ($this->estado !== EstadoDefecto::ABIERTO && $this->estado !== EstadoDefecto::REABIERTO) {
             throw new ReglaRechazada('ESTADO_NO_PERMITE_CORREGIR');
         }
-        if (trim($build) === '') {
+        if (!preg_match(Campana::FORMATO_BUILD, $build)) {
             throw new ReglaRechazada('DATOS_INVALIDOS', ['build']);
         }
         $this->estado = EstadoDefecto::CORREGIDO;
@@ -130,8 +130,27 @@ final class Defecto
         $this->historialNuevo[] = "{$this->estado->value} tras re-ejecución de {$tester}";
     }
 
+    /**
+     * RT-01 (semana 13): mientras el Líder QA no lo clasifica, el defecto cuenta con la severidad que PROPUSO el tester.
+     * Antes contaba solo la clasificada, y un CRÍTICO propuesto y sin clasificar no bloqueaba el GO.
+     */
+    public function severidadEfectiva(): Severidad
+    {
+        return $this->severidad ?? $this->propuesta;
+    }
+
     public function criticoAbierto(): bool
     {
-        return $this->severidad === Severidad::CRITICA && $this->estado !== EstadoDefecto::CERRADO;
+        return $this->severidadEfectiva() === Severidad::CRITICA && $this->estado !== EstadoDefecto::CERRADO;
+    }
+
+    /**
+     * R-09 y R-15 en UN solo lugar: lo usan la trazabilidad (bloquea_go) y los repositorios al contar para el cierre.
+     * @param list<string> $criticosDeMatriz casos críticos en la matriz para las funcionalidades de la campaña
+     */
+    public function bloqueaGo(array $criticosDeMatriz): bool
+    {
+        return $this->criticoAbierto() || ($this->severidadEfectiva() === Severidad::MAYOR && $this->estado !== EstadoDefecto::CERRADO
+            && in_array($this->casoId, $criticosDeMatriz, true));
     }
 }
