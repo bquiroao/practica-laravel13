@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MicroHis\Citas\Persistencia;
 
-use MicroHis\Citas\Aplicacion\{ErrorPersistencia, RepositorioCitas};
+use MicroHis\Citas\Aplicacion\{ErrorPersistencia, HorarioTomado, RepositorioCitas};
 use MicroHis\Citas\Dominio\Horario;
 use PDO, PDOException, PDOStatement;
 
@@ -28,8 +28,12 @@ final class RepositorioPdo implements RepositorioCitas
     }
     public function guardar(string $medico, string $paciente, string $especialidad, Horario $h, string $motivo): int
     {
-        $this->ejecutar("INSERT INTO appointments (doctor, patient, specialty, starts_at, ends_at, status, reason) VALUES (?, ?, ?, ?, ?, 'scheduled', ?)",
-                        [$medico, $paciente, $especialidad, $h->inicio, $h->fin, $motivo]);
+        // La condición de cruce va dentro del INSERT: en SQLite la sentencia es atómica (en PostgreSQL lo garantiza la exclusión gist).
+        $n = $this->ejecutar("INSERT INTO appointments (doctor, patient, specialty, starts_at, ends_at, status, reason)
+                              SELECT ?, ?, ?, ?, ?, 'scheduled', ? WHERE NOT EXISTS (SELECT 1 FROM appointments WHERE status IN ('scheduled', 'confirmed')
+                              AND starts_at < ? AND ends_at > ? AND (doctor = ? OR patient = ?))",
+                             [$medico, $paciente, $especialidad, $h->inicio, $h->fin, $motivo, $h->fin, $h->inicio, $medico, $paciente])->rowCount();
+        if ($n === 0) throw new HorarioTomado('Otra solicitud tomó el horario.');
         return (int) $this->db->lastInsertId();
     }
     public function estado(int $id): ?string { return $this->ejecutar('SELECT status FROM appointments WHERE id = ?', [$id])->fetchColumn() ?: null; }
