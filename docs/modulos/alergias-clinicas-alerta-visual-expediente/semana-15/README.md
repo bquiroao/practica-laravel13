@@ -71,8 +71,8 @@ php pruebas/ejecutar.php --evidencia=../semana-15/evidencia/salida-pruebas-todas
 
 | Comando | Resultado esperado (corrida de preparación) | Resultado en tu equipo |
 |---|---|---|
-| `--solo=semana15` | `RESULTADO: 15 pruebas, 12 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado` | `<pega aquí>` |
-| Todas | `RESULTADO: 59 pruebas, 56 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado` | `<pega aquí>` |
+| `--solo=semana15` | `RESULTADO: 15 pruebas, 12 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado` | `<>` |
+| Todas | `RESULTADO: 59 pruebas, 56 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado` | `<>` |
 
 **Capturas:** tómalas de tu terminal con las dos corridas y guárdalas en `evidencia/salida-pruebas-semana15.png` y `evidencia/defectos.png`.
 
