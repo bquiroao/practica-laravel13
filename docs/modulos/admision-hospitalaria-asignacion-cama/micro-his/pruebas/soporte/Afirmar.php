@@ -32,6 +32,8 @@ final class Afirmar
     {
         try {
             $accion();
+        } catch (PruebaOmitida $e) {
+            throw $e; // sin base de prueba la prueba se omite, no falla
         } catch (\Throwable $e) {
             if ($e instanceof $clase) {
                 return $e;
