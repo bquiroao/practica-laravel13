@@ -16,6 +16,11 @@ final class MapaErrores
         'CAMA_YA_ASIGNADA' => 409,
         'CONFLICTO_CONCURRENCIA' => 409,
         'ERROR_PERSISTENCIA' => 503,
+        'ADMISION_NO_ENCONTRADA' => 404,
+        'NO_AUTENTICADO' => 401,
+        'SOLICITUD_INVALIDA' => 400,
+        'RECURSO_NO_ENCONTRADO' => 404,
+        'METODO_NO_PERMITIDO' => 405,
     ];
 
     public static function estado(string $codigo): int
