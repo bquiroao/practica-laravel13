@@ -50,6 +50,12 @@ final class RepositorioDefectosEnMemoria implements RepositorioDefectos, Restaur
         return array_values(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant && $d->campanaId === $campanaId));
     }
 
+    public function abiertosDe(string $tenant, array $casos): array
+    {
+        return array_values(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant
+            && in_array($d->casoId, $casos, true) && $d->estado() !== EstadoDefecto::CERRADO));
+    }
+
     public function criticosAbiertos(string $tenant, array $casos): int
     {
         return count(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant
@@ -59,7 +65,7 @@ final class RepositorioDefectosEnMemoria implements RepositorioDefectos, Restaur
     public function mayoresAbiertos(string $tenant, array $casos): int
     {
         return count(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant
-            && in_array($d->casoId, $casos, true) && $d->severidad() === Severidad::MAYOR && $d->estado() !== EstadoDefecto::CERRADO));
+            && in_array($d->casoId, $casos, true) && $d->severidadEfectiva() === Severidad::MAYOR && $d->estado() !== EstadoDefecto::CERRADO));
     }
 
     /** @return list<string> eventos del historial de un defecto, en orden */

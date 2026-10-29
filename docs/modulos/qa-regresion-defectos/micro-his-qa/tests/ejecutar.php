@@ -29,6 +29,7 @@ $grupos = [
     'Cliente' => 'Cliente-servidor: cliente con bandeja, almacén remoto y circuito',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
+    'Semana15' => 'Semana 15: unitarias, caja blanca y caja negra trazadas a RF/RNF (y los hallazgos de la revisión)',
 ];
 $prefijos = [];
 foreach (array_slice($argv ?? [], 1) as $argumento) {

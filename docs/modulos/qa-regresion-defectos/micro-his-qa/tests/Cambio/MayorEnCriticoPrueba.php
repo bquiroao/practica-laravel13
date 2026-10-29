@@ -17,7 +17,7 @@ use Qa\Dominio\Modelo\Resultado;
 use Qa\Dominio\Modelo\Severidad;
 use Qa\Persistencia\FabricaAdaptadores;
 
-prueba('CAM-01', 'Dominio: GO con 0 críticos y tasa 100 %, pero 1 MAYOR abierto en un caso crítico → NO_GO con su propia causa', function (): void {
+prueba('CAM-01', 'Dominio (R-15): GO con 0 críticos y tasa 100 %, pero 1 MAYOR abierto en un caso crítico → NO_GO con su propia causa', function (): void {
     $c = Campana::planificar('hosp-norte', 'R', ['expediente'], ['TC-107' => 1], 0.95, 'lider-qa')->conId(1);
     $c->iniciar('1.4.0', [], ['TC-107' => CasoPrueba::APROBADO]);
     $c->agregar(new Intento(null, 1, 'TC-107', 1, Resultado::PASA, 't', [], [], null, null, null, 'k-cam-01', str_repeat('0', 64), new \DateTimeImmutable()));

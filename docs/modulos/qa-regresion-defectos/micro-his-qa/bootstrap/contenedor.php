@@ -10,6 +10,12 @@ declare(strict_types=1);
 
 require __DIR__ . '/autoload.php';
 
+// Semana 15 (RT-07): el Dominio usa mbstring (mb_strlen, mb_check_encoding). Sin ella, diseñar un caso terminaba en un error
+// fatal en medio de una petición; ahora el arranque lo dice antes. pdo_pgsql se verifica al abrir la conexión (FabricaConexion).
+if (!extension_loaded('mbstring')) {
+    throw new \RuntimeException('Micro-HIS QA necesita la extensión mbstring de PHP (ver README, «Requisitos»).');
+}
+
 use Qa\Aplicacion\CasosDeUso\AprobarCaso;
 use Qa\Aplicacion\CasosDeUso\CerrarCampana;
 use Qa\Aplicacion\CasosDeUso\ClasificarDefecto;
