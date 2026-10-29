@@ -1,0 +1,4 @@
+$ php semana-06/evidencia/probar-auditoria.php   # después del cambio
+[PDO] marta marca obsoleta la 1.0.0 = 200 | datosRevision(1) = {"autor":"ana","estado":"obsolete","revisor":"luis","obsoleta_por":"marta"}
+[InMemory] marta marca obsoleta la 1.0.0 = 200 | datosRevision(1) = {"autor":"ana","estado":"obsolete","revisor":"luis","obsoleta_por":"marta"}
+[PDO] fila de la 1.0.0: reviewed_by = luis, obsoleted_by = marta
