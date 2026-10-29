@@ -17,4 +17,11 @@ return [
         $camas = $servicios->camasDisponibles->ejecutar('MEDICINA_INTERNA', 'GENERAL', false, Datos::contexto('usr-adm-01'));
         Afirmar::igual(['B-201', 'B-202'], array_map(fn ($c) => $c->codigo, $camas));
     },
+    'bootstrap.php con ADMISION_ALMACEN=memoria funciona sin base de datos' => function () {
+        $servicios = (require __DIR__ . '/../../bootstrap.php')(null, 'memoria');
+        $r = $servicios->admitir->ejecutar(Datos::solicitud(), Datos::contexto('usr-adm-01'));
+        Afirmar::igual('B-201', $r->camaCodigo);
+        $camas = $servicios->camasDisponibles->ejecutar('MEDICINA_INTERNA', 'GENERAL', false, Datos::contexto('usr-adm-01'));
+        Afirmar::igual(['B-202'], array_map(fn ($c) => $c->codigo, $camas));
+    },
 ];
