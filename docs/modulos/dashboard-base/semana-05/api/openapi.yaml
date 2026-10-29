@@ -1,0 +1,87 @@
+openapi: 3.1.0
+info:
+  title: Dashboard base — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «navegación del dashboard con estados de carga, vacío, error y resumen inicial».
+    Las rutas son las del front controller de la semana 4. Hoy el hospital y los permisos llegan en las cabeceras
+    X-Tenant-ID y X-Permisos; desde la semana 15 saldrán del JWT y de RBAC (hallazgo H-01 de la semana 13).
+    Una tarjeta desconocida responde 403 E4, igual que una sin permiso (hallazgo H-03). Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+paths:
+  /dashboard:
+    get:
+      operationId: inicio
+      summary: Layout inicial con el menú del rol y sus tarjetas en «cargando» (CU-01, R-02, R-04)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Permisos' }]
+      responses:
+        '200':
+          description: Menú y esqueleto de tarjetas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [menu, tarjetas]
+                properties:
+                  menu:
+                    type: array
+                    items: { type: object, required: [ruta, titulo], properties: { ruta: { type: string }, titulo: { type: string } } }
+                  tarjetas: { type: array, items: { $ref: '#/components/schemas/Tarjeta' } }
+        '401': { $ref: '#/components/responses/Error' }
+  /dashboard/tarjetas/{id}:
+    get:
+      operationId: tarjeta
+      summary: Una tarjeta, que carga y falla por su cuenta (CU-02, CU-04, R-03)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Permisos'
+        - { name: id, in: path, required: true, schema: { type: string, enum: [pacientes, citas_hoy, camas_disponibles] } }
+      responses:
+        '200':
+          description: 'Resumen (conteo) o vacío con acción sugerida; nunca datos de pacientes (R-05, R-06)'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tarjeta' }
+              example: { id: citas_hoy, estado: resumen, texto: 1 cita hoy }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '503':
+          description: La fuente de la tarjeta falló; las demás siguen (R-03). Texto amable, sin detalles técnicos (R-09)
+          content:
+            application/json:
+              schema:
+                allOf: [{ $ref: '#/components/schemas/Tarjeta' }, { type: object, required: [error], properties: { error: { const: E5 } } }]
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant: { name: X-Tenant-ID, in: header, required: true, description: Hospital seleccionado (R-01)., schema: { type: string, example: h1 } }
+    Permisos: { name: X-Permisos, in: header, required: true, description: Permisos del rol separados por coma (RBAC simulado)., schema: { type: string, example: 'citas.ver,camas.ver' } }
+  responses:
+    Error:
+      description: Sin sesión u hospital (E1, 401) o tarjeta no disponible para el rol (E4, 403)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E4, mensaje: Esta tarjeta no está disponible para tu rol. }
+  schemas:
+    Tarjeta:
+      type: object
+      required: [id, estado, texto]
+      properties:
+        id: { type: string }
+        estado: { type: string, enum: [cargando, resumen, vacio, error] }
+        texto: { type: string }
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E1, E4, E5] }
+        mensaje: { type: string }
