@@ -6,7 +6,9 @@ declare(strict_types=1);
 $raiz = __DIR__ . '/../../micro-his-catalogo-camas';
 require $raiz . '/bootstrap.php';
 
-use MicroHis\Catalogo\Presentacion\ControladorCatalogo;
+use MicroHis\Catalogo\Persistencia\RepositorioPdo;
+use MicroHis\Catalogo\Presentacion\{ControladorCatalogo, VistaJson};
+use function MicroHis\Catalogo\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 function columnas(PDO $db, string $tabla): array { return array_column($db->query("PRAGMA table_info($tabla)")->fetchAll(), 'name'); }
@@ -16,11 +18,11 @@ printf("ENTRADA pruebas del Micro-HIS: %s (%s)\n\n", $codigo === 0 ? 'en verde' 
 
 $db = new PDO('sqlite::memory:');
 $db->exec(file_get_contents("$raiz/database/schema.sql"));
-$app = crearControlador($db);
+$app = crearControlador(new RepositorioPdo($db));
 
 // H-01: CU-05 / R-07. La única entrada del controlador no recibe usuario, permiso ni hospital, y no existe E1.
 $parametros = array_map(fn ($p) => $p->getName(), (new ReflectionMethod(ControladorCatalogo::class, 'atender'))->getParameters());
-$http = (new ReflectionClassConstant(ControladorCatalogo::class, 'HTTP'))->getValue();
+$http = (new ReflectionClassConstant(VistaJson::class, 'HTTP'))->getValue();   // desde la semana 4, la vista es dueña de los códigos
 linea('H-01', !isset($http['E1']), 'entrada atender(' . implode(', ', $parametros) . '); códigos: ' . implode(' ', array_keys($http)));
 
 // H-02: R-09. El historial guarda fecha y motivo, pero no quién hizo el cambio.
