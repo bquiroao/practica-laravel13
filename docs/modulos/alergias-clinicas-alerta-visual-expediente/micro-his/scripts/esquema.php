@@ -37,4 +37,12 @@ return [
     "CREATE OR REPLACE FUNCTION allergies_sin_borrado() RETURNS trigger LANGUAGE plpgsql AS
         \$\$ BEGIN RAISE EXCEPTION 'allergies_delete_protection'; END \$\$",
     'CREATE TRIGGER allergies_retention BEFORE DELETE ON allergies FOR EACH ROW EXECUTE FUNCTION allergies_sin_borrado()',
+    // PROPUESTA (semana 4): reconocimiento por usuario y por huella de la alerta (RN-09).
+    "CREATE TABLE allergy_alert_acknowledgements (
+        acknowledgement_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        local_patient_id uuid NOT NULL REFERENCES local_patients(local_patient_id) ON DELETE RESTRICT,
+        acknowledged_by_user_ref_id uuid NOT NULL REFERENCES local_user_refs(local_user_ref_id) ON DELETE RESTRICT,
+        alert_level text NOT NULL CHECK (alert_level IN ('ALTA', 'CRITICA')),
+        alert_fingerprint text NOT NULL, acknowledged_at timestamptz NOT NULL DEFAULT now(),
+        CONSTRAINT allergy_alert_ack_unique UNIQUE (local_patient_id, acknowledged_by_user_ref_id, alert_fingerprint))",
 ];
