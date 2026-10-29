@@ -1,0 +1,30 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes (caso CU-05 reportar resultado y CU-09 evaluar gate)
+
+Container_Boundary(m, "Micro-HIS QA E2E") {
+  Component(kernel, "Kernel", "Presentacion/Http", "Token → usuario y tenant; ruta → caso de uso; base64 → bytes.")
+  Component(reportar, "ReportarResultado", "Aplicacion", "Idempotencia → reglas → almacén → transacción.")
+  Component(gateUc, "EvaluarGate", "Aplicacion", "Carga versión y ejecución, evalúa y guarda.")
+  Component(ejec, "Ejecucion / ResultadoEscenario", "Dominio", "R-03, R-04, R-06.")
+  Component(gate, "QualityGate", "Dominio", "Reglas digest y a–e, pura.")
+  Component(puertos, "Puertos", "Dominio + Aplicacion", "Repositorios, Reloj, AlmacenEvidencias, PoliticaAcceso, Transaccion, RegistroAuditoria.")
+  Component(pdo, "Adaptadores PDO", "Persistencia/Pdo", "Prepared statements; PDOException → ErrorPersistencia.")
+  Component(mem, "Adaptadores en memoria", "Persistencia/EnMemoria", "Mismos puertos, para pruebas y demo.")
+  Component(disco, "AlmacenEvidenciasEnDisco", "Persistencia/Archivos", "Por contenido, verificado.")
+}
+ContainerDb(bd, "PostgreSQL e2e", "")
+
+Rel(kernel, reportar, "ejecutar(usuario, tenant, ejecucion, clave, datos)")
+Rel(kernel, gateUc, "ejecutar(usuario, tenant, version, ejecucion)")
+Rel(reportar, ejec, "desde() y agregar()")
+Rel(gateUc, gate, "evaluar()")
+Rel(reportar, puertos, "usa")
+Rel(gateUc, puertos, "usa")
+Rel(pdo, puertos, "implementa")
+Rel(mem, puertos, "implementa")
+Rel(disco, puertos, "implementa")
+Rel(pdo, bd, "SQL")
+@enduml

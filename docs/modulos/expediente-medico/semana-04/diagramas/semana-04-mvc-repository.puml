@@ -1,0 +1,32 @@
+@startuml semana-04-mvc-repository
+title MVC y Repository — Micro-HIS Expediente médico electrónico base
+class "public/index.php" as Front <<front controller>>
+package Presentacion {
+  class Rutas
+  class ControladorExpediente <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class ServicioExpediente
+  interface "ExpedientesHospital\nAuditoria" as Puertos <<puertos de HOSPITAL>>
+  interface RepositorioExpedientes <<repository>>
+  interface IndiceCentral <<puerto de CENTRAL>>
+  class "Paciente, Consentimiento" as Reglas
+}
+package Persistencia {
+  class "HospitalPdo\nHospitalEnMemoria" as Hosp
+  class "CentralPdo\nCentralEnMemoria" as Cent
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorExpediente : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorExpediente --> ServicioExpediente
+ControladorExpediente --> VistaJson
+ServicioExpediente --> Puertos
+ServicioExpediente --> IndiceCentral
+ServicioExpediente ..> Reglas
+RepositorioExpedientes --|> Puertos : extends
+Hosp ..|> RepositorioExpedientes
+Cent ..|> IndiceCentral
+note bottom of ControladorExpediente : sin SQL ni reglas de negocio
+@enduml

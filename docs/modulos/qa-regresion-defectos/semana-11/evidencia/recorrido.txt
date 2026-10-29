@@ -1,0 +1,56 @@
+
+== escritorio (1280 px) · A · camino feliz ==
+OK    escritorio a01-ingresar                   texto=sí  foco=sí  axe=0
+OK    escritorio a02-campanas-tester            texto=sí  foco=sí  axe=0
+OK    escritorio a03-ejecutar-tc107             texto=sí  foco=sí  axe=0
+OK    escritorio a04-confirmar                  texto=sí  foco=sí  axe=0
+OK    escritorio a04 · con el diálogo abierto, Tab no llega al fondo (fondo inerte)
+OK    escritorio a05-registrado-tc107           texto=sí  foco=sí  axe=0
+OK    escritorio a06-ejecutar-tc108             texto=sí  foco=sí  axe=0
+OK    escritorio a07-registrado-tc108           texto=sí  foco=sí  axe=0
+OK    escritorio a08-trazabilidad-lider         texto=sí  foco=sí  axe=0
+OK    escritorio a09-confirmar-cierre           texto=sí  foco=sí  axe=0
+OK    escritorio a10-cerrada-go                 texto=sí  foco=sí  axe=0
+
+== escritorio (1280 px) · B · error crítico y recuperación ==
+OK    escritorio b01-falla-formulario           texto=sí  foco=sí  axe=0
+OK    escritorio b02-falta-evidencia-422        texto=sí  foco=sí  axe=0
+OK    escritorio b03-confirmar-clinica          texto=sí  foco=sí  axe=0
+OK    escritorio b04-pendiente-sin-red          texto=sí  foco=sí  axe=0
+OK    escritorio b04 · la evidencia clínica NO está en localStorage ni sessionStorage (B-01)
+OK    escritorio b05-pendientes                 texto=sí  foco=sí  axe=0
+OK    escritorio b06-reenviado                  texto=sí  foco=sí  axe=0
+OK    escritorio b06 · la región viva anunció «TC-107 registrado. Quedan 0 pendientes.» (B-07)
+OK    escritorio b07-trazabilidad-bloquea       texto=sí  foco=sí  axe=0
+OK    escritorio b07 · Esc cierra el diálogo y el foco vuelve a «Cerrar campaña…» (B-08)
+OK    escritorio b08-confirmar-nogo             texto=sí  foco=sí  axe=0
+OK    escritorio b09-cerrada-nogo               texto=sí  foco=sí  axe=0
+
+== movil (360 px) · A · camino feliz ==
+OK    movil      a01-ingresar                   texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a02-campanas-tester            texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a03-ejecutar-tc107             texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a04-confirmar                  texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a04 · con el diálogo abierto, Tab no llega al fondo (fondo inerte)
+OK    movil      a05-registrado-tc107           texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a06-ejecutar-tc108             texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a07-registrado-tc108           texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a08-trazabilidad-lider         texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a09-confirmar-cierre           texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      a10-cerrada-go                 texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+
+== movil (360 px) · B · error crítico y recuperación ==
+OK    movil      b01-falla-formulario           texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b02-falta-evidencia-422        texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b03-confirmar-clinica          texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b04-pendiente-sin-red          texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b04 · la evidencia clínica NO está en localStorage ni sessionStorage (B-01)
+OK    movil      b05-pendientes                 texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b06-reenviado                  texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b06 · la región viva anunció «TC-107 registrado. Quedan 0 pendientes.» (B-07)
+OK    movil      b07-trazabilidad-bloquea       texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b07 · Esc cierra el diálogo y el foco vuelve a «Cerrar campaña…» (B-08)
+OK    movil      b08-confirmar-nogo             texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+OK    movil      b09-cerrada-nogo               texto=sí  foco=sí  axe=0  desborde=0  toque<44=0
+
+Comprobaciones: 46  Fallan: 0  Violaciones axe-core: 0

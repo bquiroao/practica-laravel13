@@ -1,0 +1,28 @@
+@startuml semana-04-repositorio-compartido
+' Cómo se integra el módulo en el repositorio de datos compartido (base HOSPITAL del HIS)
+skinparam componentStyle rectangle
+component "Alergias clínicas\n(este módulo)" as AL
+component "Expediente médico" as EX
+component "Prescripciones" as PR
+component "Pacientes" as PA
+component "Gobernanza y auditoría" as GA
+database "HOSPITAL (por hospital = tenant)" {
+  [allergies] as T1
+  [allergy_alert_acknowledgements\n(PROPUESTA)] as T2
+  [local_patients] as T3
+  [vista de alergias de solo lectura\n(propuesta H5 de prescripciones)] as V1
+}
+AL --> T1 : INSERT / UPDATE estado\n(único escritor)
+AL --> T2 : INSERT / SELECT
+AL --> T3 : SELECT code, status
+PA --> T3 : dueño (escribe)
+PR --> V1 : SELECT (sin privilegios\nsobre la tabla)
+V1 ..> T1 : lee
+EX --> AL : pide la alerta al abrir\nel expediente
+AL ..> GA : evento AlergiaRegistrada /\nAlertaReconocida (propuesta)
+note right of T1
+  Rol de BD propuesto para el módulo:
+  INSERT y UPDATE(status, resolved_at)
+  sobre allergies; sin DELETE (trigger).
+end note
+@enduml

@@ -1,0 +1,31 @@
+@startuml semana-07-refactor-despues
+' DESPUÉS (conceptual): un servicio arma la alerta y un modelo de presentación la redacta
+skinparam classAttributeIconSize 0
+class ServicioAlerta <<Application>> {
+  + alertaPara(PacienteRef, ?usuarioId): AlertaExpediente
+}
+class PresentacionAlerta <<Application, salida>> {
+  + titulo: string
+  + mensaje: string
+  + accion: RECONOCER | NINGUNA
+  + severidadVisible(Severidad): string
+}
+class RegistrarAlergia
+class ConsultarAlertaExpediente
+class ReconocerAlerta
+class CalculadorAlerta <<Domain>>
+class ComandoConsola
+class "vistas/alerta.php" as V
+class KernelApi
+RegistrarAlergia --> ServicioAlerta
+ConsultarAlertaExpediente --> ServicioAlerta
+ReconocerAlerta --> ServicioAlerta
+ServicioAlerta --> CalculadorAlerta
+ComandoConsola --> PresentacionAlerta
+V --> PresentacionAlerta
+KernelApi --> PresentacionAlerta : campo «presentacion»\nen el JSON
+note bottom of ServicioAlerta
+  1 solo lugar calcula la alerta
+  y 1 solo lugar redacta los textos.
+end note
+@enduml

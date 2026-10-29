@@ -7,7 +7,9 @@ $raiz = __DIR__ . '/../../micro-his-dashboard-ocupacion';
 require $raiz . '/bootstrap.php';
 
 use MicroHis\DashboardOcupacion\Aplicacion\Reloj;
+use MicroHis\DashboardOcupacion\Persistencia\RepositorioPdo;
 use MicroHis\DashboardOcupacion\Presentacion\ControladorOcupacion;
+use function MicroHis\DashboardOcupacion\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 $resultado = fn (array $r) => rtrim("{$r['status']} " . ($r['error'] ?? ''));
@@ -22,7 +24,7 @@ $db->exec("INSERT INTO wards VALUES (1, 'A', 'active'), (2, 'C', 'inactive');
            INSERT INTO beds VALUES (1, 1, 'A1', 'occupied'), (2, 1, 'A2', 'available'), (3, 2, 'C1', 'occupied');
            INSERT INTO bed_stays VALUES (1, 1, NULL), (2, 1, NULL), (3, 3, NULL);");
 $reloj = new class implements Reloj { public function ahora(): int { return 100000; } };
-$app = crearControlador($db, $reloj);
+$app = crearControlador(new RepositorioPdo($db), $reloj);
 $app->atender('consolidar', []);
 $corte = $app->atender('consultar', []);
 
@@ -34,7 +36,7 @@ linea('H-01', $r['status'] === 200, 'entrada atender(' . implode(', ', $parametr
 // H-02: códigos distintos de la semana 1, donde E3 es «sin permiso (403)» y E2 «falla la lectura».
 $estado = $app->atender('consultar', ['estado' => 'libre']);
 $rota = new PDO('sqlite::memory:');
-$lectura = crearControlador($rota, $reloj)->atender('consolidar', []);
+$lectura = crearControlador(new RepositorioPdo($rota), $reloj)->atender('consolidar', []);
 linea('H-02', $resultado($estado) === '422 E3' || ($lectura['error'] ?? '') !== 'E2', "estado inexistente = {$resultado($estado)}; falla de lectura = {$resultado($lectura)}");
 
 // H-03: R-04. Dos estancias abiertas en la misma cama (dos pacientes en A1) no se marcan.

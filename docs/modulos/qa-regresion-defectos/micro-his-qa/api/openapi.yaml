@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS QA funcional, pruebas manuales y matriz de regresión
-  version: 1.1.0
+  version: 1.2.0
   summary: Campañas de regresión manual, resultados con evidencia verificable, defectos con severidad y trazabilidad.
   description: |
     Contrato de la API del módulo QA del Sistema Hospitalario Integrado (semana 5).
@@ -777,13 +777,17 @@ components:
                   properties:
                     id:
                       type: integer
+                    campana:
+                      type: integer
+                      description: campaña donde se reportó; puede ser otra si el defecto sigue abierto (desde 1.2.0)
                     severidad:
                       type: string
+                      description: la clasificada, o la propuesta mientras no se clasifique (cuenta para el GO desde 1.2.0)
                     clasificado:
                       type: boolean
                     bloquea_go:
                       type: boolean
-                      description: CRÍTICA abierto, o MAYOR abierto en un caso crítico de la matriz (R-15, desde 1.1.0)
+                      description: CRÍTICA abierto, o MAYOR abierto en un caso crítico de la matriz (R-15, desde 1.1.0), con la severidad efectiva (1.2.0)
                     estado:
                       type: string
         requisitos:

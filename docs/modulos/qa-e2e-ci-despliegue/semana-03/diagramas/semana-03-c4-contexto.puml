@@ -1,0 +1,23 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS QA E2E, CI y despliegue
+
+Person(iqa, "Ingeniero de automatización QA", "Registra escenarios y planifica las pruebas de cada versión.")
+Person(rel, "Responsable de release", "Evalúa el quality gate.")
+Person(dev, "Desarrollador", "Registra versiones y consulta resultados.")
+System_Ext(ci, "Pipeline CI", "GitHub Actions u otro: construye el artefacto una vez, corre los E2E y reporta.")
+System(e2e, "Micro-HIS QA E2E", "Planificación, ejecuciones, evidencia y quality gates por versión.")
+System_Ext(almacen, "Almacén de artefactos", "Trazas, capturas, videos, logs y JUnit por SHA-256.")
+System_Ext(rbac, "RBAC e identidad del HIS", "Usuario, tenant y permisos.")
+System_Ext(qa, "Módulo QA funcional y regresión", "Puede importar los resultados como evidencia de una campaña.")
+
+Rel(iqa, e2e, "Escenarios y plan", "HTTPS/JSON")
+Rel(rel, e2e, "Evalúa el gate", "HTTPS/JSON")
+Rel(dev, e2e, "Versiones y trazabilidad", "HTTPS/JSON")
+Rel(ci, e2e, "Versión, ejecución, resultados con artefactos", "HTTPS/JSON + token de servicio")
+Rel(e2e, almacen, "Guarda y confirma evidencia", "por contenido")
+Rel(e2e, rbac, "¿Puede esta identidad?")
+Rel(qa, e2e, "Consulta la trazabilidad de una versión", "lectura")
+@enduml

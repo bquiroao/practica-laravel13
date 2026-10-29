@@ -1,0 +1,20 @@
+@startsalt semana-08-wireframe-w3-formulario
+{+
+  <b>Registrar alergia — PAC-00451</b>
+  ==
+  Nombre del alérgeno ¹ | "Penicilina          " | (1)
+  o código del alérgeno ¹ | "                    "
+  . | ¹ Llene al menos uno de los dos.
+  Tipo | ^Alergia^
+  Severidad * | ^Seleccione…^ | (2)
+  . | <color:#a4161a>Elija la severidad. Si no la sabe, elija «Desconocida».</color>
+  Reacción observada | {SI
+    Edema de glotis
+    .
+  } | (3)
+  . | 15 de 500 caracteres
+  Fecha de inicio | "2019-03-02" | (4)
+  ..
+  [Cancelar] | [Revisar y guardar] | (5)
+}
+@endsalt

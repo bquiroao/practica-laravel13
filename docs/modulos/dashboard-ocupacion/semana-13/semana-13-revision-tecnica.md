@@ -105,4 +105,6 @@ El **tipo** es omisión (falta algo pedido), error (hace algo distinto de lo ped
 
 Respuestas de la autorrevisión: C-01, C-02, C-05 a C-07, C-09, C-11 y C-14 «sí», confirmadas por las pruebas en verde. C-08 «sí»: la consolidación lee `beds` y `bed_stays` en el momento del corte, y el corte guarda su hora (R-05). C-13 «no aplica» en `8ffa2e2`: la ruta HTTP llega con el PR #201, aún sin integrar. Si se integra antes de la reunión, se congela el nuevo commit (E-01) y C-13 se revisa contra ella. Hay dos mayores, así que, según S-04, el moderador verifica solo las correcciones.
 
+**Reverificación tras integrar la semana 4** (29/10/2026, `develop` en `1595e00`). La semana 4 cambió la fábrica `crearControlador` y movió los códigos HTTP a `VistaJson`, así que `verificar-entrada.php` se adaptó a esa API. Su salida es idéntica: los cinco hallazgos siguen reproducidos con el código actual, y C-13 ya se puede revisar contra `Rutas.php` en la reunión.
+
 **Bibliografía:** IEEE (2008). *IEEE Std 1028-2008: Standard for Software Reviews and Audits* · Fagan, M. E. (1976). Design and code inspections to reduce errors in program development. *IBM Systems Journal, 15*(3) · Pressman, R. S. y Maxim, B. R. (2020). *Software Engineering: A Practitioner's Approach* (9.ª ed.). McGraw-Hill.

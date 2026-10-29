@@ -9,7 +9,8 @@ require $raiz . '/bootstrap.php';
 use MicroHis\Citas\Aplicacion\{Reloj, RepositorioCitas, ServicioCitas};
 use MicroHis\Citas\Dominio\Horario;
 use MicroHis\Citas\Persistencia\RepositorioPdo;
-use MicroHis\Citas\Presentacion\ControladorCitas;
+use MicroHis\Citas\Presentacion\{ControladorCitas, VistaJson};
+use function MicroHis\Citas\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 function columnas(PDO $db, string $tabla): array { return array_column($db->query("PRAGMA table_info($tabla)")->fetchAll(), 'name'); }
@@ -21,9 +22,9 @@ $db = new PDO('sqlite::memory:');
 $db->exec(file_get_contents("$raiz/database/schema.sql"));
 $db->exec("INSERT INTO doctor_specialties VALUES ('m1', 'cardio', 'active')");
 $reloj = new class implements Reloj { public int $t = 1000; public function ahora(): int { return $this->t; } };
-$app = crearControlador($db, $reloj);
+$app = crearControlador(new RepositorioPdo($db), $reloj);
 $cita = fn (string $p, int $i, int $f) => ['medico' => 'm1', 'paciente' => $p, 'especialidad' => 'cardio', 'inicio' => $i, 'fin' => $f, 'motivo' => 'control'];
-$http = (new ReflectionClassConstant(ControladorCitas::class, 'HTTP'))->getValue();
+$http = (new ReflectionClassConstant(VistaJson::class, 'HTTP'))->getValue();   // desde la semana 4, la vista es dueña de los códigos
 
 // H-01: R-09 / CU-05. La entrada del controlador no recibe usuario, permiso ni hospital, y no existe E1.
 $parametros = array_map(fn ($p) => $p->getName(), (new ReflectionMethod(ControladorCitas::class, 'atender'))->getParameters());
@@ -31,7 +32,7 @@ linea('H-01', !isset($http['E1']), 'entrada atender(' . implode(', ', $parametro
 
 // H-02: CU-01 / D7. Dos recepcionistas piden el mismo horario a la vez: entre la consulta de cruces y el INSERT
 // entra la otra solicitud. Un repositorio que intercala esa segunda solicitud reproduce la carrera.
-$intercalado = new class(new RepositorioPdo($db), fn () => crearControlador($db, $reloj)->atender('solicitar', $cita('p2', 5000, 6000))) implements RepositorioCitas {
+$intercalado = new class(new RepositorioPdo($db), fn () => crearControlador(new RepositorioPdo($db), $reloj)->atender('solicitar', $cita('p2', 5000, 6000))) implements RepositorioCitas {
     private bool $hecho = false;
     public function __construct(private RepositorioCitas $real, private Closure $otra) {}
     public function medicoVigente(string $m, string $e): bool { return $this->real->medicoVigente($m, $e); }
@@ -40,7 +41,7 @@ $intercalado = new class(new RepositorioPdo($db), fn () => crearControlador($db,
     public function estado(int $id): ?string { return $this->real->estado($id); }
     public function cambiarEstado(int $id, string $de, string $a, ?string $mot): bool { return $this->real->cambiarEstado($id, $de, $a, $mot); }
 };
-$r = (new ControladorCitas(new ServicioCitas($intercalado, $reloj)))->atender('solicitar', $cita('p1', 5000, 6000));
+$r = (new ControladorCitas(new ServicioCitas($intercalado, $reloj), new VistaJson()))->atender('solicitar', $cita('p1', 5000, 6000));
 $activas = (int) $db->query("SELECT COUNT(*) FROM appointments WHERE doctor = 'm1' AND starts_at = 5000 AND status = 'scheduled'")->fetchColumn();
 linea('H-02', $activas > 1 || $r['status'] !== 409, 'la solicitud que empezó primero = ' . rtrim("{$r['status']} " . ($r['error'] ?? '')) . " (se esperaba 409 E6); citas activas de m1 en [5000,6000): $activas; E6 en el mapa HTTP: " . (isset($http['E6']) ? 'sí' : 'no'));
 

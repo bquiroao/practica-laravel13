@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Signos vitales: wireframes de la semana 8</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.35 Arial,sans-serif;color:#222}
+.wf{width:980px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 8px;font-size:16px}.row{display:flex;gap:12px}.p{flex:1;border:2px solid #666;background:#fff;padding:10px;min-height:250px}
+.p>b{display:block;font-size:11px;color:#666;text-transform:uppercase;margin-bottom:6px}.n{width:250px;font-size:12px}.n ol{margin:0;padding-left:20px}
+i{display:inline-block;width:17px;height:17px;border-radius:50%;background:#c0392b;color:#fff;font:bold 11px/17px Arial;text-align:center;font-style:normal;margin-right:4px}
+.btn{display:inline-block;border:2px solid #333;padding:3px 10px;border-radius:3px;font-weight:bold;margin:2px 4px 2px 0}.pri{background:#333;color:#fff}.off{border-color:#aaa;color:#aaa}
+.in{display:inline-block;border:1px solid #666;min-width:70px;padding:2px 6px;background:#fff}.err{border:2px solid #c0392b}.t{color:#c0392b;font-size:12px}.hint{color:#666;font-size:12px}
+.chip{display:inline-block;border:1px solid #666;border-radius:10px;padding:0 7px;margin:1px;font-size:12px}.crit{background:#333;color:#fff;font-weight:bold}.anor{border-style:dashed;font-weight:bold}
+.row2{border-top:1px solid #ccc;padding:5px 0}.sk{height:14px;background:#ddd;margin:7px 0;border-radius:3px}.ban{border:2px solid #333;padding:6px 8px;margin:6px 0}.ban.w{border-style:dashed}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:3px 6px;text-align:left;font-size:13px}
+</style></head><body>
+
+<section class="wf" id="wf1"><h2>W1 · Tomas del paciente (enfermería y médico)</h2><div class="row">
+<div class="p"><b>a · con datos</b><div><i>1</i>Signos vitales · <b>M. P. M.</b> · P-000101 · Episodio activo</div>
+<div style="text-align:right"><i>2</i><span class="btn pri">Registrar toma</span></div>
+<div class="row2"><i>3</i>28/10 08:00 · enf-ana<br><span class="chip crit">▲ FC 135 lpm · CRÍTICA</span><span class="chip">✓ SpO2 97 % · Normal</span><span class="chip">✓ Temp 36.8 °C · Normal</span></div>
+<div class="row2">27/10 20:00 · enf-ana<br><span class="chip anor">△ PAS 150 mmHg · ANORMAL</span><span class="chip">✓ PAD 80 mmHg · Normal</span></div>
+<div class="hint"><i>4</i>2 tomas · más reciente primero</div></div>
+<div class="p"><b>b · vacío y cargando</b><div class="hint">Cargando tomas…</div><div class="sk"></div><div class="sk" style="width:70%"></div><hr>
+<div><i>5</i>Aún no hay tomas en este episodio.</div><div><span class="btn pri">Registrar toma</span> <span class="hint">(médico: «Aún no hay tomas registradas»)</span></div></div>
+<div class="n"><ol><li>Paciente por iniciales y código; el nombre completo no va en el título ni en la URL</li><li>Solo enfermería ve el botón; el médico solo consulta</li><li>Cada valor lleva unidad, texto de nivel y símbolo (no solo color)</li><li>Total anunciado con aria-live</li><li>Vacío: explica y ofrece la acción</li></ol></div></div></section>
+
+<section class="wf" id="wf2"><h2>W2 · Registrar toma (enfermería)</h2><div class="row">
+<div class="p"><b>a · formulario nuevo</b><div>Registrar toma · <b>M. P. M.</b></div><div class="hint"><i>1</i>Registra: enf-ana (su sesión) · Hospital 1</div><br>
+<table><tr><th>Signo</th><th>Valor</th><th>Unidad</th><th>Rango posible</th></tr>
+<tr><td><i>2</i>Presión sistólica (PAS)</td><td><span class="in">&nbsp;</span></td><td>mmHg</td><td class="hint">40 a 300</td></tr>
+<tr><td>Presión diastólica (PAD)</td><td><span class="in">&nbsp;</span></td><td>mmHg</td><td class="hint">20 a 200</td></tr>
+<tr><td>Frecuencia cardiaca (FC)</td><td><span class="in">&nbsp;</span></td><td>lpm</td><td class="hint">20 a 300</td></tr>
+<tr><td>Frecuencia respiratoria (FR)</td><td><span class="in">&nbsp;</span></td><td>rpm</td><td class="hint">1 a 80</td></tr>
+<tr><td>Temperatura</td><td><span class="in">&nbsp;</span></td><td>°C</td><td class="hint">25 a 45</td></tr>
+<tr><td>Saturación de oxígeno (SpO2)</td><td><span class="in">&nbsp;</span></td><td>%</td><td class="hint">50 a 100</td></tr></table>
+<div class="hint"><i>3</i>Llene al menos un signo; los demás pueden quedar vacíos</div><span class="btn pri"><i>4</i>Revisar</span><span class="btn">Cancelar</span></div>
+<div class="p"><b>b · error en línea</b><div>Frecuencia cardiaca (FC)</div><span class="in err">400</span> lpm<div class="t"><i>5</i>⚠ FC: 400 lpm no es posible (20 a 300). Revise el valor.</div><br>
+<div>Presión sistólica (PAS) <span class="in">80</span> · PAD <span class="in">95</span><div class="hint"><i>6</i>Aviso: la sistólica suele ser mayor que la diastólica. Puede continuar.</div></div><br>
+<span class="btn pri">Revisar</span><div class="t"><i>7</i>Hay 1 campo con error: FC</div></div>
+<div class="n"><ol><li>El autor sale de la sesión, no se escribe</li><li>La unidad es fija y está visible; no se elige</li><li>Un signo vacío no se envía</li><li>El botón queda activo: al pulsarlo, valida y lleva al primer error</li><li>El mensaje dice qué signo, qué valor y qué rango; texto + símbolo</li><li>Aviso no bloqueante (no es regla del servidor)</li><li>Resumen de errores con aria-live</li></ol></div></div></section>
+
+<section class="wf" id="wf3"><h2>W3 · Revisar y confirmar (enfermería)</h2><div class="row">
+<div class="p"><b>a · revisión</b><div>Revise la toma de <b>M. P. M.</b> antes de guardar</div><br>
+<table><tr><td>FC</td><td><b>135</b> lpm</td></tr><tr><td>SpO2</td><td><b>97</b> %</td></tr><tr><td>Temperatura</td><td><b>36.8</b> °C</td></tr></table>
+<div class="ban w"><i>1</i>Una toma guardada no se puede editar ni borrar. Si hay un error se corrige con otra toma.</div>
+<span class="btn"><i>2</i>Volver y corregir</span><span class="btn pri"><i>3</i>Guardar toma</span></div>
+<div class="p"><b>b · guardando</b><div class="hint">Guardando la toma…</div><br><table><tr><td>FC</td><td><b>135</b> lpm</td></tr><tr><td>SpO2</td><td><b>97</b> %</td></tr><tr><td>Temperatura</td><td><b>36.8</b> °C</td></tr></table><br>
+<span class="btn off">Volver y corregir</span><span class="btn off"><i>4</i>Guardando…</span><div class="hint"><i>5</i>Los botones se desactivan para no enviar dos veces</div></div>
+<div class="n"><ol><li>La confirmación existe porque guardar es irreversible (RF-10)</li><li>Volver conserva lo escrito</li><li>Acción principal con verbo claro</li><li>Estado de carga visible en el mismo botón</li><li>Un solo envío por confirmación</li></ol></div></div></section>
+
+<section class="wf" id="wf4"><h2>W4 · Resultado de guardar (enfermería)</h2><div class="row">
+<div class="p"><b>a · éxito con alerta crítica enviada</b><div class="ban"><i>1</i>✓ Toma guardada · 28/10 08:00</div>
+<span class="chip crit">▲ FC 135 lpm · CRÍTICA</span><span class="chip">✓ SpO2 97 % · Normal</span><span class="chip">✓ Temp 36.8 °C · Normal</span>
+<div class="ban"><i>2</i>▲ Alerta crítica: FC 135 lpm. Enviada al módulo de Alertas críticas.</div><span class="btn pri">Ver tomas</span><span class="btn">Registrar otra</span></div>
+<div class="p"><b>b · éxito con envío pendiente</b><div class="ban"><i>1</i>✓ Toma guardada · 28/10 08:00</div>
+<div class="ban w"><i>3</i>▲ Alerta crítica: FC 135 lpm. Aún no se pudo enviar; se reintentará sola. Avise al médico por otro medio.</div><span class="btn pri">Ver tomas</span></div>
+<div class="n"><ol><li>Éxito claro y con hora; el foco pasa a este mensaje (aria-live)</li><li>La alerta crítica se distingue por texto y símbolo</li><li>Si M21 no responde (RF-07) la toma sí se guardó; se dice y se indica qué hacer</li></ol></div></div></section>
+
+<section class="wf" id="wf5"><h2>W5 · Errores recuperables</h2><div class="row">
+<div class="p"><b>mensajes y acciones</b>
+<div class="ban"><i>1</i>⚠ Este paciente ya no tiene un episodio activo. No se guardó nada. <span class="btn">Volver a pacientes</span></div>
+<div class="ban"><i>2</i>⚠ No tiene acceso a este paciente o a esta acción. <span class="btn">Volver</span></div>
+<div class="ban"><i>3</i>⚠ Su sesión terminó. Inicie sesión para continuar. <span class="btn">Iniciar sesión</span></div>
+<div class="ban"><i>4</i>⚠ No se pudo guardar. Los valores siguen en pantalla. <span class="btn pri">Reintentar</span></div>
+<div class="ban"><i>5</i>⚠ Escriba al menos un signo vital. · Cada signo va una sola vez por toma.</div></div>
+<div class="n"><ol><li>409: sin salida a editar; la acción es volver</li><li>403: no revela datos del paciente</li><li>401: no conserva valores (datos clínicos fuera del navegador)</li><li>500: conserva lo escrito en pantalla y permite reintentar</li><li>422 de estructura: vuelve al formulario</li></ol></div></div></section>
+
+<section class="wf" id="wf6"><h2>W6 · Alertas y reconocimiento (médico y enfermería)</h2><div class="row">
+<div class="p"><b>a · pendiente y reconocida</b>
+<div class="row2"><i>1</i><span class="chip crit">▲ CRÍTICA</span> FC 135 lpm · 28/10 08:00 <span class="btn pri"><i>2</i>Reconocer</span></div>
+<div class="row2"><span class="chip anor">△ ANORMAL</span> PAS 150 mmHg · 27/10 20:00 <span class="btn">Reconocer</span></div>
+<div class="row2"><span class="chip">✓ Reconocida</span> Temp 38.0 °C · <i>3</i>Dr. Luis, 27/10 21:10</div></div>
+<div class="p"><b>b · confirmación y carrera</b><div class="ban"><i>4</i>¿Reconocer la alerta crítica de FC 135 lpm? Quedará registrado quién y cuándo.<br><span class="btn pri">Reconocer</span><span class="btn">Cancelar</span></div>
+<div class="ban w"><i>5</i>Esta alerta ya fue reconocida por Dr. Luis a las 08:05. Se conserva el primer reconocimiento.</div></div>
+<div class="n"><ol><li>Orden: críticas primero, luego anormales, luego reconocidas</li><li>Botón por alerta con su nombre accesible («Reconocer FC 135»)</li><li>Reconocida: quién y cuándo, sin botón</li><li>Confirmación corta: el acto deja constancia</li><li>Si otra persona ya la reconoció (CA-09) se informa y se actualiza la fila</li></ol></div></div></section>
+</body></html>

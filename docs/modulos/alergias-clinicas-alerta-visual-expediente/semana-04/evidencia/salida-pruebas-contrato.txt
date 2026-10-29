@@ -1,0 +1,25 @@
+Fecha: 2026-10-29 05:17:02 | PHP 8.4.26 | --solo=semana04 --evidencia=../semana-04/evidencia/salida-pruebas-contrato.txt
+== semana04-contrato
+[OK] T-25 [pdo] C-1 porCodigo encuentra al paciente y devuelve null si no existe
+[OK] T-26 [memoria] C-1 porCodigo encuentra al paciente y devuelve null si no existe
+[OK] T-27 [pdo] C-2 guardar y leer devuelve los mismos datos
+[OK] T-28 [memoria] C-2 guardar y leer devuelve los mismos datos
+[OK] T-29 [pdo] C-3 guardar un equivalente activo lanza AlergiaDuplicada; otro tipo sí se acepta
+[OK] T-30 [memoria] C-3 guardar un equivalente activo lanza AlergiaDuplicada; otro tipo sí se acepta
+[OK] T-31 [pdo] C-4 existeActivaEquivalente usa la misma normalización que el índice único
+[OK] T-32 [memoria] C-4 existeActivaEquivalente usa la misma normalización que el índice único
+[OK] T-33 [pdo] C-5 reconocimiento: guardar dos veces es idempotente y existe() distingue usuario
+[OK] T-34 [memoria] C-5 reconocimiento: guardar dos veces es idempotente y existe() distingue usuario
+== semana04-mvc
+[OK] T-19 GET de la alerta responde 200 y muestra el nivel con texto, no solo con color
+[OK] T-20 la vista escapa lo que escribió el usuario (sin <script> en la página)
+[OK] T-21 error de dominio en el formulario: 422, mensaje con código y lo escrito se conserva
+[OK] T-22 controladores y formulario sin SQL ni reglas de negocio (revisión del código fuente)
+[OK] T-23 POST de reconocimiento redirige (303) y la alerta muestra que ya fue reconocida
+[OK] T-24 paciente inexistente → 404 con código; ruta desconocida → 404
+== semana04
+[OK] T-15 RN-09: tras reconocer, la misma huella queda reconocida solo para ese usuario
+[OK] T-16 RN-09: una alergia nueva cambia la huella y el reconocimiento anterior deja de valer
+[OK] T-17 reconocer dos veces la misma huella no duplica filas (idempotente)
+[OK] T-18 una alerta MODERADA no admite reconocimiento (no hay nada que confirmar)
+RESULTADO: 20 pruebas, 20 correctas, 0 fallidas, 0 omitidas, 0 con defecto registrado
