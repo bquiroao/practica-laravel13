@@ -21,6 +21,8 @@ use Alergias\Persistencia\PdoDirectorioPacientes;
 use Alergias\Persistencia\PdoRepositorioAlergias;
 use Alergias\Persistencia\PdoRepositorioReconocimientos;
 use Alergias\Persistencia\RelojSistema;
+use Alergias\Presentacion\Api\AutenticadorTokens;
+use Alergias\Presentacion\Api\KernelApi;
 use Alergias\Presentacion\Web\ControladorAlergia;
 use Alergias\Presentacion\Web\ControladorAlerta;
 use Alergias\Presentacion\Web\Router;
@@ -60,4 +62,11 @@ function armarWeb(array $casos, ?string $usuarioId = null): Router
     $router->agregar('GET', '/pacientes/{codigo}/alergias/nueva', [$alergia, 'formulario']);
     $router->agregar('POST', '/pacientes/{codigo}/alergias', [$alergia, 'registrar']);
     return $router;
+}
+
+/** API REST v1 (semana 5). El registro de acceso va a stderr en JSON, sin datos clínicos. */
+function armarApi(array $casos, ?Closure $registrarAcceso = null): KernelApi
+{
+    $registrarAcceso ??= static fn (array $linea) => file_put_contents('php://stderr', json_encode($linea) . PHP_EOL);
+    return new KernelApi($casos, new AutenticadorTokens(), getenv('ALERGIAS_HOSPITAL') ?: 'H-01', $registrarAcceso);
 }
