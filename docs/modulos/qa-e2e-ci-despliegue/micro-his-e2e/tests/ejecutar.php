@@ -23,6 +23,8 @@ $grupos = [
     'Contratos' => 'Repository: la misma suite de contrato para los adaptadores InMemory y PDO',
     'Mvc' => 'MVC: formularios, controladores y vistas',
     'Presentacion' => 'Presentación: HTTP',
+    'Api' => 'Contrato API (OpenAPI) = código',
+    'Cliente' => 'Cliente-servidor: reportador del pipeline con reintentos y bandeja, y observabilidad',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
 ];

@@ -61,3 +61,20 @@ prueba('ARQ-06', 'MVC: los controladores no tienen SQL, no importan el Dominio y
     }
     igual([], $problemas, 'controladores');
 });
+
+prueba('ARQ-07', 'Cliente-servidor: el Cliente se programa contra el contrato (no importa ninguna capa) y ninguna capa importa el Cliente', function () use ($archivosDe, $capasUsadas): void {
+    $problemas = [];
+    foreach ($archivosDe('Cliente') as $archivo) {
+        foreach (array_diff($capasUsadas($archivo), ['Cliente']) as $capa) {
+            $problemas[] = basename((string) $archivo) . " → $capa";
+        }
+    }
+    foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
+        foreach ($archivosDe($capa) as $archivo) {
+            if (in_array('Cliente', $capasUsadas($archivo), true)) {
+                $problemas[] = basename((string) $archivo) . ' → Cliente';
+            }
+        }
+    }
+    igual([], $problemas, 'dependencias del cliente');
+});

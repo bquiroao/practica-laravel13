@@ -64,7 +64,7 @@ prueba('APP-05', 'Las reglas se revisan ANTES de tocar el almacén: un resultado
     $e->reportar($id, 'E2E-104', 'FALLA');
     $antes = array_keys($e->almacen->contenido);
     $dup = $e->reportar($id, 'E2E-104', 'FALLA', 1, [['tipo' => 'captura', 'bytes' => 'captura distinta del segundo reporte']]);
-    igual([Salida::CONFLICTO, 'RESULTADO_YA_REPORTADO', $antes], [$dup->tipo, $dup->codigo, array_keys($e->almacen->contenido)], 'duplicado sin huérfanos');
+    igual([Salida::CONFLICTO, 'ESCENARIO_YA_REPORTADO', $antes], [$dup->tipo, $dup->codigo, array_keys($e->almacen->contenido)], 'duplicado sin huérfanos');
 });
 
 prueba('APP-06', 'R-13: sin permiso → 403 (el pipeline no evalúa el gate ni planifica); otro tenant no ve la versión (404)', function (): void {

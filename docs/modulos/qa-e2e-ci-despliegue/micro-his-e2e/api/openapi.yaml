@@ -1,0 +1,530 @@
+openapi: 3.1.0
+info:
+  title: Micro-HIS QA E2E, CI y guía de despliegue
+  version: 1.0.0
+  summary: Planificación de pruebas, ejecución E2E, conservación de evidencia y quality gates por versión.
+  description: |
+    Contrato del módulo QA E2E del Sistema Hospitalario Integrado. Lo consumen tres roles humanos (Ingeniero de
+    automatización QA, Responsable de release, Desarrollador) y el pipeline de CI con un token de servicio.
+
+    Reglas transversales:
+    - El tenant (hospital) sale del token y se confirma con la cabecera X-Tenant-ID; otro tenant → 403.
+    - 400 = la petición no tiene la forma esperada (tipos, JSON, base64). 422 = la forma es correcta pero una regla del
+      dominio la rechaza. 409 = choca con el estado actual (plan congelado, ejecución terminada, digest distinto).
+    - Reportar un resultado exige Idempotency-Key: la misma clave con el mismo contenido devuelve 200 y el MISMO
+      resultado, aunque la ejecución ya esté cerrada; con otro contenido, 409 CLAVE_REUTILIZADA.
+    - La evidencia es fail-closed: si el almacén no confirma el artefacto, 503 EVIDENCIA_NO_DISPONIBLE y no se registra nada.
+    - No hay PUT ni DELETE: resultados, evidencias y evaluaciones solo se agregan.
+  contact:
+    name: Boris Alexander Quiroa Orellana
+servers:
+  - url: http://127.0.0.1:8080
+    description: php -S para desarrollo y demo
+security:
+  - bearer: []
+tags:
+  - name: escenarios
+  - name: versiones
+  - name: ejecuciones
+  - name: gate
+paths:
+  /api/v1/e2e/escenarios:
+    post:
+      operationId: registrarEscenario
+      summary: CU-01 registrar un escenario E2E con datos sintéticos (R-01)
+      tags: [escenarios]
+      x-permiso: e2e.disenar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscenarioNuevo'
+      responses:
+        '201':
+          $ref: '#/components/responses/Creado'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones:
+    post:
+      operationId: registrarVersion
+      summary: CU-02 registrar la versión candidata con el digest del artefacto (R-03)
+      tags: [versiones]
+      x-permiso: e2e.versionar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionNueva'
+      responses:
+        '201':
+          $ref: '#/components/responses/Creado'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/plan:
+    post:
+      operationId: planificarPruebas
+      summary: CU-03 plan con todos los críticos y los escenarios de los módulos afectados (R-02)
+      tags: [versiones]
+      x-permiso: e2e.planificar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plan'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/ejecuciones:
+    post:
+      operationId: iniciarEjecucion
+      summary: CU-04 iniciar una ejecución sobre el digest de la versión; congela el plan
+      tags: [ejecuciones]
+      x-permiso: e2e.ejecutar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InicioEjecucion'
+      responses:
+        '201':
+          $ref: '#/components/responses/Creado'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/gate:
+    post:
+      operationId: evaluarGate
+      summary: CU-09 evaluar el quality gate sobre una ejecución COMPLETADA (R-03, R-09)
+      tags: [gate]
+      x-permiso: e2e.evaluar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoGate'
+      responses:
+        '200':
+          description: Evaluación guardada (se agrega; nunca reemplaza a la anterior)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/trazabilidad:
+    get:
+      operationId: consultarTrazabilidad
+      summary: CU-12 versión, plan, ejecuciones, resultados, evidencias (solo huellas) y evaluaciones
+      tags: [versiones]
+      x-permiso: e2e.consultar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/ejecuciones/{ejecucionId}/resultados:
+    post:
+      operationId: reportarResultado
+      summary: CU-05 reportar el resultado de un escenario con sus artefactos (idempotente, fail-closed)
+      tags: [ejecuciones]
+      x-permiso: e2e.reportar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/EjecucionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultadoNuevo'
+      responses:
+        '200':
+          description: La misma clave con el mismo contenido ya estaba registrada (RESULTADO_YA_REPORTADO)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoRegistrado'
+        '201':
+          description: Resultado registrado (RESULTADO_REPORTADO); un PASA con más de un intento queda INESTABLE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoRegistrado'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/ejecuciones/{ejecucionId}/cierre:
+    post:
+      operationId: cerrarEjecucion
+      summary: CU-07 completar (todos los escenarios con resultado) o abortar con un motivo
+      tags: [ejecuciones]
+      x-permiso: e2e.ejecutar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/EjecucionId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cierre'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: JWT del HIS (en la demo, tokens fijos). El del pipeline solo puede versionar, ejecutar y reportar.
+  parameters:
+    Tenant:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+    Version:
+      name: version
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$'
+    EjecucionId:
+      name: ejecucionId
+      in: path
+      required: true
+      schema:
+        type: integer
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9._-]{8,80}$'
+  responses:
+    Creado:
+      description: Creado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Exito'
+    Ok:
+      description: Hecho
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Exito'
+    Error:
+      description: Error con un código estable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Exito:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+      additionalProperties: true
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum: [BASE64_INVALIDO, CLAVE_REUTILIZADA, CUERPO_INVALIDO, DATOS_INVALIDOS, DATOS_NO_SINTETICOS, DIGEST_DISTINTO, DIGEST_EN_USO,
+            EJECUCION_DE_OTRA_VERSION, EJECUCION_NO_ADMITE_RESULTADOS, EJECUCION_NO_COMPLETADA, ERROR_INTERNO, ERROR_PERSISTENCIA,
+            ESCENARIOS_SIN_RESULTADO, ESCENARIO_EXISTENTE, ESCENARIO_FUERA_DEL_PLAN, ESCENARIO_INEXISTENTE, ESCENARIO_YA_REPORTADO,
+            ESTADO_NO_PERMITE_CERRAR, EVIDENCIA_DEMASIADO_GRANDE, EVIDENCIA_NO_DISPONIBLE, EVIDENCIA_VACIA, IDEMPOTENCY_KEY_REQUERIDA,
+            JSON_INVALIDO, METODO_NO_PERMITIDO, MOTIVO_REQUERIDO, NO_AUTENTICADO, NO_ENCONTRADO, PERMISO_DENEGADO, PLAN_CONGELADO,
+            PLAN_INCOMPLETO, RUTA_DESCONOCIDA, TENANT_AJENO, TENANT_REQUERIDO, TIPO_NO_PERMITIDO, VERSION_EXISTENTE, VERSION_SIN_PLAN]
+        detalle:
+          type: array
+          items:
+            type: string
+        campos:
+          type: array
+          items:
+            type: string
+    EscenarioNuevo:
+      type: object
+      required: [id, titulo, modulo, critico, requisitos, datos]
+      properties:
+        id:
+          type: string
+          pattern: '^E2E-\d{3,5}$'
+        titulo:
+          type: string
+          maxLength: 200
+        modulo:
+          type: string
+        critico:
+          type: boolean
+        requisitos:
+          type: array
+          items:
+            type: string
+            pattern: '^RF-\d{2,3}$'
+        datos:
+          type: string
+          pattern: '^SINT-[A-Z0-9-]{2,40}$'
+          description: Conjunto de datos SINTÉTICO (R-01); nunca pacientes reales
+    VersionNueva:
+      type: object
+      required: [numero, commit, digest, modulos]
+      properties:
+        numero:
+          type: string
+        commit:
+          type: string
+          pattern: '^[0-9a-f]{7,40}$'
+        digest:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        modulos:
+          type: array
+          items:
+            type: string
+    Plan:
+      type: object
+      required: [escenarios]
+      properties:
+        escenarios:
+          type: array
+          items:
+            type: string
+    InicioEjecucion:
+      type: object
+      required: [digest, entorno]
+      properties:
+        digest:
+          type: string
+          description: Debe ser el de la versión (R-03); si no, 409 DIGEST_DISTINTO
+        entorno:
+          type: string
+    ResultadoNuevo:
+      type: object
+      required: [escenario, resultado, intentos]
+      properties:
+        escenario:
+          type: string
+        resultado:
+          type: string
+          enum: [PASA, FALLA, OMITIDO]
+          description: INESTABLE no se reporta; lo deduce el servidor de un PASA con más de un intento (R-06)
+        intentos:
+          type: integer
+          minimum: 0
+          maximum: 5
+        evidencias:
+          type: array
+          items:
+            type: object
+            required: [tipo, contenido_base64]
+            properties:
+              tipo:
+                type: string
+                enum: [traza, captura, video, log, junit]
+              contenido_base64:
+                type: string
+                description: Hasta 20 MB decodificado (si no, 413)
+    ResultadoRegistrado:
+      type: object
+      properties:
+        codigo:
+          type: string
+        ejecucion:
+          type: integer
+        escenario:
+          type: string
+        resultado:
+          type: string
+          enum: [PASA, FALLA, INESTABLE, OMITIDO]
+        intentos:
+          type: integer
+        evidencias:
+          type: array
+          items:
+            type: string
+            description: SHA-256 del artefacto
+    Cierre:
+      type: object
+      properties:
+        abortar:
+          type: string
+          description: Motivo; si falta, se intenta completar
+    PedidoGate:
+      type: object
+      required: [ejecucion]
+      properties:
+        ejecucion:
+          type: integer
+    Decision:
+      type: object
+      required: [codigo, decision, reglas, causas, digest, politica]
+      properties:
+        codigo:
+          type: string
+        version:
+          type: string
+        ejecucion:
+          type: integer
+        decision:
+          type: string
+          enum: [APROBADO, RECHAZADO]
+        reglas:
+          type: object
+          properties:
+            digest:
+              type: boolean
+            a_criticos:
+              type: boolean
+            b_tasa:
+              type: boolean
+            c_inestables:
+              type: boolean
+            d_evidencia:
+              type: boolean
+            e_antiguedad:
+              type: boolean
+        causas:
+          type: array
+          items:
+            type: string
+        digest:
+          type: string
+        politica:
+          type: string

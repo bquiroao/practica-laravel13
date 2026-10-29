@@ -93,7 +93,7 @@ final class Ejecucion
         $this->critico($r->escenario);
         foreach ($this->resultados as $previo) {
             if ($previo->escenario === $r->escenario) {
-                throw new ReglaRechazada('RESULTADO_YA_REPORTADO', [$r->escenario]);   // los reintentos van en «intentos»
+                throw new ReglaRechazada('ESCENARIO_YA_REPORTADO', [$r->escenario]);   // los reintentos van en «intentos»
             }
         }
         $this->resultados[] = $r;

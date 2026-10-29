@@ -47,16 +47,18 @@ function construirCasosDeUso(array $p, array $politica): array
 }
 
 /** MVC (semana 4): un controlador por recurso, cada uno con sus casos de uso. */
-function construirKernel(array $uc, array $tokens): Kernel
+function construirKernel(array $uc, array $tokens, ?callable $registroAcceso = null): Kernel
 {
     return new Kernel([
         'escenarios' => new EscenariosControlador($uc['escenario']),
         'versiones' => new VersionesControlador($uc['version'], $uc['plan'], $uc['iniciar'], $uc['gate'], $uc['trazabilidad']),
         'ejecuciones' => new EjecucionesControlador($uc['reportar'], $uc['cerrar']),
-    ], $tokens);
+    ], $tokens, $registroAcceso);
 }
 
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config), $config['politica_gate']), $config['tokens_demo']);
+    $registro = ($config['registro_acceso'] ?? 'stderr') === 'stderr' ? static fn (string $linea) => file_put_contents('php://stderr', $linea . PHP_EOL) : null;
+
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config), $config['politica_gate']), $config['tokens_demo'], $registro);
 }

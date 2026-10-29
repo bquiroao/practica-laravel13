@@ -65,7 +65,7 @@ prueba('DOM-06', 'R-04: solo EN_CURSO admite resultados, solo del plan y uno por
     $e = Ejecucion::iniciar($v, $v->digest, 'staging', $hora);
     igual('ESCENARIO_FUERA_DEL_PLAN', lanza(ReglaRechazada::class, static fn () => $e->critico('E2E-103'), 'fuera')->codigo, 'fuera del plan');
     $e->agregar($res('E2E-101', true, 'PASA'));
-    igual('RESULTADO_YA_REPORTADO', lanza(ReglaRechazada::class, static fn () => $e->agregar($res('E2E-101', true, 'FALLA')), 'duplicado')->codigo, 'duplicado');
+    igual('ESCENARIO_YA_REPORTADO', lanza(ReglaRechazada::class, static fn () => $e->agregar($res('E2E-101', true, 'FALLA')), 'duplicado')->codigo, 'duplicado');
     igual(['ESCENARIOS_SIN_RESULTADO', ['E2E-102', 'E2E-104']], [($x = lanza(ReglaRechazada::class, static fn () => $e->completar($hora), 'completar'))->codigo, $x->detalle], 'faltan');
     $e->abortar('runner sin memoria', $hora);
     igual('EJECUCION_NO_ADMITE_RESULTADOS', lanza(ReglaRechazada::class, static fn () => $e->agregar($res('E2E-102', true, 'PASA')), 'abortada')->codigo, 'abortada');

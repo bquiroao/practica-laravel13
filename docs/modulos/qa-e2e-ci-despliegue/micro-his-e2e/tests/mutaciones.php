@@ -49,6 +49,11 @@ $mutaciones = [
         "    USING (tenant = current_setting('his.tenant', true));", '    USING (true);'],
     'M21 el controlador de versiones se salta el formulario' => ['src/Presentacion/Http/Controladores/VersionesControlador.php',
         '            $datos = FormularioVersion::registrar($s);', '            $datos = json_decode($s->cuerpo, true) ?? [];'],
+    // Semana 5: cliente-servidor, contrato y observabilidad.
+    'M22 el reportador cambia la clave en cada reintento (R-12)' => ['src/Cliente/ReportadorCi.php', "'Idempotency-Key' => \$pedido['clave'],", "'Idempotency-Key' => \$pedido['clave'] . \$i,"],
+    'M23 el reportador reintenta un 4xx' => ['src/Cliente/ReportadorCi.php', "if (\$r['estado'] < 500 && \$r['estado'] !== 429) {", 'if (false) {'],
+    'M24 el contrato no documenta el 413 de reportar' => ['api/openapi.yaml', "        '413':\n          \$ref: '#/components/responses/Error'\n", ''],
+    'M25 el kernel acepta cualquier X-Request-ID' => ['src/Presentacion/Http/Kernel.php', "preg_match('/^[A-Za-z0-9-]{8,64}\$/', \$propio)", "preg_match('/^.+\$/s', \$propio)"],
 ];
 
 function copiar(string $origen, string $destino): void
