@@ -9,7 +9,8 @@ require $raiz . '/bootstrap.php';
 use MicroHis\ContratosApi\Aplicacion\{EscritorVersiones, ServicioConsulta, ServicioPublicacion, ServicioRevision};
 use MicroHis\ContratosApi\Dominio\VersionNueva;
 use MicroHis\ContratosApi\Persistencia\RepositorioPdo;
-use MicroHis\ContratosApi\Presentacion\ControladorDocumentacion;
+use MicroHis\ContratosApi\Presentacion\{ControladorDocumentacion, VistaJson};
+use function MicroHis\ContratosApi\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 function columnas(PDO $db, string $tabla): array { return array_column($db->query("PRAGMA table_info($tabla)")->fetchAll(), 'name'); }
@@ -20,9 +21,9 @@ printf("ENTRADA pruebas del Micro-HIS: %s (%s)\n\n", $codigo === 0 ? 'en verde' 
 
 $db = new PDO('sqlite::memory:');
 $db->exec(file_get_contents("$raiz/database/schema.sql"));
-$app = crearControlador($db);
+$app = crearControlador(new RepositorioPdo($db));
 $version = fn (string $v, array $aud, string $tipo = 'manual') => ['slug' => 'guia-citas', 'tipo' => $tipo, 'version' => $v, 'audiencia' => $aud, 'usuario' => 'ana'];
-$http = (new ReflectionClassConstant(ControladorDocumentacion::class, 'HTTP'))->getValue();
+$http = (new ReflectionClassConstant(VistaJson::class, 'HTTP'))->getValue();   // desde la semana 4, la vista es dueña de los códigos
 
 // H-01: CU-06 / R-06. Usuario y roles llegan en el cuerpo de la petición: quien escriba roles = [admin] los obtiene. No existe E1.
 $app->atender('enviar', $version('1.0.0', ['medico', 'enfermeria']));
@@ -48,7 +49,7 @@ $intercalado = new class(new RepositorioPdo($db), fn () => $app->atender('enviar
     public function guardarEnRevision(VersionNueva $v, string $autor): int { return $this->real->guardarEnRevision($v, $autor); }
 };
 $repo = new RepositorioPdo($db);
-$r = (new ControladorDocumentacion(new ServicioPublicacion($intercalado), new ServicioRevision($repo), new ServicioConsulta($repo)))
+$r = (new ControladorDocumentacion(new ServicioPublicacion($intercalado), new ServicioRevision($repo), new ServicioConsulta($repo), new VistaJson()))
     ->atender('enviar', ['usuario' => 'pedro'] + $version('2.0.0', ['medico']));
 linea('H-04', $resultado($r) !== '409 E3', "la solicitud que empezó primero = {$resultado($r)} (se esperaba 409 E3)");
 
