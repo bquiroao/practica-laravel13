@@ -1,0 +1,36 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/mutaciones.php
+[DETECTA  ] M1 el autor puede aprobar su propio caso (R-02)                  falla: DOM-02, APP-07, HTTP-05
+[DETECTA  ] M2 la campaña inicia sin los críticos de la matriz (R-03)        falla: DOM-03, APP-06, MVC-05, INT-02
+[DETECTA  ] M3 una FALLA sin evidencia se acepta (R-05)                      falla: APP-04, CLI-04
+[DETECTA  ] M4 la referencia externa cuenta como evidencia (R-05)            falla: APP-04
+[DETECTA  ] M5 almacén caído: se registra igual sin evidencia (fail-open)    falla: APP-11, CLI-05
+[DETECTA  ] M6 una FALLA sin defecto se acepta (R-06)                        falla: APP-05
+[DETECTA  ] M7 cambiar la severidad no exige motivo (R-07)                   falla: DOM-07
+[DETECTA  ] M8 el desarrollador cierra el defecto (R-08)                     falla: DOM-08, APP-01
+[DETECTA  ] M9 la decisión cuenta el PRIMER intento, no el último (R-09)     falla: DOM-05, APP-01
+[DETECTA  ] M10 GO aunque haya críticos abiertos (R-09)                      falla: DOM-06, CON-04-MEM, CON-04-PDO
+[DETECTA  ] M11 sin idempotencia (R-12)                                      falla: APP-15
+[DETECTA  ] M12 el resultado y la traza en transacciones separadas           falla: APP-12, INT-06
+[DETECTA  ] M13 la consulta de campañas no filtra por tenant (SQL)           falla: CON-04-PDO, INT-07
+[DETECTA  ] M14 los intentos se pueden modificar (esquema)                   falla: INT-03
+[DETECTA  ] M15 la trazabilidad expone el contenido de la evidencia          falla: APP-02
+[DETECTA  ] M16 la vista manda las reglas de datos como 409                  falla: MVC-03, MVC-05, HTTP-05, API-03, CLI-04
+[DETECTA  ] M17 el repositorio en memoria no filtra campañas por tenant      falla: APP-09, CON-04-MEM
+[DETECTA  ] M18 la transacción en memoria no deshace (sin ROLLBACK)          falla: APP-12, CON-07-MEM
+[DETECTA  ] M19 PDO: un caso duplicado vuelve a dar 503 (contrato roto)      falla: CON-02-PDO
+[DETECTA  ] M20 los requisitos dejan de ordenarse (contrato roto)            falla: CON-01-MEM
+[DETECTA  ] M21 el formulario acepta verifica_defecto como texto             falla: MVC-02
+[DETECTA  ] M22 el controlador llama al caso de uso aunque el formulario falle falla: MVC-04, HTTP-04, API-03
+[DETECTA  ] M23 el contrato declara otro permiso para registrar resultados   falla: API-01
+[DETECTA  ] M24 el contrato deja de documentar el 413 de registrarResultado  falla: API-03
+[DETECTA  ] M25 el cliente reintenta también los 4xx                         falla: CLI-04, CLI-06
+[DETECTA  ] M26 el cliente no guarda los pendientes (se pierden)             falla: CLI-03, CLI-05, CLI-06
+[DETECTA  ] M27 el almacén remoto acepta cualquier confirmación              falla: AHT-02, AHT-04
+[DETECTA  ] M28 el circuito nunca se abre                                    falla: AHT-03
+[DETECTA  ] M29 el registro de acceso guarda el cuerpo                       falla: OBS-02
+[DETECTA  ] M30 un MAYOR abierto en un caso crítico ya no bloquea el GO      falla: CAM-01, CAM-02, CAM-03
+[DETECTA  ] M31 se cuentan los MAYOR de TODO el alcance, no solo de los críticos falla: CAM-02
+[DETECTA  ] M32 un MAYOR CORREGIDO (aún no verificado) deja de bloquear (SQL) falla: CAM-05
+[DETECTA  ] M33 la trazabilidad no marca los MAYOR que bloquean              falla: CAM-04
+----------------------------------------------------------------------------------------------------
+Mutaciones: 33  Detectadas: 33  Sobreviven: 0

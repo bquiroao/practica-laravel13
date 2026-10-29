@@ -1,0 +1,19 @@
+@startsalt m04-sin-conexion
+' M-04 (360 px) Conexión limitada o conflicto
+{+
+  <b>Confirmar</b>
+  ==
+  {+
+  <b>⚠ No sabemos si se guardó</b>
+  La conexión se cortó al confirmar.
+  [ Verificar estado ]
+  }
+  <size:11>No se reintenta solo. Al verificar se consulta</size>
+  <size:11>si PAC-00451 ya tiene una admisión activa.</size>
+  ==
+  {+
+  <b>⚠ La cama B-201 ya fue asignada</b>
+  [ Ver camas disponibles ]
+  }
+}
+@endsalt

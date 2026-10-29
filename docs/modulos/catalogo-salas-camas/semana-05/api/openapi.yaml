@@ -1,0 +1,129 @@
+openapi: 3.1.0
+info:
+  title: Catálogo de salas, wards y camas — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «creación de sala y cama con control de estado operativo».
+    Las rutas son las del front controller de la semana 4. JWT y X-Tenant-ID se exigen desde la semana 15 (RNF-01);
+    hoy el Micro-HIS no los valida. Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+tags:
+  - name: catalogo
+    description: Salas y camas del hospital
+paths:
+  /salas:
+    post:
+      tags: [catalogo]
+      operationId: registrarSala
+      summary: Registrar una sala activa (CU-01)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NuevaSala' }
+            example: { codigo: A, nombre: Medicina interna }
+      responses:
+        '201': { $ref: '#/components/responses/Creado' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /salas/{sala}/camas:
+    post:
+      tags: [catalogo]
+      operationId: registrarCama
+      summary: Registrar una cama disponible en una sala activa (CU-02)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Sala'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NuevaCama' }
+            example: { codigo: '101' }
+      responses:
+        '201': { $ref: '#/components/responses/Creado' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /salas/{sala}/camas/{cama}/estado:
+    patch:
+      tags: [catalogo]
+      operationId: cambiarEstado
+      summary: Cambiar el estado operativo de una cama con motivo (CU-03)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Sala'
+        - name: cama
+          in: path
+          required: true
+          schema: { type: string, example: '101' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CambioEstado' }
+            example: { estado: maintenance, motivo: limpieza profunda }
+      responses:
+        '200': { description: Estado cambiado y registrado en el historial (R-09) }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital de la petición (R-07).
+      schema: { type: string, example: h1 }
+    Sala:
+      name: sala
+      in: path
+      required: true
+      schema: { type: string, example: A }
+  responses:
+    Creado:
+      description: Creado
+    Error:
+      description: Rechazo de negocio (E2 a E7, NF) o catálogo no disponible (E8), sin detalles técnicos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E3, mensaje: La sala A ya existe. }
+  schemas:
+    NuevaSala:
+      type: object
+      required: [codigo, nombre]
+      properties:
+        codigo: { type: string, minLength: 1 }
+        nombre: { type: string, minLength: 1 }
+    NuevaCama:
+      type: object
+      required: [codigo]
+      properties:
+        codigo: { type: string, minLength: 1 }
+    CambioEstado:
+      type: object
+      required: [estado, motivo]
+      properties:
+        estado: { type: string, enum: [available, maintenance, inactive] }
+        motivo: { type: string, minLength: 1 }
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E2, E3, E4, E5, E6, E7, E8, NF] }
+        mensaje: { type: string }

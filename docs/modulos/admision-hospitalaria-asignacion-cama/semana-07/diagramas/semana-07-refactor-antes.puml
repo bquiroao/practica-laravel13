@@ -1,0 +1,48 @@
+@startuml semana-07-refactor-antes
+' Admisión hospitalaria y asignación de cama — Semana 7
+' ANTES: la noción de «cama disponible» se rearma en dos casos de uso y en la UI.
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDF1F1
+  BorderColor #9B2C2C
+}
+title Refactor — ANTES: «cama disponible» repartida
+
+class AdmitirPacienteYAsignarCama {
+  +ejecutar(solicitud, usuario)
+  .. sabe combinar ..
+  catalogo->buscar()
+  admisiones->camasOcupadas() + in_array
+  Admision::abrir(…, evaluador)
+}
+class ConsultarCamasDisponibles {
+  +ejecutar(servicio, tipo, aislamiento, usuario)
+  .. repite la combinación ..
+  catalogo->listar()
+  admisiones->camasOcupadas() + in_array
+  evaluador->motivosDeRechazo()
+}
+class AdmisionController {
+  +registrar()
+  -error(): decide volver a 'camas'
+   y VUELVE a consultar camas
+}
+interface CatalogoCamas
+interface AdmisionRepository
+class EvaluadorElegibilidad
+
+AdmitirPacienteYAsignarCama --> CatalogoCamas
+AdmitirPacienteYAsignarCama --> AdmisionRepository
+AdmitirPacienteYAsignarCama --> EvaluadorElegibilidad
+ConsultarCamasDisponibles --> CatalogoCamas
+ConsultarCamasDisponibles --> AdmisionRepository
+ConsultarCamasDisponibles --> EvaluadorElegibilidad
+AdmisionController --> ConsultarCamasDisponibles
+AdmisionController --> AdmitirPacienteYAsignarCama
+
+note bottom of ConsultarCamasDisponibles
+  Si cambia qué significa «disponible»
+  (p. ej. reserva RN-07), hay que tocar
+  los DOS casos de uso y el controlador.
+end note
+@enduml

@@ -1,0 +1,52 @@
+@startuml semana-01-secuencia
+title Secuencia · CU-05 reportar resultado con evidencia y CU-09 evaluar quality gate
+skinparam defaultFontSize 11
+autonumber "S00"
+
+participant "Pipeline CI" as CI
+participant "API QA E2E" as API
+participant "RBAC" as RBAC
+participant "Ejecución\n(dominio)" as EJ
+participant "Almacén de\nartefactos" as ALM
+database "Base QA E2E" as BD
+participant "Auditoría" as AUD
+actor "Responsable\nde release" as REL
+participant "Quality gate\n(dominio)" as QG
+
+== CU-05 · reportar el resultado de un escenario ==
+CI -> API : POST /ejecuciones/{id}/resultados\n(escenario, resultado, intentos, artefactos)\nIdempotency-Key, token del pipeline
+API -> RBAC : ¿el token puede reportar en esta ejecución y tenant?
+RBAC --> API : sí
+API -> BD : ¿ya existe un resultado con esta clave? (R-12)
+BD --> API : no
+API -> EJ : registrar(escenario, resultado, intentos)
+EJ -> EJ : validar: ejecución EN_CURSO, escenario del plan (R-04)\nreintento que pasa → INESTABLE (R-06)
+alt FALLA o INESTABLE sin evidencia
+  EJ --> API : INCOMPLETO (cuenta como falla, R-05)
+else con evidencia
+  API -> ALM : guardar artefactos (trace, captura, log)
+  ALM --> API : ubicación + SHA-256 confirmados (R-08)
+end
+API -> BD : guardar resultado + evidencias (una transacción)
+API -> AUD : RESULTADO_REPORTADO
+API --> CI : 201 (o 200 si la clave se repite)
+
+== CU-09 · evaluar el quality gate ==
+REL -> API : POST /versiones/{v}/gate (ejecución)
+API -> RBAC : ¿puede evaluar gates en este tenant?
+RBAC --> API : sí
+API -> BD : ejecución, plan, resultados, evidencias, cuarentenas, excepciones
+BD --> API : datos
+API -> QG : evaluar(política, ejecución, digest de la versión)
+QG -> QG : a) 100 % de críticos PASA\nb) tasa ≥ umbral   c) inestables ≤ máximo\nd) toda falla con evidencia   e) ejecución reciente
+alt todas se cumplen
+  QG --> API : APROBADO
+else solo b/c/e y hay excepción vigente (R-10)
+  QG --> API : APROBADO_CON_EXCEPCION
+else
+  QG --> API : RECHAZADO + causas
+end
+API -> BD : guardar evaluación (no se edita)
+API -> AUD : GATE_EVALUADO
+API --> REL : 200 { decisión, reglas, causas, digest }
+@enduml

@@ -1,0 +1,9 @@
+M-01  Pruebas del Micro-HIS en verde                  29 de 29                                cumple
+M-02  Reglas R-xx citadas por alguna prueba           8 de 9 (88 %)                           cumple
+      sin prueba: R-08
+M-03  Casos de uso CU-xx citados por alguna prueba    2 de 5 (40 %)                           NO CUMPLE
+      sin prueba: CU-02, CU-04, CU-05
+M-04  Consultas SQL que concatenan variables          0                                       cumple
+M-05  Líneas del método más largo (máx. 15)           12 (RepositorioEnMemoria::camasDeSalasActivas)cumple
+M-07  Líneas del PR más grande integrado (máx. 400)   395 (9 PR medidos)                      cumple
+RESULTADO: 1 métrica(s) no cumplen su umbral

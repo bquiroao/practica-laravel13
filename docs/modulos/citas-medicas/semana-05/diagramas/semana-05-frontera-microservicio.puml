@@ -1,0 +1,20 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — servicio de agenda (solo si se cumplen los criterios de la §3)
+node "HIS (monolito modular)" {
+  [Catálogo de personal] as per
+  [Admisión] as adm
+}
+node "Servicio de agenda" {
+  [API /citas] as api
+  database "Base de la agenda\n(exclusión de cruces)" as dba
+}
+[Portal del paciente] as portal
+queue "Eventos de agenda\n(cita.programada, cita.cancelada)" as ev
+queue "Eventos de personal\n(especialidad.cambiada)" as evp
+portal --> api : HTTP: solicitar o cancelar\n(timeout 2 s, idempotente por clave)
+api --> dba : dueño de appointments
+per --> evp : publica
+evp --> api : copia local de especialidades vigentes
+api --> ev : outbox -> publica
+ev --> adm : consume (llegadas del día)
+@enduml

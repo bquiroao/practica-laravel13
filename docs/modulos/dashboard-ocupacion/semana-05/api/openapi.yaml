@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+  title: Dashboard de ocupación hospitalaria — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «consolidación y consulta de ocupación por sala y estado de cama».
+    Las rutas son las del front controller de la semana 4. JWT, X-Tenant-ID y el permiso de ocupación se exigen
+    desde la semana 15 (R-08, RNF-01); hoy el Micro-HIS no los valida (hallazgo H-01 de la semana 13).
+    Los códigos E3 y E8 no son los de la semana 1 (hallazgo H-02). Horas como segundos Unix. Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+paths:
+  /ocupacion/cortes:
+    post:
+      operationId: consolidar
+      summary: Consolidar un corte de ocupación por sala; solo lectura sobre las camas (CU-01, R-09)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }]
+      responses:
+        '201':
+          description: Corte guardado con su hora (R-05)
+          content:
+            application/json:
+              schema: { type: object, required: [hora, salas], properties: { hora: { type: integer }, salas: { type: integer, description: Salas activas consolidadas } } }
+        '403': { description: 'Sin permiso de ocupación (R-08): llega con RBAC en la semana 15; su código de error se fija al corregir el hallazgo H-02' }
+        '503': { $ref: '#/components/responses/Error' }
+  /ocupacion:
+    get:
+      operationId: consultar
+      summary: Último corte, con aviso si tiene más de 15 minutos, filtrable por estado de cama (CU-02, CU-03, R-06)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - { name: estado, in: query, required: false, schema: { type: string, enum: [available, occupied, maintenance, inactive] } }
+      responses:
+        '200':
+          description: 'Último corte, o {"vacio": true} si aún no hay ninguno'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { type: object, required: [vacio], properties: { vacio: { const: true } } }
+                  - $ref: '#/components/schemas/Corte'
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant: { name: X-Tenant-ID, in: header, required: true, description: Hospital de la petición (R-08)., schema: { type: string, example: h1 } }
+  responses:
+    Error:
+      description: Estado de cama desconocido (E3, 422) o lectura fallida con el corte anterior conservado (E8, 503)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E3, mensaje: Ese estado de cama no existe. }
+  schemas:
+    Corte:
+      type: object
+      required: [vacio, hora, aviso_viejo, salas]
+      properties:
+        vacio: { const: false }
+        hora: { type: integer }
+        aviso_viejo: { type: boolean }
+        salas:
+          type: object
+          description: Solo cifras por sala, nunca datos de pacientes (R-07)
+          additionalProperties: { $ref: '#/components/schemas/Sala' }
+    Sala:
+      type: object
+      required: [available, occupied, maintenance, inactive, ocupacion, inconsistentes]
+      properties:
+        available: { type: integer }
+        occupied: { type: integer }
+        maintenance: { type: integer }
+        inactive: { type: integer }
+        ocupacion: { oneOf: [{ type: number, description: 'Porcentaje: ocupadas ÷ (disponibles + ocupadas), R-01' }, { const: no aplica }] }
+        inconsistentes: { type: array, items: { type: string }, description: Camas cuyo estado no coincide con sus estancias (R-04) }
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E3, E8] }
+        mensaje: { type: string }

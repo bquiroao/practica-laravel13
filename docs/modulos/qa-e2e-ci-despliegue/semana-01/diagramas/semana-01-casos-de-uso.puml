@@ -1,0 +1,59 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+left to right direction
+title Casos de uso · Gestión de ejecuciones automatizadas y calidad de versiones
+skinparam defaultFontSize 11
+skinparam usecaseBackgroundColor #EEF0F8
+skinparam usecaseBorderColor #2E3A6E
+skinparam actorBorderColor #2E3A6E
+
+actor "Ingeniero de\nautomatización QA" as IQA
+actor "Responsable\nde release" as REL
+actor "Desarrollador" as DEV
+actor "Operador de\ndespliegue" as OPS
+actor "Pipeline CI" as CI <<sistema>>
+actor "Almacén de\nartefactos" as ALM <<sistema>>
+actor "RBAC" as RBAC <<sistema>>
+actor "Auditoría" as AUD <<sistema>>
+
+rectangle "Micro-HIS QA E2E y CI" {
+  usecase "CU-01 Registrar escenario E2E\n(flujo, criticidad, datos sintéticos)" as CU01
+  usecase "CU-02 Registrar versión candidata\n(commit + digest)" as CU02
+  usecase "CU-03 Planificar las pruebas\nde la versión" as CU03
+  usecase "CU-04 Iniciar ejecución E2E" as CU04
+  usecase "CU-05 Reportar resultado\nde escenario" as CU05
+  usecase "CU-06 Conservar evidencia\n(SHA-256 y retención)" as CU06
+  usecase "CU-07 Completar o abortar\nla ejecución" as CU07
+  usecase "CU-08 Poner un escenario\nen cuarentena" as CU08
+  usecase "CU-09 Evaluar quality gate" as CU09
+  usecase "CU-10 Aprobar excepción\ndel gate" as CU10
+  usecase "CU-11 Desplegar versión\ncon la guía reproducible" as CU11
+  usecase "CU-12 Consultar trazabilidad\nversión ↔ ejecución ↔ evidencia ↔ gate ↔ despliegue" as CU12
+}
+
+IQA --> CU01
+IQA --> CU03
+IQA --> CU08
+DEV --> CU02
+CI --> CU02
+CI --> CU04
+CI --> CU05
+CI --> CU07
+REL --> CU09
+CI --> CU09
+REL --> CU10
+OPS --> CU11
+IQA --> CU12
+REL --> CU12
+DEV --> CU12
+OPS --> CU12
+
+CU05 ..> CU06 : <<include>>
+CU10 ..> CU09 : <<extend>>\n(regla no crítica incumplida)
+CU11 ..> CU09 : <<include>>\n(gate APROBADO y mismo digest)
+CU06 --> ALM
+CU01 --> RBAC
+CU09 --> AUD
+CU11 --> AUD
+
+@enduml

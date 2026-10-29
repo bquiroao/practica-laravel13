@@ -105,4 +105,6 @@ El **tipo** es omisión (falta algo pedido), error (hace algo distinto de lo ped
 
 Respuestas de la autorrevisión: C-02 a C-05, C-07 y C-15 «sí», confirmadas por las pruebas en verde. C-11 «sí» (`ControladorCatalogo::HTTP` y la prueba del 503). C-09 «no aplica»: el Micro-HIS todavía no consulta la capacidad. C-12 «no aplica» en `8ffa2e2`: las rutas HTTP llegan con el PR #194, aún sin integrar. Si se integra antes de la reunión, se congela el nuevo commit (E-01) y C-12 se revisa contra sus rutas.
 
+**Reverificación tras integrar la semana 4** (29/10/2026, `develop` en `1595e00`). La semana 4 cambió la fábrica `crearControlador` y movió los códigos HTTP a `VistaJson`, así que `verificar-entrada.php` se adaptó a esa API. Su salida es idéntica: los cinco hallazgos siguen reproducidos con el código actual, y C-12 ya se puede revisar contra `Rutas.php` en la reunión.
+
 **Bibliografía:** IEEE (2008). *IEEE Std 1028-2008: Standard for Software Reviews and Audits* · Fagan, M. E. (1976). Design and code inspections to reduce errors in program development. *IBM Systems Journal, 15*(3) · Pressman, R. S. y Maxim, B. R. (2020). *Software Engineering: A Practitioner's Approach* (9.ª ed.). McGraw-Hill.

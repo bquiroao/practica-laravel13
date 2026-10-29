@@ -1,0 +1,13 @@
+Fecha: 2026-10-29 05:35:04 | PHP 8.4.26 | --solo=semana05 --evidencia=../semana-05/evidencia/salida-pruebas-api.txt
+== semana05
+[OK] T-35 enfermería consulta la alerta: 200, JSON con nivel y X-Request-Id
+[OK] T-36 sin token: 401 con el formato único de error
+[OK] T-37 enfermería intenta registrar: 403 PERMISO_DENEGADO y no se guarda nada
+[OK] T-38 tenant: token de H-02 → 403 aunque el encabezado diga H-01; admisión sin permiso → 403
+[OK] T-39 médico registra: 201, Location y alerta CRITICA que requiere reconocimiento
+[OK] T-40 JSON mal formado → 400 FORMATO_INVALIDO; regla de dominio → 422 con su código
+[OK] T-41 duplicado → 409 ALERGIA_DUPLICADA
+[OK] T-42 reconocer con huella vieja → 409 ALERTA_CAMBIO; con la vigente → 201 reconocida
+[OK] T-43 observabilidad: se respeta el X-Request-Id recibido y el registro no lleva datos clínicos
+[OK] T-44 base que rechaza la escritura → 503 PERSISTENCIA_NO_DISPONIBLE y 0 filas nuevas
+RESULTADO: 10 pruebas, 10 correctas, 0 fallidas, 0 omitidas, 0 con defecto registrado

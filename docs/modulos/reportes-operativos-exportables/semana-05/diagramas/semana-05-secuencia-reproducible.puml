@@ -1,0 +1,28 @@
+@startuml semana-05-secuencia-reproducible
+title Exportación reproducible, auditoría y falla del registro
+skinparam defaultFontName Arial
+autonumber
+actor "Jefatura" as J
+participant "Cliente" as C
+participant "API Reportes" as A
+database "Vistas (otros módulos)" as V
+database "exportaciones_reporte" as E
+actor "Auditor" as U
+J -> C : censo del 1 al 27 de octubre, servicio cirugía
+C -> A : GET /reportes/censo/exportar?desde=…&hasta=…&servicio=cirugia
+A -> A : normaliza filtros y fija el corte (hora actual)
+A -> V : SELECT … hospital_id, fecha, registrado_en <= corte
+A -> E : INSERT filtros, corte, hash
+E --> A : ok
+A --> C : 200 CSV + X-Exportacion-Id + X-Reporte-Sha256
+== Meses después: auditoría ==
+U -> A : POST /exportaciones/{id}/reproducir
+A -> E : lee filtros, corte y permiso guardados
+A -> V : SELECT con el MISMO corte (ignora filas posteriores)
+A --> U : 200 {coincide: true}
+== Falla del registro ==
+C -> A : GET exportar
+A -> E : INSERT
+E --> A : error
+A --> C : 500 error_persistencia (no se entrega ningún archivo)
+@enduml
