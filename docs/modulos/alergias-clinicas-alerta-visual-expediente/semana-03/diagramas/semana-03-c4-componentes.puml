@@ -1,0 +1,23 @@
+@startuml semana-03-c4-componentes
+!include <C4/C4_Component>
+title Componentes del flujo «registro de alergia y emisión de alerta»
+Container_Boundary(micro, "Micro-HIS Alergias") {
+  Component(cmd, "ComandoConsola", "Presentation", "Traduce argumentos y errores")
+  Component(reg, "RegistrarAlergia", "Application", "CU-01 + CU-02")
+  Component(con, "ConsultarAlertaExpediente", "Application", "CU-03")
+  Component(ale, "Alergia, Alergeno, Severidad, TipoAlergia", "Domain", "RN-01 a RN-06")
+  Component(cal, "CalculadorAlerta + ReglaNivelAlerta", "Domain", "CU-04, RN-08 (OCP)")
+  Component(repo, "RepositorioAlergias / DirectorioPacientes", "Domain (interfaces)", "Contrato de persistencia")
+  Component(pdo, "PdoRepositorioAlergias / PdoDirectorioPacientes", "Persistence", "SQL preparado; 23505 → AlergiaDuplicada")
+}
+ContainerDb(bd, "PostgreSQL 16", "allergies, local_patients")
+Rel(cmd, reg, "ejecutar(SolicitudRegistro)")
+Rel(cmd, con, "ejecutar(código)")
+Rel(reg, ale, "Alergia::registrar()")
+Rel(reg, cal, "calcular()")
+Rel(con, cal, "calcular()")
+Rel(reg, repo, "usa")
+Rel(con, repo, "usa")
+Rel(pdo, repo, "implementa")
+Rel(pdo, bd, "SQL")
+@enduml

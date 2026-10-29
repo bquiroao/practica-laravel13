@@ -1,0 +1,17 @@
+@startuml semana-03-c4-contexto
+!include <C4/C4_Context>
+title Contexto: Alergias clínicas y alerta visual en expediente
+Person(medico, "Médico tratante", "Registra alergias verificadas y reconoce alertas")
+Person(enfermeria, "Enfermería", "Consulta y reconoce la alerta antes de administrar")
+System(alergias, "Alergias clínicas y alerta visual", "Registra alergias y calcula la alerta del expediente")
+System_Ext(expediente, "Expediente médico", "Autoriza el acceso al expediente (módulo expediente-medico)")
+System_Ext(prescripciones, "Prescripciones", "Lee alergias para verificar medicamentos (prescripciones-alergias)")
+System_Ext(pacientes, "Pacientes", "Dueño de local_patients")
+SystemDb_Ext(hospital, "Base HOSPITAL (PostgreSQL)", "allergies, local_patients")
+Rel(medico, alergias, "Registra / consulta / reconoce")
+Rel(enfermeria, alergias, "Consulta / reconoce")
+Rel(expediente, alergias, "Pide la alerta al abrir el expediente")
+Rel(alergias, hospital, "Lee y escribe allergies; lee local_patients", "SQL preparado")
+Rel(prescripciones, hospital, "Solo lee allergies")
+Rel(pacientes, hospital, "Escribe local_patients")
+@enduml
