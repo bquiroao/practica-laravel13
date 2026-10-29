@@ -51,12 +51,15 @@ metrica('M-1', 'Pruebas en verde', sprintf('%d/%d%s', $pasan, $total, $omitidas 
     $total > 0 && $pasan === $total && $omitidas === 0, $dsn ? 'tests/ejecutar.php con PostgreSQL' : 'tests/ejecutar.php SIN PostgreSQL');
 
 // M-2 · Puntaje de mutación (última corrida) ------------------------------------------------------------------------
-$archivoMut = $modulo . '/semana-14/evidencia/mutaciones.txt';
+// La corrida más reciente de cualquier semana (semana 15: el plan se sigue usando después de su semana).
+$corridas = glob($modulo . '/semana-*/evidencia/mutaciones.txt') ?: [];
+usort($corridas, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+$archivoMut = $corridas[0] ?? $modulo . '/semana-14/evidencia/mutaciones.txt';
 $texto = is_file($archivoMut) ? (string) file_get_contents($archivoMut) : '';
 preg_match('/Mutaciones: (\d+)\s+Detectadas: (\d+)/', $texto, $m);
 $det = isset($m[2]) ? (int) $m[2] : null;
 metrica('M-2', 'Mutaciones detectadas', $det === null ? '—' : "{$m[2]}/{$m[1]}", '100 % y corrida ≤ 7 días',
-    $det === null ? null : $det === (int) $m[1] && !vencida($archivoMut), 'tests/mutaciones.php, corrida del ' . fechaDe($archivoMut));
+    $det === null ? null : $det === (int) $m[1] && !vencida($archivoMut), 'tests/mutaciones.php, corrida del ' . fechaDe($archivoMut) . ' (' . basename(dirname($archivoMut, 2)) . ')');
 
 // M-3 · Reglas de negocio con prueba con nombre ----------------------------------------------------------------------
 $descripciones = '';

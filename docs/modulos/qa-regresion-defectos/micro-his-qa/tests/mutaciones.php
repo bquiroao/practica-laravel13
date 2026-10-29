@@ -79,9 +79,9 @@ $mutaciones = [
     'M31 se cuentan los MAYOR de TODO el alcance, no solo de los críticos' => ['src/Aplicacion/CasosDeUso/CerrarCampana.php',
         '$this->defectos->mayoresAbiertos($tenant, $criticosDeMatriz)', '$this->defectos->mayoresAbiertos($tenant, $casos)'],
     'M32 un MAYOR CORREGIDO (aún no verificado) deja de bloquear (SQL)' => ['src/Persistencia/Pdo/PdoRepositorioDefectos.php',
-        "severidad = 'MAYOR' AND estado <> 'CERRADO'", "severidad = 'MAYOR' AND estado NOT IN ('CERRADO', 'CORREGIDO')"],
-    'M33 la trazabilidad no marca los MAYOR que bloquean' => ['src/Aplicacion/CasosDeUso/ConsultarTrazabilidad.php',
-        '\'bloquea_go\' => $d->criticoAbierto() ||', '\'bloquea_go\' => $d->criticoAbierto() || false &&'],
+        "COALESCE(severidad, severidad_propuesta) = 'MAYOR' AND estado <> 'CERRADO'", "COALESCE(severidad, severidad_propuesta) = 'MAYOR' AND estado NOT IN ('CERRADO', 'CORREGIDO')"],
+    'M33 la trazabilidad no marca los MAYOR que bloquean' => ['src/Dominio/Modelo/Defecto.php',
+        'return $this->criticoAbierto() || ($this->severidadEfectiva()', 'return $this->criticoAbierto() || false && ($this->severidadEfectiva()'],
     // Semana 7: el refactor no debe cambiar el comportamiento observable (CAR-01).
     'M34 el tamaño se revisa DESPUÉS de construir la evidencia (cambia qué error sale)' => ['src/Dominio/Modelo/SolicitudResultado.php',
         "            if (strlen(\$bytes) > self::TAMANO_MAXIMO) {\n                throw new ReglaRechazada('EVIDENCIA_DEMASIADO_GRANDE');\n            }\n            \$clasificacion",
@@ -89,6 +89,17 @@ $mutaciones = [
     'M35 el defecto a verificar se busca DESPUÉS de las reglas del defecto nuevo' => ['src/Aplicacion/CasosDeUso/RegistrarResultado.php',
         "\$verificado = \$this->defectoAVerificar(\$tenant, \$casoId, \$datos['verifica_defecto'] ?? null);\n        \$nuevo = \$solicitud->resolverDefecto(\$verificado,",
         "\$nuevo = \$solicitud->resolverDefecto(null,"],
+    // Semana 15: cada corrección de la revisión de la semana 13 tiene una mutación que la deshace.
+    'M36 la severidad propuesta no cuenta mientras no se clasifique (RT-01)' => ['src/Dominio/Modelo/Defecto.php',
+        'return $this->severidad ?? $this->propuesta;', 'return $this->severidad ?? Severidad::TRIVIAL;'],
+    'M37 sin casos aplicables la campaña se libera con GO (RT-05)' => ['src/Dominio/Modelo/Campana.php',
+        'if ($aplicables === []) {', 'if (false) {'],
+    'M38 CORREGIDO acepta cualquier texto como build (RT-06)' => ['src/Dominio/Modelo/Defecto.php',
+        'if (!preg_match(Campana::FORMATO_BUILD, $build)) {', "if (trim(\$build) === '') {"],
+    'M39 la trazabilidad solo muestra los defectos de su campaña (RT-02)' => ['src/Aplicacion/CasosDeUso/ConsultarTrazabilidad.php',
+        ', ...$this->defectos->abiertosDe($tenant, array_keys($campana->alcance))]', ']'],
+    'M40 el SQL cuenta solo la severidad clasificada (RT-01 en PostgreSQL)' => ['src/Persistencia/Pdo/PdoRepositorioDefectos.php',
+        "COALESCE(severidad, severidad_propuesta) = 'CRITICA'", "severidad = 'CRITICA'"],
 ];
 
 $origen = dirname(__DIR__);
