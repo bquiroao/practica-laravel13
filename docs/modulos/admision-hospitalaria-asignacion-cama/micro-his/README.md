@@ -6,10 +6,10 @@ Prototipo en **PHP 8.2+ vanilla** (sin framework ni Composer) del flujo **admisi
 
 | Capa | Carpeta | Contiene | Depende de |
 |---|---|---|---|
-| Presentation | `src/Presentation/` | Consola (semana 3); más adelante MVC y API | Application |
+| Presentation | `src/Presentation/` | Consola (semana 3) y web MVC (semana 4) | Application |
 | Application | `src/Application/` | Casos de uso `AdmitirPacienteYAsignarCama` y `ConsultarCamasDisponibles`, contexto de usuario, DTOs, puertos `Reloj` y `GeneradorId` | Domain |
 | Domain | `src/Domain/` | Entidad `Admision`, objetos de valor, criterios de elegibilidad (OCP), excepciones e **interfaces Repository** | Nada |
-| Persistence | `src/Persistence/Pdo/` | Adaptadores PDO que implementan las interfaces del dominio | Domain |
+| Persistence | `src/Persistence/Pdo/`, `src/Persistence/InMemory/` | Adaptadores PDO e InMemory con el mismo contrato | Domain |
 
 El **Composition Root** es `bootstrap.php`: es el único archivo que elige las clases concretas.
 
@@ -56,6 +56,18 @@ Los usuarios `usr-adm-01`, `usr-sup-01`, `usr-med-01` y `usr-adm-02` son fictici
 ```powershell
 php scripts/crear-esquema.php --base=micro_admision --recrear --datos-ficticios
 ```
+
+## Web MVC (semana 4)
+
+```powershell
+php -S 127.0.0.1:8085 public/index.php
+```
+
+Abre `http://127.0.0.1:8085/`. Hay que elegir un usuario ficticio: es solo de demostración, no un inicio de sesión real.
+
+## Almacén
+
+`bootstrap.php` usa PDO por defecto. Con `$env:ADMISION_ALMACEN = "memoria"` usa los adaptadores InMemory y no necesita Docker; el estado dura lo que dura el proceso PHP. La prueba `pruebas/contrato/` verifica que los dos adaptadores cumplan el mismo contrato.
 
 ## Datos y frontera con otros módulos
 - Tablas propias: `admision`, `asignacion_cama` y `evento_admision`. Los nombres son **propuesta del Micro-HIS**: el esquema real de HOSPITAL no está publicado.
