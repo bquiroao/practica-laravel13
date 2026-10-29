@@ -58,6 +58,21 @@ $mutaciones = [
     'M22 el controlador llama al caso de uso aunque el formulario falle' => ['src/Presentacion/Http/Controladores/CampanasControlador.php',
         "        } catch (EntradaInvalida \$e) {\n            return \$this->error->entrada(\$e);\n        }\n\n        return \$this->vista->mostrar(\$this->registrar",
         "        } catch (EntradaInvalida \$e) {\n            \$clave = 'x'; \$datos = [];\n        }\n\n        return \$this->vista->mostrar(\$this->registrar"],
+    // Semana 5: contrato API, cliente, almacén remoto y observabilidad.
+    'M23 el contrato declara otro permiso para registrar resultados' => ['api/openapi.yaml',
+        'x-permiso: qa.ejecutar', 'x-permiso: qa.consultar'],
+    'M24 el contrato deja de documentar el 413 de registrarResultado' => ['api/openapi.yaml',
+        "        '413':\n          \$ref: '#/components/responses/DemasiadoGrande'\n", ''],
+    'M25 el cliente reintenta también los 4xx' => ['src/Cliente/ClienteQa.php',
+        'if ($r[\'estado\'] < 500) {', 'if ($r[\'estado\'] < 400) {'],
+    'M26 el cliente no guarda los pendientes (se pierden)' => ['src/Cliente/ClienteQa.php',
+        '$this->bandeja->guardar($clave, $ruta, $cuerpo);', '// sin bandeja'],
+    'M27 el almacén remoto acepta cualquier confirmación' => ['src/Persistencia/Http/AlmacenEvidenciasHttp.php',
+        "|| (\$json['huella'] ?? null) !== \$evidencia->huella()) {", ') {'],
+    'M28 el circuito nunca se abre' => ['src/Persistencia/Http/CircuitoInterruptor.php',
+        '$this->abiertoDesde = $this->reloj->ahora();', '// nunca abre'],
+    'M29 el registro de acceso guarda el cuerpo' => ['src/Presentacion/Http/Kernel.php',
+        "'tenant' => \$identidad?->tenant,", "'tenant' => \$identidad?->tenant, 'cuerpo' => \$solicitud->cuerpo,"],
 ];
 
 $origen = dirname(__DIR__);

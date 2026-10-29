@@ -13,7 +13,7 @@ require dirname(__DIR__) . '/bootstrap/contenedor.php';
 
 use Qa\Presentacion\Http\Solicitud;
 
-$kernel = crearKernel(['persistencia' => 'memoria'] + (require dirname(__DIR__) . '/config/config.php'));
+$kernel = crearKernel(['persistencia' => 'memoria', 'registro_acceso' => 'ninguno'] + (require dirname(__DIR__) . '/config/config.php'));
 $png = base64_encode("\x89PNG\r\n\x1a\nnota-firmada-editable");
 
 $pasos = [

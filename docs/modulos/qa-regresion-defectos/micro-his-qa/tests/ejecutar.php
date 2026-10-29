@@ -22,7 +22,9 @@ $grupos = [
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas (dobles de PDO) y almacén de evidencias',
     'Contratos' => 'Repository: la misma suite de contrato para los adaptadores InMemory y PDO',
     'Mvc' => 'MVC: formularios, controladores y vistas',
-    'Presentacion' => 'Presentación: HTTP',
+    'Presentacion' => 'Presentación: HTTP y observabilidad',
+    'Api' => 'Contrato API (OpenAPI) = código',
+    'Cliente' => 'Cliente-servidor: cliente con bandeja, almacén remoto y circuito',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
 ];
