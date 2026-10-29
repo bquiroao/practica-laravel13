@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MicroHis\Expediente\Persistencia;
 
-use MicroHis\Expediente\Aplicacion\{Auditoria, ErrorPersistencia, ExpedientesHospital, IndiceCentral};
+use MicroHis\Expediente\Aplicacion\{ErrorPersistencia, IndiceCentral, RepositorioExpedientes};
 use MicroHis\Expediente\Dominio\Paciente;
 use PDO, PDOException, PDOStatement;
 
@@ -19,7 +19,7 @@ abstract class AdaptadorPdo
 }
 
 /** Base HOSPITAL: pacientes, asignaciones, expedientes y auditoría. */
-final class HospitalPdo extends AdaptadorPdo implements ExpedientesHospital, Auditoria
+final class HospitalPdo extends AdaptadorPdo implements RepositorioExpedientes
 {
     public function paciente(string $codigo): ?Paciente
     {
