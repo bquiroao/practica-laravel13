@@ -19,7 +19,7 @@
 | 9 | Teclado: todo se alcanza en orden lógico | WCAG 2.1.1, 2.4.3 | C | C | Recorrido con Tab: alérgeno → código → tipo → severidad → reacción → fecha → botón |
 | 10 | Foco visible | WCAG 2.4.7, 2.4.13 | C | C | `:focus-visible` 3 px #1d4ed8: 6.70:1 sobre blanco y 5.71:1 sobre el fondo CRÍTICA (`contraste.py`) |
 | 11 | Foco tras un error de envío | WCAG 3.3.1, 2.4.3 | C | N | Tras el 422 el foco queda en `BODY` y el campo no tiene `aria-invalid` → H-02 |
-| 12 | Contraste de texto ≥ 4.5:1 | WCAG 1.4.3 | C | C | `contraste.py`: 12 pares, 0 fallas (mínimo 6.60:1) |
+| 12 | Contraste de texto ≥ 4.5:1 | WCAG 1.4.3 | C | C | `contraste.py`: 12 pares, 0 fallas (texto: mínimo 7.75:1; no textual: mínimo 5.20:1)|
 | 13 | El color no es el único medio | WCAG 1.4.1 | C | C | Nivel con texto `[CRITICA]` además del color |
 | 14 | Etiquetas asociadas a cada campo | WCAG 1.3.1, 3.3.2 | C | C | Todos los campos tienen `<label for>` |
 | 15 | Anuncio adecuado para lector de pantalla | WCAG 4.1.3 | C | P | `role="alert"` envuelve toda la sección (lista y formulario) → H-05 |

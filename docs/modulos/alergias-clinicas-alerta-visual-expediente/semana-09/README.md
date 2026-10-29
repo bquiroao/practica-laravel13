@@ -32,7 +32,7 @@ El checklist completo está en [checklist-evaluacion.md](checklist-evaluacion.md
 | H-09 | La ayuda dice «AAAA-MM-DD», pero el selector nativo muestra dd/mm/aaaa | `formulario.php` + Chrome en español | WCAG 3.3.2 | Bajo |
 | H-10 | La entrada web no tiene autenticación: usa un usuario demo fijo (DEC-07), así que cualquiera ve «Registrar alergia» | `bootstrap.php`, `armarWeb()` | Protección de datos | **Alto** si se desplegara; la API sí exige token |
 
-Lo que **cumple** con evidencia: contraste (12/12, mínimo 6.60:1), color no exclusivo, etiquetas `<label for>`, foco visible, orden de tabulación y axe-core con 0 violaciones.
+Lo que **cumple** con evidencia: contraste contraste (12/12; texto mínimo 7.75:1, no textual mínimo 5.20:1), color no exclusivo, etiquetas `<label for>`, foco visible, orden de tabulación y axe-core con 0 violaciones.
 
 ## 3. Backlog priorizado
 
