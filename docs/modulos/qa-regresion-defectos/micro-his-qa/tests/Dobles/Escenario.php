@@ -2,25 +2,32 @@
 
 declare(strict_types=1);
 
-use Qa\Dominio\Modelo\CasoPrueba;
-use Qa\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Qa\Dominio\Modelo\Defecto;
+use Qa\Dominio\Modelo\EstadoDefecto;
+use Qa\Dominio\Modelo\Severidad;
+use Qa\Persistencia\EnMemoria\AlmacenEvidenciasEnMemoria;
+use Qa\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use Qa\Persistencia\EnMemoria\RepositorioCampanasEnMemoria;
+use Qa\Persistencia\EnMemoria\RepositorioDefectosEnMemoria;
+use Qa\Persistencia\EnMemoria\TransaccionEnMemoria;
+use Qa\Persistencia\FabricaAdaptadores;
 use Qa\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
 use Qa\Presentacion\Http\Kernel;
 
 /**
- * Arma el Micro-HIS completo con dobles y los mismos datos que database/datos-demo.sql.
- * Usa la MISMA raíz de composición que producción (construirCasosDeUso, construirKernel).
+ * Arma el Micro-HIS completo con los adaptadores EN MEMORIA de producción (FabricaAdaptadores::memoria, con
+ * database/datos-demo.php) y, encima, decoradores que pueden fallar. Usa la MISMA raíz de composición que producción.
  */
 final class Escenario
 {
     public const PNG = "\x89PNG\r\n\x1a\n" . 'captura-de-prueba';
 
-    public readonly RepositorioCasosFalso $casos;
-    public readonly RepositorioCampanasFalso $campanas;
-    public readonly RepositorioDefectosFalso $defectos;
-    public readonly AlmacenFalso $almacen;
-    public readonly AuditoriaFalsa $auditoria;
-    public readonly TransaccionFalsa $transaccion;
+    public readonly CasosConFalla $casos;
+    public readonly CampanasConFalla $campanas;
+    public readonly DefectosConFalla $defectos;
+    public readonly AuditoriaConFalla $auditoria;
+    public readonly AlmacenEvidenciasEnMemoria $almacen;
+    public readonly TransaccionEnMemoria $transaccion;
     /** @var array<string, object> */
     public readonly array $uc;
     private static int $claves = 0;
@@ -28,23 +35,15 @@ final class Escenario
     public function __construct()
     {
         $config = require dirname(__DIR__, 2) . '/config/config.php';
-        $this->casos = new RepositorioCasosFalso();
-        $this->campanas = new RepositorioCampanasFalso();
-        $this->defectos = new RepositorioDefectosFalso();
-        $this->almacen = new AlmacenFalso();
-        $this->auditoria = new AuditoriaFalsa();
-        $this->transaccion = new TransaccionFalsa([$this->casos, $this->campanas, $this->defectos, $this->auditoria]);
-        $this->sembrar();
-        $this->uc = construirCasosDeUso([
-            'acceso' => new PoliticaAccesoEstatica($config['permisos']),
-            'casos' => $this->casos,
-            'campanas' => $this->campanas,
-            'defectos' => $this->defectos,
-            'almacen' => $this->almacen,
-            'auditoria' => $this->auditoria,
-            'transaccion' => $this->transaccion,
-            'reloj' => new RelojFijo(),
-        ]);
+        $p = FabricaAdaptadores::memoria($config, require dirname(__DIR__, 2) . '/database/datos-demo.php');
+        $this->casos = new CasosConFalla($p['casos']);
+        $this->campanas = new CampanasConFalla($p['campanas']);
+        $this->defectos = new DefectosConFalla($p['defectos']);
+        $this->auditoria = new AuditoriaConFalla($p['auditoria']);
+        $this->almacen = $p['almacen'];
+        $this->transaccion = $p['transaccion'];
+        $this->uc = construirCasosDeUso(['casos' => $this->casos, 'campanas' => $this->campanas, 'defectos' => $this->defectos,
+            'auditoria' => $this->auditoria, 'reloj' => new RelojFijo()] + $p);
     }
 
     public function kernel(): Kernel
@@ -52,6 +51,34 @@ final class Escenario
         $config = require dirname(__DIR__, 2) . '/config/config.php';
 
         return construirKernel($this->uc, new AutenticadorTokenDemo($config['tokens_demo']));
+    }
+
+    /** Lo guardado de verdad (sin los decoradores). */
+    public function intentos(): array
+    {
+        return $this->memCampanas()->todosLosIntentos();
+    }
+
+    public function memCampanas(): RepositorioCampanasEnMemoria
+    {
+        return $this->campanas->real;
+    }
+
+    public function memDefectos(): RepositorioDefectosEnMemoria
+    {
+        return $this->defectos->real;
+    }
+
+    public function memAuditoria(): RegistroAuditoriaEnMemoria
+    {
+        return $this->auditoria->real;
+    }
+
+    /** Un defecto ya clasificado en un estado dado (para preparar una re-ejecución). */
+    public function sembrarDefecto(int $campana, string $caso, EstadoDefecto $estado): Defecto
+    {
+        return $this->memDefectos()->crear(new Defecto(null, 'hosp-norte', $campana, $caso, 'Sembrado', ['paso'], Severidad::MAYOR, true,
+            'tito-tester', $estado, Severidad::MAYOR, 'ALTA'));
     }
 
     /** Planifica e inicia una campaña sobre «expediente» con esos casos; devuelve su id. */
@@ -84,27 +111,5 @@ final class Escenario
     public static function clave(): string
     {
         return sprintf('prueba-%06d', ++self::$claves);
-    }
-
-    private function sembrar(): void
-    {
-        $paso = [['accion' => 'Ejecutar', 'esperado' => 'Se rechaza']];
-        $requisitos = ['TC-101' => ['RF-01'], 'TC-102' => ['RF-02'], 'TC-103' => ['RF-03'], 'TC-104' => ['RF-04'], 'TC-105' => ['RF-05'],
-            'TC-106' => ['RF-06'], 'TC-107' => ['RF-07'], 'TC-108' => ['RF-07', 'RF-08'], 'TC-109' => ['RF-07'], 'TC-110' => ['RF-09']];
-        foreach ($requisitos as $id => $rf) {
-            $this->casos->casos["hosp-norte|$id|1"] = new CasoPrueba('hosp-norte', $id, 1, 'ana-qa', "Caso $id", '', $paso, 'ALTA', $rf,
-                CasoPrueba::APROBADO, 'lider-qa');
-        }
-        $this->casos->casos['hosp-norte|TC-111|1'] = new CasoPrueba('hosp-norte', 'TC-111', 1, 'ana-qa', 'Caso TC-111', '', $paso, 'MEDIA', ['RF-06'],
-            CasoPrueba::BORRADOR);
-        $this->casos->casos['hosp-sur|TC-101|1'] = new CasoPrueba('hosp-sur', 'TC-101', 1, 'qa-sur', 'Caso sur', '', $paso, 'ALTA', ['RF-01'],
-            CasoPrueba::APROBADO, 'lider-sur');
-        $this->casos->matriz = [
-            'hosp-norte|identidad-central' => ['TC-101' => true], 'hosp-norte|mpi' => ['TC-102' => true],
-            'hosp-norte|consentimiento' => ['TC-103' => true], 'hosp-norte|sincronizacion' => ['TC-104' => false],
-            'hosp-norte|identidad-hospital' => ['TC-105' => false], 'hosp-norte|agenda-camas' => ['TC-106' => true],
-            'hosp-norte|expediente' => ['TC-107' => true, 'TC-108' => true, 'TC-109' => false, 'TC-110' => false],
-            'hosp-sur|identidad-central' => ['TC-101' => true],
-        ];
     }
 }

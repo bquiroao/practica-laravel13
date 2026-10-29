@@ -1,0 +1,75 @@
+@startuml semana-04-repositorio
+!pragma layout smetana
+title Patrón Repository: el puerto en el Dominio, dos adaptadores y una suite de contrato
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Dominio\\Puertos (el límite apropiado)" #FFF8E1 {
+  interface RepositorioCampanas {
+    + crear(Campana): Campana
+    + actualizarEstado(Campana): void
+    + porId(tenant, id): ?Campana
+    + agregarIntento(tenant, Intento): Intento
+    + intentoPorClave(tenant, clave): ?Intento
+  }
+  interface RepositorioCasos {
+    + guardar · aprobar · porId · variosPorId
+    + criticosDe(tenant, funcionalidades)
+    + queCubren(tenant, requisito)
+  }
+  interface RepositorioDefectos {
+    + crear · actualizar · porId · deCampana
+    + criticosAbiertos(tenant, casos): int
+  }
+}
+
+package "Persistencia\\Pdo" #EEF7EE {
+  abstract class ConsultasPdo {
+    # consulta(sql, params): PDOStatement
+    # traducir(PDOException): ErrorPersistencia
+  }
+  class PdoRepositorioCampanas
+  class PdoRepositorioCasos
+  class PdoRepositorioDefectos
+  ConsultasPdo <|-- PdoRepositorioCampanas
+  ConsultasPdo <|-- PdoRepositorioCasos
+  ConsultasPdo <|-- PdoRepositorioDefectos
+}
+
+package "Persistencia\\EnMemoria" #EEF7EE {
+  interface Restaurable {
+    + instantanea() · restaurar()
+  }
+  class RepositorioCampanasEnMemoria
+  class RepositorioCasosEnMemoria
+  class RepositorioDefectosEnMemoria
+  class TransaccionEnMemoria
+  Restaurable <|.. RepositorioCampanasEnMemoria
+  Restaurable <|.. RepositorioCasosEnMemoria
+  Restaurable <|.. RepositorioDefectosEnMemoria
+  TransaccionEnMemoria o-- Restaurable
+}
+
+RepositorioCampanas <|.. PdoRepositorioCampanas
+RepositorioCampanas <|.. RepositorioCampanasEnMemoria
+RepositorioCasos <|.. PdoRepositorioCasos
+RepositorioCasos <|.. RepositorioCasosEnMemoria
+RepositorioDefectos <|.. PdoRepositorioDefectos
+RepositorioDefectos <|.. RepositorioDefectosEnMemoria
+
+class "Casos de uso" as CU #F5F9FF
+CU --> RepositorioCampanas
+CU --> RepositorioCasos
+CU --> RepositorioDefectos
+
+class "tests/Contratos\nCON-01..CON-07 × {memoria, pdo}" as Contrato #FFFFFF
+Contrato ..> PdoRepositorioCampanas : la misma suite
+Contrato ..> RepositorioCampanasEnMemoria : la misma suite
+
+note bottom of Contrato
+  Encontró 2 diferencias reales: orden de los requisitos
+  y caso duplicado (503 en PDO, 409 en memoria).
+  ARQ-09: los dos adaptadores implementan los mismos puertos.
+end note
+@enduml

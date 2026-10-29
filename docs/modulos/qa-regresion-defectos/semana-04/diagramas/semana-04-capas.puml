@@ -1,0 +1,50 @@
+@startuml semana-04-capas
+!pragma layout smetana
+title Capas, responsabilidades y objetos reutilizables del Micro-HIS QA (semana 4)
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Presentación — HTTP ↔ formularios y vistas" #E8F0FB {
+  rectangle "Kernel · Ruta · Solicitud · Respuesta · Autenticador\n<<reutilizable: no sabe nada de QA>>" as K
+  rectangle "Formulario (base: JSON → objeto, tipos)\n<<reutilizable>>" as FB
+  rectangle "FormularioCaso · FormularioCampana · FormularioResultado ·\nFormularioClasificacion · FormularioBuild (solo FORMA)" as F
+  rectangle "CasosControlador · CampanasControlador · DefectosControlador\n(coordinan: formulario → caso de uso → vista)" as C
+  rectangle "SalidaVista · ErrorVista (únicas que conocen códigos HTTP)\n<<reutilizable: cualquier Salida>>" as V
+}
+package "Aplicación — orquestar" #F5F9FF {
+  rectangle "9 casos de uso (DisenarCaso … ConsultarTrazabilidad)" as CU
+  rectangle "Salida (tipo + código + datos)\n<<reutilizable>>" as S
+  rectangle "Puertos: AlmacenEvidencias · PoliticaAcceso ·\nRegistroAuditoria · Transaccion" as PA
+}
+package "Dominio — qué es válido" #FFF8E1 {
+  rectangle "CasoPrueba · Campana · Intento · Defecto · Decision" as MOD
+  rectangle "EvidenciaVerificable + FabricaEvidencias\n<<reutilizable: cualquier módulo que adjunte evidencia>>" as EV
+  rectangle "Puertos (Repository): RepositorioCasos ·\nRepositorioCampanas · RepositorioDefectos · Reloj" as PD
+}
+package "Persistencia — implementar los puertos" #EEF7EE {
+  rectangle "Pdo/* (ConsultasPdo + 3 repositorios,\nauditoría, transacción)" as PDO
+  rectangle "EnMemoria/* (3 repositorios, auditoría, almacén,\ntransacción) <<reutilizable: demo y pruebas>>" as MEM
+  rectangle "Archivos/AlmacenEvidenciasArchivos" as ARC
+  rectangle "FabricaAdaptadores (pdo | memoria)" as FAB
+}
+
+K --> C
+C --> F
+F --|> FB
+C --> CU
+C --> V
+V --> S
+CU --> S
+CU --> PA
+CU --> PD
+CU --> MOD
+CU --> EV
+PDO ..|> PD
+PDO ..|> PA
+MEM ..|> PD
+MEM ..|> PA
+ARC ..|> PA
+FAB --> PDO
+FAB --> MEM
+FAB --> ARC
+@enduml

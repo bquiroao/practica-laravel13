@@ -10,14 +10,18 @@ Implementa el flujo de las semanas 1 y 2: casos manuales versionados, campañas 
 src/
   Dominio/        Modelo (CasoPrueba, Campana, Intento, Defecto, Decision), Evidencia (semana 2), Excepciones, Puertos (repositorios, Reloj)
   Aplicacion/     CasosDeUso (9), Puertos (AlmacenEvidencias, PoliticaAcceso, RegistroAuditoria, Transaccion), Resultados\Salida
-  Persistencia/   Pdo (repositorios, auditoría, transacción), Archivos (almacén de evidencias), Configuracion
-  Presentacion/   Http (Kernel, AccionesQa, TraductorSalida, autenticación)
+  Persistencia/   Pdo (repositorios, auditoría, transacción), EnMemoria (los mismos puertos sin base), Archivos (almacén de
+                  evidencias), Configuracion, FabricaAdaptadores (pdo | memoria)
+  Presentacion/   Http: Kernel y autenticación; MVC: Formularios, Controladores (+ Rutas), Vistas
 bootstrap/        autoload PSR-4 mínimo y raíz de composición
-database/         schema.sql (esquema «qa») y datos-demo.sql
+database/         schema.sql (esquema «qa»), datos-demo.sql / datos-demo.php, integracion-central.sql (semana 4)
 public/index.php  front controller
-bin/              instalar-base.php, demo-http.sh
-tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Presentacion/, Arquitectura/, Integracion/
+bin/              instalar-base.php, demo.php (en memoria), demo-http.sh, validar-integracion-central.php
+tests/            ejecutar.php, mutaciones.php, Dobles/ (decoradores con fallas), Dominio/, Aplicacion/, Persistencia/,
+                  Contratos/ (Repository: memoria y PDO), Mvc/, Presentacion/, Arquitectura/, Integracion/
 ```
+
+**Sin base de datos:** `QA_PERSISTENCIA=memoria` usa los adaptadores en memoria con `database/datos-demo.php`. Como la memoria no sobrevive entre peticiones de `php -S`, para recorrer el flujo completo use `php bin/demo.php`.
 
 ## Uso
 
@@ -49,12 +53,13 @@ curl -s http://127.0.0.1:8093/api/v1/qa/campanas -H "Authorization: Bearer token
 ## Pruebas
 
 ```bash
-php tests/ejecutar.php                 # dominio, aplicación (dobles), persistencia (dobles de PDO), HTTP y arquitectura
+php tests/ejecutar.php                 # dominio, aplicación, persistencia, contrato (memoria), MVC, HTTP y arquitectura
 QA_DB_DSN=... php tests/ejecutar.php   # además, integración con PostgreSQL real
-QA_DB_DSN=... php tests/mutaciones.php # 16 defectos sembrados: la suite debe detectarlos todos
+QA_DB_DSN=... php tests/mutaciones.php # defectos sembrados (22): la suite debe detectarlos todos
 QA_DB_DSN=... bash bin/demo-http.sh    # recorrido HTTP con servidor real
+QA_DB_DSN=... php bin/validar-integracion-central.php   # integración con la base central del HIS (semana 4)
 ```
 
 Las pruebas de integración **borran y recrean el esquema `qa`**. Úselas solo contra una base de prueba.
 
-La arquitectura, las decisiones y la evidencia están en [semana-03](../semana-03/semana-03-arquitectura-micro-his.md).
+Arquitectura y evidencia: [semana 3](../semana-03/semana-03-arquitectura-micro-his.md) (capas, PDO, C4) · [semana 4](../semana-04/semana-04-capas-mvc-repositorio.md) (MVC, Repository, repositorio compartido).

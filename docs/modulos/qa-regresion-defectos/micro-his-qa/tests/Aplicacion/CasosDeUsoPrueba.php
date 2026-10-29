@@ -29,7 +29,7 @@ prueba('APP-01', 'Camino feliz completo: diseñar → aprobar → planificar →
     $cierre = $e->uc['cerrar']->ejecutar('lider-qa', 'hosp-norte', $id);
     igual(['GO', 1.0, []], [$cierre->datos['decision'], $cierre->datos['tasa_aprobados'], $cierre->datos['causas']], 'decisión');
     igual(['CASO_DISENADO', 'CASO_APROBADO', 'CAMPANA_PLANIFICADA', 'CAMPANA_INICIADA', 'RESULTADO_REGISTRADO', 'RESULTADO_REGISTRADO', 'RESULTADO_REGISTRADO',
-        'DEFECTO_CLASIFICADO', 'DEFECTO_CORREGIDO', 'RESULTADO_REGISTRADO', 'CAMPANA_CERRADA_GO'], $e->auditoria->acciones(), 'traza de cada paso');
+        'DEFECTO_CLASIFICADO', 'DEFECTO_CORREGIDO', 'RESULTADO_REGISTRADO', 'CAMPANA_CERRADA_GO'], $e->memAuditoria()->acciones(), 'traza de cada paso');
 });
 
 prueba('APP-02', 'Trazabilidad: requisito → caso → último intento → evidencia (solo huella) → defecto', function (): void {
@@ -54,13 +54,13 @@ prueba('APP-03', 'Idempotencia (R-12): la misma clave y el mismo contenido devue
     $repetido = $e->registrar($id, 'TC-107', 'PASA', [], 'tito-tester', 'reintento-0001');
     igual([Salida::OK, 'RESULTADO_YA_REGISTRADO', $primero->datos['intento']], [$repetido->tipo, $repetido->codigo, $repetido->datos['intento']], 'repetición');
     igual('CLAVE_REUTILIZADA', $e->registrar($id, 'TC-108', 'PASA', [], 'tito-tester', 'reintento-0001')->codigo, 'otro contenido');
-    igual(1, count($e->campanas->intentos), 'un solo intento guardado');
+    igual(1, count($e->intentos()), 'un solo intento guardado');
 });
 
 prueba('APP-15', 'Idempotencia ANTES que el estado: un reintento que llega después de cerrar la campaña o el defecto devuelve el mismo intento, no 409', function (): void {
     $e = new Escenario();
     $id = $e->campanaEnCurso(['TC-107', 'TC-108']);
-    $corregido = $e->defectos->sembrar('hosp-norte', $id, 'TC-107', Severidad::MAYOR, EstadoDefecto::CORREGIDO);
+    $corregido = $e->sembrarDefecto($id, 'TC-107', EstadoDefecto::CORREGIDO);
     $original = $e->registrar($id, 'TC-107', 'PASA', ['verifica_defecto' => $corregido->id], 'tito-tester', 'reintento-red-01');
     $e->registrar($id, 'TC-108', 'PASA');
     $e->uc['cerrar']->ejecutar('lider-qa', 'hosp-norte', $id);
@@ -75,7 +75,7 @@ prueba('APP-04', 'R-05: FALLA o BLOQUEADO sin evidencia → 422; una referencia 
     $id = $e->campanaEnCurso();
     $r = $e->registrar($id, 'TC-107', 'BLOQUEADO', ['evidencias' => [], 'referencias' => [['url' => 'https://ci.hospital.gt/build/88', 'descripcion' => 'log']]]);
     igual([Salida::INVALIDO, 'EVIDENCIA_REQUERIDA'], [$r->tipo, $r->codigo], 'bloqueado sin evidencia');
-    igual([0, []], [count($e->campanas->intentos), $e->almacen->archivos], 'nada escrito');
+    igual([0, 0], [count($e->intentos()), $e->almacen->cantidad()], 'nada escrito');
 });
 
 prueba('APP-05', 'R-06: FALLA sin defecto → 422; R-10: NO_APLICA sin motivo → 422', function (): void {
@@ -108,9 +108,9 @@ prueba('APP-07', 'R-02 y R-04 en el caso de uso: autor no aprueba (409); campañ
 prueba('APP-08', 'R-08: re-ejecutar PASA sobre un defecto que no está CORREGIDO → 409; FALLA en la re-ejecución lo REABRE sin pedir otro defecto', function (): void {
     $e = new Escenario();
     $id = $e->campanaEnCurso();
-    $abierto = $e->defectos->sembrar('hosp-norte', $id, 'TC-107', Severidad::MAYOR, EstadoDefecto::ABIERTO);
+    $abierto = $e->sembrarDefecto($id, 'TC-107', EstadoDefecto::ABIERTO);
     igual('ESTADO_NO_PERMITE_VERIFICAR', $e->registrar($id, 'TC-107', 'PASA', ['verifica_defecto' => $abierto->id])->codigo, 'no corregido');
-    $corregido = $e->defectos->sembrar('hosp-norte', $id, 'TC-107', Severidad::MAYOR, EstadoDefecto::CORREGIDO);
+    $corregido = $e->sembrarDefecto($id, 'TC-107', EstadoDefecto::CORREGIDO);
     $r = $e->registrar($id, 'TC-107', 'FALLA', ['verifica_defecto' => $corregido->id, 'defecto' => null]);
     igual([Salida::CREADO, 'REABIERTO', null], [$r->tipo, $r->datos['defecto_verificado']['estado'], $r->datos['defecto']], 'reabierto');
 });
@@ -131,7 +131,7 @@ prueba('APP-10', 'Evidencia > 5 MB → 413 sin escribir nada; formato inválido 
     $e = new Escenario();
     $id = $e->campanaEnCurso();
     $grande = $e->registrar($id, 'TC-107', 'FALLA', ['evidencias' => [['tipo' => 'registro', 'bytes' => str_repeat('a', 5 * 1024 * 1024 + 1)]]]);
-    igual([Salida::DEMASIADO_GRANDE, 0], [$grande->tipo, count($e->almacen->archivos)], '413');
+    igual([Salida::DEMASIADO_GRANDE, 0], [$grande->tipo, $e->almacen->cantidad()], '413');
     igual('TIPO_NO_PERMITIDO', $e->registrar($id, 'TC-107', 'FALLA', ['evidencias' => [['tipo' => 'captura', 'bytes' => 'GIF89a']]])->codigo, 'formato');
 });
 
@@ -139,11 +139,11 @@ prueba('APP-10', 'Evidencia > 5 MB → 413 sin escribir nada; formato inválido 
 prueba('APP-11', 'Almacén de evidencias caído (fail-closed): 503 y NO queda intento, defecto ni traza', function (): void {
     $e = new Escenario();
     $id = $e->campanaEnCurso();
-    $antes = count($e->auditoria->movimientos);
+    $antes = count($e->memAuditoria()->movimientos());
     $e->almacen->caido = true;
     $r = $e->registrar($id, 'TC-107', 'FALLA');
     igual([Salida::NO_DISPONIBLE, 'EVIDENCIA_NO_DISPONIBLE'], [$r->tipo, $r->codigo], 'resultado');
-    igual([0, 0, $antes], [count($e->campanas->intentos), count($e->defectos->deCampana('hosp-norte', $id)), count($e->auditoria->movimientos)], 'sin escrituras');
+    igual([0, 0, $antes], [count($e->intentos()), count($e->defectos->deCampana('hosp-norte', $id)), count($e->memAuditoria()->movimientos())], 'sin escrituras');
 });
 
 prueba('APP-12', 'La traza falla dentro de la transacción: 503 y se deshacen el intento y el defecto (nada a medias)', function (): void {
@@ -152,7 +152,7 @@ prueba('APP-12', 'La traza falla dentro de la transacción: 503 y se deshacen el
     $e->auditoria->fallarEn = 'registrar';
     $r = $e->registrar($id, 'TC-107', 'FALLA');
     igual([Salida::NO_DISPONIBLE, 'ERROR_PERSISTENCIA'], [$r->tipo, $r->codigo], 'resultado');
-    igual([0, 0, 1], [count($e->campanas->intentos), count($e->defectos->deCampana('hosp-norte', $id)), $e->transaccion->revertidas], 'revertido');
+    igual([0, 0, 1], [count($e->intentos()), count($e->defectos->deCampana('hosp-norte', $id)), $e->transaccion->revertidas], 'revertido');
 });
 
 prueba('APP-13', 'La base no responde al leer: cada caso de uso devuelve 503 ERROR_PERSISTENCIA, nunca una excepción', function () use ($casoNuevo): void {

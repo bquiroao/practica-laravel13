@@ -42,8 +42,22 @@ $mutaciones = [
 -- '],
     'M15 la trazabilidad expone el contenido de la evidencia' => ['src/Aplicacion/CasosDeUso/ConsultarTrazabilidad.php',
         "'tamano' => \$e->tamano, 'clasificacion' => \$e->clasificacion]", "'tamano' => \$e->tamano, 'clasificacion' => \$e->clasificacion, 'ubicacion' => 'captura-de-prueba']"],
-    'M16 el traductor manda las reglas de datos como 409' => ['src/Presentacion/Http/TraductorSalida.php',
+    'M16 la vista manda las reglas de datos como 409' => ['src/Presentacion/Http/Vistas/SalidaVista.php',
         'Salida::INVALIDO => 422,', 'Salida::INVALIDO => 409,'],
+    // Semana 4: adaptadores InMemory, contrato del Repository y MVC.
+    'M17 el repositorio en memoria no filtra campañas por tenant' => ['src/Persistencia/EnMemoria/RepositorioCampanasEnMemoria.php',
+        'if ($c === null || $c->tenant !== $tenant) {', 'if ($c === null) {'],
+    'M18 la transacción en memoria no deshace (sin ROLLBACK)' => ['src/Persistencia/EnMemoria/TransaccionEnMemoria.php',
+        '$p->restaurar($estados[$i]);', '// sin restaurar'],
+    'M19 PDO: un caso duplicado vuelve a dar 503 (contrato roto)' => ['src/Persistencia/Pdo/PdoRepositorioCasos.php',
+        "throw new ReglaRechazada('CASO_EXISTENTE');   // mismo contrato", "null; // mismo contrato"],
+    'M20 los requisitos dejan de ordenarse (contrato roto)' => ['src/Dominio/Modelo/CasoPrueba.php',
+        "        sort(\$validos);\n", "\n"],
+    'M21 el formulario acepta verifica_defecto como texto' => ['src/Presentacion/Http/Formularios/FormularioResultado.php',
+        "'verifica_defecto' => 'entero'", "'verifica_defecto' => 'texto'"],
+    'M22 el controlador llama al caso de uso aunque el formulario falle' => ['src/Presentacion/Http/Controladores/CampanasControlador.php',
+        "        } catch (EntradaInvalida \$e) {\n            return \$this->error->entrada(\$e);\n        }\n\n        return \$this->vista->mostrar(\$this->registrar",
+        "        } catch (EntradaInvalida \$e) {\n            \$clave = 'x'; \$datos = [];\n        }\n\n        return \$this->vista->mostrar(\$this->registrar"],
 ];
 
 $origen = dirname(__DIR__);

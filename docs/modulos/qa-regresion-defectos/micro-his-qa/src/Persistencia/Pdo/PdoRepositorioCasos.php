@@ -16,6 +16,9 @@ final class PdoRepositorioCasos extends ConsultasPdo implements RepositorioCasos
 
     public function guardar(CasoPrueba $caso): void
     {
+        if ($this->consulta('SELECT 1 FROM casos_prueba WHERE tenant = ? AND caso_id = ? AND version = ?', [$caso->tenant, $caso->id, $caso->version])->fetchColumn()) {
+            throw new ReglaRechazada('CASO_EXISTENTE');   // mismo contrato que el adaptador en memoria (CON-02)
+        }
         $this->consulta('INSERT INTO casos_prueba (tenant, caso_id, version, autor, titulo, precondiciones, pasos, prioridad, estado, aprobador)
             VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, ?)', [$caso->tenant, $caso->id, $caso->version, $caso->autor, $caso->titulo,
             $caso->precondiciones, json_encode($caso->pasos, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), $caso->prioridad, $caso->estado, $caso->aprobador]);

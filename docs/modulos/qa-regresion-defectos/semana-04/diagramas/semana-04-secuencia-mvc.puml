@@ -1,0 +1,36 @@
+@startuml semana-04-secuencia-mvc
+!pragma layout smetana
+title Un resultado a través de MVC y Repository (con dos salidas de error tempranas)
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+
+actor Tester
+participant Kernel as K
+participant "CampanasControlador" as C
+participant "FormularioResultado" as F
+participant "RegistrarResultado\n(Modelo)" as U
+participant "RepositorioCampanas\n(puerto)" as R
+participant "SalidaVista" as V
+
+Tester -> K : POST /campanas/2/resultados
+K -> C : registrar(solicitud, identidad, {id: 2})
+C -> F : desde(solicitud)
+alt forma inválida (sin Idempotency-Key, base64 roto, tipos)
+  F --> C : EntradaInvalida
+  C --> K : ErrorVista → 400 {error, detalle}
+  note right : el caso de uso no se llama (MVC-04)
+end
+F --> C : {clave, datos con bytes}
+C -> U : ejecutar(tester, tenant, 2, clave, datos)
+U -> R : intentoPorClave · porId · agregarIntento
+note right of R
+  PdoRepositorioCampanas o
+  RepositorioCampanasEnMemoria:
+  el caso de uso no sabe cuál
+end note
+U --> C : Salida(CREADO, RESULTADO_REGISTRADO, datos)
+C -> V : mostrar(salida)
+V --> C : Respuesta 201
+C --> K : 201
+K --> Tester : 201 + X-Request-ID
+@enduml
