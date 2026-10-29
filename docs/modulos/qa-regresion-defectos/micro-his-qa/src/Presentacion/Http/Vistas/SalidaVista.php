@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Qa\Presentacion\Http;
+namespace Qa\Presentacion\Http\Vistas;
 
 use Qa\Aplicacion\Resultados\Salida;
+use Qa\Presentacion\Http\Respuesta;
 
-/** Traduce la salida de un caso de uso a HTTP. Es el único lugar que conoce los códigos de estado. */
-final class TraductorSalida
+/**
+ * La V de MVC: convierte la salida de un caso de uso en la respuesta HTTP. Único lugar que conoce los códigos de
+ * estado (en la semana 3 era TraductorSalida). Los éxitos llevan «codigo»; los errores, «error».
+ */
+final class SalidaVista
 {
     private const ESTADOS = [
         Salida::CREADO => 201,
@@ -20,7 +24,7 @@ final class TraductorSalida
         Salida::NO_DISPONIBLE => 503,
     ];
 
-    public function traducir(Salida $s, ?string $location = null): Respuesta
+    public function mostrar(Salida $s, ?string $location = null): Respuesta
     {
         $estado = self::ESTADOS[$s->tipo];
         $clave = $estado >= 400 ? 'error' : 'codigo';

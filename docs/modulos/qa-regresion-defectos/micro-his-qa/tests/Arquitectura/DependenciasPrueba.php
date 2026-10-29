@@ -66,6 +66,37 @@ prueba('ARQ-06', 'Sin framework: ningún archivo usa Composer ni namespaces de t
     igual([], $violaciones, 'archivos con dependencias de terceros');
 });
 
+prueba('ARQ-08', 'MVC: los controladores no tienen SQL ni reglas; solo usan formularios, casos de uso y vistas', function () use ($archivosDe, $codigoDe): void {
+    $violaciones = [];
+    foreach ($archivosDe('Presentacion/Http/Controladores') as $archivo) {
+        $codigo = $codigoDe($archivo);
+        preg_match_all('/^use\s+Qa\\\\([A-Za-z\\\\]+);/m', $codigo, $m);
+        foreach ($m[1] as $usado) {
+            if (!preg_match('/^(Aplicacion\\\\CasosDeUso|Presentacion\\\\Http)\\\\/', $usado)) {
+                $violaciones[] = basename($archivo) . " usa $usado";
+            }
+        }
+        // Ni SQL, ni decisiones con el dominio: un controlador no lanza reglas ni compara estados.
+        if (preg_match('/\bSELECT\s|\bINSERT\s|\bthrow\s+new\s+ReglaRechazada|\bSalida::|->estado\(\)|\bResultado::|\bSeveridad::/', $codigo)) {
+            $violaciones[] = basename($archivo) . ' decide algo';
+        }
+    }
+    igual([], $violaciones, 'controladores');
+});
+
+prueba('ARQ-09', 'Repository: los adaptadores EnMemoria y Pdo implementan exactamente los mismos puertos', function (): void {
+    $puertos = static function (string $clase): array {
+        $p = array_values(array_filter(class_implements($clase), static fn (string $i): bool => str_starts_with($i, 'Qa\\Dominio\\Puertos') || str_starts_with($i, 'Qa\\Aplicacion\\Puertos')));
+        sort($p);
+
+        return $p;
+    };
+    $pares = [['RepositorioCasos', 'Casos'], ['RepositorioCampanas', 'Campanas'], ['RepositorioDefectos', 'Defectos']];
+    foreach ($pares as [$puerto, $sufijo]) {
+        igual($puertos("Qa\\Persistencia\\Pdo\\PdoRepositorio$sufijo"), $puertos("Qa\\Persistencia\\EnMemoria\\Repositorio{$sufijo}EnMemoria"), $puerto);
+    }
+});
+
 prueba('ARQ-07', 'LSP (semana 2): fuera de la fábrica, nadie pregunta por el subtipo de evidencia (instanceof Captura/RegistroTexto/ResultadoJUnit)', function () use ($archivosDe, $codigoDe): void {
     $violaciones = [];
     foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {

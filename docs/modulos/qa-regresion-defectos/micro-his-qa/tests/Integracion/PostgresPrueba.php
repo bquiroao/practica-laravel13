@@ -5,7 +5,8 @@ declare(strict_types=1);
 use Qa\Aplicacion\Resultados\Salida;
 use Qa\Dominio\Excepciones\ErrorPersistencia;
 use Qa\Dominio\Excepciones\ReglaRechazada;
-use Qa\Persistencia\Configuracion\PoliticaAccesoEstatica;
+use Qa\Persistencia\EnMemoria\AlmacenEvidenciasEnMemoria;
+use Qa\Persistencia\FabricaAdaptadores;
 use Qa\Persistencia\Pdo\FabricaConexion;
 use Qa\Persistencia\Pdo\PdoRegistroAuditoria;
 
@@ -16,7 +17,7 @@ use Qa\Persistencia\Pdo\PdoRegistroAuditoria;
  */
 require_once dirname(__DIR__, 2) . '/bin/instalar-base.php';
 
-/** @return array{pdo: \PDO, uc: array<string, object>, almacen: AlmacenFalso, auditoria: object} */
+/** @return array{pdo: \PDO, uc: array<string, object>, almacen: AlmacenEvidenciasEnMemoria, auditoria: object} */
 function baseDePrueba(?\Qa\Aplicacion\Puertos\RegistroAuditoria $auditoria = null): array
 {
     $dsn = getenv('QA_DB_DSN');
@@ -26,8 +27,8 @@ function baseDePrueba(?\Qa\Aplicacion\Puertos\RegistroAuditoria $auditoria = nul
     $config = require dirname(__DIR__, 2) . '/config/config.php';
     $pdo = FabricaConexion::crear($dsn, $config['db']['usuario'], $config['db']['clave']);
     instalarBase($pdo);
-    $p = adaptadoresPdo($config, $pdo);
-    $p['almacen'] = new AlmacenFalso();
+    $p = FabricaAdaptadores::crear(['persistencia' => 'pdo'] + $config, $pdo);
+    $p['almacen'] = new AlmacenEvidenciasEnMemoria();
     $p['reloj'] = new RelojFijo();
     if ($auditoria !== null) {
         $p['auditoria'] = $auditoria;
@@ -155,4 +156,27 @@ prueba('INT-09', 'La traza de auditoría va a la bandeja en la misma transacció
     igual(['CAMPANA_PLANIFICADA', 'CAMPANA_INICIADA', 'RESULTADO_REGISTRADO'], array_column($filas, 'accion'), 'acciones');
     igual("campana:$id/caso:TC-107#1", $filas[2]['recurso'], 'recurso');
     afirmar($b['auditoria'] instanceof PdoRegistroAuditoria, 'adaptador real');
+});
+
+prueba('INT-10', 'datos-demo.php (memoria) y datos-demo.sql (PostgreSQL) describen los mismos casos y la misma matriz', function (): void {
+    $b = baseDePrueba();
+    $config = require dirname(__DIR__, 2) . '/config/config.php';
+    $mem = FabricaAdaptadores::memoria($config, require dirname(__DIR__, 2) . '/database/datos-demo.php');
+    $pg = FabricaAdaptadores::crear(['persistencia' => 'pdo'] + $config, $b['pdo']);
+    $foto = static function (array $p): array {
+        $r = [];
+        foreach (['hosp-norte', 'hosp-sur'] as $t) {
+            foreach ($p['casos']->variosPorId($t, array_map(static fn (int $n): string => "TC-$n", range(101, 111))) as $id => $c) {
+                $r["$t|$id"] = [$c->titulo, $c->precondiciones, $c->pasos, $c->prioridad, $c->requisitos, $c->estado, $c->aprobador, $c->autor];
+            }
+            foreach (['identidad-central', 'mpi', 'consentimiento', 'sincronizacion', 'identidad-hospital', 'agenda-camas', 'expediente'] as $f) {
+                $r["$t|matriz|$f"] = $p['casos']->criticosDe($t, [$f]);
+            }
+        }
+        ksort($r);
+
+        return $r;
+    };
+    $a = $foto($mem);
+    igual([12, $a], [count(array_filter(array_keys($a), static fn (string $k): bool => !str_contains($k, '|matriz|'))), $foto($pg)], 'mismo contenido');
 });

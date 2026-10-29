@@ -71,9 +71,12 @@ final readonly class CasoPrueba
         if ($campos !== []) {
             throw new ReglaRechazada('DATOS_INVALIDOS', $campos);
         }
+        // Orden canónico: dos adaptadores (o dos lecturas) devuelven los mismos requisitos en el mismo orden (CON-01).
+        $validos = array_values(array_unique($validos));
+        sort($validos);
         $pasosLimpios = array_map(static fn (array $p): array => ['accion' => trim($p['accion']), 'esperado' => trim($p['esperado'])], array_values($pasos));
 
-        return new self($tenant, $id, 1, $autor, trim($titulo), trim($precondiciones), $pasosLimpios, $prioridad, array_values(array_unique($validos)), self::BORRADOR);
+        return new self($tenant, $id, 1, $autor, trim($titulo), trim($precondiciones), $pasosLimpios, $prioridad, $validos, self::BORRADOR);
     }
 
     /** R-02: lo aprueba alguien distinto del autor, y solo un borrador. */

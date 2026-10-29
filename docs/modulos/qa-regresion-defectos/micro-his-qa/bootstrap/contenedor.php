@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 /*
  * Raíz de composición: el ÚNICO lugar que conoce las clases concretas de las cuatro capas.
- * public/index.php lo arma con PDO; las pruebas arman el mismo grafo con dobles (tests/Dobles).
+ * public/index.php la usa con PDO o en memoria (QA_PERSISTENCIA); las pruebas arman el mismo grafo con adaptadores
+ * en memoria y decoradores que inyectan fallas (tests/Dobles).
  */
 
 require __DIR__ . '/autoload.php';
@@ -18,18 +19,13 @@ use Qa\Aplicacion\CasosDeUso\IniciarCampana;
 use Qa\Aplicacion\CasosDeUso\MarcarCorregido;
 use Qa\Aplicacion\CasosDeUso\PlanificarCampana;
 use Qa\Aplicacion\CasosDeUso\RegistrarResultado;
-use Qa\Persistencia\Archivos\AlmacenEvidenciasArchivos;
-use Qa\Persistencia\Configuracion\PoliticaAccesoEstatica;
-use Qa\Persistencia\Configuracion\RelojSistema;
-use Qa\Persistencia\Pdo\FabricaConexion;
-use Qa\Persistencia\Pdo\PdoRegistroAuditoria;
-use Qa\Persistencia\Pdo\PdoRepositorioCampanas;
-use Qa\Persistencia\Pdo\PdoRepositorioCasos;
-use Qa\Persistencia\Pdo\PdoRepositorioDefectos;
-use Qa\Persistencia\Pdo\PdoTransaccion;
-use Qa\Presentacion\Http\Acciones\AccionesQa;
+use Qa\Persistencia\FabricaAdaptadores;
 use Qa\Presentacion\Http\Autenticacion\Autenticador;
 use Qa\Presentacion\Http\Autenticacion\AutenticadorTokenDemo;
+use Qa\Presentacion\Http\Controladores\CampanasControlador;
+use Qa\Presentacion\Http\Controladores\CasosControlador;
+use Qa\Presentacion\Http\Controladores\DefectosControlador;
+use Qa\Presentacion\Http\Controladores\Rutas;
 use Qa\Presentacion\Http\Kernel;
 
 /**
@@ -54,31 +50,18 @@ function construirCasosDeUso(array $p): array
     ];
 }
 
-/** @param array<string, object> $casos */
-function construirKernel(array $casos, Autenticador $autenticador): Kernel
+/** @param array<string, object> $c casos de uso */
+function construirKernel(array $c, Autenticador $autenticador): Kernel
 {
-    return new Kernel((new AccionesQa($casos))->rutas(), $autenticador);
+    return new Kernel(Rutas::definir(
+        new CasosControlador($c['disenar'], $c['aprobar']),
+        new CampanasControlador($c['planificar'], $c['iniciar'], $c['registrar'], $c['cerrar'], $c['trazabilidad']),
+        new DefectosControlador($c['clasificar'], $c['corregir']),
+    ), $autenticador);
 }
 
-/** @return array<string, object> los puertos con sus adaptadores reales (PostgreSQL + disco) */
-function adaptadoresPdo(array $config, ?\PDO $pdo = null): array
-{
-    $pdo ??= FabricaConexion::crear($config['db']['dsn'], $config['db']['usuario'], $config['db']['clave']);
-
-    return [
-        'acceso' => new PoliticaAccesoEstatica($config['permisos']),
-        'casos' => new PdoRepositorioCasos($pdo),
-        'campanas' => new PdoRepositorioCampanas($pdo),
-        'defectos' => new PdoRepositorioDefectos($pdo),
-        'almacen' => new AlmacenEvidenciasArchivos($config['evidencias']),
-        'auditoria' => new PdoRegistroAuditoria($pdo),
-        'transaccion' => new PdoTransaccion($pdo),
-        'reloj' => new RelojSistema(),
-    ];
-}
-
-/** Punto de entrada real. */
+/** Punto de entrada real: PostgreSQL con PDO, o todo en memoria (QA_PERSISTENCIA=memoria). */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(adaptadoresPdo($config)), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']));
 }
