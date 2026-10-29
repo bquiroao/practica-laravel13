@@ -13,6 +13,9 @@ use Alergias\Aplicacion\RegistrarAlergia;
 use Alergias\Dominio\CalculadorAlerta;
 use Alergias\Dominio\Reglas\ReglaPorSeveridad;
 use Alergias\Dominio\Reglas\ReglaReaccionAnafilactica;
+use Alergias\Persistencia\EnMemoria\AlergiasEnMemoria;
+use Alergias\Persistencia\EnMemoria\PacientesEnMemoria;
+use Alergias\Persistencia\EnMemoria\ReconocimientosEnMemoria;
 use Alergias\Persistencia\FabricaConexion;
 use Alergias\Persistencia\PdoDirectorioPacientes;
 use Alergias\Persistencia\PdoRepositorioAlergias;
@@ -25,10 +28,15 @@ use Alergias\Presentacion\Web\Router;
 /** @return array{registrar: RegistrarAlergia, consultar: ConsultarAlertaExpediente, reconocer: ReconocerAlerta} */
 function armarCasosDeUso(?PDO $pdo = null): array
 {
-    $pdo ??= FabricaConexion::desdeEntorno();
-    $pacientes = new PdoDirectorioPacientes($pdo);
-    $alergias = new PdoRepositorioAlergias($pdo);
-    $reconocimientos = new PdoRepositorioReconocimientos($pdo);
+    // ALERGIAS_PERSISTENCIA=memoria usa los adaptadores InMemory (semana 4); el resto no cambia.
+    if ($pdo === null && getenv('ALERGIAS_PERSISTENCIA') === 'memoria') {
+        [$pacientes, $alergias, $reconocimientos] = [PacientesEnMemoria::demo(), AlergiasEnMemoria::demo(), new ReconocimientosEnMemoria()];
+    } else {
+        $pdo ??= FabricaConexion::desdeEntorno();
+        $pacientes = new PdoDirectorioPacientes($pdo);
+        $alergias = new PdoRepositorioAlergias($pdo);
+        $reconocimientos = new PdoRepositorioReconocimientos($pdo);
+    }
     // OCP: agregar una regla = agregar una clase aquí; el calculador no cambia.
     $calculador = new CalculadorAlerta(new ReglaPorSeveridad(), new ReglaReaccionAnafilactica());
 
