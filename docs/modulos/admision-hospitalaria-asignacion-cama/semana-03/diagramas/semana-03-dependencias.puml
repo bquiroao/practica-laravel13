@@ -1,0 +1,64 @@
+@startuml semana-03-dependencias
+' Admisión hospitalaria y asignación de cama — Semana 3
+' Dirección de las dependencias entre capas: todas apuntan hacia Domain.
+skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 60
+title Dependencias entre capas del Micro-HIS (semana 3)
+
+package "Presentation" #EEF4FA {
+  class AplicacionConsola
+  class Servicios
+  class UsuariosFicticios
+}
+package "Composition Root" #F7F7F7 {
+  class "bootstrap.php" as Boot
+}
+package "Application" #EEF8F1 {
+  class AdmitirPacienteYAsignarCama
+  class ConsultarCamasDisponibles
+  class ContextoUsuario
+  interface Reloj
+  interface GeneradorId
+}
+package "Domain" #FFF8E8 {
+  class Admision
+  class EvaluadorElegibilidad
+  interface CriterioElegibilidadCama
+  interface AdmisionRepository
+  interface CatalogoCamas
+  interface DirectorioPacientes
+}
+package "Persistence" #F8EEF4 {
+  class PdoAdmisionRepository
+  class PdoCatalogoCamas
+  class PdoDirectorioPacientes
+}
+
+AplicacionConsola --> Servicios
+AplicacionConsola --> UsuariosFicticios
+Servicios --> AdmitirPacienteYAsignarCama
+Servicios --> ConsultarCamasDisponibles
+AdmitirPacienteYAsignarCama --> ContextoUsuario
+AdmitirPacienteYAsignarCama --> Reloj
+AdmitirPacienteYAsignarCama --> GeneradorId
+AdmitirPacienteYAsignarCama --> Admision
+AdmitirPacienteYAsignarCama --> EvaluadorElegibilidad
+AdmitirPacienteYAsignarCama --> AdmisionRepository
+AdmitirPacienteYAsignarCama --> CatalogoCamas
+AdmitirPacienteYAsignarCama --> DirectorioPacientes
+ConsultarCamasDisponibles --> CatalogoCamas
+EvaluadorElegibilidad --> CriterioElegibilidadCama
+AdmisionRepository <|.. PdoAdmisionRepository
+CatalogoCamas <|.. PdoCatalogoCamas
+DirectorioPacientes <|.. PdoDirectorioPacientes
+Boot ..> PdoAdmisionRepository : crea
+Boot ..> AdmitirPacienteYAsignarCama : crea
+Boot ..> Servicios : entrega
+
+note bottom of AdmisionRepository
+  La interfaz vive en Domain y la implementa
+  Persistence: la dependencia se invierte (DIP).
+  Domain no importa nada de las otras capas.
+end note
+@enduml
