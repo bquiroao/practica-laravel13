@@ -11,7 +11,11 @@ use Admision\Domain\Elegibilidad\CriterioElegibilidadCama;
 use Admision\Domain\Elegibilidad\CriterioServicio;
 use Admision\Domain\Elegibilidad\CriterioTipoCama;
 use Admision\Domain\Elegibilidad\EvaluadorElegibilidad;
+use Admision\Domain\Modelo\Admision;
 use Admision\Domain\Modelo\CamaDisponible;
+use Admision\Domain\Modelo\CodigoPaciente;
+use Admision\Domain\Modelo\OrigenAdmision;
+use Admision\Domain\Modelo\Requerimiento;
 use Admision\Domain\Modelo\Rol;
 use Admision\Domain\Modelo\TenantId;
 use Admision\Domain\Modelo\TipoCama;
@@ -69,5 +73,15 @@ final class Datos
     public static function solicitud(string $paciente = 'PAC-00451', string $camaId = self::B201, bool $aislamiento = false): SolicitudAdmision
     {
         return new SolicitudAdmision($paciente, 'MEDICINA_INTERNA', 'GENERAL', $aislamiento, 'EMERGENCIA', $camaId);
+    }
+
+    /** Admisión ya validada (como la deja el caso de uso), para probar repositorios directamente. */
+    public static function admision(string $id, string $paciente, CamaDisponible $cama, string $usuario = 'usr-adm-01'): Admision
+    {
+        $contexto = self::contexto($usuario);
+        return Admision::abrir(
+            $id, $contexto->tenantId, CodigoPaciente::desde($paciente), Requerimiento::desde($cama->servicio, $cama->tipo->value, $cama->aislamiento),
+            OrigenAdmision::EMERGENCIA, $cama, self::evaluador(), $contexto->responsable(), new \DateTimeImmutable('2026-03-02T08:15:00+00:00'),
+        );
     }
 }
