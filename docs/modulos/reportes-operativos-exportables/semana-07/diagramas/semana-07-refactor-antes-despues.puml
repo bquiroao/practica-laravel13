@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+hide empty members
+title Refactor: el camino «filtros → filas → archivo» deja de estar copiado
+
+package "ANTES (semana 4)" {
+  class ExportarReporte {
+    ejecutar(): permiso + catálogo + formato
+    ejecutar(): Filtros::desde + filas + Archivo::generar
+    ejecutar(): registrar la exportación
+    reproducir(): leer el registro + catálogo
+    reproducir(): Filtros::desde + filas + Archivo::generar
+    reproducir(): comparar el hash
+  }
+  note bottom of ExportarReporte : El camino se repite 2 veces.\nSi cambia solo una copia, «coincide»\ndeja de ser verdad sin que falle nada.
+}
+package "DESPUÉS (semana 7)" {
+  class ExportarReporteDespues {
+    ejecutar(): permiso + corte + preparar + registrar
+    reproducir(): leer el registro + preparar + comparar
+  }
+  class PreparadorDeArchivo {
+    preparar(): catálogo + formato
+    preparar(): Filtros::desde + filas + Archivo::generar
+  }
+  ExportarReporteDespues --> PreparadorDeArchivo : un solo camino
+  note bottom of PreparadorDeArchivo : Una regla nueva de filas se escribe aquí\ny vale para exportar y para reproducir.
+}
+@enduml

@@ -1,0 +1,18 @@
+@startuml semana-03-c4-contenedores
+!include <C4/C4_Container>
+title Contenedores del Micro-HIS (semana 3)
+Person(medico, "Médico tratante")
+System_Boundary(micro, "Micro-HIS Alergias (PHP 8.2+ vanilla)") {
+  Container(consola, "Consola", "PHP CLI: consola.php", "Presentation: registrar y alerta")
+  Container(nucleo, "Núcleo del módulo", "PHP: src/Aplicacion + src/Dominio", "Casos de uso, entidades, reglas e interfaces Repository")
+  Container(adaptadores, "Adaptadores", "PHP + PDO pgsql", "src/Persistencia: PdoRepositorioAlergias, PdoDirectorioPacientes")
+  Container(root, "Composition Root", "bootstrap.php", "Arma los objetos concretos")
+}
+ContainerDb(bd, "PostgreSQL 16", "Docker micro-alergias-pg, puerto 55442", "micro_alergias y micro_alergias_test")
+Rel(medico, consola, "Ejecuta comandos")
+Rel(consola, nucleo, "Llama casos de uso")
+Rel(adaptadores, nucleo, "Implementa interfaces de")
+Rel(root, adaptadores, "Crea")
+Rel(root, nucleo, "Inyecta adaptadores en")
+Rel(adaptadores, bd, "prepare() + execute()", "PDO")
+@enduml

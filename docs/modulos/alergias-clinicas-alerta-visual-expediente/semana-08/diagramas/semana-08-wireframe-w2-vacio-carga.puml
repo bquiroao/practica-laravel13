@@ -1,0 +1,18 @@
+@startsalt semana-08-wireframe-w2-vacio-carga
+{+
+  <b>Expediente PAC-00452</b>
+  ==
+  {+
+    <b>[SIN REGISTRO] Sin alergias registradas</b> | (1)
+    No hay alergias registradas. Esto NO confirma | .
+    que el paciente no tenga alergias: pregunte antes de indicar. | (2)
+    [Registrar alergia] | (3)
+  }
+  ..
+  <b>Estado de carga (mientras llega la respuesta)</b>
+  {+
+    "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒" | (4)
+    Cargando alergias…
+  }
+}
+@endsalt

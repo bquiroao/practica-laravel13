@@ -1,0 +1,43 @@
+@startuml semana-07-refactor-despues
+' Admisión hospitalaria y asignación de cama — Semana 7
+' DESPUÉS: un solo servicio de aplicación define «cama disponible»; la UI solo muestra.
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F1F8F3
+  BorderColor #276749
+}
+title Refactor — DESPUÉS: DisponibilidadCamas
+
+class DisponibilidadCamas <<Application>> {
+  +disponibles(tenant, requerimiento): list<CamaDisponible>
+  +exigirDisponible(tenant, camaId, requerimiento): CamaDisponible
+}
+class AdmitirPacienteYAsignarCama {
+  +ejecutar(solicitud, usuario)
+}
+class ConsultarCamasDisponibles {
+  +ejecutar(servicio, tipo, aislamiento, usuario)
+}
+class AdmisionController <<Presentation>> {
+  +registrar(): solo elige vista
+}
+class "ResultadoConflicto\n(DTO: codigo, camasAlternativas)" as RC
+interface CatalogoCamas
+interface AdmisionRepository
+class EvaluadorElegibilidad
+
+AdmitirPacienteYAsignarCama --> DisponibilidadCamas
+ConsultarCamasDisponibles --> DisponibilidadCamas
+AdmitirPacienteYAsignarCama --> AdmisionRepository : registrar()
+DisponibilidadCamas --> CatalogoCamas
+DisponibilidadCamas --> AdmisionRepository : camasOcupadas()
+DisponibilidadCamas --> EvaluadorElegibilidad
+AdmitirPacienteYAsignarCama ..> RC : en conflicto
+AdmisionController --> AdmitirPacienteYAsignarCama
+AdmisionController ..> RC : muestra alternativas
+
+note bottom of DisponibilidadCamas
+  Un solo lugar para RN-03 + RN-04 + ocupación.
+  RN-01 sigue garantizada por el índice al registrar.
+end note
+@enduml

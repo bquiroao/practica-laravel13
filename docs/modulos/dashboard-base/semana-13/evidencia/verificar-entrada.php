@@ -7,7 +7,9 @@ $raiz = __DIR__ . '/../../micro-his-dashboard-base';
 require $raiz . '/bootstrap.php';
 
 use MicroHis\DashboardBase\Aplicacion\Reloj;
-use MicroHis\DashboardBase\Presentacion\ControladorDashboard;
+use MicroHis\DashboardBase\Persistencia\RepositorioPdo;
+use MicroHis\DashboardBase\Presentacion\VistaJson;
+use function MicroHis\DashboardBase\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 $resultado = fn (array $r) => rtrim("{$r['status']} " . ($r['error'] ?? ''));
@@ -19,9 +21,9 @@ $db = new PDO('sqlite::memory:');
 $db->exec(file_get_contents("$raiz/database/schema.sql"));
 $db->exec("INSERT INTO local_patients (status) VALUES ('active')");
 $reloj = new class implements Reloj { public function hoy(): string { return '2026-10-26'; } };
-$app = crearControlador($db, $reloj);
+$app = crearControlador(new RepositorioPdo($db), $reloj);
 $todos = ['hospital' => 'H1', 'permisos' => ['pacientes.ver', 'citas.ver', 'camas.ver']];
-$http = (new ReflectionClassConstant(ControladorDashboard::class, 'HTTP'))->getValue();
+$http = (new ReflectionClassConstant(VistaJson::class, 'HTTP'))->getValue();   // desde la semana 4, la vista es dueña de los códigos
 
 // H-01: R-02 / CU-05. Hospital y permisos llegan en la petición: cualquier texto sirve de hospital y cualquier permiso se acepta.
 $r = $app->atender('tarjeta', ['id' => 'pacientes', 'hospital' => 'hospital-ajeno', 'permisos' => ['pacientes.ver']]);

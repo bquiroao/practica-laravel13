@@ -161,6 +161,13 @@ final class DefectosConFalla implements RepositorioDefectos
         return $this->real->deCampana($tenant, $campanaId);
     }
 
+    public function abiertosDe(string $tenant, array $casos): array
+    {
+        $this->quizaFallar('abiertosDe');
+
+        return $this->real->abiertosDe($tenant, $casos);
+    }
+
     public function criticosAbiertos(string $tenant, array $casos): int
     {
         $this->quizaFallar('criticosAbiertos');

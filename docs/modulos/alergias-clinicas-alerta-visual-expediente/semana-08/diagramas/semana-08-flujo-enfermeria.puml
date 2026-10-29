@@ -1,0 +1,23 @@
+@startuml semana-08-flujo-enfermeria
+title User flow — Enfermería
+start
+:Abre el expediente desde la ronda;
+:Estado: cargando;
+if (¿Respuesta?) then (error)
+  :«Alergias no disponibles: no administre\nsin verificar» + Reintentar;
+  stop
+endif
+if (¿Nivel ALTA o CRÍTICA y no reconocida?) then (sí)
+  :Franja destacada; el resto del expediente\nqueda debajo (no se oculta);
+  :Lee la lista y pulsa «He leído las alergias»;
+  if (¿409 ALERTA_CAMBIO?) then (sí)
+    :Lista nueva resaltada; reconoce de nuevo;
+  endif
+  :«Reconocida por usted a las 08:15»;
+else (no)
+  :Franja informativa, moderada o\n«Sin alergias registradas (no verificado)»;
+endif
+:No ve el botón «Registrar alergia»\n(no tiene el permiso);
+:Ayuda: «Para agregar una alergia, avise al médico tratante»;
+stop
+@enduml

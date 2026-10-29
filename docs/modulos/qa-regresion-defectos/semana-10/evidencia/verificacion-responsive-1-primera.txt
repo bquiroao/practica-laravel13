@@ -1,0 +1,34 @@
+OK    m1-campanas-base-320.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-360.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-390.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-430.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-768.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-1024.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-carga-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-vacio-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-sin-conexion-320.png         desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-lider-390.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-base-320.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-base-360.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-base-430.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-base-1024.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-error-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-confirmar-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-confirmar-768.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m2-ejecutar-verifica-390.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-exito-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-clinica-320.png    desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-reenviado-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-rechazado-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-1024.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-base-320.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-base-390.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-base-430.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-base-1024.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-cerrar-390.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-cerrar-768.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-cerrada-390.png          desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m4-trazabilidad-producto-360.png         desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+
+Vistas: 32  Fallan: 0

@@ -1,0 +1,18 @@
+[DETECTA  ] M1 los datos de un escenario no tienen que ser sintéticos (R-01)  falla: DOM-01, HTTP-03
+[DETECTA  ] M2 el plan no exige los críticos (R-02)                           falla: DOM-02, APP-09
+[DETECTA  ] M3 el plan congelado se puede cambiar (R-02)                       falla: DOM-03
+[DETECTA  ] M4 se ejecuta sobre cualquier digest (R-03)                        falla: DOM-04, APP-09
+[DETECTA  ] M5 un PASA tras reintentar cuenta como PASA (R-06)                 falla: DOM-05, DOM-08, APP-02
+[DETECTA  ] M6 se admite un segundo resultado del mismo escenario (R-04)       falla: DOM-06
+[SOBREVIVE] M7 el gate no compara el digest (R-03)                             
+[DETECTA  ] M8 el gate acepta un crítico que no pasa (R-09a)                  falla: DOM-08, APP-02
+[DETECTA  ] M9 el gate no mira la antigüedad (R-09e)                          falla: DOM-08, APP-02
+[DETECTA  ] M10 la evidencia se guarda DESPUÉS de la base (no fail-closed)    falla: APP-02, APP-04, HTTP-03, INT-01, INT-02
+[DETECTA  ] M11 sin idempotencia (R-12)                                        falla: APP-03
+[SOBREVIVE] M12 el almacén se usa antes de revisar las reglas (huérfanos)    
+[DETECTA  ] M13 la traza va fuera de la transacción                           falla: APP-01, APP-08, INT-01
+[DETECTA  ] M14 los resultados se pueden modificar (esquema)                   falla: PER-04, INT-02
+[DETECTA  ] M15 la base acepta una ejecución con otro digest (esquema)        falla: INT-03
+[DETECTA  ] M16 el adaptador PDO no traduce la clave repetida                  falla: INT-05
+----------------------------------------------------------------------------------------------------
+Mutaciones: 16  Detectadas: 14  Sobreviven: 2
