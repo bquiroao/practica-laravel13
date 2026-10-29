@@ -1,0 +1,17 @@
+@startsalt w02-camas-disponibles
+' W-02 Camas disponibles (decisión) con variantes de carga y vacío
+{+
+  <b>Elegir cama para PAC-00451</b> | Medicina interna · General
+  ==
+  {
+    <b>Camas disponibles (2)</b>
+    (X) B-201 · Medicina interna · General
+    () B-202 · Medicina interna · General
+  }
+  [Continuar] | [Cambiar requerimiento]
+  ==
+  <i>Variante CARGA:</i> «Buscando camas disponibles…» (botones deshabilitados)
+  <i>Variante VACÍO:</i> «No hay camas disponibles para Medicina interna / General»
+  [Cambiar requerimiento]
+}
+@endsalt
