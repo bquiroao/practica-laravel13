@@ -43,7 +43,7 @@ Los números naranjas de cada imagen corresponden a las filas de su tabla.
 |:-:|---|---|
 | 1 | Tabla de lo vigente | Se ve antes de escribir, para evitar el cruce |
 | 2 | Especialidad | Solo activas; inactiva: «La especialidad no existe o no está activa» |
-| 3 | Desde / Hasta | Hasta vacío = abierta; Hasta debe ser posterior. Cruce: «Esa especialidad ya está vigente en esas fechas. Cierre la anterior o elija otro rango» (422) |
+| 3 | Desde / Hasta | Hasta vacío = abierta; Hasta debe ser posterior. Cruce: «Esa especialidad ya está vigente en esas fechas. Cierre la anterior o elija otro rango» (409 `especialidad_duplicada`) |
 | 4 | Es la principal | Ayuda: «Solo puede haber una principal a la vez». El error conserva todo lo escrito |
 
 ### W3 · Consultar disponibilidad (éxito)
