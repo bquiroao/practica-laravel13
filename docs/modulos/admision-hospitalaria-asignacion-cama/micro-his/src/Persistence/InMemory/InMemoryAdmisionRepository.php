@@ -26,11 +26,12 @@ final class InMemoryAdmisionRepository implements AdmisionRepository
     public function registrar(Admision $admision): void
     {
         $tenant = $admision->tenantId;
-        if (in_array($admision->camaId, $this->camasOcupadas($tenant), true)) {
-            throw new CamaYaAsignada();
-        }
+        // Mismo orden que PDO (primero la fila de admision, luego la de asignacion_cama): D-04.
         if ($this->tieneAdmisionActiva($tenant, $admision->codigoPaciente)) {
             throw new PacienteConAdmisionActiva();
+        }
+        if (in_array($admision->camaId, $this->camasOcupadas($tenant), true)) {
+            throw new CamaYaAsignada();
         }
         $this->admisiones[$admision->id] = $admision;
         $this->eventos[$admision->id] = $admision->eventosPendientes();
