@@ -43,3 +43,21 @@ prueba('ARQ-05', 'PDO y SQL solo existen en Persistencia; sin framework ni Compo
     igual([], $fuera, 'PDO o SQL fuera de Persistencia');
     afirmar(!is_file(dirname(__DIR__, 2) . '/composer.json') && !is_dir(dirname(__DIR__, 2) . '/vendor'), 'hay Composer');
 });
+
+prueba('ARQ-06', 'MVC: los controladores no tienen SQL, no importan el Dominio y no deciden reglas; solo usan formularios, casos de uso y vistas', function () use ($archivosDe): void {
+    $problemas = [];
+    foreach (array_filter($archivosDe('Presentacion/Http/Controladores'), static fn ($a): bool => str_ends_with((string) $a, 'Controlador.php')) as $archivo) {
+        $codigo = (string) file_get_contents((string) $archivo);
+        preg_match_all('/^use\s+E2e\\\\([\w\\\\]+);/m', $codigo, $m);
+        afirmar($m[1] !== [], basename((string) $archivo) . ': no se leyó ningún import (la expresión no sirve)');
+        foreach ($m[1] as $usado) {
+            if (!preg_match('/^(Aplicacion\\\\CasosDeUso|Presentacion\\\\Http)\\\\/', $usado)) {
+                $problemas[] = basename((string) $archivo) . " usa $usado";
+            }
+        }
+        if (preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b|PDO|ReglaRechazada|Salida::/', $codigo) === 1) {
+            $problemas[] = basename((string) $archivo) . ' tiene SQL, reglas o traduce salidas';
+        }
+    }
+    igual([], $problemas, 'controladores');
+});

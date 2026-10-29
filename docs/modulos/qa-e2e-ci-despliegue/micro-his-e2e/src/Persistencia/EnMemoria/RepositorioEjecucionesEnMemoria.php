@@ -24,8 +24,13 @@ final class RepositorioEjecucionesEnMemoria implements RepositorioEjecuciones
         return $e;
     }
 
+    /** Igual que el UPDATE … WHERE estado = 'EN_CURSO' de PDO: dos cierres simultáneos no dejan dos estados (semana 4, CON-05). */
     public function actualizarEstado(Ejecucion $ejecucion): void
     {
+        $guardada = unserialize($this->filas[(int) $ejecucion->id]['cabecera'] ?? serialize(null));
+        if ($guardada === null || $guardada->estado() !== Ejecucion::EN_CURSO) {
+            throw new ReglaRechazada('ESTADO_NO_PERMITE_CERRAR');
+        }
         $this->filas[(int) $ejecucion->id]['cabecera'] = serialize(self::sinResultados($ejecucion));
     }
 
