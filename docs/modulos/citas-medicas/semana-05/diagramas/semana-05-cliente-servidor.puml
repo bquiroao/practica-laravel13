@@ -1,0 +1,24 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Citas médicas y agenda (hoy: módulo dentro del HIS)
+actor "Recepcionista o médico" as u
+node "Navegador" {
+  [SPA Vue del HIS] as spa
+}
+node "Servidor del HIS" {
+  [Front controller /citas] as fc
+  [ControladorCitas + VistaJson] as ctl
+  [ServicioCitas + Horario + EstadoCita] as srv
+  [RepositorioPdo] as repo
+}
+database "Base HOSPITAL (tenant)" as db
+[RBAC y sesión] as rbac
+[Catálogo de personal] as per
+u --> spa
+spa --> fc : HTTPS JSON\nJWT + X-Tenant-ID + X-Request-Id
+fc --> ctl
+ctl --> srv
+srv --> repo
+repo --> db : appointments, appointment_cancellations
+repo ..> per : doctor_specialties (lectura)
+fc ..> rbac : permiso y citas propias (semana 15)
+@enduml
