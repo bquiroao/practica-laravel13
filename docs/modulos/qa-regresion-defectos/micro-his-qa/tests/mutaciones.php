@@ -73,6 +73,15 @@ $mutaciones = [
         '$this->abiertoDesde = $this->reloj->ahora();', '// nunca abre'],
     'M29 el registro de acceso guarda el cuerpo' => ['src/Presentacion/Http/Kernel.php',
         "'tenant' => \$identidad?->tenant,", "'tenant' => \$identidad?->tenant, 'cuerpo' => \$solicitud->cuerpo,"],
+    // Semana 6: cambio práctico R-15.
+    'M30 un MAYOR abierto en un caso crítico ya no bloquea el GO' => ['src/Dominio/Modelo/Campana.php',
+        'if ($mayoresEnCriticos > 0) {', 'if (false) {'],
+    'M31 se cuentan los MAYOR de TODO el alcance, no solo de los críticos' => ['src/Aplicacion/CasosDeUso/CerrarCampana.php',
+        '$this->defectos->mayoresAbiertos($tenant, $criticosDeMatriz)', '$this->defectos->mayoresAbiertos($tenant, $casos)'],
+    'M32 un MAYOR CORREGIDO (aún no verificado) deja de bloquear (SQL)' => ['src/Persistencia/Pdo/PdoRepositorioDefectos.php',
+        "severidad = 'MAYOR' AND estado <> 'CERRADO'", "severidad = 'MAYOR' AND estado NOT IN ('CERRADO', 'CORREGIDO')"],
+    'M33 la trazabilidad no marca los MAYOR que bloquean' => ['src/Aplicacion/CasosDeUso/ConsultarTrazabilidad.php',
+        '\'bloquea_go\' => $d->criticoAbierto() ||', '\'bloquea_go\' => $d->criticoAbierto() || false &&'],
 ];
 
 $origen = dirname(__DIR__);

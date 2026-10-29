@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Qa\Persistencia\EnMemoria;
 
 use Qa\Dominio\Modelo\Defecto;
+use Qa\Dominio\Modelo\EstadoDefecto;
+use Qa\Dominio\Modelo\Severidad;
 use Qa\Dominio\Puertos\RepositorioDefectos;
 
 /** Defectos e historial en memoria. Copias serializadas, sin el historial pendiente (que ya se agregó). */
@@ -52,6 +54,12 @@ final class RepositorioDefectosEnMemoria implements RepositorioDefectos, Restaur
     {
         return count(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant
             && in_array($d->casoId, $casos, true) && $d->criticoAbierto()));
+    }
+
+    public function mayoresAbiertos(string $tenant, array $casos): int
+    {
+        return count(array_filter(array_map('unserialize', $this->filas), static fn (Defecto $d): bool => $d->tenant === $tenant
+            && in_array($d->casoId, $casos, true) && $d->severidad() === Severidad::MAYOR && $d->estado() !== EstadoDefecto::CERRADO));
     }
 
     /** @return list<string> eventos del historial de un defecto, en orden */

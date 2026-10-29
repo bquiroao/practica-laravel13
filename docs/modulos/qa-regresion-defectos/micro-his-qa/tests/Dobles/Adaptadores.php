@@ -167,6 +167,13 @@ final class DefectosConFalla implements RepositorioDefectos
 
         return $this->real->criticosAbiertos($tenant, $casos);
     }
+
+    public function mayoresAbiertos(string $tenant, array $casos): int
+    {
+        $this->quizaFallar('mayoresAbiertos');
+
+        return $this->real->mayoresAbiertos($tenant, $casos);
+    }
 }
 
 final class AuditoriaConFalla implements RegistroAuditoria

@@ -47,7 +47,7 @@ function construirCasosDeUso(array $p): array
         'registrar' => new RegistrarResultado($p['acceso'], $p['campanas'], $p['defectos'], $p['almacen'], $p['auditoria'], $p['transaccion'], $p['reloj']),
         'clasificar' => new ClasificarDefecto($p['acceso'], $p['defectos'], $p['auditoria'], $p['transaccion']),
         'corregir' => new MarcarCorregido($p['acceso'], $p['defectos'], $p['auditoria'], $p['transaccion']),
-        'cerrar' => new CerrarCampana($p['acceso'], $p['campanas'], $p['defectos'], $p['auditoria'], $p['transaccion']),
+        'cerrar' => new CerrarCampana($p['acceso'], $p['casos'], $p['campanas'], $p['defectos'], $p['auditoria'], $p['transaccion']),
         'trazabilidad' => new ConsultarTrazabilidad($p['acceso'], $p['casos'], $p['campanas'], $p['defectos']),
     ];
 }
