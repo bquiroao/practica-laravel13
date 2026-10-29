@@ -9,3 +9,4 @@ Captura de signos vitales del paciente, evaluación de cada valor contra los ran
 | Semana | Entrega | Documento | Declaración IA | Defensa oral |
 |---:|---|---|---|---|
 | 1 | UML del proceso «captura de signos vitales, evaluación de umbrales y generación de alerta»: casos de uso, actividad, secuencia, trazabilidad y narrativa de alcance | [semana-01-uml-signos-vitales.md](semana-01/semana-01-uml-signos-vitales.md) | — | [§6 Defensa](semana-01/semana-01-uml-signos-vitales.md#6-fuentes-de-los-diagramas) |
+| 8 | Diseño de experiencia de usuario: flujo por rol, 6 wireframes anotados, mensajes de error y reglas de interacción | [semana-08-diseno-ux.md](semana-08/semana-08-diseno-ux.md) | — | — |
