@@ -1,0 +1,17 @@
+$ php verificar.php
+[CUMPLE] CA-01  RF-09          Todo pasa sobre el digest, a tiempo y con evidencia → APROBADO sin causas
+[CUMPLE] CA-02  RF-09 · R-09a Un crítico que FALLA (con evidencia) → RECHAZADO y lo nombra
+[CUMPLE] CA-03  RF-06 · R-06  Un crítico INESTABLE (pasó al segundo intento) no cuenta como PASA → RECHAZADO
+[CUMPLE] CA-04  RF-09 · R-09a Un crítico OMITIDO tampoco cuenta como PASA
+[CUMPLE] CA-05  RF-05 · R-05  Una FALLA sin evidencia, o con una huella que el almacén no confirma → regla d
+[CUMPLE] CA-06  RF-09 · R-09b Límite de la tasa de no críticos: 3 de 4 (75 %) con umbral 75 % aprueba; 2 de 4 no
+[CUMPLE] CA-07  RF-09 · R-09b Omitir no mejora la tasa: dos no críticos OMITIDOS cuentan igual que dos que FALLAN
+[CUMPLE] CA-08  RF-09 · R-09c Inestables: 1 (el máximo) aprueba la regla c; 2 no
+[CUMPLE] CA-09  RF-09 · R-09e Antigüedad con reloj fijo: 24 h exactas aprueba; 24 h y 1 s no
+[CUMPLE] CA-10  RF-04 · R-03  La ejecución probó otro digest → RECHAZADO aunque todo pase
+[CUMPLE] CA-11  RF-07          Una ejecución no completada no se evalúa: EJECUCION_NO_COMPLETADA
+[CUMPLE] CA-12  RF-10          Cada evaluación se agrega: evaluar dos veces deja dos decisiones con la política y el digest
+[CUMPLE] CA-13  RNF-03         Portabilidad: la MISMA ejecución en JUnit y en el JSON de otro proveedor da la MISMA decisión
+[CUMPLE] CA-14  RNF-04 · R-08 Almacén en disco: confirma un artefacto por su SHA-256 y rechaza uno alterado
+
+Criterios: 14  Fallan: 0
