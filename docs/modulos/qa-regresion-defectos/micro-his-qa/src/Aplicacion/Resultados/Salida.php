@@ -47,7 +47,13 @@ final readonly class Salida
 
     public static function rechazo(ReglaRechazada $e): self
     {
-        return new self(in_array($e->codigo, self::INVALIDOS, true) ? self::INVALIDO : self::CONFLICTO, $e->codigo,
+        $tipo = match (true) {
+            $e->codigo === 'EVIDENCIA_DEMASIADO_GRANDE' => self::DEMASIADO_GRANDE,
+            in_array($e->codigo, self::INVALIDOS, true) => self::INVALIDO,
+            default => self::CONFLICTO,
+        };
+
+        return new self($tipo, $e->codigo,
             $e->detalle === [] ? [] : ['detalle' => $e->detalle]);
     }
 }
