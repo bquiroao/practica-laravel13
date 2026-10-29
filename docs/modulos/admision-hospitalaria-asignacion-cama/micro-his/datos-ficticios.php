@@ -29,4 +29,11 @@ return [
         'usr-med-01' => ['MEDICO', 'HOSP-01'],
         'usr-adm-02' => ['ADMISIONISTA', 'HOSP-02'],
     ],
+    'tokens' => [
+        // token FICTICIO de la API (semana 5) => usuario. No son secretos ni sirven fuera del Micro-HIS.
+        'tok-adm-01' => 'usr-adm-01',
+        'tok-sup-01' => 'usr-sup-01',
+        'tok-med-01' => 'usr-med-01',
+        'tok-adm-02' => 'usr-adm-02',
+    ],
 ];
