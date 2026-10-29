@@ -1,0 +1,18 @@
+@startsalt w01-nueva-admision
+' W-01 Nueva admisión (estado con error de formato E-02)
+{+
+  <b>Nueva admisión</b> | HOSP-01 · usr-adm-01 (Admisionista)
+  ==
+  Código de paciente *
+  {"PAC-451      "}
+  <color:#B91C1C>⚠ El código debe tener el formato PAC-NNNNN.</color>
+  <size:11>Ejemplo: PAC-00451. No escriba nombres.</size>
+  --
+  Servicio * | ^MEDICINA_INTERNA^
+  Tipo de cama * | ^GENERAL^
+  [ ] Requiere aislamiento <size:11>(las camas de aislamiento se reservan)</size>
+  Origen * | ^EMERGENCIA^
+  --
+  [Buscar camas disponibles]
+}
+@endsalt
