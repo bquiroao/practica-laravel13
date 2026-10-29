@@ -1,0 +1,21 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — servicio de documentación (solo si se cumplen los criterios de la §3)
+node "HIS (monolito modular)" {
+  [Módulos que publican contratos] as mods
+  [RBAC] as rbac
+}
+node "Servicio de documentación" {
+  [API /documentos, /versiones] as api
+  database "Base de versiones\ny audiencias" as dbd
+  [Validador OpenAPI (lint)] as lint
+}
+[CDN o caché de solo lectura] as cdn
+queue "Eventos\n(version.publicada, version.obsoleta)" as ev
+mods --> api : HTTP: enviar versión (CI de cada módulo)
+api --> lint : antes de revisión (R-04, E4)
+api --> dbd : dueño de versiones
+rbac --> api : role_code del lector (token)
+cdn --> api : GET de vigentes (RNF-02)
+api --> ev : outbox -> publica
+ev --> mods : aviso de contrato nuevo u obsoleto
+@enduml

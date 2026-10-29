@@ -1,0 +1,85 @@
+@startuml semana-01-actividad
+title Actividad · planificación de pruebas, ejecución E2E, conservación de evidencia y quality gates
+skinparam defaultFontSize 11
+skinparam activityBackgroundColor #EEF0F8
+skinparam activityBorderColor #2E3A6E
+
+|Pipeline CI|
+start
+:A1 Registrar versión candidata
+(versión, commit, digest del artefacto);
+|Ingeniero QA|
+:A2 Planificar pruebas de la versión
+(críticos + escenarios de los módulos afectados);
+if (D1 ¿Faltan escenarios críticos en el plan?) then (sí)
+  :E1 422 PLAN_INCOMPLETO
+  con la lista de los que faltan;
+  stop
+else (no)
+endif
+|Pipeline CI|
+:A3 Iniciar ejecución E2E
+sobre el digest (el plan se congela);
+repeat
+  :A4 Correr un escenario
+  con datos sintéticos;
+  if (D2 ¿Pasó al primer intento?) then (sí)
+    :Resultado PASA;
+  else (no)
+    if (D3 ¿Pasó en un reintento?) then (sí)
+      :Resultado INESTABLE (R-06);
+    else (no)
+      :Resultado FALLA;
+    endif
+  endif
+  if (D4 ¿Falla o inestable sin evidencia?) then (sí)
+    :E2 Resultado INCOMPLETO
+    (cuenta como falla, R-05);
+  else (no)
+    |Almacén|
+    :A5 Conservar evidencia
+    (SHA-256, retención, R-08);
+    |Pipeline CI|
+  endif
+repeat while (D5 ¿Quedan escenarios del plan?) is (sí) not (no)
+if (D6 ¿El runner se cayó o venció el tiempo?) then (sí)
+  :E3 Ejecución ABORTADA
+  (no sirve para el gate);
+  :F4 Reintentar la ejecución completa;
+  stop
+else (no)
+  :A6 Completar la ejecución;
+endif
+|Responsable de release|
+:A7 Evaluar quality gate sobre la ejecución
+y el digest (R-09 a–e);
+if (D7 ¿Todas las reglas se cumplen?) then (sí)
+  :Gate APROBADO;
+else (no)
+  if (D8 ¿Solo fallan reglas no críticas\ny hay excepción vigente de otro aprobador?) then (sí)
+    :A8 Gate APROBADO CON EXCEPCIÓN
+    (caduca, R-10);
+  else (no)
+    :F2 Versión RECHAZADA
+    con sus causas;
+    stop
+  endif
+endif
+|Operador de despliegue|
+:A9 Desplegar con la guía reproducible;
+if (D9 ¿El digest desplegado es el evaluado?) then (no)
+  :E4 409 DIGEST_DISTINTO
+  (no se despliega, R-11);
+  stop
+else (sí)
+endif
+:A10 Verificación posterior (smoke E2E);
+if (D10 ¿El smoke pasa?) then (sí)
+  :F1 Versión DESPLEGADA
+  y trazable;
+else (no)
+  :F3 Revertir a la versión anterior
+  registrada;
+endif
+stop
+@enduml

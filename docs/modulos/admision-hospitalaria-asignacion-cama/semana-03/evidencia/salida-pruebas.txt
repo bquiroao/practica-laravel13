@@ -1,0 +1,56 @@
+Micro-HIS Admisión hospitalaria y asignación de cama — pruebas
+PHP 8.4.26 · 2026-10-29 08:34 UTC
+
+# integracion/prueba-bootstrap.php
+  [OK]      bootstrap.php arma Servicios con PDO y consulta camas reales
+# integracion/prueba-pdo-admision.php
+  [OK]      Camino feliz con PostgreSQL: admisión, asignación y dos eventos (CA-01)
+  [OK]      RN-02 en la base: segunda admisión activa del mismo paciente se rechaza
+  [OK]      RN-01: dos admisiones que pasaron la verificación previa no se quedan con la misma cama (CA-07)
+  [OK]      RN-01 simultáneo: con la cama bloqueada por otra transacción se responde conflicto, y al confirmar ella, cama ya asignada
+  [OK]      Error de persistencia a mitad de la transacción revierte todo (CA-12, RNF-08)
+  [OK]      RN-05: los eventos de trazabilidad no se pueden modificar
+  [OK]      Directorio PDO responde solo si el código existe y está activo (CA-03)
+# integracion/prueba-pdo-lectura.php
+  [OK]      Catálogo PDO lista solo las camas del hospital, ordenadas (RN-04)
+  [OK]      Catálogo PDO: id mal formado o de otro hospital no existe (CA-09)
+  [OK]      Error real de PostgreSQL al leer se convierte en ErrorPersistencia
+# unitarias/prueba-admision.php
+  [OK]      Admision::abrir deja la admisión ACTIVA con dos eventos de trazabilidad (RN-05)
+  [OK]      Regla de dominio: cama de otro hospital se trata como inexistente (RN-04, CA-09)
+  [OK]      Regla de dominio: cama no compatible se rechaza con sus motivos (RN-03)
+  [OK]      Una admisión reconstituida no trae eventos pendientes
+# unitarias/prueba-caso-de-uso.php
+  [OK]      Camino feliz: PAC-00451 queda admitido en B-201 (CA-01)
+  [OK]      Regla de dominio RN-02: segunda admisión activa rechazada sin registrar (CA-04)
+  [OK]      Paciente inactivo PAC-00460 se rechaza (CA-03)
+  [OK]      Rol MEDICO no puede admitir (RN-06, CA-08)
+  [OK]      Usuario de HOSP-02 no alcanza camas de HOSP-01 (RN-04, CA-09)
+  [OK]      Error de persistencia (doble) se propaga y no devuelve resultado (CA-12)
+  [OK]      Conflicto detectado al guardar (doble) llega como CamaYaAsignada (CA-07)
+  [OK]      Camas disponibles: sin ocupadas y con aislamiento solo B-210 (CA-05, CA-06)
+# unitarias/prueba-consola.php
+  [OK]      Consola: admitir muestra la admisión ACTIVA con código y cama (CA-01)
+  [OK]      Consola: un MEDICO recibe ACCESO_DENEGADO y código de salida 1 (CA-08)
+  [OK]      Consola: error de persistencia sale con código 2 y pide reintentar (CA-12)
+  [OK]      Consola: sin camas compatibles muestra el estado vacío (E-05)
+# unitarias/prueba-contexto.php
+  [OK]      ContextoUsuario permite los roles indicados y niega los demás (RN-06)
+  [OK]      El responsable conserva usuario, rol y solicitud (RN-05)
+  [OK]      GeneradorUuidV4 produce UUID versión 4 distintos
+# unitarias/prueba-dependencias.php
+  [OK]      Domain no depende de Application, Persistence, Presentation
+  [OK]      Application no depende de Persistence, Presentation
+  [OK]      Persistence no depende de Application, Presentation
+  [OK]      Solo Persistence usa PDO y SQL
+# unitarias/prueba-elegibilidad.php
+  [OK]      Medicina interna general: solo B-201 y B-202 (CA-05)
+  [OK]      Con aislamiento: solo B-210 (CA-06)
+  [OK]      Cada rechazo trae su motivo (RN-03, RN-04)
+  [OK]      OCP: un criterio nuevo se agrega sin modificar el evaluador (RNF-06)
+# unitarias/prueba-valores.php
+  [OK]      CodigoPaciente acepta PAC-00451 y rechaza formatos inválidos (CA-02)
+  [OK]      TenantId acepta HOSP-01 y compara por valor
+  [OK]      Requerimiento valida servicio y tipo de cama
+
+Total: 41 · OK: 41 · Fallas: 0 · Omitidas: 0 · Defectos abiertos: 0

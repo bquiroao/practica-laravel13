@@ -1,0 +1,19 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — dashboard como BFF (solo si los módulos se extraen, §3)
+node "Navegador" {
+  [SPA Vue] as spa
+}
+node "BFF del dashboard" {
+  [API /dashboard, /dashboard/tarjetas] as bff
+  [Caché de conteos por tenant (TTL 60 s)] as cache
+}
+[Servicio de pacientes] as pac
+[Servicio de agenda] as age
+[Servicio de catálogo de camas] as cat
+spa --> bff : el mismo contrato de esta semana
+bff --> cache
+bff --> pac : GET conteo (timeout 2 s)
+bff --> age : GET conteo del día (timeout 2 s)
+bff --> cat : GET conteo disponibles (timeout 2 s)
+note right of bff : una fuente caída da 503 E5\nsolo en su tarjeta (R-03)
+@enduml

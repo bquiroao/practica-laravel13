@@ -1,0 +1,43 @@
+@startuml semana-07-componentes
+' Componentes propios del módulo: backend (implementado) y frontend Vue (diseño)
+skinparam componentStyle rectangle
+package "Frontend Vue 3 (diseño)" {
+  component "AlertaAlergiasBanner" as FB
+  component "ListaAlergias" as FL
+  component "BotonReconocer" as FR
+  component "FormularioAlergia" as FF
+  component "CampoSeveridad" as FS
+  component "MensajeError" as FE
+  component "useAlertaAlergias\n(composable)" as FU
+  component "apiAlergias\n(cliente HTTP)" as FC
+}
+package "Backend PHP (implementado en micro-his)" {
+  component "KernelApi v1" as K
+  component "RegistrarAlergia" as R
+  component "ConsultarAlertaExpediente" as C
+  component "ReconocerAlerta" as RE
+  component "CalculadorAlerta + reglas" as CAL
+  component "Repositorios\n(interfaces)" as REP
+  component "Pdo* / *EnMemoria" as AD
+}
+database "HOSPITAL" as BD
+FB --> FL
+FB --> FR
+FB --> FU
+FF --> FS
+FF --> FE
+FF --> FU
+FU --> FC
+FC --> K : HTTP JSON\n(Bearer, X-Request-Id)
+K --> R
+K --> C
+K --> RE
+R --> CAL
+C --> CAL
+RE --> CAL
+R --> REP
+C --> REP
+RE --> REP
+AD ..|> REP
+AD --> BD
+@enduml

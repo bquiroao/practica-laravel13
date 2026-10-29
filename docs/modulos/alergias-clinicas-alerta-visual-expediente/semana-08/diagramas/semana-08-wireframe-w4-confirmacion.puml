@@ -1,0 +1,16 @@
+@startsalt semana-08-wireframe-w4-confirmacion
+{+
+  <b>Confirme la alergia de PAC-00451</b> | (1)
+  ==
+  Alérgeno | <b>Penicilina</b>
+  Tipo | Alergia
+  Severidad | <b>Pone en riesgo la vida → alerta CRÍTICA</b> | (2)
+  Reacción | Edema de glotis
+  Inicio | 2019-03-02
+  Verifica | MED-014 (usted) | (3)
+  ..
+  [Corregir] | [Guardar alergia] | (4)
+  ==
+  <b>Después de guardar:</b> «Alergia registrada.» y franja CRÍTICA | (5)
+}
+@endsalt

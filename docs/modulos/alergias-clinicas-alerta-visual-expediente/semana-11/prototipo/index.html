@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo — Alergias clínicas y alerta visual en expediente</title>
+<style>
+  :root { --tinta: #1d2433; --papel: #ffffff; --gris: #f3f4f6; --linea: #4b5563; --foco: #1d4ed8;
+    --critica: #a4161a; --critica-f: #fde8e8; --alta: #9a3412; --alta-f: #fff1e6; --mod: #8a6100; --mod-f: #fff8db; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--tinta); background: var(--papel); }
+  header { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; padding: .6rem 1rem; border-bottom: 2px solid var(--tinta); }
+  header h1 { font-size: 1.05rem; margin: 0; flex: 1 1 12rem; }
+  label { font-weight: 600; }
+  select, input, textarea, button { font: inherit; min-height: 44px; }
+  input, textarea, select { width: 100%; padding: .5rem; border: 1px solid var(--linea); border-radius: 4px; }
+  button { padding: .55rem 1rem; border-radius: 4px; border: 2px solid var(--tinta); background: var(--papel); cursor: pointer; }
+  button.primario { background: var(--tinta); color: var(--papel); }
+  button:disabled { opacity: .6; cursor: wait; }
+  :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  main { max-width: 60rem; margin: 0 auto; padding: 0 1rem 2rem; }
+  .franja { position: sticky; top: 0; z-index: 2; margin: 1rem -1rem; padding: .8rem 1rem; border-left: 10px solid var(--linea); background: var(--gris); }
+  .franja h2 { margin: 0; font-size: 1.15rem; }
+  .CRITICA { border-color: var(--critica); background: var(--critica-f); }
+  .ALTA { border-color: var(--alta); background: var(--alta-f); }
+  .MODERADA { border-color: var(--mod); background: var(--mod-f); }
+  .tarjetas { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+  .tarjetas li { border: 1px solid var(--linea); border-radius: 4px; padding: .6rem .8rem; }
+  .nueva { outline: 3px solid var(--critica); }
+  .etiqueta { font-weight: 700; }
+  .acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .acciones button { flex: 1 1 14rem; }
+  .aviso { border: 2px solid var(--tinta); border-radius: 4px; padding: .7rem; margin: .6rem 0 0; background: var(--papel); }
+  .error-campo { color: var(--critica); font-weight: 600; margin: .2rem 0 0; }
+  .campo { margin-top: .9rem; }
+  fieldset { border: 0; padding: 0; margin: .9rem 0 0; }
+  fieldset label { display: flex; gap: .5rem; align-items: center; font-weight: 400; min-height: 44px; }
+  fieldset input { width: auto; min-height: auto; }
+  .demo { margin-top: 2rem; padding: .7rem; border: 1px dashed var(--linea); font-size: .9rem; }
+  .resto { margin-top: 1rem; padding: 1rem; background: var(--gris); }
+  @media (min-width: 768px) { .tarjetas li { display: grid; grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Expediente · Alergias</h1>
+  <label for="rol">Sesión</label>
+  <select id="rol" style="width:auto"><option value="medico">MED-014 · Médico</option><option value="enfermeria">ENF-022 · Enfermería</option></select>
+</header>
+<main id="app" tabindex="-1"></main>
+<div aria-live="polite" id="vivo" class="sr" style="position:absolute;left:-9999px"></div>
+<script>
+// API simulada en el navegador con las mismas reglas y códigos que micro-his/KernelApi (contrato v1).
+const SEV = { life_threatening: 'Pone en riesgo la vida', severe: 'Grave', moderate: 'Moderada', mild: 'Leve', unknown: 'Desconocida' };
+const NIV = { life_threatening: 'CRITICA', severe: 'ALTA', unknown: 'ALTA', moderate: 'MODERADA', mild: 'INFORMATIVA' };
+const PESO = { SIN_REGISTRO: 0, INFORMATIVA: 1, MODERADA: 2, ALTA: 3, CRITICA: 4 };
+const TITULO = { CRITICA: 'Alergia que pone en riesgo la vida', ALTA: 'Alergia de severidad alta', MODERADA: 'Alergia moderada',
+  INFORMATIVA: 'Alergia leve', SIN_REGISTRO: 'Sin alergias registradas' };
+const db = { alergias: { 'PAC-00451': [{ id: 'a1', alergeno: 'Ibuprofeno', severidad: 'moderate', reaccion: 'Urticaria' }], 'PAC-00452': [] },
+  reconocidos: new Set(), sinConexion: false };
+const huella = (lista) => lista.map(a => a.id + ':' + a.severidad).sort().join('|') || 'vacia';
+function alerta(pac, usuario) {
+  const lista = db.alergias[pac].map(a => ({ ...a, nivel: /anafila/.test((a.reaccion || '').toLowerCase()) ? 'CRITICA' : NIV[a.severidad] }))
+    .sort((x, y) => PESO[y.nivel] - PESO[x.nivel]);
+  const nivel = lista.reduce((n, a) => PESO[a.nivel] > PESO[n] ? a.nivel : n, 'SIN_REGISTRO');
+  const h = huella(db.alergias[pac]), reconocida = db.reconocidos.has(pac + usuario + h);
+  return { paciente: pac, nivel, huella: h, alergias: lista, reconocida, requiere_reconocimiento: PESO[nivel] >= 3 && !reconocida };
+}
+const api = {
+  async consultar(pac, u) { await espera(); return alerta(pac, u); },
+  async registrar(pac, u, rol, datos) {
+    await espera();
+    if (rol !== 'medico') throw { estado: 403, codigo: 'PERMISO_DENEGADO' };
+    const clave = datos.alergeno.trim().toLowerCase();
+    if (db.alergias[pac].some(a => a.alergeno.trim().toLowerCase() === clave)) throw { estado: 409, codigo: 'ALERGIA_DUPLICADA' };
+    db.alergias[pac].push({ id: 'a' + Date.now(), ...datos, alergeno: datos.alergeno.trim() }); return alerta(pac, u);
+  },
+  async reconocer(pac, u, h) {
+    await espera();
+    if (huella(db.alergias[pac]) !== h) throw { estado: 409, codigo: 'ALERTA_CAMBIO' };
+    db.reconocidos.add(pac + u + h); return alerta(pac, u);
+  },
+};
+function espera() { return new Promise((ok, mal) => setTimeout(() => db.sinConexion ? mal({ estado: 503, codigo: 'PERSISTENCIA_NO_DISPONIBLE' }) : ok(), 250)); }
+
+// Estado de la pantalla y navegación por hash: #/expediente/PAC-00451, #/registrar/PAC-00451/1
+const $ = (s) => document.querySelector(s), app = $('#app');
+const e = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let borrador = { alergeno: '', severidad: '', reaccion: '' }, nuevas = new Set(), mensaje = null;
+const usuario = () => $('#rol').value === 'medico' ? 'MED-014' : 'ENF-022';
+const anunciar = (t) => { $('#vivo').textContent = t; };
+window.addEventListener('hashchange', pintar);
+$('#rol').addEventListener('change', pintar);
+
+async function pintar() {
+  const [, vista, pac = 'PAC-00451', paso] = location.hash.split('/');
+  if (vista === 'registrar') return formulario(pac, paso || '1');
+  app.innerHTML = `<div class="franja" aria-busy="true"><h2>Cargando alergias…</h2></div>`;
+  try { expediente(await api.consultar(pac, usuario())); }
+  catch (err) { sinConexion(pac, 'cargar'); }
+}
+
+function expediente(a) {
+  const pendiente = a.requiere_reconocimiento, rol = $('#rol').value;
+  app.innerHTML = `
+    <div class="franja ${a.nivel}" id="franja">
+      <h2 ${pendiente ? 'role="alert"' : ''}><span class="etiqueta">[${a.nivel === 'CRITICA' ? 'CRÍTICA' : a.nivel.replace('_', ' ')}]</span> ${TITULO[a.nivel]}</h2>
+      <div>Paciente ${e(a.paciente)} · ${a.alergias.length} alergia(s) activa(s)${pendiente ? ' · <strong>sin reconocer</strong>' : a.reconocida ? ' · reconocida por usted' : ''}</div>
+      ${mensaje ? `<div class="aviso" id="mensaje" tabindex="-1">${mensaje}</div>` : ''}
+    </div>
+    ${a.alergias.length === 0 ? `<p>No hay alergias registradas. Esto <strong>no</strong> confirma que el paciente no tenga alergias: pregunte antes de indicar.</p>` : ''}
+    <ul class="tarjetas">${a.alergias.map(x => `<li class="${nuevas.has(x.id) ? 'nueva' : ''}">
+      <div><span class="etiqueta">${nuevas.has(x.id) ? 'NUEVA · ' : ''}${e(x.alergeno)}</span><br>${SEV[x.severidad]}</div>
+      <div>${x.reaccion ? 'Reacción: ' + e(x.reaccion) : 'Reacción: sin dato'}</div></li>`).join('')}</ul>
+    <div class="acciones">
+      ${pendiente ? `<button class="primario" id="reconocer" data-huella="${a.huella}">He leído las alergias de este paciente</button>` : ''}
+      ${rol === 'medico' ? `<button id="nueva">Registrar alergia</button>` : `<p>Para agregar una alergia, avise al médico tratante.</p>`}
+    </div>
+    <details><summary>¿Por qué debo confirmar?</summary><p>El reconocimiento queda a su nombre. Si se registra otra alergia, se le volverá a pedir.</p></details>
+    <div class="resto">Resto del expediente (notas, signos, órdenes) — visible debajo, no bloqueado.</div>
+    <div class="demo"><strong>Controles de la demostración</strong> (no forman parte del producto)
+      <div class="acciones"><button id="otro">Otro médico registra «Látex — Grave»</button>
+      <button id="red">${db.sinConexion ? 'Restaurar conexión' : 'Simular sin conexión'}</button>
+      <button id="ir452">Ver PAC-00452 (sin alergias)</button></div></div>`;
+  if (mensaje) { $('#mensaje').focus(); mensaje = null; }
+  $('#reconocer')?.addEventListener('click', async (ev) => {
+    ev.target.disabled = true;
+    try { nuevas.clear(); expediente(await api.reconocer(a.paciente, usuario(), ev.target.dataset.huella)); anunciar('Alerta reconocida.'); }
+    catch (err) {
+      if (err.codigo === 'ALERTA_CAMBIO') {
+        const vieja = new Set(a.alergias.map(x => x.id)), nueva = await api.consultar(a.paciente, usuario());
+        nuevas = new Set(nueva.alergias.filter(x => !vieja.has(x.id)).map(x => x.id));
+        mensaje = '<strong>Se registró otra alergia mientras leía.</strong> Revise la lista actualizada; lo nuevo está marcado. (ALERTA_CAMBIO)';
+        expediente(nueva);
+      } else sinConexion(a.paciente, 'reconocer');
+    }
+  });
+  $('#nueva')?.addEventListener('click', () => { location.hash = `#/registrar/${a.paciente}/1`; });
+  $('#otro').addEventListener('click', () => { db.alergias[a.paciente].push({ id: 'x' + Date.now(), alergeno: 'Látex', severidad: 'severe', reaccion: 'Dermatitis' }); anunciar('Otro usuario registró una alergia.'); });
+  $('#red').addEventListener('click', () => { db.sinConexion = !db.sinConexion; pintar(); });
+  $('#ir452').addEventListener('click', () => { location.hash = '#/expediente/PAC-00452'; });
+}
+
+function sinConexion(pac, que) {
+  app.innerHTML = `<div class="franja"><h2 role="alert">Alergias no disponibles</h2>
+    <div>${que === 'cargar' ? 'No administre ni indique sin verificar con el paciente.' : 'No se confirmó la acción. No se guardó nada nuevo.'} (PERSISTENCIA_NO_DISPONIBLE)</div></div>
+    <div class="acciones"><button class="primario" id="reintentar">Reintentar</button><button id="red">Restaurar conexión</button></div>`;
+  $('#reintentar').addEventListener('click', pintar);
+  $('#red').addEventListener('click', () => { db.sinConexion = false; pintar(); });
+  $('#reintentar').focus();
+}
+
+function formulario(pac, paso) {
+  if ($('#rol').value !== 'medico') { app.innerHTML = '<p class="aviso" role="alert">Su rol no puede registrar alergias. Avise al médico tratante. (PERMISO_DENEGADO)</p>'; return; }
+  const campo = (id, texto, html, error) => `<div class="campo"><label for="${id}">${texto}</label>${html}
+    ${error ? `<p class="error-campo" id="${id}-error">${error}</p>` : ''}</div>`;
+  if (paso === '1') {
+    app.innerHTML = `<h2>Nueva alergia de ${e(pac)} · paso 1 de 2</h2><form id="f" novalidate>
+      ${campo('alergeno', 'Nombre o código del alérgeno', `<input id="alergeno" value="${e(borrador.alergeno)}" aria-describedby="alergeno-ayuda">`)}
+      <p id="alergeno-ayuda">Escriba el nombre o el código; basta con uno.</p>
+      <fieldset aria-describedby="sev-error"><legend><strong>Severidad</strong></legend>${Object.entries(SEV).map(([v, t]) =>
+        `<label><input type="radio" name="sev" value="${v}" ${borrador.severidad === v ? 'checked' : ''}> ${t}${v === 'unknown' ? ' (se mostrará como alta)' : ''}</label>`).join('')}</fieldset>
+      <p class="error-campo" id="sev-error" hidden>Elija la severidad. Si no la sabe, elija «Desconocida».</p>
+      <div class="acciones"><button class="primario">Siguiente</button><button type="button" id="cancelar">Cancelar</button></div></form>`;
+    $('#cancelar').addEventListener('click', () => { location.hash = `#/expediente/${pac}`; });
+    $('#f').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      borrador.alergeno = $('#alergeno').value; borrador.severidad = document.querySelector('[name=sev]:checked')?.value || '';
+      $('#alergeno').removeAttribute('aria-invalid'); $('#sev-error').hidden = true;
+      if (!borrador.alergeno.trim()) { $('#alergeno').setAttribute('aria-invalid', 'true'); $('#alergeno-ayuda').innerHTML = '<span class="error-campo">Escriba el nombre o el código del alérgeno.</span>'; return $('#alergeno').focus(); }
+      if (!borrador.severidad) { $('#sev-error').hidden = false; return document.querySelector('[name=sev]').focus(); }
+      location.hash = `#/registrar/${pac}/2`;
+    });
+    return;
+  }
+  app.innerHTML = `<h2>Nueva alergia de ${e(pac)} · paso 2 de 2</h2><form id="f">
+    ${campo('reaccion', 'Reacción observada (opcional)', `<textarea id="reaccion" maxlength="500">${e(borrador.reaccion)}</textarea>`)}
+    <div class="aviso"><strong>Resumen:</strong> ${e(borrador.alergeno)} — ${SEV[borrador.severidad]} → la alerta quedará
+      <strong>${NIV[borrador.severidad] === 'CRITICA' ? 'CRÍTICA' : NIV[borrador.severidad]}</strong>. Verifica: ${usuario()} (usted).</div>
+    <div class="acciones"><button class="primario" id="guardar">Guardar alergia</button><button type="button" id="atras">Atrás</button></div></form>`;
+  $('#atras').addEventListener('click', () => { borrador.reaccion = $('#reaccion').value; location.hash = `#/registrar/${pac}/1`; });
+  $('#f').addEventListener('submit', async (ev) => {
+    ev.preventDefault(); borrador.reaccion = $('#reaccion').value; $('#guardar').disabled = true;
+    try { await api.registrar(pac, usuario(), $('#rol').value, { ...borrador }); mensaje = '<strong>Alergia registrada.</strong>'; }
+    catch (err) { mensaje = err.codigo === 'ALERGIA_DUPLICADA' ? '<strong>La alergia ya quedó registrada.</strong> (ALERGIA_DUPLICADA)' : null; if (!mensaje) return sinConexion(pac, 'guardar'); }
+    borrador = { alergeno: '', severidad: '', reaccion: '' }; location.hash = `#/expediente/${pac}`;
+  });
+}
+if (!location.hash) location.hash = '#/expediente/PAC-00451'; else pintar();
+</script>
+</body>
+</html>

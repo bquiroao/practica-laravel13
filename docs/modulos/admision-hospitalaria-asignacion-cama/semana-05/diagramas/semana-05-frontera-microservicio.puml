@@ -1,0 +1,41 @@
+@startuml semana-05-frontera-microservicio
+' Admisión hospitalaria y asignación de cama — Semana 5
+' Frontera EVALUADA de un posible microservicio de Admisión (no se divide hoy; ver gatillos).
+skinparam componentStyle rectangle
+title Frontera candidata del servicio de Admisión (evaluación)
+
+actor "Cliente web / móvil" as C
+component "API Gateway del HIS\n(token: usuario, rol, tenant)" as GW
+
+rectangle "Servicio Admisión (frontera candidata)" #EEF8F1 {
+  component "API v1\n/api/v1/admisiones\n/api/v1/camas-disponibles" as API
+  component "Casos de uso + dominio\n(RN-01..RN-06)" as UC
+  database "BD propia\nadmision · asignacion_cama\nevento_admision · outbox" as BD
+  component "Publicador outbox" as OUT
+}
+
+queue "Bus de eventos (propuesta)" as BUS
+component "Catálogo de salas\ny camas (Josué)" as CAT
+component "Pacientes" as PAC
+component "Dashboard de ocupación" as DSH
+component "Altas / traslados" as ALT
+
+C --> GW : HTTPS
+GW --> API : HTTPS + X-Request-Id / traceparent
+API --> UC
+UC --> BD : transacción: admisión + asignación\n+ eventos + outbox
+OUT --> BD : lee outbox pendiente
+OUT --> BUS : AdmisionCreada, CamaAsignada
+UC ..> CAT : GET cama operativa\n(timeout 1 s)
+UC ..> PAC : GET paciente activo\n(timeout 1 s)
+BUS --> CAT : CamaAsignada\n(actualiza su vista de ocupación)
+BUS --> DSH : AdmisionCreada, CamaAsignada
+ALT --> BUS : AltaRegistrada
+BUS --> UC : AltaRegistrada\n(cierra la asignación)
+
+note right of BD
+  Consistencia FUERTE dentro de la frontera
+  (transacción + ux_asignacion_cama_activa).
+  EVENTUAL hacia los demás módulos (outbox).
+end note
+@enduml

@@ -22,9 +22,14 @@ $grupos = [
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas (dobles de PDO) y almacén de evidencias',
     'Contratos' => 'Repository: la misma suite de contrato para los adaptadores InMemory y PDO',
     'Mvc' => 'MVC: formularios, controladores y vistas',
-    'Presentacion' => 'Presentación: HTTP',
+    'Caracterizacion' => 'Caracterización (semana 7): el refactor de «registrar resultado» no cambia el comportamiento',
+    'Cambio' => 'Cambio práctico de la semana 6 (R-15): MAYOR abierto en caso crítico bloquea el GO',
+    'Presentacion' => 'Presentación: HTTP y observabilidad',
+    'Api' => 'Contrato API (OpenAPI) = código',
+    'Cliente' => 'Cliente-servidor: cliente con bandeja, almacén remoto y circuito',
     'Arquitectura' => 'Regla de dependencias entre capas',
     'Integracion' => 'Integración con PostgreSQL real',
+    'Semana15' => 'Semana 15: unitarias, caja blanca y caja negra trazadas a RF/RNF (y los hallazgos de la revisión)',
 ];
 $prefijos = [];
 foreach (array_slice($argv ?? [], 1) as $argumento) {

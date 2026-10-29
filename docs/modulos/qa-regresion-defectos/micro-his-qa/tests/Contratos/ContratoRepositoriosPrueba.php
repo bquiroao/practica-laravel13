@@ -120,16 +120,20 @@ foreach (adaptadoresDelContrato() as $nombre => $fabrica) {
         $p = $fabrica();
         $p['campanas']->crear(Campana::planificar('hosp-norte', 'Contrato', ['expediente'], ['TC-107' => 1, 'TC-108' => 1], 0.95, 'lider-qa'));
         $d = $p['defectos']->crear(Defecto::reportar('hosp-norte', 1, 'TC-107', 'Editable', ['Abrir', 'Editar'], Severidad::MAYOR, true, 'tito-tester'));
-        $p['defectos']->crear(Defecto::reportar('hosp-norte', 1, 'TC-108', 'Otro', ['Abrir'], Severidad::CRITICA, true, 'tito-tester'));   // sin clasificar: no cuenta
-        igual(0, $p['defectos']->criticosAbiertos('hosp-norte', ['TC-107', 'TC-108']), 'NUEVO no cuenta como crítico');
+        $p['defectos']->crear(Defecto::reportar('hosp-norte', 1, 'TC-108', 'Otro', ['Abrir'], Severidad::CRITICA, true, 'tito-tester'));   // sin clasificar: cuenta con la propuesta
+        // Semana 15 (RT-01): hasta la semana 14 este contrato decía «NUEVO no cuenta como crítico». Era la decisión de la semana 4
+        // (solo cuenta lo que confirmó el Líder QA) y fue la que dejó liberar con un crítico propuesto y sin clasificar.
+        igual(1, $p['defectos']->criticosAbiertos('hosp-norte', ['TC-107', 'TC-108']), 'CRÍTICA propuesta y sin clasificar cuenta (RT-01)');
         $d->clasificar(Severidad::CRITICA, 'ALTA', 'lider-qa', 'Altera un registro firmado');
         $p['defectos']->actualizar($d);
         $leido = $p['defectos']->porId('hosp-norte', (int) $d->id);
         igual([EstadoDefecto::ABIERTO, Severidad::CRITICA, 'ALTA', Severidad::MAYOR, ['Abrir', 'Editar']], [$leido->estado(), $leido->severidad(), $leido->prioridad(),
             $leido->propuesta, $leido->pasos], 'leído');
-        igual([1, 0, 0, null], [$p['defectos']->criticosAbiertos('hosp-norte', ['TC-107', 'TC-108']), $p['defectos']->criticosAbiertos('hosp-norte', ['TC-108']),
+        igual([2, 1, 0, null], [$p['defectos']->criticosAbiertos('hosp-norte', ['TC-107', 'TC-108']), $p['defectos']->criticosAbiertos('hosp-norte', ['TC-108']),
             $p['defectos']->criticosAbiertos('hosp-norte', []), $p['defectos']->porId('hosp-sur', (int) $d->id)], 'críticos y tenant');
         igual(2, count($p['defectos']->deCampana('hosp-norte', 1)), 'de la campaña');
+        igual([[(int) $d->id], [], []], [array_map(static fn (Defecto $x): int => (int) $x->id, $p['defectos']->abiertosDe('hosp-norte', ['TC-107'])),
+            $p['defectos']->abiertosDe('hosp-sur', ['TC-107']), $p['defectos']->abiertosDe('hosp-norte', [])], 'abiertos de los casos, por tenant (RT-02)');
     });
 
     prueba($id(7), "[$nombre] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (campaña, defecto, traza)", function () use ($fabrica): void {

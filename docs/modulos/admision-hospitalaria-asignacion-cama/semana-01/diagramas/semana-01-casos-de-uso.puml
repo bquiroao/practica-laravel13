@@ -1,0 +1,54 @@
+@startuml semana-01-casos-de-uso
+' Admisión hospitalaria y asignación de cama — Semana 1
+' Diagrama de casos de uso. Los IDs CU-NN se repiten en actividad y secuencia.
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+}
+
+actor "Admisionista" as ADM
+actor "Supervisor(a) de camas" as SUP
+actor "Médico tratante" as MED
+actor "Módulo Pacientes\n<<sistema>>" as PAC
+actor "Catálogo de salas\ny camas (Josué)\n<<sistema>>" as CAT
+
+SUP -|> ADM : hereda\npermisos de admisión
+
+rectangle "Admisión hospitalaria y asignación de cama" {
+  usecase "CU-01 Admitir paciente\ny asignar cama disponible" as CU01
+  usecase "CU-02 Validar paciente\n(existe, activo, sin\nadmisión activa)" as CU02
+  usecase "CU-03 Consultar camas\ndisponibles y compatibles" as CU03
+  usecase "CU-04 Registrar evento\nde trazabilidad" as CU04
+  usecase "CU-05 Elegir otra cama\nante conflicto" as CU05
+  usecase "CU-06 Consultar admisión\ny su trazabilidad" as CU06
+}
+
+ADM --> CU01
+ADM --> CU03
+MED --> CU06
+SUP --> CU06
+
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU01 ..> CU04 : <<include>>
+CU05 ..> CU01 : <<extend>>\n[cama tomada por\notra admisión]
+
+CU02 --> PAC : consulta\n(solo código)
+CU03 --> CAT : consulta\n(solo lectura)
+
+note right of CU01
+  Objetivo: el paciente queda con UNA
+  admisión activa y UNA cama asignada,
+  y ninguna otra admisión puede
+  quedarse con esa cama (RN-01, RN-02).
+end note
+
+note bottom of CU06
+  El médico solo consulta (RN-06).
+  Ningún caso de uso muestra nombres:
+  el paciente se identifica por código.
+end note
+@enduml

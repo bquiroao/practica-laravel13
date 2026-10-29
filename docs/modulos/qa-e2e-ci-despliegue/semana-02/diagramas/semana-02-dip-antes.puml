@@ -1,0 +1,33 @@
+@startuml semana-02-dip-antes
+title ANTES de DIP · la regla de calidad depende de los detalles (las flechas bajan)
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #FBEBDD
+skinparam classBorderColor #A35A1E
+hide empty members
+
+package "Alto nivel: política de calidad" {
+  class EvaluadorGate {
+    + evaluar(runId, digest): array
+    -- reglas a–e mezcladas con
+    lectura de XML, red y SQL --
+  }
+}
+package "Bajo nivel: detalles" {
+  class GitHubActionsApi
+  class S3Cliente
+  class "PDO (QA_DSN)" as PDO
+  class "/tmp/e2e/<run>/junit.xml" as JUnit <<archivo>>
+  class "time() · date() · getenv()" as Sistema <<global>>
+}
+EvaluadorGate --> GitHubActionsApi : new + token del entorno
+EvaluadorGate --> S3Cliente : new + claves del entorno
+EvaluadorGate --> PDO : new + INSERT
+EvaluadorGate --> JUnit : file_get_contents
+EvaluadorGate --> Sistema : reloj y entorno
+note bottom of EvaluadorGate
+  12 dependencias hacia detalles (medir-dip.php).
+  Cambiar de CI o de almacén = editar la regla.
+  Probar la regla de 24 h = esperar 24 h.
+  Y nunca compara el digest probado con el desplegado.
+end note
+@enduml

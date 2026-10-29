@@ -11,8 +11,12 @@ return [
         'usuario' => getenv('QA_DB_USUARIO') ?: 'postgres',
         'clave' => getenv('QA_DB_CLAVE') ?: '',
     ],
-    // Carpeta del almacén de evidencias (en el HIS, un almacén de objetos detrás del mismo puerto).
+    // Almacén de evidencias: «disco» (carpeta local) o «http» (servicio aparte, semana 5: AlmacenEvidenciasHttp con circuito).
+    'almacen' => getenv('QA_ALMACEN') ?: 'disco',
     'evidencias' => getenv('QA_EVIDENCIAS_DIR') ?: sys_get_temp_dir() . '/micro-his-qa-evidencias',
+    'almacen_url' => getenv('QA_ALMACEN_URL') ?: 'http://127.0.0.1:8094',
+    // Registro de acceso (una línea JSON por petición): «stderr» o «ninguno».
+    'registro_acceso' => getenv('QA_REGISTRO_ACCESO') ?: 'stderr',
     // Tokens de demostración (datos ficticios). En el HIS la identidad la entrega JwtAuth.
     'tokens_demo' => [
         'token-ana-qa' => ['ana-qa', 'hosp-norte'],

@@ -1,0 +1,19 @@
+@startsalt w06-detalle-admision
+' W-06 Detalle de la admisión (médico: solo consulta; supervisor: + trazabilidad)
+{+
+  <b>Admisión de PAC-00451</b> | Estado: <b>ACTIVA</b>
+  ==
+  {/ <b>Resumen</b> | Trazabilidad (solo Supervisor) }
+  Cama | B-201 · Medicina interna · General
+  Origen | Emergencia
+  Admitido | 02/03/2026 08:15 UTC por usr-adm-01
+  --
+  <i>Pestaña Trazabilidad (SUPERVISOR_CAMAS):</i>
+  {#
+    Evento | Usuario | Rol | Fecha | Solicitud
+    ADMISION_CREADA | usr-adm-01 | ADMISIONISTA | 08:15 | req-…0001
+    CAMA_ASIGNADA | usr-adm-01 | ADMISIONISTA | 08:15 | req-…0001
+  }
+  <size:11>Solo lectura. Sin nombres ni diagnóstico.</size>
+}
+@endsalt

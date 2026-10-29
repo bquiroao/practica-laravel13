@@ -1,0 +1,22 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Dashboard base (hoy: módulo dentro del HIS)
+actor "Usuario del hospital" as u
+node "Navegador" {
+  [SPA Vue: layout y tarjetas] as spa
+}
+node "Servidor del HIS" {
+  [Front controller /dashboard] as fc
+  [ControladorDashboard + VistaJson] as ctl
+  [ServicioDashboard + Catalogo de tarjetas] as srv
+  [RepositorioPdo: solo COUNT] as repo
+}
+database "Base HOSPITAL (tenant)" as db
+[RBAC y sesión] as rbac
+u --> spa
+spa --> fc : 1 GET /dashboard\n+ 1 GET por tarjeta, en paralelo\n(timeout 10 s en el cliente, RNF-02)
+fc --> ctl
+ctl --> srv
+srv --> repo
+repo --> db : local_patients, appointments, beds
+fc ..> rbac : hospital y permisos (hoy X-Tenant-ID y X-Permisos)
+@enduml

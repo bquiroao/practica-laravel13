@@ -1,0 +1,19 @@
+@startsalt m02-camas
+' M-02 (360 px) Paso 2 de 3: camas como tarjetas
+{+
+  <b>Camas para PAC-00451</b>   <size:11>Paso 2 de 3</size>
+  <size:11>Medicina interna · General</size>
+  ==
+  {+
+    (X) <b>B-201</b>
+    <size:11>Medicina interna · General</size>
+  }
+  {+
+    () <b>B-202</b>
+    <size:11>Medicina interna · General</size>
+  }
+  ==
+  [      Continuar        ]
+  <size:11>Actualizado hace 10 s · [Actualizar]</size>
+}
+@endsalt

@@ -1,0 +1,142 @@
+openapi: 3.1.0
+info:
+  title: Centro de documentación y manuales por rol — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «publicación y consulta de documentación y manuales diferenciados por rol».
+    Las rutas son las del front controller de la semana 4. Hoy la sesión llega en las cabeceras X-Usuario y X-Roles;
+    desde la semana 15 saldrá del JWT y de RBAC (RNF-01, hallazgo H-01 de la semana 13). Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+paths:
+  /documentos/{slug}/versiones:
+    post:
+      operationId: enviar
+      summary: Enviar una versión a revisión (CU-01 con CU-05)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Usuario'
+        - $ref: '#/components/parameters/Slug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NuevaVersion' }
+            example: { tipo: manual, version: 1.0.0, audiencia: [medico, enfermeria] }
+      responses:
+        '201':
+          description: Versión en revisión
+          content:
+            application/json:
+              schema: { type: object, required: [id], properties: { id: { type: integer, example: 1 } } }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /versiones/{id}/aprobacion:
+    post:
+      operationId: aprobar
+      summary: Aprobar una versión en revisión; nadie aprueba lo propio (CU-02, R-05)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Usuario' }, { $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: Versión publicada y vigente si es la mayor }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /versiones/{id}/rechazo:
+    post:
+      operationId: rechazar
+      summary: Rechazar una versión en revisión con motivo (CU-02)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Usuario' }, { $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [motivo], properties: { motivo: { type: string, minLength: 1 } } }
+            example: { motivo: Falta el ejemplo del error 409 }
+      responses:
+        '200': { description: 'Versión rechazada; puede volver a enviarse' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /versiones/{id}/obsolescencia:
+    post:
+      operationId: marcarObsoleta
+      summary: Marcar obsoleta una versión publicada; nunca se borra (CU-04, R-08)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Usuario' }, { $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: 'Versión obsoleta, consultable con aviso' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /documentos/{slug}:
+    get:
+      operationId: consultarVigente
+      summary: Versión vigente dentro de la audiencia del lector (CU-03, R-06)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Roles' }, { $ref: '#/components/parameters/Slug' }]
+      responses:
+        '200': { $ref: '#/components/responses/Documento' }
+        '404': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /documentos/{slug}/versiones/{version}:
+    get:
+      operationId: consultarVersion
+      summary: Una versión concreta, con aviso si está obsoleta (CU-03, R-08)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Roles'
+        - $ref: '#/components/parameters/Slug'
+        - { name: version, in: path, required: true, schema: { type: string, pattern: '^\d+\.\d+\.\d+$', example: 1.0.0 } }
+      responses:
+        '200': { $ref: '#/components/responses/Documento' }
+        '404': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant: { name: X-Tenant-ID, in: header, required: true, description: Hospital de la petición., schema: { type: string, example: h1 } }
+    Usuario: { name: X-Usuario, in: header, required: true, description: Quien envía o revisa (sesión simulada)., schema: { type: string, example: luis } }
+    Roles: { name: X-Roles, in: header, required: true, description: Roles del lector separados por coma (RBAC simulado)., schema: { type: string, example: medico } }
+    Slug: { name: slug, in: path, required: true, schema: { type: string, pattern: '^[a-z0-9-]+$', example: guia-citas } }
+    Id: { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+  responses:
+    Documento:
+      description: Versión consultada; lo ajeno responde 404, igual que lo inexistente (R-07)
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [version, tipo, obsoleta, vigente]
+            properties:
+              version: { type: string }
+              tipo: { type: string, enum: [openapi, postman, manual] }
+              obsoleta: { type: boolean }
+              vigente: { type: [string, 'null'] }
+    Error:
+      description: Rechazo de negocio (E2 a E7, NF) o servicio no disponible (E8), sin detalles técnicos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E5, mensaje: Nadie aprueba su propia publicación. }
+  schemas:
+    NuevaVersion:
+      type: object
+      required: [tipo, version, audiencia]
+      properties:
+        tipo: { type: string, enum: [openapi, postman, manual] }
+        version: { type: string, pattern: '^\d+\.\d+\.\d+$' }
+        audiencia: { type: array, minItems: 1, items: { type: string } }
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E2, E3, E5, E6, E7, E8, NF] }
+        mensaje: { type: string }
