@@ -146,8 +146,11 @@ final class Campana
         return $ultimo;
     }
 
-    /** R-09: sin pendientes; GO con 0 críticos abiertos y la tasa del último intento de cada caso ≥ el umbral. */
-    public function cerrar(int $criticosAbiertos): Decision
+    /**
+     * R-09: sin pendientes; GO con 0 críticos abiertos y la tasa del último intento de cada caso ≥ el umbral.
+     * R-15 (semana 6): tampoco hay GO con un defecto MAYOR abierto en un caso crítico de la matriz.
+     */
+    public function cerrar(int $criticosAbiertos, int $mayoresEnCriticos = 0): Decision
     {
         if ($this->estado !== EstadoCampana::EN_CURSO) {
             throw new ReglaRechazada('ESTADO_NO_PERMITE_CERRAR');
@@ -163,6 +166,10 @@ final class Campana
         $causas = [];
         if ($criticosAbiertos > 0) {
             $causas[] = $criticosAbiertos === 1 ? '1 defecto crítico abierto' : "$criticosAbiertos defectos críticos abiertos";
+        }
+        if ($mayoresEnCriticos > 0) {
+            $causas[] = $mayoresEnCriticos === 1 ? '1 defecto MAYOR abierto en un caso crítico de la matriz'
+                : "$mayoresEnCriticos defectos MAYOR abiertos en casos críticos de la matriz";
         }
         if ($tasa < $this->umbral) {
             $causas[] = sprintf('tasa de aprobados %.1f %% menor que el umbral %.1f %%', 100 * $tasa, 100 * $this->umbral);

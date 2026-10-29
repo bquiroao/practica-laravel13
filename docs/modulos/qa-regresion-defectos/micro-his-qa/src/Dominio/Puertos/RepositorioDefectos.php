@@ -24,4 +24,7 @@ interface RepositorioDefectos
 
     /** Defectos CRÍTICOS no cerrados de los casos del alcance (R-09). @param list<string> $casos @throws ErrorPersistencia */
     public function criticosAbiertos(string $tenant, array $casos): int;
+
+    /** Defectos MAYOR no cerrados de esos casos (R-15: si los casos son críticos, bloquean el GO). @param list<string> $casos @throws ErrorPersistencia */
+    public function mayoresAbiertos(string $tenant, array $casos): int;
 }

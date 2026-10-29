@@ -53,6 +53,16 @@ final class PdoRepositorioDefectos extends ConsultasPdo implements RepositorioDe
             AND caso_id IN (" . self::enlaces($casos) . ')', [$tenant, ...array_values($casos)])->fetchColumn();
     }
 
+    public function mayoresAbiertos(string $tenant, array $casos): int
+    {
+        if ($casos === []) {
+            return 0;
+        }
+
+        return (int) $this->consulta("SELECT count(*) FROM defectos WHERE tenant = ? AND severidad = 'MAYOR' AND estado <> 'CERRADO'
+            AND caso_id IN (" . self::enlaces($casos) . ')', [$tenant, ...array_values($casos)])->fetchColumn();
+    }
+
     /** @param list<string> $eventos */
     private function historial(string $tenant, int $id, array $eventos): void
     {

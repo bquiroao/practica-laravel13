@@ -8,6 +8,8 @@ use Qa\Aplicacion\Puertos\PoliticaAcceso;
 use Qa\Aplicacion\Resultados\Salida;
 use Qa\Dominio\Excepciones\ErrorPersistencia;
 use Qa\Dominio\Modelo\Defecto;
+use Qa\Dominio\Modelo\EstadoDefecto;
+use Qa\Dominio\Modelo\Severidad;
 use Qa\Dominio\Puertos\RepositorioCampanas;
 use Qa\Dominio\Puertos\RepositorioCasos;
 use Qa\Dominio\Puertos\RepositorioDefectos;
@@ -40,6 +42,7 @@ final class ConsultarTrazabilidad
             }
             $casos = $this->casos->variosPorId($tenant, array_keys($campana->alcance));
             $defectos = $this->defectos->deCampana($tenant, $campanaId);
+            $criticos = $this->casos->criticosDe($tenant, $campana->funcionalidades);
         } catch (ErrorPersistencia) {
             return Salida::persistencia();
         }
@@ -58,7 +61,10 @@ final class ConsultarTrazabilidad
                 'evidencias' => $ultimo === null ? [] : array_map(static fn ($e): array => ['tipo' => $e->tipo, 'huella' => $e->huella,
                     'tamano' => $e->tamano, 'clasificacion' => $e->clasificacion], $ultimo->evidencias),
                 'defectos' => array_map(static fn (Defecto $d): array => ['id' => $d->id, 'severidad' => ($d->severidad() ?? $d->propuesta)->value,
-                    'clasificado' => $d->severidad() !== null, 'estado' => $d->estado()->value], $delCaso),
+                    'clasificado' => $d->severidad() !== null, 'estado' => $d->estado()->value,
+                    // R-09 y R-15: lo mismo que cuenta CerrarCampana, para que el Líder QA vea ANTES de cerrar qué lo impide.
+                    'bloquea_go' => $d->criticoAbierto() || ($d->severidad() === Severidad::MAYOR && $d->estado() !== EstadoDefecto::CERRADO
+                        && in_array($d->casoId, $criticos, true))], $delCaso),
             ];
             foreach ($casos[$casoId]->requisitos ?? [] as $rf) {
                 $requisitos[$rf][] = $casoId;
