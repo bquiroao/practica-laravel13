@@ -15,23 +15,36 @@ use Admision\Domain\Elegibilidad\CriterioCamaOperativa;
 use Admision\Domain\Elegibilidad\CriterioServicio;
 use Admision\Domain\Elegibilidad\CriterioTipoCama;
 use Admision\Domain\Elegibilidad\EvaluadorElegibilidad;
+use Admision\Persistence\InMemory\InMemoryAdmisionRepository;
+use Admision\Persistence\InMemory\InMemoryCatalogoCamas;
+use Admision\Persistence\InMemory\InMemoryDirectorioPacientes;
 use Admision\Persistence\Pdo\ConexionPdo;
 use Admision\Persistence\Pdo\PdoAdmisionRepository;
 use Admision\Persistence\Pdo\PdoCatalogoCamas;
 use Admision\Persistence\Pdo\PdoDirectorioPacientes;
 use Admision\Presentation\Servicios;
 
-return static function (?PDO $pdo = null): Servicios {
-    $pdo ??= ConexionPdo::desdeEntorno();
+// Almacén: ADMISION_ALMACEN=pdo (por defecto) o memoria. Ambos cumplen el mismo contrato (semana 4).
+return static function (?PDO $pdo = null, ?string $almacen = null): Servicios {
+    $almacen ??= getenv('ADMISION_ALMACEN') ?: 'pdo';
     // OCP: para un criterio nuevo se agrega aquí su clase; EvaluadorElegibilidad no cambia.
     $evaluador = new EvaluadorElegibilidad(
         new CriterioCamaOperativa(), new CriterioServicio(), new CriterioTipoCama(), new CriterioAislamiento(),
     );
-    $admisiones = new PdoAdmisionRepository($pdo);
-    $catalogo = new PdoCatalogoCamas($pdo);
+    if ($almacen === 'memoria') {
+        $datos = require __DIR__ . '/datos-ficticios.php';
+        $admisiones = new InMemoryAdmisionRepository();
+        $catalogo = new InMemoryCatalogoCamas($datos['camas']);
+        $pacientes = new InMemoryDirectorioPacientes($datos['pacientes']);
+    } else {
+        $pdo ??= ConexionPdo::desdeEntorno();
+        $admisiones = new PdoAdmisionRepository($pdo);
+        $catalogo = new PdoCatalogoCamas($pdo);
+        $pacientes = new PdoDirectorioPacientes($pdo);
+    }
 
     return new Servicios(
-        new AdmitirPacienteYAsignarCama(new PdoDirectorioPacientes($pdo), $catalogo, $admisiones, $evaluador, new RelojSistema(), new GeneradorUuidV4()),
+        new AdmitirPacienteYAsignarCama($pacientes, $catalogo, $admisiones, $evaluador, new RelojSistema(), new GeneradorUuidV4()),
         new ConsultarCamasDisponibles($catalogo, $admisiones, $evaluador),
     );
 };
