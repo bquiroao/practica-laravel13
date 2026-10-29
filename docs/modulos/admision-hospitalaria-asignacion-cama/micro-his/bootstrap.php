@@ -7,7 +7,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/autoload.php';
 
 use Admision\Application\AdmitirPacienteYAsignarCama;
+use Admision\Application\ConsultarAdmision;
 use Admision\Application\ConsultarCamasDisponibles;
+use Admision\Application\ConsultarTrazabilidad;
 use Admision\Application\Puertos\GeneradorUuidV4;
 use Admision\Application\Puertos\RelojSistema;
 use Admision\Domain\Elegibilidad\CriterioAislamiento;
@@ -46,5 +48,7 @@ return static function (?PDO $pdo = null, ?string $almacen = null): Servicios {
     return new Servicios(
         new AdmitirPacienteYAsignarCama($pacientes, $catalogo, $admisiones, $evaluador, new RelojSistema(), new GeneradorUuidV4()),
         new ConsultarCamasDisponibles($catalogo, $admisiones, $evaluador),
+        new ConsultarAdmision($admisiones),
+        new ConsultarTrazabilidad($admisiones),
     );
 };
