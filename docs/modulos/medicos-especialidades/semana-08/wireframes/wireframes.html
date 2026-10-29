@@ -1,0 +1,60 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Wireframes Médicos, semana 8</title>
+<style>
+body{font:14px Arial,sans-serif;background:#fff;color:#222;margin:20px;display:grid;gap:28px;justify-content:start}
+.wf{width:560px;border:2px solid #444;border-radius:6px;padding:16px 16px 16px 36px;background:#fafafa;position:relative}
+h2{font-size:15px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #bbb}
+.nav{background:#ddd;padding:6px 10px;margin:-4px 0 12px;border-radius:4px;font-size:12px}
+label{display:block;font-weight:bold;margin:10px 0 3px}
+.c{border:1px solid #777;background:#fff;padding:7px 9px;border-radius:3px;min-height:18px}.c.err{border:2px solid #b00020}
+.m{color:#b00020;font-size:12px;margin-top:3px}.ok{color:#146c2e}.h{color:#555;font-size:12px;margin-top:3px}
+.b{display:inline-block;background:#444;color:#fff;padding:8px 16px;border-radius:3px;margin:12px 8px 0 0}.b.s{background:#fff;color:#222;border:1px solid #444}
+.n{position:absolute;background:#d9822b;color:#fff;font-weight:bold;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;font-size:12px}
+table{border-collapse:collapse;width:100%;margin-top:10px}td,th{border:1px solid #999;padding:5px 8px;text-align:left}th{background:#e6e6e6}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.p{border:1px dashed #666;background:#fff;padding:10px;min-height:92px}
+.sk{background:#ddd;height:12px;margin:8px 0;border-radius:3px}.al{border:2px solid #b00020;background:#fdecee;padding:8px;margin-top:10px}
+</style>
+<body>
+<section class="wf" id="w1"><h2>W1 · Administración — Registrar médico (estado: error de validación)</h2>
+<div class="nav">Médicos › Registrar &nbsp; | &nbsp; Rol: Administración</div>
+<label>Usuario del sistema *</label><div class="c">Dra. Ana Pérez (u-ana) ▾</div>
+<label>Colegiado * <span class="h">(?)</span></label><div class="c err">12345</div><div class="m">Ese colegiado ya tiene perfil de médico. Revise el número o busque al médico.</div>
+<label>Especialidad principal</label><div class="c">Medicina interna ▾</div><div class="h">Opcional: se puede asociar después.</div>
+<label>Vigente desde</label><div class="c">28/10/2026</div>
+<span class="b">Registrar médico</span><span class="b s">Cancelar</span>
+<i class="n" style="left:8px;top:52px">1</i><i class="n" style="left:8px;top:112px">2</i><i class="n" style="left:8px;top:164px">3</i><i class="n" style="left:8px;top:270px">4</i><i class="n" style="left:8px;top:332px">5</i></section>
+
+<section class="wf" id="w2"><h2>W2 · Administración — Asociar especialidad (estado: cruce de vigencia)</h2>
+<div class="nav">Médicos › Dra. Ana Pérez › Especialidades</div>
+<table><tr><th>Especialidad</th><th>Desde</th><th>Hasta</th><th>Principal</th></tr><tr><td>Medicina interna</td><td>01/01/2026</td><td>—</td><td>Sí</td></tr></table>
+<label>Especialidad *</label><div class="c">Medicina interna ▾</div>
+<label>Desde * / Hasta</label><div class="g"><div class="c err">15/11/2026</div><div class="c">(abierta)</div></div>
+<div class="m">Esa especialidad ya está vigente en esas fechas. Cierre la anterior o elija otro rango.</div>
+<label><span class="c" style="display:inline-block;width:12px;min-height:8px;padding:0"></span> Es la principal</label><div class="h">Solo puede haber una principal a la vez.</div>
+<span class="b">Asociar</span><span class="b s">Volver</span>
+<i class="n" style="left:8px;top:52px">1</i><i class="n" style="left:8px;top:168px">2</i><i class="n" style="left:8px;top:236px">3</i><i class="n" style="left:8px;top:322px">4</i></section>
+
+<section class="wf" id="w3"><h2>W3 · Recepción y médico — Consultar disponibilidad (estado: éxito)</h2>
+<div class="nav">Disponibilidad &nbsp; | &nbsp; Rol: Recepción</div>
+<div class="g"><div><label>Especialidad *</label><div class="c">Medicina interna ▾</div></div><div><label>Rango (máx. 14 días) *</label><div class="c">02/11 – 06/11</div></div></div>
+<span class="b">Buscar</span>
+<table><tr><th>Fecha</th><th>Médico</th><th>Franjas libres (30 min)</th></tr><tr><td>lun 02/11</td><td>Dra. Ana Pérez</td><td>08:30 · 09:00 · 09:30</td></tr><tr><td>mar 03/11</td><td>Dr. Luis Gómez</td><td>10:00 · 10:30</td></tr></table>
+<div class="h">Muestra 2 de 2 días con franjas. Solo nombre y hora: sin datos de pacientes ni colegiado.</div>
+<i class="n" style="left:8px;top:96px">1</i><i class="n" style="left:308px;top:122px">2</i><i class="n" style="left:8px;top:156px">3</i><i class="n" style="left:8px;top:236px">4</i><i class="n" style="left:8px;top:328px">5</i></section>
+
+<section class="wf" id="w4"><h2>W4 · Estados de la consulta de disponibilidad</h2>
+<div class="g">
+<div class="p"><b>Cargando</b><div class="sk"></div><div class="sk"></div><div class="sk" style="width:60%"></div><div class="h">Buscar queda inactivo.</div></div>
+<div class="p"><b>Vacío</b><div class="h" style="margin-top:12px">Sin franjas en estas fechas.</div><span class="b s" style="padding:4px 8px;margin:8px 0 0">Ampliar rango</span></div>
+<div class="p"><b>Rango inválido</b><div class="c err" style="margin-top:8px">20/10 – 05/11</div><div class="m">Empiece hoy o después; máximo 14 días.</div></div>
+<div class="p"><b>Error recuperable (503)</b><div class="al">No podemos ofrecer franjas ahora. Citas no responde.</div><span class="b" style="padding:4px 8px;margin:8px 0 0">Reintentar</span></div>
+</div>
+<i class="n" style="left:8px;top:52px">1</i><i class="n" style="left:300px;top:52px">2</i><i class="n" style="left:8px;top:170px">3</i><i class="n" style="left:300px;top:170px">4</i></section>
+
+<section class="wf" id="w5"><h2>W5 · Administración — Registrar ausencia (estado: conflicto con citas)</h2>
+<div class="nav">Médicos › Dra. Ana Pérez › Ausencias</div>
+<div class="g"><div><label>Desde *</label><div class="c">02/11/2026</div></div><div><label>Hasta (no incluido) *</label><div class="c">09/11/2026</div></div></div>
+<label>Motivo</label><div class="c">Congreso</div>
+<div class="al"><b>Hay 2 citas en esas fechas</b><br>lun 02/11 08:00 · mar 03/11 09:30<br><span class="h">El módulo no las cancela: Citas debe reprogramarlas.</span></div>
+<span class="b">Registrar ausencia y avisar a Citas</span><span class="b s">Cambiar fechas</span>
+<i class="n" style="left:8px;top:96px">1</i><i class="n" style="left:8px;top:152px">2</i><i class="n" style="left:8px;top:206px">3</i><i class="n" style="left:8px;top:290px">4</i></section>
+</body></html>
