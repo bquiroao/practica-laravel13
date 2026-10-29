@@ -1,0 +1,3 @@
+$ php bin/demo-r15.php > despues.txt && diff ../semana-06/evidencia/demo-r15.txt despues.txt
+demo-r15: idéntica a la de la semana 6 (15 pasos)
+demo.php: idéntica a la de la semana 4 (8 pasos)
