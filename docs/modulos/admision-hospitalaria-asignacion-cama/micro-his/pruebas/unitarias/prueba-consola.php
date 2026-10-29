@@ -4,7 +4,9 @@ declare(strict_types=1);
 // Presentación por consola con dobles: solo traduce argumentos y errores; no tiene reglas.
 
 use Admision\Application\AdmitirPacienteYAsignarCama;
+use Admision\Application\ConsultarAdmision;
 use Admision\Application\ConsultarCamasDisponibles;
+use Admision\Application\ConsultarTrazabilidad;
 use Admision\Domain\Excepciones\ErrorPersistencia;
 use Admision\Presentation\Consola\AplicacionConsola;
 use Admision\Presentation\Servicios;
@@ -22,6 +24,8 @@ $correr = function (array $argv, ?AdmisionRepositoryEspia $repo = null): array {
     $servicios = new Servicios(
         new AdmitirPacienteYAsignarCama(new DirectorioPacientesFalso(), new CatalogoCamasFalso(), $repo, Datos::evaluador(), new RelojFijo(), new GeneradorIdSecuencial()),
         new ConsultarCamasDisponibles(new CatalogoCamasFalso(), $repo, Datos::evaluador()),
+        new ConsultarAdmision($repo),
+        new ConsultarTrazabilidad($repo),
     );
     $lineas = [];
     $consola = new AplicacionConsola($servicios, new UsuariosFicticios(Datos::crudos()['usuarios']), new GeneradorIdSecuencial(), function (string $l) use (&$lineas) {
