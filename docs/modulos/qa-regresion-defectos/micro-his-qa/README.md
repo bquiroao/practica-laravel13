@@ -62,4 +62,4 @@ QA_DB_DSN=... php bin/validar-integracion-central.php   # integración con la ba
 
 Las pruebas de integración **borran y recrean el esquema `qa`**. Úselas solo contra una base de prueba.
 
-Arquitectura y evidencia: [semana 3](../semana-03/semana-03-arquitectura-micro-his.md) (capas, PDO, C4) · [semana 4](../semana-04/semana-04-capas-mvc-repositorio.md) (MVC, Repository, repositorio compartido).
+Arquitectura y evidencia: [semana 3](../semana-03/semana-03-arquitectura-micro-his.md) (capas, PDO, C4) · [semana 4](../semana-04/semana-04-capas-mvc-repositorio.md) (MVC, Repository, repositorio compartido) · [semana 5](../semana-05/semana-05-cliente-servidor-microservicios.md) (contrato [OpenAPI](api/openapi.yaml), cliente, almacén remoto, medición: `php bin/medir.php`).

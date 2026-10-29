@@ -27,6 +27,8 @@ use Qa\Presentacion\Http\Controladores\CasosControlador;
 use Qa\Presentacion\Http\Controladores\DefectosControlador;
 use Qa\Presentacion\Http\Controladores\Rutas;
 use Qa\Presentacion\Http\Kernel;
+use Qa\Presentacion\Http\Observabilidad\RegistroAcceso;
+use Qa\Presentacion\Http\Observabilidad\RegistroAccesoJson;
 
 /**
  * @param array{acceso: \Qa\Aplicacion\Puertos\PoliticaAcceso, casos: \Qa\Dominio\Puertos\RepositorioCasos,
@@ -51,17 +53,18 @@ function construirCasosDeUso(array $p): array
 }
 
 /** @param array<string, object> $c casos de uso */
-function construirKernel(array $c, Autenticador $autenticador): Kernel
+function construirKernel(array $c, Autenticador $autenticador, ?RegistroAcceso $registro = null): Kernel
 {
     return new Kernel(Rutas::definir(
         new CasosControlador($c['disenar'], $c['aprobar']),
         new CampanasControlador($c['planificar'], $c['iniciar'], $c['registrar'], $c['cerrar'], $c['trazabilidad']),
         new DefectosControlador($c['clasificar'], $c['corregir']),
-    ), $autenticador);
+    ), $autenticador, $registro);
 }
 
 /** Punto de entrada real: PostgreSQL con PDO, o todo en memoria (QA_PERSISTENCIA=memoria). */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']),
+        ($config['registro_acceso'] ?? 'stderr') === 'ninguno' ? null : new RegistroAccesoJson());
 }
