@@ -1,0 +1,28 @@
+@startuml semana-08-flujo-consulta
+title User flow — Recepción y médico: consultar disponibilidad
+|Recepción / Médico|
+start
+:Inicia sesión y abre «Disponibilidad»;
+:Elige especialidad y rango de fechas;
+|Sistema|
+:Valida el rango (hoy o después, máximo 14 días) y muestra «Cargando…»;
+if (¿Rango inválido?) then (sí)
+  :Mensaje bajo el campo y conserva la especialidad;
+  |Recepción / Médico|
+  :Corrige las fechas;
+  |Sistema|
+endif
+if (¿Citas (M05) responde?) then (no)
+  :Error recuperable: «No podemos ofrecer franjas ahora» con botón Reintentar (503);
+  stop
+else (sí)
+endif
+if (¿Hay franjas?) then (no)
+  :Estado vacío: «Sin franjas en estas fechas» y sugerencia de ampliar el rango;
+else (sí)
+  :Tabla de franjas por médico, ordenada por fecha;
+endif
+|Recepción / Médico|
+:Copia la hora elegida o sigue en Citas;
+stop
+@enduml
