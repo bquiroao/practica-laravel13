@@ -134,7 +134,7 @@ final class Escenario
     {
         $config = require dirname(__DIR__, 2) . '/config/config.php';
 
-        return new Kernel($this->uc, $config['tokens_demo']);
+        return construirKernel($this->uc, $config['tokens_demo']);
     }
 
     public function auditoriaReal(): RegistroAuditoriaEnMemoria

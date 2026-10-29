@@ -26,11 +26,12 @@ src/
                   Puertos (repositorios, Reloj), Excepciones
   Aplicacion/     CasosDeUso (8), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
   Persistencia/   Pdo, EnMemoria, Archivos (almacén por contenido), Configuracion, FabricaAdaptadores
-  Presentacion/   Http (Kernel, Solicitud, Respuesta)
+  Presentacion/   Http: Kernel (autentica y enruta), Formularios (forma, 400), Controladores (MVC), Vistas (códigos HTTP)
 bootstrap/        autoload.php, contenedor.php (raíz de composición)
-database/         schema.sql, datos-demo.sql / datos-demo.php
+database/         schema.sql, datos-demo.sql / datos-demo.php, integracion-compartida.sql (semana 4)
 bin/              instalar-base.php, demo-http.sh
-tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Presentacion/, Arquitectura/, Integracion/
+tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Contratos/ (memoria y PDO), Mvc/,
+                  Presentacion/, Arquitectura/, Integracion/
 ```
 
 ## Ejecutar
@@ -38,11 +39,11 @@ tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, 
 ```bash
 php tests/ejecutar.php                                       # sin base: dominio, aplicación (dobles), HTTP y arquitectura
 E2E_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php     # + integración (recrea el esquema e2e)
-E2E_DB_DSN=... php tests/mutaciones.php                      # 16 defectos sembrados: la suite debe detectarlos todos
+E2E_DB_DSN=... php tests/mutaciones.php                      # 21 defectos sembrados: la suite debe detectarlos todos
 E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTTP real (php -S + curl)
 ```
 
-## API (semana 3)
+## API (rutas de la semana 3, en MVC desde la semana 4)
 
 | Método y ruta | Caso de uso | Permiso |
 |---|---|---|

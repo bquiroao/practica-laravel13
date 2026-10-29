@@ -1,0 +1,22 @@
+$ E2E_DB_DSN=... php tests/ejecutar.php --solo=CON   # primera corrida de la suite de contrato
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Repository: la misma suite de contrato para los adaptadores InMemory y PDO ==
+[PASA ] CON-01-MEM [MEM] Escenarios: lo guardado vuelve igual (requisitos y criticidad), ordenado por id, por tenant
+[PASA ] CON-02-MEM [MEM] Versiones: por número y por digest; el plan y el estado persisten; otro tenant no la ve
+[PASA ] CON-03-MEM [MEM] Ejecuciones: crear asigna id; los resultados vuelven en orden con sus evidencias; el plan se conserva
+[PASA ] CON-04-MEM [MEM] Idempotencia: resultadoPorClave devuelve ejecución y resultado; una clave repetida en el tenant → CLAVE_REUTILIZADA
+[FALLA] CON-05-MEM [MEM] Estado de la ejecución: se guarda con su hora; actualizarla dos veces (dos cierres) → ESTADO_NO_PERMITE_CERRAR
+         -> segundo cierre: se esperaba E2e\Dominio\Excepciones\ReglaRechazada y no se lanzó nada (Arnes.php:68)
+[PASA ] CON-06-MEM [MEM] Evaluaciones: se agregan en orden, con reglas booleanas, causas, política y hora; otro tenant no las ve
+[PASA ] CON-07-MEM [MEM] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (versión, ejecución, resultado, traza)
+[FALLA] CON-01-PDO [PDO] Escenarios: lo guardado vuelve igual (requisitos y criticidad), ordenado por id, por tenant
+         -> La base del módulo E2E no respondió como se esperaba. (ConsultasPdo.php:35)
+[PASA ] CON-02-PDO [PDO] Versiones: por número y por digest; el plan y el estado persisten; otro tenant no la ve
+[PASA ] CON-03-PDO [PDO] Ejecuciones: crear asigna id; los resultados vuelven en orden con sus evidencias; el plan se conserva
+[PASA ] CON-04-PDO [PDO] Idempotencia: resultadoPorClave devuelve ejecución y resultado; una clave repetida en el tenant → CLAVE_REUTILIZADA
+[PASA ] CON-05-PDO [PDO] Estado de la ejecución: se guarda con su hora; actualizarla dos veces (dos cierres) → ESTADO_NO_PERMITE_CERRAR
+[PASA ] CON-06-PDO [PDO] Evaluaciones: se agregan en orden, con reglas booleanas, causas, política y hora; otro tenant no las ve
+[PASA ] CON-07-PDO [PDO] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (versión, ejecución, resultado, traza)
+
+Total: 14  Pasan: 12  Fallan: 2  Omitidas: 0

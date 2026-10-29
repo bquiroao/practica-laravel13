@@ -122,3 +122,40 @@ prueba('INT-07', 'Tenant: la versión de hosp-norte no existe para hosp-sur; y d
     usort($php, static fn (array $a, array $b): int => [$a[0], $a[1]] <=> [$b[0], $b[1]]);
     igual($php, $sql, 'catálogo');
 });
+
+prueba('INT-08', 'Repositorio compartido: cada evaluación del gate se publica en compartido.calidad_versiones en la MISMA transacción, y el hecho no se corrige', function () use ($conPostgres, $flujo, $falla): void {
+    [$pdo, $p, $uc] = $conPostgres();
+    $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/integracion-compartida.sql'));
+    $id = $flujo($uc);
+    $uc['gate']->ejecutar('resp-release', 'hosp-norte', '2.4.0', $id);
+    $fila = $pdo->query('SELECT tenant, version, digest, decision FROM compartido.calidad_versiones')->fetchAll();
+    igual([['tenant' => 'hosp-norte', 'version' => '2.4.0', 'digest' => Escenario::DIGEST, 'decision' => 'APROBADO']], $fila, 'hecho publicado');
+    afirmar(str_contains($falla($pdo, "UPDATE compartido.calidad_versiones SET decision = 'RECHAZADO'"), 'solo admite INSERT'), 'el hecho se pudo corregir');
+    // Si la evaluación se deshace, el hecho también: es la misma transacción.
+    $pdo->beginTransaction();
+    $pdo->exec("INSERT INTO e2e.evaluaciones (tenant, version, ejecucion_id, decision, reglas, causas, digest, politica, evaluada_en, evaluada_por)
+        SELECT tenant, version, ejecucion_id, 'RECHAZADO', reglas, '[\"x\"]', digest, politica, now(), 'u' FROM e2e.evaluaciones LIMIT 1");
+    $pdo->rollBack();
+    igual(1, (int) $pdo->query('SELECT count(*) FROM compartido.calidad_versiones')->fetchColumn(), 'sin hecho huérfano');
+});
+
+prueba('INT-09', 'Repositorio compartido: el rol lector ve SOLO su hospital (seguridad por filas), no escribe y no entra al esquema e2e', function () use ($conPostgres, $flujo, $falla): void {
+    [$pdo, $p, $uc] = $conPostgres();
+    $pdo->exec((string) file_get_contents(dirname(__DIR__, 2) . '/database/integracion-compartida.sql'));
+    $uc['gate']->ejecutar('resp-release', 'hosp-norte', '2.4.0', $flujo($uc));
+    $pdo->exec('SET ROLE his_lector_calidad');
+    try {
+        $ver = static function (string $tenant) use ($pdo): int {
+            $pdo->exec("SET his.tenant = '$tenant'");
+
+            return (int) $pdo->query('SELECT count(*) FROM compartido.calidad_versiones')->fetchColumn();
+        };
+        igual([1, 0], [$ver('hosp-norte'), $ver('hosp-sur')], 'filas por tenant');
+        afirmar(str_contains($falla($pdo, "INSERT INTO compartido.calidad_versiones (tenant, version, digest, decision, causas, politica, evaluada_en)
+            VALUES ('hosp-norte', '9.9.9', 'sha256:' || repeat('0', 64), 'APROBADO', '[]', 'p', now())"), 'permission denied'), 'el lector pudo escribir');
+        afirmar(str_contains($falla($pdo, 'SELECT * FROM e2e.evaluaciones'), 'permission denied'), 'el lector entró al esquema e2e');
+    } finally {
+        $pdo->exec('RESET ROLE');
+        $pdo->exec('RESET his.tenant');
+    }
+});

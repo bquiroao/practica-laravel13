@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * Defectos sembrados a propósito: cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
+ * Defectos sembrados a propósito (16 de la semana 3 y 5 de la semana 4): cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
  * de uso o una restricción del esquema) y corre la suite sobre la copia. Si la suite sigue en verde, falta una prueba.
  *   E2E_DB_DSN=... php tests/mutaciones.php      (sin base, las mutaciones del esquema sobreviven: corren solo con PostgreSQL)
  * Código de salida: cantidad de mutaciones que sobreviven.
@@ -36,6 +36,19 @@ $mutaciones = [
     'M16 el adaptador PDO no traduce la clave repetida' => ['src/Persistencia/Pdo/PdoRepositorioEjecuciones.php',
         "return \$e->getCode() === '23505' && str_contains(\$e->getMessage(), 'clave') ? new ReglaRechazada('CLAVE_REUTILIZADA') : parent::traducir(\$e);",
         'return parent::traducir($e);'],
+    // Semana 4: Repository, MVC y repositorio compartido.
+    'M17 el adaptador en memoria no condiciona el cierre al estado anterior' => ['src/Persistencia/EnMemoria/RepositorioEjecucionesEnMemoria.php',
+        "if (\$guardada === null || \$guardada->estado() !== Ejecucion::EN_CURSO) {", 'if (false) {'],
+    'M18 el formulario no revisa los tipos' => ['src/Presentacion/Http/Formularios/Formulario.php', "        if (\$mal !== []) {
+            throw new EntradaInvalida('CUERPO_INVALIDO', \$mal);",
+        "        if (false) {
+            throw new EntradaInvalida('CUERPO_INVALIDO', \$mal);"],
+    'M19 la evaluación no se publica en el repositorio compartido' => ['database/integracion-compartida.sql',
+        'CREATE TRIGGER evaluaciones_publicar AFTER INSERT ON e2e.evaluaciones FOR EACH ROW EXECUTE FUNCTION e2e.publicar_evaluacion();', ''],
+    'M20 el repositorio compartido no filtra por hospital' => ['database/integracion-compartida.sql',
+        "    USING (tenant = current_setting('his.tenant', true));", '    USING (true);'],
+    'M21 el controlador de versiones se salta el formulario' => ['src/Presentacion/Http/Controladores/VersionesControlador.php',
+        '            $datos = FormularioVersion::registrar($s);', '            $datos = json_decode($s->cuerpo, true) ?? [];'],
 ];
 
 function copiar(string $origen, string $destino): void
@@ -59,7 +72,7 @@ foreach ($mutaciones as $nombre => [$archivo, $buscar, $reemplazo]) {
     file_put_contents("$copia/$archivo", str_replace($buscar, $reemplazo, $codigo));
     $salida = [];
     exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg("$copia/tests/ejecutar.php") . ' 2>&1', $salida, $codigoSalida);
-    $fallan = array_map(static fn (string $l): string => trim(substr($l, 8, 9)), preg_grep('/^\[FALLA\]/', $salida) ?: []);
+    $fallan = array_map(static fn (string $l): string => preg_replace('/^\[FALLA\]\s+(\S+).*$/', '$1', $l), preg_grep('/^\[FALLA\]/', $salida) ?: []);
     $sobreviven += $codigoSalida === 0 ? 1 : 0;
     printf("[%s] %-66s %s\n", $codigoSalida === 0 ? 'SOBREVIVE' : 'DETECTA  ', $nombre, $fallan === [] ? '' : 'falla: ' . implode(', ', $fallan));
 }

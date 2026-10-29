@@ -1,0 +1,44 @@
+@startuml semana-04-capas-mvc-repository
+title Capas, MVC en la entrada y Repository en el límite del dominio
+skinparam defaultFontSize 11
+hide empty members
+left to right direction
+
+package "Presentación (MVC)" #F5F9FF {
+  class Kernel <<autentica y enruta>>
+  class Rutas <<tabla>>
+  class "VersionesControlador\nEjecucionesControlador\nEscenariosControlador" as C <<C: sin SQL ni reglas>>
+  class "FormularioVersion\nFormularioResultado\nFormularioEscenario" as F <<solo forma: 400>>
+  class "SalidaVista\nErrorVista" as V <<V: único lugar con códigos HTTP>>
+  Kernel --> Rutas
+  Kernel --> C
+  C --> F
+  C --> V
+}
+package "Aplicación" #EEF0F8 {
+  class "8 casos de uso" as UC <<M: orquestan>>
+  class Salida
+  interface "PoliticaAcceso\nAlmacenEvidencias\nRegistroAuditoria\nTransaccion" as PA
+  UC --> Salida
+  UC --> PA
+}
+package "Dominio" #DDEFE4 {
+  class "Version · Ejecucion\nResultadoEscenario · QualityGate" as M <<reglas>>
+  interface "RepositorioEscenarios\nRepositorioVersiones\nRepositorioEjecuciones\nRepositorioEvaluaciones" as REPO <<Repository>>
+}
+package "Persistencia" #FBEBDD {
+  class "Pdo*" as PDO <<PostgreSQL, preparadas>>
+  class "*EnMemoria" as MEM <<pruebas y demo>>
+}
+C --> UC
+UC --> M
+UC --> REPO
+PDO ..|> REPO
+MEM ..|> REPO
+PDO ..|> PA
+MEM ..|> PA
+note bottom of REPO
+  La MISMA suite de contrato (CON-01..07)
+  corre contra PDO y EnMemoria.
+end note
+@enduml
