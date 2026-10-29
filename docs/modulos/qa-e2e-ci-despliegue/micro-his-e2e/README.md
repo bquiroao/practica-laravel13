@@ -26,10 +26,12 @@ src/
                   Puertos (repositorios, Reloj), Excepciones
   Aplicacion/     CasosDeUso (8), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
   Persistencia/   Pdo, EnMemoria, Archivos (almacén por contenido), Configuracion, FabricaAdaptadores
+  Cliente/        ReportadorCi (lado del pipeline: reintentos idempotentes y bandeja de pendientes), transportes
   Presentacion/   Http: Kernel (autentica y enruta), Formularios (forma, 400), Controladores (MVC), Vistas (códigos HTTP)
 bootstrap/        autoload.php, contenedor.php (raíz de composición)
 database/         schema.sql, datos-demo.sql / datos-demo.php, integracion-compartida.sql (semana 4)
-bin/              instalar-base.php, demo-http.sh
+api/              openapi.yaml (contrato 1.0.0, semana 5; verificado por tests/Api)
+bin/              instalar-base.php, demo-http.sh, medir.php y proxy-ingesta.php (frontera de microservicio, semana 5)
 tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Contratos/ (memoria y PDO), Mvc/,
                   Presentacion/, Arquitectura/, Integracion/
 ```
@@ -39,11 +41,11 @@ tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, 
 ```bash
 php tests/ejecutar.php                                       # sin base: dominio, aplicación (dobles), HTTP y arquitectura
 E2E_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php     # + integración (recrea el esquema e2e)
-E2E_DB_DSN=... php tests/mutaciones.php                      # 21 defectos sembrados: la suite debe detectarlos todos
+E2E_DB_DSN=... php tests/mutaciones.php                      # 25 defectos sembrados: la suite debe detectarlos todos
 E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTTP real (php -S + curl)
 ```
 
-## API (rutas de la semana 3, en MVC desde la semana 4)
+## API (contrato completo en api/openapi.yaml)
 
 | Método y ruta | Caso de uso | Permiso |
 |---|---|---|
