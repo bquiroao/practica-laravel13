@@ -1,0 +1,47 @@
+@startuml semana-01-casos-de-uso
+' Alergias clínicas y alerta visual en expediente - Semana 1
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecaseBackgroundColor #F7F9FC
+skinparam usecaseBorderColor #34495E
+
+actor "Médico tratante" as MED
+actor "Enfermería" as ENF
+actor "Expediente médico\n(módulo expediente-medico)" as EXP <<sistema>>
+
+rectangle "Alergias clínicas y alerta visual en expediente" {
+  usecase "CU-01\nRegistrar alergia" as CU01
+  usecase "CU-02\nValidar alergia\n(alérgeno, severidad, fecha,\nequivalencia)" as CU02
+  usecase "CU-03\nConsultar alerta\ndel expediente" as CU03
+  usecase "CU-04\nCalcular nivel de alerta" as CU04
+  usecase "CU-05\nReconocer alerta\n(ALTA o CRÍTICA)" as CU05
+  usecase "CU-06\nInactivar o resolver\nalergia" as CU06
+}
+
+
+MED --> CU01
+MED --> CU03
+MED --> CU05
+MED --> CU06
+ENF --> CU03
+ENF --> CU05
+EXP --> CU03 : abre el expediente\n(acceso ya autorizado)
+
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU04 : <<include>>
+CU03 ..> CU04 : <<include>>
+CU06 ..> CU02 : <<include>>
+CU05 .> CU03 : <<extend>> [nivel ≥ ALTA\ny huella no reconocida]
+
+note right of CU04
+  Fuera de este módulo: prescripciones-alergias
+  solo LEE la tabla allergies para verificar
+  medicamentos; no usa estos casos de uso.
+end note
+
+note bottom of CU06
+  Se modela para delimitar el alcance;
+  no se implementa en el Micro-HIS.
+end note
+@enduml
