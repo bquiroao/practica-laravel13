@@ -55,7 +55,7 @@ export const sections: Section[] = [
                 modules: ['expediente-medico', 'notas-soap-diagnosticos', 'signos-vitales-alertas', 'alergias-clinicas-alerta-visual-expediente'],
                 phase: 4, ready: true, summary: 'Expediente con notas SOAP, diagnósticos, signos vitales y alergias siempre visibles.' },
             { path: '/prescripciones', label: 'Prescripciones', icon: Pill, anyOf: ['prescripciones.crear', 'medicamentos.ver'],
-                modules: ['prescripciones-alergias', 'catalogo-medicamentos'], phase: 4, ready: false,
+                modules: ['prescripciones-alergias', 'catalogo-medicamentos'], phase: 4, ready: true,
                 summary: 'Recetas electrónicas que se bloquean ante una alergia, y catálogo de medicamentos.' },
             { path: '/alertas', label: 'Alertas', icon: BellRing, anyOf: ['alertas.ver'], modules: ['alertas-criticas-notificaciones-internas'],
                 phase: 4, ready: false, summary: 'Alertas críticas con reconocimiento y escalamiento.' },
@@ -64,9 +64,9 @@ export const sections: Section[] = [
     {
         title: 'Laboratorio',
         items: [
-            { path: '/laboratorio', label: 'Laboratorio', icon: FlaskConical, anyOf: ['pruebas_lab.ver', 'ordenes_lab.crear'],
+            { path: '/laboratorio', label: 'Laboratorio', icon: FlaskConical, anyOf: ['pruebas_lab.ver', 'ordenes_lab.crear', 'muestras.recibir', 'resultados.registrar', 'resultados.validar'],
                 modules: ['catalogo-pruebas-laboratorio', 'ordenes-laboratorio-emr', 'recepcion-muestras', 'ingreso-resultados-laboratorio',
-                    'validacion-resultados-bioquimico'], phase: 5, ready: false,
+                    'validacion-resultados-bioquimico'], phase: 5, ready: true,
                 summary: 'De la orden a la validación: catálogo, órdenes, muestras con código, resultados y firma del bioquímico.' },
         ],
     },

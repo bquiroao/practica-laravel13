@@ -181,13 +181,13 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no 
 | | `signos-vitales-alertas` | ✅ Integrado |
 | | `alergias-clinicas-alerta-visual-expediente` | 🟦 **Disponible** (sección 7.5) |
 | | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
-| | `prescripciones-alergias` | ⏳ Espera a los catálogos de medicamentos y alergias |
+| | `prescripciones-alergias` | ✅ Integrado (con catálogo provisional) |
 | | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
 | Laboratorio | `catalogo-pruebas-laboratorio` | 🟦 **Disponible** (sección 7.1) |
-| | `ordenes-laboratorio-emr` | ⏳ Espera al catálogo de pruebas |
-| | `recepcion-muestras` | ⏳ Espera al catálogo de pruebas |
-| | `ingreso-resultados-laboratorio` | ⏳ Espera al catálogo de pruebas |
-| | `validacion-resultados-bioquimico` | ⏳ Espera al catálogo de pruebas |
+| | `ordenes-laboratorio-emr` | ✅ Integrado (con catálogo provisional) |
+| | `recepcion-muestras` | ✅ Integrado (con catálogo provisional) |
+| | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
+| | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
 | Gestión | `reportes-analytics-basicos` | 🟦 **Disponible** (sección 7.3) |
 | | `reportes-operativos-exportables` | 🔜 En el plan |
 | Calidad | `qa-regresion-defectos` | 🔜 En el plan |
@@ -320,7 +320,12 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - las tablas del laboratorio: el esquema base las dejó pendientes (tarea 3.6 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md`);
   - el registro de pruebas con vigencias que no se crucen;
   - la pantalla del catálogo.
-- **Se conecta con:** órdenes, recepción de muestras, ingreso y validación de resultados. Esos cuatro módulos esperan a este. Deja bien definida y documentada la tabla de pruebas (código, nombre, tipo de muestra, unidades, rangos de referencia y vigencia), porque la van a usar todos.
+- **Se conecta con:** órdenes, recepción, ingreso y validación de resultados, que **ya están integrados** con un catálogo provisional (`config/nido_catalogos.php`). Para conectar tu catálogo:
+  1. implementa `App\Services\Catalogs\LabTestDirectory` sobre tu tabla. Devuelve `code`, `name`, `specimen_type`, `unit`, `ref_low`, `ref_high`, `critical_low` y `critical_high`, y respeta la vigencia;
+  2. en `AppServiceProvider`, cambia el `bind` de `LabTestDirectory` por tu clase.
+
+  Las órdenes guardan una copia de los datos de cada prueba al pedirla, así que editar el catálogo no cambia la historia clínica.
+- **Pantalla:** reemplaza la pestaña «Pruebas disponibles» de `/laboratorio` (`resources/js/pages/lab/LabPage.tsx`) por tu catálogo administrable.
 
 ### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama`
 - **Ya existe:**
@@ -359,7 +364,7 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - la tabla de alertas;
   - el reconocimiento y el escalamiento;
   - la pantalla y el contador de la campana.
-- **Se conecta con:** signos vitales fuera de rango (ya integrado) y resultados críticos de laboratorio. Para no acoplar los módulos, se usan **eventos de Laravel**:
+- **Se conecta con:** signos vitales fuera de rango y resultados críticos de laboratorio, ambos ya integrados. Al validar un resultado crítico se dispara `App\Events\LabResultCritical` (paciente, prueba, valor, unidad y marca). Para no acoplar los módulos, se usan **eventos de Laravel**:
   - al guardar una toma con valores anormales o críticos, `VitalSignService` dispara `App\Events\VitalSignsOutOfRange`;
   - el evento trae hospital, paciente, código del paciente, episodio, toma y la lista de hallazgos (`signo`, `etiqueta`, `valor`, `nivel`: `anormal` o `critica`), y `isCritical()`;
   - para crear la alerta, registra un *listener* en `AppServiceProvider` con `Event::listen(VitalSignsOutOfRange::class, …)`.
@@ -376,7 +381,7 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
 - **Se conecta con:**
   - la ficha del paciente (`resources/js/pages/patients/PatientDetailPage.tsx`);
   - el expediente (`resources/js/pages/records/RecordPage.tsx`), que ya tiene marcado con un comentario el lugar del banner, debajo del nombre del paciente;
-  - prescripciones, que bloquearán una receta que choque con una alergia.
+  - prescripciones (ya integrado), que **lee** las alergias activas de la tabla `allergies` para bloquear o advertir. Lo que registres aparece ahí sin más cambios. En la demostración se cargan dos alergias de ejemplo.
 - **Acuerdo de integración:** exporta un componente `AllergyBanner` en `resources/js/modules/allergies/` que reciba el id del paciente, para que las demás pantallas solo tengan que colocarlo.
 
 ### 7.6 Catálogo de medicamentos — `catalogo-medicamentos`
@@ -388,7 +393,10 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - las tablas de medicamentos: el esquema base las dejó pendientes (tarea 3.5 del mismo `tasks.md`);
   - el registro y la búsqueda de medicamentos;
   - la pantalla.
-- **Se conecta con:** prescripciones, que esperan a este catálogo y al de alergias. Usen pestañas en `/prescripciones`: «Catálogo» para este módulo y «Recetas» para prescripciones.
+- **Se conecta con:** prescripciones, que **ya está integrado** con un catálogo provisional. Para conectar tu catálogo:
+  1. implementa `App\Services\Catalogs\MedicationDirectory` sobre tu tabla. Devuelve `code`, `name`, `presentation`, `route` y `groups`. `groups` son las familias para las alergias cruzadas, por ejemplo `['penicilinas']`; las palabras de cada familia están en `config/nido_catalogos.php`, en `familias_alergia`;
+  2. en `AppServiceProvider`, cambia el `bind` de `MedicationDirectory` por tu clase.
+- **Pantalla:** reemplaza la pestaña «Catálogo de medicamentos» de `/prescripciones` (`resources/js/pages/prescriptions/PrescriptionsPage.tsx`) por tu catálogo administrable.
 
 **Para evitar conflictos al unir ramas:**
 - `routes/api.php`, `config/nido.php`, `resources/js/routes.tsx` y `resources/js/modules/catalog.ts` los comparten todos los módulos.
@@ -425,7 +433,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **125 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **131 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
 
 ---
 
@@ -484,3 +492,11 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/notas/{id}/correccion` | `notas.firmar` |
 | POST | `/expediente/{paciente}/signos` | `signos_vitales.registrar` |
 | POST | `/expediente/{paciente}/consulta` · `/episodios/{id}/terminar` | `notas.registrar` |
+| GET | `/laboratorio/pruebas` · `/expediente/{paciente}/laboratorio` | permisos de laboratorio o `expediente.leer` |
+| POST | `/expediente/{paciente}/laboratorio` (orden) | `ordenes_lab.crear` |
+| GET | `/laboratorio/trabajo?etapa=recepcion, resultados o validacion` | `muestras.recibir`, `resultados.registrar` o `resultados.validar` |
+| POST | `/laboratorio/items/{id}/recibir` · `/laboratorio/items/{id}/rechazar` | `muestras.recibir` |
+| POST | `/laboratorio/items/{id}/resultado` | `resultados.registrar` |
+| POST | `/laboratorio/resultados/{id}/revision` | `resultados.validar` |
+| GET | `/medicamentos` · `/recetas[?paciente=]` | `medicamentos.ver`, `prescripciones.crear` o `expediente.leer` |
+| POST | `/expediente/{paciente}/recetas` · `/recetas/{id}/anular` | `prescripciones.crear` / `prescripciones.anular` |

@@ -7,6 +7,8 @@ import { api, errorMessage, ruleError } from '@/lib/api';
 import { formatDate, formatTime, sexLabels } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import type { Patient } from '@/modules/clinical/types';
+import { LabTab } from '@/pages/records/LabTab';
+import { PrescriptionsTab } from '@/pages/records/PrescriptionsTab';
 import { Alert, BackLink, Badge, Button, Card, Dialog, EmptyState, Field, Input, Select, Spinner, Textarea } from '@/components/ui';
 
 type Soap = { s: string; o: string; a: string; p: string };
@@ -27,7 +29,7 @@ const SECTIONS: { key: keyof Soap; label: string; hint: string }[] = [
 ];
 const dxType = { primary: 'Principal', secondary: 'Secundario', differential: 'Diferencial' };
 const episodeType = { outpatient: 'Consulta externa', emergency: 'Emergencia', inpatient: 'Internamiento' };
-const TABS = [['notas', 'Notas SOAP'], ['signos', 'Signos vitales'], ['atenciones', 'Atenciones']] as const;
+const TABS = [['notas', 'Notas SOAP'], ['signos', 'Signos vitales'], ['laboratorio', 'Laboratorio'], ['recetas', 'Recetas'], ['atenciones', 'Atenciones']] as const;
 
 /** Expediente del paciente (módulos expediente médico, notas SOAP y signos vitales). */
 export function RecordPage() {
@@ -82,6 +84,8 @@ export function RecordPage() {
             {tab === 'notas' && <NotesTab data={data} currentEpisode={current} />}
             {tab === 'signos' && <VitalsTab data={data} />}
             {tab === 'atenciones' && <EpisodesTab data={data} />}
+            {tab === 'laboratorio' && <LabTab patientId={data.patient.id} />}
+            {tab === 'recetas' && <PrescriptionsTab patientId={data.patient.id} />}
         </>
     );
 }

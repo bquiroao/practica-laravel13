@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Central\CentralUser;
 use App\Models\Central\Hospital;
 use App\Models\Central\HospitalMembership;
+use App\Models\Hospital\Allergy;
 use App\Models\Hospital\Appointment;
 use App\Models\Hospital\Bed;
 use App\Models\Hospital\BedStay;
@@ -134,6 +135,11 @@ class DemoClinicSeeder
             return;
         }
         $ref = $refs->forUser(CentralUser::query()->findOrFail($doctorId), $hospital);
+        // Alergias de ejemplo para ver el bloqueo de prescripciones (el registro de alergias es su propio módulo).
+        Allergy::query()->create(['local_patient_id' => $patients[0]->local_patient_id, 'verified_by_user_ref_id' => $ref->local_user_ref_id,
+            'allergen_name' => 'Penicilina', 'reaction' => 'Urticaria y dificultad respiratoria', 'allergy_type' => 'allergy', 'severity' => 'severe', 'status' => 'active']);
+        Allergy::query()->create(['local_patient_id' => $patients[1]->local_patient_id, 'verified_by_user_ref_id' => $ref->local_user_ref_id,
+            'allergen_name' => 'Ibuprofeno', 'reaction' => 'Malestar gástrico', 'allergy_type' => 'intolerance', 'severity' => 'mild', 'status' => 'active']);
         foreach ([[3, 'MED-1/201', 'Neumonía adquirida en la comunidad', 3], [7, 'CIR-1/301', 'Postoperatorio de apendicectomía', 1], [2, 'PED-1/101', 'Deshidratación moderada', 2]] as [$n, $bed, $reason, $days]) {
             $since = now()->subDays($days);
             $episode = CareEpisode::query()->create(['local_patient_id' => $patients[$n]->local_patient_id, 'type' => 'inpatient', 'status' => 'open',

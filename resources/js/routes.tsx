@@ -23,6 +23,8 @@ const BedsPage = lazy(() => import('@/pages/beds/BedsPage').then((m) => ({ defau
 const OccupancyPage = lazy(() => import('@/pages/beds/OccupancyPage').then((m) => ({ default: m.OccupancyPage })));
 const RecordSearchPage = lazy(() => import('@/pages/records/RecordSearchPage').then((m) => ({ default: m.RecordSearchPage })));
 const RecordPage = lazy(() => import('@/pages/records/RecordPage').then((m) => ({ default: m.RecordPage })));
+const LabPage = lazy(() => import('@/pages/lab/LabPage').then((m) => ({ default: m.LabPage })));
+const PrescriptionsPage = lazy(() => import('@/pages/prescriptions/PrescriptionsPage').then((m) => ({ default: m.PrescriptionsPage })));
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then((m) => ({ default: m.NewAppointmentPage })));
 
 const ready: Record<string, ReactNode> = {
@@ -36,6 +38,8 @@ const ready: Record<string, ReactNode> = {
     '/camas': <BedsPage />,
     '/ocupacion': <OccupancyPage />,
     '/expediente': <RecordSearchPage />,
+    '/laboratorio': <LabPage />,
+    '/prescripciones': <PrescriptionsPage />,
 };
 
 // Pantallas internas de un módulo: mismo permiso que pida la acción.

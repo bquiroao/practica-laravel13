@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
+use App\Http\Controllers\Api\V1\Clinical\LabController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
+use App\Http\Controllers\Api\V1\Clinical\PrescriptionController;
 use App\Http\Controllers\Api\V1\Clinical\RecordController;
 use App\Http\Controllers\Api\V1\Clinical\SpecialtyController;
 use App\Http\Controllers\Api\V1\HospitalController;
@@ -81,5 +83,21 @@ Route::middleware('tenant')->group(function (): void {
         Route::post('/expediente/{patient}/signos', [RecordController::class, 'storeVitals'])->middleware('permiso:signos_vitales.registrar')->whereUuid('patient');
         Route::post('/expediente/{patient}/consulta', [RecordController::class, 'startConsultation'])->middleware('permiso:notas.registrar')->whereUuid('patient');
         Route::post('/episodios/{episode}/terminar', [RecordController::class, 'endConsultation'])->middleware('permiso:notas.registrar')->whereUuid('episode');
+
+        // Fase 5: laboratorio (órdenes, recepción, resultados, validación) y prescripciones.
+        $lab = 'permiso:pruebas_lab.ver|ordenes_lab.crear|muestras.recibir|resultados.registrar|resultados.validar|expediente.leer';
+        Route::get('/laboratorio/pruebas', [LabController::class, 'tests'])->middleware($lab);
+        Route::get('/laboratorio/trabajo', [LabController::class, 'worklist'])->middleware('permiso:muestras.recibir|resultados.registrar|resultados.validar');
+        Route::get('/expediente/{patient}/laboratorio', [LabController::class, 'patientOrders'])->middleware($lab)->whereUuid('patient');
+        Route::post('/expediente/{patient}/laboratorio', [LabController::class, 'store'])->middleware('permiso:ordenes_lab.crear')->whereUuid('patient');
+        Route::post('/laboratorio/items/{item}/recibir', [LabController::class, 'receive'])->middleware('permiso:muestras.recibir')->whereUuid('item');
+        Route::post('/laboratorio/items/{item}/rechazar', [LabController::class, 'reject'])->middleware('permiso:muestras.recibir')->whereUuid('item');
+        Route::post('/laboratorio/items/{item}/resultado', [LabController::class, 'result'])->middleware('permiso:resultados.registrar')->whereUuid('item');
+        Route::post('/laboratorio/resultados/{result}/revision', [LabController::class, 'review'])->middleware('permiso:resultados.validar')->whereUuid('result');
+
+        Route::get('/medicamentos', [PrescriptionController::class, 'medications'])->middleware('permiso:medicamentos.ver|prescripciones.crear');
+        Route::get('/recetas', [PrescriptionController::class, 'index'])->middleware('permiso:prescripciones.crear|medicamentos.ver|expediente.leer');
+        Route::post('/expediente/{patient}/recetas', [PrescriptionController::class, 'store'])->middleware('permiso:prescripciones.crear')->whereUuid('patient');
+        Route::post('/recetas/{prescription}/anular', [PrescriptionController::class, 'cancel'])->middleware('permiso:prescripciones.anular')->whereUuid('prescription');
     });
 });
