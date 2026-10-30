@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Traslados y altas: wireframes de la semana 8</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.35 Arial,sans-serif;color:#222}
+.wf{width:980px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 8px;font-size:16px}.row{display:flex;gap:12px}.p{flex:1;border:2px solid #666;background:#fff;padding:10px;min-height:250px}
+.p>b{display:block;font-size:11px;color:#555;text-transform:uppercase;margin-bottom:6px}.n{width:250px;font-size:12px}.n ol{margin:0;padding-left:20px}
+i{display:inline-block;width:17px;height:17px;border-radius:50%;background:#a93226;color:#fff;font:bold 11px/17px Arial;text-align:center;font-style:normal;margin-right:4px}
+.btn{display:inline-block;border:2px solid #333;padding:3px 10px;border-radius:3px;font-weight:bold;margin:2px 4px 2px 0}.pri{background:#333;color:#fff}.off{border-color:#6b6b6b;color:#6b6b6b}
+.in{display:inline-block;border:1px solid #666;min-width:110px;padding:2px 6px;background:#fff}.err{border:2px solid #a93226}.t{color:#a93226;font-size:12px}.hint{color:#555;font-size:12px}
+.chip{display:inline-block;border:1px solid #666;border-radius:10px;padding:0 7px;margin:1px;font-size:12px}.sel{background:#333;color:#fff;font-weight:bold}
+.row2{border-top:1px solid #ccc;padding:5px 0}.sk{height:14px;background:#ddd;margin:7px 0;border-radius:3px}.ban{border:2px solid #333;padding:6px 8px;margin:6px 0}.ban.w{border-style:dashed}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:3px 6px;text-align:left;font-size:13px}
+</style></head><body>
+
+<section class="wf" id="wf1"><h2>W1 · Movimientos del paciente (enfermería y admisión)</h2><div class="row">
+<div class="p"><b>a · con orden vigente</b><div><i>1</i><b>M. P. M.</b> · P-000101 · Episodio activo · Cama actual: <b>A1</b> (Medicina general)</div>
+<div class="ban"><i>2</i>Orden médica vigente: <b>Traslado</b> · cama de <b>UCI</b> · dr-luis, 28/10 07:40</div>
+<div><i>3</i><span class="btn pri">Registrar traslado</span><span class="btn off">Registrar alta (no hay orden de alta)</span></div>
+<div class="hint"><i>4</i>Historial de camas: 1 estancia · <a>Ver historial</a></div></div>
+<div class="p"><b>b · sin orden, cargando y sin cama</b><div class="hint">Cargando movimientos del paciente…</div><div class="sk"></div><div class="sk" style="width:60%"></div><hr>
+<div><i>5</i>No hay orden médica vigente para este paciente. Pídala al médico.</div><div><span class="btn off">Registrar traslado</span><span class="btn off">Registrar alta</span></div>
+<div class="row2"><i>6</i>Este paciente no tiene cama asignada. No se puede registrar un movimiento.</div></div>
+<div class="n"><ol><li>Paciente por iniciales y código; el nombre completo no va en el título ni en la URL</li><li>La orden vigente se muestra primero: qué se pidió y quién</li><li>Cada botón se activa solo si hay orden de ese tipo; el desactivado dice por qué</li><li>Atajo al historial, que ven los tres roles</li><li>Sin orden: se explica y se dice quién la da</li><li>Sin cama: se explica, no se esconde el botón</li></ol></div></div></section>
+
+<section class="wf" id="wf2"><h2>W2 · Orden médica (médico) — propuesta, aún sin código</h2><div class="row">
+<div class="p"><b>a · orden de traslado</b><div>Orden médica · <b>M. P. M.</b></div><br>
+<div><i>1</i>Tipo: <span class="chip sel">Traslado</span><span class="chip">Alta</span></div><br>
+<div><i>2</i>Cama requerida: <span class="chip sel">Cualquiera</span><span class="chip">UCI</span></div>
+<div class="hint">Si pide UCI, solo se podrá trasladar a una cama de UCI.</div><br><span class="btn pri">Guardar orden</span><span class="btn">Cancelar</span></div>
+<div class="p"><b>b · orden de alta con error</b><div><i>3</i>Tipo: <span class="chip">Traslado</span><span class="chip sel">Alta</span></div><br>
+<div>Tipo de alta: <span class="chip">Médica</span><span class="chip">Voluntaria</span><span class="chip">Referencia</span><span class="chip">Defunción</span></div><div class="t"><i>4</i>Elija el tipo de alta.</div><br>
+<div>Motivo <span class="in err">&nbsp;</span></div><div class="t"><i>5</i>Escriba el motivo del alta.</div><br><span class="btn pri">Guardar orden</span></div>
+<div class="n"><ol><li>Solo el médico ve esta pantalla</li><li>Requisito de cama: cualquiera o UCI</li><li>La alta pide tipo y motivo; las 4 opciones son botones, no texto libre</li><li>Mensaje junto al campo que falta</li><li>El motivo es obligatorio (si falta, el servidor responde alta_invalida)</li></ol></div></div></section>
+
+<section class="wf" id="wf3"><h2>W3 · Registrar traslado: elegir cama destino</h2><div class="row">
+<div class="p"><b>a · camas del tipo pedido</b><div><i>1</i>Traslado de <b>M. P. M.</b> · de <b>A1</b> · orden: <b>UCI</b></div><br>
+<table><tr><th>Cama</th><th>Servicio</th><th>Estado</th><th></th></tr>
+<tr><td><i>2</i>U1</td><td>UCI</td><td>Disponible</td><td><span class="btn pri">Elegir</span></td></tr>
+<tr><td>U2</td><td>UCI</td><td>Ocupada</td><td class="hint">No se puede elegir</td></tr>
+<tr><td>U3</td><td>UCI</td><td>En mantenimiento</td><td class="hint">No se puede elegir</td></tr></table></div>
+<div class="p"><b>b · vacío y cargando</b><div class="hint">Cargando camas…</div><div class="sk"></div><div class="sk"></div><hr>
+<div><i>3</i>No hay camas de UCI disponibles ahora. Intente más tarde o avise al médico.</div><span class="btn">Volver</span></div>
+<div class="n"><ol><li>Se resumen paciente, cama de origen y requisito de la orden</li><li>Solo las camas «Disponible» tienen botón; las demás dicen su estado con texto</li><li>Sin camas del tipo pedido: se explica y se ofrece salida</li></ol></div></div></section>
+
+<section class="wf" id="wf4"><h2>W4 · Confirmación (traslado y alta)</h2><div class="row">
+<div class="p"><b>a · confirmar traslado</b><div><i>1</i><b>Confirme el traslado</b></div><br>
+<div class="ban">M. P. M. pasa de <b>A1</b> a <b>U1</b> (UCI).<br>La cama <b>A1</b> quedará en mantenimiento.</div>
+<div class="hint"><i>2</i>Todo se guarda junto o no se guarda nada.</div><br><span class="btn pri">Confirmar traslado</span><span class="btn">Volver</span>
+<div class="hint">Al confirmar: <span class="btn off">Guardando…</span></div></div>
+<div class="p"><b>b · confirmar alta</b><div><i>3</i><b>Confirme el alta voluntaria</b></div><br>
+<div class="ban w">Se cerrará el episodio de M. P. M. y la cama <b>A1</b> quedará en mantenimiento.<br>Motivo: «Decisión del paciente».</div>
+<div class="hint"><i>4</i>Esto no se puede deshacer. Un error se corrige con otro movimiento.</div><br><span class="btn pri">Confirmar alta</span><span class="btn">Volver</span></div>
+<div class="n"><ol><li>Dice qué cama se ocupa y qué cama se libera</li><li>Explica el «todo o nada»</li><li>El alta lleva borde punteado: cierra el episodio</li><li>Dice que no se deshace (RF-10)</li></ol></div></div></section>
+
+<section class="wf" id="wf5"><h2>W5 · Resultado y errores</h2><div class="row">
+<div class="p"><b>a · éxito</b><div class="ban"><i>1</i><b>Traslado registrado.</b> M. P. M. está en <b>U1</b>. La cama <b>A1</b> quedó en mantenimiento.</div>
+<div class="hint"><i>2</i>Avise a limpieza de la cama A1.</div><br><span class="btn pri">Ver historial</span><span class="btn">Volver a pacientes</span></div>
+<div class="p"><b>b · rechazos recuperables</b>
+<div class="ban w"><i>3</i><b>La cama U1 ya no está disponible.</b> Otra persona la ocupó. No se guardó nada. <span class="btn">Elegir otra cama</span></div>
+<div class="ban w"><i>4</i><b>La orden pide UCI</b> y U5 es una cama general. <span class="btn">Elegir otra cama</span></div>
+<div class="ban w"><i>5</i><b>No se pudo guardar.</b> No se cambió nada. <span class="btn">Reintentar</span></div></div>
+<div class="n"><ol><li>Éxito con la cama liberada y el aviso a limpieza</li><li>Recordatorio de limpieza (RF-07): hoy es un aviso, no una función del sistema</li><li>Conflicto: dice qué pasó y deja elegir otra</li><li>Requisito: dice cuál era</li><li>Error de guardado: confirma que no cambió nada</li></ol></div></div></section>
+
+<section class="wf" id="wf6"><h2>W6 · Historial de camas (enfermería, admisión y médico)</h2><div class="row">
+<div class="p"><b>a · con datos</b><div><i>1</i>Camas de <b>M. P. M.</b> · P-000101</div><br>
+<table><tr><th>Cama</th><th>Desde</th><th>Hasta</th><th>Motivo</th></tr>
+<tr><td>U1</td><td>28/10 08:10</td><td><i>2</i>Actual</td><td>traslado</td></tr>
+<tr><td>A1</td><td>20/10 08:00</td><td>28/10 08:10</td><td>ingreso</td></tr></table>
+<div class="hint"><i>3</i>2 estancias · más antigua primero</div></div>
+<div class="p"><b>b · vacío y cargando</b><div class="hint">Cargando historial…</div><div class="sk"></div><hr><div><i>4</i>Este paciente aún no tiene camas registradas.</div>
+<div class="row2"><div class="t"><i>5</i>El episodio no existe o no es de su hospital.</div></div></div>
+<div class="n"><ol><li>Paciente por iniciales y código</li><li>La estancia abierta se llama «Actual»</li><li>Orden cronológico y total anunciado</li><li>Vacío explicado, sin tabla vacía</li><li>Error de acceso sin dar detalles del paciente</li></ol></div></div></section>
+</body></html>
