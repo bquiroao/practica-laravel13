@@ -40,7 +40,9 @@
     event.preventDefault();
     clearAlerts();
     const term = $("orderSearch").value.trim().toUpperCase();
-    if (!term || (!term.includes("ORD-2026-0418") && !term.includes("SP-2026-008472"))) {
+    if (!term || !["ORD-2026-0418", "SP-2026-008472"].includes(term)) {
+      $("orderResult").classList.add("hidden");
+      $("searchError").textContent = "No encontramos una coincidencia autorizada en esta demo. Revisa la referencia e intenta de nuevo; no se creó ninguna recepción.";
       $("searchError").classList.remove("hidden");
       $("searchError").focus();
       return;
@@ -157,6 +159,7 @@
     duplicateScenario = false;
     savedDecision = "accept";
     $("searchForm").reset();
+    $("orderResult").classList.remove("hidden");
     $("orderSearch").value = "ORD-2026-0418";
     $("specimenCode").value = "SP-2026-008472";
     $("observation").value = "";
