@@ -21,9 +21,9 @@ final class RepositorioPdo implements RepositorioOcupacion
     public function camasDeSalasActivas(): array
     {
         $filas = $this->ejecutar("SELECT w.code AS sala, b.code AS cama, b.status AS estado,
-                                         EXISTS (SELECT 1 FROM bed_stays s WHERE s.bed_id = b.bed_id AND s.ended_at IS NULL) AS con_estancia
+                                         (SELECT COUNT(*) FROM bed_stays s WHERE s.bed_id = b.bed_id AND s.ended_at IS NULL) AS estancias
                                   FROM wards w LEFT JOIN beds b ON b.ward_id = w.ward_id WHERE w.status = 'active' ORDER BY w.code, b.code")->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn (array $f) => ['con_estancia' => (bool) $f['con_estancia']] + $f, $filas);
+        return array_map(fn (array $f) => ['estancias' => (int) $f['estancias']] + $f, $filas);
     }
 
     public function guardarCorte(Corte $corte): void   // ZERO_FRACTION: 50.0 % vuelve como 50.0, no como el entero 50

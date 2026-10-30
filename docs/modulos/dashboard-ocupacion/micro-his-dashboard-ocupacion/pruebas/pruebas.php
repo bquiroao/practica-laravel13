@@ -43,7 +43,14 @@ foreach (['PDO' => new RepositorioPdo($db), 'InMemory' => $memoria] as $adaptado
            array_column($repo->camasDeSalasActivas(), 'cama') === ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2'] && $repo->ultimoCorte()->salas['A']['ocupacion'] === 50.0);
 }
 prueba('[PDO] regla: consolidar no cambia ningún estado de cama (R-09)', $db->query("SELECT group_concat(status) FROM beds")->fetchColumn() === 'available,available,occupied,occupied,maintenance,maintenance,inactive,occupied');
-prueba('[InMemory] contrato: una sala activa sin camas aparece con cama null, como en el LEFT JOIN', (new RepositorioEnMemoria(['D' => true]))->camasDeSalasActivas() === [['sala' => 'D', 'cama' => null, 'estado' => null, 'con_estancia' => false]]);
+prueba('[InMemory] contrato: una sala activa sin camas aparece con cama null, como en el LEFT JOIN', (new RepositorioEnMemoria(['D' => true]))->camasDeSalasActivas() === [['sala' => 'D', 'cama' => null, 'estado' => null, 'estancias' => 0]]);
+
+// Cambio práctico de la semana 6: una cama ocupada con dos estancias abiertas (dos pacientes en una cama) es inconsistente (R-04).
+$otra = baseDePrueba(); $otra->exec('INSERT INTO bed_stays (bed_id, ended_at) VALUES (3, NULL)');   // base aparte: A3, ocupada, con 2 estancias
+foreach (['PDO' => [new RepositorioPdo($otra),['A2', 'A3', 'A4']], 'InMemory' => [new RepositorioEnMemoria(['A' => true], [['A', 'A3', 'occupied', 2], ['A', 'A6', 'occupied', 1]]), ['A3']]] as $adaptador => [$repo, $esperadas]) {
+    $app = crearControlador($repo, $reloj); $app->atender('consolidar', []);
+    prueba("[$adaptador] cambio S6: A3 ocupada con 2 estancias abiertas queda inconsistente; una con 1 no (R-04)", $app->atender('consultar', [])['salas']['A']['inconsistentes'] === $esperadas);
+}
 
 // 3. Error de persistencia: un doble que simula la base caída y una PDOException real.
 $caida = new class implements FuenteCamas { public function camasDeSalasActivas(): array { throw new ErrorPersistencia('SQLSTATE[08006] conexión perdida'); } };
