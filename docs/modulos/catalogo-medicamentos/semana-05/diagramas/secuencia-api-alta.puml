@@ -1,0 +1,44 @@
+@startuml secuencia-api-alta
+' Catálogo de medicamentos - Semana 5 - Cliente-servidor: POST /api/v1/medicamentos
+autonumber
+title Cliente-servidor: alta por la API REST (CU-01)
+participant "Cliente\n(UI Vue o módulo)" as CLI
+participant "KernelApi" as K
+participant "Autenticador" as AUT
+participant "ApiMedicamentos" as API
+participant "Permisos" as PER
+participant "RegistrarMedicamento" as CU
+participant "RepositorioMedicamentos\n(PDO)" as REPO
+database "PostgreSQL" as BD
+
+CLI -> K : POST /api/v1/medicamentos\nAuthorization: Bearer <token>\nX-Request-Id: abc-123\nContent-Type: application/json
+K -> K : request_id = abc-123 (o uno nuevo)
+K -> AUT : identificar(Authorization)
+alt token ausente o desconocido
+  K --> CLI : 401 NO_AUTENTICADO + X-Request-Id
+else identidad (usuario, rol, hospital)
+  K -> API : registrar(petición) con la identidad
+  API -> PER : permite(rol, "registrar")
+  alt rol sin permiso
+    API --> K : ErrorHttp 403 PROHIBIDO
+    K --> CLI : 403 + formato único de error
+  else permitido
+    API -> API : CuerpoJson: 415 / 400 si no es JSON;\ndescarta hospital_id y usuario del cuerpo
+    API -> CU : ejecutar(hospital del token, datos, usuario del token)
+    CU -> REPO : equivalenteVigente / siguienteCodigo / agregar
+    REPO -> BD : SQL preparado en transacción
+    alt validación (RN-05) o regla (RN-04)
+      CU --> K : ErrorValidacion / ErrorReglaNegocio
+      K --> CLI : 422 VALIDACION o 409 DUPLICADO\n{error:{codigo, mensaje, detalles, request_id}}
+    else base no disponible
+      REPO --> K : ErrorPersistencia
+      K --> CLI : 503 PERSISTENCIA + Retry-After: 5\n(sin SQL ni trazas)
+    else guardado
+      CU --> API : Medicamento v1
+      API --> K : 201 {datos} + Location
+      K --> CLI : 201 + X-Request-Id
+    end
+  end
+end
+K -> K : registra una línea JSON:\nrequest_id, ruta, estado, ms, usuario, hospital\n(sin token ni datos clínicos)
+@enduml

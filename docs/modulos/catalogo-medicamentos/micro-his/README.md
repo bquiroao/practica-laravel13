@@ -47,6 +47,17 @@ php -S 127.0.0.1:8085 -t public
 Abrir `http://127.0.0.1:8085/medicamentos`. Usuario fijo de demostración: `qf.norte` del Hospital
 Norte (ficticio). Con `memoria` los datos se reinician en cada petición.
 
+## API REST (semana 5)
+
+Mismo servidor: las rutas `/api/v1/...` van a la API. Tokens **ficticios** en `config.php`
+(`tok-qf-norte-0001`, `tok-consulta-norte-0001`, `tok-auditor-norte-0001`, `tok-prescripciones-norte-0001`, `tok-qf-sur-0001`).
+
+```powershell
+php scripts/probar-api.php --base=http://127.0.0.1:8085   # 9 llamadas con el código HTTP esperado
+```
+
+Contrato completo: `../semana-05/contrato-api.md`.
+
 ## Pruebas
 
 ```powershell
@@ -63,11 +74,11 @@ php pruebas/ejecutar.php --evidencia=../semana-03/evidencia/salida-pruebas.txt
 src/Domain/        Modelo, reglas RN-01..RN-06, errores e interfaces Repository (ISP)
 src/Application/   Casos de uso CU-01..CU-06 y RF-09
 src/Persistence/   Adaptadores PDO e InMemory, reloj, UUID y datos ficticios de ejemplo
-src/Presentation/  Entradas: consola (S3) y web MVC (S4)
-public/            Front controller web (index.php)
+src/Presentation/  Entradas: consola (S3), web MVC (S4) y API REST (S5)
+public/            Front controller (index.php): web y /api/v1
 bootstrap.php      Composition Root
-scripts/           crear-esquema.php
-pruebas/           Ejecutor propio, dobles, unitarias, contrato e integración
+scripts/           crear-esquema.php y probar-api.php
+pruebas/           Ejecutor propio, dobles, unitarias, contrato, integración y API
 ```
 
 ## Esquema (propuesta del Micro-HIS)
