@@ -14,7 +14,7 @@ const variants: Record<Variant, string> = {
     primary: 'bg-nido-700 text-white hover:bg-nido-800 disabled:bg-slate-300 disabled:text-slate-700',
     secondary: 'bg-white text-nido-800 ring-1 ring-inset ring-nido-200 hover:bg-nido-50',
     ghost: 'text-nido-800 hover:bg-nido-50',
-    danger: 'bg-critico text-white hover:brightness-95',
+    danger: 'bg-red-700 text-white hover:bg-red-800',
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; loading?: boolean; size?: 'sm' | 'md' }>(

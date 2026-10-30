@@ -35,14 +35,14 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
-| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas (**listos**); prescripciones-alergias cuando existan los catálogos de medicamentos y alergias | En curso |
-| 5 | Laboratorio, de la orden a la validación | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico (sobre el catálogo de pruebas) | Pendiente |
+| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas | **Lista** |
+| 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables | Pendiente |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | Pendiente |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | Pendiente |
 | Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, reportes-analytics-basicos, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
 
-Son 30 módulos: 4 + 3 + 3 + 4 + 4 + 1 + 4 + 1 en las fases, más los 6 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 1 + 4 + 1 en las fases, más los 6 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -172,6 +172,35 @@ Son 30 módulos: 4 + 3 + 3 + 4 + 4 + 1 + 4 + 1 en las fases, más los 6 disponib
 - 8 pruebas Feature nuevas (`RecordTest`);
 - recorrido en Chrome: 13/13, sin violaciones WCAG A/AA y sin desborde a 375 px.
 - **Corregido en esta fase:** el color de los botones animaba al pasar de «deshabilitado» a normal y, en ese instante, no tenía contraste suficiente. El estado deshabilitado ahora es gris legible.
+
+## Fase 5: qué se entregó
+
+**Laboratorio** (un módulo por paso):
+- **Órdenes desde el expediente:** al menos una prueba, sin repetidas, con indicación clínica y prioridad. Las urgentes se atienden primero.
+- **Recepción:** código único de muestra para rotular el tubo, o rechazo con motivo.
+- **Resultados:**
+  - en la unidad de la prueba;
+  - marcados como normal, bajo, alto o crítico;
+  - se pueden corregir antes de validar, y la versión anterior se conserva.
+- **Validación:**
+  - la hace una persona distinta de quien ingresó el resultado; también lo exige un CHECK en la base;
+  - un resultado rechazado vuelve a ingreso;
+  - lo validado ya no cambia;
+  - un valor crítico dispara `App\Events\LabResultCritical`.
+- **Copia de datos:** cada ítem guarda los datos de la prueba al momento de pedirla.
+
+**Prescripciones:**
+- antes de emitir, se cruzan las alergias activas del paciente con el medicamento, por nombre y por familia;
+- una alergia grave bloquea la receta (`BLOQUEO_ALERGIA`, o `BLOQUEO_ALERGIA_CRUZADA` si es de la misma familia);
+- una alergia leve o moderada pide confirmación con motivo;
+- anular una receta exige motivo.
+
+**Catálogos provisionales:** pruebas y medicamentos salen de `config/nido_catalogos.php`, a través de las interfaces `LabTestDirectory` y `MedicationDirectory`. Los módulos de catálogo los reemplazan cambiando un `bind`.
+
+**Verificación:**
+- 6 pruebas Feature nuevas;
+- recorrido en Chrome: 18/18, con médico, laboratorio, bioquímico y vista de celular;
+- se corrigió el contraste de los botones de acción peligrosa: el coral no llegaba a AA y ahora son rojo oscuro.
 
 ## Pendientes conocidos
 
