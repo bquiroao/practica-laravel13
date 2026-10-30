@@ -1,0 +1,40 @@
+@startuml semana-11-mapa-navegacion
+' Admisión hospitalaria y asignación de cama — Semana 11
+' Mapa de navegación del prototipo (prototipo/index.html).
+hide empty description
+skinparam state {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+}
+title Mapa de navegación del prototipo (semana 11)
+
+[*] --> Datos : rol Admisionista / Supervisor(a)
+[*] --> Consulta : rol Médico
+
+state "Paso 1 · Nueva admisión\n(W-01 / M-01)" as Datos
+state "Buscando camas…\n(estado de carga)" as Carga
+state "Paso 2 · Elegir cama\n(W-02 / M-02)" as Camas
+state "Sin camas\n(estado vacío, E-05)" as Vacio
+state "Paso 3 · Confirmar\n(W-03 / M-03)" as Confirmar
+state "Resultado: admisión ACTIVA\n(W-05)" as Resultado
+state "Error crítico: cama tomada\n(W-04, RN-01)" as Conflicto
+state "Detalle de la admisión\n(W-06)" as Detalle
+state "Consulta (solo lectura)" as Consulta
+
+Datos --> Datos : código inválido\n(aria-invalid, foco en el campo)
+Datos --> Datos : paciente inexistente o con\nadmisión activa (aviso)
+Datos --> Carga : Buscar camas
+Carga --> Camas : hay camas
+Carga --> Vacio : no hay camas
+Vacio --> Datos : Cambiar requerimiento
+Camas --> Confirmar : Continuar
+Camas --> Datos : Cambiar requerimiento
+Confirmar --> Camas : Volver
+Confirmar --> Resultado : Confirmar (botón deshabilitado)
+Confirmar --> Conflicto : otra admisión tomó la cama
+Conflicto --> Confirmar : elegir otra cama\n(lista actualizada)
+Resultado --> Datos : Nueva admisión
+Resultado --> Detalle : Ver detalle
+Consulta --> Detalle : Ver admisión
+Detalle --> Datos : Volver al inicio
+@enduml

@@ -1,0 +1,75 @@
+@startuml semana-01-actividad
+' Admisión hospitalaria y asignación de cama — Semana 1
+' Diagrama de actividad de CU-01. Cada acción lleva su ID A-NN (ver README).
+skinparam activity {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+  DiamondBackgroundColor #FFF6DD
+}
+title CU-01 Admitir paciente y asignar cama disponible
+
+|Admisionista|
+start
+:A-01 Ingresar código de paciente,
+servicio, tipo de cama, aislamiento
+y origen de la admisión;
+
+|Sistema de Admisión|
+if (A-02 ¿Rol autorizado y\nmismo hospital (tenant)?) then (no)
+  :E-01 Rechazar: acceso denegado;
+  stop
+else (sí)
+endif
+if (A-03 ¿Código con formato\nPAC-NNNNN?) then (no)
+  :E-02 Mostrar error de validación
+  y conservar lo capturado;
+  stop
+else (sí)
+endif
+:A-04 Consultar paciente en
+Módulo Pacientes (CU-02);
+if (A-05 ¿Paciente existe y activo?) then (no)
+  :E-03 Rechazar: paciente no encontrado;
+  stop
+else (sí)
+endif
+if (A-06 ¿Ya tiene admisión activa?) then (sí)
+  :E-04 Rechazar: admisión activa
+  existente (RN-02);
+  stop
+else (no)
+endif
+:A-07 Consultar camas operativas del
+catálogo y quitar las ya asignadas (CU-03);
+:A-08 Filtrar por compatibilidad
+(servicio, tipo, aislamiento) (RN-03);
+if (A-09 ¿Hay camas compatibles?) then (no)
+  :E-05 Informar sin camas compatibles;
+  note right: Estado vacío.\nNo se crea admisión.
+  stop
+else (sí)
+endif
+
+|Admisionista|
+:A-10 Elegir una cama de la lista;
+
+|Sistema de Admisión|
+:A-11 Abrir transacción y registrar
+admisión + asignación de cama;
+if (A-12 ¿La cama sigue libre?\n(índice único de asignación activa)) then (no)
+  :E-06 Revertir transacción
+  y avisar conflicto (RN-01);
+  |Admisionista|
+  :A-13 Elegir otra cama (CU-05);
+  note right: Vuelve a A-07\ncon lista actualizada.
+  stop
+else (sí)
+endif
+|Sistema de Admisión|
+:A-14 Registrar eventos ADMISION_CREADA
+y CAMA_ASIGNADA (CU-04, RN-05);
+:A-15 Confirmar transacción;
+:A-16 Mostrar resultado: admisión ACTIVA,
+cama asignada, fecha y responsable;
+stop
+@enduml

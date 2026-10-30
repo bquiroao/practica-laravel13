@@ -1,0 +1,50 @@
+[
+  {
+    "file": "01-iniciar-recepcion.svg",
+    "title": "WF-01 — Iniciar recepción por orden e ítem",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  },
+  {
+    "file": "02-verificar-muestra.svg",
+    "title": "WF-02 — Verificar correspondencia e integridad",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  },
+  {
+    "file": "03-confirmar-aceptacion.svg",
+    "title": "WF-03 — Confirmar aceptación individual",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  },
+  {
+    "file": "04-rechazar-muestra.svg",
+    "title": "WF-04 — Registrar un rechazo con motivo",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  },
+  {
+    "file": "05-confirmacion-custodia.svg",
+    "title": "WF-05 — Confirmación y cadena de custodia",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  },
+  {
+    "file": "06-errores-recuperables.svg",
+    "title": "WF-06 — Errores recuperables y estados pendientes",
+    "headerFill": "rgb(255, 255, 255)",
+    "overflow": [],
+    "interactive": 0,
+    "headerContrast": "13.57"
+  }
+]

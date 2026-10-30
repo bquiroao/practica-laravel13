@@ -1,0 +1,28 @@
+@startuml semana-02-ocp-antes
+' Admisión hospitalaria y asignación de cama — Semana 2
+' ANTES: un solo método con switch/if decide la compatibilidad (viola OCP).
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDF1F1
+  BorderColor #9B2C2C
+}
+title OCP — Diseño ANTES
+
+class "AdmitirPacienteYAsignarCama" as CU {
+  +ejecutar(solicitud)
+}
+class "AsignadorCamas" as AS {
+  +esElegible(cama: array, req: array): bool
+}
+note right of AS
+  Un solo método con un if por servicio,
+  un switch por tipo de cama y un if por
+  aislamiento.
+  Cada criterio nuevo = MODIFICAR esta clase
+  y volver a probar todos los criterios.
+  Solo devuelve true/false: la pantalla no
+  sabe POR QUÉ se rechazó la cama.
+end note
+
+CU --> AS : usa (dependencia concreta)
+@enduml

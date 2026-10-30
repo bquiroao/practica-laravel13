@@ -1,0 +1,38 @@
+@startuml repository-adaptadores
+' Semana 4 - Interfaz Repository en el límite del dominio y sus dos adaptadores
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+package "Domain" #FFF7E0 {
+  interface AlertaRepository {
+    + guardar(alerta : Alerta) : void
+    + buscar(id, tenant) : ?Alerta
+    + buscarPorOrigen(tenant, origen, idOrigen) : ?Alerta
+    + pendientesDeAcuse() : Alerta[]
+    + listar(tenant) : Alerta[]
+  }
+  class ErrorPersistenciaException
+}
+package "Application" #EAF7EE {
+  class "Casos de uso" as UC
+}
+package "Persistence" #FBEDEA {
+  class PdoAlertaRepository {
+    - pdo : PDO
+    prepare() + execute()
+  }
+  class InMemoryAlertaRepository {
+    - filas : array
+    copias reconstruidas
+  }
+}
+package "pruebas/contrato" #EEEEEE {
+  class "repositorio-contrato-pruebas.php" as CT
+}
+UC --> AlertaRepository : depende de
+PdoAlertaRepository ..|> AlertaRepository
+InMemoryAlertaRepository ..|> AlertaRepository
+PdoAlertaRepository ..> ErrorPersistenciaException : traduce PDOException
+InMemoryAlertaRepository ..> ErrorPersistenciaException : unicidad RN-02
+CT ..> PdoAlertaRepository : mismas 8 pruebas
+CT ..> InMemoryAlertaRepository : mismas 8 pruebas
+@enduml

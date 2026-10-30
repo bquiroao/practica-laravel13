@@ -1,0 +1,34 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor: quién es dueño de qué y cómo se comunica
+skinparam defaultFontSize 11
+
+node "Runner de CI (efímero)" as R {
+  component "Job E2E\n(construye UNA vez, corre los escenarios)" as JOB
+  component "ReportadorCi\nreintentos con la MISMA clave" as REP
+  file "bandeja.jsonl\n(workspace del job)" as BAN
+}
+node "Servidor del módulo QA E2E" as S {
+  component "API HTTP 1.0.0\nX-Request-ID · registro de acceso" as API
+  component "Casos de uso + Dominio" as UC
+}
+database "PostgreSQL\nesquema e2e (dueño: QA E2E)" as BD
+database "PostgreSQL\nesquema compartido (dueño: plataforma)" as CMP
+storage "Almacén de artefactos\n(bytes por SHA-256)" as ALM
+actor "Responsable de release" as REL
+
+JOB --> REP : resultado + artefactos
+REP --> API : POST /resultados\nHTTPS + token de servicio\nIdempotency-Key
+REP ..> BAN : sin respuesta tras 3 intentos\n→ PENDIENTE
+BAN ..> REP : paso final:\nreenviarPendientes()
+API --> UC
+UC --> ALM : 1º guardar y confirmar\n(fail-closed)
+UC --> BD : 2º resultado + evidencia + traza\n(una transacción)
+BD --> CMP : trigger: hecho «gate evaluado»\n(misma transacción)
+REL --> API : POST /gate
+note bottom of BD
+  Consistencia: fuerte dentro del módulo (una transacción).
+  Hacia otros módulos: el hecho publicado en la MISMA transacción.
+  Hacia el pipeline: eventual, pero sin pérdida ni duplicados
+  (bandeja + clave idempotente).
+end note
+@enduml

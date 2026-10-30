@@ -39,7 +39,14 @@ final class ConsultarTrazabilidad
                 return Salida::noEncontrado();
             }
             $casos = $this->casos->variosPorId($tenant, array_keys($campana->alcance));
-            $defectos = $this->defectos->deCampana($tenant, $campanaId);
+            // RT-02 (semana 13): además de los de esta campaña, los abiertos de OTRAS campañas sobre estos casos, que el cierre
+            // también cuenta. Sin ellos el Líder QA no veía nada que bloqueara y el cierre daba NO-GO.
+            $defectos = [];
+            foreach ([...$this->defectos->deCampana($tenant, $campanaId), ...$this->defectos->abiertosDe($tenant, array_keys($campana->alcance))] as $d) {
+                $defectos[$d->id] = $d;
+            }
+            ksort($defectos);
+            $criticos = $this->casos->criticosDe($tenant, $campana->funcionalidades);
         } catch (ErrorPersistencia) {
             return Salida::persistencia();
         }
@@ -57,8 +64,10 @@ final class ConsultarTrazabilidad
                 'ultimo_resultado' => $ultimo?->resultado->value ?? 'PENDIENTE',
                 'evidencias' => $ultimo === null ? [] : array_map(static fn ($e): array => ['tipo' => $e->tipo, 'huella' => $e->huella,
                     'tamano' => $e->tamano, 'clasificacion' => $e->clasificacion], $ultimo->evidencias),
-                'defectos' => array_map(static fn (Defecto $d): array => ['id' => $d->id, 'severidad' => ($d->severidad() ?? $d->propuesta)->value,
-                    'clasificado' => $d->severidad() !== null, 'estado' => $d->estado()->value], $delCaso),
+                'defectos' => array_map(static fn (Defecto $d): array => ['id' => $d->id, 'campana' => $d->campanaId,
+                    'severidad' => $d->severidadEfectiva()->value, 'clasificado' => $d->severidad() !== null, 'estado' => $d->estado()->value,
+                    // R-09 y R-15: la MISMA regla que cuentan los repositorios para CerrarCampana (Defecto::bloqueaGo).
+                    'bloquea_go' => $d->bloqueaGo($criticos)], $delCaso),
             ];
             foreach ($casos[$casoId]->requisitos ?? [] as $rf) {
                 $requisitos[$rf][] = $casoId;

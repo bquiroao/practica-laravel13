@@ -1,0 +1,11 @@
+$ node semana-11/evidencia/capturar.mjs semana-11/prototipo/index.html semana-12/capturas 01-...=docs 02-...@<buscar «openapi»> 03-...@<buscar «farmacia»>   # Edge sin interfaz; el título agrega las filas visibles
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-buscador (#docs) | 320 | 320 | 320 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 2 | H1
+01-buscador (#docs) | 360 | 360 | 360 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 2 | H1
+01-buscador (#docs) | 430 | 430 | 430 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 2 | H1
+02-busqueda-un-resultado (#docs) | 320 | 320 | 320 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 1 | H1
+02-busqueda-un-resultado (#docs) | 360 | 360 | 360 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 1 | H1
+02-busqueda-un-resultado (#docs) | 430 | 430 | 430 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 1 | H1
+03-busqueda-ajena-sin-resultados (#docs) | 320 | 320 | 320 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 0 | H1
+03-busqueda-ajena-sin-resultados (#docs) | 360 | 360 | 360 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 0 | H1
+03-busqueda-ajena-sin-resultados (#docs) | 430 | 430 | 430 | no | Mi documentación · Documentación · Hospital HIS | filas visibles: 0 | H1

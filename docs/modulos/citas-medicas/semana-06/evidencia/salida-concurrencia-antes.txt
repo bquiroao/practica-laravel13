@@ -1,0 +1,3 @@
+$ php semana-06/evidencia/probar-concurrencia.php   # antes del cambio, sobre develop 1595e00
+[PDO] primera solicitud (p1) = 201 | segunda, intercalada (p2) = 201 | citas activas de m1 en [5000,6000): 2
+[InMemory] primera solicitud (p1) = 201 | segunda, intercalada (p2) = 201 | citas activas de m1 en [5000,6000): 2

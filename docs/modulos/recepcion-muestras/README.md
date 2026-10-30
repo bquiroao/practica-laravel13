@@ -31,6 +31,12 @@ java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/sema
 java -jar plantuml.jar -charset UTF-8 -tpng docs/modulos/recepcion-muestras/semana-03/diagramas/*.puml
 ```
 
+## Semana 4
+
+[MVC, Repository PDO/InMemory e integración compartida](semana-04/README.md).
+## Semana 9
+
+[Evaluación UX, checklist y backlog de accesibilidad](semana-09/README.md).
 ## Semana 14
 
 [Plan SQA: métricas, riesgos, controles y calendario](semana-14/semana-14-plan-sqa-recepcion-muestras.md).

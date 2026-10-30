@@ -1,0 +1,62 @@
+$ php tests/ejecutar.php   # sin base: solo dobles
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Dominio: escenarios, versiones y plan, ejecuciones, resultados y quality gate ==
+[PASA ] DOM-01   R-01: un escenario E2E sin un conjunto de datos SINT-… se rechaza (DATOS_NO_SINTETICOS); los campos inválidos se listan todos
+[PASA ] DOM-02   R-02: el plan debe incluir todos los críticos y los escenarios de los módulos afectados; lista los que faltan
+[PASA ] DOM-03   R-02: el plan se congela al iniciar la primera ejecución y ya no cambia (nadie quita el escenario que falla)
+[PASA ] DOM-04   R-03: una ejecución sobre otro digest no se inicia (DIGEST_DISTINTO); sin plan tampoco
+[PASA ] DOM-05   R-06: el pipeline reporta PASA con 2 intentos y el dominio lo registra INESTABLE; INESTABLE no se acepta como dato de entrada
+[PASA ] DOM-06   R-04: solo EN_CURSO admite resultados, solo del plan y uno por escenario; completar exige todos
+[PASA ] DOM-07   Evidencia: tipo permitido, no vacía y de 20 MB o menos
+[PASA ] DOM-08   R-09: gate APROBADO solo si se cumplen digest y a–e; cada regla incumplida da su causa
+[PASA ] DOM-09   R-09: no se evalúa una ejecución abortada o en curso (EJECUCION_NO_COMPLETADA)
+[PASA ] DOM-10   R-03 en el gate (defensa en profundidad): una ejecución cuyo digest no es el de la versión (datos importados o alterados) se RECHAZA
+
+== Aplicación: camino feliz, reglas y errores de persistencia (dobles) ==
+[PASA ] APP-01   Camino feliz: escenario → versión → plan → ejecución → 6 resultados → completar → gate APROBADO → trazabilidad, con la traza de cada paso (R-14)
+[PASA ] APP-02   Regla de dominio por el caso de uso: un crítico INESTABLE y una ejecución de 25 h → RECHAZADO con sus causas y la versión RECHAZADA
+[PASA ] APP-03   R-12: la misma clave con el mismo contenido devuelve el MISMO resultado (200), aunque la ejecución ya esté completada; con otro contenido, 409
+[PASA ] APP-04   Fail-closed (R-08): con el almacén caído → 503 EVIDENCIA_NO_DISPONIBLE y no queda resultado, evidencia ni traza
+[PASA ] APP-05   Las reglas se revisan ANTES de tocar el almacén: un resultado rechazado no deja artefactos huérfanos
+[PASA ] APP-06   R-13: sin permiso → 403 (el pipeline no evalúa el gate ni planifica); otro tenant no ve la versión (404)
+[PASA ] APP-07   Error de persistencia al leer: el caso de uso devuelve 503 ERROR_PERSISTENCIA, nunca una excepción
+[PASA ] APP-08   Error de persistencia al escribir la traza: la transacción deshace el resultado (nada a medias) y responde 503
+[PASA ] APP-09   R-02 y R-03 por el caso de uso: plan incompleto (422 con los faltantes), iniciar con otro digest (409), digest de otra versión (409)
+[PASA ] APP-10   El gate no se evalúa sobre una ejecución abortada (409) y una ejecución no se cierra dos veces (409)
+
+== Persistencia: PDO con sentencias preparadas y almacén de evidencias ==
+[PASA ] PER-01   Base caída: cada adaptador PDO lanza ErrorPersistencia SIN el host ni la contraseña del mensaje del driver
+[PASA ] PER-02   FabricaConexion: un DSN inválido da ErrorPersistencia sin el DSN ni la clave
+[PASA ] PER-03   Sentencias preparadas: ningún adaptador PDO interpola variables en el SQL (solo «?»)
+[PASA ] PER-04   Almacén en disco: direccionado por contenido, idempotente y verificado; un archivo alterado deja de confirmarse
+
+== Presentación: HTTP ==
+[PASA ] HTTP-01  Recorrido HTTP: versión 201, plan 200, ejecución 201, resultado con evidencia base64 201, cierre 200, gate 200, trazabilidad 200
+[PASA ] HTTP-02  Autenticación, tenant y forma: sin token 401, sin X-Tenant-ID 400, tenant ajeno 403, JSON roto 400, base64 roto 400, sin Idempotency-Key 400, ruta 404
+[PASA ] HTTP-03  Traducción de la salida: 422 regla de datos, 409 estado, 413 evidencia grande, 503 almacén caído, 403 sin permiso
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de Aplicacion, Persistencia, Presentacion
+[PASA ] ARQ-02   Aplicacion no depende de Persistencia, Presentacion
+[PASA ] ARQ-03   Persistencia no depende de Presentacion
+[PASA ] ARQ-04   Presentacion no depende de Persistencia, Dominio
+[PASA ] ARQ-05   PDO y SQL solo existen en Persistencia; sin framework ni Composer
+
+== Integración con PostgreSQL real ==
+[OMITE] INT-01   Camino feliz en PostgreSQL: versión, plan congelado, ejecución, 6 resultados con evidencia en disco, gate APROBADO y traza
+         -> sin E2E_DB_DSN
+[OMITE] INT-02   R-04/R-08 en la base: resultados, evidencias, evaluaciones y traza no se modifican ni se borran, aunque se salten la aplicación
+         -> sin E2E_DB_DSN
+[OMITE] INT-03   R-03 en la base: una ejecución con otro digest que su versión se rechaza; el digest de una versión no cambia
+         -> sin E2E_DB_DSN
+[OMITE] INT-04   R-02 en la base: el plan congelado no cambia ni se descongela; R-06: un PASA con 2 intentos no entra
+         -> sin E2E_DB_DSN
+[OMITE] INT-05   R-12 en la base: dos resultados con la misma clave en el tenant chocan con el UNIQUE y el adaptador lo traduce a CLAVE_REUTILIZADA
+         -> sin E2E_DB_DSN
+[OMITE] INT-06   Atomicidad real: si el trabajo falla después de escribir el resultado, PostgreSQL deshace el resultado y su evidencia
+         -> sin E2E_DB_DSN
+[OMITE] INT-07   Tenant: la versión de hosp-norte no existe para hosp-sur; y datos-demo.php y datos-demo.sql describen el mismo catálogo
+         -> sin E2E_DB_DSN
+
+Total: 39  Pasan: 32  Fallan: 0  Omitidas: 7

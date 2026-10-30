@@ -1,0 +1,36 @@
+@startuml semana-11-mapa-navegacion
+!pragma layout smetana
+title Mapa de navegación del prototipo (rutas por hash) · verde: camino feliz · rojo: error crítico y recuperación
+skinparam defaultFontSize 11
+skinparam rectangleRoundCorner 10
+
+rectangle "<U+0023>/ingresar\nElegir usuario (demo)" as I
+rectangle "<U+0023>/campanas\nMis campañas / Campañas" as C
+rectangle "<U+0023>/ejecutar/1/TC-107|TC-108\nPasos · Resultado · Evidencia · Defecto" as E
+rectangle "Hoja «¿Registrar?»\n(fondo inerte · foco en Volver · Esc)" as H1 #F5F9FF
+rectangle "<U+0023>/registro\n✓ Registrado / ⏳ Pendiente / ✕ Rechazado" as R
+rectangle "<U+0023>/pendientes\nBandeja · Reenviar ahora · región viva" as P
+rectangle "<U+0023>/trazabilidad/1\nPrevisión GO / NO-GO con sus causas · ⛔ Bloquea" as T
+rectangle "Hoja «¿Cerrar?»\n(consecuencia · Esc · foco de vuelta)" as H2 #F5F9FF
+
+I --> C : Tester o Líder QA
+C -[#2E8B57]-> E : Ejecutar el siguiente caso
+E -[#2E8B57]-> H1 : Registrar…
+H1 -[#2E8B57]-> R : Registrar (201)
+R -[#2E8B57]-> E : Siguiente caso
+C -[#2E8B57]-> T : Ver trazabilidad
+T -[#2E8B57]-> H2 : Cerrar campaña… (Líder QA)
+H2 -[#2E8B57]-> T : GO / NO-GO
+
+E -[#A33A3A]-> E : FALLA sin evidencia: error\ny foco al campo (422)
+H1 -[#A33A3A]-> R : sin red: PENDIENTE\n(evidencia clínica solo en memoria)
+R -[#A33A3A]-> P : Ver pendientes
+P -[#A33A3A]-> P : Reenviar (misma clave)\n«TC-107 registrado»
+H1 --> E : Volver / Esc
+H2 --> T : Volver / Esc
+
+note bottom of P
+  El reenvío usa la MISMA Idempotency-Key:
+  no duplica (CLI-01..08, semana 5).
+end note
+@enduml

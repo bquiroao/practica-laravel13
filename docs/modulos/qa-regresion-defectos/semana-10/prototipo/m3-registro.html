@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultado del registro · QA y regresión</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="btn atras" href="m1-campanas.html" aria-label="Volver a las campañas">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">QA · Hospital Regional del Norte</span></button>
+  <span class="avatar" aria-label="tito-tester">TT</span>
+</header>
+<div class="red" role="status" data-estado="pendiente pendiente-clinica">Sin conexión · los resultados esperan en este teléfono</div>
+
+<main>
+  <!-- Región viva: anuncia cada reenvío confirmado o rechazado (semana 9 B-07) -->
+  <p class="vivo aviso ok" role="status" aria-live="polite" data-estado="reenviado">TC-108 registrado al recuperar la conexión. Quedan 0 pendientes.</p>
+
+  <section class="aviso ok" data-estado="exito" role="status">
+    <h2>✓ Registrado</h2>
+    <p>Intento #1 de TC-107 (Falla) · defecto #12 creado para clasificar.</p>
+    <div class="acciones"><a class="btn primario" href="m2-ejecutar.html?estado=verifica">Siguiente caso: TC-108 →</a></div>
+  </section>
+
+  <section class="aviso error" data-estado="rechazado" role="alert">
+    <h2>✕ La campaña ya no admite resultados</h2>
+    <p>«Regresión H4» se cerró a las 16:05. El resultado de TC-108 (Pasa) <strong>no se registró</strong>; avise al Líder QA.</p>
+    <div class="acciones"><button type="button" class="btn">Copiar el resumen</button></div>
+  </section>
+
+  <section class="aviso atencion" data-estado="pendiente pendiente-clinica" role="status">
+    <h2>⏳ Pendiente de confirmar</h2>
+    <p>No se pudo confirmar con el servidor. Se reenviará solo con la misma clave: <strong>no lo registre de nuevo</strong>.</p>
+  </section>
+
+  <section class="aviso error" data-estado="pendiente-clinica" role="alert">
+    <h2>No cierre esta pantalla</h2>
+    <p>El resultado de TC-107 lleva evidencia con datos clínicos. Por protección, <strong>no se guarda en el teléfono</strong>: si cierra la pantalla antes de confirmar, tendrá que registrarlo otra vez.</p>
+  </section>
+
+  <section data-estado="pendiente pendiente-clinica reenviado">
+    <div class="fila"><h2 style="margin:0">Pendientes en este teléfono</h2>
+      <a class="btn primario derecha" href="m3-registro.html?estado=reenviado" data-estado="pendiente pendiente-clinica">Reenviar ahora</a></div>
+    <ul class="bandeja" data-estado="pendiente pendiente-clinica">
+      <li><strong>TC-108 · Pasa</strong><span class="chip nuevo">⏳ Sin confirmar</span><span class="cuando">Hace 3 min · 3 intentos sin respuesta</span></li>
+      <li data-estado="pendiente-clinica"><strong>TC-107 · Falla</strong><span class="chip bloquea">🔒 Solo en esta pantalla</span><span class="cuando">Datos clínicos: en memoria, no en el teléfono</span></li>
+    </ul>
+    <p class="meta" data-estado="reenviado">No hay resultados sin confirmar.</p>
+  </section>
+</main>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-campanas.html"><span class="ico" aria-hidden="true">☰</span>Campañas</a>
+  <a href="m3-registro.html?estado=pendiente" aria-current="page"><span class="ico" aria-hidden="true">⇅</span>Pendientes</a>
+  <a href="m4-trazabilidad.html"><span class="ico" aria-hidden="true">⌘</span>Trazabilidad</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

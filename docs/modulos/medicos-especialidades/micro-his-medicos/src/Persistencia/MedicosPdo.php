@@ -2,12 +2,13 @@
 declare(strict_types=1);
 
 // Persistencia: SQL con sentencias preparadas. El perfil del médico y su especialidad principal se guardan en UNA transacción.
+// Semana 4: implementa los dos puertos; en PostgreSQL los ids deben ser uuid (los genera public/index.php).
 namespace Medicos\Persistencia;
 
-use Medicos\Aplicacion\ErrorPersistencia;
+use Medicos\Aplicacion\{ErrorPersistencia, FuenteHospital, MedicoNuevo, RepositorioMedicos};
 use Medicos\Dominio\{Asignacion, Vigencia};
 
-final class MedicosPdo {
+final class MedicosPdo implements RepositorioMedicos, FuenteHospital {
     public function __construct(private \PDO $pdo) { $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); }
 
     public function usuarioActivo(string $id): bool { return $this->hay('SELECT 1 FROM local_user_refs WHERE local_user_ref_id = ? AND status = ?', [$id, 'active']); }
@@ -42,11 +43,11 @@ final class MedicosPdo {
                                  AND starts_at < ? AND ends_at > ?", $ids, [$hasta . ' 24:00', $desde]) as $f) { $c[$f['id']][] = [substr($f['starts_at'], 0, 16), substr($f['ends_at'], 0, 16)]; }
         return $c;
     }
-    public function guardarMedico(string $id, string $usuarioId, string $colegiado, Vigencia $v, ?Asignacion $principal, string $asignacionId): void {
-        $this->enTransaccion(function () use ($id, $usuarioId, $colegiado, $v, $principal, $asignacionId) {
+    public function guardarMedico(MedicoNuevo $m): void {
+        $this->enTransaccion(function () use ($m) {
             $this->pdo->prepare('INSERT INTO doctor_profiles (doctor_profile_id, local_user_ref_id, license_number, status, valid_from) VALUES (?, ?, ?, ?, ?)')
-                ->execute([$id, $usuarioId, $colegiado, 'active', $v->desde]);
-            if ($principal !== null) { $this->insertarAsignacion($asignacionId, $id, $principal); }
+                ->execute([$m->id, $m->usuarioId, $m->colegiado, 'active', $m->vigencia->desde]);
+            if ($m->principal !== null) { $this->insertarAsignacion($m->asignacionId, $m->id, $m->principal); }
         });
     }
     public function guardarAsignacion(string $id, string $medicoId, Asignacion $a): void { $this->enTransaccion(fn () => $this->insertarAsignacion($id, $medicoId, $a)); }

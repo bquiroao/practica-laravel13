@@ -1,0 +1,28 @@
+@startuml refactor-antes
+' Catálogo de medicamentos - Semana 7 - Refactor: ANTES (controlador con todo acoplado)
+title ANTES: el controlador mezcla UI, aplicación, dominio y persistencia
+skinparam classAttributeIconSize 0
+hide empty members
+class MedicamentoController <<Laravel controller>> {
+  +store(Request): JsonResponse
+  +nuevaVersion(Request, codigo): JsonResponse
+  +buscar(Request): JsonResponse
+  --
+  - valida longitudes a mano (duplica RN-05)
+  - consulta duplicados con Eloquent (RN-04)
+  - cierra la versión anterior con UPDATE (RN-01)
+  - arma LIKE con el texto del usuario (RN-03)
+  - lee hospital_id del cuerpo
+  - decide 409/422/500
+}
+class "Medicamento\n(modelo Eloquent)" as ME
+class "DB / Eloquent" as DB
+class "Prescripcion\n(modelo de otro módulo)" as PRE
+MedicamentoController --> ME
+MedicamentoController --> DB
+MedicamentoController --> PRE : consulta su tabla
+note bottom of MedicamentoController
+  5 responsabilidades en 1 clase; 3 dependencias concretas.
+  La misma regla de vigencia se repite en store() y nuevaVersion().
+end note
+@enduml

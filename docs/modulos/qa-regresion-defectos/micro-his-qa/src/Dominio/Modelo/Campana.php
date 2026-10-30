@@ -12,6 +12,9 @@ use Qa\Dominio\Excepciones\ReglaRechazada;
  */
 final class Campana
 {
+    /** Formato del build: x.y.z con el commit opcional. Lo usan iniciar la campaña y marcar un defecto CORREGIDO (RT-06). */
+    public const FORMATO_BUILD = '/^\d+\.\d+\.\d+(\+[0-9a-f]{7,40})?$/';
+
     /** @var list<Intento> */
     private array $intentos = [];
 
@@ -93,7 +96,7 @@ final class Campana
         if ($this->estado !== EstadoCampana::PLANIFICADA) {
             throw new ReglaRechazada('ESTADO_NO_PERMITE_INICIAR');
         }
-        if (!preg_match('/^\d+\.\d+\.\d+(\+[0-9a-f]{7,40})?$/', $build)) {
+        if (!preg_match(self::FORMATO_BUILD, $build)) {
             throw new ReglaRechazada('ALCANCE_INCOMPLETO', ['build']);
         }
         $faltan = array_values(array_diff($criticosAfectados, array_keys($this->alcance)));
@@ -146,8 +149,11 @@ final class Campana
         return $ultimo;
     }
 
-    /** R-09: sin pendientes; GO con 0 críticos abiertos y la tasa del último intento de cada caso ≥ el umbral. */
-    public function cerrar(int $criticosAbiertos): Decision
+    /**
+     * R-09: sin pendientes; GO con 0 críticos abiertos y la tasa del último intento de cada caso ≥ el umbral.
+     * R-15 (semana 6): tampoco hay GO con un defecto MAYOR abierto en un caso crítico de la matriz.
+     */
+    public function cerrar(int $criticosAbiertos, int $mayoresEnCriticos = 0): Decision
     {
         if ($this->estado !== EstadoCampana::EN_CURSO) {
             throw new ReglaRechazada('ESTADO_NO_PERMITE_CERRAR');
@@ -159,12 +165,20 @@ final class Campana
         $ultimos = array_map(fn (string $c): Intento => $this->ultimo($c), array_keys($this->alcance));
         $aplicables = array_values(array_filter($ultimos, static fn (Intento $i): bool => $i->resultado !== Resultado::NO_APLICA));
         $pasan = count(array_filter($aplicables, static fn (Intento $i): bool => $i->resultado === Resultado::PASA));
-        $tasa = $aplicables === [] ? 1.0 : round($pasan / count($aplicables), 4);
+        // RT-05 (semana 13): sin ningún caso aplicable no hay ejecución que respalde liberar; antes la tasa valía 1,0 y daba GO.
+        $tasa = $aplicables === [] ? 0.0 : round($pasan / count($aplicables), 4);
         $causas = [];
+        if ($aplicables === []) {
+            $causas[] = 'ningún caso aplicable: no hay ejecución que respalde la liberación';
+        }
         if ($criticosAbiertos > 0) {
             $causas[] = $criticosAbiertos === 1 ? '1 defecto crítico abierto' : "$criticosAbiertos defectos críticos abiertos";
         }
-        if ($tasa < $this->umbral) {
+        if ($mayoresEnCriticos > 0) {
+            $causas[] = $mayoresEnCriticos === 1 ? '1 defecto MAYOR abierto en un caso crítico de la matriz'
+                : "$mayoresEnCriticos defectos MAYOR abiertos en casos críticos de la matriz";
+        }
+        if ($aplicables !== [] && $tasa < $this->umbral) {
             $causas[] = sprintf('tasa de aprobados %.1f %% menor que el umbral %.1f %%', 100 * $tasa, 100 * $this->umbral);
         }
         $this->estado = EstadoCampana::CERRADA;

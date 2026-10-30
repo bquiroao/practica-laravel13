@@ -11,6 +11,7 @@ final class Rutas
         return match (true) {
             $metodo === 'GET' && $ruta === '/dashboard' => ['inicio', []],
             $metodo === 'GET' && preg_match('#^/dashboard/tarjetas/([a-z_]+)$#', $ruta, $m) === 1 => ['tarjeta', ['id' => $m[1]]],
+            $metodo === 'GET' && preg_match('#^/dashboard/navegacion/([a-z]+)$#', $ruta, $m) === 1 => ['navegar', ['ruta' => "/$m[1]"]],
             default => ['', []],
         };
     }

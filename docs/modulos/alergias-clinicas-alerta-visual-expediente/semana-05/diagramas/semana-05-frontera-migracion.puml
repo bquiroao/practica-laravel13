@@ -1,0 +1,19 @@
+@startuml semana-05-frontera-migracion
+' Frontera evaluada y migración por etapas (solo si se cumplen los gatillos)
+left to right direction
+rectangle "Etapa 0 (hoy)\nMódulo dentro del monolito\nLaravel del HIS; misma base\nHOSPITAL" as E0
+rectangle "Etapa 1\nAPI v1 interna estable\n(contrato de esta semana);\nexpediente y prescripciones\nconsumen solo la API" as E1
+rectangle "Etapa 2\nEsquema propio de la base\n(alergias.*) + vista de\nlectura para prescripciones;\neventos AlergiaRegistrada" as E2
+rectangle "Etapa 3 (solo con gatillo)\nServicio aparte con su base;\nexpediente lo llama por HTTP\ncon timeout y circuit breaker" as E3
+E0 --> E1 : sin gatillo
+E1 --> E2 : G2 o G3
+E2 --> E3 : G1 y G4
+note bottom of E3
+  Gatillos medibles (ver README):
+  G1 consultas de alerta > 50/s sostenidas
+  G2 > 2 módulos escribiendo alergias
+  G3 despliegues del módulo > 2 por semana
+     bloqueados por el monolito
+  G4 p95 de la alerta > 300 ms en el monolito
+end note
+@enduml

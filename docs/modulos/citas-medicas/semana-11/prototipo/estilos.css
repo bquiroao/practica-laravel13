@@ -13,6 +13,7 @@ a, button { min-height: 44px; }
 button, .boton { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border: 1px solid #64748b;
   border-radius: 8px; background: #fff; color: #0f172a; font: inherit; text-decoration: none; cursor: pointer; }
 .principal { background: #2563eb; border-color: #2563eb; color: #fff; }
+.peligro { background: #b91c1c; border-color: #b91c1c; color: #fff; }   /* semana 12, B-02: la acción destructiva se distingue de «Volver» */
 table { width: 100%; border-collapse: collapse; background: #fff; }
 th, td { padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 fieldset { border: 1px solid #64748b; border-radius: 8px; margin: 0 0 12px; }

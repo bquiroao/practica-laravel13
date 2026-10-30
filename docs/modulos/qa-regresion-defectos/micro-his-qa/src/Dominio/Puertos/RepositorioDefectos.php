@@ -22,6 +22,15 @@ interface RepositorioDefectos
     /** @return list<Defecto> @throws ErrorPersistencia */
     public function deCampana(string $tenant, int $campanaId): array;
 
-    /** Defectos CRÍTICOS no cerrados de los casos del alcance (R-09). @param list<string> $casos @throws ErrorPersistencia */
+    /**
+     * Defectos NO cerrados de esos casos, de cualquier campaña (RT-02): son los que el cierre cuenta.
+     * @param list<string> $casos @return list<Defecto> @throws ErrorPersistencia
+     */
+    public function abiertosDe(string $tenant, array $casos): array;
+
+    /** Defectos CRÍTICOS (severidad efectiva) no cerrados de los casos del alcance (R-09). @param list<string> $casos @throws ErrorPersistencia */
     public function criticosAbiertos(string $tenant, array $casos): int;
+
+    /** Defectos MAYOR (severidad efectiva) no cerrados de esos casos (R-15: si los casos son críticos, bloquean el GO). @param list<string> $casos @throws ErrorPersistencia */
+    public function mayoresAbiertos(string $tenant, array $casos): int;
 }

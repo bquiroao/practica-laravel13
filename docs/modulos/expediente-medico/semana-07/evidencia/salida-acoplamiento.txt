@@ -1,0 +1,21 @@
+$ php semana-07/evidencia/medir-acoplamiento.php   # sobre develop 2f3a807
+Tipo                         Capa           Ce  Ca     I  Usa
+ServicioExpediente           Aplicacion      7   1  0.88  ExpedientesHospital, IndiceCentral, Auditoria, Reloj, ReglaDeDominio, Consentimiento, Paciente
+Paciente                     Dominio         1   4  0.20  ReglaDeDominio
+ControladorExpediente        Presentacion    4   0  1.00  ServicioExpediente, VistaJson, ReglaDeDominio, ErrorPersistencia
+ReglaDeDominio               Dominio         0   4  0.00  -
+RepositorioExpedientes       Aplicacion      2   2  0.50  ExpedientesHospital, Auditoria
+AdaptadorPdo                 Persistencia    1   2  0.33  ErrorPersistencia
+ExpedientesHospital          Aplicacion      1   2  0.33  Paciente
+HospitalPdo                  Persistencia    3   0  1.00  AdaptadorPdo, RepositorioExpedientes, Paciente
+IndiceCentral                Aplicacion      0   3  0.00  -
+Auditoria                    Aplicacion      0   2  0.00  -
+CentralPdo                   Persistencia    2   0  1.00  AdaptadorPdo, IndiceCentral
+ErrorPersistencia            Aplicacion      0   2  0.00  -
+HospitalEnMemoria            Persistencia    2   0  1.00  RepositorioExpedientes, Paciente
+VistaJson                    Presentacion    1   1  0.50  ReglaDeDominio
+CentralEnMemoria             Persistencia    1   0  1.00  IndiceCentral
+Consentimiento               Dominio         0   1  0.00  -
+Reloj                        Aplicacion      0   1  0.00  -
+Rutas                        Presentacion    0   0     -  -
+Mayor acoplamiento: ServicioExpediente

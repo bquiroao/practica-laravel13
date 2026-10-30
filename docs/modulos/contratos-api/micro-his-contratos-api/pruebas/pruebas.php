@@ -37,6 +37,8 @@ foreach (['PDO' => new RepositorioPdo(baseDePrueba()), 'InMemory' => new Reposit
     $publicas = array_column($repo->consultables('guia-citas'), 'version'); sort($publicas);
     prueba("[$adaptador] contrato: la 1.2.0 en revisión no es consultable, una versión inexistente es null y un estado viejo devuelve false",
            $publicas === ['1.0.0', '1.1.0'] && $repo->datosRevision(99) === null && $repo->cambiarEstado(3, 'published', 'obsolete', 'luis', null) === false);
+    $app->atender('obsoleta', ['id' => 2, 'usuario' => 'marta']); $d = $repo->datosRevision(2);
+    prueba("[$adaptador] cambio S6: la 1.1.0 aprobada por luis y marcada obsoleta por marta conserva a los dos (R-10)", [$d['revisor'], $d['obsoleta_por']] === ['luis', 'marta']);
 }
 
 // 3. Error de persistencia: un doble que simula la base caída y una PDOException real.

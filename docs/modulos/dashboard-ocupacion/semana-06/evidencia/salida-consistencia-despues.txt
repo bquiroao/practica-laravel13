@@ -1,0 +1,2 @@
+$ php semana-06/evidencia/probar-consistencia.php   # después del cambio
+sala A: ocupación 66.7 %, ocupadas 2, disponibles 1; inconsistentes: [A1]

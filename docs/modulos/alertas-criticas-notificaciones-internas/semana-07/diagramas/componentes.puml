@@ -1,0 +1,53 @@
+@startuml componentes
+' Semana 7 - Componentes backend y frontend propios del módulo
+skinparam componentStyle rectangle
+package "Frontend (navegador / app)" #EAF1FB {
+  [BandejaAlertas] as FBA
+  [TarjetaAlerta] as FTA
+  [PanelDetalle] as FPD
+  [BotonAcuse] as FBAc
+  [FormularioCierre] as FFC
+  [LineaTiempoHistorial] as FLT
+  [AvisoEscalamiento] as FAE
+  [ClienteApiAlertas] as FCA
+}
+package "Backend · Presentation" #F3F3F3 {
+  [ApiAlertas v1] as BAPI
+  [AlertaController (MVC)] as BMVC
+}
+package "Backend · Application" #EAF7EE {
+  [Casos de uso\n(Registrar, Acusar, Escalar,\nCerrar, Consultar, Listar)] as BUC
+  [NotificarNivel] as BNN
+  [DespachadorNotificaciones] as BDN
+}
+package "Backend · Domain" #FFF7E0 {
+  [Alerta + PoliticaEscalamiento] as BDO
+  interface "AlertaRepository" as IR
+  interface "PuertoNotificacion" as IN
+  interface "DirectorioDestinatarios" as ID
+}
+package "Backend · Persistence" #FBEDEA {
+  [PdoAlertaRepository] as BPDO
+  [NotificadorSimulado] as BNS
+}
+FBA --> FTA
+FBA --> FPD
+FPD --> FBAc
+FPD --> FFC
+FPD --> FLT
+FPD --> FAE
+FBAc --> FCA
+FFC --> FCA
+FBA --> FCA
+FCA --> BAPI : JSON + Bearer
+BAPI --> BUC
+BMVC --> BUC
+BUC --> BNN
+BNN --> BDN
+BUC --> BDO
+BUC --> IR
+BDN --> IN
+BNN --> ID
+BPDO ..|> IR
+BNS ..|> IN
+@enduml

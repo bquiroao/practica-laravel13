@@ -1,0 +1,38 @@
+@startuml semana-07-refactor-antes
+' ANTES: la decisión «qué alerta ve el usuario» está repartida
+skinparam classAttributeIconSize 0
+class RegistrarAlergia {
+  porCodigo() + activas() + calcular()
+}
+class ConsultarAlertaExpediente {
+  porCodigo() + activas() + calcular()
+  + reconocimientos.existe()
+}
+class ReconocerAlerta {
+  porCodigo() + activas() + calcular()
+}
+class ComandoConsola {
+  textos propios por nivel
+  «Sin alergias registradas (no verificado…)»
+}
+class "vistas/alerta.php" as V {
+  $titulos por nivel + mensaje
+  muestra severidad en inglés
+}
+class KernelApi {
+  solo códigos: el cliente
+  inventa sus propios textos
+}
+class CalculadorAlerta
+RegistrarAlergia --> CalculadorAlerta
+ConsultarAlertaExpediente --> CalculadorAlerta
+ReconocerAlerta --> CalculadorAlerta
+ComandoConsola ..> RegistrarAlergia
+V ..> ConsultarAlertaExpediente
+KernelApi ..> ConsultarAlertaExpediente
+note bottom of V
+  3 lugares calculan la alerta y 2 (+1 futuro en Vue)
+  redactan el mensaje de seguridad clínica.
+  Un cambio en «SIN_REGISTRO» exige tocar 3 capas.
+end note
+@enduml

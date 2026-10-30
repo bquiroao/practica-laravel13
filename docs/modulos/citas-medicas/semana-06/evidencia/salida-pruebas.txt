@@ -1,0 +1,32 @@
+$ php micro-his-citas/pruebas/pruebas.php   # después del cambio; exit 0
+OK    [PDO] feliz: solicitar m1/p1 en [2000,3000) = 201 con id 1
+OK    [PDO] feliz: confirmar y luego cancelar con motivo = 200 y 200
+OK    [PDO] feliz: el horario liberado se puede volver a usar (R-08)
+OK    [PDO] regla: cita en el pasado = 422 E2 (R-01)
+OK    [PDO] regla: médico sin especialidad vigente = 422 E3 (R-04, R-05)
+OK    [PDO] regla: médico ocupado = 409 E4 (R-02)
+OK    [PDO] regla: paciente ocupado = 409 E5 (R-03)
+OK    [PDO] regla: cancelar una cita ya cancelada = 422 E7 (R-07)
+OK    [PDO] contrato: [2000,3000) y [3000,4000) no se cruzan; cambiar desde un estado viejo devuelve false
+OK    [PDO] cambio S6: guardar sobre un horario ya tomado lanza HorarioTomado (barrera de E6, D7)
+OK    [InMemory] feliz: solicitar m1/p1 en [2000,3000) = 201 con id 1
+OK    [InMemory] feliz: confirmar y luego cancelar con motivo = 200 y 200
+OK    [InMemory] feliz: el horario liberado se puede volver a usar (R-08)
+OK    [InMemory] regla: cita en el pasado = 422 E2 (R-01)
+OK    [InMemory] regla: médico sin especialidad vigente = 422 E3 (R-04, R-05)
+OK    [InMemory] regla: médico ocupado = 409 E4 (R-02)
+OK    [InMemory] regla: paciente ocupado = 409 E5 (R-03)
+OK    [InMemory] regla: cancelar una cita ya cancelada = 422 E7 (R-07)
+OK    [InMemory] contrato: [2000,3000) y [3000,4000) no se cruzan; cambiar desde un estado viejo devuelve false
+OK    [InMemory] cambio S6: guardar sobre un horario ya tomado lanza HorarioTomado (barrera de E6, D7)
+OK    [PDO e InMemory] feliz: el motivo queda en appointment_cancellations y en las cancelaciones en memoria (R-10)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException se traduce a 503 E8
+OK    MVC: las rutas llevan a su acción con el id de la ruta, y una ruta desconocida responde 404
+OK    MVC: el controlador no tiene SQL, PDO, horarios, estados de cita ni throw
+OK    dependencias: Dominio no usa Aplicacion, Persistencia, Presentacion
+OK    dependencias: Aplicacion no usa Persistencia, Presentacion
+OK    dependencias: Persistencia no usa Presentacion
+OK    dependencias: Presentacion no usa Persistencia
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

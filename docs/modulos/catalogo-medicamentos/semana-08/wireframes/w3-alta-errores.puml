@@ -1,0 +1,24 @@
+@startsalt w3-alta-errores
+' W3 Registrar medicamento con errores 422 por campo
+{+
+  {* Catálogo de medicamentos | Buscar | Registrar | Ayuda }
+  ==
+  <b>Registrar medicamento
+  {+ <color:#A4161A><b>Revise los 2 campos marcados: | <u>Nombre</u> · <u>Concentración</u> }
+  .
+  Nombre * | "X                    "
+  . | <color:#A4161A>Use entre 3 y 150 caracteres (tiene 1)
+  Principio activo * | "Loratadina           "
+  Concentración * | "0     " | ^mg^
+  . | <color:#A4161A>La concentración debe ser mayor que 0
+  Forma farmacéutica * | ^TABLETA^
+  Vía * | ^ORAL^
+  Presentación * | "Caja con 10 tabletas "
+  Registro sanitario | "RS-FIC-0107 " | <i>opcional
+  Vigente desde | "          " | <i>vacío = hoy
+  .
+  [Registrar] | [Cancelar]
+  --
+  <i>* obligatorio. Los datos escritos se conservan tras el error.
+}
+@endsalt

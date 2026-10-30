@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MicroHis\DashboardBase\Dominio;
 
-/** Violación de una regla de negocio. El código (E1, E4) lo traduce a HTTP la capa de presentación. */
+/** Violación de una regla de negocio. El código (E1, E4, E6, NF) lo traduce a HTTP la capa de presentación. */
 final class ReglaDeDominio extends \DomainException
 {
     public function __construct(public readonly string $codigo, string $mensaje) { parent::__construct($mensaje); }
@@ -43,6 +43,14 @@ final class Catalogo
         $r = [];
         foreach (self::MENU as $ruta => [$titulo, $permiso]) if (in_array($permiso, $permisos, true)) $r[] = ['ruta' => $ruta, 'titulo' => $titulo];
         return $r;
+    }
+
+    /** CU-03: un módulo del menú, solo si el rol lo permite (R-02). Escribir la ruta a mano no salta el permiso (E6). */
+    public static function destino(string $ruta, array $permisos): array
+    {
+        [$titulo, $permiso] = self::MENU[$ruta] ?? throw new ReglaDeDominio('NF', 'Esa sección no existe.');
+        if (!in_array($permiso, $permisos, true)) throw new ReglaDeDominio('E6', 'Esa sección no está disponible para tu rol.');
+        return ['ruta' => $ruta, 'titulo' => $titulo];
     }
 
     /** @return array<string, Tarjeta> */

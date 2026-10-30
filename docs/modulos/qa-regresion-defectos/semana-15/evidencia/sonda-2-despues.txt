@@ -1,0 +1,33 @@
+$ php herramientas/sonda-revision.php   (semana 13, después de corregir)
+no se reproduce  RT-01
+    regla:     R-09: no hay GO con un defecto crítico abierto
+    esperado:  NO-GO (o 409 hasta clasificar): el tester propuso CRÍTICA y nadie la revisó
+    observado: trazabilidad: severidad CRITICA, clasificado false, bloquea_go true → cierre NO_GO (tasa 0.67, umbral 0.60)
+
+no se reproduce  RT-02
+    regla:     D-23: la trazabilidad dice qué bloquea el GO ANTES de cerrar
+    esperado:  si el cierre va a dar NO-GO por un defecto, la trazabilidad lo marca con bloquea_go
+    observado: trazabilidad de la campaña 2: 1 defectos con bloquea_go → cierre NO_GO: 1 defecto crítico abierto
+
+SE REPRODUCE  RT-03
+    regla:     RF-11: requisito ↔ caso (VERSIÓN) ↔ intento
+    esperado:  la campaña congeló TC-108 v1: sus requisitos son los de la v1
+    observado: fila TC-108: versión 1, requisitos [RF-99]; requisitos de la campaña: [RF-07, RF-99]
+
+SE REPRODUCE  RT-04
+    regla:     CA-02: editar uno aprobado → versión 2 en borrador y la 1 sigue aprobada
+    esperado:  una operación que cree la versión siguiente
+    observado: diseñar TC-107 otra vez → CASO_EXISTENTE; métodos públicos de CasoPrueba: __construct, disenar, aprobar; rutas del contrato: 9, ninguna de edición
+
+no se reproduce  RT-05
+    regla:     R-09: GO con la tasa de aprobados ≥ el umbral
+    esperado:  sin ningún caso aplicable no hay evidencia para liberar: NO-GO o 409
+    observado: cierre NO_GO, tasa 0.00, causas [ningún caso aplicable: no hay ejecución que respalde la liberación]
+
+no se reproduce  RT-06
+    regla:     R-08 y R-03: el build tiene el formato semver(+commit) que exige iniciar una campaña
+    esperado:  422 DATOS_INVALIDOS [build]
+    observado: marcar corregido con build «ya quedó» → DATOS_INVALIDOS
+
+Hallazgos reproducidos: 2 de 6
+(código de salida: 2)

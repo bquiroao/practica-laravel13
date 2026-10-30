@@ -5,7 +5,7 @@ declare(strict_types=1);
 use SignosVitales\Aplicacion\{ConsultarTomas, ErrorPersistencia, RegistrarToma, Usuario};
 use SignosVitales\Dominio\{ErrorDominio, RangoSigno};
 use SignosVitales\Persistencia\{EnMemoria, TomasPdo};
-use SignosVitales\Presentacion\{Enrutador, Peticion, TomasControlador};
+use SignosVitales\Presentacion\{Enrutador, Peticion, TomasControlador, VistaJson};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -101,6 +101,33 @@ prueba('ARQ-01', 'Dependencias: Dominio aislado; Aplicación sin Persistencia ni
     igual(0, preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b/', $codigo('Aplicacion') . $codigo('Presentacion')), 'SQL fuera de Persistencia');
     igual(0, preg_match('/Clasificacion|RangoSigno|LIMITES|Toma::/', (string) file_get_contents(__DIR__ . '/../src/Presentacion/TomasControlador.php')), 'reglas en el controlador');
 });
+
+prueba('RES-01', 'Idempotency-Key: el reintento devuelve 200 con la misma toma; otra persona o clave inválida no la reutiliza', function () use ($ana) {
+    $repo = enMemoria();
+    $app = app($repo, ['enf-ana' => $ana, 'enf-eva' => new Usuario('enf-eva', 'enfermeria', 'hosp-1')]);
+    $post = fn (string $u, ?string $clave) => $app->atender(new Peticion('POST', '/api/v1/signos-vitales/tomas', [], $u,
+        '{"paciente_id":"pac-adulto","episodio_id":"epi-1","mediciones":{"spo2":88}}', $clave));
+    [$primera, $reintento] = [$post('enf-ana', 'toma-0800-cama4'), $post('enf-ana', 'toma-0800-cama4')];
+    igual([201, 200, $primera[1]['toma_id'], 1], [$primera[0], $reintento[0], $reintento[1]['toma_id'], count($repo->deEpisodio('epi-1'))], 'reintento');
+    igual([201, 400, 2], [$post('enf-eva', 'toma-0800-cama4')[0], $post('enf-ana', 'corta')[0], count($repo->deEpisodio('epi-1'))], 'otra persona y clave inválida');
+});
+prueba('CON-01', 'Contrato api/openapi.yaml: documenta cada código de error y cada estado que devuelve la API', function () {
+    $contrato = (string) file_get_contents(__DIR__ . '/../api/openapi.yaml');
+    $codigos = array_merge(array_keys((new ReflectionClassConstant(VistaJson::class, 'ESTADOS'))->getValue()), ['medicion_invalida', 'toma_vacia', 'signo_repetido']);
+    igual([], array_values(array_filter($codigos, fn ($c) => !preg_match("/\\b$c\\b/", $contrato))), 'códigos sin documentar');
+    igual([], array_values(array_filter(['200', '201', '400', '401', '403', '409', '422', '500'], fn ($e) => !str_contains($contrato, "\"$e\":"))), 'estados sin documentar');
+});
+$repo = new TomasPdo(base());
+$app = new Enrutador(new TomasControlador(caso($repo), new ConsultarTomas($repo, $repo), ['enf-ana' => $ana]));
+$tiempos = [];
+for ($i = 0; $i < 200; $i++) {
+    $t = hrtime(true);
+    $app->atender(new Peticion('POST', '/api/v1/signos-vitales/tomas', [], 'enf-ana', '{"paciente_id":"pac-adulto","episodio_id":"epi-1","mediciones":{"fc":72,"spo2":97}}', "medicion-$i"));
+    $tiempos[] = (hrtime(true) - $t) / 1e6;
+}
+sort($tiempos);
+$p95 = round($tiempos[189], 2);
+prueba('RNF-03', "Rendimiento: p95 de 200 registros por HTTP interno con SQLite = $p95 ms (meta < 2000 ms)", fn () => igual(true, $p95 < 2000, 'p95'));
 
 printf("\nTotal: %d  Pasan: %d  Fallan: %d\n", array_sum($conteo), $conteo['PASA'], $conteo['FALLA']);
 exit($conteo['FALLA'] === 0 ? 0 : 1);

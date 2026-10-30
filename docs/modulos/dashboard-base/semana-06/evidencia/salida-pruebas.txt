@@ -1,0 +1,32 @@
+$ php micro-his-dashboard-base/pruebas/pruebas.php   # después del cambio; exit 0
+OK    [PDO] feliz: inicio = 200 con el menú del rol y sus 3 tarjetas en «cargando» (CU-01, R-04)
+OK    [PDO] feliz: pacientes = 200 «2 pacientes activos» (CU-02)
+OK    [PDO] feliz: citas de hoy = «2 citas hoy» (sin canceladas ni de otro día)
+OK    [PDO] regla: 0 camas = 200 «vacío» con sugerencia, no error (R-05)
+OK    [PDO] regla: el menú y las tarjetas muestran solo lo que el rol permite (R-02)
+OK    [PDO] regla: tarjeta sin permiso = 403 E4, se oculta (R-07)
+OK    [PDO] regla: sin hospital seleccionado = 401 E1 (R-01)
+OK    [PDO] regla: la tarjeta solo devuelve id, estado y texto (R-06)
+OK    [PDO] contrato: los conteos de pacientes, citas de hoy y camas disponibles son 2, 2 y 0
+OK    [InMemory] feliz: inicio = 200 con el menú del rol y sus 3 tarjetas en «cargando» (CU-01, R-04)
+OK    [InMemory] feliz: pacientes = 200 «2 pacientes activos» (CU-02)
+OK    [InMemory] feliz: citas de hoy = «2 citas hoy» (sin canceladas ni de otro día)
+OK    [InMemory] regla: 0 camas = 200 «vacío» con sugerencia, no error (R-05)
+OK    [InMemory] regla: el menú y las tarjetas muestran solo lo que el rol permite (R-02)
+OK    [InMemory] regla: tarjeta sin permiso = 403 E4, se oculta (R-07)
+OK    [InMemory] regla: sin hospital seleccionado = 401 E1 (R-01)
+OK    [InMemory] regla: la tarjeta solo devuelve id, estado y texto (R-06)
+OK    [InMemory] contrato: los conteos de pacientes, citas de hoy y camas disponibles son 2, 2 y 0
+OK    [InMemory] regla: con un solo registro el texto va en singular («1 cita hoy») (R-09)
+OK    cambio S6: navegar a un módulo del rol = 200 con su título (CU-03)
+OK    cambio S6: escribir a mano un módulo que el rol no permite = 403 E6 (CU-03, R-02)
+OK    cambio S6: un módulo que no existe = 404 NF, y sin hospital = 401 E1 (CU-05)
+OK    persistencia (doble): camas = 503 E5 «error» con texto amable, sin detalles técnicos (R-09)
+OK    persistencia (doble): las demás tarjetas siguen con su resumen (R-03)
+OK    persistencia (PDO real): PDOException en camas = 503 «error»; pacientes sigue en 200 (R-03)
+OK    persistencia (PDO real): al reintentar con la base recuperada, la tarjeta vuelve a 200 (CU-04, R-08)
+OK    MVC: las rutas llevan a su acción con el id de la tarjeta, y una ruta desconocida responde 404
+OK    MVC: el controlador no tiene SQL, PDO, estados de tarjeta, catálogo ni throw
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

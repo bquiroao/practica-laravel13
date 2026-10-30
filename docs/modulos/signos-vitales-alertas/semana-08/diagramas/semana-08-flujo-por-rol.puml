@@ -1,0 +1,47 @@
+@startuml semana-08-flujo-por-rol
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Flujo de usuario por rol (los códigos W1 a W6 son los wireframes)
+|Enfermería|
+start
+:Abre los signos vitales del paciente;
+|Sistema|
+:Muestra «Cargando tomas…»;
+if (¿Sesión, hospital y episodio activo?) then (no)
+  :Mensaje de acceso 401, 403 o 409 (W5);
+  stop
+else (sí)
+  :Muestra la lista o el estado vacío (W1);
+endif
+|Enfermería|
+:Pulsa «Registrar toma»;
+repeat
+  :Escribe los valores con su unidad (W2);
+  :Pulsa «Revisar»;
+  |Sistema|
+  :Valida en pantalla: número, rango posible, al menos un signo;
+  |Enfermería|
+repeat while (¿hay campos con error?) is (sí, corrige)
+:Revisa el resumen (W3);
+if (¿Confirma que no se podrá editar?) then (no: vuelve a W2 y no se guarda)
+  stop
+else (sí)
+  :Pulsa «Guardar toma»;
+endif
+|Sistema|
+:Guarda toma, mediciones y alertas en una transacción;
+if (¿Se guardó?) then (no, 500)
+  :Error con los valores en pantalla y «Reintentar» (W5);
+  stop
+else (sí)
+  :Muestra el resultado y las alertas (W4);
+endif
+|Médico|
+:Consulta tomas y alertas (W1, W6);
+if (¿Alerta sin reconocer?) then (sí)
+  :Pulsa «Reconocer» y confirma (W6);
+  |Sistema|
+  :Guarda quién y cuándo, una sola vez;
+endif
+stop
+@enduml

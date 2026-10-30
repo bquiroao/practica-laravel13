@@ -1,0 +1,14 @@
+$ E2E_DB_DSN=... php tests/ejecutar.php --solo=INT   # primera corrida con PostgreSQL
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Integración con PostgreSQL real ==
+[PASA ] INT-01   Camino feliz en PostgreSQL: versión, plan congelado, ejecución, 6 resultados con evidencia en disco, gate APROBADO y traza
+[PASA ] INT-02   R-04/R-08 en la base: resultados, evidencias, evaluaciones y traza no se modifican ni se borran, aunque se salten la aplicación
+[PASA ] INT-03   R-03 en la base: una ejecución con otro digest que su versión se rechaza; el digest de una versión no cambia
+[PASA ] INT-04   R-02 en la base: el plan congelado no cambia ni se descongela; R-06: un PASA con 2 intentos no entra
+[FALLA] INT-05   R-12 en la base: dos resultados con la misma clave en el tenant chocan con el UNIQUE y el adaptador lo traduce a CLAVE_REUTILIZADA
+         -> carrera: se esperaba E2e\Dominio\Excepciones\ReglaRechazada, se lanzó TypeError (E2e\Persistencia\Pdo\PdoRepositorioEjecuciones::traducir(): Return value must be of type RuntimeException, E2e\Dominio\Excepciones\ReglaRechazada returned) (Arnes.php:65)
+[PASA ] INT-06   Atomicidad real: si el trabajo falla después de escribir el resultado, PostgreSQL deshace el resultado y su evidencia
+[PASA ] INT-07   Tenant: la versión de hosp-norte no existe para hosp-sur; y datos-demo.php y datos-demo.sql describen el mismo catálogo
+
+Total: 7  Pasan: 6  Fallan: 1  Omitidas: 0
