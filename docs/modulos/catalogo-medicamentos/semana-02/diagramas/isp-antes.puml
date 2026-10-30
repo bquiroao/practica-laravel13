@@ -1,0 +1,41 @@
+@startuml isp-antes
+' Catálogo de medicamentos - Semana 2 - ISP: ANTES
+title ANTES: una interfaz "gorda" para todos los clientes
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface RepositorioCatalogo <<12 métodos>> {
+  +buscarVigentes(hospitalId, texto, fecha)
+  +vigentePorCodigo(hospitalId, codigo, fecha)
+  +historial(hospitalId, codigo)
+  +equivalenteVigente(hospitalId, clave, desde)
+  +siguienteCodigo(hospitalId)
+  +agregar(medicamento)
+  +reemplazarVigente(anteriorCerrada, nueva)
+  +cerrar(cerrada)
+  +eliminar(hospitalId, codigo)
+  +fueUsadoEnPrescripciones(hospitalId, codigo)
+  +actualizarPrecio(hospitalId, codigo, precio)
+  +existencias(hospitalId, codigo)
+}
+
+class BuscarMedicamentosVigentes
+class ConsultarHistorial
+class RegistrarMedicamento
+class EliminarRegistroSinUso
+
+BuscarMedicamentosVigentes --> RepositorioCatalogo : usa 1 de 12
+ConsultarHistorial --> RepositorioCatalogo : usa 1 de 12
+RegistrarMedicamento --> RepositorioCatalogo : usa 3 de 12
+EliminarRegistroSinUso --> RepositorioCatalogo : usa 2 de 12
+
+note right of RepositorioCatalogo
+  Problemas:
+  - precio y existencias son de farmacia/inventario
+  - el uso en prescripciones es de otro módulo
+  - un doble de prueba para la búsqueda
+    debe implementar los 12 métodos
+  - un cambio en precio obliga a revisar
+    clientes que solo buscan
+end note
+@enduml
