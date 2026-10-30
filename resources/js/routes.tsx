@@ -21,6 +21,8 @@ const DoctorDetailPage = lazy(() => import('@/pages/doctors/DoctorDetailPage').t
 const AgendaPage = lazy(() => import('@/pages/appointments/AgendaPage').then((m) => ({ default: m.AgendaPage })));
 const BedsPage = lazy(() => import('@/pages/beds/BedsPage').then((m) => ({ default: m.BedsPage })));
 const OccupancyPage = lazy(() => import('@/pages/beds/OccupancyPage').then((m) => ({ default: m.OccupancyPage })));
+const RecordSearchPage = lazy(() => import('@/pages/records/RecordSearchPage').then((m) => ({ default: m.RecordSearchPage })));
+const RecordPage = lazy(() => import('@/pages/records/RecordPage').then((m) => ({ default: m.RecordPage })));
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then((m) => ({ default: m.NewAppointmentPage })));
 
 const ready: Record<string, ReactNode> = {
@@ -33,6 +35,7 @@ const ready: Record<string, ReactNode> = {
     '/citas': <AgendaPage />,
     '/camas': <BedsPage />,
     '/ocupacion': <OccupancyPage />,
+    '/expediente': <RecordSearchPage />,
 };
 
 // Pantallas internas de un módulo: mismo permiso que pida la acción.
@@ -42,6 +45,7 @@ const subPages: { path: string; anyOf: string[]; element: ReactNode }[] = [
     { path: '/pacientes/:id/editar', anyOf: ['pacientes.gestionar'], element: <PatientFormPage /> },
     { path: '/medicos/:id', anyOf: ['medicos.ver'], element: <DoctorDetailPage /> },
     { path: '/citas/nueva', anyOf: ['citas.gestionar'], element: <NewAppointmentPage /> },
+    { path: '/expediente/:id', anyOf: ['expediente.leer'], element: <RecordPage /> },
 ];
 
 function RequireSession({ children }: { children: ReactNode }) {

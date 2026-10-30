@@ -35,7 +35,7 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
-| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas; prescripciones-alergias cuando existan los catálogos de medicamentos y alergias | Pendiente |
+| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas (**listos**); prescripciones-alergias cuando existan los catálogos de medicamentos y alergias | En curso |
 | 5 | Laboratorio, de la orden a la validación | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico (sobre el catálogo de pruebas) | Pendiente |
 | 6 | Reportes | reportes-operativos-exportables | Pendiente |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | Pendiente |
@@ -143,6 +143,35 @@ Son 30 módulos: 4 + 3 + 3 + 4 + 4 + 1 + 4 + 1 en las fases, más los 6 disponib
 - recorrido en Chrome: 15/15, sin violaciones WCAG A/AA y sin desborde a 375 px.
 - Las pruebas del esquema que revierten migraciones por pasos ahora cuentan los pasos solas, así una migración nueva no las rompe.
 - Los internamientos de la demostración se cargan como datos de ejemplo; el flujo real de admisión lo integra su propio módulo.
+
+## Fase 4: qué se entregó
+
+**Expediente** (módulo expediente-medico):
+- un expediente por paciente (`EXP-<código>`);
+- atenciones: consulta externa o internamiento. Si el paciente no tiene una atención abierta, al escribir se abre una consulta externa sola, para que nadie tenga que entender qué es un «episodio»;
+- el encabezado dice en qué atención se está escribiendo y muestra los diagnósticos activos.
+
+**Notas SOAP** (módulo notas-soap-diagnosticos):
+- las cuatro secciones son obligatorias;
+- diagnósticos con código CIE-10, con un solo principal;
+- borrador que se completa y firma después;
+- una nota firmada no cambia: se corrige con una versión nueva y un motivo de al menos 10 caracteres, y la versión anterior queda en el historial;
+- solo un médico con perfil escribe notas, y queda asignado a la atención.
+
+**Signos vitales** (módulo signos-vitales-alertas):
+- los registran enfermería o el médico tratante;
+- al menos una medición, con valores físicamente posibles;
+- clasificación normal, anormal o crítica con rangos de adulto;
+- si hay valores fuera de rango, se dispara `App\Events\VitalSignsOutOfRange` para el módulo de alertas críticas.
+
+**Ajustes al esquema base** (migración `2026_10_30_000300`, reversible):
+- la versión de las notas era única por expediente, lo que permitía **una sola nota por paciente**; ahora la versión es por cadena de corrección;
+- los signos vitales solo los aceptaba del médico asignado; ahora también de enfermería.
+
+**Verificación:**
+- 8 pruebas Feature nuevas (`RecordTest`);
+- recorrido en Chrome: 13/13, sin violaciones WCAG A/AA y sin desborde a 375 px.
+- **Corregido en esta fase:** el color de los botones animaba al pasar de «deshabilitado» a normal y, en ese instante, no tenía contraste suficiente. El estado deshabilitado ahora es gris legible.
 
 ## Pendientes conocidos
 

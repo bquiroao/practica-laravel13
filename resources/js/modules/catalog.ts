@@ -53,7 +53,7 @@ export const sections: Section[] = [
         items: [
             { path: '/expediente', label: 'Expediente', icon: HeartPulse, anyOf: ['expediente.leer'],
                 modules: ['expediente-medico', 'notas-soap-diagnosticos', 'signos-vitales-alertas', 'alergias-clinicas-alerta-visual-expediente'],
-                phase: 4, ready: false, summary: 'Expediente con notas SOAP, diagnósticos, signos vitales y alergias siempre visibles.' },
+                phase: 4, ready: true, summary: 'Expediente con notas SOAP, diagnósticos, signos vitales y alergias siempre visibles.' },
             { path: '/prescripciones', label: 'Prescripciones', icon: Pill, anyOf: ['prescripciones.crear', 'medicamentos.ver'],
                 modules: ['prescripciones-alergias', 'catalogo-medicamentos'], phase: 4, ready: false,
                 summary: 'Recetas electrónicas que se bloquean ante una alergia, y catálogo de medicamentos.' },
