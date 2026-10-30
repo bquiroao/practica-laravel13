@@ -30,6 +30,15 @@ foreach (['PDO' => new RepositorioPdo($db), 'InMemory' => new RepositorioEnMemor
     $repo->cambiarEstado('A', '101', 'maintenance', 'occupied', 'admisión');   // admisión ocupa la cama por el mismo puerto
     prueba("[$adaptador] regla: cama ocupada no cambia a mano = 409 E5 (R-06)", $error($app->atender('cambiarEstado', ['sala' => 'A', 'cama' => '101', 'estado' => 'available', 'motivo' => 'x'])) === '409 E5');
     prueba("[$adaptador] contrato: cambiar desde un estado que ya no es el actual devuelve false (E7)", $repo->cambiarEstado('A', '101', 'available', 'inactive', 'x') === false);
+    // Cambio práctico de la semana 6: capacidad de la sala (E9). La sala A, sin capacidad, sigue sin tope.
+    $app->atender('registrarSala', ['codigo' => 'P', 'nombre' => 'Pediatría', 'capacidad' => 2]);
+    foreach (['1', '2', '3'] as $c) $ultima = $app->atender('registrarCama', ['sala' => 'P', 'codigo' => $c]);
+    prueba("[$adaptador] cambio S6: la tercera cama en una sala de capacidad 2 = 409 E9", $error($ultima) === '409 E9' && $repo->camasEnUso('P') === 2);
+    $app->atender('cambiarEstado', ['sala' => 'P', 'cama' => '2', 'estado' => 'inactive', 'motivo' => 'retirada']);
+    prueba("[$adaptador] cambio S6: la cama inactiva no cuenta y la sala admite otra = 201", $app->atender('registrarCama', ['sala' => 'P', 'codigo' => '3'])['status'] === 201);
+    prueba("[$adaptador] contrato: guardarCama en una sala llena devuelve false (alta concurrente)", $repo->guardarCama('P', '4') === false);
+    prueba("[$adaptador] cambio S6: capacidad 0 o en texto = 422 E2", array_map($error, [$app->atender('registrarSala', ['codigo' => 'Q', 'nombre' => 'x', 'capacidad' => 0]),
+           $app->atender('registrarSala', ['codigo' => 'Q', 'nombre' => 'x', 'capacidad' => '2'])]) === ['422 E2', '422 E2']);
 }
 prueba('[PDO] feliz: el cambio queda en bed_status_history con su motivo (R-09)', $db->query('SELECT reason FROM bed_status_history ORDER BY id')->fetchColumn() === 'limpieza profunda');
 $memoria = new RepositorioEnMemoria(); $memoria->guardarSala('A', 'x'); $memoria->guardarCama('A', '1'); $memoria->cambiarEstado('A', '1', 'available', 'maintenance', 'limpieza');
@@ -38,9 +47,11 @@ prueba('[InMemory] feliz: el cambio queda en el historial con su motivo (R-09)',
 // 3. Error de persistencia: un doble que simula la base caída y una PDOException real.
 $caida = new class implements RepositorioCatalogo {
     public function salaActiva(string $s): ?bool { throw new ErrorPersistencia('SQLSTATE[08006] conexión perdida'); }
-    public function guardarSala(string $s, string $n): void {}
+    public function guardarSala(string $s, string $n, ?int $c = null): void {}
+    public function capacidad(string $s): ?int { return null; }
+    public function camasEnUso(string $s): int { return 0; }
     public function estadoCama(string $s, string $c): ?string { return null; }
-    public function guardarCama(string $s, string $c): void {}
+    public function guardarCama(string $s, string $c): bool { return false; }
     public function cambiarEstado(string $s, string $c, string $de, string $a, string $m): bool { return false; }
 };
 $r = crearControlador($caida)->atender('registrarSala', ['codigo' => 'B', 'nombre' => 'Cirugía']);

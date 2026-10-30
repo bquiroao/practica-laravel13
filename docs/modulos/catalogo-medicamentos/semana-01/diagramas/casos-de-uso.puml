@@ -1,0 +1,60 @@
+@startuml casos-de-uso
+' Catálogo de medicamentos - Semana 1
+' Proceso: alta, búsqueda y control de vigencia de un medicamento
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+
+actor "Químico farmacéutico\ndel catálogo\n(QF_CATALOGO)" as QF
+actor "Personal clínico\nde consulta\n(CONSULTA_CLINICA)" as CLI
+actor "Auditor de calidad\n(AUDITOR_CALIDAD)" as AUD
+actor "Módulo\nprescripciones-alergias\n(sistema, solo lectura)" as PRE <<sistema>>
+
+rectangle "Catálogo de medicamentos (por hospital / tenant)" {
+  usecase "CU-01 Registrar medicamento\n(alta)" as CU01
+  usecase "CU-02 Buscar medicamentos\nvigentes a una fecha" as CU02
+  usecase "CU-03 Registrar nueva versión\n(cambio de concentración\no presentación)" as CU03
+  usecase "CU-04 Dar de baja\n(cerrar vigencia)" as CU04
+  usecase "CU-05 Consultar historial\nde versiones" as CU05
+  usecase "CU-06 Eliminar registro\nerróneo sin uso" as CU06
+
+  usecase "Validar datos y límites\n(RN-05)" as V
+  usecase "Verificar duplicado vigente\n(RN-04)" as D
+  usecase "Cerrar versión anterior\n(RN-01)" as C
+  usecase "Verificar uso en\nprescripciones (RN-02)" as U
+}
+
+QF --> CU01
+QF --> CU03
+QF --> CU04
+QF --> CU06
+QF --> CU02
+CLI --> CU02
+AUD --> CU05
+AUD --> CU02
+PRE --> CU02
+
+CU01 ..> V : <<include>>
+CU01 ..> D : <<include>>
+CU03 ..> V : <<include>>
+CU03 ..> D : <<include>>
+CU03 ..> C : <<include>>
+CU06 ..> U : <<include>>
+CU04 ..> CU06 : <<extend>>\n[está usado:\nse ofrece baja]
+
+note bottom of CU02
+  Solo devuelve versiones vigentes a la fecha
+  indicada (por defecto hoy). Filtra por nombre,
+  principio activo, código o forma farmacéutica (RN-03).
+end note
+
+note right of PRE
+  Fuera de alcance: existencias, lotes,
+  precios y prescripciones. Los otros
+  módulos solo leen el catálogo.
+end note
+@enduml

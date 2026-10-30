@@ -1,0 +1,118 @@
+
+=== Escritorio (1280 px) ===
+OK    A1 · pantalla de ingreso
+OK    A1 · Release ve «Evaluar el gate de 2.4.1» (ejecución completada sin evaluar)
+OK    A1 · Release no ve «Desplegar» (no tiene e2e.desplegar)
+OK    a01-versiones-release · axe-core sin violaciones
+      a01-versiones-release: Versiones del responsable de release
+OK    A2 · la ejecución #1 muestra 3 de 3 con resultado
+OK    a02-ejecucion-completada · axe-core sin violaciones
+      a02-ejecucion-completada: Ejecución #1 completada
+OK    A3 · el gate NO anticipa la decisión: las reglas «se calculan al registrar» (semana 9 H-09)
+OK    A3 · se listan las 6 reglas del servidor (semanas 8 y 10 mostraban 5)
+OK    A3 · al abrir el diálogo, el foco está en «Volver»
+OK    A3 · el fondo queda inerte
+OK    A3 · cuatro Tab no salen del diálogo
+OK    a03-confirmar-gate · axe-core sin violaciones
+      a03-confirmar-gate: Confirmación del gate
+OK    A3 · Esc cierra y devuelve el foco a «Registrar la decisión del gate…»
+OK    A4 · la decisión la devuelve el servidor: Aprobado
+OK    A4 · las 6 reglas, con «✓ cumple» en texto
+OK    A4 · el foco va al resultado
+OK    a04-gate-aprobado · axe-core sin violaciones
+      a04-gate-aprobado: Gate registrado: Aprobado
+OK    A5 · Operaciones ve «Desplegar 2.4.1» con su vencimiento
+OK    a05-versiones-ops · axe-core sin violaciones
+      a05-versiones-ops: Versiones de Operaciones
+OK    A6 · digest distinto: no abre el diálogo, el foco va al campo inválido
+OK    A6 · se marca 1 bloque distinto y el mensaje queda a la vista sobre la barra de acción (R-F1)
+OK    a06-digest-distinto · axe-core sin violaciones
+      a06-digest-distinto: Digest distinto, señalado
+OK    A7 · el servidor registra el despliegue de 2.4.1
+OK    a07-desplegado · axe-core sin violaciones
+      a07-desplegado: Desplegada en producción
+OK    A8 · la trazabilidad une versión, ejecución, gate y despliegue
+OK    a08-trazabilidad · axe-core sin violaciones
+      a08-trazabilidad: Trazabilidad de 2.4.1
+OK    b01-desplegar-2-5-0 · axe-core sin violaciones
+      b01-desplegar-2-5-0: Operaciones prepara 2.5.0, aprobada
+OK    B2 · (otro actor) la nueva evaluación de 2.5.0 es RECHAZADO
+OK    B3 · el servidor rechaza con 409 GATE_NO_APROBADO y la UI lo explica (M-19)
+OK    B3 · el foco va al mensaje y lo cargado se conserva (semana 9 B-09)
+FALLA B3 · el contexto ya no dice «Aprobada» y no se ofrece registrar otra vez (revisión visual de la semana 11)
+OK    b03-gate-no-aprobado · axe-core sin violaciones
+      b03-gate-no-aprobado: 409 GATE_NO_APROBADO
+OK    B4 · la trazabilidad muestra APROBADO y después RECHAZADO, y ningún despliegue
+OK    b04-trazabilidad-rechazado · axe-core sin violaciones
+      b04-trazabilidad-rechazado: Por qué no se desplegó
+OK    B5 · Desarrollo ve la falla de E2E-102 con su evidencia (tarjeta en móvil, tabla en escritorio)
+OK    B5 · Desarrollo no ve Gate ni Desplegar
+OK    b05-ejecucion-dev · axe-core sin violaciones
+      b05-ejecucion-dev: Desarrollo diagnostica
+OK    R-D1 · el token no aparece en la URL
+
+=== Móvil (390 px) ===
+OK    A1 · pantalla de ingreso
+OK    A1 · Release ve «Evaluar el gate de 2.4.1» (ejecución completada sin evaluar)
+OK    A1 · Release no ve «Desplegar» (no tiene e2e.desplegar)
+OK    a01-versiones-release · axe-core sin violaciones
+OK    a01-versiones-release · móvil: sin desborde y objetivos ≥ 44 px
+      a01-versiones-release: Versiones del responsable de release
+OK    A2 · la ejecución #1 muestra 3 de 3 con resultado
+OK    a02-ejecucion-completada · axe-core sin violaciones
+OK    a02-ejecucion-completada · móvil: sin desborde y objetivos ≥ 44 px
+      a02-ejecucion-completada: Ejecución #1 completada
+OK    A3 · el gate NO anticipa la decisión: las reglas «se calculan al registrar» (semana 9 H-09)
+OK    A3 · se listan las 6 reglas del servidor (semanas 8 y 10 mostraban 5)
+OK    A3 · al abrir el diálogo, el foco está en «Volver»
+OK    A3 · el fondo queda inerte
+OK    A3 · cuatro Tab no salen del diálogo
+OK    a03-confirmar-gate · axe-core sin violaciones
+OK    a03-confirmar-gate · móvil: sin desborde y objetivos ≥ 44 px
+      a03-confirmar-gate: Confirmación del gate
+OK    A3 · Esc cierra y devuelve el foco a «Registrar la decisión del gate…»
+OK    A4 · la decisión la devuelve el servidor: Aprobado
+OK    A4 · las 6 reglas, con «✓ cumple» en texto
+OK    A4 · el foco va al resultado
+OK    a04-gate-aprobado · axe-core sin violaciones
+OK    a04-gate-aprobado · móvil: sin desborde y objetivos ≥ 44 px
+      a04-gate-aprobado: Gate registrado: Aprobado
+OK    A5 · Operaciones ve «Desplegar 2.4.1» con su vencimiento
+OK    a05-versiones-ops · axe-core sin violaciones
+OK    a05-versiones-ops · móvil: sin desborde y objetivos ≥ 44 px
+      a05-versiones-ops: Versiones de Operaciones
+OK    A6 · digest distinto: no abre el diálogo, el foco va al campo inválido
+OK    A6 · se marca 1 bloque distinto y el mensaje queda a la vista sobre la barra de acción (R-F1)
+OK    a06-digest-distinto · axe-core sin violaciones
+OK    a06-digest-distinto · móvil: sin desborde y objetivos ≥ 44 px
+      a06-digest-distinto: Digest distinto, señalado
+OK    A7 · el servidor registra el despliegue de 2.4.1
+OK    a07-desplegado · axe-core sin violaciones
+OK    a07-desplegado · móvil: sin desborde y objetivos ≥ 44 px
+      a07-desplegado: Desplegada en producción
+OK    A8 · la trazabilidad une versión, ejecución, gate y despliegue
+OK    a08-trazabilidad · axe-core sin violaciones
+OK    a08-trazabilidad · móvil: sin desborde y objetivos ≥ 44 px
+      a08-trazabilidad: Trazabilidad de 2.4.1
+OK    b01-desplegar-2-5-0 · axe-core sin violaciones
+OK    b01-desplegar-2-5-0 · móvil: sin desborde y objetivos ≥ 44 px
+      b01-desplegar-2-5-0: Operaciones prepara 2.5.0, aprobada
+OK    B2 · (otro actor) la nueva evaluación de 2.5.0 es RECHAZADO
+OK    B3 · el servidor rechaza con 409 GATE_NO_APROBADO y la UI lo explica (M-19)
+OK    B3 · el foco va al mensaje y lo cargado se conserva (semana 9 B-09)
+FALLA B3 · el contexto ya no dice «Aprobada» y no se ofrece registrar otra vez (revisión visual de la semana 11)
+OK    b03-gate-no-aprobado · axe-core sin violaciones
+OK    b03-gate-no-aprobado · móvil: sin desborde y objetivos ≥ 44 px
+      b03-gate-no-aprobado: 409 GATE_NO_APROBADO
+OK    B4 · la trazabilidad muestra APROBADO y después RECHAZADO, y ningún despliegue
+OK    b04-trazabilidad-rechazado · axe-core sin violaciones
+OK    b04-trazabilidad-rechazado · móvil: sin desborde y objetivos ≥ 44 px
+      b04-trazabilidad-rechazado: Por qué no se desplegó
+OK    B5 · Desarrollo ve la falla de E2E-102 con su evidencia (tarjeta en móvil, tabla en escritorio)
+OK    B5 · Desarrollo no ve Gate ni Desplegar
+OK    b05-ejecucion-dev · axe-core sin violaciones
+OK    b05-ejecucion-dev · móvil: sin desborde y objetivos ≥ 44 px
+      b05-ejecucion-dev: Desarrollo diagnostica
+OK    R-D1 · el token no aparece en la URL
+
+Comprobaciones: 88  Fallan: 2

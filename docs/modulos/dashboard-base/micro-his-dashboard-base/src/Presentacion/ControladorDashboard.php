@@ -19,6 +19,7 @@ final class ControladorDashboard
             switch ($accion) {
                 case 'inicio': return $this->vista->inicio($this->servicio->inicio($hospital, $permisos));
                 case 'tarjeta': return $this->vista->tarjeta($this->servicio->tarjeta((string) ($d['id'] ?? ''), $hospital, $permisos));
+                case 'navegar': return $this->vista->navegacion($this->servicio->navegar((string) ($d['ruta'] ?? ''), $hospital, $permisos));
                 default: return $this->vista->rutaDesconocida();
             }
         } catch (ReglaDeDominio $e) { return $this->vista->rechazo($e); }

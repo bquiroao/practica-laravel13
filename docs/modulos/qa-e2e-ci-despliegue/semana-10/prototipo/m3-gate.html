@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quality gate · 2.5.1 · Calidad de versiones</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="btn atras" href="m2-ejecucion.html?estado=completada" aria-label="Volver a la ejecución #15">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">Calidad · Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Release</span>
+  <span class="avatar" aria-label="resp-release">RR</span>
+</header>
+
+<div class="contexto">
+  <span class="version">Quality gate · versión 2.5.1</span>
+  <span class="meta">Ejecución #15 · completada 15:20 · política gate-2026.1</span>
+</div>
+
+<main>
+  <section class="aviso atencion" data-estado="incompleta" role="status">
+    <h2>La ejecución #15 todavía está en curso</h2>
+    <p>Faltan 2 resultados. El gate se evalúa sobre una ejecución completada.</p>
+    <div class="acciones"><a class="btn" href="m2-ejecucion.html">Ver la ejecución</a></div>
+  </section>
+
+  <section class="aviso ok" data-estado="registrada" role="status" tabindex="-1">
+    <h2>Decisión registrada: ✕ Rechazado</h2>
+    <p>15:24 · política gate-2026.1. Coincide con la vista previa. No se edita: para aprobar, corrija y ejecute otra versión.</p>
+  </section>
+
+  <section class="aviso error" data-estado="cambio" role="alert" tabindex="-1">
+    <h2>La decisión cambió al registrar</h2>
+    <p>La vista previa decía <strong>Aprobado</strong>, pero al registrar la ejecución ya tenía 24 h y 3 min: el servidor registró <strong>Rechazado</strong> por antigüedad.</p>
+    <div class="acciones"><a class="btn" href="m1-versiones.html">Volver a las versiones</a></div>
+  </section>
+
+  <h1 data-estado="base confirmar incompleta">Si se registra ahora</h1>
+  <h1 data-estado="registrada cambio">Reglas evaluadas</h1>
+  <p class="sub">La política vigente decide; esta pantalla no aprueba ni rechaza por su cuenta.</p>
+
+  <ul class="reglas">
+    <li><span>Críticos que pasan</span><span class="valor">2 de 2 · exige todos</span><span class="resultado-regla cumple">✓ cumple</span></li>
+    <li><span>No críticos que pasan</span><span class="valor">2 de 4 (50 %) · exige ≥ 95 %</span><span class="resultado-regla no-cumple">✕ no cumple</span></li>
+    <li><span>Inestables</span><span class="valor">1 · acepta hasta 2</span><span class="resultado-regla cumple">✓ cumple</span></li>
+    <li><span>Digest probado = digest de la versión</span><span class="valor">sha256:3c81… igual</span><span class="resultado-regla cumple">✓ cumple</span></li>
+    <li><span>Antigüedad de la ejecución</span><span class="valor">4 min · acepta hasta 24 h</span><span class="resultado-regla cumple">✓ cumple</span></li>
+  </ul>
+
+  <section class="aviso error" data-estado="base confirmar">
+    <h2>Resultado esperado: ✕ Rechazado</h2>
+    <p>Causa: E2E-103 inestable y E2E-106 «Traslado de cama» falla.</p>
+    <div class="acciones"><a class="btn" href="m2-ejecucion.html?estado=completada">Ver evidencias</a></div>
+  </section>
+  <p class="meta" data-estado="base confirmar">Si al registrar el servidor decide otra cosa, se muestra la decisión real.</p>
+</main>
+
+<div class="accion-fija" data-estado="base">
+  <a class="btn primario" href="m3-gate.html?estado=confirmar">Registrar la decisión del gate…</a>
+</div>
+
+<div data-estado="confirmar">
+  <div class="velo"></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-gate" aria-describedby="d-gate">
+    <div class="asa"></div>
+    <h2 id="t-gate">¿Registrar la decisión del gate de 2.5.1?</h2>
+    <p id="d-gate">El servidor la calcula con la política vigente sobre la ejecución #15. Hoy daría <strong>Rechazado</strong>. Una decisión registrada no se edita.</p>
+    <div class="acciones">
+      <a class="btn primario" href="m3-gate.html?estado=registrada">Registrar la decisión</a>
+      <a class="btn" href="m3-gate.html" autofocus>Volver</a>
+    </div>
+  </section>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-versiones.html"><span class="ico" aria-hidden="true">☰</span>Versiones</a>
+  <a href="m2-ejecucion.html?estado=completada"><span class="ico" aria-hidden="true">▶</span>Ejecución</a>
+  <a href="m3-gate.html" aria-current="page"><span class="ico" aria-hidden="true">⚖</span>Gate</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

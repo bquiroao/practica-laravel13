@@ -1,0 +1,30 @@
+@startuml semana-05-migracion
+' Admisión hospitalaria y asignación de cama — Semana 5
+' Migración por etapas (estrangulamiento). Cada etapa tiene condición de salida y vuelta atrás.
+skinparam activity {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+}
+title Migración razonada por etapas (propuesta)
+
+start
+:E0 — Hoy: monolito modular
+Puertos Repository, esquema propio, API v1;
+:E1 — Contratos
+Solo vistas o API para leer camas y pacientes;
+note right: Salida: 0 lecturas directas\na tablas ajenas
+:E2 — Eventos con outbox
+AdmisionCreada / CamaAsignada / AltaRegistrada;
+note right: Salida: catálogo y dashboard\nconsumen eventos 2 semanas sin pérdidas
+if (¿Se cumple al menos un gatillo\nG-1..G-4 durante 4 semanas?) then (no)
+  :Permanecer en E2
+  (no se divide sin medición);
+  stop
+else (sí)
+endif
+:E3 — Servicio separado detrás del gateway
+Misma API v1; tráfico 10% → 50% → 100%;
+note right: Vuelta atrás: el gateway\nregresa el tráfico al monolito
+:E4 — Retirar el código del monolito;
+stop
+@enduml

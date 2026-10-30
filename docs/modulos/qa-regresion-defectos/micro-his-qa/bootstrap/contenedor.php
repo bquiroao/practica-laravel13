@@ -10,6 +10,12 @@ declare(strict_types=1);
 
 require __DIR__ . '/autoload.php';
 
+// Semana 15 (RT-07): el Dominio usa mbstring (mb_strlen, mb_check_encoding). Sin ella, diseñar un caso terminaba en un error
+// fatal en medio de una petición; ahora el arranque lo dice antes. pdo_pgsql se verifica al abrir la conexión (FabricaConexion).
+if (!extension_loaded('mbstring')) {
+    throw new \RuntimeException('Micro-HIS QA necesita la extensión mbstring de PHP (ver README, «Requisitos»).');
+}
+
 use Qa\Aplicacion\CasosDeUso\AprobarCaso;
 use Qa\Aplicacion\CasosDeUso\CerrarCampana;
 use Qa\Aplicacion\CasosDeUso\ClasificarDefecto;
@@ -27,6 +33,8 @@ use Qa\Presentacion\Http\Controladores\CasosControlador;
 use Qa\Presentacion\Http\Controladores\DefectosControlador;
 use Qa\Presentacion\Http\Controladores\Rutas;
 use Qa\Presentacion\Http\Kernel;
+use Qa\Presentacion\Http\Observabilidad\RegistroAcceso;
+use Qa\Presentacion\Http\Observabilidad\RegistroAccesoJson;
 
 /**
  * @param array{acceso: \Qa\Aplicacion\Puertos\PoliticaAcceso, casos: \Qa\Dominio\Puertos\RepositorioCasos,
@@ -45,23 +53,24 @@ function construirCasosDeUso(array $p): array
         'registrar' => new RegistrarResultado($p['acceso'], $p['campanas'], $p['defectos'], $p['almacen'], $p['auditoria'], $p['transaccion'], $p['reloj']),
         'clasificar' => new ClasificarDefecto($p['acceso'], $p['defectos'], $p['auditoria'], $p['transaccion']),
         'corregir' => new MarcarCorregido($p['acceso'], $p['defectos'], $p['auditoria'], $p['transaccion']),
-        'cerrar' => new CerrarCampana($p['acceso'], $p['campanas'], $p['defectos'], $p['auditoria'], $p['transaccion']),
+        'cerrar' => new CerrarCampana($p['acceso'], $p['casos'], $p['campanas'], $p['defectos'], $p['auditoria'], $p['transaccion']),
         'trazabilidad' => new ConsultarTrazabilidad($p['acceso'], $p['casos'], $p['campanas'], $p['defectos']),
     ];
 }
 
 /** @param array<string, object> $c casos de uso */
-function construirKernel(array $c, Autenticador $autenticador): Kernel
+function construirKernel(array $c, Autenticador $autenticador, ?RegistroAcceso $registro = null): Kernel
 {
     return new Kernel(Rutas::definir(
         new CasosControlador($c['disenar'], $c['aprobar']),
         new CampanasControlador($c['planificar'], $c['iniciar'], $c['registrar'], $c['cerrar'], $c['trazabilidad']),
         new DefectosControlador($c['clasificar'], $c['corregir']),
-    ), $autenticador);
+    ), $autenticador, $registro);
 }
 
 /** Punto de entrada real: PostgreSQL con PDO, o todo en memoria (QA_PERSISTENCIA=memoria). */
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']));
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config)), new AutenticadorTokenDemo($config['tokens_demo']),
+        ($config['registro_acceso'] ?? 'stderr') === 'ninguno' ? null : new RegistroAccesoJson());
 }

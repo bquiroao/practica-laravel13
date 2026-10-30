@@ -1,0 +1,112 @@
+$ E2E_DB_DSN=... php tests/ejecutar.php   # DESPUÉS del cambio
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Dominio: escenarios, versiones y plan, ejecuciones, resultados y quality gate ==
+[PASA ] DOM-01   R-01: un escenario E2E sin un conjunto de datos SINT-… se rechaza (DATOS_NO_SINTETICOS); los campos inválidos se listan todos
+[PASA ] DOM-02   R-02: el plan debe incluir todos los críticos y los escenarios de los módulos afectados; lista los que faltan
+[PASA ] DOM-03   R-02: el plan se congela al iniciar la primera ejecución y ya no cambia (nadie quita el escenario que falla)
+[PASA ] DOM-04   R-03: una ejecución sobre otro digest no se inicia (DIGEST_DISTINTO); sin plan tampoco
+[PASA ] DOM-05   R-06: el pipeline reporta PASA con 2 intentos y el dominio lo registra INESTABLE; INESTABLE no se acepta como dato de entrada
+[PASA ] DOM-06   R-04: solo EN_CURSO admite resultados, solo del plan y uno por escenario; completar exige todos
+[PASA ] DOM-07   Evidencia: tipo permitido, no vacía y de 20 MB o menos
+[PASA ] DOM-08   R-09: gate APROBADO solo si se cumplen digest y a–e; cada regla incumplida da su causa
+[PASA ] DOM-09   R-09: no se evalúa una ejecución abortada o en curso (EJECUCION_NO_COMPLETADA)
+[PASA ] DOM-10   R-03 en el gate (defensa en profundidad): una ejecución cuyo digest no es el de la versión (datos importados o alterados) se RECHAZA
+
+== Aplicación: camino feliz, reglas y errores de persistencia (dobles) ==
+[PASA ] APP-01   Camino feliz: escenario → versión → plan → ejecución → 6 resultados → completar → gate APROBADO → trazabilidad, con la traza de cada paso (R-14)
+[PASA ] APP-02   Regla de dominio por el caso de uso: un crítico INESTABLE y una ejecución de 25 h → RECHAZADO con sus causas y la versión RECHAZADA
+[PASA ] APP-03   R-12: la misma clave con el mismo contenido devuelve el MISMO resultado (200), aunque la ejecución ya esté completada; con otro contenido, 409
+[PASA ] APP-04   Fail-closed (R-08): con el almacén caído → 503 EVIDENCIA_NO_DISPONIBLE y no queda resultado, evidencia ni traza
+[PASA ] APP-05   Las reglas se revisan ANTES de tocar el almacén: un resultado rechazado no deja artefactos huérfanos
+[PASA ] APP-06   R-13: sin permiso → 403 (el pipeline no evalúa el gate ni planifica); otro tenant no ve la versión (404)
+[PASA ] APP-07   Error de persistencia al leer: el caso de uso devuelve 503 ERROR_PERSISTENCIA, nunca una excepción
+[PASA ] APP-08   Error de persistencia al escribir la traza: la transacción deshace el resultado (nada a medias) y responde 503
+[PASA ] APP-09   R-02 y R-03 por el caso de uso: plan incompleto (422 con los faltantes), iniciar con otro digest (409), digest de otra versión (409)
+[PASA ] APP-10   El gate no se evalúa sobre una ejecución abortada (409) y una ejecución no se cierra dos veces (409)
+
+== Persistencia: PDO con sentencias preparadas y almacén de evidencias ==
+[PASA ] PER-01   Base caída: cada adaptador PDO lanza ErrorPersistencia SIN el host ni la contraseña del mensaje del driver
+[PASA ] PER-02   FabricaConexion: un DSN inválido da ErrorPersistencia sin el DSN ni la clave
+[PASA ] PER-03   Sentencias preparadas: ningún adaptador PDO interpola variables en el SQL (solo «?»)
+[PASA ] PER-04   Almacén en disco: direccionado por contenido, idempotente y verificado; un archivo alterado deja de confirmarse
+[PASA ] PER-05   Almacén en disco (semana 6): un artefacto corrupto se REPARA al volver a guardarlo con los bytes correctos; no queda bloqueado para siempre
+
+== Repository: la misma suite de contrato para los adaptadores InMemory y PDO ==
+[PASA ] CON-01-MEM [MEM] Escenarios: lo guardado vuelve igual (requisitos y criticidad), ordenado por id, por tenant
+[PASA ] CON-02-MEM [MEM] Versiones: por número y por digest; el plan y el estado persisten; otro tenant no la ve
+[PASA ] CON-03-MEM [MEM] Ejecuciones: crear asigna id; los resultados vuelven en orden con sus evidencias; el plan se conserva
+[PASA ] CON-04-MEM [MEM] Idempotencia: resultadoPorClave devuelve ejecución y resultado; una clave repetida en el tenant → CLAVE_REUTILIZADA
+[PASA ] CON-05-MEM [MEM] Estado de la ejecución: se guarda con su hora; actualizarla dos veces (dos cierres) → ESTADO_NO_PERMITE_CERRAR
+[PASA ] CON-06-MEM [MEM] Evaluaciones: se agregan en orden, con reglas booleanas, causas, política y hora; otro tenant no las ve
+[PASA ] CON-08-MEM [MEM] Despliegues (semana 6): se agregan en orden; vigente() es el último DESPLEGADO del entorno, no un REVERTIDO
+[PASA ] CON-07-MEM [MEM] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (versión, ejecución, resultado, traza)
+[PASA ] CON-01-PDO [PDO] Escenarios: lo guardado vuelve igual (requisitos y criticidad), ordenado por id, por tenant
+[PASA ] CON-02-PDO [PDO] Versiones: por número y por digest; el plan y el estado persisten; otro tenant no la ve
+[PASA ] CON-03-PDO [PDO] Ejecuciones: crear asigna id; los resultados vuelven en orden con sus evidencias; el plan se conserva
+[PASA ] CON-04-PDO [PDO] Idempotencia: resultadoPorClave devuelve ejecución y resultado; una clave repetida en el tenant → CLAVE_REUTILIZADA
+[PASA ] CON-05-PDO [PDO] Estado de la ejecución: se guarda con su hora; actualizarla dos veces (dos cierres) → ESTADO_NO_PERMITE_CERRAR
+[PASA ] CON-06-PDO [PDO] Evaluaciones: se agregan en orden, con reglas booleanas, causas, política y hora; otro tenant no las ve
+[PASA ] CON-08-PDO [PDO] Despliegues (semana 6): se agregan en orden; vigente() es el último DESPLEGADO del entorno, no un REVERTIDO
+[PASA ] CON-07-PDO [PDO] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (versión, ejecución, resultado, traza)
+
+== MVC: formularios, controladores y vistas ==
+[PASA ] MVC-01   Formulario de versión: solo FORMA. Tipos equivocados y obligatorios ausentes → 400 con los campos; un digest con mal formato PASA (lo rechaza el dominio con 422)
+[PASA ] MVC-02   Formulario de resultado: Idempotency-Key obligatoria, intentos entero, base64 estricto con el índice del artefacto
+[PASA ] MVC-03   Vista: cada tipo de Salida tiene su código HTTP; Location solo en 201; los errores usan «error» y los éxitos «codigo»
+[PASA ] MVC-04   Controlador: una entrada mal formada se responde 400 SIN llamar al caso de uso (nada escrito, nada trazado)
+[PASA ] MVC-05   Kernel: 405 si la ruta existe con otro método; Location en los 201 de versión y de ejecución
+
+== Cambio práctico de la semana 6: despliegue reproducible (CU-11, R-11) ==
+[PASA ] CAM-01   R-11: con el último gate APROBADO, vigente y el MISMO digest, el despliegue queda DESPLEGADO con la guía y el operador
+[PASA ] CAM-02   R-11: sin evaluación, o si la ÚLTIMA evaluación es RECHAZADO (aunque antes hubo un APROBADO), no se despliega: 409 GATE_NO_APROBADO
+[PASA ] CAM-03   R-03/R-11: el digest instalado tiene que ser el evaluado: otro digest → 409 DIGEST_DISTINTO
+[PASA ] CAM-04   R-11: la aprobación vence a las 72 h: 72 h exactas despliega, 72 h y 1 s → 409 APROBACION_VENCIDA
+[PASA ] CAM-05   R-11: si la verificación posterior (smoke) falla, queda REVERTIDO a la versión DESPLEGADA antes en ese entorno; la guía no versionada → 422
+[PASA ] CAM-06   R-13 por HTTP: el operador despliega (201) y el pipeline no puede (403); la trazabilidad muestra el despliegue
+
+== Presentación: HTTP ==
+[PASA ] HTTP-01  Recorrido HTTP: versión 201, plan 200, ejecución 201, resultado con evidencia base64 201, cierre 200, gate 200, trazabilidad 200
+[PASA ] HTTP-02  Autenticación, tenant y forma: sin token 401, sin X-Tenant-ID 400, tenant ajeno 403, JSON roto 400, base64 roto 400, sin Idempotency-Key 400, ruta 404
+[PASA ] HTTP-03  Traducción de la salida: 422 regla de datos, 409 estado, 413 evidencia grande, 503 almacén caído, 403 sin permiso
+
+== Contrato API (OpenAPI) = código ==
+[PASA ] API-01   Contrato = código: las operaciones son las rutas del código, y cada x-permiso es la constante PERMISO de su caso de uso
+[PASA ] API-02   Cada operación documenta su éxito y los errores transversales (400, 401, 403, 500, 503); no hay PUT ni DELETE
+[PASA ] API-03   En escenarios reales por el kernel, cada estado está documentado en SU operación y cada código de error está en el enum
+[PASA ] API-04   Estructura del contrato sin dependencias: cada $ref existe, cada {parámetro} de ruta está declarado, operationId únicos, sin tabulaciones
+
+== Cliente-servidor: reportador del pipeline con reintentos y bandeja, y observabilidad ==
+[PASA ] CLI-01   R-12: los reintentos llevan la MISMA Idempotency-Key; la red cae dos veces y al tercero registra; esperas de 200 y 400 ms
+[PASA ] CLI-02   Respuesta perdida: el servidor ya registró, el pipeline reintenta y recibe 200 RESULTADO_YA_REPORTADO; hay UN resultado
+[PASA ] CLI-03   Sin respuesta en ningún intento → PENDIENTE en la bandeja del job; reenviarPendientes() lo registra UNA vez y vacía la bandeja
+[PASA ] CLI-04   Un 4xx no se reintenta ni se encola: un escenario fuera del plan es RECHAZADO en una sola llamada
+[PASA ] CLI-05   Almacén caído (503): el resultado queda PENDIENTE sin nada escrito; cuando vuelve, el reenvío lo registra con su evidencia una sola vez
+[PASA ] CLI-06   Clave determinística: el mismo escenario en la misma ejecución da la misma clave (un job reiniciado no duplica); otro escenario, otra
+[PASA ] CLI-07   TransporteHttpStream contra un puerto cerrado: FallaTransporte en menos de 5 s
+[PASA ] OBS-01   X-Request-ID en TODA respuesta (201, 401, 404): se respeta el válido del cliente y se reemplaza el inseguro
+[PASA ] OBS-02   Registro de acceso: una línea JSON por petición con request_id, estado, código, ms, usuario y tenant; sin token, cuerpo ni artefactos
+[PASA ] OBS-03   Si el registro de acceso falla, la respuesta no cambia
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de Aplicacion, Persistencia, Presentacion
+[PASA ] ARQ-02   Aplicacion no depende de Persistencia, Presentacion
+[PASA ] ARQ-03   Persistencia no depende de Presentacion
+[PASA ] ARQ-04   Presentacion no depende de Persistencia, Dominio
+[PASA ] ARQ-05   PDO y SQL solo existen en Persistencia; sin framework ni Composer
+[PASA ] ARQ-06   MVC: los controladores no tienen SQL, no importan el Dominio y no deciden reglas; solo usan formularios, casos de uso y vistas
+[PASA ] ARQ-07   Cliente-servidor: el Cliente se programa contra el contrato (no importa ninguna capa) y ninguna capa importa el Cliente
+
+== Integración con PostgreSQL real ==
+[PASA ] INT-01   Camino feliz en PostgreSQL: versión, plan congelado, ejecución, 6 resultados con evidencia en disco, gate APROBADO y traza
+[PASA ] INT-02   R-04/R-08 en la base: resultados, evidencias, evaluaciones y traza no se modifican ni se borran, aunque se salten la aplicación
+[PASA ] INT-03   R-03 en la base: una ejecución con otro digest que su versión se rechaza; el digest de una versión no cambia
+[PASA ] INT-04   R-02 en la base: el plan congelado no cambia ni se descongela; R-06: un PASA con 2 intentos no entra
+[PASA ] INT-05   R-12 en la base: dos resultados con la misma clave en el tenant chocan con el UNIQUE y el adaptador lo traduce a CLAVE_REUTILIZADA
+[PASA ] INT-06   Atomicidad real: si el trabajo falla después de escribir el resultado, PostgreSQL deshace el resultado y su evidencia
+[PASA ] INT-07   Tenant: la versión de hosp-norte no existe para hosp-sur; y datos-demo.php y datos-demo.sql describen el mismo catálogo
+[PASA ] INT-08   Repositorio compartido: cada evaluación del gate se publica en compartido.calidad_versiones en la MISMA transacción, y el hecho no se corrige
+[PASA ] INT-09   Repositorio compartido: el rol lector ve SOLO su hospital (seguridad por filas), no escribe y no entra al esquema e2e
+[PASA ] INT-10   R-11 en la base (semana 6): un despliegue sin un gate APROBADO, o con otro digest, se rechaza aunque se salten la aplicación; y no se edita
+
+Total: 86  Pasan: 86  Fallan: 0  Omitidas: 0

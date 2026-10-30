@@ -1,0 +1,54 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend de la agenda (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [VistaAgenda] as VA
+  [AsistenteSolicitud\n(paciente, médico, horario, motivo)] as AS
+  [VistaHorarioOcupado] as VO
+  [ClienteAgenda\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorCitas] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ServicioCitas] as S
+    interface RepositorioCitas as P
+    interface Reloj as RL
+  }
+  package "Dominio" {
+    [Disponibilidad\n(precedencia E4 antes que E5,\nfuente única)] as D #FFF3CD
+    [Horario] as H
+    [EstadoCita] as E
+  }
+  package "Persistencia" {
+    [RepositorioPdo] as PDO
+    [RepositorioEnMemoria] as MEM
+  }
+}
+database "appointments,\nappointment_cancellations" as DB
+VA --> CL
+AS --> CL : medico, paciente,\ninicio, fin, motivo
+VO --> CL
+CL --> R : HTTP JSON
+R --> C
+C --> S
+C --> V
+S --> P
+S --> RL
+S --> D
+S --> H
+S --> E
+PDO ..|> P
+MEM ..|> P
+PDO --> DB
+note bottom of D
+  Después: el repositorio solo informa
+  hechos (¿cruza el médico? ¿cruza el
+  paciente?); el dominio decide el código.
+end note
+@enduml

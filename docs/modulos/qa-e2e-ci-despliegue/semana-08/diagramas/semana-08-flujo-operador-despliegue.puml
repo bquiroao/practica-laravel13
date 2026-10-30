@@ -1,0 +1,37 @@
+@startuml semana-08-flujo-operador-despliegue
+!pragma layout smetana
+title User flow · Operador de despliegue: instalar una versión aprobada con la guía y registrar el smoke (W5)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Despliegues» → «Versiones aprobadas y vigentes»;
+if (¿La versión tiene su ÚLTIMO gate APROBADO y vigente?) then (no)
+  :ESTADO · la fila muestra «RECHAZADO» o «Aprobación vencida hace 3 h» y el botón [Desplegar] deshabilitado con el motivo (M-14);
+  stop
+else (sí)
+endif
+:Abre «Desplegar 2.5.0»: guía guia-2026.3, entorno, digest esperado y «vence en 41 h»;
+:Instala siguiendo la guía (fuera del sistema);
+:Pega el digest instalado;
+:VALIDACIÓN en vivo: ✓ coincide / ✕ «No es el digest aprobado» (M-15);
+:Ejecuta el smoke y marca PASA o FALLA;
+if (¿smoke FALLA?) then (sí)
+  :AYUDA · «Se registra como REVERTIDO a 2.4.0, la última DESPLEGADA en producción» (A-04);
+else (no)
+endif
+:CONFIRMACIÓN · resumen [Registrar despliegue];
+switch (Respuesta)
+case (201 DESPLEGADO)
+  #E8F5E9:ÉXITO · «2.5.0 desplegada en producción con guia-2026.3» (M-16);
+case (201 REVERTIDO)
+  #FFF4E5:«Smoke fallido: el entorno quedó en 2.4.0»; aviso al responsable de release (M-17);
+case (409 APROBACION_VENCIDA)
+  #FDECEC:«La aprobación venció mientras instalaba»; hay que evaluar el gate otra vez (M-18);
+case (409 DIGEST_DISTINTO / GATE_NO_APROBADO)
+  #FDECEC:ERROR · no se registra nada; el campo «digest» marcado (M-15, M-19);
+endswitch
+stop
+@enduml

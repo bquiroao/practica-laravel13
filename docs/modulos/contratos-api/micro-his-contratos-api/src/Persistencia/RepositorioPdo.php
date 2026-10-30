@@ -30,11 +30,16 @@ final class RepositorioPdo implements RepositorioDocumentos
             return $id;
         } catch (ErrorPersistencia $e) { $this->db->rollBack(); throw $e; }
     }
-    public function datosRevision(int $id): ?array { return $this->ejecutar('SELECT author AS autor, status AS estado FROM doc_versions WHERE id = ?', [$id])->fetch(PDO::FETCH_ASSOC) ?: null; }
+    public function datosRevision(int $id): ?array
+    {
+        return $this->ejecutar('SELECT author AS autor, status AS estado, reviewed_by AS revisor, obsoleted_by AS obsoleta_por FROM doc_versions WHERE id = ?', [$id])->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
     public function cambiarEstado(int $id, string $de, string $a, string $revisor, ?string $motivo): bool
     {
-        return $this->ejecutar('UPDATE doc_versions SET status = ?, reviewed_by = ?, reason = COALESCE(?, reason) WHERE id = ? AND status = ?',
-                               [$a, $revisor, $motivo, $id, $de])->rowCount() === 1;
+        $sql = $a === 'obsolete'   // quien marca obsoleta va en su propia columna: no pisa a quien aprobó (R-10)
+            ? 'UPDATE doc_versions SET status = ?, obsoleted_by = ?, reason = COALESCE(?, reason) WHERE id = ? AND status = ?'
+            : 'UPDATE doc_versions SET status = ?, reviewed_by = ?, reason = COALESCE(?, reason) WHERE id = ? AND status = ?';
+        return $this->ejecutar($sql, [$a, $revisor, $motivo, $id, $de])->rowCount() === 1;
     }
     public function consultables(string $slug): array
     {

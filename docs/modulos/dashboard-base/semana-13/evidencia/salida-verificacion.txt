@@ -1,7 +1,7 @@
 ENTRADA pruebas del Micro-HIS: en verde (RESULTADO: todo correcto)
 
-H-01  reproducido     hospital = «hospital-ajeno» con permisos escritos por el cliente = 200 «1 pacientes activos»; E3 en el mapa HTTP: no
+H-01  reproducido     hospital = «hospital-ajeno» con permisos escritos por el cliente = 200 «1 paciente activo»; E3 en el mapa HTTP: no
 H-02  reproducido     navegar a /usuarios = 404; códigos: E1 E4
 H-03  reproducido     tarjeta «tarjeta-inexistente» = 403 E4 (se esperaba 404)
 H-04  reproducido     cita 2026-10-27T02:00:00Z (20:00 del 26, UTC-6) con hoy = 2026-10-26: «No hay citas hoy: agenda una.»
-H-05  reproducido     1 paciente activo en la base: «1 pacientes activos»
+H-05  no reproducido  1 paciente activo en la base: «1 paciente activo»

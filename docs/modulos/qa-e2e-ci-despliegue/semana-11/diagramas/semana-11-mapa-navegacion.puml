@@ -1,0 +1,38 @@
+@startuml semana-11-mapa-navegacion
+title Mapa de navegación · consola de release (prototipo de la semana 11, sobre la API real 1.1.0)
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam stateBackgroundColor #F5F9FF
+skinparam stateBorderColor #2E3A6E
+hide empty description
+
+state "~#/ingresar\nElegir usuario (demostración)" as ING
+state "~#/versiones\nTarjeta por versión seguida\n(GET …/trazabilidad por versión: brecha B-1)" as VER
+state "~#/ejecucion/{v}/{id}\nResultados · pausa · región viva" as EJE
+state "~#/gate/{v}\nReglas «se calculan al registrar»" as GATE
+state "Diálogo: ¿Registrar la decisión?\nfoco en Volver · Esc · trampa de foco" as DGATE #FFF8E1
+state "~#/desplegar/{v}\nDigest en bloques · guía · smoke" as DESP
+state "Diálogo: ¿Registrar despliegue / REVERTIDO?" as DDESP #FFF8E1
+state "~#/trazabilidad/{v}\nVersión → plan → ejecuciones → gates → despliegues" as TRAZ
+
+[*] --> ING
+ING --> VER : Release · Operaciones · Desarrollo
+VER --> EJE : Ver ejecución #n (todos)
+VER --> GATE : Evaluar el gate (solo Release,\nejecución COMPLETADA sin evaluar)
+VER --> DESP : Desplegar (solo Operaciones,\núltimo gate APROBADO y vigente)
+VER --> TRAZ : Ver trazabilidad (todos)
+EJE --> GATE : Evaluar el gate (Release, al completarse)
+GATE --> DGATE : Registrar la decisión del gate…
+DGATE --> GATE : Volver / Esc
+DGATE --> GATE : POST …/gate → 200 decisión real\n409 → mensaje
+DESP --> DESP : digest distinto → foco al campo,\nbloque «distinto» (no abre diálogo)
+DESP --> DDESP : Registrar…
+DDESP --> DESP : Volver / Esc
+DDESP --> DESP : 201 DESPLEGADO / REVERTIDO\n409 GATE_NO_APROBADO · APROBACION_VENCIDA →\nmensaje, se conserva lo cargado
+DESP --> TRAZ : Ver por qué no se puede desplegar
+VER --> ING : Salir
+note right of VER
+  Camino feliz A: ING → VER → EJE → GATE → DGATE → (Operaciones) VER → DESP → DDESP → TRAZ
+  Error crítico B: DESP (2.5.0 aprobada) … otro actor la RECHAZA … DDESP → 409 → TRAZ
+end note
+@enduml

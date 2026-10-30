@@ -1,0 +1,35 @@
+@startuml semana-08-flujo-administracion
+title User flow — Administración: registrar médico, asociar especialidad y registrar ausencia
+|Administración|
+start
+:Inicia sesión y abre «Médicos»;
+|Sistema|
+if (¿Rol administrador?) then (no)
+  :Muestra «Sin permiso» (403) y vuelve al inicio;
+  stop
+else (sí)
+endif
+|Administración|
+:Elige una acción: registrar médico, asociar especialidad o registrar ausencia;
+repeat
+  :Completa el formulario (con ayuda contextual);
+  |Sistema|
+  :Valida campo por campo y estado «Guardando…»;
+  if (¿Hay error?) then (sí)
+    :Mensaje junto al campo (colegiado repetido, especialidad inactiva, cruce de vigencia);
+    |Administración|
+    :Corrige sin perder lo escrito;
+  else (no)
+  endif
+repeat while (¿Quedó con error?) is (sí) not (no)
+|Sistema|
+if (¿La ausencia choca con citas?) then (sí)
+  :Muestra las citas en conflicto (solo hora, sin datos del paciente);
+  |Administración|
+  :Confirma que avisará a Citas;
+else (no)
+endif
+|Sistema|
+:Confirmación con lo guardado y atajo «Consultar disponibilidad»;
+stop
+@enduml

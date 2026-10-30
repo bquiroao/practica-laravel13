@@ -1,0 +1,11 @@
+{
+    "scope": "DEMO_ONLY",
+    "result": {
+        "status": "RECORDED",
+        "identifier": "SP-353599D950074701890E634FEF3F53C1",
+        "decision": "rejected",
+        "reasons": [
+            "El recipiente no está íntegro."
+        ]
+    }
+}

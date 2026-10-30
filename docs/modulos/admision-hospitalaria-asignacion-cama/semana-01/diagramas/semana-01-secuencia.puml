@@ -1,0 +1,65 @@
+@startuml semana-01-secuencia
+' Admisión hospitalaria y asignación de cama — Semana 1
+' Diagrama de secuencia de CU-01. Mensajes S-NN; acciones A-NN del diagrama de actividad.
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+autonumber "S-00"
+title CU-01 Admitir paciente y asignar cama (camino feliz y excepciones)
+
+actor "Admisionista" as U
+participant "Pantalla de\nadmisión" as UI
+participant "AdmitirPaciente\nYAsignarCama" as CU
+participant "DirectorioPacientes\n(Módulo Pacientes)" as DP
+participant "CatalogoCamas\n(Catálogo de Josué)" as CC
+participant "EvaluadorElegibilidad" as EV
+participant "AdmisionRepository" as AR
+database "BD del módulo" as BD
+
+note over U, CC
+  Antes de este intercambio la pantalla mostró la lista de CU-03
+  (A-07..A-10) y el admisionista eligió una cama. El caso de uso
+  vuelve a validar la cama elegida: la lista pudo cambiar.
+end note
+U -> UI : código paciente, servicio,\ntipo cama, aislamiento, origen, cama
+UI -> CU : ejecutar(solicitud, contexto usuario)
+CU -> CU : autorizar rol y tenant [A-02]
+CU -> CU : validar formato PAC-NNNNN [A-03]
+CU -> DP : existeActivo(tenant, código) [A-04]
+DP --> CU : sí / no [A-05]
+CU -> AR : buscarActivaPorPaciente(tenant, código) [A-06]
+AR --> CU : ninguna
+CU -> CC : buscar(tenant, camaId) [A-07]
+CC --> CU : cama operativa
+CU -> EV : motivosDeRechazo(cama, requerimiento) [A-08]
+EV --> CU : sin motivos (compatible)
+
+group transacción [A-11 .. A-15]
+  CU -> AR : registrar(admisión, asignación, eventos)
+  AR -> BD : BEGIN
+  AR -> BD : INSERT admision
+  AR -> BD : INSERT asignacion_cama [A-12]
+  AR -> BD : INSERT evento_admision ×2 [A-14]
+  AR -> BD : COMMIT [A-15]
+  AR --> CU : registrado
+end
+CU --> UI : resultado (admisión ACTIVA, cama)
+UI --> U : confirmación con datos mínimos [A-16]
+
+== Excepciones (misma numeración E-NN del diagrama de actividad) ==
+alt rol no autorizado u otro tenant [E-01]
+  CU --> UI : AccesoDenegado
+else formato inválido [E-02]
+  CU --> UI : CodigoPacienteInvalido
+else paciente inexistente o inactivo [E-03]
+  CU --> UI : PacienteNoEncontrado
+else admisión activa previa [E-04]
+  CU --> UI : PacienteConAdmisionActiva
+else cama no compatible o fuera de servicio [E-05]
+  CU --> UI : CamaNoElegible (con motivos)
+else otra admisión tomó la cama [E-06]
+  BD --> AR : violación ux_asignacion_cama_activa
+  AR -> BD : ROLLBACK
+  AR --> CU : CamaYaAsignada
+  CU --> UI : conflicto: elegir otra cama (CU-05)
+end
+@enduml

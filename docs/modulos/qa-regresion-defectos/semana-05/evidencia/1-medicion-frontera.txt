@@ -1,0 +1,11 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php bin/medir.php 100
+Resultados FALLA con defecto y una captura de 200 KB por escenario: 100 (PHP 8.4.26)
+
+A · en proceso, memoria                             p50=    0.839 ms   p95=    1.057 ms   registrados=100/100
+B · en proceso, PostgreSQL + almacén en disco      p50=    7.828 ms   p95=   12.431 ms   registrados=100/100
+C · por HTTP (php -S) + PostgreSQL, con ClienteQa   p50=  118.274 ms   p95=  229.806 ms   registrados=100/100
+D · en proceso + PostgreSQL, almacén REMOTO (HTTP) p50=   18.863 ms   p95=   37.412 ms   registrados=100/100
+E · como D, con el almacén caído (500)            p50=    1.883 ms   p95=    3.314 ms   registrados=0/100
+F · como C, captura de 2 MB                         p50=  252.617 ms   p95=  389.599 ms   registrados=20/20
+
+Costo de la base (B − A): 6.989 ms · de la API por HTTP (C − B): 110.446 ms · del almacén remoto (D − B): 11.035 ms · de 2 MB por la API (F − C): 134.343 ms

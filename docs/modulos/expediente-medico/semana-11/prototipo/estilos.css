@@ -31,3 +31,4 @@ textarea { width: 100%; font: inherit; border: 1px solid #64748b; border-radius:
   .acciones > * { flex: 1 1 100%; }
 }
 .paciente { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+[aria-invalid="true"] { border-color: #b91c1c; border-width: 2px; }

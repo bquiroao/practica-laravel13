@@ -1,0 +1,14 @@
+$ npx @redocly/cli@1.34.3 bundle api/openapi.yaml --ext json -o openapi.json && php evidencia/verificar-contrato.php openapi.json
+OK    solicitar cita: POST /citas -> 201 (documentados: 201, 409, 422, 503)
+OK    médico ocupado (R-02): POST /citas -> 409 E4 (documentados: 201, 409, 422, 503)
+OK    paciente ocupado (R-03): POST /citas -> 409 E5 (documentados: 201, 409, 422, 503)
+OK    cita en el pasado (R-01): POST /citas -> 422 E2 (documentados: 201, 409, 422, 503)
+OK    médico sin especialidad (R-04): POST /citas -> 422 E3 (documentados: 201, 409, 422, 503)
+OK    confirmar: POST /citas/1/confirmacion -> 200 (documentados: 200, 404, 422, 503)
+OK    cancelar con motivo: POST /citas/1/cancelacion -> 200 (documentados: 200, 404, 422, 503)
+OK    cancelar otra vez (R-07): POST /citas/1/cancelacion -> 422 E7 (documentados: 200, 404, 422, 503)
+OK    cita inexistente: POST /citas/99/confirmacion -> 404 NF (documentados: 200, 404, 422, 503)
+OK    base caída: POST /citas -> 503 E8 (documentados: 201, 409, 422, 503)
+OK    operaciones documentadas = acciones del controlador: solicitar, confirmar, cancelar
+OK    ruta no documentada: GET /citas -> 404
+RESULTADO: el Micro-HIS cumple el contrato

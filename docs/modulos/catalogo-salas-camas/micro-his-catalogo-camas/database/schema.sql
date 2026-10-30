@@ -1,7 +1,8 @@
 -- Versión SQLite mínima de wards y beds (database/migrations/hospital/..._000300_create_scheduling_and_bed_tables.php) más el historial (R-09).
 CREATE TABLE IF NOT EXISTS wards (
   ward_id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')));
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  capacity INTEGER CHECK (capacity IS NULL OR capacity > 0));   -- semana 6: tope de camas en uso; NULL = sin tope
 CREATE TABLE IF NOT EXISTS beds (
   bed_id INTEGER PRIMARY KEY, ward_id INTEGER NOT NULL REFERENCES wards(ward_id), code TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'maintenance', 'inactive')),

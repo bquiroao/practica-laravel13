@@ -1,0 +1,41 @@
+@startuml semana-07-refactor-antes-despues
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+title Refactor: la política de alertas sale de la persistencia
+
+package "ANTES (semana 4)" #FDECEA {
+  class RegistrarToma_A
+  class Toma_A {
+    alertas() : array
+  }
+  class TomasPdo_A {
+    guardar(Toma)
+    --
+    regla escondida:
+    critica -> pendiente_envio
+  }
+  RegistrarToma_A --> Toma_A
+  RegistrarToma_A --> TomasPdo_A : guardar(toma)
+  TomasPdo_A ..> Toma_A : llama alertas() y decide el envío
+}
+package "DESPUÉS" #E9F6EC {
+  class RegistrarToma_D
+  interface PoliticaDeAlertas {
+    alertasDe(Toma) : Alerta[]
+  }
+  class PoliticaEstandar
+  class Alerta {
+    signo, nivel, valor, envio
+  }
+  class TomasPdo_D {
+    guardar(Toma, Alerta[])
+    --
+    solo escribe filas
+  }
+  RegistrarToma_D --> PoliticaDeAlertas
+  PoliticaEstandar ..|> PoliticaDeAlertas
+  PoliticaDeAlertas --> Alerta
+  RegistrarToma_D --> TomasPdo_D : guardar(toma, alertas)
+}
+@enduml

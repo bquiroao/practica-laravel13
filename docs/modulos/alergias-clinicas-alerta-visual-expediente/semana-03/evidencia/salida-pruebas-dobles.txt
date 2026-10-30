@@ -1,0 +1,12 @@
+Fecha: 2026-10-29 04:25:05 | PHP 8.4.26 | --solo=semana03 --evidencia=../semana-03/evidencia/salida-pruebas-dobles.txt
+== semana03
+[OK] T-01 camino feliz: registra la alergia y la alerta queda CRITICA pendiente de reconocer
+[OK] T-02 RN-03: rechaza una alergia activa equivalente aunque cambien mayúsculas y espacios
+[OK] T-03 RN-05: rechaza fecha de inicio futura y no guarda nada
+[OK] T-04 RN-06: rechaza registrar en un paciente que no está activo
+[OK] T-05 RN-08: severidad desconocida se muestra como ALTA
+[OK] T-06 RN-08: sin alergias registradas el nivel es SIN_REGISTRO y no pide reconocimiento
+[OK] T-07 error de persistencia (doble): el caso de uso no oculta ErrorPersistencia
+[OK] T-08 paciente inexistente: PacienteNoEncontrado
+[OK] T-09 OCP: reacción con anafilaxia sube una alergia moderada a CRITICA
+RESULTADO: 9 pruebas, 9 correctas, 0 fallidas, 0 omitidas, 0 con defecto registrado

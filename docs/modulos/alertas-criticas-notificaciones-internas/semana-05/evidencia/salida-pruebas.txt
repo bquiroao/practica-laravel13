@@ -1,0 +1,106 @@
+Micro-HIS Alertas críticas y notificaciones internas — salida de pruebas
+PHP 8.4.26 · 2026-10-30 09:20:59
+
+== aplicacion/acuse-escalamiento-pruebas.php
+  [OK]    CA-10/CA-11 escalar con reloj fijo: 10:14 nada, 10:15 sube a nivel 1
+  [OK]    CA-12 una alerta acusada no se escala aunque pase el plazo
+  [OK]    CA-13 tras nivel 2 se agota una sola vez
+  [OK]    CA-08 acusar dos veces devuelve cambio=false y guarda una sola vez
+  [OK]    CA-09 RNF-01 un usuario de otro tenant no encuentra la alerta
+  [OK]    CA-15 flujo completo: creada, enviada, acusada y cerrada
+== aplicacion/registrar-pruebas.php
+  [OK]    CAMINO FELIZ CA-01/CA-05 registrar guarda, notifica al nivel 0 y queda ENVIADA
+  [OK]    CA-03 RN-02 el mismo evento de origen no duplica ni reenvía
+  [OK]    CA-04 RN-03 sin destinatarios en nivel 0 se notifica al nivel 1
+  [OK]    CA-06 RN-08 3 intentos al destinatario que falla y escalamiento inmediato
+  [OK]    RNF-05 si el canal lanza excepción la alerta no se pierde
+  [OK]    ERROR DE PERSISTENCIA: si la base falla no se notifica a nadie
+  [OK]    REGLA DE DOMINIO: datos inválidos no llegan a guardarse
+== contrato/repositorio-contrato-pruebas.php
+  [OK]    [InMemory] guardar y buscar devuelve la misma alerta
+  [OK]    [InMemory] RNF-01 otro tenant, id inexistente o inválido devuelven null
+  [OK]    [InMemory] buscarPorOrigen encuentra por tenant + origen + id de origen
+  [OK]    [InMemory] RN-02 otro id con el mismo origen lanza ErrorPersistenciaException
+  [OK]    [InMemory] guardar de nuevo actualiza el estado sin duplicar eventos
+  [OK]    [InMemory] lo leído es una copia: cambios sin guardar no se ven
+  [OK]    [InMemory] pendientesDeAcuse excluye acusadas y agotadas
+  [OK]    [InMemory] listar trae solo el tenant, más recientes primero
+  [OK]    [PDO] guardar y buscar devuelve la misma alerta
+  [OK]    [PDO] RNF-01 otro tenant, id inexistente o inválido devuelven null
+  [OK]    [PDO] buscarPorOrigen encuentra por tenant + origen + id de origen
+  [OK]    [PDO] RN-02 otro id con el mismo origen lanza ErrorPersistenciaException
+  [OK]    [PDO] guardar de nuevo actualiza el estado sin duplicar eventos
+  [OK]    [PDO] lo leído es una copia: cambios sin guardar no se ven
+  [OK]    [PDO] pendientesDeAcuse excluye acusadas y agotadas
+  [OK]    [PDO] listar trae solo el tenant, más recientes primero
+== integracion/pdo-pruebas.php
+  [OK]    CAMINO FELIZ con base de prueba: registrar y releer igual
+  [OK]    CA-03 RN-02 en base: el segundo registro devuelve la misma alerta
+  [OK]    RN-02 la restricción única de la base respalda la deduplicación
+  [OK]    CA-08 acuse idempotente persistido: un solo evento «acusada» en la base
+  [OK]    RNF-01 buscar desde otro tenant o con id no válido devuelve null
+  [OK]    CA-10 escalamiento con reloj fijo y base real
+  [OK]    RN-10 la base rechaza modificar o borrar el historial
+  [OK]    ERROR DE PERSISTENCIA real: sin tablas visibles se lanza ErrorPersistenciaException
+== presentacion/api-pruebas.php
+  [OK]    API sin token → 401 con formato único de error
+  [OK]    API POST /alertas con token de laboratorio → 201, Location y luego 200 duplicada
+  [OK]    API el tenant sale del token: un tenant en el cuerpo se ignora
+  [OK]    API permisos: enfermería no registra (403) y el laboratorio no consulta (403)
+  [OK]    API RF-08: enfermería no cierra (403); el médico sí, con nota
+  [OK]    API acuse idempotente: cambio true y luego false
+  [OK]    API errores: RN-01 → 422 con regla, RN-07 → 403, JSON inválido → 400
+  [OK]    API escalamiento solo con token de planificador y reloj fijo
+  [OK]    API X-Request-Id: se respeta el entrante válido y se genera si falta o es inválido
+  [OK]    API rutas desconocidas → 404 y método incorrecto → 405 en JSON
+== presentacion/consola-pruebas.php
+  [OK]    Consola registrar muestra la alerta ENVIADA y devuelve 0
+  [OK]    Consola traduce una regla incumplida a código 2 con el ID de la regla
+  [OK]    Consola: alerta de otro tenant da código 3
+  [OK]    Consola: comando desconocido muestra ayuda y devuelve 1
+== presentacion/controlador-pruebas.php
+  [OK]    GET / sin alertas muestra el estado vacío
+  [OK]    POST /alertas registra y redirige con 303 al detalle
+  [OK]    La descripción con HTML se muestra escapada (sin XSS)
+  [OK]    Acuse por la web: primero «acusada», después «ya-acusada»
+  [OK]    RN-07 por la web: un usuario no notificado recibe 403
+  [OK]    RNF-01 por la web: otro tenant recibe 404
+  [OK]    RN-01 y RN-09 por la web: datos inválidos o cierre sin nota dan 422
+  [OK]    Error de persistencia por la web: 503 con mensaje recuperable
+  [OK]    El controlador no tiene SQL ni reglas de negocio (revisión estática)
+== presentacion/web-nucleo-pruebas.php
+  [OK]    Router resuelve el parámetro {id}
+  [OK]    Router distingue 404 (ruta inexistente) de 405 (método no permitido)
+  [OK]    Router no deja que {id} cruce barras
+  [OK]    Vista escapa HTML en la salida (sin XSS)
+  [OK]    Respuesta::redirigir usa 303 y Location
+  [OK]    SesionDemo ignora usuarios desconocidos y usa el de omisión
+== unidad/alerta-pruebas.php
+  [OK]    CA-01 crear deja la alerta CREADA con evento «creada»
+  [OK]    CA-02 RN-01 sin código de paciente se rechaza
+  [OK]    RN-01 código de paciente con formato inválido se rechaza
+  [OK]    RN-01 prioridad desconocida se rechaza
+  [OK]    CA-05 registrarEnvio en nivel 0 deja ENVIADA y guarda destinatarios
+  [OK]    CA-07 acusar registra usuario y hora
+  [OK]    CA-08 RN-06 acusar dos veces no duplica el evento
+  [OK]    CA-09 RN-07 un usuario no notificado no puede acusar
+  [OK]    CA-12 RN-06 una alerta acusada no se escala
+  [OK]    CA-13 RN-05 en nivel 2 no se sube más y el agotamiento se marca una vez
+  [OK]    CA-14 RN-09 cerrar exige acuse previo y nota
+  [OK]    CA-15 RN-10 historial completo y ordenado
+  [OK]    RNF-02 el resumen lleva el código del paciente y no nombres
+== unidad/politica-pruebas.php
+  [OK]    CA-10 / CA-11 límite del plazo CRITICA: 10:14 no vence, 10:15 sí
+  [OK]    RN-04 prioridad ALTA usa 30 minutos
+  [OK]    CA-16 RN-11 plazos fuera de 5-60 minutos se rechazan
+  [OK]    CA-12 RN-06 una alerta acusada no vence
+  [OK]    RN-05 una alerta con escalamiento agotado ya no vence
+  [OK]    RN-11 el constructor también valida los plazos
+== unidad/valores-pruebas.php
+  [OK]    CodigoPaciente normaliza espacios y minúsculas
+  [OK]    CodigoPaciente rechaza nombres y formatos incompletos
+  [OK]    Prioridad acepta minúsculas y rechaza valores desconocidos
+  [OK]    EstadoAlerta: solo ENVIADA y ESCALADA esperan acuse
+  [OK]    IdAlerta genera UUID v4 distintos
+
+Total: 90 · Pasaron: 90 · Fallaron: 0 · Tiempo: 1.04 s

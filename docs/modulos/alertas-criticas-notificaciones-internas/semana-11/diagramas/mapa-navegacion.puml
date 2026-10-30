@@ -1,0 +1,18 @@
+@startuml mapa-navegacion
+' Semana 11 - Mapa de navegación del prototipo
+[*] --> Bandeja
+Bandeja : #bandeja\ntabla (≥768 px) / tarjetas (móvil)
+Detalle : #alerta/{id}\nplazo, acción primaria, historial
+Cierre : #cierre/{id}\nnota obligatoria + confirmación
+ErrorSinConexion : aviso en #estado\n«no se registró» + Reintentar
+ErrorPermiso : aviso RN-07 / RF-08
+Bandeja --> Detalle : tocar paciente
+Detalle --> Bandeja : ← Bandeja
+Detalle --> Detalle : Acusar (200) → ACUSADA
+Detalle --> ErrorSinConexion : Acusar sin red
+ErrorSinConexion --> Detalle : Reintentar (idempotente)
+Detalle --> ErrorPermiso : usuario no notificado
+Detalle --> Cierre : «Cerrar alerta» (médico / jefe)
+Cierre --> Detalle : cerrar con nota y confirmación → CERRADA
+Cierre --> Cierre : nota vacía → error en el campo
+@enduml

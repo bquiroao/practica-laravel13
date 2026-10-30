@@ -1,0 +1,15 @@
+@startsalt m03-confirmar
+' M-03 (360 px) Paso 3 de 3: confirmación con barra inferior fija
+{+
+  <b>Confirmar</b>   <size:11>Paso 3 de 3</size>
+  ==
+  Paciente | <b>PAC-00451</b>
+  Cama | <b>B-201</b>
+  Servicio | Medicina interna
+  Origen | Emergencia
+  ==
+  <size:11>Barra fija inferior (zona del pulgar):</size>
+  [  Confirmar admisión   ]
+  [        Volver         ]
+}
+@endsalt

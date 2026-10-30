@@ -1,0 +1,69 @@
+@startuml semana-07-componentes
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+title Componentes de Signos vitales y alertas (backend existente, nuevos y frontend propuesto)
+
+package "Frontend (propuesto, semanas 8 a 11)" as FE #E8F1FA {
+  [FormularioToma] as F1
+  [CampoSigno\nvalor + unidad + ayuda] as F2
+  [ListaTomas] as F3
+  [InsigniaClasificacion] as F4
+  [PanelAlertas] as F5
+  [ClienteApi] as F6
+}
+package "Presentación" as P {
+  [Enrutador + Peticion] as P1
+  [TomasControlador] as P2
+  [VistaJson] as P3
+}
+package "Aplicación" as A {
+  [RegistrarToma\nCU-01 a CU-04] as A1
+  [ConsultarTomas\nCU-05] as A2
+  interface "RepositorioTomas" as R1
+  interface "FuenteClinica" as R2
+}
+package "Dominio" as D {
+  [Toma + Medicion] as D1
+  [EvaluadorUmbrales\nReglaDeUmbral] as D2
+  [ValidadorLimitesFisicos] as D3
+  [PoliticaDeAlertas\n+ Alerta] as D4 #FFE9B3
+}
+package "Persistencia" as S {
+  [TomasPdo] as S1
+  [EnMemoria] as S2
+}
+database "BD hospital\ntomas, mediciones, alertas,\nepisodios, rangos" as DB
+cloud "M21 Alertas críticas\n(bandeja de salida)" as M21
+
+F6 --> P1 : HTTP JSON
+F1 --> F2
+F1 --> F6
+F3 --> F4
+F5 --> F4
+F3 --> F6
+P1 --> P2
+P2 --> A1
+P2 --> A2
+P2 ..> P3
+A1 --> D1
+A1 --> D2
+A1 --> D3
+A1 --> D4
+A1 --> R1
+A1 --> R2
+A2 --> R1
+A2 --> R2
+S1 ..|> R1
+S1 ..|> R2
+S2 ..|> R1
+S2 ..|> R2
+S1 --> DB
+S1 ..> M21 : críticas quedan\npendiente_envio
+note right of D4
+  Nuevo en el refactor (sección 4):
+  decide qué es alerta y cuáles
+  se envían a M21. Hoy esa regla
+  vive dentro de TomasPdo.
+end note
+@enduml

@@ -53,7 +53,7 @@ prueba('MVC-04', 'Controlador: una entrada mal formada se responde 400 SIN llama
 });
 
 prueba('MVC-05', 'Modo «memoria» de producción: el mismo Kernel funciona sin base (QA_PERSISTENCIA=memoria, datos-demo.php)', function (): void {
-    $config = ['persistencia' => 'memoria'] + (require dirname(__DIR__, 2) . '/config/config.php');
+    $config = ['persistencia' => 'memoria', 'registro_acceso' => 'ninguno'] + (require dirname(__DIR__, 2) . '/config/config.php');
     $k = crearKernel($config);
     $h = ['authorization' => 'Bearer token-lider-qa', 'x-tenant-id' => 'hosp-norte'];
     $p = $k->manejar(new Solicitud('POST', '/api/v1/qa/campanas', $h, json_encode(['nombre' => 'Demo', 'funcionalidades' => ['expediente'], 'casos' => ['TC-109']])));

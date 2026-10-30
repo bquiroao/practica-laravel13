@@ -20,9 +20,17 @@ final class RepositorioPdo implements RepositorioCatalogo
     }
 
     public function salaActiva(string $sala): ?bool { $e = $this->ejecutar('SELECT status FROM wards WHERE code = ?', [$sala])->fetchColumn(); return $e === false ? null : $e === 'active'; }
-    public function guardarSala(string $sala, string $nombre): void { $this->ejecutar("INSERT INTO wards (code, name, status) VALUES (?, ?, 'active')", [$sala, $nombre]); }
+    public function guardarSala(string $sala, string $nombre, ?int $capacidad = null): void { $this->ejecutar("INSERT INTO wards (code, name, status, capacity) VALUES (?, ?, 'active', ?)", [$sala, $nombre, $capacidad]); }
+    public function capacidad(string $sala): ?int { $c = $this->ejecutar('SELECT capacity FROM wards WHERE code = ?', [$sala])->fetchColumn(); return is_numeric($c) ? (int) $c : null; }
+    public function camasEnUso(string $sala): int { return (int) $this->ejecutar("SELECT COUNT(*) FROM beds b JOIN wards w ON w.ward_id = b.ward_id WHERE w.code = ? AND b.status <> 'inactive'", [$sala])->fetchColumn(); }
     public function estadoCama(string $sala, string $cama): ?string { return $this->ejecutar('SELECT b.status FROM beds b JOIN wards w ON w.ward_id = b.ward_id WHERE w.code = ? AND b.code = ?', [$sala, $cama])->fetchColumn() ?: null; }
-    public function guardarCama(string $sala, string $cama): void { $this->ejecutar("INSERT INTO beds (ward_id, code, status) SELECT ward_id, ?, 'available' FROM wards WHERE code = ?", [$cama, $sala]); }
+
+    /** El INSERT vuelve a contar en la misma sentencia: en SQLite dos altas simultáneas no pasan juntas el tope. */
+    public function guardarCama(string $sala, string $cama): bool
+    {
+        return $this->ejecutar("INSERT INTO beds (ward_id, code, status) SELECT w.ward_id, ?, 'available' FROM wards w WHERE w.code = ?
+            AND (w.capacity IS NULL OR w.capacity > (SELECT COUNT(*) FROM beds b WHERE b.ward_id = w.ward_id AND b.status <> 'inactive'))", [$cama, $sala])->rowCount() === 1;
+    }
 
     public function cambiarEstado(string $sala, string $cama, string $de, string $a, string $motivo): bool
     {

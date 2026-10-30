@@ -1,0 +1,37 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 matriz de estados 4 x 4: 3 permitidos y 13 E7 (R-03, R-08)
+OK    U-02 metadatos: tipo, x.y.z, audiencia y slug = E2; igual o menor = E3; 1.0.10 > 1.0.9 por versión, no por texto (R-01, R-02)
+OK    U-03 audiencia: sin roles y sin rol común no ven; un rol común basta (R-06)
+OK    U-04 consulta: vigente = mayor publicada (1.10.0); la obsoleta avisa; ajeno e inexistente dan el mismo E6 (R-06 a R-08)
+FALLA U-05 carrera de dos envíos de la 2.0.0: el segundo, que pasó la validación, debe dar E3 y no E8 (R-02, H-04 de la semana 13)
+      obtenido: ok, E8
+OK    U-06 cada código de rechazo (E7, E2, E3, NF, E5, E6) tiene su HTTP fijo
+== Caja blanca
+OK    CB-01 cambiar(): 5 caminos (V(G) = 4 más la salida del dominio): NF, E7 del dominio, E5, E7 de la carrera y éxito; solo los dos últimos escriben
+OK    CB-02 MC/DC de «publicada && autor = revisor» (V,V), (V,F), (F,V) y la condición del motivo en rechazar
+== Caja negra (HTTP)
+OK    CN-01 equivalencia del envío: válido; tipo desconocido; versión x.y; audiencia vacía (R-01)
+OK    CN-02 revisión y límites de versión: el autor no aprueba; otro sí; dos veces = E7; igual y menor = E3; la rechazada se reenvía (R-02, R-05)
+OK    CN-03 audiencia: el lector de la audiencia ve; el ajeno recibe el mismo 404 E6 que lo inexistente (R-06, R-07, RNF-04)
+FALLA CN-04 permisos: enviar sin usuario y aprobar con un rol sin permiso de revisión = 403 (RNF-01, H-01 de la semana 13)
+      obtenido: 201, 200
+OK    CN-05 errores del cliente: versión inexistente, slug con mayúsculas, cuerpo que no es JSON y versión que no existe
+FALLA CN-06 base no disponible al arrancar = 503 E8, sin detalles técnicos
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 11 de 14 pruebas pasan; 3 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-contratos-api/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # el mismo archivo contra el Micro-HIS de la semana 6 (PR #436, sin integrar), en una copia temporal
+FALLA U-05 carrera de dos envíos de la 2.0.0: el segundo, que pasó la validación, debe dar E3 y no E8 (R-02, H-04 de la semana 13)
+FALLA CN-04 permisos: enviar sin usuario y aprobar con un rol sin permiso de revisión = 403 (RNF-01, H-01 de la semana 13)
+FALLA CN-06 base no disponible al arrancar = 503 E8, sin detalles técnicos
+RESULTADO: 11 de 14 pruebas pasan; 3 fallan (ver defectos)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal; solo se listan las pruebas que pasaban y ahora fallan
+M1: publicada -> en revisión permitida en EstadoVersion -> fallan: U-01
+M2: ServicioRevision deja que el autor apruebe lo suyo (sin E5) -> fallan: CB-01 CB-02

@@ -1,0 +1,77 @@
+@startuml actividad-alta-busqueda-vigencia
+' Catálogo de medicamentos - Semana 1
+' Actividad: alta, búsqueda y control de vigencia (CU-01, CU-02, CU-03, CU-04)
+' [QF] = Químico farmacéutico del catálogo · [Sistema] = Catálogo de medicamentos
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+title Alta, búsqueda y control de vigencia de un medicamento
+
+start
+:[QF] Inicia sesión en su hospital (tenant);
+:[QF] Busca por nombre, principio activo,
+código o forma farmacéutica (CU-02);
+:[Sistema] Filtra solo versiones vigentes
+a la fecha (por defecto hoy) (RN-03);
+if (¿Hay resultados?) then (no)
+  :[QF] Elige "Registrar medicamento" (CU-01) y captura
+  nombre, principio activo, concentración, unidad,
+  forma, vía, presentación y fecha de inicio;
+  :[Sistema] Valida formato y límites (RN-05);
+  if (¿Datos válidos?) then (no)
+    :Excepción E1: errores por campo (422),
+    no se guarda nada y el QF corrige; <<#FFE5E5>>
+    stop
+  else (sí)
+  endif
+  :[Sistema] Calcula la clave de equivalencia
+  (principio activo + concentración + forma + vía);
+  if (¿Otro medicamento vigente con
+  la misma clave? (RN-04)) then (sí)
+    :Excepción E2: rechaza el duplicado (409)
+    e indica el código que ya existe; <<#FFE5E5>>
+    stop
+  else (no)
+    :[Sistema] Asigna código MED-NNNNNN y versión 1,
+    con vigencia desde la fecha indicada y sin fin;
+    if (¿Falla la base de datos?) then (sí)
+      :Excepción E3: error de persistencia (503),
+      sin datos parciales; <<#FFE5E5>>
+      stop
+    else (no)
+      :Resultado R1: medicamento registrado
+      y visible en la búsqueda; <<#E5FFE5>>
+      stop
+    endif
+  endif
+else (sí)
+  :[QF] Selecciona el medicamento
+  y revisa su versión vigente;
+  if (¿Qué cambio necesita?) then (otra concentración\no presentación)
+    :[QF] Captura los nuevos datos
+    y la fecha de inicio (CU-03);
+    :[Sistema] Valida datos (RN-05)
+    y duplicado (RN-04);
+    if (¿Inicio posterior al inicio de
+    la versión vigente? (RN-01)) then (no)
+      :Excepción E4: rechaza fechas que
+      solaparían versiones (409); <<#FFE5E5>>
+      stop
+    else (sí)
+      :[Sistema] Cierra la versión anterior
+      (hasta = inicio de la nueva) y crea
+      la versión N+1 con el mismo código;
+      :Resultado R2: una sola versión vigente
+      por código en cualquier fecha; <<#E5FFE5>>
+      stop
+    endif
+  else (deja de usarse)
+    :[QF] Indica fecha y motivo de baja (CU-04);
+    :[Sistema] Cierra la vigencia sin borrar (RN-02);
+    :Resultado R3: deja de aparecer en búsquedas
+    desde esa fecha y el historial se conserva; <<#E5FFE5>>
+    stop
+  endif
+endif
+@enduml

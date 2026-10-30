@@ -1,0 +1,34 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 12
+title Flujo de usuario por rol — filtrado y exportación reproducible
+
+|Jefatura, administración y auditoría|
+start
+:W1 Elige reporte y filtros\n(rango obligatorio, máx. 92 días);
+if (¿Filtros válidos?) then (no)
+  :Mensaje junto al campo\ny vuelve a W1;
+  detach
+else (sí)
+endif
+:W2 Vista previa\n(datos personales enmascarados\nsi el permiso no los incluye);
+if (¿Hay filas?) then (no)
+  :Mensaje de vacío;
+  stop
+endif
+:W3 Confirma la exportación\n(formato CSV, corte, registro);
+if (¿Se generó y se registró?) then (sí)
+  :W4 Archivo listo\n(número y sello);
+else (no)
+  :W4 «No se entregó ningún archivo»\ny reintentar;
+  stop
+endif
+|Auditor|
+:W5 Comprueba la exportación\npor su número;
+if (¿Coincide?) then (sí)
+  :«✓ Coincide»;
+else (no)
+  :«△ No coincide»\nAvisar a quien administra;
+endif
+stop
+@enduml

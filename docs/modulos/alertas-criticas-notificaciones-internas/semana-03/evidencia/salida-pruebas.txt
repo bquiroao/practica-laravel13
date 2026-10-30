@@ -1,0 +1,61 @@
+Micro-HIS Alertas críticas y notificaciones internas — salida de pruebas
+PHP 8.4.26 · 2026-10-30 08:48:34
+
+== aplicacion/acuse-escalamiento-pruebas.php
+  [OK]    CA-10/CA-11 escalar con reloj fijo: 10:14 nada, 10:15 sube a nivel 1
+  [OK]    CA-12 una alerta acusada no se escala aunque pase el plazo
+  [OK]    CA-13 tras nivel 2 se agota una sola vez
+  [OK]    CA-08 acusar dos veces devuelve cambio=false y guarda una sola vez
+  [OK]    CA-09 RNF-01 un usuario de otro tenant no encuentra la alerta
+  [OK]    CA-15 flujo completo: creada, enviada, acusada y cerrada
+== aplicacion/registrar-pruebas.php
+  [OK]    CAMINO FELIZ CA-01/CA-05 registrar guarda, notifica al nivel 0 y queda ENVIADA
+  [OK]    CA-03 RN-02 el mismo evento de origen no duplica ni reenvía
+  [OK]    CA-04 RN-03 sin destinatarios en nivel 0 se notifica al nivel 1
+  [OK]    CA-06 RN-08 3 intentos al destinatario que falla y escalamiento inmediato
+  [OK]    RNF-05 si el canal lanza excepción la alerta no se pierde
+  [OK]    ERROR DE PERSISTENCIA: si la base falla no se notifica a nadie
+  [OK]    REGLA DE DOMINIO: datos inválidos no llegan a guardarse
+== integracion/pdo-pruebas.php
+  [OK]    CAMINO FELIZ con base de prueba: registrar y releer igual
+  [OK]    CA-03 RN-02 en base: el segundo registro devuelve la misma alerta
+  [OK]    RN-02 la restricción única de la base respalda la deduplicación
+  [OK]    CA-08 acuse idempotente persistido: un solo evento «acusada» en la base
+  [OK]    RNF-01 buscar desde otro tenant o con id no válido devuelve null
+  [OK]    CA-10 escalamiento con reloj fijo y base real
+  [OK]    RN-10 la base rechaza modificar o borrar el historial
+  [OK]    ERROR DE PERSISTENCIA real: sin tablas visibles se lanza ErrorPersistenciaException
+== presentacion/consola-pruebas.php
+  [OK]    Consola registrar muestra la alerta ENVIADA y devuelve 0
+  [OK]    Consola traduce una regla incumplida a código 2 con el ID de la regla
+  [OK]    Consola: alerta de otro tenant da código 3
+  [OK]    Consola: comando desconocido muestra ayuda y devuelve 1
+== unidad/alerta-pruebas.php
+  [OK]    CA-01 crear deja la alerta CREADA con evento «creada»
+  [OK]    CA-02 RN-01 sin código de paciente se rechaza
+  [OK]    RN-01 código de paciente con formato inválido se rechaza
+  [OK]    RN-01 prioridad desconocida se rechaza
+  [OK]    CA-05 registrarEnvio en nivel 0 deja ENVIADA y guarda destinatarios
+  [OK]    CA-07 acusar registra usuario y hora
+  [OK]    CA-08 RN-06 acusar dos veces no duplica el evento
+  [OK]    CA-09 RN-07 un usuario no notificado no puede acusar
+  [OK]    CA-12 RN-06 una alerta acusada no se escala
+  [OK]    CA-13 RN-05 en nivel 2 no se sube más y el agotamiento se marca una vez
+  [OK]    CA-14 RN-09 cerrar exige acuse previo y nota
+  [OK]    CA-15 RN-10 historial completo y ordenado
+  [OK]    RNF-02 el resumen lleva el código del paciente y no nombres
+== unidad/politica-pruebas.php
+  [OK]    CA-10 / CA-11 límite del plazo CRITICA: 10:14 no vence, 10:15 sí
+  [OK]    RN-04 prioridad ALTA usa 30 minutos
+  [OK]    CA-16 RN-11 plazos fuera de 5-60 minutos se rechazan
+  [OK]    CA-12 RN-06 una alerta acusada no vence
+  [OK]    RN-05 una alerta con escalamiento agotado ya no vence
+  [OK]    RN-11 el constructor también valida los plazos
+== unidad/valores-pruebas.php
+  [OK]    CodigoPaciente normaliza espacios y minúsculas
+  [OK]    CodigoPaciente rechaza nombres y formatos incompletos
+  [OK]    Prioridad acepta minúsculas y rechaza valores desconocidos
+  [OK]    EstadoAlerta: solo ENVIADA y ESCALADA esperan acuse
+  [OK]    IdAlerta genera UUID v4 distintos
+
+Total: 49 · Pasaron: 49 · Fallaron: 0 · Tiempo: 0.60 s

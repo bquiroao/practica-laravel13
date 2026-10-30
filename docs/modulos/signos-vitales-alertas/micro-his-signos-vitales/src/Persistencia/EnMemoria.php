@@ -29,6 +29,8 @@ final class EnMemoria implements RepositorioTomas, FuenteClinica {
         $this->tomas[$toma->id] = $toma;
     }
 
+    public function existe(string $tomaId): bool { return isset($this->tomas[$tomaId]); }
+
     public function deEpisodio(string $episodioId): array {
         $propias = array_filter($this->tomas, fn (Toma $t) => $t->episodioId === $episodioId);
         usort($propias, fn (Toma $a, Toma $b) => [$b->tomadaEn, $a->id] <=> [$a->tomadaEn, $b->id]);

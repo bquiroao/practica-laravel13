@@ -1,0 +1,38 @@
+@startuml semana-08-flujo-desarrollador
+!pragma layout smetana
+title User flow · Desarrollador — ver el defecto con su evidencia y marcarlo CORREGIDO (W4)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Defectos asignados a mi equipo» (filtro por severidad y estado);
+if (¿Hay defectos ABIERTOS o REABIERTOS?) then (no)
+  #E8F5E9:Vacío · «No hay defectos abiertos» (M-17);
+  stop
+else (sí)
+endif
+:Abre el defecto: pasos, severidad, caso y build donde falló;
+if (¿La evidencia es DATOS CLÍNICOS?) then (sí)
+  #FFF4E5:Se muestra solo la huella y el tipo,
+  «Ver contenido» exige qa.ver_evidencia_clinica (no lo tiene) (M-18);
+else (no)
+  :Ve la captura o el log;
+endif
+:Corrige en su rama y anota el build que lo contiene;
+:CONFIRMACIÓN · «Marcar CORREGIDO en 1.4.1. No lo cierra: QA lo verifica re-ejecutando» [Marcar];
+switch (Respuesta)
+case (200)
+  #E8F5E9:ÉXITO · estado CORREGIDO (M-19);
+case (409)
+  #FFF4E5:«El defecto no está abierto» (otro ya lo marcó o lo cerró) → se recarga (M-20);
+case (403)
+  #FDECEC:«No tiene permiso para esta acción» (M-21);
+endswitch
+note right
+  No existe «Cerrar defecto» ni «Cambiar severidad»
+  para este rol: la UI no los muestra (R-08).
+end note
+stop
+@enduml

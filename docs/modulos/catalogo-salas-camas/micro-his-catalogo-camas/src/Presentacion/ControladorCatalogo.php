@@ -15,7 +15,7 @@ final class ControladorCatalogo
     {
         try {
             switch ($accion) {
-                case 'registrarSala': $this->servicio->registrarSala($d['codigo'] ?? '', $d['nombre'] ?? ''); return $this->vista->exito(201);
+                case 'registrarSala': $this->servicio->registrarSala($d['codigo'] ?? '', $d['nombre'] ?? '', $d['capacidad'] ?? null); return $this->vista->exito(201);
                 case 'registrarCama': $this->servicio->registrarCama($d['sala'] ?? '', $d['codigo'] ?? ''); return $this->vista->exito(201);
                 case 'cambiarEstado': $this->servicio->cambiarEstado($d['sala'] ?? '', $d['cama'] ?? '', $d['estado'] ?? '', $d['motivo'] ?? ''); return $this->vista->exito(200);
                 default: return $this->vista->rutaDesconocida();

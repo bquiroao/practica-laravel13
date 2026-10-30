@@ -1,0 +1,29 @@
+@startuml semana-04-mvc-secuencia
+autonumber
+actor "Médico" as U
+participant "public/index.php" as FC
+participant Router
+participant ControladorAlergia as C
+participant FormularioAlergia as F
+participant RegistrarAlergia as RA
+participant Vista
+U -> FC : POST /pacientes/PAC-00451/alergias
+FC -> Router : despachar(POST, ruta, $_POST)
+Router -> C : registrar({codigo}, formulario)
+C -> F : solicitud(código, post, usuario)
+F --> C : SolicitudRegistro (sin validar reglas)
+C -> RA : ejecutar(solicitud)
+alt válida
+  RA --> C : AlertaExpediente
+  C --> FC : 303 Location /pacientes/PAC-00451/alerta
+else ReglaDominioViolada
+  RA --> C : excepción con código
+  C -> Vista : render(formulario, valores + mensaje)
+  C --> FC : 422 (lo escrito se conserva)
+else ErrorPersistencia
+  RA --> C : excepción
+  C -> Vista : render(error)
+  C --> FC : 503
+end
+FC --> U : respuesta HTTP
+@enduml

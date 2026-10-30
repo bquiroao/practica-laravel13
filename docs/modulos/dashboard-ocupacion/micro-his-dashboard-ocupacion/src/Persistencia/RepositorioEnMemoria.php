@@ -14,7 +14,8 @@ final class RepositorioEnMemoria implements RepositorioOcupacion
 
     /**
      * @param array<string, bool> $salas código => activa (wards)
-     * @param list<array{0: string, 1: string, 2: string, 3: bool}> $camas [sala, cama, estado, con estancia abierta] (beds y bed_stays)
+     * @param list<array{0: string, 1: string, 2: string, 3: int|bool}> $camas [sala, cama, estado, estancias abiertas] (beds y bed_stays);
+     *        true y false valen como 1 y 0, como antes de la semana 6
      */
     public function __construct(private array $salas = [], private array $camas = []) {}
 
@@ -25,8 +26,8 @@ final class RepositorioEnMemoria implements RepositorioOcupacion
         foreach ($activas as $sala) {
             $deLaSala = array_filter($this->camas, fn (array $c) => $c[0] === $sala);
             usort($deLaSala, fn (array $x, array $y) => strcmp($x[1], $y[1]));
-            if ($deLaSala === []) $filas[] = ['sala' => $sala, 'cama' => null, 'estado' => null, 'con_estancia' => false];   // como el LEFT JOIN
-            foreach ($deLaSala as [, $cama, $estado, $abierta]) $filas[] = ['sala' => $sala, 'cama' => $cama, 'estado' => $estado, 'con_estancia' => $abierta];
+            if ($deLaSala === []) $filas[] = ['sala' => $sala, 'cama' => null, 'estado' => null, 'estancias' => 0];   // como el LEFT JOIN
+            foreach ($deLaSala as [, $cama, $estado, $abierta]) $filas[] = ['sala' => $sala, 'cama' => $cama, 'estado' => $estado, 'estancias' => (int) $abierta];
         }
         return $filas;
     }

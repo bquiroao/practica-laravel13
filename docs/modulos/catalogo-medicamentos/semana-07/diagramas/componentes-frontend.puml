@@ -1,0 +1,56 @@
+@startuml componentes-frontend
+' Catálogo de medicamentos - Semana 7 - Componentes frontend (Vue 3) propios del módulo
+title Componentes frontend del Catálogo de medicamentos (Vue 3)
+skinparam componentStyle rectangle
+
+package "Vistas (rutas)" {
+  [CatalogoBuscarView\n/catalogo] as VB
+  [CatalogoDetalleView\n/catalogo/:codigo] as VD
+  [CatalogoFormularioView\n/catalogo/nuevo · /catalogo/:codigo/version] as VF
+}
+package "Componentes de UI" {
+  [BuscadorMedicamentos] as CB
+  [TablaMedicamentos] as CT
+  [FormularioMedicamento] as CF
+  [HistorialVersiones] as CH
+  [DialogoConfirmacion] as CD
+  [MensajeEstado\n(vacío, carga, éxito, error)] as CM
+}
+package "Composables (aplicación en el cliente)" {
+  [useBusquedaVigentes] as UB
+  [useFormularioMedicamento] as UF
+  [usePermisos] as UP
+  [useCatalogoApi\n(único que hace HTTP)] as UA
+}
+cloud "API /api/v1\n(contrato semana 5)" as API
+
+VB --> CB
+VB --> CT
+VB --> CM
+VB --> UB
+VD --> CH
+VD --> CD
+VD --> CM
+VD --> UP
+VF --> CF
+VF --> CM
+VF --> UF
+CB ..> UB : emite criterio
+CF ..> UF : emite datos
+UB --> UA
+UF --> UA
+VD --> UA
+UP --> UA : rol del token
+UA --> API : fetch + Bearer +\nX-Request-Id
+
+note bottom of UA
+  Traduce el formato único de error:
+  422 -> errores por campo, 409 -> mensaje
+  con acción, 401/403 -> sesión/permiso,
+  503 -> reintento.
+end note
+note right of UP
+  Solo oculta acciones; el servidor
+  sigue siendo quien autoriza (403).
+end note
+@enduml

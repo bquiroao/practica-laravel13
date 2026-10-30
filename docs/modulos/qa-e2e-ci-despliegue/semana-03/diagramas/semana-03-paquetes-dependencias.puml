@@ -1,0 +1,26 @@
+@startuml semana-03-paquetes-dependencias
+title Paquetes y regla de dependencias (verificada por ARQ-01..ARQ-05)
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Presentacion\n(Http: Kernel, Solicitud, Respuesta)" as P #F5F9FF
+package "Aplicacion\n(CasosDeUso ×8, Puertos, Resultados\\Salida)" as A #EEF0F8
+package "Dominio\n(Modelo, Puertos, Excepciones)" as D #DDEFE4
+package "Persistencia\n(Pdo, EnMemoria, Archivos, Configuracion,\nFabricaAdaptadores)" as R #FBEBDD
+package "bootstrap/contenedor.php\n(raíz de composición)" as B
+
+P --> A : llama casos de uso,\nlee Salida
+A --> D : reglas y puertos
+R --> D : implementa puertos\ndel dominio
+R --> A : implementa puertos\nde la aplicación
+B ..> P
+B ..> R
+note right of D
+  No importa ninguna otra capa (ARQ-01).
+  Sin PDO ni SQL (ARQ-05).
+end note
+note right of P
+  No importa Dominio ni Persistencia (ARQ-04):
+  solo conoce los casos de uso y su Salida.
+end note
+@enduml

@@ -1,0 +1,35 @@
+@startuml semana-04-repositorio
+skinparam classAttributeIconSize 0
+interface RepositorioAlergias {
+  + existeActivaEquivalente(pacienteId, tipo, clave): bool
+  + guardar(Alergia): void
+  + activasDePaciente(pacienteId): Alergia[]
+}
+interface RepositorioReconocimientos {
+  + existe(pacienteId, usuarioId, huella): bool
+  + guardar(Reconocimiento): void
+}
+interface DirectorioPacientes {
+  + porCodigo(codigo): ?PacienteRef
+}
+class PdoRepositorioAlergias
+class PdoRepositorioReconocimientos
+class PdoDirectorioPacientes
+class AlergiasEnMemoria
+class ReconocimientosEnMemoria
+class PacientesEnMemoria
+class "pruebas/semana04-contrato.php\n(C-1 a C-5 × 2 adaptadores)" as Contrato <<prueba>>
+PdoRepositorioAlergias ..|> RepositorioAlergias
+AlergiasEnMemoria ..|> RepositorioAlergias
+PdoRepositorioReconocimientos ..|> RepositorioReconocimientos
+ReconocimientosEnMemoria ..|> RepositorioReconocimientos
+PdoDirectorioPacientes ..|> DirectorioPacientes
+PacientesEnMemoria ..|> DirectorioPacientes
+Contrato ..> RepositorioAlergias : misma suite
+Contrato ..> RepositorioReconocimientos
+Contrato ..> DirectorioPacientes
+note bottom of AlergiasEnMemoria
+  guardar() rechaza un equivalente activo
+  igual que el índice único de PostgreSQL (C-3).
+end note
+@enduml

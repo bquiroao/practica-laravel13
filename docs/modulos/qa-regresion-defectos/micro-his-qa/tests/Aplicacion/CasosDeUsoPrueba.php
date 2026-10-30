@@ -10,7 +10,7 @@ $casoNuevo = ['id' => 'TC-200', 'titulo' => 'H4 diagnóstico: código CIE-10 vá
     'pasos' => [['accion' => 'Registrar diagnóstico con código X99.9', 'esperado' => 'Se rechaza']], 'prioridad' => 'ALTA', 'requisitos' => ['RF-07']];
 
 // --- Camino feliz -----------------------------------------------------------------------------------------------
-prueba('APP-01', 'Camino feliz completo: diseñar → aprobar → planificar → iniciar → FALLA con defecto → clasificar → corregir → re-ejecutar PASA → GO', function () use ($casoNuevo): void {
+prueba('APP-01', 'Camino feliz completo: diseñar → aprobar → planificar → iniciar → FALLA con defecto → clasificar → corregir → re-ejecutar PASA → GO, con la traza de cada paso (R-14)', function () use ($casoNuevo): void {
     $e = new Escenario();
     igual('CASO_DISENADO', $e->uc['disenar']->ejecutar('ana-qa', 'hosp-norte', $casoNuevo)->codigo, 'diseño');
     igual('CASO_APROBADO', $e->uc['aprobar']->ejecutar('lider-qa', 'hosp-norte', 'TC-200')->codigo, 'aprobación');
@@ -115,7 +115,7 @@ prueba('APP-08', 'R-08: re-ejecutar PASA sobre un defecto que no está CORREGIDO
     igual([Salida::CREADO, 'REABIERTO', null], [$r->tipo, $r->datos['defecto_verificado']['estado'], $r->datos['defecto']], 'reabierto');
 });
 
-prueba('APP-09', 'Permisos y tenant: sin permiso → 403; el tester de otro hospital ve la campaña como inexistente (404)', function (): void {
+prueba('APP-09', 'Permisos y tenant (R-13): sin permiso → 403; el tester de otro hospital ve la campaña como inexistente (404)', function (): void {
     $e = new Escenario();
     $id = $e->campanaEnCurso();
     igual(Salida::DENEGADO, $e->registrar($id, 'TC-107', 'PASA', [], 'dev-luis')->tipo, 'dev no ejecuta');
