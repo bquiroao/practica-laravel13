@@ -22,6 +22,7 @@ $grupos = [
     'Persistencia' => 'Persistencia: PDO con sentencias preparadas y almacén de evidencias',
     'Contratos' => 'Repository: la misma suite de contrato para los adaptadores InMemory y PDO',
     'Mvc' => 'MVC: formularios, controladores y vistas',
+    'Caracterizacion' => 'Caracterización (semana 7): el refactor de «reportar» y «desplegar» no cambia el comportamiento',
     'Cambio' => 'Cambio práctico de la semana 6: despliegue reproducible (CU-11, R-11)',
     'Presentacion' => 'Presentación: HTTP',
     'Api' => 'Contrato API (OpenAPI) = código',

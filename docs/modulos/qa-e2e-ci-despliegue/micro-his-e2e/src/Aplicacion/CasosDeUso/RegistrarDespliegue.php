@@ -44,9 +44,8 @@ final class RegistrarDespliegue
             if ($v === null) {
                 return Salida::noEncontrado();
             }
-            $evaluaciones = $this->evaluaciones->deVersion($tenant, $numero);
             $entorno = (string) ($datos['entorno'] ?? '');
-            $nuevo = Despliegue::registrar($v, $evaluaciones === [] ? null : end($evaluaciones), (string) ($datos['digest'] ?? ''), $entorno,
+            $nuevo = Despliegue::registrar($v, $this->evaluaciones->deVersion($tenant, $numero), (string) ($datos['digest'] ?? ''), $entorno,
                 (string) ($datos['guia'] ?? ''), (string) ($datos['smoke'] ?? ''), $this->despliegues->vigente($tenant, $entorno), $this->reloj->ahora(),
                 $this->vigenciaHoras, $usuario);
             $d = $this->transaccion->ejecutar(function () use ($nuevo, $usuario, $tenant): Despliegue {
