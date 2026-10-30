@@ -1,0 +1,14 @@
+@startsalt
+title W5 — Errores recuperables al publicar
+{+
+  <b>No se pudo enviar la versión 1.0.0</b>
+  La versión debe ser mayor que la vigente (1.0.0). Sugerencia: <b>1.0.1</b> o <b>1.1.0</b>. | [Usar 1.1.0]
+  Tu archivo y la audiencia elegida se conservan.
+  ---
+  <b>El documento no pasó la validación</b>
+  Línea 42: el ejemplo contiene algo que parece un número de identificación real.
+  [Ver el reporte] | [Reemplazar archivo]
+  ---
+  <b>El centro de documentación no está disponible</b> · No perdiste nada. | [Reintentar]
+}
+@endsalt

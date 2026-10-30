@@ -1,0 +1,21 @@
+$ php bin/acoplamiento.php   # DESPUÉS del refactor
+Micro-HIS E2E — acoplamiento por clase (76 clases en src/)
+------------------------------------------------------------------------------------------------------------------------------------
+Clase                        Capa            Ce   Ca  Ramas   Dr   LOC  P  Preocupaciones que mezcla
+ConsultarTrazabilidad        Aplicacion      12    1      3    0    59  5  ejecuciones E2E · quality gates · versiones · evidencia · despliegue
+EvaluarGate                  Aplicacion      13    1      5    0    59  4  ejecuciones E2E · quality gates · versiones · evidencia
+QualityGate                  Dominio          7    1     19    0    62  4  ejecuciones E2E · quality gates · versiones · evidencia
+Ejecucion                    Dominio          5    6     10    2   133  4  ejecuciones E2E · CI · versiones · evidencia
+ReportarResultado            Aplicacion      13    1      7    0    77  3  ejecuciones E2E · CI · evidencia
+RegistrarDespliegue          Aplicacion      11    1      8    0    58  3  quality gates · versiones · despliegue
+PdoRepositorioEjecuciones    Persistencia     7    1     11    0    81  3  ejecuciones E2E · CI · evidencia
+Version                      Dominio          3    7     16    4   107  3  ejecuciones E2E · quality gates · versiones
+IniciarEjecucion             Aplicacion      10    1      4    0    51  2  ejecuciones E2E · versiones
+RepositorioEjecucionesEnMemoria Persistencia     4    1     17    0    87  2  ejecuciones E2E · CI
+Despliegue                   Dominio          3    5     12    2    65  2  quality gates · versiones
+RepositorioEjecuciones       Dominio          3    7      0    0    21  2  ejecuciones E2E · CI
+ReporteResultado             Dominio          2    2     19    3    43  2  ejecuciones E2E · CI
+ResultadoEscenario           Dominio          2    7      7    1    51  2  ejecuciones E2E · CI
+------------------------------------------------------------------------------------------------------------------------------------
+Ce total: 250 · LOC total de src/: 2734 · Clases que mezclan ≥ 4 preocupaciones: 4
+Decisiones de regla (Dr) en Aplicación y Presentación: 2 · en el Dominio: 17

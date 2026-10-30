@@ -1,0 +1,63 @@
+@startuml srp-despues
+' Semana 2 - SRP: diseño DESPUÉS (una razón de cambio por clase)
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+hide empty members
+package "Application (orquesta)" #F4F8FF {
+  class RegistrarAlertaCritica
+  class AcusarAlerta
+  class EscalarAlertasVencidas
+  class DespachadorNotificaciones {
+    + despachar(alerta, destinatarios) : ResultadoEntrega
+  }
+}
+package "Domain (reglas)" #F0FFF4 {
+  class Alerta {
+    + crear(...) : Alerta
+    + marcarEnviada(momento)
+    + acusar(usuario, momento) : bool
+    + escalar(momento, nivelMaximo)
+    + cerrar(usuario, nota, momento)
+    + historial() : EventoHistorial[]
+  }
+  class PoliticaEscalamiento {
+    + plazoMinutos(prioridad) : int
+    + vencida(alerta, ahora) : bool
+  }
+  interface AlertaRepository
+  interface PuertoNotificacion
+  interface DirectorioDestinatarios
+  interface Reloj
+}
+package "Persistence / adaptadores" #FFF8E8 {
+  class PdoAlertaRepository
+  class NotificadorSimulado
+  class DirectorioDestinatariosEnMemoria
+  class RelojSistema
+  class RelojFijo
+}
+RegistrarAlertaCritica --> AlertaRepository
+RegistrarAlertaCritica --> DirectorioDestinatarios
+RegistrarAlertaCritica --> DespachadorNotificaciones
+RegistrarAlertaCritica --> Reloj
+RegistrarAlertaCritica ..> Alerta
+AcusarAlerta --> AlertaRepository
+AcusarAlerta --> Reloj
+EscalarAlertasVencidas --> AlertaRepository
+EscalarAlertasVencidas --> PoliticaEscalamiento
+EscalarAlertasVencidas --> DirectorioDestinatarios
+EscalarAlertasVencidas --> DespachadorNotificaciones
+EscalarAlertasVencidas --> Reloj
+DespachadorNotificaciones --> PuertoNotificacion
+PdoAlertaRepository ..|> AlertaRepository
+NotificadorSimulado ..|> PuertoNotificacion
+DirectorioDestinatariosEnMemoria ..|> DirectorioDestinatarios
+RelojSistema ..|> Reloj
+RelojFijo ..|> Reloj
+note bottom of DespachadorNotificaciones
+  Única responsabilidad: entregar
+  con reintentos (RN-08). No sabe
+  qué canal usa ni guarda nada.
+end note
+@enduml

@@ -1,0 +1,122 @@
+openapi: 3.1.0
+info:
+  title: Citas médicas y agenda — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «solicitud, validación de disponibilidad y confirmación o cancelación de cita».
+    Las rutas son las del front controller de la semana 4. JWT y X-Tenant-ID se exigen desde la semana 15 (RNF-01);
+    hoy el Micro-HIS no los valida. E6 (otra persona tomó el horario, 409) está pendiente: hallazgo H-02 de la semana 13.
+    Horas como segundos Unix. Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+tags:
+  - name: agenda
+    description: Citas del hospital
+paths:
+  /citas:
+    post:
+      tags: [agenda]
+      operationId: solicitar
+      summary: Solicitar una cita si el médico y el paciente están libres (CU-01 con CU-04)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Solicitud' }
+            example: { medico: m1, paciente: p1, especialidad: cardio, inicio: 1793548800, fin: 1793550600, motivo: control }
+      responses:
+        '201':
+          description: Cita programada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id: { type: integer, example: 1 }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /citas/{id}/confirmacion:
+    post:
+      tags: [agenda]
+      operationId: confirmar
+      summary: Confirmar una cita programada (CU-02)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { description: Cita confirmada }
+        '404': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /citas/{id}/cancelacion:
+    post:
+      tags: [agenda]
+      operationId: cancelar
+      summary: Cancelar una cita con motivo; libera el horario (CU-03)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [motivo]
+              properties:
+                motivo: { type: string, minLength: 1 }
+            example: { motivo: viaje del paciente }
+      responses:
+        '200': { description: Cita cancelada y motivo registrado (R-10) }
+        '404': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital de la petición (R-09).
+      schema: { type: string, example: h1 }
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, example: 1 }
+  responses:
+    Error:
+      description: Rechazo de negocio (E2 a E7, NF) o agenda no disponible (E8), sin detalles técnicos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E4, mensaje: El médico ya tiene una cita en ese horario. }
+  schemas:
+    Solicitud:
+      type: object
+      required: [medico, paciente, especialidad, inicio, fin, motivo]
+      properties:
+        medico: { type: string }
+        paciente: { type: string }
+        especialidad: { type: string }
+        inicio: { type: integer, description: Futuro (R-01) }
+        fin: { type: integer, description: Posterior al inicio (R-01) }
+        motivo: { type: string, minLength: 1 }
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E2, E3, E4, E5, E7, E8, NF] }
+        mensaje: { type: string }

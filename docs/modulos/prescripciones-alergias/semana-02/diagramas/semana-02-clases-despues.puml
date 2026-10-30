@@ -1,0 +1,92 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title DESPUÉS (con DIP) — política y detalles dependen de abstracciones del alto nivel
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Alto nivel: Aplicacion (dueña de los puertos)" #F5F9FF {
+  class EmitirPrescripcion {
+    + ejecutar(SolicitudEmision) : Respuesta
+  }
+  class VerificarAlergiasPrevia {
+    + ejecutar(usuario, hospital, paciente, items) : Respuesta
+  }
+  class EvaluacionClinica {
+    + evaluar(paciente, hospital, items)
+  }
+  package "Puertos" #E8F0FB {
+    interface FuenteAlergias {
+      + alergiasDe(paciente, hospital) : ExpedienteAlergias
+      .. contrato: si falla, lanza ..
+      .. FuenteAlergiasNoDisponible; nunca vacío ..
+    }
+    interface CatalogoMedicamentos
+    interface RepositorioPrescripciones {
+      + porClave(hospital, clave)
+      + guardar(Prescripcion)
+    }
+    interface RegistroAuditoria
+    interface PoliticaAcceso
+    interface Pacientes
+    interface Reloj
+  }
+}
+
+package "Dominio (reglas puras)" #FFF8E1 {
+  class VerificadorAlergias
+  class ValidadorPrescripcion
+  class "Prescripcion <<readonly>>" as Prescripcion
+  class ExpedienteAlergias
+}
+
+package "Bajo nivel: Adaptadores" #EEF7EE {
+  class FuenteAlergiasPdo <<tabla allergies>>
+  class FuenteAlergiasEnMemoria
+  class FuenteAlergiasCaida <<doble>>
+  class "FuenteAlergiasFhir\n(DIP-03, clase anónima)" as Fhir
+  class CatalogoEnMemoria
+  class RepositorioEnMemoria
+  class AuditoriaEnMemoria
+  class PoliticaEnMemoria
+  class PacientesEnMemoria
+  class RelojFijo
+}
+
+class "composicion.php\n(raíz de composición)" as Composicion <<único lugar concreto>>
+
+EmitirPrescripcion --> EvaluacionClinica
+VerificarAlergiasPrevia --> EvaluacionClinica
+EmitirPrescripcion --> RepositorioPrescripciones
+EmitirPrescripcion --> RegistroAuditoria
+EmitirPrescripcion --> PoliticaAcceso
+EmitirPrescripcion --> Pacientes
+EmitirPrescripcion --> Reloj
+EvaluacionClinica --> FuenteAlergias
+EvaluacionClinica --> CatalogoMedicamentos
+EvaluacionClinica --> VerificadorAlergias
+EvaluacionClinica --> ValidadorPrescripcion
+
+FuenteAlergiasPdo ..|> FuenteAlergias
+FuenteAlergiasEnMemoria ..|> FuenteAlergias
+FuenteAlergiasCaida ..|> FuenteAlergias
+Fhir ..|> FuenteAlergias
+CatalogoEnMemoria ..|> CatalogoMedicamentos
+RepositorioEnMemoria ..|> RepositorioPrescripciones
+AuditoriaEnMemoria ..|> RegistroAuditoria
+PoliticaEnMemoria ..|> PoliticaAcceso
+PacientesEnMemoria ..|> Pacientes
+RelojFijo ..|> Reloj
+
+FuenteAlergiasPdo -[hidden]down- FuenteAlergiasEnMemoria
+FuenteAlergiasEnMemoria -[hidden]down- FuenteAlergiasCaida
+FuenteAlergiasCaida -[hidden]down- Fhir
+Fhir -[hidden]down- RelojFijo
+CatalogoEnMemoria -[hidden]down- RepositorioEnMemoria
+RepositorioEnMemoria -[hidden]down- AuditoriaEnMemoria
+AuditoriaEnMemoria -[hidden]down- PoliticaEnMemoria
+PoliticaEnMemoria -[hidden]down- PacientesEnMemoria
+
+Composicion ..> EmitirPrescripcion : <<create>>
+Composicion ..> FuenteAlergiasPdo : <<create>>
+@enduml

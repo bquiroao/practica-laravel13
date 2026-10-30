@@ -1,0 +1,29 @@
+@startuml refactor-antes
+' Semana 7 - ANTES: NotificarNivel decide, entrega, registra fallas y escala en un mismo bucle
+start
+repeat
+  :usuarios = directorio(tenant, servicio, nivel);
+  if (¿lista vacía? [RN-03]) then (sí)
+    :registrar «sin destinatarios»;
+    if (¿nivel < 2?) then (sí)
+      :subirNivel;
+    else (no)
+      :agotarEscalamiento;
+      stop
+    endif
+  else (no)
+    :despachar con reintentos [RN-08];
+    :registrar envío y entregas fallidas;
+    if (¿hubo fallidos?) then (no)
+      stop
+    elseif (¿nivel < 2?) then (sí)
+      :subirNivel;
+    else (no, nivel 2)
+      if (¿nadie recibió?) then (sí)
+        :agotarEscalamiento;
+      endif
+      stop
+    endif
+  endif
+repeat while (vuelve a resolver el nuevo nivel)
+@enduml

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Reportes operativos: wireframes de la semana 8</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.35 Arial,sans-serif;color:#222}
+.wf{width:980px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 8px;font-size:16px}.row{display:flex;gap:12px}.p{flex:1;border:2px solid #666;background:#fff;padding:10px;min-height:250px}
+.p>b{display:block;font-size:11px;color:#555;text-transform:uppercase;margin-bottom:6px}.n{width:250px;font-size:12px}.n ol{margin:0;padding-left:20px}
+i{display:inline-block;width:17px;height:17px;border-radius:50%;background:#a93226;color:#fff;font:bold 11px/17px Arial;text-align:center;font-style:normal;margin-right:4px}
+.btn{display:inline-block;border:2px solid #333;padding:3px 10px;border-radius:3px;font-weight:bold;margin:2px 4px 2px 0}.pri{background:#333;color:#fff}.off{border-color:#6b6b6b;color:#6b6b6b}
+.in{display:inline-block;border:1px solid #666;min-width:110px;padding:2px 6px;background:#fff}.err{border:2px solid #a93226}.t{color:#a93226;font-size:12px}.hint{color:#555;font-size:12px}
+.chip{display:inline-block;border:1px solid #666;border-radius:10px;padding:0 7px;margin:1px;font-size:12px}.sel{background:#333;color:#fff;font-weight:bold}
+.row2{border-top:1px solid #ccc;padding:5px 0}.sk{height:14px;background:#ddd;margin:7px 0;border-radius:3px}.ban{border:2px solid #333;padding:6px 8px;margin:6px 0}.ban.w{border-style:dashed}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:3px 6px;text-align:left;font-size:13px}
+</style></head><body>
+
+<section class="wf" id="wf1"><h2>W1 · Elegir reporte y filtros (jefatura, administración y auditoría)</h2><div class="row">
+<div class="p"><b>a · formulario nuevo</b><div><i>1</i>Reporte: <span class="chip sel">Censo por servicio</span><span class="chip">Egresos</span></div><br>
+<div><i>2</i>Desde <span class="in">&nbsp;</span> Hasta <span class="in">&nbsp;</span></div><div class="hint">Formato AAAA-MM-DD · máximo 92 días · sin fechas futuras</div><br>
+<div><i>3</i>Servicio: <span class="chip sel">Todos</span><span class="chip">Medicina</span><span class="chip">Cirugía</span><span class="chip">Pediatría</span></div><br>
+<span class="btn pri">Ver reporte</span><span class="btn">Limpiar filtros</span></div>
+<div class="p"><b>b · con errores</b><div>Desde <span class="in err">2026-13-45</span></div><div class="t"><i>4</i>Escriba la fecha como AAAA-MM-DD, por ejemplo 2026-10-01.</div>
+<div>Hasta <span class="in err">2027-01-01</span></div><div class="t"><i>5</i>No se aceptan fechas futuras.</div><br>
+<div class="ban w"><i>6</i>Corrija los 2 campos marcados para continuar.</div><span class="btn pri">Ver reporte</span></div>
+<div class="n"><ol><li>El catálogo fija los reportes; nadie escribe un nombre de vista</li><li>Rango obligatorio, con el formato y los límites a la vista</li><li>Solo los filtros que el catálogo permite para ese reporte</li><li>Mensaje junto al campo, con ejemplo</li><li>Mismo patrón para cada regla de fechas</li><li>Resumen arriba; el botón no se desactiva, lleva al primer error</li></ol></div></div></section>
+
+<section class="wf" id="wf2"><h2>W2 · Vista previa del reporte</h2><div class="row">
+<div class="p"><b>a · con datos (auditor, sin datos personales)</b><div><i>1</i>Censo · 2026-10-01 a 2026-10-25 · <b>2 filas</b></div>
+<table><tr><th>Paciente</th><th>Documento</th><th>Servicio</th><th>Cama</th><th>Fecha</th></tr>
+<tr><td><i>2</i>***</td><td>***</td><td>cirugia</td><td>B2</td><td>2026-10-21</td></tr><tr><td>***</td><td>***</td><td>medicina</td><td>A1</td><td>2026-10-20</td></tr></table>
+<div class="hint"><i>3</i>Su permiso no incluye datos personales: se muestran como ***.</div><br><span class="btn pri">Exportar CSV</span><span class="btn off">PDF (no disponible)</span><span class="btn">Imprimir</span></div>
+<div class="p"><b>b · cargando y vacío</b><div class="hint">Cargando reporte…</div><div class="sk"></div><div class="sk" style="width:70%"></div><hr>
+<div><i>4</i>No hay filas con esos filtros. Pruebe con otro rango o servicio.</div><span class="btn off">Exportar CSV</span></div>
+<div class="n"><ol><li>Resumen de lo que se está viendo: reporte, rango y total</li><li>Columnas del catálogo, en orden estable; los datos personales salen enmascarados si el permiso no los incluye</li><li>Aviso visible del enmascarado</li><li>Vacío explicado; la pantalla no ofrece exportar (el servidor sí lo permitiría)</li></ol></div></div></section>
+
+<section class="wf" id="wf3"><h2>W3 · Confirmar la exportación</h2><div class="row">
+<div class="p"><b>a · resumen y confirmación</b><div><i>1</i><b>Confirme la exportación</b></div><br>
+<div class="ban">Censo por servicio · 2026-10-01 a 2026-10-25 · servicio: medicina<br>Formato: <b>CSV</b> · datos con corte a la hora de la exportación</div>
+<div class="hint"><i>2</i>Se registrará quién exporta, con qué filtros y el sello del archivo, para poder reproducirlo después.</div><br>
+<span class="btn pri">Exportar</span><span class="btn">Volver</span><div class="hint">Al confirmar: <span class="btn off">Generando…</span></div></div>
+<div class="p"><b>b · datos personales</b><div class="ban w"><i>3</i>Este archivo incluirá nombre y documento de pacientes. Descárguelo solo si lo necesita y guárdelo en un lugar seguro.</div>
+<div class="hint"><i>4</i>Solo se muestra si su permiso incluye datos personales.</div></div>
+<div class="n"><ol><li>Dice qué se exporta, en qué formato y con qué corte</li><li>Explica el registro de la exportación (reproducibilidad)</li><li>Borde punteado: el archivo lleva datos personales</li><li>El aviso depende del permiso, no del rol</li></ol></div></div></section>
+
+<section class="wf" id="wf4"><h2>W4 · Exportación lista</h2><div class="row">
+<div class="p"><b>a · éxito</b><div class="ban"><i>1</i><b>Archivo generado.</b> 2 filas · exportación <b>exp-3fa9c1d2e4b7</b></div>
+<table><tr><td>Sello (SHA-256)</td><td><i>2</i>9b1c…e07a</td></tr><tr><td>Corte</td><td>2026-10-25 12:00:00</td></tr></table>
+<div class="hint"><i>3</i>Con este número cualquier auditor puede comprobar que el archivo no cambió.</div><br><span class="btn pri">Ver comprobación</span><span class="btn">Hacer otro reporte</span></div>
+<div class="p"><b>b · el registro falló</b><div class="ban w"><i>4</i><b>No se pudo generar el reporte.</b> No se entregó ningún archivo.</div><span class="btn pri">Reintentar</span><span class="btn">Volver</span></div>
+<div class="n"><ol><li>Éxito con el número de exportación y el total de filas</li><li>El sello se muestra abreviado y se puede copiar completo</li><li>Dice para qué sirve</li><li>Si no se pudo registrar, no se entrega nada y se dice claro</li></ol></div></div></section>
+
+<section class="wf" id="wf5"><h2>W5 · Comprobar una exportación</h2><div class="row">
+<div class="p"><b>a · formulario y resultado</b><div><i>1</i>Número de exportación <span class="in">exp-3fa9c1d2e4b7</span> <span class="btn pri">Comprobar</span></div><br>
+<div class="ban"><i>2</i><b>✓ Coincide.</b> El archivo se vuelve a generar igual con los mismos filtros, corte y permiso.</div></div>
+<div class="p"><b>b · no coincide y no existe</b><div class="ban w"><i>3</i><b>△ No coincide.</b> Los datos de origen cambiaron o el archivo fue alterado. Avise a quien administra el sistema.</div>
+<div class="t"><i>4</i>No encontramos esa exportación en su hospital. Revise el número.</div></div>
+<div class="n"><ol><li>Un solo campo; el número se copia desde W4</li><li>Resultado con texto y símbolo, no solo color</li><li>No coincide: dice qué puede significar y a quién avisar</li><li>No existe o es de otro hospital: el mismo mensaje, sin dar detalles</li></ol></div></div></section>
+
+<section class="wf" id="wf6"><h2>W6 · Errores del servidor</h2><div class="row">
+<div class="p"><b>a · permisos y sesión</b>
+<div class="ban w"><i>1</i><b>No tiene permiso para ver reportes.</b> Pida acceso a su jefatura. <span class="btn">Volver</span></div>
+<div class="ban w"><i>2</i><b>Su sesión terminó.</b> Inicie sesión para continuar. <span class="btn">Iniciar sesión</span></div></div>
+<div class="p"><b>b · reporte y formato</b>
+<div class="ban w"><i>3</i><b>Ese reporte no existe.</b> Elija uno de la lista. <span class="btn">Volver a reportes</span></div>
+<div class="ban w"><i>4</i><b>Ese formato no está disponible.</b> Por ahora solo CSV. <span class="btn">Exportar CSV</span></div></div>
+<div class="n"><ol><li>Sin permiso: dice qué hacer, no culpa</li><li>Sesión: mantiene los filtros escritos en pantalla</li><li>Reporte inexistente: ofrece la lista</li><li>Formato: dice cuál sí existe</li></ol></div></div></section>
+</body></html>

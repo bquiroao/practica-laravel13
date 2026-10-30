@@ -1,0 +1,7 @@
+Registrar sin Idempotency-Key  1.er envío: 201  reintento: 201 otra nota          notas nuevas: 2  → NO SEGURO (duplica la nota)
+Registrar con Idempotency-Key  1.er envío: 201  reintento: 201 misma nota         notas nuevas: 1  → SEGURO
+Firmar                         1.er envío: 200  reintento: 409 nota_firmada       notas nuevas: 0  → SEGURO
+Corregir nota firmada          1.er envío: 201  reintento: 409 nota_ya_corregida  notas nuevas: 1  → SEGURO
+
+Casos: 4  No seguros: 1
+Por eso la app móvil SIEMPRE manda Idempotency-Key al registrar (regla R-M5).

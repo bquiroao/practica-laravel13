@@ -1,0 +1,58 @@
+@startuml semana-13-proceso-revision
+title Revisión técnica formal del Micro-HIS QA · fases, roles y compuertas
+skinparam defaultFontSize 11
+skinparam activityBorderColor #2E3A6E
+skinparam activityBackgroundColor #EEF0F8
+skinparam noteBackgroundColor #FFF8E6
+
+|Autor|
+start
+:Pide la revisión con el paquete:
+alcance, commit, suite y sonda;
+|Moderador|
+if (¿Criterios de entrada E-1..E-6?) then (no)
+  :Devuelve el paquete
+  con lo que falta;
+  stop
+else (sí)
+endif
+:Planificación (D0):
+asigna focos y checklist,
+fija la reunión;
+|Revisores|
+fork
+  :Revisor de dominio
+  C-01..C-04, C-09..C-11;
+fork again
+  :Revisor de contrato y seguridad
+  C-05..C-08;
+fork again
+  :Revisor de trazabilidad y evidencia
+  C-12..C-14;
+end fork
+:Preparación individual (D1-D2):
+registra hallazgos candidatos
+en el formato RT con evidencia;
+|Moderador|
+:Reunión de revisión (D3, máx. 2 h):
+se leen los candidatos, se confirman
+o descartan, se asigna severidad.
+No se discuten soluciones;
+|Registrador|
+:Acta y registro de hallazgos;
+|Autor|
+:Retrabajo (D4-D6):
+una prueba que falla por hallazgo,
+después la corrección;
+|Moderador|
+:Seguimiento (D7):
+la sonda y la suite otra vez;
+if (¿Criterios de salida S-1..S-5?) then (sí)
+  :Producto ACEPTADO;
+  stop
+else (no)
+  :Nueva revisión solo
+  de lo que no cerró;
+  stop
+endif
+@enduml

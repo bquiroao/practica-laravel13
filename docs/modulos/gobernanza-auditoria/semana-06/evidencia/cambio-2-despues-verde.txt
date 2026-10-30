@@ -1,0 +1,125 @@
+$ php tests/ejecutar.php   (después de implementar el cambio)
+Micro-HIS Auditoría - pruebas (PHP 8.4.26)
+
+== Dominio: reglas del movimiento, filtros y sello ==
+[PASA ] DOM-01   Movimiento: ocurrido_en pasa a UTC; el detalle se canoniza (mismas claves en otro orden = mismo contenido)
+[PASA ] DOM-02   Reglas de registro, cada una aislada: tenant, campos, módulo del emisor, formato, catálogo, resultado, fecha y datos prohibidos
+[PASA ] DOM-03   Sello: depende del sello anterior, de la secuencia y del contenido; es determinista
+[PASA ] DOM-04   FiltroRangoFechas: obligatorio; «hasta» incluye el día entero en hora de Guatemala; el SQL lleva los límites en UTC como parámetros
+[PASA ] DOM-05   Filtros por campo: el fragmento SQL solo tiene marcadores; un valor malicioso queda como parámetro
+[PASA ] DOM-06   ConsultaMovimientos: el alcance de hospital excluye otros hospitales; la red los incluye; el cursor excluye lo ya entregado
+
+== Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles) ==
+[PASA ] APP-01   Camino feliz: registrar → consultar → detalle → verificar; cada lectura deja su evento sellado
+[PASA ] APP-02   Regla de dominio: otro hospital (403) o datos inválidos (422) se rechazan SIN abrir transacción ni guardar
+[PASA ] APP-03   Idempotencia: el reintento idéntico devuelve el MISMO id y sello sin alargar la cadena; con otro contenido, 409
+[PASA ] APP-04   Error de persistencia al registrar: 503, ROLLBACK, nada guardado; el reintento con el mismo event_id lo crea
+[PASA ] APP-05   Error de persistencia en la meta-auditoría: la consulta responde 503 y NO entrega resultados (R-08)
+[PASA ] APP-06   Error de persistencia al leer (buscar, porEvento, porId, cadena): 503 genérico en cada caso de uso
+[PASA ] APP-07   Alcance: el auditor ve solo su hospital; la red y otro hospital le dan 403; el super administrador ve la red
+[PASA ] APP-08   Paginación: 51 movimientos → 50 + cursor; con el cursor, el que falta; cursor alterado → 422
+[PASA ] APP-09   Integridad: alterar la fila 2 → ALTERADA en 2; recalcular su sello → ALTERADA en 3; el auditor no puede verificar
+[PASA ] APP-11   Ancla externa (semana 5): borrar la ÚLTIMA fila no se ve sin ancla; con el ancla publicada antes, TRUNCADA; el auditor no obtiene anclas
+[PASA ] APP-10   La cadena se bloquea ANTES de leer el último sello, una vez por movimiento y por la cadena correcta
+[PASA ] CORR-01  Corregir un movimiento propio: el original queda IDÉNTICO; la corrección es otro movimiento sellado en la misma cadena que lo referencia
+[PASA ] CORR-02  El motivo es obligatorio (≥ 10 caracteres, sin contar espacios); un motivo sin corrección también se rechaza
+[PASA ] CORR-03  Tenant y emisor: corregir un evento de OTRO hospital o de OTRO emisor da la MISMA respuesta que uno inexistente
+[PASA ] CORR-04  Una sola corrección por movimiento (409 YA_CORREGIDO); para volver a corregir se corrige la corrección
+[PASA ] CORR-05  Reintentar la MISMA corrección (mismo event_id) es idempotente: 200 YA_REGISTRADO, no 409 YA_CORREGIDO
+[PASA ] CORR-06  Consulta por fechas: el original sigue en SU fecha, marcado con corregido_por; la corrección aparece en la suya con corrige_a
+
+== Persistencia: PDO con sentencias preparadas (dobles de PDO) ==
+[PASA ] PER-01   agregar(): un INSERT preparado con parámetros con nombre, fecha en UTC, detalle JSON y el id que devuelve RETURNING
+[PASA ] PER-02   buscar(): compone el WHERE con el alcance, los fragmentos de cada filtro y el cursor; un valor malicioso solo viaja como parámetro
+[PASA ] PER-03   La cadena de red (hospital NULL) se lee con IS NOT DISTINCT FROM y el candado usa una clave por cadena
+[PASA ] PER-04   Hidratar una fila: jsonb reordenado y sello char(64) → el sello recalculado SIGUE coincidiendo
+[PASA ] PER-05   Cualquier PDOException (08006, 23505, 22001) → ErrorPersistencia, sin SQL ni valores en el mensaje
+[PASA ] PER-06   PdoTransaccion: COMMIT al terminar; ROLLBACK y la MISMA excepción si falla la operación; COMMIT caído → ErrorPersistencia
+
+== Repository: la misma suite de contrato para InMemory y PDO ==
+[PASA ] API-01   Contrato = código: las mismas 5 operaciones; cada x-permiso es exactamente el que exige su caso de uso
+[PASA ] API-02   Contrato completo: toda operación documenta 400/401/403/500/503; el registro 201, 200, 409 y 422; la consulta 422; el detalle 404 y 405
+[PASA ] API-03   Cada estado y cada código de error que la API devuelve en 24 escenarios reales está documentado en el contrato
+[PASA ] CON-MEM-01 [MEM] agregar() asigna ids crecientes y lo leído es idéntico a lo guardado (contenido, secuencia, sello)
+[PASA ] CON-MEM-02 [MEM] porEvento() busca por (emisor, event_id): el mismo event_id de otro emisor es otro evento
+[PASA ] CON-MEM-03 [MEM] el mismo (emisor, event_id) dos veces → ErrorPersistencia, y la primera fila sigue
+[PASA ] CON-MEM-04 [MEM] la misma secuencia dos veces en una cadena → ErrorPersistencia; en otra cadena (u otro hospital) no
+[PASA ] CON-MEM-05 [MEM] ultimo() y cadena() por hospital, en orden de secuencia; la cadena de red (null) es aparte
+[PASA ] CON-MEM-06 [MEM] buscar(): alcance, filtros, orden (fecha, id) descendente, límite y cursor
+[PASA ] CON-MEM-07 [MEM] un detalle con claves desordenadas se lee de forma que su sello recalculado coincide
+[PASA ] CON-MEM-09 [MEM] semana 6: correccionDe() y correccionesDe(); una segunda corrección del mismo original → ErrorPersistencia
+[PASA ] CON-MEM-08 [MEM] Transaccion: lo agregado dentro de una operación que lanza no queda
+[OMITE] CON-PDO-01 [PDO] agregar() asigna ids crecientes y lo leído es idéntico a lo guardado (contenido, secuencia, sello)
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-02 [PDO] porEvento() busca por (emisor, event_id): el mismo event_id de otro emisor es otro evento
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-03 [PDO] el mismo (emisor, event_id) dos veces → ErrorPersistencia, y la primera fila sigue
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-04 [PDO] la misma secuencia dos veces en una cadena → ErrorPersistencia; en otra cadena (u otro hospital) no
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-05 [PDO] ultimo() y cadena() por hospital, en orden de secuencia; la cadena de red (null) es aparte
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-06 [PDO] buscar(): alcance, filtros, orden (fecha, id) descendente, límite y cursor
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-07 [PDO] un detalle con claves desordenadas se lee de forma que su sello recalculado coincide
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-09 [PDO] semana 6: correccionDe() y correccionesDe(); una segunda corrección del mismo original → ErrorPersistencia
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] CON-PDO-08 [PDO] Transaccion: lo agregado dentro de una operación que lanza no queda
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+
+== Presentación: MVC, HTTP y observabilidad ==
+[PASA ] CORR-07  HTTP (semana 6): corregir por la API → 201; el detalle del original avisa; 409 YA_CORREGIDO; todo documentado en el contrato 1.1.0
+[PASA ] HTTP-01  POST movimientos → 201 con Location, secuencia y sello; el reintento → 200 YA_REGISTRADO
+[PASA ] HTTP-02  Orden del kernel: 404 ruta, 405 método, 400 sin hospital, 401 sin token o inválido, 403 tenant del token
+[PASA ] HTTP-03  Registro: sin cuerpo 400; datos inválidos 422 con campos; módulo ajeno 403
+[PASA ] HTTP-04  Consulta: 200 con movimientos; sin rango 422; filtro desconocido 422; parámetro repetido (arreglo) 400
+[PASA ] HTTP-05  Detalle: el de otro hospital da el MISMO 404 que uno inexistente; el super administrador lo ve con X-Tenant-ID «*»
+[PASA ] HTTP-06  Base caída → 503 genérico; excepción inesperada → 500 genérico; ninguno revela detalles internos
+[PASA ] MVC-01   Formulario: solo FORMATO (cuerpo ausente o lista → 400); el emisor y el hospital salen del token y la cabecera, nunca del cuerpo
+[PASA ] MVC-02   Vistas: único lugar con códigos HTTP; Location solo en el 201; cada categoría de error a su código
+[PASA ] MVC-03   El controlador funciona sin Kernel ni rutas: se prueba solo, con el Modelo real (casos de uso en memoria)
+[PASA ] MVC-04   Formato válido pero regla rota llega al Dominio: 422 DATOS_INVALIDOS (no 400 del formulario)
+[PASA ] OBS-01   X-Request-ID: se respeta el válido, se genera si falta y se reemplaza si es peligroso
+[PASA ] OBS-02   Registro de acceso: una línea por petición con request_id, ruta, estado, duración, actor y tenant; SIN token, consulta ni cuerpo
+[PASA ] OBS-03   Si el registro de acceso falla, la respuesta al usuario no cambia (y el movimiento sí se registró)
+
+== Cliente-servidor: librería cliente, bandeja local y resiliencia ==
+[PASA ] CLI-01   Comunicación: token, tenant y el MISMO X-Request-ID en cada reintento; el servidor lo devuelve
+[PASA ] CLI-02   Reintento seguro: la respuesta del 201 se pierde, el cliente reintenta y recibe 200 YA_REGISTRADO; hay UN solo movimiento
+[PASA ] CLI-03   Servicio caído: el emisor NO falla; el movimiento va a la bandeja local; el reenvío respeta el circuito y entrega al volver
+[PASA ] CLI-04   Un 4xx no se reintenta ni se guarda (error del emisor); en el reenvío, un 4xx sale de la bandeja como rechazado
+[PASA ] CLI-05   Circuit breaker: 3 fallas → ABIERTO (ya no llama al servidor; todo va a la bandeja) → 30 s → SEMIABIERTO → éxito → CERRADO
+[PASA ] CLI-06   BandejaArchivo: sobrevive a reiniciar el proceso del emisor y no duplica un event_id
+[PASA ] CLI-07   El emisor debe asignar el event_id antes de enviar (sin él no hay reintento seguro); la consulta usa el mismo cliente
+[PASA ] CLI-08   Red real: puerto cerrado → FallaTransporte en el transporte HTTP de streams, y el cliente guarda en la bandeja en menos de 5 s
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Regla de dependencias: Presentación → Aplicación → Dominio ← Persistencia (por los «use» de cada archivo)
+[PASA ] ARQ-02   PDO solo existe en Persistencia
+[PASA ] ARQ-03   Persistencia usa solo sentencias preparadas: sin query()/exec() y sin variables interpoladas en el SQL
+[PASA ] ARQ-04   El Dominio no hace E/S ni conoce HTTP: sin superglobales, archivos, salida ni códigos de estado
+[PASA ] ARQ-06   Repository: cada puerto de persistencia tiene un adaptador PDO y uno InMemory de producción
+[PASA ] ARQ-07   Controlador: solo recibe casos de uso; sin SQL, sin «new», sin códigos de negocio y sin armar respuestas
+[PASA ] ARQ-08   Vistas: Respuesta::json solo aparece en Presentacion/Http/Vistas
+[PASA ] ARQ-05   Inmutabilidad en el código: el puerto no ofrece modificar ni borrar, y src/ no tiene UPDATE ni DELETE sobre audit_logs
+
+== Integración con PostgreSQL real ==
+[OMITE] INT-01   PostgreSQL: registrar y verificar; el detalle pasa por jsonb (claves reordenadas) y la cadena sigue ÍNTEGRA
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-02   PostgreSQL: el trigger rechaza UPDATE, DELETE y TRUNCATE sobre audit_logs (solo inserción)
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-03   PostgreSQL: consulta filtrada real (rango local, usuario, módulo) y paginación con cursor sobre 52 filas
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-04   PostgreSQL: ROLLBACK real; si la operación falla dentro de la transacción no queda la fila ni avanza la cadena
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-05   PostgreSQL: un administrador desactiva el trigger y cambia una fila con SQL; la verificación la DETECTA
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-07   PostgreSQL: se borra la última fila con el trigger desactivado; solo el ancla publicada antes lo delata (TRUNCADA)
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-08   PostgreSQL (semana 6): la base sola impide una corrección sin motivo y una segunda corrección del mismo original
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+[OMITE] INT-06   PostgreSQL: la restricción única (emisor, event_id) y la de (cadena, secuencia) existen en el esquema
+         -> defina AUDITORIA_DB_DSN para ejecutarla
+
+Total: 88  Pasan: 71  Fallan: 0  Omitidas: 17

@@ -1,0 +1,76 @@
+Comprobacion por mutacion del Micro-HIS Pacientes (PHP 8.4.26)
+
+M1 - El UPDATE deja de comparar la versión (R-06)
+   [FALLA] PER-05   UPDATE … WHERE version: sin filas y versión 8 → ConflictoVersion; sin filas y sin paciente → no encontrado
+
+M2 - El hash del documento pasa a ser el número en claro (R-04)
+   [FALLA] PER-01   Registrar: un INSERT preparado con parámetros con nombre; el DPI no viaja en claro
+   [FALLA] PER-07   Protección del documento: HMAC determinista, cifrado con nonce, descifra, y falla con otra clave
+
+M3 - La política deja de bloquear el documento repetido (R-02)
+   [FALLA] DOM-06   R-02/R-03: documento existente bloquea; coincidencia exige confirmación, permiso y motivo
+   [FALLA] APP-02   Regla de dominio al registrar: el mismo DPI → conflicto PACIENTE_EXISTENTE, sin guardar ni auditar
+   [FALLA] HTTP-03  Reglas hacia HTTP: cuerpo no JSON 400, datos inválidos 422, DPI repetido 409, clínico 403
+
+M4 - Registrar responde «creado» aunque la base falle
+   [FALLA] APP-06   Error de persistencia al guardar: no_disponible, sin paciente ni evento
+   [FALLA] APP-07   Error de persistencia en la bitácora: la transacción revierte el registro y la actualización
+   [FALLA] HTTP-07  Base de datos caída → 503 genérico, sin SQLSTATE ni detalles internos
+
+M5 - El controlador importa una clase del Dominio (rompe la regla de capas)
+   [FALLA] ARQ-01   Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado
+
+M6 - La vista traduce los datos inválidos a 400 en vez de 422
+   [FALLA] IDEM-02  Misma clave con otro cuerpo → 422 IDEMPOTENCY_KEY_REUTILIZADA; clave mal formada → 400
+   [FALLA] HTTP-03  Reglas hacia HTTP: cuerpo no JSON 400, datos inválidos 422, DPI repetido 409, clínico 403
+   [FALLA] HTTP-04  GET /api/v1/pacientes?nombre=…: 200 con datos mínimos; criterio corto 422
+   [FALLA] MVC-02   Vistas: ÚNICO lugar con códigos HTTP; ETag/Location en el éxito y categoría → código en el error
+   [FALLA] MVC-04   Formato válido pero regla rota llega al Dominio: 422 DATOS_INVALIDOS (no 400 del formulario)
+   [FALLA] CLI-02   Reintento acotado: 1 reintento ante red o 5xx; ninguno ante 4xx (es una respuesta válida)
+
+M7 - La búsqueda deja de escapar los comodines del usuario
+   [FALLA] PER-02   Búsqueda por nombre: comodines del usuario escapados, límite 20 como parámetro y filas hidratadas
+
+M8 - El dato y su evento ya no se guardan en una transacción (R-09)
+   [FALLA] APP-07   Error de persistencia en la bitácora: la transacción revierte el registro y la actualización
+
+M9 - El adaptador InMemory deja de comparar la versión
+   [FALLA] APP-03   Regla de dominio al actualizar: versión desactualizada → conflicto y el cambio anterior se conserva
+   [FALLA] CON-MEM-03 Contrato: actualizar con la versión vigente da +1 y se lee; con una vieja, ConflictoVersion sin cambios
+   [FALLA] HTTP-06  PUT: sin If-Match 428; If-Match viejo 409; If-Match vigente 200 con el nuevo ETag
+   [FALLA] CLI-07   PUT sin reintento: si la respuesta se pierde el resultado es INCIERTO (1 sola llamada); un 409 llega tal cual
+
+M10 - El controlador toma una decisión de negocio y crea el comando
+   [FALLA] IDEM-01  Misma Idempotency-Key y mismo cuerpo: misma respuesta 201, Idempotent-Replayed, un paciente y un evento
+   [FALLA] IDEM-02  Misma clave con otro cuerpo → 422 IDEMPOTENCY_KEY_REUTILIZADA; clave mal formada → 400
+   [FALLA] ARQ-07   Controlador: solo recibe casos de uso; sin SQL, sin new, sin códigos de negocio y sin armar respuestas
+
+M11 - El Kernel arma una respuesta sin pasar por las Vistas
+   [FALLA] ARQ-08   Vistas: Respuesta::json y new Respuesta solo aparecen en Presentacion/Http/Vistas
+
+M12 - El adaptador InMemory deja de exigir el documento único
+   [FALLA] CON-MEM-04 Contrato: el documento es único en toda la red al registrar y al actualizar (DocumentoDuplicado)
+
+M13 - El cliente reintenta los PUT (puede pisar datos o dar 409 engañoso)
+   [FALLA] CLI-07   PUT sin reintento: si la respuesta se pierde el resultado es INCIERTO (1 sola llamada); un 409 llega tal cual
+
+M14 - El cliente importa una clase del servidor
+   [FALLA] ARQ-01   Regla de dependencias: Presentación→Aplicación→Dominio←Persistencia; Cliente aislado
+
+M15 - El contrato declara otro permiso para la búsqueda
+   [FALLA] API-01   Contrato = código: mismas operaciones; cada x-permiso existe y es el que exige su caso de uso
+
+M16 - El contrato deja de documentar el 428 del PUT
+   [FALLA] API-02   Contrato completo: toda operación documenta 400/401/403/500/503; escrituras 422; PUT 409 y 428; detalle 304 y 404
+   [FALLA] API-03   Cada código que la API devuelve en 18 escenarios reales está documentado en el contrato
+
+M17 - El registro de acceso incluye la query (nombres de pacientes)
+   [FALLA] OBS-02   Registro de acceso: una línea por petición, sin token, sin query (nombres), sin cuerpo ni documento
+
+M18 - El registro deja de consultar la Idempotency-Key
+   [FALLA] IDEM-01  Misma Idempotency-Key y mismo cuerpo: misma respuesta 201, Idempotent-Replayed, un paciente y un evento
+   [FALLA] IDEM-02  Misma clave con otro cuerpo → 422 IDEMPOTENCY_KEY_REUTILIZADA; clave mal formada → 400
+   [FALLA] IDEM-03  El problema que resuelve: sin clave, el reintento de un registro que SÍ se hizo responde 409; con clave, 201 con el código
+   [FALLA] CLI-03   POST seguro: la respuesta se pierde, el cliente reintenta con la misma Idempotency-Key y hay UN solo paciente
+
+Mutaciones: 18  Detectadas: 18  Sobreviven: 0

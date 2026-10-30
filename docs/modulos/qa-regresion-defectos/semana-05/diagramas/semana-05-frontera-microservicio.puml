@@ -1,0 +1,34 @@
+@startuml semana-05-frontera-microservicio
+!pragma layout smetana
+title Fronteras evaluadas: qué se separa y qué no (con su medición)
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "HIS (monolito modular)" #F5F9FF {
+  rectangle "Módulo QA\n(casos, campañas, intentos, defectos)" as QA
+  rectangle "Identidad (C0/C1)\nmembresías" as ID
+  rectangle "Otros módulos clínicos" as OT
+}
+database "Base central" as BD
+rectangle "Almacén de evidencias\n= SERVICIO APARTE" as AL #EEF7EE
+rectangle "QA como microservicio\n(opción evaluada, NO elegida)" as QAMS #FDECEC
+
+QA --> BD : misma base que las membresías\n(revocación inmediata)
+ID --> BD
+OT --> BD
+QA --> AL : cuesta 11–21 ms por resultado (D − B)\ncaído → 0 registrados, «no» en 2 ms
+
+QAMS ..> ID : API + caché: ventana de revocación
+QAMS ..> AL
+
+note right of AL
+  SÍ se separa: bytes de 200 KB–5 MB no van a PostgreSQL;
+  direccionado por contenido (PUT idempotente);
+  escala y se respalda aparte.
+end note
+note bottom of QAMS
+  Criterios medibles para extraerlo (C-1..C-5)
+  no se cumplen hoy: volumen bajo, sin SLA distinto,
+  sin equipo propio, cuesta la revocación inmediata.
+end note
+@enduml

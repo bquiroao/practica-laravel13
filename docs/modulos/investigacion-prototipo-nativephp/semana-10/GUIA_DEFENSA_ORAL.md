@@ -1,0 +1,1 @@
+Mostrar cinco pantallas en 320/375/430. Explicar consulta separada de capacidad y viabilidad parcial. Recorrer permiso denegado y conexión limitada con snapshot obsoleto. Defender lectura sin cola clínica, no reintento ciego de notificación y exportación independiente. Demostrar encaje y límites: wireframes estáticos no prueban runtime, CSS ni accesibilidad operativa.

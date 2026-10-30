@@ -1,0 +1,45 @@
+@startuml repositorio-compartido
+' Semana 4 - Análisis (PROPUESTA): integración del módulo con un repositorio de datos compartido
+skinparam componentStyle rectangle
+skinparam ArrowFontSize 11
+
+package "Módulos productores (dueños de sus datos)" {
+  [ingreso-resultados-laboratorio] as LAB
+  [Alergias clínicas] as ALG
+}
+package "Alertas críticas y notificaciones internas" #EAF1FB {
+  [Lector de bandeja\n(adaptador nuevo)] as LEC
+  [RegistrarAlertaCritica] as REG
+  [PdoAlertaRepository] as PDO
+}
+[rbac] as RBAC
+
+database "PostgreSQL HOSPITAL (por tenant)" as HOSP {
+  folder "Repositorio compartido (contrato publicado)" #FFF7E0 {
+    [evento_clinico_critico\n(bandeja: escribe el productor,\nlee y marca Alertas)] as BAN
+  }
+  folder "Propiedad exclusiva de Alertas" #EAF7EE {
+    [alerta_critica\nalerta_destinatario\nalerta_evento] as TAB
+  }
+  folder "Propiedad de otros módulos" #FBEDEA {
+    [resultados, alergias,\nexpediente, pacientes] as AJENAS
+  }
+}
+database "PostgreSQL CENTRAL" as CEN {
+  [usuarios, roles, tenants] as USR
+}
+
+LAB --> BAN : INSERT evento (id_origen,\ncodigo_paciente, prioridad)
+ALG --> BAN : INSERT evento
+LEC --> BAN : lee pendientes\n(FOR UPDATE SKIP LOCKED)\ny marca procesado
+LEC --> REG : ejecutar(datos)
+REG --> PDO
+PDO --> TAB : escribe solo aquí
+RBAC --> USR
+REG ..> RBAC : consulta rol/tenant\n(contrato, no JOIN)
+LEC -[hidden]-> AJENAS
+note bottom of AJENAS
+  Alertas NO lee ni escribe estas tablas.
+  Solo recibe el código de paciente.
+end note
+@enduml

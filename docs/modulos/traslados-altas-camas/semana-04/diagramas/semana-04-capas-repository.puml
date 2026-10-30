@@ -1,0 +1,33 @@
+@startuml semana-04-capas-repository
+title Semana 4 — Capas, MVC y Repository del Micro-HIS Traslados, altas y camas
+skinparam defaultFontName Arial
+hide empty members
+package "Presentación (MVC)" #EEF2F7 {
+  class Enrutador
+  class MovimientosControlador <<Controlador>>
+  class VistaJson <<Vista>>
+}
+package "Aplicación" #E8F5E9 {
+  class RegistrarMovimiento
+  interface RepositorioMovimientos <<Repository>>
+  interface FuenteClinica <<solo lectura>>
+}
+package "Dominio" #FFF8E1 {
+  class "MovimientoDeCama · Traslado · Alta · Resultado" as Dom <<Modelo>>
+}
+package "Persistencia" #FCE4EC {
+  class MovimientosPdo
+  class EnMemoria
+}
+Enrutador -right-> MovimientosControlador
+MovimientosControlador -down-> RegistrarMovimiento
+MovimientosControlador .right.> VistaJson
+RegistrarMovimiento -down-> RepositorioMovimientos
+RegistrarMovimiento -down-> FuenteClinica
+RegistrarMovimiento .left.> Dom
+MovimientosPdo .up.|> RepositorioMovimientos
+MovimientosPdo .up.|> FuenteClinica
+EnMemoria .up.|> RepositorioMovimientos
+EnMemoria .up.|> FuenteClinica
+note right of EnMemoria : MovimientosPdo: SQL preparado + una transacción\nEnMemoria: pruebas, demostración y doble que falla
+@enduml

@@ -1,0 +1,54 @@
+@startuml semana-03-c4-componentes
+!pragma layout smetana
+!include <C4/C4_Component>
+
+title C4 · Nivel 3 — Componentes de la API QA (cuatro capas)
+
+Container(cliente, "Cliente HTTP", "curl / SPA")
+ContainerDb(bd, "PostgreSQL", "esquema qa")
+ContainerDb(archivos, "Almacén de evidencias", "disco")
+
+Container_Boundary(api, "API QA") {
+    Boundary(pres, "Presentación") {
+        Component(kernel, "Kernel", "Http", "Ruta (404/405) → token (401) → tenant (400/403) → acción; 500 sin detalles; X-Request-ID.")
+        Component(acciones, "AccionesQa", "Http", "Lee JSON, Idempotency-Key y base64 de evidencias; sin SQL ni reglas.")
+        Component(traductor, "TraductorSalida", "Http", "Tipo de salida → 200/201/403/404/409/413/422/503; Location.")
+    }
+    Boundary(app, "Aplicación") {
+        Component(casos, "DisenarCaso · AprobarCaso", "Casos de uso", "CU-01, CU-02.")
+        Component(campanas, "PlanificarCampana · IniciarCampana · CerrarCampana", "Casos de uso", "CU-03, CU-04, CU-10.")
+        Component(registrar, "RegistrarResultado", "Caso de uso", "Permiso → idempotencia → reglas → almacén (fail-closed) → intento + defecto + traza en UNA transacción.")
+        Component(defectos, "ClasificarDefecto · MarcarCorregido", "Casos de uso", "CU-08, CU-09.")
+        Component(traza, "ConsultarTrazabilidad", "Caso de uso", "RF → caso → último intento → huellas → defectos.")
+        Component(puertosApp, "Puertos de Aplicación", "Interfaces", "AlmacenEvidencias, PoliticaAcceso, RegistroAuditoria, Transaccion.")
+    }
+    Boundary(dom, "Dominio") {
+        Component(modelo, "CasoPrueba · Campana · Intento · Defecto · Decision", "Modelo", "R-01..R-12. Intento readonly.")
+        Component(evidencia, "EvidenciaVerificable y subtipos", "Modelo (semana 2, LSP)", "Captura, RegistroTexto, ResultadoJUnit; FabricaEvidencias.")
+        Component(puertosDom, "RepositorioCasos · RepositorioCampanas · RepositorioDefectos · Reloj", "Puertos del dominio", "Sin métodos para cambiar ni borrar intentos.")
+    }
+    Boundary(per, "Persistencia") {
+        Component(pdo, "Adaptadores PDO", "PDO pgsql", "PdoRepositorioCasos, PdoRepositorioCampanas, PdoRepositorioDefectos, PdoRegistroAuditoria, PdoTransaccion.")
+        Component(disco, "AlmacenEvidenciasArchivos", "Archivos", "Direccionado por contenido; relee y compara la huella.")
+        Component(config, "PoliticaAccesoEstatica · RelojSistema", "Configuración", "Stand-ins de RBAC y del reloj.")
+    }
+}
+
+Rel(cliente, kernel, "HTTP/JSON")
+Rel(kernel, acciones, "despacha")
+Rel(acciones, registrar, "ejecutar()")
+Rel(acciones, campanas, "ejecutar()")
+Rel(acciones, casos, "ejecutar()")
+Rel(acciones, defectos, "ejecutar()")
+Rel(acciones, traza, "ejecutar()")
+Rel(acciones, traductor, "traducir()")
+Rel(registrar, modelo, "usa")
+Rel(registrar, evidencia, "crea con la fábrica")
+Rel(registrar, puertosApp, "depende de")
+Rel(registrar, puertosDom, "depende de")
+Rel(pdo, puertosApp, "implementa")
+Rel(pdo, puertosDom, "implementa")
+Rel(disco, puertosApp, "implementa")
+Rel(pdo, bd, "sentencias preparadas")
+Rel(disco, archivos, "escribe / lee")
+@enduml

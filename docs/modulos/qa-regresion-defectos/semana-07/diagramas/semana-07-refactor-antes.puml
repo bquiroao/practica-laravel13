@@ -1,0 +1,41 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title Antes del refactor: RegistrarResultado decide y orquesta (Ce 22 · 67 ramas · Dq 8 · 181 líneas)
+skinparam defaultFontSize 10
+skinparam classAttributeIconSize 0
+hide empty members
+
+class RegistrarResultado #FBEBDD {
+  + ejecutar(tester, tenant, campaña, clave, datos): Salida
+  - registrar(): permiso → idempotencia → campaña admite →
+    Resultado::tryFrom · NO_APLICA ⇒ motivo · TAMANO_MAXIMO ·
+    Clasificacion::tryFrom · FabricaEvidencias · exigeEvidencia() ·
+    ReferenciaExterna · verifica_defecto · verificar() ·
+    FALLA ⇒ defecto · Severidad::tryFrom · Defecto::reportar →
+    almacén → transacción
+  - evidencias(): ?list
+  - defectoAVerificar() · repetido() · huellaSolicitud()
+}
+class FabricaEvidencias
+class Clasificacion
+class ReferenciaExterna
+class Severidad
+class Resultado
+class Defecto
+class EvidenciaInvalida
+class "Puertos (7)" as Puertos
+RegistrarResultado --> FabricaEvidencias
+RegistrarResultado --> Clasificacion
+RegistrarResultado --> ReferenciaExterna
+RegistrarResultado --> Severidad
+RegistrarResultado --> Resultado
+RegistrarResultado --> Defecto
+RegistrarResultado --> EvidenciaInvalida
+RegistrarResultado --> Puertos
+note bottom of RegistrarResultado
+  Cinco preocupaciones en una clase de la Aplicación:
+  campañas · defectos · severidad · evidencia · trazabilidad.
+  Para probar «una FALLA sin defecto se rechaza» hay que armar
+  permisos, repositorios, almacén y transacción.
+end note
+@enduml

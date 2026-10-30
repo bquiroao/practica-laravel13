@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="420" viewBox="0 0 1040 420" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 11 - Mapa de navegación de recepción</title>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#41585d"/></marker></defs>
+  <text x="520" y="28" text-anchor="middle" font-size="17" font-weight="bold">Recepción de muestras: camino feliz, rechazo y bloqueo crítico</text>
+
+  <g fill="#fff" stroke="#71878a" stroke-width="1.5">
+    <rect x="30" y="160" width="150" height="66" rx="8"/><rect x="235" y="160" width="165" height="66" rx="8"/>
+    <rect x="465" y="160" width="150" height="66" rx="8"/><rect x="680" y="160" width="150" height="66" rx="8"/>
+    <rect x="880" y="160" width="130" height="66" rx="8"/>
+    <rect x="235" y="45" width="165" height="62" rx="8" fill="#fff7f6" stroke="#bd5a53"/>
+    <rect x="465" y="45" width="165" height="62" rx="8" fill="#fff7f6" stroke="#bd5a53"/>
+    <rect x="680" y="45" width="150" height="62" rx="8" fill="#fff8e8" stroke="#be8b31"/>
+    <rect x="465" y="300" width="165" height="62" rx="8" fill="#fff8e8" stroke="#be8b31"/>
+  </g>
+  <g text-anchor="middle" fill="#18343a">
+    <text x="105" y="188" font-weight="bold">1. Buscar orden</text><text x="105" y="208" font-size="11">seleccionar ítem</text>
+    <text x="317" y="188" font-weight="bold">2. Verificar muestra</text><text x="317" y="208" font-size="11">etiqueta, recipiente, sello</text>
+    <text x="540" y="188" font-weight="bold">3. Decisión</text><text x="540" y="208" font-size="11">aceptar o rechazar</text>
+    <text x="755" y="188" font-weight="bold">4. Custodia</text><text x="755" y="208" font-size="11">persona, lugar, hora</text>
+    <text x="945" y="188" font-weight="bold">Confirmación</text><text x="945" y="208" font-size="11">estado + historial</text>
+    <text x="317" y="72" font-weight="bold">Error de búsqueda</text><text x="317" y="91" font-size="11">no crea recepción</text>
+    <text x="547" y="72" font-weight="bold">Código duplicado</text><text x="547" y="91" font-size="11">bloquea; no crea custodia</text>
+    <text x="755" y="72" font-weight="bold">Pendiente / escalar</text><text x="755" y="91" font-size="11">falta de información</text>
+    <text x="547" y="326" font-weight="bold">Rechazo</text><text x="547" y="345" font-size="11">motivo obligatorio</text>
+  </g>
+  <g fill="none" stroke="#41585d" stroke-width="1.6" marker-end="url(#arrow)">
+    <path d="M180,193 H235"/><path d="M400,193 H465"/><path d="M615,193 H680"/><path d="M830,193 H880"/>
+    <path d="M317,160 V107"/><path d="M400,76 H465"/>
+    <path d="M400,193 H430 V76 H465"/>
+    <path d="M540,226 V300"/>
+    <path d="M465,331 H435 V193 H465"/>
+    <path d="M540,107 V140"/>
+    <path d="M755,160 V107"/>
+    <path d="M317,107 V140"/>
+    <path d="M945,226 V255 H105 V226"/>
+  </g>
+  <text x="420" y="184" font-size="10" fill="#52696d">único</text>
+  <text x="428" y="126" font-size="10" fill="#a54640">duplicado</text>
+  <text x="20" y="398" fill="#718487" font-size="11">Una falla técnica o dato incompleto no se convierte en rechazo clínico. Rechazo confirmado queda registrado y no pasa a procesamiento.</text>
+</svg>

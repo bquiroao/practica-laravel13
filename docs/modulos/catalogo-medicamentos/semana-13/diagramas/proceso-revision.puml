@@ -1,0 +1,42 @@
+@startuml proceso-revision
+' Catálogo de medicamentos - Semana 13 - Proceso de la revisión técnica formal
+title Revisión técnica formal del Catálogo de medicamentos
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+|Autor|
+start
+:Planificación: congela la versión
+(commit de develop) y arma el paquete;
+|Moderador|
+if (¿Cumple los criterios de entrada?) then (no)
+  :Devuelve al autor con lo que falta;
+  stop
+else (sí)
+endif
+:Envía paquete, checklist y agenda
+(48 h antes);
+|Revisores|
+:Preparación individual
+(60-90 min, checklist C-01..C-15);
+:Anotan posibles hallazgos
+en el formato;
+|Moderador|
+:Reunión (máx. 90 min):
+se leen los ítems del checklist,
+se registran hallazgos, no se corrige;
+:Clasifica severidad y decide:
+aceptado / aceptado con cambios / nueva revisión;
+|Autor|
+:Corrige cada hallazgo y enlaza
+el commit o PR que lo cierra;
+|Moderador|
+if (¿Cumple los criterios de salida?) then (sí)
+  :Cierra el acta;
+  stop
+else (no)
+  :Programa seguimiento;
+  stop
+endif
+@enduml

@@ -1,0 +1,34 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+title Cliente-servidor del módulo QA (semana 5)
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+actor "Tester" as T
+actor "Líder QA" as L
+actor "Responsable de producto" as P
+
+package "Cliente (SPA, semanas 8–11)" #E8F0FB {
+  rectangle "ClienteQa\n· Idempotency-Key por resultado\n· reintento 5xx / sin respuesta\n· bandeja de PENDIENTES" as C
+  rectangle "BandejaPendientes\n(almacenamiento local)" as B
+}
+package "Servidor: Micro-HIS QA (monolito modular)" #F5F9FF {
+  rectangle "Kernel\nX-Request-ID · registro de acceso JSON" as K
+  rectangle "MVC → 9 casos de uso → dominio" as M
+  rectangle "Adaptadores PDO" as A
+}
+database "Base central\n(esquema qa · C0/C1)" as BD
+rectangle "Almacén de evidencias\n(servicio aparte)\nPUT/GET /almacen/v1/{tenant}/{sha256}" as AL #EEF7EE
+rectangle "Identidad / RBAC" as ID
+
+T --> C
+L --> C
+P --> C
+C --> B : PENDIENTE
+C --> K : HTTPS/JSON · api/openapi.yaml
+K --> M
+M --> A
+A --> BD : PDO
+M --> AL : AlmacenEvidenciasHttp\n(3 s, circuito, fail-closed)
+K ..> ID : token
+@enduml

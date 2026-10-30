@@ -1,0 +1,56 @@
+@startuml semana-08-flujo-admisionista
+' Admisión hospitalaria y asignación de cama — Semana 8
+' User flow del rol ADMISIONISTA (pantallas W-01..W-05).
+skinparam activity {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+  DiamondBackgroundColor #FFF6DD
+}
+title User flow — Admisionista
+
+start
+:Inicio: «Nueva admisión» (W-01);
+note right: Ayuda: «Use el código PAC-NNNNN;\nno escriba nombres».
+repeat
+  :Escribe código, servicio, tipo,
+  aislamiento y origen;
+backward :Error junto al campo, foco en él,
+se conserva lo escrito (E-02);
+repeat while (¿Formato válido?\n(al salir del campo)) is (no) not (sí)
+:Buscar camas -> estado CARGA (W-02);
+if (¿Paciente activo y sin admisión activa?) then (no)
+  :Mensaje con acción:
+  «Verifique el código» o «Ya tiene admisión activa: ver»;
+  stop
+else (sí)
+endif
+if (¿Hay camas compatibles?) then (no)
+  :Estado VACÍO (W-02):
+  «No hay camas para este requerimiento»
+  + «Cambiar requerimiento»;
+  stop
+else (sí)
+endif
+:Elige cama (W-02);
+:Confirmación con resumen (W-03);
+if (¿Confirma?) then (volver)
+  :Regresa a la lista sin perder datos;
+  stop
+else (confirmar)
+endif
+:Guardando… (botón deshabilitado, evita doble envío);
+if (¿Resultado?) then (409 cama tomada)
+  :Error recuperable (W-04):
+  «La cama B-202 ya fue asignada»
+  + lista actualizada, foco en el aviso;
+  stop
+elseif (409 conflicto / 503) then
+  :«Intente de nuevo» (reintentable)
+  conservando la selección;
+  stop
+else (201)
+  :Éxito (W-05): admisión ACTIVA,
+  cama, fecha y responsable;
+  stop
+endif
+@enduml

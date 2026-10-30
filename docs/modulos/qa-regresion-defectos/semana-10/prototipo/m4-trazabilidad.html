@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trazabilidad · Regresión H4 · QA y regresión</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="btn atras" href="m1-campanas.html?estado=lider" aria-label="Volver a las campañas">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">QA · Hospital Regional del Norte</span></button>
+  <span class="rol-actual" data-estado="base cerrar cerrada">Líder QA</span>
+  <span class="rol-actual" data-estado="producto">Producto</span>
+  <span class="avatar" aria-label="lider-qa">LQ</span>
+</header>
+
+<main>
+  <h1>Regresión H4</h1>
+  <p class="sub">Build 1.4.0+abc1234 · <span data-estado="base cerrar producto">en curso</span><span data-estado="cerrada">cerrada a las 16:05 por lider-qa</span></p>
+
+  <section class="aviso error" data-estado="base cerrar producto">
+    <h2>⛔ Hoy daría No liberar (NO-GO) · 1 causa</h2>
+    <p>1 defecto MAYOR abierto en un caso crítico (TC-107). Tasa de aprobados: 100 % (3 de 3).</p>
+  </section>
+  <section class="aviso error" data-estado="cerrada" role="status">
+    <h2>⛔ Cerrada: No liberar (NO-GO)</h2>
+    <p>Causa: 1 defecto MAYOR abierto en un caso crítico de la matriz.</p>
+  </section>
+
+  <h2>Casos</h2>
+  <article class="tarjeta caso">
+    <div class="fila"><span class="titulo">TC-107 ★</span><span class="chip go derecha">✓ Pasa (#2)</span></div>
+    <div class="meta">RF-07 · 1 captura 🔒 huella 3fa9…c2e1</div>
+    <div class="defecto">
+      <div class="fila"><strong>#12 · Mayor · Abierto</strong><span class="chip bloquea derecha">⛔ Bloquea</span></div>
+      <p class="motivo">Bloquea porque TC-107 es crítico para «expediente» y el defecto no está cerrado.</p>
+    </div>
+  </article>
+  <article class="tarjeta caso">
+    <div class="fila"><span class="titulo">TC-108 ★</span><span class="chip go derecha">✓ Pasa</span></div>
+    <div class="meta">RF-07, RF-08 · sin evidencia · sin defectos</div>
+  </article>
+  <article class="tarjeta caso">
+    <div class="fila"><span class="titulo">TC-109</span><span class="chip go derecha">✓ Pasa</span></div>
+    <div class="defecto">
+      <div class="fila"><strong>#14 · Mayor · Abierto</strong><span class="chip no-bloquea derecha">No bloquea</span></div>
+      <p class="motivo">TC-109 no es crítico en la matriz para esta campaña.</p>
+    </div>
+  </article>
+  <p class="meta">★ crítico en la matriz para las funcionalidades de esta campaña.</p>
+
+  <table class="tabla" aria-label="Trazabilidad por caso">
+    <thead><tr><th>Caso</th><th>Requisitos</th><th>Último</th><th>Evidencia</th><th>Defectos</th></tr></thead>
+    <tbody>
+      <tr><td>TC-107 ★</td><td>RF-07</td><td>✓ Pasa (#2)</td><td>1 captura 🔒</td><td>#12 Mayor · Abierto · <strong>⛔ Bloquea</strong></td></tr>
+      <tr><td>TC-108 ★</td><td>RF-07, RF-08</td><td>✓ Pasa</td><td>—</td><td>—</td></tr>
+      <tr><td>TC-109</td><td>RF-07</td><td>✓ Pasa</td><td>—</td><td>#14 Mayor · Abierto · no bloquea</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<div class="accion-fija" data-estado="base cerrar">
+  <a class="btn primario" href="m4-trazabilidad.html?estado=cerrar">Cerrar campaña…</a>
+</div>
+
+<div data-estado="cerrar">
+  <div class="velo"></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-cerrar" aria-describedby="d-cerrar">
+    <div class="asa"></div>
+    <h2 id="t-cerrar">¿Cerrar «Regresión H4»?</h2>
+    <p id="d-cerrar">Cerrar no se puede deshacer. La decisión será <strong>No liberar (NO-GO)</strong> por el defecto #12.</p>
+    <div class="acciones">
+      <a class="btn peligro" href="m4-trazabilidad.html?estado=cerrada">Cerrar con No liberar</a>
+      <a class="btn" href="m4-trazabilidad.html" autofocus>Volver</a>
+    </div>
+  </section>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-campanas.html?estado=lider"><span class="ico" aria-hidden="true">☰</span>Campañas</a>
+  <a href="m4-trazabilidad.html" aria-current="page"><span class="ico" aria-hidden="true">⌘</span>Trazabilidad</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

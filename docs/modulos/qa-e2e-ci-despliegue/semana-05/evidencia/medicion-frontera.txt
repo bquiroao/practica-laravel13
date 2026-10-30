@@ -1,0 +1,11 @@
+$ E2E_DB_DSN=... php bin/medir.php 100
+Reportar un resultado FALLA con una traza de 200 KB · N = 100
+
+Escenario                                     p50 ms    p95 ms  confirmados
+A · en proceso, memoria                         1.6       2.2      100/100
+B · en proceso, PostgreSQL + disco             20.7      25.8      100/100
+C · por HTTP + PostgreSQL (hoy)               127.8     168.2      100/100
+D · ingesta aparte → API → PostgreSQL     149.1     198.1      100/100
+E · ingesta aparte con la API caída         2126.4    2175.3        0/100
+
+Costo del salto extra (D − C): p50 +21.3 ms, p95 +29.9 ms por resultado; en un job de 300 escenarios: +6.4 s.

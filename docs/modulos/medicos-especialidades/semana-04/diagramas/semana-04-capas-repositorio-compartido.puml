@@ -1,0 +1,39 @@
+@startuml semana-04-capas-repositorio-compartido
+title Semana 4 — Capas MVC, Repository y repositorio de datos compartido (Micro-HIS Médicos)
+hide empty members
+package "Presentación (MVC)" #EEF2F7 {
+  class Enrutador
+  class MedicosControlador <<Controlador>>
+  class VistaJson <<Vista>>
+}
+package "Aplicación" #E8F5E9 {
+  class "RegistrarMedico\nAsociarEspecialidad\nConsultarDisponibilidad" as Casos
+  class MedicoNuevo <<reutilizable>>
+  interface RepositorioMedicos <<Repository>>
+  interface FuenteHospital <<solo lectura>>
+}
+class "Dominio\nVigencia · Asignacion · ReglasEspecialidad · Agenda" as Dom #FFF8E1
+package "Persistencia" #FCE4EC {
+  class MedicosPdo
+  class EnMemoria <<pruebas>>
+}
+package "Base HOSPITAL compartida (PostgreSQL)" #F5F5F5 {
+  class "doctor_profiles · doctor_specialties\n+ horarios_medico (propuesta)\n(escribe Médicos)" as Propias
+  class "local_user_refs (Identidad, sincronizada de CENTRAL)\nspecialties (catálogo) · appointments (Citas, M05)" as Ajenas <<solo lectura>>
+  class "Trigger de Citas y de care_assignments:\nel médico debe tener la especialidad vigente" as Regla <<lee doctor_specialties>>
+}
+Enrutador -right-> MedicosControlador
+MedicosControlador .right.> VistaJson
+MedicosControlador -down-> Casos
+Casos -down-> RepositorioMedicos
+Casos -down-> FuenteHospital
+Casos .left.> Dom
+RepositorioMedicos ..> MedicoNuevo
+MedicosPdo .up.|> RepositorioMedicos
+MedicosPdo .up.|> FuenteHospital
+EnMemoria .up.|> RepositorioMedicos
+EnMemoria .up.|> FuenteHospital
+MedicosPdo -down-> Propias : una transacción
+MedicosPdo .down.> Ajenas : SELECT
+Regla .left.> Propias : depende de
+@enduml

@@ -1,0 +1,434 @@
+openapi: 3.1.0
+info:
+  title: HIS Tenant Identity and Session API
+  version: 1.0.0
+  description: >
+    Contrato académico para invitación tenant-bound, establecimiento de credenciales,
+    autenticación y revocación. HTTPS obligatorio. No representa una API desplegada.
+servers:
+  - url: https://his.example.edu/api/v1
+    description: URL ilustrativa; reemplazar por el host institucional aprobado.
+tags:
+  - name: Invitations
+    description: Alta autorizada de membresías y establecimiento de credenciales.
+  - name: Authentication
+    description: Inicio de sesión, consulta de contexto y revocación de sesión.
+paths:
+  /tenants/{tenantId}/user-invitations:
+    post:
+      tags: [Invitations]
+      operationId: createTenantUserInvitation
+      summary: Crear una invitación de usuario dentro del tenant autenticado
+      description: >
+        Requiere permiso users:invite dentro del mismo tenant. El rol solicitado debe
+        estar permitido para el invitador. No recibe ni devuelve contraseñas o tokens
+        de invitación. La entrega de notificación puede ser asíncrona.
+      security:
+        - sessionBearer: []
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvitationRequest'
+      responses:
+        '202':
+          description: Invitación creada y encolada para entrega; no confirma entrega del mensaje.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationAccepted'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/TenantNotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Validation'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /auth/invitation-credentials:
+    post:
+      tags: [Invitations]
+      operationId: acceptInvitationAndSetCredentials
+      summary: Aceptar una invitación y establecer la credencial inicial
+      description: >
+        El token de invitación es de un solo uso, tenant-bound y enviado solo en el
+        esquema de autorización Invitation; no debe ir en la URL ni en logs. El consumo
+        y el alta de credencial/membresía activa son una transacción.
+      security:
+        - invitationToken: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCredentialsRequest'
+      responses:
+        '204':
+          description: Invitación consumida y credencial establecida.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invitación desconocida, vencida o ya utilizada.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          $ref: '#/components/responses/Validation'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /auth/sessions:
+    post:
+      tags: [Authentication]
+      operationId: createTenantSession
+      summary: Autenticar dentro de un tenant activo
+      description: >
+        X-Tenant-ID selecciona el contexto solicitado, no concede acceso. Identidad,
+        credencial, tenant activo y membresía se verifican antes de crear una sesión
+        persistida. Los fallos de credencial y membresía producen el mismo 401.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: Sesión persistida; el token opaco se devuelve una única vez.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+              description: Evita almacenar respuestas que contienen un bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Credenciales inválidas o membresía no disponible.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          $ref: '#/components/responses/TenantNotFound'
+        '422':
+          $ref: '#/components/responses/Validation'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      operationId: getCurrentSession
+      summary: Obtener identidad y tenant de la sesión autenticada
+      security:
+        - sessionBearer: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Contexto mínimo de la sesión actual.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentSession'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /auth/sessions/current:
+    delete:
+      tags: [Authentication]
+      operationId: revokeCurrentSession
+      summary: Revocar la sesión actual
+      description: >
+        Persiste revokedAt antes de responder. No invalida otras sesiones del mismo
+        usuario. Repetir el cierre de una sesión conocida ya revocada devuelve 204.
+      security:
+        - sessionBearer: []
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '204':
+          description: Sesión actual revocada o ya revocada.
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+components:
+  securitySchemes:
+    sessionBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-session-token
+      description: Token aleatorio opaco; el servidor persiste solo su hash SHA-256.
+    invitationToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        El cliente envía Authorization: Invitation <token>. Es un secreto de un solo
+        uso y se acepta únicamente en el endpoint de establecimiento de credenciales.
+  parameters:
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      description: Identificador del tenant operativo resuelto por el servidor.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+    TenantIdHeader:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Tenant solicitado para login; no sustituye la autorización.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Clave opaca por operación, retenida al menos 24 horas.
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Correlación sin PII ni secretos; el servidor genera uno si falta.
+      schema:
+        type: string
+        maxLength: 128
+  schemas:
+    CreateInvitationRequest:
+      type: object
+      additionalProperties: false
+      required: [email, displayName, roleCode]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        roleCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Rol permitido por política para el usuario invitador.
+    InvitationAccepted:
+      type: object
+      additionalProperties: false
+      required: [invitationId, status, expiresAt, deliveryStatus]
+      properties:
+        invitationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          const: pending
+        expiresAt:
+          type: string
+          format: date-time
+        deliveryStatus:
+          type: string
+          enum: [queued]
+    SetCredentialsRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          minLength: 1
+          maxLength: 128
+          writeOnly: true
+    SessionCreated:
+      type: object
+      additionalProperties: false
+      required: [accessToken, tokenType, expiresAt, user]
+      properties:
+        accessToken:
+          type: string
+          minLength: 43
+          description: Secreto de sesión opaco, mostrado una sola vez.
+        tokenType:
+          type: string
+          const: Bearer
+        expiresAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/SessionUser'
+    CurrentSession:
+      type: object
+      additionalProperties: false
+      required: [user, tenant]
+      properties:
+        user:
+          $ref: '#/components/schemas/SessionUser'
+        tenant:
+          $ref: '#/components/schemas/TenantSummary'
+    SessionUser:
+      type: object
+      additionalProperties: false
+      required: [id, displayName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          maxLength: 120
+    TenantSummary:
+      type: object
+      additionalProperties: false
+      required: [id, displayName]
+      properties:
+        id:
+          type: string
+          maxLength: 64
+        displayName:
+          type: string
+          maxLength: 120
+    Problem:
+      type: object
+      description: RFC 9457 problem details; detail must not contain secrets or internal SQL.
+      required: [type, title, status, code, requestId]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        code:
+          type: string
+        requestId:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      additionalProperties: true
+  responses:
+    BadRequest:
+      description: JSON malformado o cabecera requerida inválida.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthenticated:
+      description: Sesión no válida, expirada o revocada.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: El actor autenticado no tiene permiso para esa operación o tenant.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TenantNotFound:
+      description: Tenant no existe, está inactivo o no puede resolverse.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Invitación/membresía duplicada o clave de idempotencia reutilizada con distinto cuerpo.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Validation:
+      description: Campos que no cumplen las reglas del contrato o del dominio.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    RateLimited:
+      description: Límite de intentos excedido; puede incluir Retry-After.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unavailable:
+      description: Dependencia necesaria no disponible; la operación no se confirma como exitosa.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -1,0 +1,31 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS QA funcional, pruebas manuales y matriz de regresión
+
+Person(analista, "Analista QA", "Diseña casos manuales versionados.")
+Person(lider, "Líder QA", "Aprueba casos, planifica, clasifica severidad y cierra con GO / NO_GO.")
+Person(tester, "Tester", "Ejecuta y registra resultados con evidencia.")
+Person(dev, "Desarrollador", "Marca defectos CORREGIDO en un build.")
+Person(producto, "Responsable de producto", "Consulta la trazabilidad antes de liberar.")
+
+System(qa, "Micro-HIS QA y regresión", "Campañas de regresión manual sobre un build, matriz de críticos, evidencias verificables, defectos con severidad y trazabilidad RF → resultado.")
+
+System_Ext(rbac, "RBAC", "Decide qa.disenar / aprobar / planificar / ejecutar / clasificar / corregir / cerrar / consultar.")
+System_Ext(identidad, "Identidad (JWT)", "Usuario y tenant del token (simulado con tokens demo).")
+System_Ext(almacen, "Almacén de evidencias", "Guarda capturas, logs y JUnit por su huella sha256.")
+System_Ext(auditoria, "Módulo Auditoría", "Recibe RESULTADO_REGISTRADO, DEFECTO_*, CAMPANA_CERRADA_GO / NO_GO.")
+System_Ext(his, "HIS en desarrollo (sistema bajo prueba)", "Las suites C1–C4 y H1–H4 del esquema federado son los casos de demostración.")
+
+Rel(analista, qa, "Diseña casos", "HTTPS/JSON")
+Rel(lider, qa, "Aprueba, planifica, clasifica, cierra", "HTTPS/JSON")
+Rel(tester, qa, "Registra resultados + evidencia", "HTTPS/JSON · Idempotency-Key")
+Rel(dev, qa, "Marca CORREGIDO", "HTTPS/JSON")
+Rel(producto, qa, "Consulta trazabilidad", "HTTPS/JSON")
+Rel(tester, his, "Prueba manualmente el build")
+Rel(qa, rbac, "Pide decisión", "puerto PoliticaAcceso")
+Rel(qa, identidad, "Valida token", "Autenticador")
+Rel(qa, almacen, "Guarda y relee evidencias", "puerto AlmacenEvidencias · si falla → 503 (fail-closed)")
+Rel(qa, auditoria, "Envía trazas", "bandeja local (outbox)")
+@enduml

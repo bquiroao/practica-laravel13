@@ -1,0 +1,34 @@
+@startuml refactor-despues
+title Después: una sola fuente para vigencia y requisitos, cada capa con un rol
+skinparam componentStyle rectangle
+
+package "UI" {
+  [AltaPruebaView.vue] as V
+  [useCatalogoStore] as ST
+  [catalogoApi] as CL
+}
+package "Aplicación" {
+  [RegistrarPrueba / ConsultarPruebasVigentes] as UC
+}
+package "Dominio" {
+  [Vigencia::incluye()\nRequisitoMuestra::TIPOS] as DM
+  interface LabTestRepository as IR
+}
+package "Persistencia" {
+  [EloquentLabTestRepository\nbuscarVigentes(fecha)] as ER
+}
+[Órdenes] as O
+
+V --> ST
+ST --> CL
+CL --> UC : API v1
+UC --> DM
+UC --> IR
+ER ..|> IR
+O --> UC : GET vigentes (API)
+
+note bottom of DM
+  La regla de vigencia y las listas de
+  tipos de muestra existen una sola vez.
+end note
+@enduml

@@ -1,0 +1,35 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 09608d4 (rama semana-8-contratos-api, PR #204). Comando: git show 09608d4:<archivo> | grep -nE '<patrón>'
+
+[H-01] semana-08-wf4-leer-documento.puml
+5:  <color:orange>Estás viendo una versión obsoleta. La vigente es la 1.1.0.</color> | [Ir a la 1.1.0]
+
+[H-02] semana-08-wf2-publicar-version.puml
+6:  Tipo * | { () OpenAPI | () Postman | (X) Manual } | <i>R-01</i>
+8:  Audiencia * | { [X] médico | [X] enfermería | [ ] farmacia } | <i>Al menos un rol (R-01)</i>
+
+[H-03] semana-08-wf3-revisar-version.puml
+7:  Motivo (obligatorio para rechazar) | "                       "
+8:  <i>Si la enviaste tú, «Aprobar» está deshabilitado: debe aprobarla otra persona (R-05).</i> | .
+9:  [Rechazar] | [Aprobar y publicar]
+
+[H-04] semana-08-wf2-publicar-version.puml
+9:  Archivo * | [Elegir archivo…] guia-citas-1.1.0.pdf | <i>Sin datos reales de pacientes (R-09)</i>
+
+[H-05, H-08] semana-08-wf1-mi-documentacion.puml
+5:  Tus roles: <b>médico</b> | Buscar: | "citas       " | Tipo: ^Todos^
+8:    guia-citas | Manual | 1.1.0 | 26/10/2026
+9:    citas-api | OpenAPI | 2.0.0 | 20/10/2026
+
+[H-09] semana-08-wf5-error-recuperable.puml
+5:  La versión debe ser mayor que la vigente (1.0.0). Sugerencia: <b>1.0.1</b> o <b>1.1.0</b>. | [Usar 1.1.0]
+
+[foco] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-mi-documentacion.puml: 0
+semana-08-wf2-publicar-version.puml: 0
+semana-08-wf3-revisar-version.puml: 0
+semana-08-wf4-leer-documento.puml: 0
+semana-08-wf5-error-recuperable.puml: 0
+semana-08-flujo-ux.md: 0

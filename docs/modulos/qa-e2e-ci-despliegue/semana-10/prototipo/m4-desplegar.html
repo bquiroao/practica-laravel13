@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desplegar 2.4.1 · Calidad de versiones</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="btn atras" href="m1-versiones.html?estado=ops" aria-label="Volver a las versiones">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">Calidad · Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Operaciones</span>
+  <span class="avatar" aria-label="ops-luis">OL</span>
+</header>
+
+<div class="contexto">
+  <span class="version">Desplegar 2.4.1 → producción</span>
+  <span class="meta">
+    <span data-estado="base digest-distinto listo smoke-falla confirmar confirmar-falla">Aprobada · vence en 41 h</span>
+    <span data-estado="vence-pronto">Aprobada · vence en 1 h 40 min</span>
+    <span data-estado="vencida">Aprobación vencida a las 07:12</span>
+    <span data-estado="desplegado revertido">Despliegue registrado</span>
+    · guía guia-2026.3
+  </span>
+</div>
+
+<main>
+  <!-- Semana 9 B-09: aviso antes del vencimiento, y lo cargado se conserva tras el 409 -->
+  <section class="aviso atencion" data-estado="vence-pronto" role="status">
+    <h2>La aprobación vence en 1 h 40 min</h2>
+    <p>Si vence antes de registrar, el despliegue se rechaza y hay que evaluar el gate otra vez. Lo que cargues se conserva.</p>
+  </section>
+  <section class="aviso error" data-estado="vencida" role="alert" tabindex="-1">
+    <h2>La aprobación venció mientras instalabas</h2>
+    <p>No se registró nada. La guía, el digest y el smoke siguen cargados abajo.</p>
+    <div class="acciones"><a class="btn" href="m1-versiones.html?estado=ops">Pedir una nueva evaluación</a></div>
+  </section>
+  <section class="aviso ok" data-estado="desplegado" role="status" tabindex="-1">
+    <h2>✓ 2.4.1 desplegada en producción</h2>
+    <p>Con guia-2026.3 · smoke pasa · 30/10 06:58 · ops-luis</p>
+  </section>
+  <section class="aviso error" data-estado="revertido" role="status" tabindex="-1">
+    <h2>✕ Smoke fallido: producción quedó en 2.4.0</h2>
+    <p>Se registró REVERTIDO a 2.4.0, la última desplegada. El responsable de release lo ve en la versión 2.4.1.</p>
+  </section>
+
+  <div data-estado="base digest-distinto listo smoke-falla confirmar confirmar-falla vence-pronto vencida">
+    <h1>Instalar con la guía</h1>
+    <p class="sub">Producción hoy: 2.4.0 (desde el 27/10).</p>
+    <a class="btn bloque" href="#">Abrir la guía guia-2026.3</a>
+
+    <span class="etiqueta">Digest aprobado</span>
+    <p class="digest" id="aprobado">sha256:<span class="bloque">9f2c4d1a</span><span class="bloque">7be0c3f2</span><span class="bloque">5a61e9d8</span><span class="bloque">03b47c2e</span><span class="bloque">e81f6a09</span><span class="bloque">c4d27b35</span><span class="bloque">1a9e0f6c</span><span class="bloque">a07be41a</span></p>
+    <button class="btn" type="button">Copiar digest aprobado</button>
+
+    <div data-estado="base vence-pronto">
+      <label for="digest-vacio">Digest instalado (pegar)</label>
+      <textarea id="digest-vacio" class="digest-campo" placeholder="sha256:…"></textarea>
+    </div>
+    <div data-estado="digest-distinto">
+      <label for="digest-mal">Digest instalado (pegar)</label>
+      <textarea id="digest-mal" class="digest-campo" aria-invalid="true" aria-describedby="err-digest">sha256:9f2c4d1a7be0c3f25a61e9d803b47c2ee81f6a09c4d27b351a9e0f6ca07be41b</textarea>
+      <div id="err-digest">
+      <p class="error">✕ No es el digest aprobado. Difiere el último bloque:</p>
+      <p class="digest">sha256:<span class="bloque">9f2c4d1a</span><span class="bloque">7be0c3f2</span><span class="bloque">5a61e9d8</span><span class="bloque">03b47c2e</span><span class="bloque">e81f6a09</span><span class="bloque">c4d27b35</span><span class="bloque">1a9e0f6c</span><span class="bloque distinto">a07be41b</span></p>
+      </div>
+    </div>
+    <div data-estado="listo smoke-falla confirmar confirmar-falla vencida">
+      <label for="digest-ok">Digest instalado (pegar)</label>
+      <textarea id="digest-ok" class="digest-campo" aria-describedby="ok-digest">sha256:9f2c4d1a7be0c3f25a61e9d803b47c2ee81f6a09c4d27b351a9e0f6ca07be41a</textarea>
+    </div>
+    <p class="ayuda" id="ok-digest" data-estado="listo smoke-falla confirmar confirmar-falla vencida">✓ Coincide con el aprobado (8 de 8 bloques).</p>
+
+    <label for="guia">Guía usada</label>
+    <input id="guia" value="guia-2026.3" inputmode="text" autocomplete="off">
+    <p class="ayuda">Formato guia-AAAA.N</p>
+
+    <fieldset class="opciones" data-estado="base digest-distinto listo confirmar vence-pronto vencida">
+      <legend>Smoke posterior</legend>
+      <div class="grupo">
+        <label class="opcion"><input type="radio" name="smoke" checked> ✓ Pasa</label>
+        <label class="opcion"><input type="radio" name="smoke"> ✕ Falla</label>
+      </div>
+    </fieldset>
+    <fieldset class="opciones" data-estado="smoke-falla confirmar-falla">
+      <legend>Smoke posterior</legend>
+      <div class="grupo">
+        <label class="opcion"><input type="radio" name="smoke-f"> ✓ Pasa</label>
+        <label class="opcion"><input type="radio" name="smoke-f" checked> ✕ Falla</label>
+      </div>
+    </fieldset>
+    <p class="clinica" data-estado="smoke-falla confirmar-falla">Si el smoke falla, se registra REVERTIDO y producción vuelve a 2.4.0, la última desplegada.</p>
+  </div>
+</main>
+
+<!-- Semana 9 B-03: el botón nunca está deshabilitado; con el digest distinto, lleva el foco al campo con el error -->
+<div class="accion-fija" data-estado="base digest-distinto listo smoke-falla vence-pronto vencida">
+  <a class="btn primario" href="m4-desplegar.html?estado=digest-distinto" data-estado="base digest-distinto vence-pronto">Registrar despliegue…</a>
+  <a class="btn primario" href="m4-desplegar.html?estado=confirmar" data-estado="listo vencida">Registrar despliegue…</a>
+  <a class="btn primario" href="m4-desplegar.html?estado=confirmar-falla" data-estado="smoke-falla">Registrar REVERTIDO…</a>
+</div>
+
+<div data-estado="confirmar">
+  <div class="velo"></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-desp" aria-describedby="d-desp">
+    <div class="asa"></div>
+    <h2 id="t-desp">¿Registrar el despliegue de 2.4.1 en producción?</h2>
+    <p id="d-desp">Digest coincidente · guia-2026.3 · smoke pasa. El registro no se edita.</p>
+    <div class="acciones">
+      <a class="btn primario" href="m4-desplegar.html?estado=desplegado">Registrar despliegue</a>
+      <a class="btn" href="m4-desplegar.html?estado=listo" autofocus>Volver</a>
+    </div>
+  </section>
+</div>
+
+<div data-estado="confirmar-falla">
+  <div class="velo"></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-rev" aria-describedby="d-rev">
+    <div class="asa"></div>
+    <h2 id="t-rev">¿Registrar el smoke fallido de 2.4.1?</h2>
+    <p id="d-rev">Se registra <strong>REVERTIDO</strong>: producción vuelve a 2.4.0, la última desplegada. El registro no se edita.</p>
+    <div class="acciones">
+      <a class="btn peligro" href="m4-desplegar.html?estado=revertido">Registrar REVERTIDO a 2.4.0</a>
+      <a class="btn" href="m4-desplegar.html?estado=smoke-falla" autofocus>Volver</a>
+    </div>
+  </section>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-versiones.html?estado=ops"><span class="ico" aria-hidden="true">☰</span>Versiones</a>
+  <a href="m2-ejecucion.html"><span class="ico" aria-hidden="true">▶</span>Ejecución</a>
+  <a href="m4-desplegar.html" aria-current="page"><span class="ico" aria-hidden="true">⇪</span>Desplegar</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

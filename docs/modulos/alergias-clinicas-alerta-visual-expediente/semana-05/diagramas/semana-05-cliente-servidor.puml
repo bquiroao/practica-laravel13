@@ -1,0 +1,23 @@
+@startuml semana-05-cliente-servidor
+' Despliegue cliente-servidor del Micro-HIS (prototipo, no producción)
+node "Equipo del usuario" {
+  [Navegador\n(vistas MVC)] as NAV
+  [Cliente API\n(Vue del HIS / PowerShell)] as CLI
+}
+node "Servidor PHP (php -S, puerto 8042)" {
+  [public/index.php] as FC
+  [Router MVC] as MVC
+  [KernelApi v1] as API
+  [Casos de uso + Dominio] as CORE
+  [Adaptadores PDO] as PDO
+}
+database "PostgreSQL 16\n(Docker, 55442)" as BD
+NAV --> FC : HTTP GET/POST (HTML)
+CLI --> FC : HTTP JSON + Bearer
+FC --> MVC : /pacientes/...
+FC --> API : /api/v1/...
+MVC --> CORE
+API --> CORE
+CORE --> PDO
+PDO --> BD : SQL preparado
+@enduml

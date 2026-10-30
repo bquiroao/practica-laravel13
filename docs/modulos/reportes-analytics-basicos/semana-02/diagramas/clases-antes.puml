@@ -1,0 +1,23 @@
+@startuml m23_s2_clases_antes
+title M23 · Semana 2 · ANTES: jerarquía que viola LSP
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+abstract class ReporteBase {
+  +calcular(filtros): float
+  +desglosar(filtros, dimension): array
+}
+class ReporteOcupacionAntes <<devuelve 0.78, no 78>>
+class ReporteCitasAntes <<exige medico_id>>
+class ReporteMortalidadAntes <<no desglosa: LogicException>>
+class "mostrarTrazableAntes()" as Cliente <<cliente>>
+
+ReporteBase <|-- ReporteOcupacionAntes : postcondición\ndebilitada
+ReporteBase <|-- ReporteCitasAntes : precondición\nreforzada
+ReporteBase <|-- ReporteMortalidadAntes : contrato\nroto
+Cliente ..> ReporteOcupacionAntes : instanceof
+Cliente ..> ReporteCitasAntes : instanceof
+Cliente ..> ReporteMortalidadAntes : instanceof
+
+note right of Cliente : Depende de cada subclase:\nagregar un reporte obliga a modificarlo
+@enduml

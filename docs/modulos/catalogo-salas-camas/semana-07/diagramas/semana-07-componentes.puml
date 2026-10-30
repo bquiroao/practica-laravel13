@@ -1,0 +1,50 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend del catálogo (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [VistaSalas] as VS
+  [VistaSala] as VSa
+  [FormularioCambioEstado] as FC
+  [ClienteCatalogo\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorCatalogo] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ServicioCatalogo] as S
+    interface RepositorioCatalogo as P
+  }
+  package "Dominio" {
+    [EstadoCama\n(transiciones R-05, R-06\nfuente única de destinos)] as E #FFF3CD
+    [ReglaDeDominio] as RD
+  }
+  package "Persistencia" {
+    [RepositorioPdo] as PDO
+    [RepositorioEnMemoria] as MEM
+  }
+}
+database "wards, beds,\nbed_status_history" as DB
+VS --> CL
+VSa --> CL
+FC --> CL : estado, motivo
+CL --> R : HTTP JSON
+R --> C
+C --> S
+C --> V
+S --> P
+S --> E
+E --> RD
+PDO ..|> P
+MEM ..|> P
+PDO --> DB
+note right of FC
+  Después: dibuja los «destinos» que
+  devuelve el backend; ya no guarda
+  su propia tabla DESTINOS.
+end note
+@enduml

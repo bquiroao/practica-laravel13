@@ -1,0 +1,23 @@
+@startuml semana-02-clases-despues
+' Semana 2 — Dashboard de ocupación hospitalaria (tarea Odoo 2489): DESPUÉS de aplicar ISP
+title DESPUÉS — una interfaz por cliente, ninguna escribe camas
+interface FuenteCamas <<solo lectura>> {
+  salasActivas() · camas() · estanciasAbiertas()
+}
+interface EscritorCortes {
+  guardarCorte()
+}
+interface LectorCortes {
+  ultimoCorte()
+}
+class ConsolidadorOcupacion <<CU-01, temporizador>>
+class ConsultaOcupacion <<CU-02, jefatura>>
+class FuenteEnMemoria
+class AlmacenCortesEnMemoria
+ConsolidadorOcupacion --> FuenteCamas
+ConsolidadorOcupacion --> EscritorCortes
+ConsultaOcupacion --> LectorCortes
+FuenteEnMemoria ..|> FuenteCamas
+AlmacenCortesEnMemoria ..|> EscritorCortes
+AlmacenCortesEnMemoria ..|> LectorCortes
+@enduml

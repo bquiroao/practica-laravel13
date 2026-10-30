@@ -1,0 +1,3 @@
+# Declaración de uso de inteligencia artificial
+
+Se utilizó un asistente de inteligencia artificial como apoyo para estructurar el Plan SQA, organizar riesgos, proponer controles y redactar métricas y calendario a partir de las entregas existentes del módulo. Las metas operativas se identifican como propuestas para aprobación y calibración; no son mediciones del sistema. La estudiante debe validar responsables, fuentes, metas, contratos y riesgos con la jefatura, seguridad, operaciones y responsables del EMR/laboratorio. No se utilizaron datos clínicos reales ni se inventaron transiciones de estados.

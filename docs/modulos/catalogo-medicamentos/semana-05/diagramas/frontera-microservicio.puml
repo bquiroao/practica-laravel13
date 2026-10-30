@@ -1,0 +1,31 @@
+@startuml frontera-microservicio
+' Catálogo de medicamentos - Semana 5 - Frontera de microservicio (hoy y si se cumplen los gatillos)
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+title Frontera evaluada: hoy módulo del HIS; servicio aparte solo si se cumplen los gatillos
+
+Person(qf, "QF / personal clínico / auditor")
+
+System_Boundary(his, "HIS (Laravel 12 + Vue 3) - HOY") {
+  Container(ui, "SPA Vue 3", "JavaScript", "Pantallas del catálogo")
+  Container(mono, "Aplicación Laravel", "PHP", "Módulo catálogo con casos de uso e interfaz Repository; otros módulos")
+  ContainerDb(hos, "Base HOSPITAL", "PostgreSQL", "Esquema catalogo (dueño: catálogo) + v_medicamentos_vigentes")
+}
+
+System_Boundary(fut, "FUTURO (solo con gatillos medibles)") {
+  Container(svc, "Servicio catálogo de medicamentos", "PHP", "Misma API /api/v1; mismos casos de uso")
+  ContainerDb(bdsvc, "Base propia del catálogo", "PostgreSQL", "Única dueña de medicamentos")
+  Container(outbox, "Outbox + publicador", "Tabla + proceso", "Eventos MedicamentoVersionado / MedicamentoDadoDeBaja")
+}
+
+System_Ext(pre, "prescripciones-alergias", "Lee vigentes y informa uso (RN-02)")
+
+Rel(qf, ui, "Usa", "HTTPS")
+Rel(ui, mono, "API JSON", "HTTPS + token")
+Rel(mono, hos, "SQL preparado")
+Rel(pre, mono, "GET /api/v1/medicamentos/{codigo}", "HTTPS, timeout 2 s")
+Rel_D(mono, svc, "Etapa 3: el módulo delega (strangler)", "HTTPS")
+Rel(svc, bdsvc, "SQL")
+Rel(svc, outbox, "misma transacción")
+Rel(outbox, pre, "eventos (consistencia eventual)")
+@enduml

@@ -1,0 +1,40 @@
+@startuml cliente_servidor_reportes_analytics_basicos
+title Semana 5 · Cliente-servidor: indicador trazable en tres niveles
+skinparam shadowing false
+autonumber
+
+actor "Jefe de área" as usuario
+participant "Cliente\n(cliente.html / Vue)" as cliente
+participant "API v1\nApiReporteController" as api
+participant "CalcularIndicador" as caso
+participant "ReporteOcupacion" as reporte
+participant "OcupacionRepository\n(adaptador PDO)" as repo
+database "PostgreSQL" as bd
+
+usuario -> cliente : elige período y calcula
+cliente -> api : GET /api/v1/reportes/ocupacion?desde&hasta\nX-Rol, X-Correlation-Id
+api -> caso : ejecutar(rol, ocupacion, Filtros, indicador)
+caso -> caso : PoliticaPermisos.exigir (RN-01)
+caso -> reporte : calcular(Filtros)
+reporte -> repo : camasHabilitadas(), ocupadasPorSala()
+repo -> bd : SELECT preparado (solo lectura)
+bd --> repo : filas
+repo --> reporte : 50 camas · {Medicina 18, Cirugía 14, Pediatría 7}
+reporte --> caso : Indicador 78 % + ficha (RN-05)
+caso --> api : ResultadoConsulta éxito
+api --> cliente : 200 JSON
+cliente --> usuario : 78 % con ficha de trazabilidad
+
+usuario -> cliente : ver desglose y abrir Medicina
+cliente -> api : GET …/ocupacion/registros?parte=Medicina
+api --> cliente : 200 · desglose total 39 · 18 registros (RN-07, RN-09)
+
+alt la base no responde
+  repo -> bd : SELECT
+  bd --> repo : error de conexión
+  repo --> caso : DatosNoDisponibles
+  caso --> api : error 503
+  api --> cliente : 503 DATOS_NO_DISPONIBLES + correlationId
+  cliente --> usuario : «No se pudieron obtener los datos. Intente de nuevo»
+end
+@enduml

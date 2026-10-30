@@ -1,0 +1,22 @@
+$ php tests/ejecutar.php --solo=CB      # ANTES de corregir DEF-02
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles) ==
+[FALLA] CB-01    Caminos básicos de EmitirPrescripcion: V(G) = 14, 14 caminos independientes C1..C14, cada uno con su salida
+         -> caminos con otra salida: esperado array (
+), obtenido array (
+  'C4 misma clave y contenido, OTRO prescriptor' => 'obtenido OK YA_EMITIDA, esperado CONFLICTO CLAVE_REUTILIZADA',
+) (Arnes.php:41)
+[FALLA] CB-02    MC/DC: «!evaluado && !confirma», «justificación < 20 || !override» y «misma huella && mismo prescriptor»: cada condición cambia la salida sola
+         -> reintento: esperado array (
+  0 => 'YA_EMITIDA',
+  1 => 'CLAVE_REUTILIZADA',
+  2 => 'CLAVE_REUTILIZADA',
+), obtenido array (
+  0 => 'YA_EMITIDA',
+  1 => 'CLAVE_REUTILIZADA',
+  2 => 'YA_EMITIDA',
+) (Arnes.php:41)
+[PASA ] CB-03    Caminos y ramas de AnularPrescripcion: sin permiso, inexistente, ya anulada, motivo corto, anulada, carrera (YaAnulada), base caída y traza que falla
+
+Total: 3  Pasan: 1  Fallan: 2  Omitidas: 0

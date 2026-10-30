@@ -1,0 +1,31 @@
+Primera corrida de la suite de contrato del Repository (salida real, antes de corregir). Total: 14  Pasan: 8  Fallan: 6.
+Dos fallas eran diferencias REALES entre los adaptadores; las otras cuatro, errores de la propia prueba.
+
+$ QA_DB_DSN=... php tests/ejecutar.php --solo=CON
+[FALLA] CON-01-MEM [memoria] Casos: lo guardado vuelve igual (pasos, requisitos en orden), por tenant
+         -> caso: esperado [..., ['RF-07', 'RF-08'], ...], obtenido [..., ['RF-08', 'RF-07'], ...]
+[PASA ] CON-02-MEM [memoria] Casos: guardar una versión que ya existe → CASO_EXISTENTE; aprobar dos veces → ESTADO_NO_PERMITE_APROBAR
+[FALLA] CON-01-PDO [pdo] Casos: lo guardado vuelve igual (pasos, requisitos en orden), por tenant
+         -> esperado ['TC-108'], obtenido ['TC-108', 'TC-300']
+[FALLA] CON-02-PDO [pdo] Casos: guardar una versión que ya existe → CASO_EXISTENTE; aprobar dos veces → ESTADO_NO_PERMITE_APROBAR
+         -> duplicado: se esperaba Qa\Dominio\Excepciones\ReglaRechazada, se lanzó Qa\Dominio\Excepciones\ErrorPersistencia
+            (La base del módulo QA no respondió como se esperaba.)
+[FALLA] CON-04-PDO [pdo] Campañas: crear asigna id; otro tenant no la ve; el estado avanza solo desde el anterior; la decisión persiste
+         -> La base del módulo QA no respondió como se esperaba. (ConsultasPdo.php:41)
+[FALLA] CON-05-PDO [pdo] Intentos: ... -> referencia y fecha: esperado 1761663600, obtenido 1793199600
+(CON-05-MEM falló igual)
+
+Diagnóstico:
+  H-1 (REAL)  CON-01-MEM: el adaptador en memoria devolvía los requisitos en el orden de entrada y PDO, ordenados
+              (json_agg ... ORDER BY). Un caso de uso que compara listas vería cosas distintas según el adaptador.
+              Corrección: el DOMINIO fija el orden (CasoPrueba::disenar ordena); los dos adaptadores lo conservan.
+  H-2 (REAL)  CON-02-PDO: un caso duplicado daba 503 ERROR_PERSISTENCIA con PDO (violación de PK) y 409 CASO_EXISTENTE
+              en memoria. Corrección: PdoRepositorioCasos comprueba la clave antes de insertar y lanza la misma regla.
+  Prueba      CON-01-PDO: TC-300 también cubre RF-08 (lo creó la propia prueba); la expectativa estaba mal.
+  Prueba      CON-04-PDO: la prueba guardaba una FALLA sin defecto; el CHECK intentos_falla_con_defecto de PostgreSQL la
+              rechazó, con razón. Asimetría ACEPTADA: el adaptador en memoria no repite los CHECK de la base (la regla
+              vive en el dominio, D-8 de la semana 3). La prueba ahora usa BLOQUEADO.
+  Prueba      CON-05: la marca de tiempo esperada estaba mal calculada (2025 en lugar de 2026).
+
+VERDE tras las correcciones: Total: 14  Pasan: 14  Fallan: 0. Las mutaciones M19 (PDO vuelve a dar 503) y M20 (sin
+ordenar los requisitos) reintroducen H-2 y H-1 y se detectan (3-mutaciones.txt).

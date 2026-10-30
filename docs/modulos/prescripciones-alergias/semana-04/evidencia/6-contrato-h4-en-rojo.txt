@@ -1,0 +1,18 @@
+$ PRESCRIPCIONES_DB_DSN=… php tests/ejecutar.php --solo=CON   (ANTES de corregir H-4; se muestra la diferencia)
+[PASA ] CON-MEM-01 [MEM] guardar asigna ids crecientes y lo leído es idéntico a lo guardado (ítems, verificación, fecha)
+[PASA ] CON-MEM-02 [MEM] porClave busca por (hospital, clave); otro hospital no la ve
+[PASA ] CON-MEM-03 [MEM] la misma clave en el mismo hospital → ClaveEnUso; en otro hospital se acepta
+[PASA ] CON-MEM-04 [MEM] porId fuera del hospital o inexistente → null (R-08)
+[PASA ] CON-MEM-05 [MEM] la transacción revierte lo guardado si el trabajo falla, y confirma si no
+[PASA ] CON-MEM-06 [MEM] FuenteAlergias devuelve el expediente de database/datos-demo (activas, resueltas, sin código, no evaluado)
+[PASA ] CON-MEM-07 [MEM] CatalogoMedicamentos: medicamentos y grupo del alérgeno por código o por nombre
+[FALLA] CON-PDO-01 [PDO] guardar asigna ids crecientes y lo leído es idéntico a lo guardado (ítems, verificación, fecha)
+[PASA ] CON-PDO-02 [PDO] porClave busca por (hospital, clave); otro hospital no la ve
+[PASA ] CON-PDO-03 [PDO] la misma clave en el mismo hospital → ClaveEnUso; en otro hospital se acepta
+[PASA ] CON-PDO-04 [PDO] porId fuera del hospital o inexistente → null (R-08)
+[PASA ] CON-PDO-05 [PDO] la transacción revierte lo guardado si el trabajo falla, y confirma si no
+[PASA ] CON-PDO-06 [PDO] FuenteAlergias devuelve el expediente de database/datos-demo (activas, resueltas, sin código, no evaluado)
+[PASA ] CON-PDO-07 [PDO] CatalogoMedicamentos: medicamentos y grupo del alérgeno por código o por nombre
+Total: 14  Pasan: 13  Fallan: 1  Omitidas: 0
+
+Diferencia en CON-PDO-01: items[0].dosis → InMemory 500 (int) · PDO 500.0 (float, columna numeric)

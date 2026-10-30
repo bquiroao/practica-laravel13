@@ -1,0 +1,13 @@
+@startsalt w3-cierre-confirmacion
+{+
+  {* ← Alerta 3511c21a | Cerrar alerta }
+  ==
+  PAC-00451 · ACUSADA por enf.turno01 a las 10:05
+  Nota de cierre (obligatoria) (5)
+  {+ "Se indicó tratamiento (ficticio)                " }
+  <color:#B42318>⚠ La nota es obligatoria</color> (6)
+  ==
+  <b>¿Confirmar cierre?</b> Esta acción no se puede deshacer.
+  {[Cancelar] | [<b>Cerrar alerta</b>] }
+}
+@endsalt

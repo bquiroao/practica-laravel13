@@ -1,0 +1,24 @@
+@startsalt m1-buscar-tarjetas
+' M1 Móvil 360 px: búsqueda y resultados como tarjetas
+scale 2
+{+
+  {* ☰ | Catálogo | Norte · enf.norte }
+  ==
+  {+ "amoxi               " | [Buscar] }
+  [Filtros (forma, fecha) ▾]
+  <i>Vigentes al 2026-10-15 · 2 resultados
+  --
+  {+
+    <b>Amoxicilina 250 mg/5 mL suspensión
+    250 mg/5mL · Suspensión · Oral
+    MED-000103 · versión 1     [Ver >]
+  }
+  {+
+    <b>Amoxicilina 500 mg cápsula
+    500 mg · Cápsula · Oral
+    MED-000102 · versión 1     [Ver >]
+  }
+  --
+  <i>Sin tabla: 1 tarjeta por medicamento (B-11)
+}
+@endsalt

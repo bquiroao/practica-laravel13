@@ -1,0 +1,14 @@
+@startsalt
+title M4 — Generar un corte ahora (administrador)
+{+
+  [< Ocupación] | <b>Corte nuevo</b>
+  Último corte: 10:35
+  Se leerán las camas y estancias actuales.
+  No cambia ningún estado de cama (R-09).
+  ---
+  [Generar un corte ahora]
+  [Volver]
+  ---
+  <b>2 camas no coinciden</b> con su estancia | [Ver >]
+}
+@endsalt

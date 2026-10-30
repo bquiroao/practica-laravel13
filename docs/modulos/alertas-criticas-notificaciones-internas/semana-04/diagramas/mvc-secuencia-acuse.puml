@@ -1,0 +1,39 @@
+@startuml mvc-secuencia-acuse
+' Semana 4 - Recorrido MVC de «acusar alerta» (POST /alertas/{id}/acuse)
+autonumber
+skinparam ParticipantBackgroundColor #F4F8FF
+skinparam ParticipantBorderColor #2F5597
+actor "enf.turno01\n(navegador)" as U
+participant "public/index.php" as IDX
+participant "Router" as R
+participant "AlertaController" as C
+participant "AcusarAlerta\n(Application)" as UC
+participant "Alerta\n(Domain)" as A
+participant "AlertaRepository\n(PDO o InMemory)" as REP
+participant "Vista + plantillas" as V
+
+U -> IDX : POST /alertas/{id}/acuse (cookie usuario_demo)
+IDX -> R : despachar(Peticion)
+R -> C : acusar(peticion, id)
+C -> UC : ejecutar(id, usuario, tenant)
+UC -> REP : buscar(id, tenant)
+alt no existe o es de otro tenant (RNF-01)
+  REP --> UC : null
+  UC --> C : AlertaNoEncontradaException
+  C -> V : render('error', 404)
+  V --> U : 404 (salida escapada)
+else encontrada
+  UC -> A : acusar(usuario, ahora)
+  alt usuario no notificado (RN-07)
+    A --> C : ReglaDominioException
+    C -> V : render('error', 403)
+    V --> U : 403
+  else primer acuse o repetido (RN-06)
+    A --> UC : cambio = true / false
+    UC -> REP : guardar(alerta) [solo si cambió]
+    C --> U : 303 Location /alertas/{id}?msg=acusada|ya-acusada
+    U -> IDX : GET /alertas/{id}
+    note right of C : el controlador no tiene SQL\nni reglas: solo traduce
+  end
+end
+@enduml

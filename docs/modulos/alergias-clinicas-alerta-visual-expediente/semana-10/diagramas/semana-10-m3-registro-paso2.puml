@@ -1,0 +1,17 @@
+@startsalt semana-10-m3-registro-paso2
+{+
+  {< <b>Nueva alergia</b> · paso 2 de 2 }
+  ==
+  Reacción (opcional) | (1)
+  {SI
+    Edema de glotis
+  }
+  Fecha de inicio (opcional)
+  "02/03/2019"
+  ..
+  <b>Resumen:</b> Penicilina → alerta CRÍTICA | (2)
+  ..
+  [     Guardar alergia     ] | (3)
+  [ Atrás ]
+}
+@endsalt

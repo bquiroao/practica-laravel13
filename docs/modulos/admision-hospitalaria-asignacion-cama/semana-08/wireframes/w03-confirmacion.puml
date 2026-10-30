@@ -1,0 +1,15 @@
+@startsalt w03-confirmacion
+' W-03 Confirmación antes de guardar
+{+
+  <b>Confirmar admisión</b>
+  ==
+  Paciente | <b>PAC-00451</b>
+  Cama | <b>B-201</b> · Medicina interna · General
+  Origen | Emergencia
+  Registra | usr-adm-01 (Admisionista)
+  --
+  <size:11>Al confirmar se asigna la cama. Si otra admisión la tomó, podrá elegir otra.</size>
+  --
+  [Confirmar admisión] | [Volver]
+}
+@endsalt

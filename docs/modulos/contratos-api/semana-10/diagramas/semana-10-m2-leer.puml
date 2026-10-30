@@ -1,0 +1,16 @@
+@startsalt
+title M2 — Leer citas-api (OpenAPI)
+{+
+  [< Documentos] | <b>citas-api</b>
+  Versión: | ^2.0.0 (vigente)^
+  ---
+  <b>▸ Endpoints (3)</b>
+  <b>POST</b> /citas
+  <b>POST</b> /citas/&#123;id&#125;/confirmacion
+  <b>POST</b> /citas/&#123;id&#125;/cancelacion
+  <b>▸ Errores (E2–E8)</b>
+  <b>▸ Ejemplo de solicitud</b> | [Copiar]
+  ---
+  <i>Secciones plegadas; los ejemplos JSON saltan de línea.</i>
+}
+@endsalt

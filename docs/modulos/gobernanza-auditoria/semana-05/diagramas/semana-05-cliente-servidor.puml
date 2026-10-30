@@ -1,0 +1,39 @@
+@startuml semana-05-cliente-servidor
+!pragma layout smetana
+title Diseño cliente-servidor de Gobernanza y auditoría (semana 5)
+skinparam defaultFontSize 11
+skinparam componentBackgroundColor #F5F9FF
+skinparam componentBorderColor #2F5D8A
+
+node "Módulo emisor (p. ej. Pacientes)" as EM {
+  component "Caso de uso del emisor" as CUE
+  component "ClienteAuditoria\n(reintento idempotente,\ncircuit breaker)" as CLI
+  database "BandejaLocal\n(outbox del emisor)" as BL
+}
+node "Herramienta de gobernanza (SPA Vue, semana 8)" as UI {
+  component "ClienteAuditoria\n(consulta)" as CLI2
+}
+node "Servicio de auditoría (micro-HIS)" as SRV {
+  component "Kernel\nX-Request-ID · registro de acceso" as K
+  component "MVC + casos de uso" as MVC
+  component "PdoBitacora" as PB
+}
+database "PostgreSQL\naudit_logs" as DB
+interface "API REST /api/v1/auditoria\n(openapi.yaml 1.0.0)" as API
+
+CUE --> CLI : registrar(movimiento con event_id)
+CLI --> API : POST /movimientos
+CLI --> BL : si no hay servicio:\nguardar y seguir
+BL ..> CLI : reenviarPendientes()
+CLI2 --> API : GET /movimientos · /{id}\nPOST /verificaciones · GET /anclas
+API - K
+K --> MVC
+MVC --> PB
+PB --> DB : SQL preparado
+
+note bottom of CLI
+  El emisor NUNCA falla por la auditoría:
+  respuesta 2xx → listo · 4xx → error del emisor (no se reintenta)
+  red / 5xx / circuito abierto → BandejaLocal
+end note
+@enduml

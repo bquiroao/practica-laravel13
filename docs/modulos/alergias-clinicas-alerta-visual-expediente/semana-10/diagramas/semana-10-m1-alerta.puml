@@ -1,0 +1,22 @@
+@startsalt semana-10-m1-alerta
+{+
+  {< <b>PAC-00451</b> | [☰] }
+  ==
+  {+
+    <b>[CRÍTICA] Riesgo vital</b> | (1)
+    2 alergias activas · <b>sin reconocer</b>
+  }
+  ..
+  {+
+    <b>Penicilina</b> | (2)
+    Pone en riesgo la vida
+    Edema de glotis…  [ver más]
+  }
+  {+
+    <b>Ibuprofeno</b>
+    Moderada · Urticaria
+  }
+  ..
+  [   He leído las alergias   ] | (3)
+}
+@endsalt

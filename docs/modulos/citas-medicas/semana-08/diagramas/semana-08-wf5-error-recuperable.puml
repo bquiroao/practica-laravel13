@@ -1,0 +1,13 @@
+@startsalt
+title W5 — Errores recuperables (concurrencia y servicio no disponible)
+{+
+  <b>Ese horario se ocupó mientras confirmabas</b>
+  La Dra. Ruiz ya tiene una cita el 28/10 a las 08:30. Tus datos se conservan.
+  Siguientes horarios libres: | () <b>11:00–11:30</b> | () <b>11:30–12:00</b>
+  [Elegir y confirmar] | [Volver a la agenda]
+  ---
+  <b>La agenda no está disponible en este momento</b>
+  No perdiste lo que escribiste. Intenta de nuevo en unos segundos.
+  [Reintentar] | [Cancelar]
+}
+@endsalt

@@ -1,0 +1,55 @@
+@startuml semana-01-actividad
+' Semana 1 — Expediente médico electrónico base (tarea Odoo 2503)
+title Actividad — apertura y consulta autorizada del expediente longitudinal
+
+start
+switch (D1 ¿Qué operación?)
+case (Abrir expediente)
+  :Admisión elige al paciente;
+  if (D2 ¿Paciente activo? (R-03)) then (no)
+    :E2 Paciente no activo (422);
+    :Audita el rechazo (R-08);
+    :F5 Acceso rechazado con mensaje claro;
+    stop
+  elseif (D3 ¿Ya tiene expediente? (R-01)) then (sí)
+    :E3 Expediente existente (409): se abre el que ya existe;
+    stop
+  endif
+  :Crea el expediente «abierto» con número único (R-02);
+  :Audita la apertura (R-08);
+  :F1 Expediente abierto;
+case (Consultar)
+  if (D4 ¿Asignación de atención activa? (R-05)) then (no)
+    :E1 Acceso denegado (403);
+    :Audita el rechazo (R-08);
+    :F5 Acceso rechazado con mensaje claro;
+    stop
+  endif
+  :Muestra episodios, notas y diagnósticos\ndentro del alcance autorizado (R-09);
+  if (D5 ¿Pide la historia de otros hospitales?) then (no)
+    :Audita el acceso (R-08);
+    :F2 Expediente local consultado;
+    stop
+  endif
+  if (D6 ¿Vinculado al índice maestro? (R-10)) then (no)
+    :E4 Solo historia local, con aviso;
+    stop
+  endif
+  if (D7 ¿Consentimiento activo para\neste hospital? (R-06)) then (sí)
+    :Agrega los datos externos permitidos;
+    :Audita el acceso (R-08);
+    :F3 Historia longitudinal con datos externos;
+  else (no)
+    if (D8 ¿Emergencia con justificación\nescrita? (R-07)) then (no)
+      :E5 Sin consentimiento (403) o\nE6 sin justificación (422);
+      :Audita el rechazo (R-08);
+      :F5 Acceso rechazado con mensaje claro;
+      stop
+    endif
+    :Acceso de 1 hora y revisión pendiente (R-07);
+    :Audita el acceso de emergencia (R-08);
+    :F4 Acceso de emergencia concedido;
+  endif
+endswitch
+stop
+@enduml

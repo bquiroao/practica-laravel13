@@ -1,0 +1,28 @@
+@startuml semana-04-repositorio-compartido
+title Integración con el repositorio de datos compartido (una base PostgreSQL por hospital)
+skinparam defaultFontName Arial
+component "Micro-HIS Traslados\n(M8)" as M8
+component "Admisión / Episodios" as ADM
+component "Catálogo de camas" as CAT
+component "Limpieza de camas\n(CU-07, pendiente)" as LIM
+component "Reportes operativos\n(M27)" as REP
+database "Base del hospital" {
+  folder "Escribe M8" {
+    [ordenes_movimiento]
+    [bed_stays (cierra y abre)]
+    [beds.status (solo la columna)]
+    [care_episodes.status (solo al alta)]
+  }
+  folder "M8 solo lee" {
+    [care_episodes]
+    [beds (tipo, sala)]
+  }
+}
+M8 --> [ordenes_movimiento] : RepositorioMovimientos\n(MovimientosPdo)
+M8 --> [bed_stays (cierra y abre)] : una sola transacción
+M8 ..> [care_episodes] : FuenteClinica (SELECT)
+ADM --> [care_episodes] : dueño
+CAT --> [beds (tipo, sala)] : dueño
+[beds.status (solo la columna)] ..> LIM : cama en «maintenance»
+REP ..> [bed_stays (cierra y abre)] : lectura por vista\n(vw_ocupacion_camas)
+@enduml
