@@ -6,6 +6,8 @@ declare(strict_types=1);
  *   php pruebas/ejecutar.php [--evidencia=ruta.txt] [--sin-bd] [--grupo=unitarias]
  * Cada archivo de pruebas devuelve un arreglo nombre => función y se carga en su propio ámbito.
  * Los archivos de pruebas/integracion usan la base de prueba (config.php); --sin-bd los omite.
+ * Una prueba cuyo nombre lleva [DEFECTO D-NN] documenta un defecto abierto (semana 15): si falla se
+ * informa como DEFECTO y no rompe la ejecución; si pasa, se avisa para cerrar el defecto.
  */
 
 require __DIR__ . '/../autoload.php';
@@ -26,7 +28,7 @@ foreach (array_slice($argv, 1) as $arg) {
 
 $grupos = array_values(array_filter(glob(__DIR__ . '/*', GLOB_ONLYDIR), fn ($d) => basename($d) !== 'dobles'));
 $lineas = ['Pruebas del Micro-HIS Catálogo de medicamentos', 'Fecha: ' . date('Y-m-d H:i:s T') . ' · PHP ' . PHP_VERSION, ''];
-$total = $fallas = $omitidas = 0;
+$total = $fallas = $omitidas = $defectos = 0;
 
 foreach ($grupos as $dir) {
     $grupo = basename($dir);
@@ -43,12 +45,13 @@ foreach ($grupos as $dir) {
         $casos = (static fn (string $ruta): array => require $ruta)($archivo);
         foreach ($casos as $nombre => $prueba) {
             $total++;
+            $esDefecto = preg_match('/\[DEFECTO D-\d{2}\]/', $nombre) === 1;
             try {
                 $prueba();
-                $lineas[] = "OK       $etiqueta :: $nombre";
+                $lineas[] = str_pad($esDefecto ? 'CORREGIDO' : 'OK', 9) . "$etiqueta :: $nombre" . ($esDefecto ? ' (ya pasa: cerrar el defecto)' : '');
             } catch (Throwable $e) {
-                $fallas++;
-                $lineas[] = "FALLA    $etiqueta :: $nombre";
+                $esDefecto ? $defectos++ : $fallas++;
+                $lineas[] = str_pad($esDefecto ? 'DEFECTO' : 'FALLA', 9) . "$etiqueta :: $nombre";
                 $lineas[] = '         ' . $e::class . ': ' . $e->getMessage();
             }
         }
@@ -56,7 +59,8 @@ foreach ($grupos as $dir) {
 }
 
 $lineas[] = '';
-$lineas[] = sprintf('Resumen: %d pruebas, %d correctas, %d fallas, %d archivos omitidos', $total, $total - $fallas, $fallas, $omitidas);
+$resumen = sprintf('Resumen: %d pruebas, %d correctas, %d fallas, %d archivos omitidos', $total, $total - $fallas - $defectos, $fallas, $omitidas);
+$lineas[] = $defectos > 0 ? "$resumen, $defectos defectos abiertos documentados" : $resumen;
 $texto = implode(PHP_EOL, $lineas) . PHP_EOL;
 echo $texto;
 
