@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consola de release · Calidad de versiones</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra" id="barra">
+  <a class="btn atras" id="atras" href="#/versiones" aria-label="Volver" hidden>←</a>
+  <button class="hospital" type="button" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">Calidad · Hospital Regional del Norte</span></button>
+  <span class="rol-actual" id="rol"></span>
+  <span class="avatar" id="avatar" hidden></span>
+</header>
+<div class="red" id="red" role="status" hidden></div>
+<div id="contexto"></div>
+<main id="principal" tabindex="-1"></main>
+<div id="accion"></div>
+<nav class="nav-inferior" id="nav" aria-label="Secciones" hidden></nav>
+<div id="dialogo"></div>
+<div class="oculto-visual" id="anuncio" aria-live="polite" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
