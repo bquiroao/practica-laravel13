@@ -1,0 +1,21 @@
+@startuml semana-05-cliente-servidor
+!include <C4/C4_Container>
+title Cliente-servidor y frontera de microservicio evaluada — Signos vitales (semana 5)
+Person(enf, "Enfermería / Médico")
+Container(cli, "Cliente web o móvil del HIS", "Vue / app", "Formulario de toma, reintento con Idempotency-Key")
+System_Ext(rbac, "RBAC (M02)", "Token, rol y hospital")
+System_Boundary(shi, "SHI — monolito modular (hoy)") {
+  Boundary(frontera, "Frontera de microservicio evaluada (no se divide aún)", "candidata") {
+    Container(api, "Módulo Signos vitales", "PHP 8.2, REST /api/v1/signos-vitales", "Enrutador → controlador → casos de uso → Repository")
+    Container(desp, "Despachador de bandeja de salida", "Proceso PHP (propuesto)", "Envía críticas pendientes con reintento")
+  }
+  ContainerDb(bd, "Base compartida", "PostgreSQL + RLS", "Tablas de M13 + bandeja de salida")
+}
+System_Ext(m21, "Alertas críticas (M21)", "Notifica al servicio")
+Rel(enf, cli, "usa")
+Rel(cli, api, "POST / GET JSON", "HTTPS + X-Request-Id")
+Rel(api, rbac, "valida token", "sync")
+Rel(api, bd, "transacción: toma + mediciones + alertas", "SQL")
+Rel(desp, bd, "lee «pendiente_envio» / marca «enviada»", "SQL")
+Rel(desp, m21, "alerta crítica (id único)", "async, al menos una vez")
+@enduml
