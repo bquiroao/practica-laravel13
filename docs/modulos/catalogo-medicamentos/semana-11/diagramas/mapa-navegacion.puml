@@ -1,0 +1,31 @@
+@startuml mapa-navegacion
+' Catálogo de medicamentos - Semana 11 - Mapa de navegación del prototipo
+title Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+[*] --> Buscar
+state "Buscar\nruta ~#/buscar" as Buscar
+state "Resultados / vacío\nruta ~#/buscar?q=…" as Resultados
+state "Registrar\nruta ~#/nuevo (solo QF)" as Nuevo
+state "Detalle e historial\nruta ~#/medicamento/MED-…" as Detalle
+state "Nueva versión\nruta ~#/medicamento/MED-…/version (solo QF)" as Version
+state "Diálogo de baja" as Baja
+state "Diálogo eliminar\n(escribir el código)" as Eliminar
+state "Eliminar bloqueado\n(usado: RN-02)" as Bloqueado
+state "Sin permiso (403)\n/ No encontrado (404)" as Error
+
+Buscar --> Resultados : buscar
+Resultados --> Detalle : tarjeta
+Resultados --> Nuevo : "Registrar medicamento"\n(estado vacío)
+Nuevo --> Nuevo : 422 resumen con enlaces\n409 DUPLICADO (error crítico)
+Nuevo --> Detalle : registrado (aviso de éxito)
+Detalle --> Version : "Registrar nueva versión"
+Version --> Detalle : versión N+1, anterior cerrada
+Detalle --> Baja : "Dar de baja"
+Baja --> Detalle : confirmada (aviso)
+Detalle --> Eliminar : "Eliminar registro erróneo"\n(no usado)
+Detalle --> Bloqueado : "Eliminar registro erróneo"\n(usado)
+Bloqueado --> Baja : "Ir a dar de baja"
+Eliminar --> Buscar : eliminado
+Nuevo --> Error : rol sin permiso
+Detalle --> Buscar : "Volver a la búsqueda"
+@enduml
