@@ -1,0 +1,30 @@
+@startuml c4-componentes
+' Catálogo de medicamentos - Semana 3 - C4 nivel 3 (componentes del Micro-HIS)
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Componentes del Micro-HIS Catálogo de medicamentos (PHP 8.2+ vanilla)
+
+Person(qf, "Químico farmacéutico", "Usa la consola en la semana 3")
+
+Container_Boundary(micro, "Micro-HIS (docs/modulos/catalogo-medicamentos/micro-his)") {
+  Component(consola, "ConsolaCatalogo", "Presentation · bin/catalogo.php", "Traduce argumentos a casos de uso y errores a 422/409/404/503")
+  Component(root, "Composition Root", "bootstrap.php", "Único lugar que crea PDO y conecta adaptadores con casos de uso")
+  Component(casos, "Casos de uso", "Application", "RegistrarMedicamento, BuscarMedicamentosVigentes, RegistrarNuevaVersion, DarDeBajaMedicamento, ConsultarHistorial, EliminarRegistroSinUso, ConsultarVigentePorCodigo")
+  Component(dominio, "Modelo y reglas", "Domain", "Medicamento, FichaMedicamento, Vigencia, ClaveEquivalencia, CriterioBusqueda, Limites; RN-01..RN-06")
+  Component(interfaces, "Interfaz Repository (ISP)", "Domain", "BusquedaCatalogo, HistorialCatalogo, ControlEquivalencia, EscrituraCatalogo, RepositorioMedicamentos; puertos ConsultaUsoPrescripciones, Reloj, GeneradorId")
+  Component(pdo, "RepositorioMedicamentosPdo", "Persistence", "prepare()+execute(); traduce restricciones a 409 y fallas a 503")
+  Component(uso, "UsoPrescripcionesPdo", "Persistence", "Adaptador del puerto RN-02 (tabla de simulación)")
+}
+ContainerDb(bd, "PostgreSQL 16 (Docker, puerto 55445)", "micro_medicamentos / micro_medicamentos_test", "medicamentos (CHECK, UNIQUE, EXCLUDE) y referencias_prescripcion (simulación)")
+
+Rel(qf, consola, "Ejecuta órdenes")
+Rel(consola, root, "Pide los casos de uso")
+Rel(root, casos, "Crea e inyecta")
+Rel(consola, casos, "Llama ejecutar()")
+Rel(casos, dominio, "Aplica reglas")
+Rel(casos, interfaces, "Depende solo de la interfaz de rol que usa")
+Rel(pdo, interfaces, "Implementa")
+Rel(uso, interfaces, "Implementa")
+Rel(pdo, bd, "SQL preparado", "PDO pgsql")
+Rel(uso, bd, "SELECT preparado", "PDO pgsql")
+@enduml
