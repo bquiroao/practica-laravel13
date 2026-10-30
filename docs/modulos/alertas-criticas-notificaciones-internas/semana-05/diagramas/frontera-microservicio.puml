@@ -1,0 +1,20 @@
+@startuml frontera-microservicio
+' Semana 5 - Frontera EVALUADA de microservicio (estado objetivo, no construido)
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+System_Ext(lab, "ingreso-resultados-laboratorio", "productor de eventos críticos")
+System_Ext(rbac, "rbac / autenticación", "emite tokens con rol y tenant")
+System_Boundary(his, "HIS (monolito modular Laravel)") {
+  Container(otros, "Otros módulos", "Laravel", "expediente, pacientes, alergias…")
+}
+System_Boundary(ms, "Servicio de Alertas críticas (candidato)") {
+  Container(api, "API Alertas v1", "PHP", "contrato de la semana 5")
+  Container(worker, "Despachador / escalador", "proceso PHP", "reintentos y plazos")
+  ContainerDb(db, "BD propia de Alertas", "PostgreSQL", "alerta_critica, alerta_destinatario, alerta_evento")
+}
+Rel(lab, api, "POST /alertas (idempotente por id_origen)", "HTTPS + Bearer")
+Rel(otros, api, "consulta / acusa", "HTTPS + Bearer")
+Rel(api, db, "lee/escribe solo lo suyo")
+Rel(worker, db, "pendientes de acuse")
+Rel(api, rbac, "valida token", "HTTPS")
+@enduml
