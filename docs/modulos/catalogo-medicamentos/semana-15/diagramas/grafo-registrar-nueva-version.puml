@@ -1,0 +1,41 @@
+@startuml grafo-registrar-nueva-version
+' Catálogo de medicamentos - Semana 15 - Grafo de flujo de RegistrarNuevaVersion::ejecutar (caja blanca)
+title Grafo de flujo: RegistrarNuevaVersion::ejecutar · V(G) = 7
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+start
+:N1 Leer código;
+if (D1 ¿código con formato MED-000000?) then (no)
+  :C1 ErrorValidacion(codigo); <<#FFE5E5>>
+  stop
+endif
+:N2 Validar ficha y fecha;
+if (D2 ¿datos válidos?) then (no)
+  :C2 ErrorValidacion(campos); <<#FFE5E5>>
+  stop
+endif
+:N3 Leer historial;
+if (D3 ¿hay versiones?) then (no)
+  :C3 ErrorNoEncontrado; <<#FFE5E5>>
+  stop
+endif
+:N4 Tomar la última versión;
+if (D4 ¿está abierta?) then (no)
+  :C4 409 YA_DADO_DE_BAJA; <<#FFE5E5>>
+  stop
+endif
+if (D5 ¿la nueva empieza después?) then (no)
+  :C5 409 SOLAPE_VIGENCIA; <<#FFE5E5>>
+  stop
+endif
+:N5 Buscar equivalente en otro código;
+if (D6 ¿existe?) then (sí)
+  :C6 409 DUPLICADO; <<#FFE5E5>>
+  stop
+endif
+:N6 reemplazarVigente (atómico);
+:C7 versión N+1; <<#E5FFE5>>
+stop
+@enduml

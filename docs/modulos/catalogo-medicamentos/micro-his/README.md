@@ -68,6 +68,17 @@ php pruebas/ejecutar.php --evidencia=../semana-03/evidencia/salida-pruebas.txt
 
 `--evidencia` escribe el archivo en UTF-8 desde PHP; no use `>` en PowerShell 5 (guarda UTF-16).
 
+Grupos (carpetas de `pruebas/`): `unitarias`, `contrato`, `integracion`, `api`, `caja-blanca` y
+`caja-negra` (los dos últimos, semana 15). Se puede correr uno con `--grupo=caja-negra`.
+Una prueba con `[DEFECTO D-NN]` en el nombre documenta un defecto abierto: si falla, se informa como
+`DEFECTO` y no rompe la ejecución (ver `../semana-15/defectos.md`).
+
+Rendimiento de la búsqueda (RNF-03), sobre la base de prueba:
+
+```powershell
+php scripts/medir-busqueda.php                    # carga 5 000 versiones y mide p50/p95
+```
+
 ## Estructura
 
 ```
@@ -77,7 +88,7 @@ src/Persistence/   Adaptadores PDO e InMemory, reloj, UUID y datos ficticios de 
 src/Presentation/  Entradas: consola (S3), web MVC (S4) y API REST (S5)
 public/            Front controller (index.php): web y /api/v1
 bootstrap.php      Composition Root
-scripts/           crear-esquema.php y probar-api.php
+scripts/           crear-esquema.php, probar-api.php y medir-busqueda.php
 pruebas/           Ejecutor propio, dobles, unitarias, contrato, integración y API
 ```
 
