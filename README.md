@@ -1,326 +1,472 @@
-# Proyecto Final ASII 2026 — Hospital Nido
+# Hospital Nido — Sistema Hospitalario Integrado
 
-**Hospital Nido** (*nido*: protección y cuidado) es el Sistema Hospitalario Integrado que une los 30 módulos de `docs/modulos/` en una sola plataforma: Laravel 12 (API REST, MVC) + React con TypeScript. El plan de integración, la fase actual y de qué módulo sale cada pantalla están en [docs/hospital-nido/PLAN.md](docs/hospital-nido/PLAN.md).
+**Hospital Nido** (*nido*: protección y cuidado) es el sistema hospitalario integrado del Proyecto Final de Análisis de Sistemas II 2026. Une en una sola plataforma los 30 módulos analizados y prototipados en `docs/modulos/` para una red de varios hospitales:
+- pacientes, citas y camas;
+- expediente y laboratorio;
+- reportes, calidad y administración.
 
-Repositorio base para el **Proyecto Final de Análisis de Sistemas II 2026**. Este repositorio es una base limpia para que cada estudiante implemente un **módulo vertical individual** del Sistema Hospitalario Integrado, usando ramas, worktrees, pull requests, documentación y evidencia de pruebas.
+> Requisito transversal: el sistema debe ser **fácil de usar, intuitivo y entenderse solo al usarlo**. Cada pantalla explica qué hacer, valida en el momento y confirma cada acción.
 
-> Este proyecto no consiste en “hacer pantallas”. Cada módulo debe demostrar análisis, diseño, arquitectura, implementación, pruebas, seguridad e integración.
+## Contenido
 
-## Estado actual del repositorio
+1. [Tecnologías y arquitectura](#1-tecnologías-y-arquitectura)
+2. [Cómo levantar el sistema](#2-cómo-levantar-el-sistema)
+3. [Usuarios de demostración](#3-usuarios-de-demostración)
+4. [Estado de los módulos](#4-estado-de-los-módulos)
+5. [Estructura del proyecto](#5-estructura-del-proyecto)
+6. [Cómo continuar un módulo](#6-cómo-continuar-un-módulo)
+7. [Guía de los módulos disponibles](#7-guía-de-los-módulos-disponibles)
+8. [Pruebas](#8-pruebas)
+9. [Flujo de trabajo con Git](#9-flujo-de-trabajo-con-git)
+10. [API](#10-api)
 
-| Área | Estado real |
+---
+
+## 1. Tecnologías y arquitectura
+
+| Capa | Tecnología |
 |---|---|
-| Stack backend | Laravel 12, PHP 8.2+, API REST con arquitectura MVC (modelos Eloquent, controladores, Form Requests, API Resources y servicios con las reglas de negocio), JWT (`tymon/jwt-auth`). |
-| Stack frontend | React 19 + TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod, Tailwind 4 (componentes al estilo shadcn/ui). |
-| Seguridad base | JWT de 15 minutos emitido **por hospital** (claim `hid`), hospital en `X-Tenant-ID`, RBAC propio sobre `hospital_memberships` (roles, permisos y matriz editable por el administrador de red), límite de intentos de login y bitácora encadenada de solo inserción. |
-| Base de datos | PostgreSQL federado: una base CENTRAL (red, identidad, MPI, consentimientos, auditoría, sincronización) y una base clínica HOSPITAL por hospital. Migraciones en `database/migrations/{central,hospital,framework}` con pruebas de integridad en `tests/Database`. |
-| Esquema en curso | Listo: CENTRAL completo y HOSPITAL hasta expediente, alergias y signos vitales. Pendiente: medicamentos/prescripciones, laboratorio, auditoría local, modelos Eloquent, factories y seeders (`openspec/changes/postgresql-federated-schema-rebuild/tasks.md`). |
-| API actual | Fase 1 lista: autenticación por hospital, cambio de hospital, usuarios, roles y permisos, y auditoría (ver «API disponible»). Las credenciales viven en `user_credentials` (CENTRAL). |
-| Módulos clínicos | Se integran por fases (2 a 8) según [docs/hospital-nido/PLAN.md](docs/hospital-nido/PLAN.md); sus pantallas ya existen en el menú con la marca «pronto». |
-| Documentación nueva | Este README, el plan semanal, la guía de worktrees y las plantillas de issues/PR son la base de trabajo ASII. |
+| Backend | **Laravel 12** (PHP 8.2+) como **API REST** con arquitectura **MVC** |
+| Frontend | **React 19 + TypeScript**, Vite, React Router, TanStack Query, React Hook Form + Zod, Tailwind CSS 4 (componentes al estilo shadcn/ui) |
+| Base de datos | **PostgreSQL 15+** federado: una base **CENTRAL** y una base **HOSPITAL por cada hospital** |
+| Autenticación | JWT de 15 minutos emitido **para un hospital** (`tymon/jwt-auth`), renovado por la aplicación |
+| Autorización | RBAC propio: roles por hospital (`hospital_memberships`) y permisos por módulo (`config/nido.php`) |
+| Auditoría | Bitácora de solo inserción, sellada en cadena (SHA-256) por hospital |
 
-## Trabajo individual por módulos verticales
+**Cómo encaja MVC con React:**
 
-Cada estudiante debe construir una capacidad completa del HIS, no una pieza aislada. Un módulo terminado debe incluir:
+| Capa | Dónde vive |
+|---|---|
+| Modelo | Modelos Eloquent (`app/Models/Central`, `app/Models/Hospital`) + servicios con las reglas de negocio (`app/Services`) |
+| Controlador | Controladores de la API (`app/Http/Controllers/Api/V1`), con validación en Form Requests y permisos en el middleware `permiso:` |
+| Vista | API Resources (`app/Http/Resources`), que dan forma al JSON, y páginas React (`resources/js/pages`), que lo muestran |
 
-- análisis del problema, actores y casos de uso;
-- requerimientos funcionales y no funcionales;
-- diseño arquitectónico y de componentes;
-- contrato API y reglas de permisos;
-- implementación backend/frontend mínima funcional;
-- pruebas y evidencia de ejecución;
-- documentación y evidencia de integración.
+**Bases de datos:**
+- **CENTRAL:** la red y sus hospitales, usuarios y credenciales, roles y permisos, índice maestro de pacientes, consentimientos, bitácora de auditoría, sincronización, y sesiones, caché y colas.
+- **HOSPITAL, una por hospital:** todo lo clínico (pacientes, médicos, citas, camas, expediente, laboratorio…).
+  - Las tablas no tienen columna de hospital: cada hospital es su propia base.
+  - La conexión `hospital` apunta automáticamente a la base del hospital con el que se inició sesión (`App\Services\Hospital\HospitalDatabase`).
+  - Entre las dos bases no hay llaves foráneas físicas, solo referencias por UUID.
 
-## Asignación de módulos
+El plan de integración, las decisiones de diseño y lo entregado en cada fase están en [`docs/hospital-nido/PLAN.md`](docs/hospital-nido/PLAN.md).
 
-| # | Estudiante | GitHub | Módulo asignado |
-|---:|---|---|---|
-| 1 | BRANDON JOSÉ AQUINO ARRIVILLAGA | `AquinoB2090` | Gestión de usuarios, tenants y endurecimiento de autenticación |
-| 2 | LUIS DAVID AROCHE CONTRERAS | `Luis890D` | RBAC: roles, permisos y protección de rutas |
-| 3 | GLENDI PATRICIA CAMPOS ORELLANA | `Glendi20` | Pacientes: registro, edición, búsqueda y detalle |
-| 4 | BILLY EDUARDO CARDONA LÓPEZ | Pendiente de confirmación | Médicos, especialidades y disponibilidad |
-| 5 | EDDY ADOLFO CASTRO VÉLIZ | `EddCastro` | Citas médicas y agenda |
-| 6 | MADELIN JAZMÍN CERÓN MOLINA | `MadelinCeron` | Catálogo de salas, wards y camas |
-| 7 | OSCAR LEONEL CRUZ PAREDES | `Leonels16` | Admisión hospitalaria y asignación de cama |
-| 8 | ESAÚ ABIMAEL DE LA CRUZ | `00AbiMendoza` | Traslados, altas y liberación de camas |
-| 9 | JAVIER ALEXANDER FAJARDO LÓPEZ | `Javifa2324` | Dashboard de ocupación hospitalaria |
-| 10 | MARYORI RACHAEL FAJARDO PAREDES | `maryorifajardo14` | Expediente médico electrónico base |
-| 11 | JOSHUA EDUARDO GARCIA REYES | `jgarciar73-svg` | Notas SOAP y diagnósticos |
-| 12 | AXEL ELIÚ HERRERA SÁNCHEZ | `AxelHerrera11` | Alergias clínicas y alerta visual en expediente |
-| 13 | JOSUÉ FERNANDO HICHO GARCÍA | `Jhos-hgnu` | Signos vitales y alertas por valores anormales |
-| 14 | MARIA YAMILET LINDO PABLO | `Yamilet1235` | Catálogo de medicamentos |
-| 15 | MARÍA DE LOS ANGELES LÓPEZ FAJARDO | `Mar-03` | Prescripciones electrónicas con validación de alergias |
-| 16 | MERCEDES AZUCENA LOPEZ PEREZ | `Azucena17` | Órdenes de laboratorio desde EMR |
-| 17 | JOSUÉ MANUEL MARTÍNEZ PEDROZA | `Josuemart555` | Catálogo de pruebas de laboratorio |
-| 18 | ARMANDO CECILIO MORALES SAGASTUME | `ArmandoMorales` | Recepción de muestras y códigos identificadores |
-| 19 | KEILY FABIOLA ORELLANA MARROQUÍN | `orem6` | Ingreso de resultados de laboratorio |
-| 20 | GERSON GIOVANNI ORELLANA VÉLIZ | `gioore` | Validación de resultados por bioquímico |
-| 21 | DULCE MARÍA PRADO VÁSQUEZ | `Dulce2024` | Alertas críticas y notificaciones internas |
-| 22 | BORIS ALEXANDER QUIROA ORELLANA | `bquiroao` | Gobernanza y auditoría de movimientos del sistema |
-| 23 | ERICK ROLANDO RAMAZZINI MURALLES | `ErickRamazzini` | Reportes y analytics básicos |
-| 24 | ALBINO SEBASTIAN ROSALES RUANO | `codsebas` | Contratos API: OpenAPI/Postman y documentación técnica |
-| 25 | CINDY MAYTTÉ RUANO CALDERÓN | `cindyruano` | QA, pruebas E2E, CI y guía de despliegue final |
-| 26 | JOSUÉ DAVID MORALES RAMÍREZ | `morales-js` | Dashboard base UI/UX e implementación transversal |
-| 27 | LIS IVETTE ROSALES COLINDREZ | `Lis671` | Reportes operativos exportables y filtros administrativos |
-| 28 | DIDHYER ALEXANDER ORTÍZ GUEVARA | `DidhyerOrtiz` | QA funcional, pruebas manuales y matriz de regresión |
-| 29 | HUGO DAVID MOSCOSO CASTRO | `HugoX2024` | Investigación y prototipo NativePHP para extensión móvil/escritorio |
-| 30 | JOSÉ ALEXANDER DIONICIO CÓRDOVA | Pendiente de confirmación | API Gateway del proyecto hospitalario |
+---
 
-Notas de delimitación:
+## 2. Cómo levantar el sistema
 
-- El módulo de **Boris Alexander Quiroa Orellana** cubre gobernanza para super admin: bitácora/auditoría de movimientos de usuarios en el sistema, tabla `audit_logs` o ajuste documentado del scaffold existente, interfaz protegida y filtros obligatorios por usuario, módulo y rango libre de fechas (`desde` / `hasta`).
-- El módulo de **Josué David Morales Ramírez** cubre el dashboard base: layout, navegación, tarjetas/resúmenes iniciales, estados vacíos/carga/error y consistencia UI/UX transversal. No reemplaza los reportes analíticos.
-- El módulo de **Lis Ivette Rosales Colindrez** cubre reportes operativos exportables: filtros, tablas, impresión/PDF/CSV y reportes administrativos. Se diferencia del módulo de Erick, que se enfoca en analytics básicos y visualización de indicadores.
-- El módulo de **Hugo David Moscoso Castro** es exploratorio-aplicado: evaluar NativePHP como puente Laravel hacia app móvil/escritorio y entregar un prototipo acotado o informe técnico con decisión de viabilidad.
-- El módulo de **José Alexander Dionicio Córdova** cubre el API Gateway: contratos, routing, documentación API, reenvío controlado de autenticación, agregación, rate limiting, resiliencia y observabilidad. Su usuario de GitHub está pendiente; `codsebas` pertenece únicamente a Albino Sebastian Rosales Ruano.
+**Requisitos:**
+- PHP 8.2+ con las extensiones `pdo_pgsql` y `pgsql`;
+- Composer 2;
+- Node.js 20+;
+- PostgreSQL 15+ (probado con 18).
 
-## Flujo obligatorio con worktree
+Los comandos son para PowerShell en Windows. En Linux o macOS son los mismos, cambiando la ruta de `createdb`.
 
-Nunca trabajes directamente sobre `main`. Cada módulo debe desarrollarse en su propio worktree y rama feature desde `origin/develop`.
-
-```bash
-git fetch origin
-git worktree add ../shi-asii-XX-slug -b feature/asii-XX-slug-usuario origin/develop
-cd ../shi-asii-XX-slug
-```
-
-Ejemplo de nombre:
-
-```bash
-git worktree add ../shi-asii-03-pacientes -b feature/asii-03-pacientes-glendi20 origin/develop
-cd ../shi-asii-03-pacientes
-```
-
-Reglas estrictas:
-
-- No trabajar en `main`.
-- No hacer `force push`.
-- No mezclar módulos diferentes en una misma rama.
-- No abrir PR sin evidencia de análisis, diseño, implementación y pruebas.
-- No modificar archivos de otros módulos sin coordinación previa.
-- Todo PR debe apuntar a `develop`, no a `main`.
-
-Guía detallada: [`docs/worktree-guide.md`](docs/worktree-guide.md).
-
-## Instalación rápida Laravel/React
-
-Requisitos: PHP 8.2+ con extensiones `pdo_pgsql` y `pgsql`, Composer 2, Node.js 20+, npm y PostgreSQL 15+. No se usa SQLite ni MySQL.
-
-```bash
+**1. Traer el proyecto e instalar dependencias:**
+```powershell
+git checkout develop
+git pull origin develop
 composer install
-cp .env.example .env
+npm install
+```
+
+**2. Crear el archivo de configuración** (solo la primera vez):
+```powershell
+copy .env.example .env
 php artisan key:generate
 php artisan jwt:secret
 ```
 
-Bases de datos PostgreSQL (dos bases distintas; ajuste `CENTRAL_DB_*` y `HOSPITAL_DB_*` en `.env`):
+**3. En `.env`, poner los datos de tu PostgreSQL** (puerto y contraseña del usuario `postgres`):
+```
+CENTRAL_DB_PORT=5432
+CENTRAL_DB_PASSWORD=tu_contraseña
+HOSPITAL_DB_PORT=5432
+HOSPITAL_DB_PASSWORD=tu_contraseña
+```
+Para comprobar la conexión: `php artisan db:show --database=central`.
 
-```bash
-createdb his_central
-createdb his_hospital
-psql -d his_hospital -c 'CREATE EXTENSION IF NOT EXISTS btree_gist;'
-
-composer migrate:central     # red, identidad, MPI, consentimientos, sincronización
-composer migrate:hospital    # esquema clínico del hospital
-composer migrate:framework   # sessions, cache y jobs (en CENTRAL)
+**4. Crear las dos bases principales.** Si dice que ya existen, sigue al paso 5.
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_central
+& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_hospital
 ```
 
-Catálogo de roles y permisos (siempre) y red de demostración (solo en `local`/`testing`): cuatro hospitales y un usuario por rol, todos con la contraseña `NidoDemo2026` (`admin@nido.test`, `admin.hospital@nido.test`, `medico@nido.test`, `enfermeria@nido.test`, `recepcion@nido.test`, `laboratorio@nido.test`, `bioquimico@nido.test`, `farmacia@nido.test`, `direccion@nido.test`, `calidad@nido.test`):
+**5. Crear las tablas de CENTRAL:**
+```powershell
+php artisan migrate --database=central --path=database/migrations/central
+php artisan migrate --database=central --path=database/migrations/framework
+```
 
-```bash
+**6. Cargar roles, permisos, los 4 hospitales y los usuarios de demostración:**
+```powershell
 php artisan db:seed
 ```
 
-Cada hospital tiene su propia base clínica (esquema federado). Este comando crea la que falte, la migra, carga el catálogo de especialidades y, con `--demo`, médicos con horario, pacientes ficticios y citas. En desarrollo, Hospital Nido Central usa `HOSPITAL_DB_DATABASE` y los otros tres `his_hospital_nor`, `his_hospital_ori` y `his_hospital_occ`:
-
-```bash
+**7. Crear la base de cada hospital con datos de ejemplo:**
+```powershell
 php artisan nido:hospitales --demo
 ```
+Este comando:
+- crea la base que falte (Central usa `his_hospital`; Norte, Oriente y Occidente usan `his_hospital_nor`, `his_hospital_ori` y `his_hospital_occ`);
+- la migra y carga el catálogo de especialidades;
+- con `--demo`, agrega médicos con horario, pacientes ficticios y citas;
+- con `--fresh`, borra y recrea el esquema de cada base.
 
-Las pruebas usan dos bases desechables definidas en `phpunit.xml` (puertos 55431 y 55433, con `btree_gist` instalado en la base HOSPITAL):
-
-```bash
-composer test
-```
-
-Frontend y servidor local:
-
-```bash
-npm install
-npm run dev
-```
-
-En otra terminal:
-
-```bash
+**8. Compilar las pantallas y encender:**
+```powershell
+npm run build
 php artisan serve
 ```
+Abre **http://localhost:8000**. Mientras programas, abre en otra terminal `npm run dev` para ver los cambios de React al instante.
 
-Validaciones recomendadas antes de abrir PR:
+**Cada vez que traigas cambios de `develop`:**
+1. `git pull`;
+2. `composer install` y `npm install`, si cambiaron dependencias;
+3. `php artisan migrate --database=central --path=database/migrations/central`;
+4. `php artisan nido:hospitales` (migra todas las bases de hospital);
+5. `npm run build`.
 
-```bash
-php artisan route:list --path=api
-npm run build
-php artisan test
+**Problemas comunes:**
+
+| Mensaje | Solución |
+|---|---|
+| `password authentication failed` | La contraseña de `.env` no es la de tu usuario `postgres`. |
+| «Demasiados intentos» al iniciar sesión | `php artisan cache:clear` |
+| La página sale en blanco | `npm run build` |
+| `relation "..." does not exist` | Falta migrar: pasos 5 y 7. |
+
+---
+
+## 3. Usuarios de demostración
+
+Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **Contraseña de todos: `NidoDemo2026`.**
+
+| Correo | Rol | Para probar |
+|---|---|---|
+| `admin@nido.test` | Administrador de red | Todo, en los 4 hospitales; edita la matriz de permisos |
+| `admin.hospital@nido.test` | Administrador de hospital | Usuarios, roles, auditoría, médicos y horarios |
+| `recepcion@nido.test` | Recepción y admisión | Pacientes y citas |
+| `medico@nido.test` | Médico (Central y Norte) | Su agenda; cambio de hospital |
+| `pediatria@nido.test`, `cardiologia@nido.test` | Médico | Otros especialistas |
+| `enfermeria@nido.test` | Enfermería | Consulta de pacientes |
+| `laboratorio@nido.test`, `bioquimico@nido.test` | Laboratorio | Módulos de laboratorio |
+| `farmacia@nido.test` | Farmacia | Catálogo de medicamentos |
+| `direccion@nido.test` | Dirección médica | Reportes y ocupación |
+| `calidad@nido.test` | Calidad y QA | Auditoría y calidad |
+
+---
+
+## 4. Estado de los módulos
+
+Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no se integran aparecen con la marca «pronto» y muestran de qué módulos salen.
+
+| Área | Módulo (`docs/modulos/…`) | Estado |
+|---|---|---|
+| Plataforma | `gestion-usuarios-tenants-autenticacion` | ✅ Integrado |
+| | `rbac` | ✅ Integrado |
+| | `gobernanza-auditoria` | ✅ Integrado |
+| | `dashboard-base` | ✅ Integrado (inicio por rol) |
+| | `contratos-api` | 🔜 En el plan |
+| | `verificacion-bd-postgresql` | 🔜 En el plan |
+| Pacientes y agenda | `pacientes` | ✅ Integrado |
+| | `medicos-especialidades` | ✅ Integrado |
+| | `citas-medicas` | ✅ Integrado |
+| Camas | `catalogo-salas-camas` | 🔜 En el plan |
+| | `admision-hospitalaria-asignacion-cama` | 🟦 **Disponible** (sección 7.2) |
+| | `traslados-altas-camas` | 🔜 En el plan |
+| | `dashboard-ocupacion` | 🔜 En el plan |
+| Clínico | `expediente-medico` | 🔜 En el plan |
+| | `notas-soap-diagnosticos` | 🔜 En el plan |
+| | `signos-vitales-alertas` | 🔜 En el plan |
+| | `alergias-clinicas-alerta-visual-expediente` | 🟦 **Disponible** (sección 7.5) |
+| | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
+| | `prescripciones-alergias` | ⏳ Espera a los catálogos de medicamentos y alergias |
+| | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
+| Laboratorio | `catalogo-pruebas-laboratorio` | 🟦 **Disponible** (sección 7.1) |
+| | `ordenes-laboratorio-emr` | ⏳ Espera al catálogo de pruebas |
+| | `recepcion-muestras` | ⏳ Espera al catálogo de pruebas |
+| | `ingreso-resultados-laboratorio` | ⏳ Espera al catálogo de pruebas |
+| | `validacion-resultados-bioquimico` | ⏳ Espera al catálogo de pruebas |
+| Gestión | `reportes-analytics-basicos` | 🟦 **Disponible** (sección 7.3) |
+| | `reportes-operativos-exportables` | 🔜 En el plan |
+| Calidad | `qa-regresion-defectos` | 🔜 En el plan |
+| | `qa-e2e-ci-despliegue` | 🔜 En el plan |
+| Móvil | `investigacion-prototipo-nativephp` | 🔜 En el plan |
+
+**Leyenda:**
+- ✅ funciona de punta a punta, con pruebas;
+- 🟦 listo para tomarse (la base, los permisos y la entrada del menú ya existen);
+- 🔜 programado en las siguientes fases;
+- ⏳ depende de otro módulo.
+
+---
+
+## 5. Estructura del proyecto
+
+```
+app/
+  Console/Commands/         nido:hospitales (prepara la base de cada hospital)
+  Exceptions/               DomainRuleException: regla rechazada → {message, code, details}
+  Http/Controllers/Api/V1/  controladores (Admin/, Clinical/, Auth, Hospital)
+  Http/Middleware/          tenant (hospital), sesion (JWT), permiso:<código>
+  Http/Requests/            validación de entrada (Form Requests)
+  Http/Resources/           forma del JSON de respuesta
+  Models/Central/           modelos de la base CENTRAL
+  Models/Hospital/          modelos de la base del hospital
+  Services/                 reglas de negocio por módulo (Patients, Doctors, Appointments, Audit…)
+config/nido.php             catálogo de roles y permisos (cada permiso indica su módulo)
+database/migrations/
+  central/                  esquema CENTRAL
+  hospital/                 esquema clínico (se aplica a la base de cada hospital)
+  framework/                sesiones, caché y colas (en CENTRAL)
+database/seeders/           catálogo RBAC, red de demostración, especialidades y datos clínicos
+resources/js/
+  components/ui.tsx         componentes base (Button, Field, Card, Dialog, Table…)
+  lib/                      api.ts (cliente y errores), format.ts (fechas, horas, etiquetas)
+  modules/catalog.ts        menú: cada pantalla, su permiso, sus módulos y si ya está lista
+  pages/                    una carpeta por área (patients, doctors, appointments, admin…)
+  routes.tsx                rutas de la aplicación
+routes/api.php              rutas de la API (/api/v1)
+tests/
+  Database/                 integridad del esquema PostgreSQL
+  Feature/Platform/         autenticación, RBAC y auditoría
+  Feature/Clinical/         pacientes, médicos y citas
+docs/
+  hospital-nido/PLAN.md     plan de integración y decisiones
+  modulos/                  análisis, diseño y prototipo de cada módulo (semanas 1–15)
 ```
 
-## API disponible
+---
 
-Todas las rutas están bajo `/api/v1`. Salvo `/hospitales`, requieren `X-Tenant-ID` con el id del hospital; las protegidas, además, `Authorization: Bearer <token>` de ese mismo hospital.
+## 6. Cómo continuar un módulo
 
-| Método | Ruta | Acceso |
+Cada módulo de `docs/modulos/<modulo>/` trae su análisis, sus reglas de negocio y un prototipo en `micro-his-*/` (PHP sin framework, con pruebas). **Integrarlo** es llevar esas reglas y pruebas al proyecto Laravel + React con estos pasos.
+
+El ejemplo completo a imitar es el módulo de pacientes:
+- `app/Services/Patients/PatientService.php`;
+- `app/Http/Controllers/Api/V1/Clinical/PatientController.php`;
+- `app/Http/Requests/Clinical/PatientRequest.php` y `app/Http/Resources/PatientResource.php`;
+- `resources/js/pages/patients/`;
+- `tests/Feature/Clinical/PatientTest.php`.
+
+**1. Lee el módulo.** El `README.md` del módulo y su `micro-his-*/src/Dominio` dicen las reglas, los códigos de error y los casos de prueba. Esas reglas son las que se respetan.
+
+**2. Base de datos.**
+- Revisa si las tablas ya existen en `database/migrations/hospital/` (por ejemplo, `allergies`, `vital_signs`, `care_episodes`, `bed_stays`, `wards`, `beds`).
+- Si falta algo, crea una migración **nueva** en esa carpeta con la fecha de hoy. No edites las existentes.
+- Usa SQL con `protected $connection = 'hospital'`, como las demás.
+- Toda llave foránea va con `ON DELETE RESTRICT` y con un índice que empiece por sus columnas. `tests/Database/Verification/MigrationReversibilityTest` lo exige, y también exige que `down()` deje el esquema exactamente como estaba.
+- Aplícala con `php artisan nido:hospitales`.
+
+**3. Modelo.** En `app/Models/Hospital/`, extiende `HospitalModel` (conexión `hospital`, llaves UUID).
+
+**4. Reglas de negocio.**
+- Crea un servicio en `app/Services/<Área>/`.
+- Cuando una regla se rechace, lanza `DomainRuleException('CODIGO', 'Mensaje claro para el usuario', 422|409|403, $detalles)`. Usa el mismo código del prototipo del módulo.
+- Registra cada escritura en la bitácora: `$this->audit->record('<modulo>', 'ACCION', 'exito', $hospital->hospital_id, $user->user_id, 'recurso:id', [...], $ip)`.
+- Si necesitas el usuario dentro de la base clínica (para firmar un registro), usa `UserRefSync::forUser($user, $hospital)`.
+
+**5. Validación y controlador.**
+- Form Request en `app/Http/Requests/`, con los nombres de los campos en español en `attributes()`.
+- Controlador delgado en `app/Http/Controllers/Api/V1/Clinical/`: valida, llama al servicio y devuelve un Resource.
+- **Busca los registros por id dentro del controlador** (`Model::query()->find($id)`), sin route model binding: el binding correría antes de elegir la base del hospital.
+
+**6. Rutas y permisos.**
+- Agrega las rutas en `routes/api.php`, dentro del grupo `sesion`, con `->middleware('permiso:<código>')`. Para aceptar cualquiera de dos permisos: `permiso:a|b`.
+- Los permisos de cada módulo **ya existen** en `config/nido.php`.
+- Si necesitas uno nuevo, agrégalo ahí (indicando su módulo), asígnalo a los roles que correspondan y corre `php artisan db:seed --class=RbacCatalogSeeder`.
+
+**7. Pantalla.**
+- Crea la página en `resources/js/pages/<área>/` y regístrala en `resources/js/routes.tsx` con carga diferida (`lazy`), como las demás.
+- En `resources/js/modules/catalog.ts`, pon `ready: true` en la entrada de tu módulo.
+- Usa los componentes de `components/ui.tsx`.
+- Para mostrar errores de la API, usa `errorMessage`, `fieldErrors` y `ruleError`, de `lib/api.ts`.
+- Para fechas y horas, usa `formatDate` y `formatTime`, de `lib/format.ts`: muestran la hora del hospital.
+
+**8. Pruebas.**
+- Crea pruebas Feature en `tests/Feature/Clinical/` que extiendan `ClinicalTestCase`. Esa clase deja una base limpia con especialidades, médicos con horario y 10 pacientes.
+- `$this->as('recepcion@nido.test')` devuelve los encabezados de sesión de ese usuario.
+- Prueba al menos:
+  - el camino feliz;
+  - cada regla del módulo, con su código de error;
+  - que un usuario sin permiso reciba 403.
+
+**9. Documenta.** Actualiza la [sección 4](#4-estado-de-los-módulos), la [sección 10](#10-api) y `docs/hospital-nido/PLAN.md`.
+
+**Criterios de facilidad de uso** (obligatorios en toda pantalla):
+- Título y una línea que diga para qué sirve la pantalla.
+- Etiquetas en español claro.
+- Debajo de cada campo con formato, una indicación con un ejemplo («13 dígitos», «Ej.: Neurología»).
+- Errores junto al campo que los causa, diciendo qué hacer, no solo qué falló.
+- Solo las acciones que el usuario puede hacer, según su permiso y el estado del registro.
+- Un mensaje que confirme cada acción («Cita agendada», «Horario guardado»).
+- Confirmación antes de las acciones que no se pueden deshacer.
+- Estados vacíos con una salida («No hay citas este día · Agendar una cita»).
+- Contraste AA (no usar `text-slate-400` para texto), todo usable con teclado y sin desborde horizontal a 375 px de ancho.
+
+---
+
+## 7. Guía de los módulos disponibles
+
+Estos seis módulos están listos para tomarse. En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+
+### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
+- **Ya existe:**
+  - los permisos `pruebas_lab.ver` y `pruebas_lab.gestionar` (laboratorio, bioquímico y administrador de hospital; el médico solo ve);
+  - la entrada del menú `/laboratorio`, compartida con los demás módulos de laboratorio;
+  - el prototipo en `docs/modulos/catalogo-pruebas-laboratorio/micro-his/` (`LabTest`, `RequisitoMuestra`, `Vigencia`, `VigenciaSuperpuesta`).
+- **Falta:**
+  - las tablas del laboratorio: el esquema base las dejó pendientes (tarea 3.6 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md`);
+  - el registro de pruebas con vigencias que no se crucen;
+  - la pantalla del catálogo.
+- **Se conecta con:** órdenes, recepción de muestras, ingreso y validación de resultados. Esos cuatro módulos esperan a este. Deja bien definida y documentada la tabla de pruebas (código, nombre, tipo de muestra, unidades, rangos de referencia y vigencia), porque la van a usar todos.
+
+### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama`
+- **Ya existe:**
+  - las tablas `care_episodes` (episodio de atención), `bed_stays` (estancia en una cama; la base impide dos estancias a la vez en la misma cama), `wards` y `beds`;
+  - el permiso `admisiones.gestionar` (médico y recepción);
+  - el prototipo, con las reglas de aislamiento, cama operativa y concurrencia.
+- **Falta:**
+  - el servicio de admisión: abrir un episodio `inpatient` y asignar una cama disponible, todo en una transacción;
+  - la pantalla dentro de `/camas`.
+- **Defectos abiertos que le tocan** (`tests/Database/Verification/ConstraintBoundaryTest`):
+  - **AU-01:** un episodio cerrado sin fecha de fin se guarda;
+  - **AU-05:** una cama con estancia abierta sigue figurando como disponible.
+- **Se conecta con:**
+  - el catálogo de salas y camas (en el plan), que da de alta salas y camas en `/camas`;
+  - traslados y altas (en el plan), que cierran o mueven la estancia.
+- **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas trabajan sobre esa estancia.
+
+### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos`
+- **Ya existe:**
+  - el permiso `reportes.ver` (dirección, administrador de hospital y calidad);
+  - la entrada del menú `/reportes`, compartida con reportes operativos exportables;
+  - el prototipo (`ReportRegistry`, `ReporteOcupacion`, `Indicador`, `Filtros`).
+- **Falta:**
+  - los indicadores, calculados con las tablas existentes (pacientes, citas y estancias) y filtros por fecha;
+  - la pantalla con tarjetas de indicadores y gráficas (se recomienda Recharts).
+- **Se conecta con:** reportes operativos exportables, que también vive en `/reportes`. Usen pestañas: «Indicadores» para este módulo y «Exportar» para el otro.
+
+### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas`
+- **Ya existe:**
+  - los permisos `alertas.ver` y `alertas.gestionar`;
+  - la entrada del menú `/alertas`;
+  - la campana de la barra superior (`resources/js/layout/AppShell.tsx`), lista para mostrar el número de alertas;
+  - el prototipo (`Alerta`, `Prioridad`, `PoliticaEscalamiento`, `EstadoAlerta`).
+- **Falta:**
+  - la tabla de alertas;
+  - el reconocimiento y el escalamiento;
+  - la pantalla y el contador de la campana.
+- **Se conecta con:** signos vitales fuera de rango y resultados críticos de laboratorio. Para no acoplar los módulos, esos módulos **disparan un evento de Laravel** con el valor anormal, y este módulo lo escucha para crear la alerta. El evento quedará documentado en `PLAN.md` cuando se integren los signos vitales.
+
+### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente`
+- **Ya existe:**
+  - la tabla `allergies`: alérgeno, tipo, severidad y estado, con una regla que impide duplicar una alergia activa;
+  - el permiso `alergias.gestionar` (médico y enfermería);
+  - el prototipo (`CalculadorAlerta`, `NivelAlerta`, `ReglaNivelAlerta`).
+- **Falta:**
+  - el registro y la confirmación de alergias;
+  - el cálculo del nivel de alerta;
+  - **el banner visual**, siempre visible en la ficha del paciente y en el expediente.
+- **Se conecta con:**
+  - la ficha del paciente (`resources/js/pages/patients/PatientDetailPage.tsx`);
+  - el expediente (en el plan);
+  - prescripciones, que bloquearán una receta que choque con una alergia.
+- **Acuerdo de integración:** exporta un componente `AllergyBanner` en `resources/js/modules/allergies/` que reciba el id del paciente, para que las demás pantallas solo tengan que colocarlo.
+
+### 7.6 Catálogo de medicamentos — `catalogo-medicamentos`
+- **Ya existe:**
+  - los permisos `medicamentos.ver` y `medicamentos.gestionar` (farmacia y administrador de hospital; médico y enfermería solo ven);
+  - la entrada del menú `/prescripciones`, compartida con prescripciones;
+  - el prototipo (`CodigoMedicamento`, `Concentracion`, `ClaveEquivalencia`, `BusquedaCatalogo`).
+- **Falta:**
+  - las tablas de medicamentos: el esquema base las dejó pendientes (tarea 3.5 del mismo `tasks.md`);
+  - el registro y la búsqueda de medicamentos;
+  - la pantalla.
+- **Se conecta con:** prescripciones, que esperan a este catálogo y al de alergias. Usen pestañas en `/prescripciones`: «Catálogo» para este módulo y «Recetas» para prescripciones.
+
+**Para evitar conflictos al unir ramas:**
+- `routes/api.php`, `config/nido.php`, `resources/js/routes.tsx` y `resources/js/modules/catalog.ts` los comparten todos los módulos.
+- Agrega tus líneas en un bloque propio, con un comentario del módulo, y no reordenes lo que ya existe.
+- Haz `git pull origin develop` antes de abrir tu PR.
+
+---
+
+## 8. Pruebas
+
+Las pruebas usan dos bases **desechables**, distintas de las de desarrollo, porque se borran en cada prueba. `phpunit.xml` las espera en los puertos 55431 y 55433. Con tu PostgreSQL local, crea las bases y sobrescribe la conexión con variables de entorno.
+
+**Una sola vez:**
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_central_test
+& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_hospital_test
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h 127.0.0.1 -d his_hospital_test -c "CREATE EXTENSION IF NOT EXISTS btree_gist"
+```
+
+**Cada vez**, en la misma terminal:
+```powershell
+$env:CENTRAL_DB_PORT="5432"; $env:HOSPITAL_DB_PORT="5432"
+$env:CENTRAL_DB_PASSWORD="tu_contraseña"; $env:HOSPITAL_DB_PASSWORD="tu_contraseña"
+php artisan test                      # todo
+php artisan test --group=clinical     # pacientes, médicos y citas
+php artisan test --group=platform     # autenticación, RBAC y auditoría
+```
+
+**Antes de abrir un PR:**
+```powershell
+php artisan test
+npx tsc --noEmit
+npm run build
+vendor/bin/pint --dirty
+```
+
+Hoy la suite da **109 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+
+---
+
+## 9. Flujo de trabajo con Git
+
+- **Nunca trabajes sobre `main`.** Todo se integra en `develop`.
+- Una rama por módulo o fase, creada desde `develop` actualizado:
+  ```powershell
+  git checkout develop
+  git pull origin develop
+  git checkout -b modulo-catalogo-medicamentos
+  ```
+- Commits en español, con prefijo: `feat(medicamentos): …`, `fix(…): …`, `docs: …`.
+- Antes del PR: corre las validaciones de la sección 8 y vuelve a traer `develop` (`git pull origin develop`).
+- El PR va hacia `develop`, con la plantilla del repositorio (`.github/pull_request_template.md`): resumen, alcance, validación ejecutada, contrato de la API y riesgos.
+- No hagas `force push` sobre ramas compartidas. No mezcles en una rama cambios de módulos que no se relacionan.
+
+---
+
+## 10. API
+
+Todas las rutas están bajo `/api/v1`.
+- **Encabezados:** salvo `/hospitales`, todas requieren `X-Tenant-ID` con el id del hospital. Las protegidas requieren además `Authorization: Bearer <token>`, emitido para ese mismo hospital.
+- **Errores de regla de negocio:** `{ "message", "code", "details"? }`, por ejemplo `POSIBLE_DUPLICADO` o `MEDICO_OCUPADO`.
+- **Errores de validación:** el formato estándar de Laravel, con mensajes en español.
+
+| Método | Ruta | Permiso |
 |---|---|---|
 | GET | `/hospitales` | Público (lista para el login) |
 | POST | `/auth/login` | Hospital |
-| GET | `/auth/me` | Sesión |
-| GET | `/auth/hospitales` | Sesión (hospitales donde el usuario tiene rol) |
-| POST | `/auth/cambiar-hospital` | Sesión |
-| POST | `/auth/refresh` | Sesión |
-| POST | `/auth/logout` | Sesión |
+| GET | `/auth/me`, `/auth/hospitales` | Sesión |
+| POST | `/auth/cambiar-hospital`, `/auth/refresh`, `/auth/logout` | Sesión |
 | GET / POST | `/usuarios` | `usuarios.ver` / `usuarios.gestionar` |
 | PATCH | `/usuarios/{id}/estado` | `usuarios.gestionar` |
 | GET | `/roles` | `roles.ver` |
-| PUT | `/roles/{rol}/permisos` | `roles.configurar` (administrador de red) |
-| POST | `/membresias` | `roles.asignar` |
-| POST | `/membresias/{id}/revocar` | `roles.revocar` |
+| PUT | `/roles/{rol}/permisos` | `roles.configurar` |
+| POST | `/membresias` · `/membresias/{id}/revocar` | `roles.asignar` / `roles.revocar` |
 | GET | `/auditoria`, `/auditoria/verificacion` | `auditoria.consultar` |
-| GET / POST | `/pacientes` | `pacientes.ver` / `pacientes.gestionar` (búsqueda con `?q=`) |
-| GET / PUT | `/pacientes/{id}` | `pacientes.ver` / `pacientes.gestionar` (PUT exige `version`) |
-| GET / POST | `/especialidades` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
-| GET / POST | `/medicos` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
-| GET | `/medicos/candidatos` | `medicos.gestionar` |
+| GET / POST | `/pacientes` (`?q=` para buscar) | `pacientes.ver` / `pacientes.gestionar` |
+| GET / PUT | `/pacientes/{id}` (PUT exige `version`) | `pacientes.ver` / `pacientes.gestionar` |
+| GET / POST | `/especialidades` · PATCH `/especialidades/{id}` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
+| GET / POST | `/medicos` · GET `/medicos/candidatos` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
+| GET | `/medicos/{id}` | `medicos.ver` |
 | POST / DELETE | `/medicos/{id}/especialidades[/{link}]` | `medicos.gestionar` |
 | PUT / PATCH | `/medicos/{id}/horario`, `/medicos/{id}/estado` | `medicos.gestionar` |
-| GET | `/disponibilidad?especialidad=&desde=` | `citas.ver` |
-| GET / POST | `/citas` | `citas.ver` / `citas.gestionar` |
+| GET | `/disponibilidad?especialidad=&desde=[&medico=]` | `citas.ver` |
+| GET / POST | `/citas` (`?desde=&hasta=&medico=&paciente=`) | `citas.ver` / `citas.gestionar` |
 | POST | `/citas/{id}/estado` | `citas.gestionar` |
-
-Los errores de regla de negocio responden `{ "message", "code" }` (p. ej. `AUTOASIGNACION`, `ASIGNACION_DUPLICADA`, `MOTIVO_INSUFICIENTE`); los de validación, el formato estándar de Laravel con mensajes en español.
-
-## Plan semanal ASII
-
-El plan completo está en [`docs/weekly-plan.md`](docs/weekly-plan.md).
-
-| Semana | Entrega principal del módulo | Evidencia esperada |
-|---:|---|---|
-| 1 | Diagnóstico, actores y casos de uso del módulo. | Diagrama UML de casos de uso + narrativa breve. |
-| 2 | RF/RNF, criterios de aceptación y diseño inicial. | Tabla RF/RNF + ejemplo de al menos un principio SOLID aplicado al módulo, usando como fuente `https://mvpcluster.com/diseno-de-software-2/`. |
-| 3 | Vista arquitectónica del módulo. | Diagrama C4/UML o vista de componentes de alto nivel. |
-| 4 | Diseño por capas y responsabilidades. | UI, API, lógica, persistencia y objetos reutilizables. |
-| 5 | Contrato API preliminar y plan de integración. | Endpoints, payloads, errores, permisos, rama, worktree y PR. |
-| 6 | Primera evaluación parcial. | Defensa teórica y caso práctico arquitectónico. |
-| 7 | Diseño de componentes backend/frontend. | Diagrama de componentes + propuesta de refactorización. |
-| 8 | Flujo UX por rol. | User flow, wireframes iniciales y reglas de interacción. |
-| 9 | Evaluación de usabilidad y accesibilidad. | Checklist, hallazgos y mejoras propuestas. |
-| 10 | Adaptación responsive/móvil. | Escenarios móviles y prioridades de pantalla. |
-| 11 | Mockup o prototipo navegable. | Mockup desktop/móvil en Figma, Canva, Excalidraw o equivalente. |
-| 12 | Segunda evaluación parcial. | Defensa teórica y caso práctico de diseño. |
-| 13 | Plan de revisión técnica formal. | Checklist de revisión, responsables y evidencia. |
-| 14 | Plan de aseguramiento de calidad. | Métricas, riesgos y estrategia SQA del módulo. |
-| 15 | Pruebas unitarias, caja blanca y caja negra. | Casos de prueba + evidencia de ejecución. |
-| 16 | Integración, validación y primera entrega funcional. | Evidencia en staging/on-premise y errores corregidos. |
-| 17 | Seguridad y despliegue final. | Matriz de amenazas, pruebas de permisos/datos sensibles y bitácora de despliegue. |
-| 18 | Evaluación final y defensa. | Demo funcional, PR integrado y evidencia completa. |
-
-## Evaluación
-
-| Componente | Puntos |
-|---|---:|
-| Actividades ASII semanales | 20 |
-| Proyecto individual final | 15 |
-
-Proyecto individual — 15 puntos:
-
-| Criterio | Puntos |
-|---|---:|
-| Funcionalidad completa del módulo | 5 |
-| Integración con el HIS y flujos existentes | 3 |
-| Calidad del análisis y diseño | 3 |
-| Pruebas, validaciones y seguridad | 2 |
-| Documentación, demo y evidencia de despliegue | 2 |
-
-## Definition of Done por módulo
-
-Un módulo se considera terminado cuando cumple todo lo siguiente:
-
-- [ ] Issue asignado y documentado.
-- [ ] Rama feature creada desde `origin/develop` en worktree propio.
-- [ ] RF/RNF y criterios de aceptación documentados.
-- [ ] Casos de uso y alcance del módulo claros.
-- [ ] Diseño arquitectónico, por capas y de componentes incluido.
-- [ ] Contrato API documentado: endpoints, payloads, respuestas, errores y permisos.
-- [ ] Backend implementado con controllers delgados, validaciones, servicios/actions cuando aplique y control por rol/tenant.
-- [ ] UI mínima funcional en Vue para el flujo principal del módulo.
-- [ ] Pruebas ejecutadas y evidencia adjunta.
-- [ ] Seguridad revisada: roles, permisos, tenant y datos clínicos sensibles.
-- [ ] PR abierto hacia `develop` con checklist completo.
-- [ ] Evidencia de integración con otros módulos o con el flujo general del HIS.
-- [ ] Demo o capturas incluidas cuando el módulo tenga interfaz.
-
-## Documentos de apoyo
-
-- [`docs/weekly-plan.md`](docs/weekly-plan.md): cronograma detallado de semanas 1 a 18.
-- [`docs/worktree-guide.md`](docs/worktree-guide.md): flujo estricto de ramas, worktrees y recuperación.
-- [Plantilla de Pull Request](.github/pull_request_template.md): evidencia obligatoria para revisión.
-- [Plantilla de issue de módulo](.github/ISSUE_TEMPLATE/module_task.md): estructura para asignar y dar seguimiento a cada módulo.
-
-<!-- INICIO: EJERCICIOS_INDIVIDUALES_SEMANAS_1_5 -->
-## Ejercicios individuales — semanas 1 a 5
-
-Estas guías convierten el módulo oficial de cada estudiante en una secuencia continua: análisis UML, diseño SOLID, micro-monolito PHP por capas, MVC con Repository y evolución razonada hacia cliente-servidor/microservicios.
-
-### Documentos
-
-- Semana 1: [diagramas UML del proceso de negocio (Word)](docs/ejercicios/semana_1_al_5/semana_1_diagramas_uml.docx) · [(Markdown)](docs/ejercicios/semana_1_al_5/semana_1_diagramas_uml.md)
-- Semana 2: [aplicación de principios SOLID (Word)](docs/ejercicios/semana_1_al_5/semana_2_principios_solid.docx) · [(Markdown)](docs/ejercicios/semana_1_al_5/semana_2_principios_solid.md)
-- Semana 3: [micro-monolito PHP por capas (Word)](docs/ejercicios/semana_1_al_5/semana_3_micro_monolito_capas.docx) · [(Markdown)](docs/ejercicios/semana_1_al_5/semana_3_micro_monolito_capas.md)
-- Semana 4: [MVC y Repository (Word)](docs/ejercicios/semana_1_al_5/semana_4_mvc_repository.docx) · [(Markdown)](docs/ejercicios/semana_1_al_5/semana_4_mvc_repository.md)
-- Semana 5: [cliente-servidor y microservicios (Word)](docs/ejercicios/semana_1_al_5/semana_5_cliente_servidor_microservicios.docx) · [(Markdown)](docs/ejercicios/semana_1_al_5/semana_5_cliente_servidor_microservicios.md)
-
-### Reglas comunes de entrega
-
-- Trabajo individual con datos ficticios y repositorio personal compartido con el docente.
-- Portada, índice actualizado, introducción, conclusión, bibliografía, fuentes editables y evidencia técnica.
-- Evidencia Git verificable: rama, commit evaluado, historial legible y enlace al árbol de archivos.
-- Declaración transparente de IA en `DECLARACION_IA.md`: herramienta, propósito, prompts relevantes, contenido aceptado o modificado y validación humana; declarar expresamente si no se utilizó.
-- Defensa oral individual obligatoria para explicar decisiones, demostrar el trabajo y realizar un cambio solicitado.
-- No se admite texto oculto, blanco, engañoso, adversarial ni instrucciones trampa.
-- Las Semanas 3, 4 y 5 continúan el MISMO microproyecto PHP 8.2+ vanilla de cada estudiante.
-
-### Matriz individual completa
-
-| # | Estudiante | Módulo oficial o adaptación declarada | Semana 1 | Semana 2 | Semana 3 | Semana 4 | Semana 5 |
-|---:|---|---|---|---|---|---|---|
-| 1 | BRANDON JOSÉ AQUINO ARRIVILLAGA | Gestión de usuarios, tenants y endurecimiento de autenticación | Modele el proceso «alta de usuario por tenant, autenticación segura y revocación de sesión». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «alta de usuario por tenant, autenticación segura y revocación de sesión». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Gestión de usuarios, tenants y endurecimiento de autenticación» en PHP 8.2+ vanilla para ejecutar «alta de usuario por tenant, autenticación segura y revocación de sesión». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Gestión de usuarios, tenants y endurecimiento de autenticación» y el flujo «alta de usuario por tenant, autenticación segura y revocación de sesión». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Gestión de usuarios, tenants y endurecimiento de autenticación» y el flujo «alta de usuario por tenant, autenticación segura y revocación de sesión» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 2 | LUIS DAVID AROCHE CONTRERAS | RBAC: roles, permisos y protección de rutas | Modele el proceso «asignación de rol, autorización de una operación y denegación trazable». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «asignación de rol, autorización de una operación y denegación trazable». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS RBAC: roles, permisos y protección de rutas» en PHP 8.2+ vanilla para ejecutar «asignación de rol, autorización de una operación y denegación trazable». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS RBAC: roles, permisos y protección de rutas» y el flujo «asignación de rol, autorización de una operación y denegación trazable». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS RBAC: roles, permisos y protección de rutas» y el flujo «asignación de rol, autorización de una operación y denegación trazable» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 3 | GLENDI PATRICIA CAMPOS ORELLANA | Pacientes: registro, edición, búsqueda y detalle | Modele el proceso «registro, búsqueda y actualización segura de un paciente». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «registro, búsqueda y actualización segura de un paciente». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Pacientes: registro, edición, búsqueda y detalle» en PHP 8.2+ vanilla para ejecutar «registro, búsqueda y actualización segura de un paciente». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Pacientes: registro, edición, búsqueda y detalle» y el flujo «registro, búsqueda y actualización segura de un paciente». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Pacientes: registro, edición, búsqueda y detalle» y el flujo «registro, búsqueda y actualización segura de un paciente» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 4 | BILLY EDUARDO CARDONA LÓPEZ | Médicos, especialidades y disponibilidad | Modele el proceso «registro de médico, asociación de especialidad y consulta de disponibilidad». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «registro de médico, asociación de especialidad y consulta de disponibilidad». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Médicos, especialidades y disponibilidad» en PHP 8.2+ vanilla para ejecutar «registro de médico, asociación de especialidad y consulta de disponibilidad». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Médicos, especialidades y disponibilidad» y el flujo «registro de médico, asociación de especialidad y consulta de disponibilidad». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Médicos, especialidades y disponibilidad» y el flujo «registro de médico, asociación de especialidad y consulta de disponibilidad» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 5 | EDDY ADOLFO CASTRO VÉLIZ | Citas médicas y agenda | Modele el proceso «solicitud, validación de disponibilidad y confirmación o cancelación de cita». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique DIP al diseño del flujo «solicitud, validación de disponibilidad y confirmación o cancelación de cita». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Citas médicas y agenda» en PHP 8.2+ vanilla para ejecutar «solicitud, validación de disponibilidad y confirmación o cancelación de cita». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Citas médicas y agenda» y el flujo «solicitud, validación de disponibilidad y confirmación o cancelación de cita». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Citas médicas y agenda» y el flujo «solicitud, validación de disponibilidad y confirmación o cancelación de cita» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 6 | MADELIN JAZMÍN CERÓN MOLINA | Catálogo de salas, wards y camas | Modele el proceso «creación de sala y cama con control de estado operativo». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «creación de sala y cama con control de estado operativo». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Catálogo de salas, wards y camas» en PHP 8.2+ vanilla para ejecutar «creación de sala y cama con control de estado operativo». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Catálogo de salas, wards y camas» y el flujo «creación de sala y cama con control de estado operativo». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Catálogo de salas, wards y camas» y el flujo «creación de sala y cama con control de estado operativo» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 7 | OSCAR LEONEL CRUZ PAREDES | Admisión hospitalaria y asignación de cama | Modele el proceso «admisión de paciente y asignación de una cama disponible». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «admisión de paciente y asignación de una cama disponible». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Admisión hospitalaria y asignación de cama» en PHP 8.2+ vanilla para ejecutar «admisión de paciente y asignación de una cama disponible». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Admisión hospitalaria y asignación de cama» y el flujo «admisión de paciente y asignación de una cama disponible». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Admisión hospitalaria y asignación de cama» y el flujo «admisión de paciente y asignación de una cama disponible» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 8 | ESAÚ ABIMAEL DE LA CRUZ | Traslados, altas y liberación de camas | Modele el proceso «traslado o alta del paciente con liberación consistente de cama». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «traslado o alta del paciente con liberación consistente de cama». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Traslados, altas y liberación de camas» en PHP 8.2+ vanilla para ejecutar «traslado o alta del paciente con liberación consistente de cama». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Traslados, altas y liberación de camas» y el flujo «traslado o alta del paciente con liberación consistente de cama». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Traslados, altas y liberación de camas» y el flujo «traslado o alta del paciente con liberación consistente de cama» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 9 | JAVIER ALEXANDER FAJARDO LÓPEZ | Dashboard de ocupación hospitalaria | Modele el proceso «consolidación y consulta de ocupación por sala y estado de cama». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «consolidación y consulta de ocupación por sala y estado de cama». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Dashboard de ocupación hospitalaria» en PHP 8.2+ vanilla para ejecutar «consolidación y consulta de ocupación por sala y estado de cama». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Dashboard de ocupación hospitalaria» y el flujo «consolidación y consulta de ocupación por sala y estado de cama». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Dashboard de ocupación hospitalaria» y el flujo «consolidación y consulta de ocupación por sala y estado de cama» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 10 | MARYORI RACHAEL FAJARDO PAREDES | Expediente médico electrónico base | Modele el proceso «apertura y consulta autorizada del expediente longitudinal». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique DIP al diseño del flujo «apertura y consulta autorizada del expediente longitudinal». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Expediente médico electrónico base» en PHP 8.2+ vanilla para ejecutar «apertura y consulta autorizada del expediente longitudinal». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Expediente médico electrónico base» y el flujo «apertura y consulta autorizada del expediente longitudinal». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Expediente médico electrónico base» y el flujo «apertura y consulta autorizada del expediente longitudinal» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 11 | JOSHUA EDUARDO GARCIA REYES | Notas SOAP y diagnósticos | Modele el proceso «registro de nota SOAP y asociación de diagnóstico clínico». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «registro de nota SOAP y asociación de diagnóstico clínico». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Notas SOAP y diagnósticos» en PHP 8.2+ vanilla para ejecutar «registro de nota SOAP y asociación de diagnóstico clínico». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Notas SOAP y diagnósticos» y el flujo «registro de nota SOAP y asociación de diagnóstico clínico». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Notas SOAP y diagnósticos» y el flujo «registro de nota SOAP y asociación de diagnóstico clínico» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 12 | AXEL ELIÚ HERRERA SÁNCHEZ | Alergias clínicas y alerta visual en expediente | Modele el proceso «registro de alergia y emisión de alerta al consultar el expediente». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «registro de alergia y emisión de alerta al consultar el expediente». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Alergias clínicas y alerta visual en expediente» en PHP 8.2+ vanilla para ejecutar «registro de alergia y emisión de alerta al consultar el expediente». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Alergias clínicas y alerta visual en expediente» y el flujo «registro de alergia y emisión de alerta al consultar el expediente». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Alergias clínicas y alerta visual en expediente» y el flujo «registro de alergia y emisión de alerta al consultar el expediente» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 13 | JOSUÉ FERNANDO HICHO GARCÍA | Signos vitales y alertas por valores anormales | Modele el proceso «captura de signos vitales, evaluación de umbrales y generación de alerta». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «captura de signos vitales, evaluación de umbrales y generación de alerta». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Signos vitales y alertas por valores anormales» en PHP 8.2+ vanilla para ejecutar «captura de signos vitales, evaluación de umbrales y generación de alerta». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Signos vitales y alertas por valores anormales» y el flujo «captura de signos vitales, evaluación de umbrales y generación de alerta». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Signos vitales y alertas por valores anormales» y el flujo «captura de signos vitales, evaluación de umbrales y generación de alerta» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 14 | MARIA YAMILET LINDO PABLO | Catálogo de medicamentos | Modele el proceso «alta, búsqueda y control de vigencia de un medicamento». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «alta, búsqueda y control de vigencia de un medicamento». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Catálogo de medicamentos» en PHP 8.2+ vanilla para ejecutar «alta, búsqueda y control de vigencia de un medicamento». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Catálogo de medicamentos» y el flujo «alta, búsqueda y control de vigencia de un medicamento». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Catálogo de medicamentos» y el flujo «alta, búsqueda y control de vigencia de un medicamento» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 15 | MARÍA DE LOS ANGELES LÓPEZ FAJARDO | Prescripciones electrónicas con validación de alergias | Modele el proceso «creación de prescripción con verificación previa de alergias». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique DIP al diseño del flujo «creación de prescripción con verificación previa de alergias». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Prescripciones electrónicas con validación de alergias» en PHP 8.2+ vanilla para ejecutar «creación de prescripción con verificación previa de alergias». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Prescripciones electrónicas con validación de alergias» y el flujo «creación de prescripción con verificación previa de alergias». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Prescripciones electrónicas con validación de alergias» y el flujo «creación de prescripción con verificación previa de alergias» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 16 | MERCEDES AZUCENA LOPEZ PEREZ | Órdenes de laboratorio desde EMR | Modele el proceso «emisión de orden desde el expediente y seguimiento de su estado». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «emisión de orden desde el expediente y seguimiento de su estado». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Órdenes de laboratorio desde EMR» en PHP 8.2+ vanilla para ejecutar «emisión de orden desde el expediente y seguimiento de su estado». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Órdenes de laboratorio desde EMR» y el flujo «emisión de orden desde el expediente y seguimiento de su estado». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Órdenes de laboratorio desde EMR» y el flujo «emisión de orden desde el expediente y seguimiento de su estado» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 17 | JOSUÉ MANUEL MARTÍNEZ PEDROZA | Catálogo de pruebas de laboratorio | Modele el proceso «alta y consulta de prueba con requisitos de muestra y vigencia». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «alta y consulta de prueba con requisitos de muestra y vigencia». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Catálogo de pruebas de laboratorio» en PHP 8.2+ vanilla para ejecutar «alta y consulta de prueba con requisitos de muestra y vigencia». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Catálogo de pruebas de laboratorio» y el flujo «alta y consulta de prueba con requisitos de muestra y vigencia». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Catálogo de pruebas de laboratorio» y el flujo «alta y consulta de prueba con requisitos de muestra y vigencia» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 18 | ARMANDO CECILIO MORALES SAGASTUME | Recepción de muestras y códigos identificadores | Modele el proceso «recepción, identificación inequívoca y rechazo controlado de muestra». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «recepción, identificación inequívoca y rechazo controlado de muestra». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Recepción de muestras y códigos identificadores» en PHP 8.2+ vanilla para ejecutar «recepción, identificación inequívoca y rechazo controlado de muestra». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Recepción de muestras y códigos identificadores» y el flujo «recepción, identificación inequívoca y rechazo controlado de muestra». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Recepción de muestras y códigos identificadores» y el flujo «recepción, identificación inequívoca y rechazo controlado de muestra» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 19 | KEILY FABIOLA ORELLANA MARROQUÍN | Ingreso de resultados de laboratorio | Modele el proceso «captura y corrección controlada de resultados pendientes». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «captura y corrección controlada de resultados pendientes». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Ingreso de resultados de laboratorio» en PHP 8.2+ vanilla para ejecutar «captura y corrección controlada de resultados pendientes». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Ingreso de resultados de laboratorio» y el flujo «captura y corrección controlada de resultados pendientes». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Ingreso de resultados de laboratorio» y el flujo «captura y corrección controlada de resultados pendientes» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 20 | GERSON GIOVANNI ORELLANA VÉLIZ | Validación de resultados por bioquímico | Modele el proceso «revisión, validación o rechazo de un resultado por bioquímico». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique DIP al diseño del flujo «revisión, validación o rechazo de un resultado por bioquímico». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Validación de resultados por bioquímico» en PHP 8.2+ vanilla para ejecutar «revisión, validación o rechazo de un resultado por bioquímico». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Validación de resultados por bioquímico» y el flujo «revisión, validación o rechazo de un resultado por bioquímico». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Validación de resultados por bioquímico» y el flujo «revisión, validación o rechazo de un resultado por bioquímico» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 21 | DULCE MARÍA PRADO VÁSQUEZ | Alertas críticas y notificaciones internas | Modele el proceso «detección, envío, acuse y escalamiento de una alerta crítica». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «detección, envío, acuse y escalamiento de una alerta crítica». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Alertas críticas y notificaciones internas» en PHP 8.2+ vanilla para ejecutar «detección, envío, acuse y escalamiento de una alerta crítica». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Alertas críticas y notificaciones internas» y el flujo «detección, envío, acuse y escalamiento de una alerta crítica». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Alertas críticas y notificaciones internas» y el flujo «detección, envío, acuse y escalamiento de una alerta crítica» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 22 | BORIS ALEXANDER QUIROA ORELLANA | Gobernanza y auditoría de movimientos del sistema | Modele el proceso «registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Gobernanza y auditoría de movimientos del sistema» en PHP 8.2+ vanilla para ejecutar «registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Gobernanza y auditoría de movimientos del sistema» y el flujo «registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Gobernanza y auditoría de movimientos del sistema» y el flujo «registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 23 | ERICK ROLANDO RAMAZZINI MURALLES | Reportes y analytics básicos | Modele el proceso «cálculo y visualización trazable de un indicador hospitalario». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «cálculo y visualización trazable de un indicador hospitalario». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Reportes y analytics básicos» en PHP 8.2+ vanilla para ejecutar «cálculo y visualización trazable de un indicador hospitalario». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Reportes y analytics básicos» y el flujo «cálculo y visualización trazable de un indicador hospitalario». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Reportes y analytics básicos» y el flujo «cálculo y visualización trazable de un indicador hospitalario» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 24 | ALBINO SEBASTIAN ROSALES RUANO | Contratos API: OpenAPI/Postman y documentación técnica. Adaptación para este ejercicio: Centro de documentación y manuales por rol (adaptación académica del módulo oficial de API/documentación; no constituye reasignación). | Modele el proceso «publicación y consulta de documentación y manuales diferenciados por rol». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «publicación y consulta de documentación y manuales diferenciados por rol». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Contratos API: OpenAPI/Postman y documentación técnica» en PHP 8.2+ vanilla para ejecutar «publicación y consulta de documentación y manuales diferenciados por rol». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Contratos API: OpenAPI/Postman y documentación técnica» y el flujo «publicación y consulta de documentación y manuales diferenciados por rol». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Contratos API: OpenAPI/Postman y documentación técnica» y el flujo «publicación y consulta de documentación y manuales diferenciados por rol» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 25 | CINDY MAYTTÉ RUANO CALDERÓN | QA, pruebas E2E, CI y guía de despliegue final. Adaptación para este ejercicio: Gestión de ejecuciones automatizadas y calidad de versiones. | Modele el proceso «planificación de pruebas, ejecución E2E, conservación de evidencia y aplicación de quality gates». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique DIP al diseño del flujo «planificación de pruebas, ejecución E2E, conservación de evidencia y aplicación de quality gates». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS QA, pruebas E2E, CI y guía de despliegue final» en PHP 8.2+ vanilla para ejecutar «planificación de pruebas, ejecución E2E, conservación de evidencia y aplicación de quality gates». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS QA, pruebas E2E, CI y guía de despliegue final» y el flujo «planificación de pruebas, ejecución E2E, conservación de evidencia y aplicación de quality gates». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS QA, pruebas E2E, CI y guía de despliegue final» y el flujo «planificación de pruebas, ejecución E2E, conservación de evidencia y aplicación de quality gates» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 26 | JOSUÉ DAVID MORALES RAMÍREZ | Dashboard base UI/UX e implementación transversal | Modele el proceso «navegación del dashboard con estados de carga, vacío, error y resumen inicial». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique SRP al diseño del flujo «navegación del dashboard con estados de carga, vacío, error y resumen inicial». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Dashboard base UI/UX e implementación transversal» en PHP 8.2+ vanilla para ejecutar «navegación del dashboard con estados de carga, vacío, error y resumen inicial». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Dashboard base UI/UX e implementación transversal» y el flujo «navegación del dashboard con estados de carga, vacío, error y resumen inicial». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Dashboard base UI/UX e implementación transversal» y el flujo «navegación del dashboard con estados de carga, vacío, error y resumen inicial» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 27 | LIS IVETTE ROSALES COLINDREZ | Reportes operativos exportables y filtros administrativos | Modele el proceso «filtrado y exportación reproducible de un reporte operativo». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique OCP al diseño del flujo «filtrado y exportación reproducible de un reporte operativo». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Reportes operativos exportables y filtros administrativos» en PHP 8.2+ vanilla para ejecutar «filtrado y exportación reproducible de un reporte operativo». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Reportes operativos exportables y filtros administrativos» y el flujo «filtrado y exportación reproducible de un reporte operativo». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Reportes operativos exportables y filtros administrativos» y el flujo «filtrado y exportación reproducible de un reporte operativo» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 28 | DIDHYER ALEXANDER ORTÍZ GUEVARA | QA funcional, pruebas manuales y matriz de regresión. Adaptación para este ejercicio: Gestión de campañas de regresión y defectos. | Modele el proceso «diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique LSP al diseño del flujo «diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS QA funcional, pruebas manuales y matriz de regresión» en PHP 8.2+ vanilla para ejecutar «diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS QA funcional, pruebas manuales y matriz de regresión» y el flujo «diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS QA funcional, pruebas manuales y matriz de regresión» y el flujo «diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 29 | HUGO DAVID MOSCOSO CASTRO | Investigación y prototipo NativePHP para extensión móvil/escritorio | Modele el proceso «evaluación y prototipo acotado de un flujo HIS mediante NativePHP». Casos de uso: delimitar actores y objetivo; el de actividad debe incluir decisiones, excepciones y resultado; el de secuencia debe mostrar participantes, mensajes, validaciones y respuesta. Mantenga trazabilidad entre los tres diagramas. | Aplique ISP al diseño del flujo «evaluación y prototipo acotado de un flujo HIS mediante NativePHP». Defina RF/RNF y criterios de aceptación; muestre el diseño antes/después, justifique responsabilidades y dependencias y aporte evidencia verificable. | Inicie «Micro-HIS Investigación y prototipo NativePHP para extensión móvil/escritorio» en PHP 8.2+ vanilla para ejecutar «evaluación y prototipo acotado de un flujo HIS mediante NativePHP». Separe Presentation, Application, Domain y Persistence; use PDO con sentencias preparadas, sin framework, y pruebe al menos camino feliz, regla de dominio y error de persistencia mediante dobles o una base de prueba. | Continúe el MISMO «Micro-HIS Investigación y prototipo NativePHP para extensión móvil/escritorio» y el flujo «evaluación y prototipo acotado de un flujo HIS mediante NativePHP». Organice la entrada con MVC; defina una interfaz Repository en el límite apropiado y adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de negocio. Además, analice y diagrame cómo un repositorio de datos compartido integraría este módulo. | Evolucione el MISMO «Micro-HIS Investigación y prototipo NativePHP para extensión móvil/escritorio» y el flujo «evaluación y prototipo acotado de un flujo HIS mediante NativePHP» hacia un diseño cliente-servidor y evalúe una frontera de microservicio. Especifique contrato API, propiedad de datos, comunicación, seguridad, resiliencia, observabilidad y consistencia; incluya diagramas y una migración razonada. Puede entregar diseño/prototipo: no construya infraestructura de producción ni divida el sistema sin una justificación medible. |
-| 30 | JOSÉ ALEXANDER DIONICIO CÓRDOVA | API Gateway del proyecto hospitalario | Modele en UML el flujo del API Gateway desde el cliente hasta al menos dos servicios hospitalarios. Incluya actores, resolución de ruta, reenvío de identidad controlada, respuesta agregada y caminos de error; mantenga trazabilidad entre casos de uso, actividad y secuencia. | Aplique DIP al diseño del API Gateway. Defina RF/RNF y criterios de aceptación; haga que la lógica de resolución dependa de contratos de rutas y clientes de servicio, no de implementaciones HTTP concretas, y muestre el diseño antes/después con evidencia verificable. | Inicie «Micro-HIS API Gateway del proyecto hospitalario» en PHP 8.2+ vanilla. Separe Presentation, Application, Domain y Persistence; implemente un catálogo ficticio de al menos dos rutas, resolución y simulación de proxy, use PDO preparado y pruebe éxito, ruta desconocida y servicio no disponible. | Continúe el MISMO microproyecto con MVC y una interfaz GatewayRouteRepository, más adaptadores PDO e InMemory. El controlador no tendrá SQL ni reglas de enrutamiento. Analice además cuándo un repositorio de datos compartido ayudaría o acoplaría indebidamente al gateway. | Evolucione el MISMO gateway hacia cliente-servidor y microservicios. Especifique contratos, rutas, documentación API, reenvío controlado de autenticación, agregación, rate limiting, resiliencia, correlation ID, observabilidad y consistencia; incluya diagramas y una migración razonada sin exigir infraestructura productiva. |
-
-> Las adaptaciones de Albino, Cindy y Didhyer delimitan el ejercicio académico y no modifican sus asignaciones oficiales. En Semana 2 la fuente obligatoria es [https://mvpcluster.com/diseno-de-software-2/](https://mvpcluster.com/diseno-de-software-2/) y su alcance se limita a SRP, OCP, LSP, ISP y DIP.
-<!-- FIN: EJERCICIOS_INDIVIDUALES_SEMANAS_1_5 -->

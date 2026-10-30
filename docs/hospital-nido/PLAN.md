@@ -34,14 +34,15 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 |---|---|---|---|
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
-| 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | Pendiente |
-| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos, prescripciones-alergias, alertas-criticas-notificaciones-internas | Pendiente |
-| 5 | Laboratorio, de la orden a la validación | catalogo-pruebas-laboratorio, ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico | Pendiente |
-| 6 | Reportes | reportes-analytics-basicos, reportes-operativos-exportables | Pendiente |
+| 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | Pendiente |
+| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas; prescripciones-alergias cuando existan los catálogos de medicamentos y alergias | Pendiente |
+| 5 | Laboratorio, de la orden a la validación | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico (sobre el catálogo de pruebas) | Pendiente |
+| 6 | Reportes | reportes-operativos-exportables | Pendiente |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | Pendiente |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | Pendiente |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, reportes-analytics-basicos, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
 
-Son 30 módulos: 4 + 3 + 4 + 7 + 5 + 2 + 4 + 1. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 3 + 4 + 4 + 1 + 4 + 1 en las fases, más los 6 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
