@@ -36,11 +36,22 @@ php bin/catalogo.php eliminar MED-000101          # 409 EN_USO: está en una pre
 php bin/catalogo.php buscar tab --hospital=sur
 ```
 
+## Web MVC (semana 4)
+
+```powershell
+php -S 127.0.0.1:8085 -t public                   # con PostgreSQL
+$env:CATALOGO_ALMACEN = "memoria"                 # o sin base, con el adaptador InMemory
+php -S 127.0.0.1:8085 -t public
+```
+
+Abrir `http://127.0.0.1:8085/medicamentos`. Usuario fijo de demostración: `qf.norte` del Hospital
+Norte (ficticio). Con `memoria` los datos se reinician en cada petición.
+
 ## Pruebas
 
 ```powershell
 php pruebas/ejecutar.php                          # todas (necesita la base)
-php pruebas/ejecutar.php --sin-bd                 # sin la base: omite pruebas/integracion
+php pruebas/ejecutar.php --sin-bd                 # sin la base: omite integración; contrato solo InMemory
 php pruebas/ejecutar.php --evidencia=../semana-03/evidencia/salida-pruebas.txt
 ```
 
@@ -51,11 +62,12 @@ php pruebas/ejecutar.php --evidencia=../semana-03/evidencia/salida-pruebas.txt
 ```
 src/Domain/        Modelo, reglas RN-01..RN-06, errores e interfaces Repository (ISP)
 src/Application/   Casos de uso CU-01..CU-06 y RF-09
-src/Persistence/   Adaptadores PDO, reloj, UUID y datos ficticios de ejemplo
-src/Presentation/  Entradas (consola en semana 3)
+src/Persistence/   Adaptadores PDO e InMemory, reloj, UUID y datos ficticios de ejemplo
+src/Presentation/  Entradas: consola (S3) y web MVC (S4)
+public/            Front controller web (index.php)
 bootstrap.php      Composition Root
 scripts/           crear-esquema.php
-pruebas/           Ejecutor propio, dobles, unitarias e integración
+pruebas/           Ejecutor propio, dobles, unitarias, contrato e integración
 ```
 
 ## Esquema (propuesta del Micro-HIS)
