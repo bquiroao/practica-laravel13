@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Traslados y altas: pantallas móviles de la semana 10</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.4 Arial,sans-serif;color:#222}
+.wf{width:1130px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 10px;font-size:16px}.row{display:flex;gap:16px;align-items:flex-start}
+.tel{width:360px;min-height:560px;border:3px solid #333;border-radius:18px;background:#fff;display:flex;flex-direction:column;overflow:hidden;flex:none}
+.top{background:#333;color:#fff;padding:10px 14px;font-weight:bold;font-size:16px}.cuerpo{padding:12px 14px;flex:1}
+.pie{border-top:1px solid #bbb;padding:10px 14px;background:#f3f3f3}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #333;border-radius:6px;font:bold 16px Arial;margin:6px 0;background:#fff}.pri{background:#333;color:#fff}.off{border-color:#6b6b6b;color:#6b6b6b}
+.et{font-size:16px;font-weight:bold;margin-top:10px}.hint{color:#555;font-size:14px}.t{color:#a93226;font-size:14px;font-weight:bold}
+.card{border:1px solid #888;border-radius:6px;padding:8px 10px;margin:8px 0}.chip{display:inline-block;border:1px solid #666;border-radius:12px;padding:3px 9px;margin:2px;font-size:14px}.sel{background:#333;color:#fff;font-weight:bold}
+.ban{border:3px solid #333;padding:10px;margin:8px 0;font-size:16px}.ban.w{border-style:dashed}
+i{display:inline-block;width:20px;height:20px;border-radius:50%;background:#a93226;color:#fff;font:bold 14px/20px Arial;text-align:center;font-style:normal;margin-right:4px}
+.n{font-size:14px;max-width:260px}.n ol{margin:0;padding-left:20px}.n li{margin-bottom:6px}
+</style></head><body>
+
+<section class="wf" id="m1"><h2>M1 · Movimientos del paciente (320 a 430 px)</h2><div class="row">
+<div class="tel"><div class="top">Traslados y altas</div><div class="cuerpo">
+<div><i>1</i><b>M. P. M.</b> · P-000101<br>Episodio activo · Cama actual: <b>A1</b> (Medicina general)</div>
+<div class="ban"><i>2</i>Orden médica vigente:<br><b>Traslado</b> · cama de <b>UCI</b><br>dr-luis, 28/10 07:40</div>
+<div class="hint">Historial de camas: 1 estancia · <a>Ver historial</a></div></div>
+<div class="pie"><i>3</i><div class="btn pri">Registrar traslado</div><div class="btn off">Registrar alta</div><div class="hint"><i>4</i>No hay orden de alta. Pídala al médico.</div></div></div>
+<div class="n"><ol><li>Paciente por iniciales y código; la orden vigente va primero, en un recuadro</li><li>Los dos botones van a ancho completo, apilados y al alcance del pulgar</li><li>Solo se activa el botón del tipo de orden que existe</li><li>El motivo del botón desactivado va como texto debajo, no dentro del botón</li></ol></div></div></section>
+
+<section class="wf" id="m2"><h2>M2 · Elegir cama destino (una tarjeta por cama)</h2><div class="row">
+<div class="tel"><div class="top">Elegir cama · M. P. M.</div><div class="cuerpo">
+<div class="hint"><i>1</i>De <b>A1</b> · orden: <b>UCI</b></div>
+<div class="card"><b>U1</b> · UCI<br><span class="chip">Disponible</span><div class="btn pri">Elegir cama U1</div></div>
+<div class="card"><b>U2</b> · UCI<br><span class="chip">Ocupada</span><div class="hint"><i>2</i>No se puede elegir</div></div>
+<div class="card"><b>U3</b> · UCI<br><span class="chip">En mantenimiento</span><div class="hint">No se puede elegir</div></div>
+<div class="card"><b>U4</b> · UCI<br><span class="chip">Inactiva</span><div class="hint">No se puede elegir</div></div></div>
+<div class="pie"><div class="btn">Volver</div></div></div>
+<div class="n"><ol><li>Resumen de origen y requisito de la orden arriba; una cama por tarjeta, sin tabla</li><li>El estado se dice con texto; solo la cama «Disponible» tiene botón, y el botón dice cuál es</li></ol></div></div></section>
+
+<section class="wf" id="m3"><h2>M3 · Confirmar el movimiento</h2><div class="row">
+<div class="tel"><div class="top">Confirme el traslado</div><div class="cuerpo">
+<div class="ban"><i>1</i>M. P. M. pasa de <b>A1</b> a <b>U1</b> (UCI).<br>La cama <b>A1</b> quedará en mantenimiento.</div>
+<div class="hint"><i>2</i>Todo se guarda junto o no se guarda nada.</div></div>
+<div class="pie"><div class="btn pri">Confirmar traslado</div><div class="btn">Volver</div></div></div>
+<div class="tel"><div class="top">Confirme el alta voluntaria</div><div class="cuerpo">
+<div class="ban w"><i>3</i>Se cerrará el episodio de M. P. M. y la cama <b>A1</b> quedará en mantenimiento.<br>Motivo: «Decisión del paciente».</div>
+<div class="hint"><i>4</i>Esto no se puede deshacer. Un error se corrige con otro movimiento.</div></div>
+<div class="pie"><div class="btn pri">Confirmar alta</div><div class="btn">Volver</div></div></div>
+<div class="n"><ol><li>Traslado: dice qué cama se ocupa y cuál se libera</li><li>Explica el «todo o nada»</li><li>Alta: borde punteado, porque cierra el episodio</li><li>Dice que no se deshace; el botón de confirmar queda al pie, el de volver debajo</li></ol></div></div></section>
+
+<section class="wf" id="m4"><h2>M4 · Resultado: traslado registrado</h2><div class="row">
+<div class="tel"><div class="top">Traslado registrado</div><div class="cuerpo">
+<div class="ban"><i>1</i><b>Traslado registrado.</b><br>M. P. M. está en <b>U1</b>. La cama <b>A1</b> quedó en mantenimiento.</div>
+<div class="hint"><i>2</i>Avise a limpieza de la cama A1.</div></div>
+<div class="pie"><div class="btn pri">Ver historial</div><div class="btn">Volver a pacientes</div></div></div>
+<div class="n"><ol><li>La primera línea dice el resultado y la cama donde quedó el paciente</li><li>Recordatorio de limpieza: hoy es un aviso, no una función del sistema (RF-07)</li></ol></div></div></section>
+
+<section class="wf" id="m5"><h2>M5 · Sin conexión: no sabemos si se guardó</h2><div class="row">
+<div class="tel"><div class="top">No sabemos si se guardó</div><div class="cuerpo">
+<div class="ban w"><i>1</i><b>No recibimos respuesta.</b> El movimiento puede haberse guardado o no.</div>
+<div class="card"><b>Traslado</b> de M. P. M.<br>de <b>A1</b> a <b>U1</b> · 28/10 08:10</div>
+<div class="hint"><i>2</i>No cierre esta pantalla. Revise el historial antes de intentarlo otra vez.</div></div>
+<div class="pie"><div class="btn pri">Ver historial</div><div class="btn">Reintentar</div></div></div>
+<div class="n"><ol><li>Primera línea: no se sabe si se guardó; no dice «error»</li><li>Los datos del movimiento quedan a la vista; no se guardan en el navegador</li></ol></div></div></section>
+</body></html>
