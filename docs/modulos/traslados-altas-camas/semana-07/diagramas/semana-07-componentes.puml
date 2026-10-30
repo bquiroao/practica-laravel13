@@ -1,0 +1,58 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontSize 12
+title Traslados, altas y liberación de camas — componentes (semana 7)
+
+package "Frontend (propuesta; aún no hay código)" {
+  [PantallaMovimiento\n(FormularioMovimiento,\nSelectorCamaDestino,\nResumenConfirmacion)] as FM
+  [PantallaHistorial\n(TablaHistorial)] as FH
+  [ClienteApiMovimientos] as CLI
+  [TraductorDeErrores\ncódigo → mensaje] as TRA
+}
+package "Backend — Presentación" {
+  [Enrutador + Peticion] as ENR
+  [MovimientosControlador] as CTRL
+  [VistaJson\n(código → HTTP)] as VIS
+}
+package "Backend — Aplicación" {
+  [RegistrarMovimiento] as REG
+  [ConsultarHistorial\n(propuesta)] as HIS
+  interface "RepositorioMovimientos" as PR
+  interface "FuenteClinica" as PF
+}
+package "Backend — Dominio" {
+  [Traslado / Alta\n(MovimientoDeCama)] as DOM
+  [PlanDeMovimiento\n(NUEVO)] as PLAN
+}
+package "Backend — Persistencia" {
+  [MovimientosPdo\n(lee y delega el plan)] as PDO
+  [EnMemoria] as MEM
+  [AplicadorPdo (NUEVO)] as APDO
+  [AplicadorMemoria (NUEVO)] as AMEM
+}
+database "HOSPITAL (PostgreSQL)\nbed_stays · beds · care_episodes\n+ ordenes_movimiento" as DB
+
+FM --> CLI
+FH --> CLI
+FM ..> TRA
+CLI --> ENR : HTTP JSON
+ENR --> CTRL
+CTRL --> VIS
+CTRL --> REG
+CTRL --> HIS
+REG --> PR
+REG --> PF
+HIS --> PR
+REG ..> DOM
+PLAN ..> DOM : mismo Resultado
+PDO ..|> PR
+PDO ..|> PF
+MEM ..|> PR
+MEM ..|> PF
+PDO --> PLAN : pide el plan
+PDO --> APDO
+MEM --> PLAN
+MEM --> AMEM
+APDO --> DB : 1 transacción
+@enduml

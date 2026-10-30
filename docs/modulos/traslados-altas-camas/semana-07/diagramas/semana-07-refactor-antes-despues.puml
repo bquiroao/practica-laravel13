@@ -1,0 +1,34 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+title Refactor: las reglas de «qué le pasa a cada tabla» salen de los adaptadores
+
+package "ANTES (semana 4)" {
+  class MovimientosPdo {
+    aplicar() escribe SQL
+    reglas: maintenance, occupied
+    aplicada, alta → closed
+  }
+  class EnMemoria {
+    aplicar() escribe arreglos
+    reglas: maintenance, occupied
+    aplicada, alta → closed
+  }
+  note bottom of EnMemoria : Las mismas 5 reglas escritas dos veces.\nUn cambio de política = editar 2 archivos\ny la prueba REP-01 avisa tarde.
+}
+package "DESPUÉS (semana 7)" {
+  class PlanDeMovimiento {
+    para(MovimientoConfirmado): lista de Cambio
+  }
+  class AplicadorPdo {
+    aplicar(lista de Cambio): 1 transacción
+  }
+  class AplicadorMemoria {
+    aplicar(lista de Cambio)
+  }
+  PlanDeMovimiento ..> AplicadorPdo : lista de cambios
+  PlanDeMovimiento ..> AplicadorMemoria : lista de cambios
+  note bottom of AplicadorMemoria : Las 5 reglas viven en un solo lugar.\nLos aplicadores no tienen reglas.
+}
+@enduml
