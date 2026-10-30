@@ -15,4 +15,6 @@ return [
         'clave' => $entorno('CATALOGO_BD_CLAVE', 'catalogo_local'),
     ],
     'zona_horaria' => 'America/Guatemala',
+    // Semana 4: identidad fija de demostración para la entrada web (sin autenticación todavía).
+    'web' => ['hospital' => '11111111-1111-4111-8111-111111111111', 'usuario' => 'qf.norte'],
 ];
