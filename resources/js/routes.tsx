@@ -19,6 +19,8 @@ const PatientFormPage = lazy(() => import('@/pages/patients/PatientFormPage').th
 const DoctorsPage = lazy(() => import('@/pages/doctors/DoctorsPage').then((m) => ({ default: m.DoctorsPage })));
 const DoctorDetailPage = lazy(() => import('@/pages/doctors/DoctorDetailPage').then((m) => ({ default: m.DoctorDetailPage })));
 const AgendaPage = lazy(() => import('@/pages/appointments/AgendaPage').then((m) => ({ default: m.AgendaPage })));
+const BedsPage = lazy(() => import('@/pages/beds/BedsPage').then((m) => ({ default: m.BedsPage })));
+const OccupancyPage = lazy(() => import('@/pages/beds/OccupancyPage').then((m) => ({ default: m.OccupancyPage })));
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then((m) => ({ default: m.NewAppointmentPage })));
 
 const ready: Record<string, ReactNode> = {
@@ -29,6 +31,8 @@ const ready: Record<string, ReactNode> = {
     '/pacientes': <PatientsPage />,
     '/medicos': <DoctorsPage />,
     '/citas': <AgendaPage />,
+    '/camas': <BedsPage />,
+    '/ocupacion': <OccupancyPage />,
 };
 
 // Pantallas internas de un módulo: mismo permiso que pida la acción.
