@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/RepositorioDoble.php';
 
-use AlertasCriticas\Application\{DespachadorNotificaciones, NotificarNivel, RegistrarAlertaCritica};
-use AlertasCriticas\Domain\{AlertaRepository, PuertoNotificacion};
+use AlertasCriticas\Application\{AcusarAlerta, CerrarAlerta, DespachadorNotificaciones, EscalarAlertasVencidas,
+    NotificarNivel, RegistrarAlertaCritica};
+use AlertasCriticas\Domain\{AlertaRepository, PoliticaEscalamiento, PuertoNotificacion};
 use AlertasCriticas\Persistence\{DirectorioDestinatariosEnMemoria, NotificadorSimulado, RelojFijo};
 
 const DIRECTORIO_FICTICIO = [
@@ -23,7 +24,7 @@ function datosAlerta(array $cambios = []): array
         'descripcion' => 'Potasio sérico 6.8 mmol/L (ref. 3.5-5.1)'];
 }
 
-/** @return array{repo: AlertaRepository, notificador: PuertoNotificacion, reloj: RelojFijo, registrar: RegistrarAlertaCritica} */
+/** @return array{repo: AlertaRepository, notificador: PuertoNotificacion, reloj: RelojFijo, registrar: RegistrarAlertaCritica, acusar: AcusarAlerta, escalar: EscalarAlertasVencidas, cerrar: CerrarAlerta} */
 function escenario(?AlertaRepository $repo = null, ?PuertoNotificacion $notificador = null): array
 {
     $repo ??= new RepositorioDoble();
@@ -34,6 +35,9 @@ function escenario(?AlertaRepository $repo = null, ?PuertoNotificacion $notifica
     return [
         'repo' => $repo, 'notificador' => $notificador, 'reloj' => $reloj,
         'registrar' => new RegistrarAlertaCritica($repo, $notificar, $reloj),
+        'acusar' => new AcusarAlerta($repo, $reloj),
+        'escalar' => new EscalarAlertasVencidas($repo, new PoliticaEscalamiento(), $notificar, $reloj),
+        'cerrar' => new CerrarAlerta($repo, $reloj),
     ];
 }
 
