@@ -1,0 +1,20 @@
+$ php semana-07/evidencia/medir-acoplamiento.php   # sobre develop 402fd68
+Tipo                         Capa           Ce  Ca     I  Usa
+ControladorDocumentacion     Presentacion    6   0  1.00  ServicioPublicacion, ServicioRevision, ServicioConsulta, VistaJson, ReglaDeDominio, ErrorPersistencia
+ReglaDeDominio               Dominio         0   6  0.00  -
+RepositorioDocumentos        Aplicacion      3   2  0.60  EscritorVersiones, RevisionPublicaciones, LectorDocumentos
+ServicioConsulta             Aplicacion      4   1  0.80  LectorDocumentos, Audiencia, EstadoVersion, ReglaDeDominio
+VersionNueva                 Dominio         1   4  0.20  ReglaDeDominio
+ServicioRevision             Aplicacion      3   1  0.75  RevisionPublicaciones, EstadoVersion, ReglaDeDominio
+EscritorVersiones            Aplicacion      1   2  0.33  VersionNueva
+EstadoVersion                Dominio         1   2  0.33  ReglaDeDominio
+RepositorioPdo               Persistencia    3   0  1.00  RepositorioDocumentos, ErrorPersistencia, VersionNueva
+ServicioPublicacion          Aplicacion      2   1  0.67  EscritorVersiones, VersionNueva
+ErrorPersistencia            Aplicacion      0   2  0.00  -
+LectorDocumentos             Aplicacion      0   2  0.00  -
+RepositorioEnMemoria         Persistencia    2   0  1.00  RepositorioDocumentos, VersionNueva
+RevisionPublicaciones        Aplicacion      0   2  0.00  -
+VistaJson                    Presentacion    1   1  0.50  ReglaDeDominio
+Audiencia                    Dominio         0   1  0.00  -
+Rutas                        Presentacion    0   0     -  -
+Mayor acoplamiento: ControladorDocumentacion
