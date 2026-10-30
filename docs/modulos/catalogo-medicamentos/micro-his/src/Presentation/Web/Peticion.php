@@ -10,6 +10,7 @@ final class Peticion
      * @param array<string, mixed> $consulta
      * @param array<string, mixed> $cuerpo
      * @param array<string, string> $cabeceras nombres en minúsculas
+     * @param string $crudo cuerpo sin procesar (JSON de la API, semana 5)
      */
     public function __construct(
         public readonly string $metodo,
@@ -17,6 +18,7 @@ final class Peticion
         public readonly array $consulta = [],
         public readonly array $cuerpo = [],
         public readonly array $cabeceras = [],
+        public readonly string $crudo = '',
     ) {
     }
 
@@ -32,6 +34,7 @@ final class Peticion
             $cabeceras['content-type'] = (string) $_SERVER['CONTENT_TYPE'];
         }
         $ruta = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
-        return new self(strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')), rtrim($ruta, '/') ?: '/', $_GET, $_POST, $cabeceras);
+        return new self(strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')), rtrim($ruta, '/') ?: '/', $_GET, $_POST, $cabeceras,
+            (string) file_get_contents('php://input'));
     }
 }
