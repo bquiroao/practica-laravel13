@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Access\PermissionResolver;
+use App\Services\Hospital\HospitalDatabase;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Una caché de permisos por petición: un rol revocado se nota en la petición siguiente.
         $this->app->scoped(PermissionResolver::class);
+        $this->app->singleton(HospitalDatabase::class);
     }
 
     /**

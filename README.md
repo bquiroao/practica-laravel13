@@ -131,6 +131,12 @@ Catálogo de roles y permisos (siempre) y red de demostración (solo en `local`/
 php artisan db:seed
 ```
 
+Cada hospital tiene su propia base clínica (esquema federado). Este comando crea la que falte, la migra, carga el catálogo de especialidades y, con `--demo`, médicos con horario, pacientes ficticios y citas. En desarrollo, Hospital Nido Central usa `HOSPITAL_DB_DATABASE` y los otros tres `his_hospital_nor`, `his_hospital_ori` y `his_hospital_occ`:
+
+```bash
+php artisan nido:hospitales --demo
+```
+
 Las pruebas usan dos bases desechables definidas en `phpunit.xml` (puertos 55431 y 55433, con `btree_gist` instalado en la base HOSPITAL):
 
 ```bash
@@ -178,6 +184,16 @@ Todas las rutas están bajo `/api/v1`. Salvo `/hospitales`, requieren `X-Tenant-
 | POST | `/membresias` | `roles.asignar` |
 | POST | `/membresias/{id}/revocar` | `roles.revocar` |
 | GET | `/auditoria`, `/auditoria/verificacion` | `auditoria.consultar` |
+| GET / POST | `/pacientes` | `pacientes.ver` / `pacientes.gestionar` (búsqueda con `?q=`) |
+| GET / PUT | `/pacientes/{id}` | `pacientes.ver` / `pacientes.gestionar` (PUT exige `version`) |
+| GET / POST | `/especialidades` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
+| GET / POST | `/medicos` | `medicos.ver` o `citas.ver` / `medicos.gestionar` |
+| GET | `/medicos/candidatos` | `medicos.gestionar` |
+| POST / DELETE | `/medicos/{id}/especialidades[/{link}]` | `medicos.gestionar` |
+| PUT / PATCH | `/medicos/{id}/horario`, `/medicos/{id}/estado` | `medicos.gestionar` |
+| GET | `/disponibilidad?especialidad=&desde=` | `citas.ver` |
+| GET / POST | `/citas` | `citas.ver` / `citas.gestionar` |
+| POST | `/citas/{id}/estado` | `citas.gestionar` |
 
 Los errores de regla de negocio responden `{ "message", "code" }` (p. ej. `AUTOASIGNACION`, `ASIGNACION_DUPLICADA`, `MOTIVO_INSUFICIENTE`); los de validación, el formato estándar de Laravel con mensajes en español.
 

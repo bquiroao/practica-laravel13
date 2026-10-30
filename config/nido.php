@@ -82,7 +82,7 @@ return [
             'reportes.ver', 'reportes.exportar', 'auditoria.consultar',
         ]],
         'medico' => ['Médico', 'hospital', [
-            'pacientes.ver', 'citas.ver', 'medicos.ver', 'camas.ver', 'ocupacion.ver', 'admisiones.gestionar', 'traslados.gestionar',
+            'pacientes.ver', 'citas.ver', 'citas.gestionar', 'medicos.ver', 'camas.ver', 'ocupacion.ver', 'admisiones.gestionar', 'traslados.gestionar',
             'expediente.leer', 'notas.registrar', 'notas.firmar', 'signos_vitales.registrar', 'alergias.gestionar',
             'prescripciones.crear', 'prescripciones.anular', 'medicamentos.ver', 'alertas.ver', 'alertas.gestionar',
             'pruebas_lab.ver', 'ordenes_lab.crear', 'dashboard.ver', 'movil.usar',

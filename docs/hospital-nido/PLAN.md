@@ -33,7 +33,7 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | Fase | Contenido | Módulos | Estado |
 |---|---|---|---|
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
-| 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | Pendiente |
+| 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | Pendiente |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos, prescripciones-alergias, alertas-criticas-notificaciones-internas | Pendiente |
 | 5 | Laboratorio, de la orden a la validación | catalogo-pruebas-laboratorio, ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico | Pendiente |
@@ -69,9 +69,53 @@ Son 30 módulos: 4 + 3 + 4 + 7 + 5 + 2 + 4 + 1. La prueba `AccessControlTest::te
 - `php artisan test`: 90 correctas y 3 incompletas, que son los defectos AU-01, AU-02 y AU-05 del esquema clínico; se corrigen en las fases 2 y 3.
 - Recorrido en Chrome real: 25/25 comprobaciones, axe-core sin violaciones WCAG A/AA en todas las pantallas y sin desborde horizontal a 375 px.
 
+## Fase 2: qué se entregó
+
+**Una base clínica por hospital.** La base HOSPITAL no tiene columna de hospital: cada hospital es su propia base, como define el esquema federado.
+- `HospitalDatabase` cambia la conexión «hospital» según el hospital de la petición (`metadata.database` en CENTRAL).
+- `php artisan nido:hospitales` crea, migra y siembra cada base.
+- Los pacientes de un hospital no aparecen en otro.
+
+**Pacientes** (módulo pacientes):
+- código por hospital (`HN-CEN-000123`);
+- documento DPI (13 dígitos, departamento 01 a 22) o pasaporte (6 a 20 caracteres, país de 3 letras);
+- el mismo documento bloquea el registro e indica la ficha existente (R-02);
+- mismo nombre y nacimiento advierte y exige motivo para continuar (R-03);
+- cambiar la identidad o el estado exige motivo (R-07);
+- control de versión: si otra persona editó la ficha, se avisa en lugar de sobrescribir;
+- búsqueda por código, documento o nombre de 3+ letras, sin importar tildes (R-10);
+- el documento se muestra enmascarado a quien no puede editar.
+
+**Médicos y especialidades** (módulo médicos-especialidades):
+- perfil solo para cuentas con rol «Médico», con colegiado único;
+- especialidades con vigencia y una sola principal;
+- horario semanal en bloques de 30 minutos, sin cruces;
+- franjas libres = horario − citas activas, hasta 14 días.
+
+**Citas** (módulo citas médicas):
+- horario futuro y dentro del horario del médico;
+- especialidad vigente;
+- sin cruces de médico ni de paciente; si otra persona toma el horario al mismo tiempo, la base lo impide y se pide elegir otro;
+- transiciones programada → confirmada → atendida y cancelación con motivo;
+- solo se marca «atendida» al terminar su hora.
+
+**Para que sea fácil de usar:**
+- una sola caja de búsqueda con ejemplos;
+- formularios en secciones con indicaciones;
+- un diálogo que ofrece abrir la ficha existente antes de duplicar;
+- la cita se agenda en 4 pasos y solo muestra horarios libres;
+- la agenda muestra en cada cita solo las acciones permitidas;
+- el horario del médico se edita en la misma pantalla, con atajo «copiar lunes a martes–viernes»;
+- mensajes de confirmación después de cada acción.
+
+**Verificación:**
+- `php artisan test`: 109 correctas y 2 incompletas (AU-01 episodios y AU-05 camas, de la fase 3).
+- Se cerró **AU-02**: código y nombres de paciente en blanco.
+- Recorrido en Chrome: 30/30, sin violaciones WCAG A/AA y sin desborde a 375 px.
+
 ## Pendientes conocidos
 
 - **Diseño de Stitch:** la paleta y los componentes actuales son provisionales. Al llegar el diseño se ajustan `resources/css/app.css` y `resources/js/components/ui.tsx`, y el cambio se propaga a todas las pantallas.
+- **Identidad protegida (R-11 del módulo pacientes):** pacientes confidenciales visibles solo con un permiso especial. Queda para una fase posterior, porque necesita permisos nuevos.
 - **Esquema de Richard:** siguen pendientes las tareas 3.5 a 3.7 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md` (medicamentos, laboratorio, auditoría local). Se completan en las fases 4 y 5.
-- **Una base HOSPITAL para todos:** por ahora los cuatro hospitales de demostración comparten la base HOSPITAL configurada. Una base por hospital necesita una conexión dinámica según el hospital del token, y queda para cuando haya datos clínicos (fase 2).
 - **Dependencias:** `composer audit` reporta avisos de seguridad en paquetes del `composer.lock` heredado. Conviene actualizarlo en un PR aparte, con todas las pruebas.

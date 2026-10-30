@@ -37,6 +37,16 @@ export interface ApiErrorBody {
     message?: string;
     code?: string;
     errors?: Record<string, string[]>;
+    details?: Record<string, unknown>;
+}
+
+/** Código de la regla de negocio que rechazó la operación (p. ej. POSIBLE_DUPLICADO) y sus datos. */
+export function ruleError(error: unknown): { code: string; message: string; details: Record<string, unknown> } | null {
+    if (axios.isAxiosError<ApiErrorBody>(error) && error.response?.data?.code) {
+        const body = error.response.data;
+        return { code: body.code!, message: body.message ?? '', details: body.details ?? {} };
+    }
+    return null;
 }
 
 /** Mensaje legible de un error de la API (validación, regla de negocio o red). */

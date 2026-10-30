@@ -89,7 +89,7 @@ export function UsersPage() {
                                         <td className={td}><p className="font-semibold text-slate-900">{u.name}</p><p className="text-xs text-slate-500">{u.email}</p></td>
                                         <td className={td}>
                                             <div className="flex flex-wrap gap-1">
-                                                {u.roles.length === 0 && <span className="text-xs text-slate-400">Sin rol vigente</span>}
+                                                {u.roles.length === 0 && <span className="text-xs text-slate-500">Sin rol vigente</span>}
                                                 {u.roles.map((r) => (
                                                     <span key={r.membership_id} className="inline-flex items-center gap-1 rounded-full bg-nido-100 py-0.5 pl-2 pr-1 text-xs font-semibold text-nido-800">
                                                         {roleName(r.role)}

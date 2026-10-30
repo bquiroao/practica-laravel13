@@ -61,7 +61,7 @@ class AuthService
     {
         return [
             'user' => ['id' => $user->user_id, 'name' => $user->display_name, 'email' => $user->email],
-            'hospital' => ['id' => $hospital->hospital_id, 'code' => $hospital->code, 'name' => $hospital->name],
+            'hospital' => ['id' => $hospital->hospital_id, 'code' => $hospital->code, 'name' => $hospital->name, 'timezone' => $hospital->timezone],
             'roles' => $this->permissions->rolesFor($user->user_id, $hospital->hospital_id),
             'permissions' => $this->permissions->permissionsFor($user->user_id, $hospital->hospital_id),
         ];

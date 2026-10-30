@@ -35,11 +35,11 @@ export const sections: Section[] = [
     {
         title: 'Atención',
         items: [
-            { path: '/pacientes', label: 'Pacientes', icon: Users, anyOf: ['pacientes.ver'], modules: ['pacientes'], phase: 2, ready: false,
+            { path: '/pacientes', label: 'Pacientes', icon: Users, anyOf: ['pacientes.ver'], modules: ['pacientes'], phase: 2, ready: true,
                 summary: 'Registro, edición, búsqueda por nombre, DPI o código y detalle del paciente.' },
-            { path: '/citas', label: 'Citas', icon: CalendarDays, anyOf: ['citas.ver'], modules: ['citas-medicas'], phase: 2, ready: false,
+            { path: '/citas', label: 'Citas', icon: CalendarDays, anyOf: ['citas.ver'], modules: ['citas-medicas'], phase: 2, ready: true,
                 summary: 'Agenda por médico y especialidad, sin choques de horario.' },
-            { path: '/medicos', label: 'Médicos', icon: Stethoscope, anyOf: ['medicos.ver'], modules: ['medicos-especialidades'], phase: 2, ready: false,
+            { path: '/medicos', label: 'Médicos', icon: Stethoscope, anyOf: ['medicos.ver'], modules: ['medicos-especialidades'], phase: 2, ready: true,
                 summary: 'Médicos, especialidades y disponibilidad.' },
             { path: '/camas', label: 'Camas', icon: BedDouble, anyOf: ['camas.ver'],
                 modules: ['catalogo-salas-camas', 'admision-hospitalaria-asignacion-cama', 'traslados-altas-camas'], phase: 3, ready: false,

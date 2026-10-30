@@ -180,7 +180,8 @@ class MedicalRecordIntegrityTest extends TestCase
 
     public function test_pr9b_rollback_and_reinstall_preserve_pr9a_and_h1_through_h3(): void
     {
-        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => 1, '--force' => true]);
+        // +1 paso: la migración de Hospital Nido (fase 2) va después de las de este esquema.
+        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => 2, '--force' => true]);
         $this->assertFalse($this->tableExists('allergies'));
         $this->assertFalse($this->tableExists('vital_signs'));
         $this->assertTrue($this->tableExists('medical_records'));

@@ -50,7 +50,7 @@ class ApiBoundaryTest extends TestCase
     {
         return [
             'tenant inexistente' => ['POST', '/api/v1/auth/login', ['X-Tenant-ID' => '00000000-0000-0000-0000-0000000000aa'], 404, 'E-01: App\\Models\\Tenant y la tabla tenants no existen'],
-            'ruta de API que no existe' => ['POST', '/api/v1/pacientes', [], 404, 'E-07: la ruta web /{any?} también atrapa /api/v1/*'],
+            'ruta de API que no existe' => ['POST', '/api/v1/ruta-inexistente', [], 404, 'E-07: la ruta web /{any?} también atrapa /api/v1/*'],
             'método no permitido' => ['GET', '/api/v1/auth/login', [], 405, 'E-07: la ruta web /{any?} responde la vista de la SPA en vez de 405'],
         ];
     }
