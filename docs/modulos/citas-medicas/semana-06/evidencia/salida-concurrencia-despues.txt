@@ -1,0 +1,3 @@
+$ php semana-06/evidencia/probar-concurrencia.php   # después del cambio
+[PDO] primera solicitud (p1) = 409 E6 | segunda, intercalada (p2) = 201 | citas activas de m1 en [5000,6000): 1
+[InMemory] primera solicitud (p1) = 409 E6 | segunda, intercalada (p2) = 201 | citas activas de m1 en [5000,6000): 1

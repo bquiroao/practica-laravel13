@@ -1,0 +1,98 @@
+@startuml semana-07-componentes
+title Diagrama de componentes: micro-his-e2e (semana 7). En verde, lo que movió el refactor
+skinparam defaultFontSize 10
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Pipeline CI" as PIPE
+actor "Ingeniería QA /\nRelease / Ops" as HUM
+
+package "Clientes (UI de consola y frontend)" {
+  component "ReportadorCi\n(CLI del pipeline)" as RCI
+  component "BandejaPendientes\n(reintento sin red)" as BAN
+  component "Consola de release\n(vistas de S8–S11, prototipo)" as WEB
+  RCI --> BAN : guarda si falla
+}
+
+package "Presentación (HTTP, MVC)" {
+  component "Kernel\n(token, X-Request-ID,\nlog de acceso)" as KER
+  component "Rutas" as RUT
+  component "Controladores\nEscenarios · Versiones ·\nEjecuciones" as CTL
+  component "Formularios\n(forma de la entrada)" as FRM
+  component "Vistas\nSalidaVista · ErrorVista" as VIS
+  KER --> RUT
+  RUT --> CTL
+  CTL --> FRM
+  CTL --> VIS
+}
+
+package "Aplicación (orquesta, no decide)" {
+  component "9 casos de uso\nRegistrarEscenario … RegistrarDespliegue" as CU
+  component "ReportarResultado\n(77 líneas, 7 ramas)" as RR #DDEFE4
+  component "Salida\n(código + datos)" as SAL
+  interface "Puertos de aplicación\nPoliticaAcceso · AlmacenEvidencias\nRegistroAuditoria · Transaccion" as IAP
+  CU ..> SAL
+  RR ..> SAL
+}
+
+package "Dominio (reglas R-01…R-12)" {
+  component "EscenarioE2E · Version" as DV
+  component "Ejecucion\n+ preparar()" as DE #DDEFE4
+  component "ReporteResultado\n(clave, huella, repite())" as DRR #DDEFE4
+  component "QualityGate · PoliticaGate\n· Decision" as DG
+  component "Despliegue::registrar\n(elige la ÚLTIMA evaluación)" as DD #DDEFE4
+  component "Evidencia::validar" as DEV
+  interface "Repositorio*\n(5 puertos)" as IREP
+  interface "Reloj" as IREL
+  DE --> DRR
+  DE --> DEV
+}
+
+package "Persistencia (adaptadores)" {
+  component "Pdo*\n(PostgreSQL, esquema e2e)" as PDO
+  component "EnMemoria*\n(pruebas)" as MEM
+  component "AlmacenEvidenciasEnDisco" as DISK
+  component "PoliticaAccesoEstatica ·\nRelojSistema · RelojFijo" as CFG
+  component "FabricaAdaptadores" as FAB
+}
+
+database "PostgreSQL 18\nesquemas e2e y compartido" as DB
+folder "Almacén de\nartefactos" as FS
+
+PIPE --> RCI
+HUM --> WEB
+RCI --> KER : HTTPS + Bearer\n(openapi.yaml 1.1.0)
+WEB --> KER : HTTPS + Bearer
+CTL --> CU
+CTL --> RR
+CU --> DV
+CU --> DG
+CU --> DD
+RR --> DE
+RR --> DRR
+CU --> IREP
+RR --> IREP
+CU --> IREL
+WEB -[hidden]-> KER
+VIS -[hidden]-> CU
+SAL -[hidden]-> DV
+DEV -[hidden]-> PDO
+CU --> IAP
+RR --> IAP
+PDO ..|> IREP
+MEM ..|> IREP
+DISK ..|> IAP
+CFG ..|> IAP
+CFG ..|> IREL
+PDO --> DB
+DISK --> FS
+FAB --> PDO
+FAB --> MEM
+
+note bottom of DE
+  Regla de dependencias (ARQ-01…ARQ-06):
+  Presentación → Aplicación → Dominio ← Persistencia.
+  El dominio no conoce PDO, HTTP ni el disco.
+end note
+@enduml

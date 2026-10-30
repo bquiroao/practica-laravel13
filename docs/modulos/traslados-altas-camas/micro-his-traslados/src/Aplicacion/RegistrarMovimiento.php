@@ -21,10 +21,15 @@ final class RegistrarMovimiento {
     }
 
     /** $entrada: episodio_id, tipo (traslado|alta) y destino_id (solo traslado: la cama la elige enfermería al ejecutar). */
-    public function ejecutar(array $entrada, Usuario $usuario): array {
+    public function ejecutar(array $entrada, Usuario $usuario, ?string $clave = null): array {
         if (!in_array($usuario->rol, ['enfermeria', 'admision'], true)) { throw new ErrorDominio('acceso_denegado', 'Solo enfermería o admisión registran movimientos'); }
         $episodio = (string) ($entrada['episodio_id'] ?? '');
         $tipo = (string) ($entrada['tipo'] ?? '');
+        $previa = $clave === null ? null : $this->movimientos->ordenPorClave($clave); // reintento: la clave ya resolvió un movimiento
+        if ($previa !== null) {
+            if ($previa['care_episode_id'] !== $episodio || $previa['tipo'] !== $tipo) { throw new ErrorDominio('clave_reutilizada', 'Esa clave de idempotencia ya se usó en otro movimiento'); }
+            return ['aplicado' => true, 'rechazo' => null, 'origen_id' => $previa['origen_id'], 'destino_id' => $previa['destino_id'], 'repetida' => true];
+        }
         if ($this->clinica->episodioAbierto($episodio) === null) { throw new ErrorDominio('episodio_no_disponible', 'El episodio no existe o ya está cerrado'); }
         $orden = $this->movimientos->ordenVigente($episodio, $tipo);
         if ($orden === null) { throw new ErrorDominio('orden_requerida', 'No hay orden médica vigente de ese tipo para este episodio'); }
@@ -32,7 +37,7 @@ final class RegistrarMovimiento {
         $origen = $estancia === null ? null : new CamaOrigen($estancia['bed_id'], $estancia['bed_stay_id']);
         $resultado = $this->movimiento($tipo, $orden)->aplicar($origen, $this->destino($tipo, (string) ($entrada['destino_id'] ?? '')));
         if ($resultado->fueAplicado()) {
-            $this->movimientos->aplicar($episodio, $orden['orden_id'], $tipo, $resultado, $estancia['bed_stay_id'], ($this->nuevoId)(), ($this->reloj)());
+            $this->movimientos->aplicar($episodio, $orden['orden_id'], $tipo, $resultado, $estancia['bed_stay_id'], ($this->nuevoId)(), ($this->reloj)(), $clave);
         }
         return ['aplicado' => $resultado->fueAplicado(), 'rechazo' => $resultado->rechazo, 'origen_id' => $resultado->origenId, 'destino_id' => $resultado->destinoId];
     }

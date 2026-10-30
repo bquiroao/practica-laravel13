@@ -1,0 +1,12 @@
+Fecha: 2026-10-29 04:04:18 | PHP 8.4.26
+[OK] OCP-01 mismo resultado antes y después (sin alergias): antes=SIN_REGISTRO después=SIN_REGISTRO
+[OK] OCP-01 mismo resultado antes y después (leve): antes=INFORMATIVA después=INFORMATIVA
+[OK] OCP-01 mismo resultado antes y después (moderada + grave): antes=ALTA después=ALTA
+[OK] OCP-01 mismo resultado antes y después (desconocida): antes=ALTA después=ALTA
+[OK] OCP-01 mismo resultado antes y después (riesgo vital): antes=CRITICA después=CRITICA
+[OK] OCP-01 mismo resultado antes y después (moderada con anafilaxia): antes=CRITICA después=CRITICA
+[OK] OCP-02 regla nueva aplicada sin editar archivos: nivel=ALTA
+[OK] OCP-03 CalculadorAlerta.php sigue idéntico (SHA-256 registrado)
+[OK] OCP-04 el calculador no conoce ninguna regla concreta
+[OK] ANT-01 antes: severidad y anafilaxia viven en el mismo método (cada regla nueva obliga a editarlo)
+RESULTADO: 10 verificaciones, 0 fallas

@@ -1,0 +1,2 @@
+$ php bin/caracterizar.php   # ANTES del refactor
+35 escenarios grabados en tests/Caracterizacion/esperado.json

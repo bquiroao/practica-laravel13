@@ -1,0 +1,33 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Pantallas móviles — Médicos, semana 10</title>
+<style>
+*{box-sizing:border-box}body{margin:20px;display:flex;gap:28px;align-items:flex-start;background:#fff;font:16px/1.4 Arial,sans-serif;color:#222}
+.t{width:360px;min-height:640px;border:2px solid #444;border-radius:18px;background:#fafafa;position:relative;overflow:hidden;padding-bottom:70px}
+.t>header{background:#12303b;color:#fff;padding:12px 16px;font-weight:bold}.in{padding:16px}h1{font-size:19px;margin:0 0 6px}
+label{display:block;font-weight:bold;margin:12px 0 4px}.c{min-height:44px;border:1px solid #777;border-radius:6px;background:#fff;padding:10px}.c.e{border:2px solid #b00020}
+.m{color:#b00020;font-size:14px;margin-top:4px}.h{color:#555;font-size:14px}.b{min-height:44px;background:#12303b;color:#fff;border-radius:6px;font-weight:bold;text-align:center;padding:11px;margin-top:14px}.b.s{background:#fff;color:#12303b;border:2px solid #12303b}
+.al{border:2px solid #b00020;background:#fdecee;border-radius:6px;padding:12px;margin-top:12px}.bar{position:absolute;bottom:0;left:0;right:0;padding:10px 16px;background:#fff;border-top:1px solid #999}.bar .b{margin:0}
+.tabs{position:absolute;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #999}.tabs div{flex:1;min-height:56px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#12303b}
+.n{position:absolute;left:4px;background:#8a4b0a;color:#fff;font-weight:bold;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:13px}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px}.chk i{flex:0 0 24px;height:24px;border:2px solid #12303b;border-radius:4px;background:#fff;display:block}
+</style>
+<body>
+<section class="t" id="m2"><header>Médicos · Disponibilidad</header><div class="in"><h1>Disponibilidad</h1>
+<div class="al" role="alert"><b>Sin conexión</b><br>No se muestran franjas guardadas para no duplicar citas. Revise su conexión.</div><div class="b">Reintentar</div>
+<div class="al" role="alert" style="margin-top:22px"><b>No podemos ofrecer franjas ahora</b><br>Citas no responde. Intente en unos minutos.</div><div class="b s">Reintentar</div>
+<p class="h" style="margin-top:22px"><b>Vacío:</b> «Sin franjas en estas fechas» y botón «Ampliar rango».</p></div>
+<div class="tabs"><div>Disponibilidad</div><div>Médicos</div><div>Ausencias</div></div>
+<i class="n" style="top:96px">1</i><i class="n" style="top:226px">2</i><i class="n" style="top:330px">3</i></section>
+<section class="t" id="m3"><header>Médicos · Registrar</header><div class="in"><h1>Registrar médico</h1><p class="h">* Campo obligatorio</p>
+<label>Usuario del sistema *</label><div class="c">Dra. Ana Pérez ▾</div>
+<label>Colegiado *</label><div class="c e">12345</div><div class="m" role="alert">Ese colegiado ya tiene perfil de médico. Revise el número.</div>
+<label>Especialidad principal</label><div class="c">Medicina interna ▾</div>
+<label>Vigente desde *</label><div class="c">02/11/2026</div></div>
+<div class="bar"><div class="b">Registrar médico</div></div>
+<i class="n" style="top:104px">1</i><i class="n" style="top:252px">2</i><i class="n" style="top:560px">3</i></section>
+<section class="t" id="m4"><header>Médicos · Ausencias</header><div class="in"><h1>Ausencia de Dra. Ana Pérez</h1>
+<label>Primer día *</label><div class="c">02/11/2026</div><label>Último día *</label><div class="c">08/11/2026</div>
+<div class="al" role="alert"><b>Hay 2 citas en esas fechas</b><br>lun 02/11 08:00<br>mar 03/11 09:30<br><span class="h">El módulo no las cancela: Citas debe reprogramarlas.</span></div><div class="b s">Copiar lista para Citas</div>
+<div class="chk"><i></i><span>Entiendo que Citas aún no fue avisada</span></div></div>
+<div class="bar"><div class="b">Registrar ausencia</div></div>
+<i class="n" style="top:150px">1</i><i class="n" style="top:250px">2</i><i class="n" style="top:398px">3</i><i class="n" style="top:560px">4</i></section>
+</body></html>

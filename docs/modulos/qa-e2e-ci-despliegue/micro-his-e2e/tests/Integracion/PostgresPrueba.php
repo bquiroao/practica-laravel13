@@ -159,3 +159,15 @@ prueba('INT-09', 'Repositorio compartido: el rol lector ve SOLO su hospital (seg
         $pdo->exec('RESET his.tenant');
     }
 });
+
+prueba('INT-10', 'R-11 en la base (semana 6): un despliegue sin un gate APROBADO, o con otro digest, se rechaza aunque se salten la aplicación; y no se edita', function () use ($conPostgres, $flujo, $falla): void {
+    [$pdo, $p, $uc] = $conPostgres();
+    $id = $flujo($uc);
+    $insertar = static fn (string $digest): string => $falla($pdo, "INSERT INTO despliegues (tenant, version, digest, entorno, guia, operador, estado, en)
+        VALUES ('hosp-norte', '2.4.0', ?, 'produccion', 'guia-2026.1', 'ops', 'DESPLEGADO', now())", [$digest]);
+    afirmar(str_contains($insertar(Escenario::DIGEST), 'no hay un gate APROBADO'), 'sin gate');
+    $uc['gate']->ejecutar('resp-release', 'hosp-norte', '2.4.0', $id);
+    afirmar(str_contains($insertar('sha256:' . str_repeat('1', 64)), 'otro digest'), 'otro digest');
+    igual('NO FALLÓ', $insertar(Escenario::DIGEST), 'con el gate aprobado y su digest, entra');
+    afirmar(str_contains($falla($pdo, "UPDATE despliegues SET estado = 'REVERTIDO'"), 'solo admite INSERT'), 'se pudo editar');
+});

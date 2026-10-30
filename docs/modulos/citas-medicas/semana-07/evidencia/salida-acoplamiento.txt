@@ -1,0 +1,15 @@
+$ php semana-07/evidencia/medir-acoplamiento.php   # sobre develop 402fd68
+Tipo                         Capa           Ce  Ca     I  Usa
+ServicioCitas                Aplicacion      5   1  0.83  RepositorioCitas, Reloj, ReglaDeDominio, Horario, EstadoCita
+Horario                      Dominio         1   4  0.20  ReglaDeDominio
+ReglaDeDominio               Dominio         0   5  0.00  -
+ControladorCitas             Presentacion    4   0  1.00  ServicioCitas, VistaJson, ReglaDeDominio, ErrorPersistencia
+RepositorioCitas             Aplicacion      1   3  0.25  Horario
+RepositorioPdo               Persistencia    3   0  1.00  RepositorioCitas, ErrorPersistencia, Horario
+ErrorPersistencia            Aplicacion      0   2  0.00  -
+EstadoCita                   Dominio         1   1  0.50  ReglaDeDominio
+RepositorioEnMemoria         Persistencia    2   0  1.00  RepositorioCitas, Horario
+VistaJson                    Presentacion    1   1  0.50  ReglaDeDominio
+Reloj                        Aplicacion      0   1  0.00  -
+Rutas                        Presentacion    0   0     -  -
+Mayor acoplamiento: ServicioCitas

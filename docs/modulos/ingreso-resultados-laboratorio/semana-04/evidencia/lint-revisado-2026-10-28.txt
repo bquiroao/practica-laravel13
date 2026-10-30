@@ -1,0 +1,13 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\bin\demo.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\bin\result.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Application\CaptureOrCorrectResult.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Application\ResultOperation.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Application\ResultPorts.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Domain\LabResult.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Infrastructure\Identity\RandomResultIdentifierGenerator.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Persistence\InMemoryLabResultRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Persistence\PdoLabResultRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Presentation\Cli\LabResultCommand.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\src\Presentation\Mvc\Mvc.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-ingreso-resultados-mvc-mercedes-lopez\docs\modulos\ingreso-resultados-laboratorio\semana-04\ejemplo\tests\run.php

@@ -20,4 +20,8 @@ if (getenv('TRAS_ALMACEN') === 'memoria') {
 }
 $usuarios = ['enf-ana' => new Usuario('enf-ana', 'enfermeria'), 'adm-eva' => new Usuario('adm-eva', 'admision'), 'dr-luis' => new Usuario('dr-luis', 'medico')];
 $controlador = new MovimientosControlador(new RegistrarMovimiento($repo, $repo), $usuarios);
-VistaJson::enviar((new Enrutador($controlador))->atender(Peticion::desdeGlobales()));
+$peticion = Peticion::desdeGlobales();
+$inicio = hrtime(true);
+$respuesta = (new Enrutador($controlador))->atender($peticion);
+VistaJson::enviar($respuesta, $peticion->idSolicitud);
+error_log(VistaJson::registro($peticion, $respuesta, (hrtime(true) - $inicio) / 1e6));

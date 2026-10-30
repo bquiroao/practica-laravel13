@@ -87,16 +87,39 @@ final class Ejecucion
 
     public function agregar(ResultadoEscenario $r): void
     {
+        $this->exigirAdmite($r->escenario);
+        $this->resultados[] = $r;
+    }
+
+    /**
+     * Semana 7 (refactor): las reglas de un reporte, en el MISMO orden que antes decidía el caso de uso
+     * (plan → datos → estado y duplicado → evidencia), sin escribir nada. Devuelve el resultado sin evidencias:
+     * el almacén se usa recién después, y solo si todas las reglas pasaron.
+     */
+    public function preparar(ReporteResultado $reporte, \DateTimeImmutable $ahora): ResultadoEscenario
+    {
+        $sinEvidencias = ResultadoEscenario::desde($reporte->escenario, $this->critico($reporte->escenario), $reporte->resultado, $reporte->intentos, [],
+            $reporte->clave, $reporte->huella, $ahora);
+        $this->exigirAdmite($reporte->escenario);
+        foreach ($reporte->artefactos as $a) {
+            Evidencia::validar($a['tipo'], $a['bytes']);
+        }
+
+        return $sinEvidencias;
+    }
+
+    /** R-04: solo EN_CURSO admite resultados, del plan y uno por escenario (los reintentos van en «intentos»). */
+    private function exigirAdmite(string $escenario): void
+    {
         if ($this->estado !== self::EN_CURSO) {
             throw new ReglaRechazada('EJECUCION_NO_ADMITE_RESULTADOS');
         }
-        $this->critico($r->escenario);
+        $this->critico($escenario);
         foreach ($this->resultados as $previo) {
-            if ($previo->escenario === $r->escenario) {
-                throw new ReglaRechazada('RESULTADO_YA_REPORTADO', [$r->escenario]);   // los reintentos van en «intentos»
+            if ($previo->escenario === $escenario) {
+                throw new ReglaRechazada('ESCENARIO_YA_REPORTADO', [$escenario]);
             }
         }
-        $this->resultados[] = $r;
     }
 
     public function completar(\DateTimeImmutable $ahora): void

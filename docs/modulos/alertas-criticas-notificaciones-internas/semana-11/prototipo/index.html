@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo · Alertas críticas y notificaciones internas</title>
+<style>
+  :root { --azul:#12355b; --rojo:#b42318; --verde:#1e7e34; --borde:#d0d5dd; --fondo:#f6f7f9; }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 16px/1.45 system-ui, sans-serif; color:#1a1a1a; background:var(--fondo); }
+  .saltar { position:absolute; left:-999px; } .saltar:focus { left:8px; top:8px; background:#fff; padding:8px; z-index:9; }
+  header { background:var(--azul); color:#fff; padding:.6rem 1rem; display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; justify-content:space-between; }
+  header h1 { font-size:1.05rem; margin:0; }
+  main { max-width:960px; margin:0 auto; padding:1rem; }
+  button, select, textarea { font:inherit; }
+  button { min-height:44px; padding:.5rem 1rem; border-radius:6px; border:1px solid #475467; background:#fff; cursor:pointer; }
+  button.primario { background:var(--azul); color:#fff; border-color:var(--azul); font-weight:600; }
+  :focus-visible { outline:3px solid #1a1a1a; outline-offset:2px; box-shadow:0 0 0 6px #fff; }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:8px; padding:.8rem; margin:.6rem 0; }
+  .CRITICA { color:var(--rojo); font-weight:700; } .ALTA { color:#93370d; font-weight:700; }
+  .aviso { background:#e6f4ea; border-left:4px solid var(--verde); padding:.6rem .9rem; }
+  .error { background:#fdecea; border-left:4px solid var(--rojo); padding:.6rem .9rem; }
+  .fila { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+  .grande { font-size:1.25rem; font-weight:700; }
+  table { width:100%; border-collapse:collapse; background:#fff; } th, td { text-align:left; padding:.45rem; border-bottom:1px solid var(--borde); }
+  .solo-escritorio { display:none; }
+  @media (min-width:768px) { .solo-escritorio { display:block; } .solo-movil { display:none; } }
+  label { display:block; font-weight:600; margin:.6rem 0 .2rem; } textarea { width:100%; min-height:6rem; }
+  .ayuda { color:#475467; font-size:.9rem; }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header>
+  <h1>Alertas críticas · <span id="tenant">HOSP-GUA-01</span></h1>
+  <div class="fila">
+    <label for="rol" style="margin:0;color:#fff">Usuario (ficticio)</label>
+    <select id="rol">
+      <option value="enf.turno01">enf.turno01 · enfermería</option>
+      <option value="med.tratante01">med.tratante01 · médico</option>
+      <option value="jefe.servicio01">jefe.servicio01 · jefe de servicio</option>
+    </select>
+    <label style="margin:0;color:#fff"><input type="checkbox" id="sinRed"> Simular sin conexión</label>
+  </div>
+</header>
+<main id="contenido" tabindex="-1">
+  <div id="estado" role="status" aria-live="polite"></div>
+  <div id="vista"></div>
+</main>
+<script>
+// Prototipo navegable: datos FICTICIOS en memoria, sin servidor. Reglas iguales al Micro-HIS.
+const ROLES = { 'enf.turno01':'enfermeria', 'med.tratante01':'medico', 'jefe.servicio01':'jefe_servicio' };
+const alertas = [
+  { id:'3511c21a', paciente:'PAC-00451', prioridad:'CRITICA', servicio:'MED-INT', desc:'Potasio sérico 6.8 mmol/L (ref. 3.5-5.1)',
+    estado:'ENVIADA', nivel:0, vence:'09:12', notificados:['enf.turno01','med.tratante01'], historial:[['10:00','creada','sistema:laboratorio'],['10:00','enviada','nivel 0: enf.turno01, med.tratante01']] },
+  { id:'7c20e9b4', paciente:'PAC-00452', prioridad:'ALTA', servicio:'MED-INT', desc:'Glucosa 38 mg/dL',
+    estado:'ESCALADA', nivel:1, vence:'24:40', notificados:['enf.turno01','med.tratante01','jefe.servicio01'], historial:[['09:30','creada','sistema:laboratorio'],['10:00','escalada','a nivel 1 por plazo vencido']] },
+];
+let hora = 10 * 60 + 5;
+const $ = s => document.querySelector(s);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usuario = () => $('#rol').value;
+const hhmm = () => `${String(Math.floor(hora/60)).padStart(2,'0')}:${String(hora%60).padStart(2,'0')}`;
+function mensaje(html, tipo='aviso') { $('#estado').innerHTML = html ? `<p class="${tipo}">${html}</p>` : ''; }
+
+function bandeja() {
+  const filas = alertas.map(a => `
+    <tr><td><a href="#alerta/${a.id}">${esc(a.paciente)}</a></td><td class="${a.prioridad}">${a.prioridad}</td>
+        <td>${a.estado} · nivel ${a.nivel}</td><td>${a.estado==='ENVIADA'||a.estado==='ESCALADA' ? 'vence en '+a.vence : '—'}</td></tr>`).join('');
+  const tarjetas = alertas.map(a => `
+    <div class="tarjeta"><div class="${a.prioridad}">${a.prioridad==='CRITICA'?'‼':'!'} ${a.prioridad} · ${a.estado}</div>
+      <div class="grande">${esc(a.paciente)}</div><div>${esc(a.desc)}</div>
+      <div class="ayuda">${a.estado==='ENVIADA'||a.estado==='ESCALADA' ? 'Vence en '+a.vence+' · nivel '+a.nivel : 'Sin plazo pendiente'}</div>
+      <p><a href="#alerta/${a.id}">Ver detalle de ${esc(a.paciente)}</a></p></div>`).join('');
+  $('#vista').innerHTML = `<h2>Bandeja de alertas</h2>
+    <div class="solo-escritorio"><table><caption>Alertas de HOSP-GUA-01</caption>
+      <thead><tr><th scope="col">Paciente</th><th scope="col">Prioridad</th><th scope="col">Estado</th><th scope="col">Plazo</th></tr></thead><tbody>${filas}</tbody></table></div>
+    <div class="solo-movil">${tarjetas}</div>`;
+}
+
+function detalle(id) {
+  const a = alertas.find(x => x.id === id); if (!a) { mensaje('La alerta no existe en su hospital.', 'error'); return bandeja(); }
+  const puedeCerrar = a.estado === 'ACUSADA' && ['medico','jefe_servicio'].includes(ROLES[usuario()]);
+  const esperando = a.estado === 'ENVIADA' || a.estado === 'ESCALADA';
+  $('#vista').innerHTML = `<p><a href="#bandeja">← Bandeja</a></p>
+    <h2>${esc(a.paciente)} · <span class="${a.prioridad}">${a.prioridad}</span></h2>
+    <p>Estado <strong id="estadoAlerta">${a.estado}</strong> · nivel ${a.nivel} · ${esc(a.servicio)}</p>
+    <p>${esc(a.desc)}</p>
+    ${esperando ? `<p class="grande">Vence en ${a.vence} → escala a ${a.nivel===0?'jefe de servicio':'coordinación médica'}</p>
+      <button class="primario" id="acusar">Acusar como ${esc(usuario())}</button>` : ''}
+    ${puedeCerrar ? `<p><a href="#cierre/${a.id}">Cerrar alerta</a></p>` : ''}
+    <h3>Historial</h3><table><caption>Historial de la alerta</caption><thead><tr><th scope="col">Hora</th><th scope="col">Evento</th><th scope="col">Actor / detalle</th></tr></thead>
+    <tbody>${a.historial.map(h => `<tr><td>${h[0]}</td><td>${esc(h[1])}</td><td>${esc(h[2])}</td></tr>`).join('')}</tbody></table>`;
+  const b = $('#acusar'); if (b) b.onclick = () => acusar(a);
+}
+
+function acusar(a) {
+  if ($('#sinRed').checked) { // ERROR CRÍTICO: sin conexión; la alerta NO se marca como acusada
+    mensaje('⚠ Sin conexión: el acuse <strong>no se registró</strong>. Reintentar es seguro (no duplica). <button id="reintentar">Reintentar ahora</button>', 'error');
+    $('#reintentar').onclick = () => acusar(a); $('#reintentar').focus(); return;
+  }
+  if (!a.notificados.includes(usuario())) { mensaje('No fue notificado de esta alerta (RN-07). Corresponde a nivel ' + a.nivel + '.', 'error'); return; }
+  if (a.estado === 'ACUSADA' || a.estado === 'CERRADA') { mensaje('La alerta ya estaba acusada; no hubo cambios.'); return detalle(a.id); }
+  a.estado = 'ACUSADA'; a.historial.push([hhmm(), 'acusada', usuario()]);
+  mensaje('✓ Acuse registrado a las ' + hhmm() + '.'); detalle(a.id);
+}
+
+function cierre(id) {
+  const a = alertas.find(x => x.id === id);
+  if (!a || a.estado !== 'ACUSADA' || !['medico','jefe_servicio'].includes(ROLES[usuario()])) { mensaje('No puede cerrar esta alerta (RF-08 o RN-09).', 'error'); return detalle(id); }
+  $('#vista').innerHTML = `<p><a href="#alerta/${a.id}">← Volver</a></p><h2>Cerrar alerta ${esc(a.paciente)}</h2>
+    <label for="nota">Nota de cierre (obligatoria)</label><textarea id="nota" aria-describedby="ayudaNota"></textarea>
+    <p id="ayudaNota" class="ayuda">Describa la atención brindada. No escriba nombres de pacientes.</p>
+    <p id="errNota" class="error" hidden>La nota es obligatoria.</p>
+    <label><input type="checkbox" id="confirmar"> Confirmo el cierre: no se puede deshacer</label>
+    <p class="fila"><button class="primario" id="cerrar">Cerrar alerta</button> <a href="#alerta/${a.id}">Cancelar</a></p>`;
+  $('#cerrar').onclick = () => {
+    if (!$('#nota').value.trim()) { $('#errNota').hidden = false; $('#nota').focus(); return; }
+    if (!$('#confirmar').checked) { mensaje('Marque la confirmación para cerrar.', 'error'); $('#confirmar').focus(); return; }
+    a.estado = 'CERRADA'; a.historial.push([hhmm(), 'cerrada', usuario() + ': ' + $('#nota').value.trim()]);
+    mensaje('✓ Alerta cerrada.'); location.hash = '#alerta/' + a.id;
+  };
+}
+
+function enrutar() {
+  const [vista, id] = (location.hash.slice(1) || 'bandeja').split('/');
+  if (vista === 'alerta') detalle(id); else if (vista === 'cierre') cierre(id); else bandeja();
+}
+window.addEventListener('hashchange', () => { enrutar(); $('#contenido').focus(); });
+$('#rol').addEventListener('change', () => { mensaje(''); enrutar(); });
+enrutar();
+</script>
+</body>
+</html>

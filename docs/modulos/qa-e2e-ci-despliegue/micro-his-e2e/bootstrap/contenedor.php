@@ -18,6 +18,7 @@ use E2e\Aplicacion\CasosDeUso\ConsultarTrazabilidad;
 use E2e\Aplicacion\CasosDeUso\EvaluarGate;
 use E2e\Aplicacion\CasosDeUso\IniciarEjecucion;
 use E2e\Aplicacion\CasosDeUso\PlanificarPruebas;
+use E2e\Aplicacion\CasosDeUso\RegistrarDespliegue;
 use E2e\Aplicacion\CasosDeUso\RegistrarEscenario;
 use E2e\Aplicacion\CasosDeUso\RegistrarVersion;
 use E2e\Aplicacion\CasosDeUso\ReportarResultado;
@@ -42,21 +43,25 @@ function construirCasosDeUso(array $p, array $politica): array
         'cerrar' => new CerrarEjecucion($p['acceso'], $p['ejecuciones'], $p['auditoria'], $p['transaccion'], $p['reloj']),
         'gate' => new EvaluarGate($p['acceso'], $p['versiones'], $p['ejecuciones'], $p['evaluaciones'], $p['almacen'], $p['auditoria'], $p['transaccion'],
             $p['reloj'], $gate),
-        'trazabilidad' => new ConsultarTrazabilidad($p['acceso'], $p['versiones'], $p['ejecuciones'], $p['evaluaciones']),
+        'trazabilidad' => new ConsultarTrazabilidad($p['acceso'], $p['versiones'], $p['ejecuciones'], $p['evaluaciones'], $p['despliegues']),
+        'desplegar' => new RegistrarDespliegue($p['acceso'], $p['versiones'], $p['evaluaciones'], $p['despliegues'], $p['auditoria'], $p['transaccion'], $p['reloj'],
+            $politica['vigencia_aprobacion_horas']),
     ];
 }
 
 /** MVC (semana 4): un controlador por recurso, cada uno con sus casos de uso. */
-function construirKernel(array $uc, array $tokens): Kernel
+function construirKernel(array $uc, array $tokens, ?callable $registroAcceso = null): Kernel
 {
     return new Kernel([
         'escenarios' => new EscenariosControlador($uc['escenario']),
-        'versiones' => new VersionesControlador($uc['version'], $uc['plan'], $uc['iniciar'], $uc['gate'], $uc['trazabilidad']),
+        'versiones' => new VersionesControlador($uc['version'], $uc['plan'], $uc['iniciar'], $uc['gate'], $uc['trazabilidad'], $uc['desplegar']),
         'ejecuciones' => new EjecucionesControlador($uc['reportar'], $uc['cerrar']),
-    ], $tokens);
+    ], $tokens, $registroAcceso);
 }
 
 function crearKernel(array $config): Kernel
 {
-    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config), $config['politica_gate']), $config['tokens_demo']);
+    $registro = ($config['registro_acceso'] ?? 'stderr') === 'stderr' ? static fn (string $linea) => file_put_contents('php://stderr', $linea . PHP_EOL) : null;
+
+    return construirKernel(construirCasosDeUso(FabricaAdaptadores::crear($config), $config['politica_gate']), $config['tokens_demo'], $registro);
 }

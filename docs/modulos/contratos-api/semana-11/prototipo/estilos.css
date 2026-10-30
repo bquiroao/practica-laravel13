@@ -33,3 +33,5 @@ textarea { width: 100%; font: inherit; border: 1px solid #64748b; border-radius:
 details { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-top: 12px; }
 summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
 .texto-largo { overflow-wrap: anywhere; } /* rutas y JSON saltan de línea en vez de forzar scroll (1.4.10) */
+input[type=search] { display: block; width: 100%; min-height: 44px; font: inherit; border: 1px solid #64748b; border-radius: 8px; padding: 8px; margin: 4px 0 12px; }   /* semana 12, B-08 */
+[hidden] { display: none !important; }   /* semana 12: las tarjetas móviles (display: block) no deben anular hidden */

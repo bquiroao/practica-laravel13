@@ -22,10 +22,11 @@ const vistas = {
   docs: () => {
     const mios = Object.keys(DOCUMENTOS).filter(visible);
     return ['Mi documentación', `<h1 tabindex="-1">Mi documentación</h1><p>Tus roles: <strong>${ROLES[rol]}</strong></p>
+      <label for="buscar">Buscar en mi documentación</label><input id="buscar" type="search" autocomplete="off">
       <table><thead><tr><th>Documento</th><th>Tipo</th><th>Vigente</th><th>Actualizado</th></tr></thead><tbody>
-      ${mios.map((id) => `<tr><td><a href="#doc/${id}"><strong>${id}</strong></a></td><td data-etiqueta="Tipo">${DOCUMENTOS[id].tipo}</td>
+      ${mios.map((id) => `<tr data-busqueda="${esc(`${id} ${DOCUMENTOS[id].tipo}`.toLowerCase())}"><td><a href="#doc/${id}"><strong>${id}</strong></a></td><td data-etiqueta="Tipo">${DOCUMENTOS[id].tipo}</td>
         <td data-etiqueta="Vigente">${DOCUMENTOS[id].vigente}</td><td data-etiqueta="Actualizado">${DOCUMENTOS[id].fecha}</td></tr>`).join('')}
-      </tbody></table>`, () => avisar(`${mios.length} documentos para tus roles.`)];
+      </tbody></table>`, () => { avisar(`${mios.length} documentos para tus roles.`); prepararBusqueda(); }];
   },
 
   doc: (id, version) => {
@@ -50,6 +51,18 @@ const vistas = {
       }];
   },
 };
+
+/** Semana 12 (B-08): filtra solo lo que el rol ya puede ver (R-06) y anuncia el resultado sin mover el foco. */
+function prepararBusqueda() {
+  const buscar = document.getElementById('buscar');
+  buscar.addEventListener('input', () => {
+    const q = buscar.value.trim().toLowerCase();
+    const filas = [...document.querySelectorAll('tr[data-busqueda]')];
+    filas.forEach((f) => { f.hidden = !f.dataset.busqueda.includes(q); });
+    const n = filas.filter((f) => !f.hidden).length;
+    avisar(n ? `${n} ${n === 1 ? 'documento encontrado' : 'documentos encontrados'}.` : `Ningún documento de tus roles coincide con «${q}».`);
+  });
+}
 
 function avisar(texto) { document.getElementById('estado').textContent = texto; }
 

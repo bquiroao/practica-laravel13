@@ -1,0 +1,39 @@
+@startuml migracion-etapas
+' Catálogo de medicamentos - Semana 5 - Migración por etapas (strangler fig)
+title Migración por etapas: cada paso es reversible y tiene criterio de salida
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+
+start
+:E0 (hoy): módulo dentro del HIS
+interfaz Repository + casos de uso (Micro-HIS S3-S5);
+:E1: API /api/v1 + vista v_medicamentos_vigentes
+de solo lectura. Nadie escribe la tabla salvo el catálogo;
+note right
+  Salida: 0 consultas directas a la
+  tabla desde otros módulos (revisión de código)
+end note
+:E2: consumidores leen por API o vista,
+pruebas de contrato del consumidor;
+note right
+  Salida: pruebas de contrato en verde
+  en prescripciones-alergias
+end note
+if (¿Se cumple al menos un gatillo\nmedible durante 2 meses?) then (no)
+  :Se queda como módulo.
+  Revisión en cada parcial (S6, S12) y en el SQA; <<#E5FFE5>>
+  stop
+else (sí)
+  :E3: servicio aparte con base propia.
+  El módulo del HIS delega por HTTP (strangler),
+  outbox para eventos;
+  note right
+  Salida: p95 y tasa de 5xx iguales o
+  mejores que en E2; reversión probada
+end note
+  :E4: retirar la vista y las lecturas directas;
+  stop
+endif
+@enduml

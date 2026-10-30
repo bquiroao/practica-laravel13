@@ -130,11 +130,15 @@ final class Escenario
         $this->uc = construirCasosDeUso($this->p, $politica + $config['politica_gate']);
     }
 
-    public function kernel(): Kernel
+    /** @var list<string> líneas del registro de acceso */
+    public array $accesos = [];
+
+    public function kernel(bool $registroQueFalla = false): Kernel
     {
         $config = require dirname(__DIR__, 2) . '/config/config.php';
 
-        return construirKernel($this->uc, $config['tokens_demo']);
+        return construirKernel($this->uc, $config['tokens_demo'], $registroQueFalla ? static fn () => throw new RuntimeException('disco lleno')
+            : function (string $l): void { $this->accesos[] = $l; });
     }
 
     public function auditoriaReal(): RegistroAuditoriaEnMemoria

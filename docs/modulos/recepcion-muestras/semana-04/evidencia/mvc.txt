@@ -1,0 +1,27 @@
+PASS: memory: guarda recepción
+PASS: memory: aceptación por política existente
+PASS: memory: sin motivos en aceptada
+PASS: memory: rechazo también se registra
+PASS: memory: dominio decide recipiente roto
+PASS: memory: rechazo tiene motivo
+PASS: memory: cadena no se convierte a booleano verdadero
+PASS: memory: referencia vacía rechazada por dominio
+PASS: memory: tipo de entrada desconocido
+PASS: memory: vista conserva decisión/motivo
+PASS: memory: colisión no sobrescribe ni confirma
+PASS: pdo: guarda recepción
+PASS: pdo: aceptación por política existente
+PASS: pdo: sin motivos en aceptada
+PASS: pdo: rechazo también se registra
+PASS: pdo: dominio decide recipiente roto
+PASS: pdo: rechazo tiene motivo
+PASS: pdo: cadena no se convierte a booleano verdadero
+PASS: pdo: referencia vacía rechazada por dominio
+PASS: pdo: tipo de entrada desconocido
+PASS: pdo: vista conserva decisión/motivo
+PASS: pdo: colisión no sobrescribe ni confirma
+PASS: InMemory conserva dos recepciones
+PASS: PDO conserva dos recepciones
+PASS: PDO roto no confirma recepción
+PASS: error no presenta identificador como guardado
+OK: 26 aserciones MVC/Repository. PDO real temporal, datos ficticios.

@@ -1,0 +1,71 @@
+@startuml semana-01-secuencia
+' Participantes, mensajes, validaciones y respuestas
+autonumber
+skinparam sequenceMessageAlign center
+actor "Médico" as MED
+actor "Enfermería" as ENF
+participant "Entrada\n(vista o API)" as UI
+participant "RegistrarAlergia" as REG
+participant "ConsultarAlerta\nExpediente" as CON
+participant "ReconocerAlerta" as REC
+participant "DirectorioPacientes" as PAC
+participant "Alergia\n(Dominio)" as DOM
+participant "CalculadorAlerta" as CAL
+database "HOSPITAL\nallergies" as BD
+
+== Registro (CU-01, CU-02) ==
+MED -> UI : registrar(PAC-00451, Penicilina,\nlife_threatening, reacción, 2019-03-02)
+UI -> REG : ejecutar(SolicitudRegistro)
+REG -> PAC : porCodigo(PAC-00451)
+PAC --> REG : PacienteRef(activo)
+REG -> DOM : registrar(...)
+note right of DOM : RN-01 alérgeno\nRN-02 tipo y severidad\nRN-04 reacción\nRN-05 fecha\nRN-06 paciente activo
+alt alguna regla falla
+  DOM --> REG : ReglaDominioViolada(código)
+  REG --> UI : error
+  UI --> MED : 422 + mensaje; conserva lo escrito
+else válida
+  REG -> BD : ¿existe activa equivalente? (RN-03)
+  alt ya existe
+    BD --> REG : sí
+    REG --> UI : AlergiaDuplicada
+    UI --> MED : 409 ALERGIA_DUPLICADA
+  else no existe
+    REG -> BD : INSERT allergies (verified_by = médico)
+    alt la base no responde
+      BD --> REG : ErrorPersistencia
+      UI <-- REG : error
+      UI --> MED : 503, no se guardó nada
+    else guardada
+      REG -> CAL : calcular(alergias activas) (CU-04)
+      CAL --> REG : AlertaExpediente(CRITICA, huella)
+      REG --> UI : alerta recalculada
+      UI --> MED : 201 + alerta CRÍTICA
+    end
+  end
+end
+
+== Consulta y reconocimiento (CU-03, CU-04, CU-05) ==
+ENF -> UI : abrir expediente de PAC-00451
+UI -> CON : ejecutar(PAC-00451, usuario)
+CON -> BD : alergias activas + ¿reconocida esta huella?
+CON -> CAL : calcular(alergias activas)
+CAL --> CON : nivel máximo, detalle ordenado, huella
+CON --> UI : AlertaExpediente
+alt nivel ALTA o CRÍTICA y no reconocida
+  UI --> ENF : alerta destacada + «He leído las alergias»
+  ENF -> UI : reconocer(huella vista)
+  UI -> REC : ejecutar(PAC-00451, usuario, huella)
+  REC -> CAL : recalcular
+  alt la huella cambió (otra alergia nueva)
+    REC --> UI : ALERTA_CAMBIO
+    UI --> ENF : 409, muestra la alerta actualizada
+  else huella vigente
+    REC -> BD : guardar reconocimiento (usuario + huella)
+    REC --> UI : alerta reconocida
+    UI --> ENF : 201, alerta marcada como leída
+  end
+else SIN_REGISTRO, INFORMATIVA o MODERADA
+  UI --> ENF : alerta visible sin bloqueo\n(SIN_REGISTRO dice «no verificado»)
+end
+@enduml

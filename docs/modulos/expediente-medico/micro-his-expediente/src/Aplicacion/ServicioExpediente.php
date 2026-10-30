@@ -58,5 +58,9 @@ final class ServicioExpediente
     {
         try { $r = $caso(); $this->auditoria->registrar($profesional, $operacion, $paciente, 'ok'); return $r; }
         catch (ReglaDeDominio $e) { $this->auditoria->registrar($profesional, $operacion, $paciente, $e->codigo); throw $e; }
+        catch (ErrorPersistencia $e) {   // semana 6: el fallo técnico también deja su evento (RNF-04), salvo que la caída sea la propia auditoría
+            try { $this->auditoria->registrar($profesional, $operacion, $paciente, 'E8'); } catch (ErrorPersistencia) {}
+            throw $e;
+        }
     }
 }

@@ -22,16 +22,19 @@ Implementa el flujo de las semanas 1 y 2:
 
 ```
 src/
-  Dominio/        Modelo (EscenarioE2E, Version, Ejecucion, ResultadoEscenario, Evidencia, PoliticaGate, Decision, QualityGate),
+  Dominio/        Modelo (EscenarioE2E, Version, Ejecucion, ResultadoEscenario, ReporteResultado (semana 7), Evidencia, PoliticaGate, Decision, QualityGate),
                   Puertos (repositorios, Reloj), Excepciones
-  Aplicacion/     CasosDeUso (8), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
+  Aplicacion/     CasosDeUso (9; RegistrarDespliegue desde la semana 6), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
   Persistencia/   Pdo, EnMemoria, Archivos (almacén por contenido), Configuracion, FabricaAdaptadores
+  Cliente/        ReportadorCi (lado del pipeline: reintentos idempotentes y bandeja de pendientes), transportes
   Presentacion/   Http: Kernel (autentica y enruta), Formularios (forma, 400), Controladores (MVC), Vistas (códigos HTTP)
 bootstrap/        autoload.php, contenedor.php (raíz de composición)
 database/         schema.sql, datos-demo.sql / datos-demo.php, integracion-compartida.sql (semana 4)
-bin/              instalar-base.php, demo-http.sh
+api/              openapi.yaml (contrato 1.3.0: 1.0.0 en la semana 5 + despliegues en la 6 + vista previa del gate en la 12 + reintento de despliegue en la 15; verificado por tests/Api)
+bin/              instalar-base.php, demo-http.sh, medir.php y proxy-ingesta.php (frontera de microservicio, semana 5),
+                  acoplamiento.php y caracterizar.php (refactor de la semana 7)
 tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Contratos/ (memoria y PDO), Mvc/,
-                  Presentacion/, Arquitectura/, Integracion/
+                  Caracterizacion/ (35 respuestas grabadas antes del refactor), Presentacion/, Arquitectura/, Integracion/
 ```
 
 ## Ejecutar
@@ -39,11 +42,11 @@ tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, 
 ```bash
 php tests/ejecutar.php                                       # sin base: dominio, aplicación (dobles), HTTP y arquitectura
 E2E_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php     # + integración (recrea el esquema e2e)
-E2E_DB_DSN=... php tests/mutaciones.php                      # 21 defectos sembrados: la suite debe detectarlos todos
+E2E_DB_DSN=... php tests/mutaciones.php                      # 35 defectos sembrados: la suite debe detectarlos todos
 E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTTP real (php -S + curl)
 ```
 
-## API (rutas de la semana 3, en MVC desde la semana 4)
+## API (contrato completo en api/openapi.yaml)
 
 | Método y ruta | Caso de uso | Permiso |
 |---|---|---|
@@ -54,4 +57,6 @@ E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTT
 | `POST /api/v1/e2e/ejecuciones/{id}/resultados` (con `Idempotency-Key`) | ReportarResultado | `e2e.reportar` |
 | `POST /api/v1/e2e/ejecuciones/{id}/cierre` | CerrarEjecucion | `e2e.ejecutar` |
 | `POST /api/v1/e2e/versiones/{v}/gate` | EvaluarGate | `e2e.evaluar` |
+| `POST /api/v1/e2e/versiones/{v}/gate/vista-previa` (semana 12, sin efectos) | EvaluarGate::previsualizar | `e2e.evaluar` |
 | `GET /api/v1/e2e/versiones/{v}/trazabilidad` | ConsultarTrazabilidad | `e2e.consultar` |
+| `POST /api/v1/e2e/versiones/{v}/despliegues` (semana 6) | RegistrarDespliegue | `e2e.desplegar` |

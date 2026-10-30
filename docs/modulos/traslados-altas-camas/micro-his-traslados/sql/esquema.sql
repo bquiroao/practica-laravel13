@@ -14,6 +14,8 @@ CREATE TABLE ordenes_movimiento (orden_id TEXT PRIMARY KEY, care_episode_id TEXT
                                  tipo TEXT NOT NULL CHECK (tipo IN ('traslado', 'alta')),
                                  estado TEXT NOT NULL CHECK (estado IN ('vigente', 'aplicada', 'cancelada')),
                                  requisito_cama TEXT, tipo_alta TEXT, motivo TEXT);
+-- Semana 5: clave de idempotencia → resultado del movimiento. Se guarda en la misma transacción que el movimiento (un reintento no lo repite).
+CREATE TABLE claves_idempotencia (clave TEXT PRIMARY KEY, orden_id TEXT NOT NULL REFERENCES ordenes_movimiento(orden_id), origen_id TEXT NOT NULL, destino_id TEXT);
 
 -- Datos de demostración. epi-9 no tiene estancia (prueba sin_cama); epi-2 solo tiene orden de alta (prueba orden_requerida).
 INSERT INTO wards VALUES ('ward-gen', 'MED', 'Medicina general'), ('ward-uci', 'UCI', 'Cuidados intensivos');

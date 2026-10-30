@@ -1,12 +1,13 @@
 openapi: 3.1.0
 info:
   title: Dashboard base — Micro-HIS
-  version: 0.5.0
+  version: 0.6.0
   description: >
     Contrato preliminar (semana 5) del flujo «navegación del dashboard con estados de carga, vacío, error y resumen inicial».
     Las rutas son las del front controller de la semana 4. Hoy el hospital y los permisos llegan en las cabeceras
     X-Tenant-ID y X-Permisos; desde la semana 15 saldrán del JWT y de RBAC (hallazgo H-01 de la semana 13).
-    Una tarjeta desconocida responde 403 E4, igual que una sin permiso (hallazgo H-03). Datos ficticios.
+    Una tarjeta desconocida responde 403 E4, igual que una sin permiso (hallazgo H-03). La semana 6 agrega navegar (CU-03)
+    con E6 y NF, que cierra el hallazgo H-02. Datos ficticios.
   license:
     name: Uso académico
     identifier: CC-BY-4.0
@@ -58,6 +59,24 @@ paths:
             application/json:
               schema:
                 allOf: [{ $ref: '#/components/schemas/Tarjeta' }, { type: object, required: [error], properties: { error: { const: E5 } } }]
+  /dashboard/navegacion/{modulo}:
+    get:
+      operationId: navegar
+      summary: Abrir un módulo del menú o escrito a mano; la ruta no salta el permiso (CU-03, R-02; semana 6)
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Permisos'
+        - { name: modulo, in: path, required: true, schema: { type: string, example: citas } }
+      responses:
+        '200':
+          description: Módulo permitido para el rol
+          content:
+            application/json:
+              schema: { type: object, required: [ruta, titulo], properties: { ruta: { type: string }, titulo: { type: string } } }
+              example: { ruta: /citas, titulo: Citas }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
 components:
   securitySchemes:
     jwt: { type: http, scheme: bearer, bearerFormat: JWT }
@@ -66,7 +85,7 @@ components:
     Permisos: { name: X-Permisos, in: header, required: true, description: Permisos del rol separados por coma (RBAC simulado)., schema: { type: string, example: 'citas.ver,camas.ver' } }
   responses:
     Error:
-      description: Sin sesión u hospital (E1, 401) o tarjeta no disponible para el rol (E4, 403)
+      description: Sin sesión u hospital (E1, 401), tarjeta o módulo no disponible para el rol (E4 o E6, 403) o módulo inexistente (NF, 404)
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
@@ -83,5 +102,5 @@ components:
       type: object
       required: [error, mensaje]
       properties:
-        error: { type: string, enum: [E1, E4, E5] }
+        error: { type: string, enum: [E1, E4, E5, E6, NF] }
         mensaje: { type: string }

@@ -1,0 +1,39 @@
+$ php tests/ejecutar.php --solo=CAM   # ANTES de implementar el cambio
+PHP Warning:  Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+
+Warning: Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+PHP Warning:  Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+
+Warning: Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+PHP Warning:  Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+
+Warning: Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+PHP Warning:  Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+
+Warning: Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+PHP Warning:  Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+
+Warning: Undefined array key "desplegar" in docs\modulos\qa-e2e-ci-despliegue\micro-his-e2e\tests\Cambio\DespliegueReproduciblePrueba.php on line 27
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Cambio práctico de la semana 6: despliegue reproducible (CU-11, R-11) ==
+[FALLA] CAM-01   R-11: con el último gate APROBADO, vigente y el MISMO digest, el despliegue queda DESPLEGADO con la guía y el operador
+         -> Call to a member function ejecutar() on null (DespliegueReproduciblePrueba.php:27)
+[FALLA] CAM-02   R-11: sin evaluación, o si la ÚLTIMA evaluación es RECHAZADO (aunque antes hubo un APROBADO), no se despliega: 409 GATE_NO_APROBADO
+         -> Call to a member function ejecutar() on null (DespliegueReproduciblePrueba.php:27)
+[FALLA] CAM-03   R-03/R-11: el digest instalado tiene que ser el evaluado: otro digest → 409 DIGEST_DISTINTO
+         -> Call to a member function ejecutar() on null (DespliegueReproduciblePrueba.php:27)
+[FALLA] CAM-04   R-11: la aprobación vence a las 72 h: 72 h exactas despliega, 72 h y 1 s → 409 APROBACION_VENCIDA
+         -> Call to a member function ejecutar() on null (DespliegueReproduciblePrueba.php:27)
+[FALLA] CAM-05   R-11: si la verificación posterior (smoke) falla, queda REVERTIDO a la versión DESPLEGADA antes en ese entorno; la guía no versionada → 422
+         -> Call to a member function ejecutar() on null (DespliegueReproduciblePrueba.php:27)
+[FALLA] CAM-06   R-13 por HTTP: el operador despliega (201) y el pipeline no puede (403); la trazabilidad muestra el despliegue
+         -> estados: esperado array (
+  0 => 403,
+  1 => 201,
+), obtenido array (
+  0 => 404,
+  1 => 401,
+) (Arnes.php:41)
+
+Total: 6  Pasan: 0  Fallan: 6  Omitidas: 0

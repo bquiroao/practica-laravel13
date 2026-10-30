@@ -44,7 +44,7 @@ prueba('PER-03', 'Sentencias preparadas: ningún adaptador PDO interpola variabl
 });
 
 prueba('PER-04', 'Almacén en disco: direccionado por contenido, idempotente y verificado; un archivo alterado deja de confirmarse', function (): void {
-    $dir = sys_get_temp_dir() . '/e2e-almacen-' . getmypid();
+    $dir = sys_get_temp_dir() . '/e2e-almacen-' . uniqid('', true);       // semana 6: con el PID se reusaba la carpeta de otra corrida
     $alm = new AlmacenEvidenciasEnDisco($dir);
     $a = $alm->guardar('traza', 'traza de prueba');
     $b = $alm->guardar('traza', 'traza de prueba');
@@ -53,4 +53,13 @@ prueba('PER-04', 'Almacén en disco: direccionado por contenido, idempotente y v
     igual([false, false], [$alm->confirmada($a->sha256), $alm->confirmada('../../etc/passwd')], 'alterada y ruta manipulada');
     $roto = new AlmacenEvidenciasEnDisco(__FILE__);                                 // un archivo como directorio: no se puede escribir
     lanza(AlmacenNoDisponible::class, static fn () => $roto->guardar('log', 'x'), 'directorio imposible');
+});
+
+prueba('PER-05', 'Almacén en disco (semana 6): un artefacto corrupto se REPARA al volver a guardarlo con los bytes correctos; no queda bloqueado para siempre', function (): void {
+    $dir = sys_get_temp_dir() . '/e2e-almacen-' . uniqid('', true);
+    $alm = new AlmacenEvidenciasEnDisco($dir);
+    $a = $alm->guardar('traza', 'traza original');
+    file_put_contents($dir . '/' . substr($a->sha256, 0, 2) . '/' . $a->sha256, 'corrompida');
+    igual(false, $alm->confirmada($a->sha256), 'corrompida');
+    igual([$a->sha256, true], [$alm->guardar('traza', 'traza original')->sha256, $alm->confirmada($a->sha256)], 'reparada');
 });

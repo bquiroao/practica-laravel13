@@ -43,6 +43,10 @@ final class TomasPdo implements RepositorioTomas, FuenteClinica {
         }
     }
 
+    public function existe(string $tomaId): bool {
+        return $this->leer('SELECT 1 FROM tomas_signos_vitales WHERE id = :id', [':id' => $tomaId]) !== [];
+    }
+
     public function deEpisodio(string $episodioId): array {
         $tomas = [];
         foreach ($this->leer('SELECT t.id, t.tomada_en, t.autor_id, m.tipo, m.valor, m.clasificacion FROM tomas_signos_vitales t

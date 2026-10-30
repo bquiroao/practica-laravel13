@@ -1,0 +1,22 @@
+﻿[
+    {
+        "branch":  "semana-15-ingreso-resultados-pruebas-mercedes-lopez",
+        "exit":  0,
+        "output":  "REPRODUCCION: PASS indica defecto observado, no corregido.\nPASS D01 actor no autorizado aceptado sin verificar rol hospital\nPASS D02 precision canonical cambia valor persistido\nPASS D03 excepcion de persistencia escapa del servicio\n3 casos, 0 fallidos."
+    },
+    {
+        "branch":  "semana-15-nativephp-pruebas-mercedes-lopez",
+        "exit":  0,
+        "output":  "MODO REPRODUCCION: PASS significa defecto observado, no corregido.\nPASS D01 gateway lanza y el flujo no devuelve error explicito\nPASS D02 notificador lanza y no devuelve capacidad no disponible\n2 casos, 0 fallidos."
+    },
+    {
+        "branch":  "semana-15-recepcion-muestras-pruebas-mercedes-lopez",
+        "exit":  0,
+        "output":  "REPRODUCCION: PASS indica defecto observado, no corregido.\nPASS D01 orden inexistente aceptada sin verificacion externa\nPASS D02 identificador solo espacios aceptado\nPASS D03 rechazo con motivo solo espacios aceptado por modelo\n3 casos, 0 fallidos."
+    },
+    {
+        "branch":  "semana-15-usuarios-tenants-pruebas-mercedes-lopez",
+        "exit":  0,
+        "output":  "REPRODUCCION: PASS indica defecto observado, no corregido.\nPASS D01 sesion con campos solo blancos aceptada\nPASS D02 emisor devuelve token de otro tenant y login informa exito\n2 casos, 0 fallidos."
+    }
+]

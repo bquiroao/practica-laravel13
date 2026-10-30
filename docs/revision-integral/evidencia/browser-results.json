@@ -1,0 +1,116 @@
+﻿[
+    {
+        "branch":  "semana-10-nativephp-movilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-10-nativephp-movilidad-mercedes-lopez\\docs\\modulos\\investigacion-prototipo-nativephp\\semana-10\\verificacion\\medir.cjs",
+        "exit":  0,
+        "output":  "PASS 15 SVG en 320/375/430: textos dentro del lienzo; 5 capturas a 375. Sin prueba de interacción ni SO nativo."
+    },
+    {
+        "branch":  "semana-10-usuarios-tenants-movilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-10-usuarios-tenants-movilidad-mercedes-lopez\\docs\\modulos\\gestion-usuarios-tenants-autenticacion\\semana-10\\verificacion\\medir.cjs",
+        "exit":  0,
+        "output":  "PASS 15 SVG en 320/375/430: textos dentro del lienzo; 5 capturas a 375. Sin prueba de interacción, JWT ni revocación real."
+    },
+    {
+        "branch":  "semana-11-ingreso-resultados-prototipo-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-11-ingreso-resultados-prototipo-mercedes-lopez\\docs\\modulos\\ingreso-resultados-laboratorio\\semana-11\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil 375px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil-320 320px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil-430 430px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS."
+    },
+    {
+        "branch":  "semana-11-nativephp-prototipo-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-11-nativephp-prototipo-mercedes-lopez\\docs\\modulos\\investigacion-prototipo-nativephp\\semana-11\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil 375px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil-320 320px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil-430 430px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final."
+    },
+    {
+        "branch":  "semana-11-ordenes-emr-prototipo-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-11-ordenes-emr-prototipo-mercedes-lopez\\docs\\modulos\\ordenes-laboratorio-emr\\semana-11\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil 375px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil-320 320px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil-430 430px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS."
+    },
+    {
+        "branch":  "semana-11-usuarios-tenants-prototipo-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-11-usuarios-tenants-prototipo-mercedes-lopez\\docs\\modulos\\gestion-usuarios-tenants-autenticacion\\semana-11\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil 375px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil-320 320px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil-430 430px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS."
+    },
+    {
+        "branch":  "semana-11-validacion-resultados-prototipo-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-11-validacion-resultados-prototipo-mercedes-lopez\\docs\\modulos\\validacion-resultados-bioquimico\\semana-11\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366x900: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.\nPASS movil 375x812: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.\nPASS movil-320 320x812: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.\nPASS movil-430 430x900: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS."
+    },
+    {
+        "branch":  "semana-12-ingreso-resultados-evaluacion-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-12-ingreso-resultados-evaluacion-mercedes-lopez\\docs\\modulos\\ingreso-resultados-laboratorio\\semana-12\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil 375px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil-320 320px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS.\nPASS movil-430 430px: precisión inválida, decimal coma, fuera de rango pendiente, motivo obligatorio, volver conserva datos, historial v1-v2, fallo sin éxito, conflicto, validado bloqueado, rol solo lectura; sin errores JS."
+    },
+    {
+        "branch":  "semana-12-nativephp-evaluacion-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-12-nativephp-evaluacion-mercedes-lopez\\docs\\modulos\\investigacion-prototipo-nativephp\\semana-12\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil 375px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil-320 320px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final.\nPASS movil-430 430px: blanco invalido, consulta actual, permiso denegado sin ocultar dato, caida con snapshot obsoleto, aislamiento snapshot por ID, orden inexistente, viabilidad pendiente, rol bloqueado; sin errores JS ni desbordamiento en vista final."
+    },
+    {
+        "branch":  "semana-12-ordenes-emr-evaluacion-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-12-ordenes-emr-evaluacion-mercedes-lopez\\docs\\modulos\\ordenes-laboratorio-emr\\semana-12\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil 375px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil-320 320px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS.\nPASS movil-430 430px: seleccion vacia, volver conserva pruebas, emision completa, catalogo indisponible sin parcial, fallo sin orden, timeout sin exito anticipado, comprobacion sin duplicado, consulta sin emision y acceso denegado; sin errores JS."
+    },
+    {
+        "branch":  "semana-12-usuarios-tenants-evaluacion-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-12-usuarios-tenants-evaluacion-mercedes-lopez\\docs\\modulos\\gestion-usuarios-tenants-autenticacion\\semana-12\\verificacion\\run.cjs",
+        "exit":  0,
+        "output":  "PASS desktop 1366px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil 375px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil-320 320px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS.\nPASS movil-430 430px: rol denegado, alta tenant ajeno, alta H1, clave vacia/incorrecta, login H2 rechazado, sesion H1, acceso cruzado, fallo logout mantiene activa, cierre confirmado bloquea acceso; sin errores JS."
+    },
+    {
+        "branch":  "semana-5-nativephp-api-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-5-nativephp-api-mercedes-lopez\\docs\\modulos\\investigacion-prototipo-nativephp\\semana-05\\verificacion\\validate.cjs",
+        "exit":  0,
+        "output":  "PASS OpenAPI 3.1.0: referencias y estructura validadas.\nPASS límites: una ruta GET, sesión requerida, errores explícitos, estados del ejemplo, campos mínimos y no-store.\nALCANCE: validación estática; no ejecuta endpoint, autorización ni runtime NativePHP."
+    },
+    {
+        "branch":  "semana-5-ordenes-emr-api-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-5-ordenes-emr-api-mercedes-lopez\\docs\\modulos\\ordenes-laboratorio-emr\\semana-05\\verificacion\\validate.cjs",
+        "exit":  0,
+        "output":  "PASS OpenAPI 3.1.0: estructura/referencias válidas; GET/POST, sesión, sin actor en cuerpo, idempotencia y errores explícitos. Validación estática, no servidor operativo."
+    },
+    {
+        "branch":  "semana-9-ingreso-resultados-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-ingreso-resultados-accesibilidad-mercedes-lopez\\docs\\modulos\\ingreso-resultados-laboratorio\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "01-bandeja-pendientes.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 4; controles 0\n02-captura-resultado.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 3; controles 0\n03-confirmar-captura.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 4; controles 0\n04-correccion-controlada.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 5; controles 0\n05-resultado-registrado.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 4; controles 0\n06-errores-recuperables.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 4; controles 0"
+    },
+    {
+        "branch":  "semana-9-nativephp-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-nativephp-accesibilidad-mercedes-lopez\\docs\\modulos\\investigacion-prototipo-nativephp\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "01-inicio.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n02-destino.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n03-confirmacion.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n04-resultado.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n05-recuperacion.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n06-evidencia.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0"
+    },
+    {
+        "branch":  "semana-9-ordenes-emr-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-ordenes-emr-accesibilidad-mercedes-lopez\\docs\\modulos\\ordenes-laboratorio-emr\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "Inspección de fuentes SVG, 2026-10-28. No prueba de controles HTML ni dictamen WCAG.\n01-inicio-expediente.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\n02-seleccionar-pruebas.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\n03-confirmar-orden.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\n04-exito-trazabilidad.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\n05-seguimiento.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\n06-error-recuperable.svg: lienzo 1100x700; role img=true; title/desc=true; tabindex=false; controles nativos HTML=false\nContraste #ffffff/#126574: 6.69:1\nContraste #243f47/#ffffff: 11.19:1\nContraste #3c5962/#f2f6f7: 6.90:1\nContraste #526b73/#f2f6f7: 5.20:1\nContraste #d0e2e6/#153e49: 8.64:1"
+    },
+    {
+        "branch":  "semana-9-recepcion-muestras-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-recepcion-muestras-accesibilidad-mercedes-lopez\\docs\\modulos\\recepcion-muestras\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "01-iniciar-recepcion.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0\n02-verificar-muestra.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0\n03-confirmar-aceptacion.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0\n04-rechazar-muestra.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0\n05-confirmacion-custodia.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0\n06-errores-recuperables.svg: contraste cabecera 13.57:1; textos fuera del lienzo 0; controles 0"
+    },
+    {
+        "branch":  "semana-9-usuarios-tenants-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-usuarios-tenants-accesibilidad-mercedes-lopez\\docs\\modulos\\gestion-usuarios-tenants-autenticacion\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "01-usuarios.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n02-invitacion.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n03-credencial.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n04-login.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n05-sesion.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0\n06-recuperacion.svg: cabecera rgb(255, 255, 255) contraste 11.56:1; anotacion 10.87:1; textos fuera lienzo 0; controles 0"
+    },
+    {
+        "branch":  "semana-9-validacion-resultados-accesibilidad-mercedes-lopez",
+        "file":  "C:\\Users\\azul1\\OneDrive\\Desktop\\shi-semana-9-validacion-resultados-accesibilidad-mercedes-lopez\\docs\\modulos\\validacion-resultados-bioquimico\\semana-09\\verificacion\\inspeccionar.cjs",
+        "exit":  0,
+        "output":  "01-bandeja-pendientes.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0\n02-revision-contexto.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0\n03-confirmar-validacion.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0\n04-rechazo-motivo.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0\n05-decision-registrada.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0\n06-error-recuperable.svg: cabecera rgb(23, 43, 77) contraste 1.18:1; numero 2.07:1; textos fuera lienzo 1; controles 0"
+    }
+]

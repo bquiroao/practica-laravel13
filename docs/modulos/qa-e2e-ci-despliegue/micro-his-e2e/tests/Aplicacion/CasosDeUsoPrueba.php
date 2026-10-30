@@ -64,7 +64,7 @@ prueba('APP-05', 'Las reglas se revisan ANTES de tocar el almacén: un resultado
     $e->reportar($id, 'E2E-104', 'FALLA');
     $antes = array_keys($e->almacen->contenido);
     $dup = $e->reportar($id, 'E2E-104', 'FALLA', 1, [['tipo' => 'captura', 'bytes' => 'captura distinta del segundo reporte']]);
-    igual([Salida::CONFLICTO, 'RESULTADO_YA_REPORTADO', $antes], [$dup->tipo, $dup->codigo, array_keys($e->almacen->contenido)], 'duplicado sin huérfanos');
+    igual([Salida::CONFLICTO, 'ESCENARIO_YA_REPORTADO', $antes], [$dup->tipo, $dup->codigo, array_keys($e->almacen->contenido)], 'duplicado sin huérfanos');
 });
 
 prueba('APP-06', 'R-13: sin permiso → 403 (el pipeline no evalúa el gate ni planifica); otro tenant no ve la versión (404)', function (): void {
@@ -110,4 +110,18 @@ prueba('APP-10', 'El gate no se evalúa sobre una ejecución abortada (409) y un
     igual('EJECUCION_ABORTADA', $e->uc['cerrar']->ejecutar('pipeline-ci', 'hosp-norte', $id, 'el runner se quedó sin memoria')->codigo, 'abortar');
     igual([Salida::CONFLICTO, 'EJECUCION_NO_COMPLETADA'], [($g = $e->uc['gate']->ejecutar('resp-release', 'hosp-norte', '2.4.0', $id))->tipo, $g->codigo], 'gate');
     igual('ESTADO_NO_PERMITE_CERRAR', $e->uc['cerrar']->ejecutar('pipeline-ci', 'hosp-norte', $id)->codigo, 'segundo cierre');
+});
+
+prueba('APP-11', 'Semana 12 (cambio B-01): la vista previa del gate da la MISMA decisión que el registro hecho a la misma hora y no guarda nada (ni evaluación, ni estado, ni traza)', function (): void {
+    $e = new Escenario();
+    $id = $e->ejecucionEnCurso();
+    $e->completar($id, ['E2E-102' => ['PASA', 2]]);
+    $antes = $e->auditoriaReal()->acciones();
+    $vista = $e->uc['gate']->previsualizar('resp-release', 'hosp-norte', '2.4.0', $id);
+    igual([Salida::OK, 'GATE_PREVISTO', 'RECHAZADO'], [$vista->tipo, $vista->codigo, $vista->datos['decision']], 'vista previa');
+    igual([$antes, 'CANDIDATA', 0], [$e->auditoriaReal()->acciones(), $e->uc['trazabilidad']->ejecutar('dev-ana', 'hosp-norte', '2.4.0')->datos['estado'],
+        count($e->uc['trazabilidad']->ejecutar('dev-ana', 'hosp-norte', '2.4.0')->datos['evaluaciones'])], 'sin efectos');
+    $real = $e->uc['gate']->ejecutar('resp-release', 'hosp-norte', '2.4.0', $id);
+    igual([$vista->datos['decision'], $vista->datos['reglas'], $vista->datos['causas']], [$real->datos['decision'], $real->datos['reglas'], $real->datos['causas']], 'igual al registro');
+    igual(Salida::DENEGADO, $e->uc['gate']->previsualizar('pipeline-ci', 'hosp-norte', '2.4.0', $id)->tipo, 'mismo permiso que evaluar');
 });

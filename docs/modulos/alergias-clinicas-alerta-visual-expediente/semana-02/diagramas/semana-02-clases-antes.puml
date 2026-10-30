@@ -1,0 +1,21 @@
+@startuml semana-02-clases-antes
+' ANTES: una sola clase decide todas las reglas del nivel de alerta
+skinparam classAttributeIconSize 0
+class CalculadorAlertaAntes {
+  + calcular(alergias): string
+  --
+  switch por severidad
+  if reacción contiene «anafila»
+  (cada regla nueva = editar calcular())
+}
+class "Vista del expediente" as Vista
+class "Registro de alergia" as Registro
+Vista --> CalculadorAlertaAntes : usa
+Registro --> CalculadorAlertaAntes : usa
+note right of CalculadorAlertaAntes
+  Cerrado a extensión, abierto a modificación:
+  agregar «anafilaxia» obligó a tocar el mismo
+  método que ya estaba probado. Cada cambio
+  vuelve a poner en riesgo las reglas viejas.
+end note
+@enduml

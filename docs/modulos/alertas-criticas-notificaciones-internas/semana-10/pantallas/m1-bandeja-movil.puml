@@ -1,0 +1,17 @@
+@startsalt m1-bandeja-movil
+{+
+  {* ☰ | <b>Alertas</b> | 2 }
+  ==
+  {/ <b>Pendientes</b> | Acusadas }
+  ==
+  {+ <b>‼ CRITICA</b> · vence 09:12
+     PAC-00451 · MED-INT
+     Potasio 6.8 mmol/L
+     [<b>Acusar</b>] }
+  {+ <b>! ALTA</b> · nivel 1 · vence 24:40
+     PAC-00452 · PED
+     [Ver detalle] }
+  ==
+  Actualizado 10:03 · ⟳
+}
+@endsalt

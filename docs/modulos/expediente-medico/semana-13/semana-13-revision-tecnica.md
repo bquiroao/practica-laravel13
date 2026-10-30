@@ -105,4 +105,6 @@ El **tipo** es omisión (falta algo pedido), error (hace algo distinto de lo ped
 
 Respuestas de la autorrevisión: C-01 a C-05, C-07, C-08 y C-14 «sí», confirmadas por las pruebas en verde. C-04 se confirma porque ningún puerto ni consulta hace `DELETE`. C-10 «no aplica»: la semana 3 dejó el acceso de emergencia para después, según sus limitaciones. C-15 «no aplica»: las rutas HTTP llegan en la semana 4, aún pendiente. Hay cuatro mayores, así que, según S-04, la inspección se repite completa después de las correcciones.
 
+**Reverificación tras integrar la semana 4** (29/10/2026, `develop` en `1595e00`). La semana 4 cambió la fábrica `crearControlador` y movió los códigos HTTP a `VistaJson`, así que `verificar-entrada.php` se adaptó a esa API. Su salida es idéntica: los cinco hallazgos siguen reproducidos con el código actual, y C-15 (rutas) ya se puede revisar contra `Rutas.php` en la reunión.
+
 **Bibliografía:** IEEE (2008). *IEEE Std 1028-2008: Standard for Software Reviews and Audits* · Fagan, M. E. (1976). Design and code inspections to reduce errors in program development. *IBM Systems Journal, 15*(3) · Pressman, R. S. y Maxim, B. R. (2020). *Software Engineering: A Practitioner's Approach* (9.ª ed.). McGraw-Hill.

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Signos vitales: pantallas móviles de la semana 10</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.4 Arial,sans-serif;color:#222}
+.wf{width:700px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 10px;font-size:16px}.row{display:flex;gap:16px;align-items:flex-start}
+.tel{width:360px;min-height:560px;border:3px solid #333;border-radius:18px;background:#fff;display:flex;flex-direction:column;overflow:hidden;flex:none}
+.top{background:#333;color:#fff;padding:10px 14px;font-weight:bold;font-size:16px}.cuerpo{padding:12px 14px;flex:1}
+.pie{border-top:1px solid #bbb;padding:10px 14px;background:#f3f3f3}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #333;border-radius:6px;font:bold 16px Arial;margin:6px 0;background:#fff}.pri{background:#333;color:#fff}.off{border-color:#6b6b6b;color:#6b6b6b}
+.campo{display:flex;align-items:center;justify-content:space-between;height:48px;border:2px solid #666;border-radius:6px;padding:0 10px;font-size:18px;background:#fff}.err{border:3px solid #c0392b}
+.et{font-size:16px;font-weight:bold;margin-top:10px}.hint{color:#555;font-size:14px}.t{color:#a93226;font-size:14px;font-weight:bold}
+.card{border:1px solid #888;border-radius:6px;padding:8px 10px;margin:8px 0}.chip{display:inline-block;border:1px solid #666;border-radius:12px;padding:3px 9px;margin:2px;font-size:14px}.crit{background:#333;color:#fff;font-weight:bold}.anor{border-style:dashed;font-weight:bold}
+.ban{border:3px solid #333;padding:10px;margin:8px 0;font-size:16px}.ban.w{border-style:dashed}
+i{display:inline-block;width:20px;height:20px;border-radius:50%;background:#a93226;color:#fff;font:bold 14px/20px Arial;text-align:center;font-style:normal;margin-right:4px}
+.n{font-size:14px;max-width:260px}.n ol{margin:0;padding-left:20px}.n li{margin-bottom:6px}
+</style></head><body>
+
+<section class="wf" id="m1"><h2>M1 · Tomas del paciente (320 a 430 px)</h2><div class="row">
+<div class="tel"><div class="top">Signos vitales</div><div class="cuerpo">
+<div><i>1</i><b>M. P. M.</b> · P-000101 · Episodio activo</div>
+<div class="card"><b>28/10 08:00</b> · enf-ana<br><span class="chip crit">▲ FC 135 lpm · CRÍTICA</span><span class="chip">✓ SpO2 97 % · Normal</span><span class="chip">✓ Temp 36.8 °C · Normal</span></div>
+<div class="card"><b>27/10 20:00</b> · enf-ana<br><span class="chip anor">△ PAS 150 mmHg · ANORMAL</span><span class="chip">✓ PAD 80 mmHg · Normal</span><span class="chip">? FR 18 rpm · Sin rango</span></div>
+<div class="hint"><i>2</i>2 tomas · más reciente primero</div></div>
+<div class="pie"><i>3</i><div class="btn pri">Registrar toma</div></div></div>
+<div class="n"><ol><li>Paciente por iniciales y código; una sola línea</li><li>La tabla de escritorio pasa a tarjetas: una toma por tarjeta, con fecha y quién la registró arriba</li><li>Botón principal fijo al pie, al alcance del pulgar (solo enfermería)</li><li>Cada valor lleva unidad, texto y símbolo; si no cabe en una línea, baja a la siguiente</li></ol></div></div></section>
+
+<section class="wf" id="m2"><h2>M2 · Registrar toma (un signo por fila)</h2><div class="row">
+<div class="tel"><div class="top">Registrar toma · M. P. M.</div><div class="cuerpo">
+<div class="hint">Registra: enf-ana · Hospital 1</div>
+<div class="et"><i>1</i>Presión sistólica (mmHg)</div><div class="campo" data-inputmode="decimal"><span>&nbsp;</span><span class="hint">mmHg</span></div><div class="hint">Rango posible: 40 a 300</div>
+<div class="et">Presión diastólica (mmHg)</div><div class="campo" data-inputmode="decimal"><span>&nbsp;</span><span class="hint">mmHg</span></div><div class="hint">Rango posible: 20 a 200</div>
+<div class="et">Frecuencia cardiaca (lpm)</div><div class="campo err" data-inputmode="decimal"><span>350</span><span class="hint">lpm</span></div><div class="t"><i>2</i>FC: 350 lpm no es posible (20 a 300). Revise el valor.</div><div class="hint">Rango posible: 20 a 300</div>
+<div class="et">Frecuencia respiratoria (rpm)</div><div class="campo" data-inputmode="decimal"><span>&nbsp;</span><span class="hint">rpm</span></div><div class="hint">Rango posible: 1 a 80</div>
+<div class="et">Temperatura (°C)</div><div class="campo" data-inputmode="decimal"><span>&nbsp;</span><span class="hint">°C</span></div><div class="hint">Rango posible: 25 a 45</div>
+<div class="et">Saturación de oxígeno (%)</div><div class="campo" data-inputmode="decimal"><span>&nbsp;</span><span class="hint">%</span></div><div class="hint">Rango posible: 50 a 100</div></div>
+<div class="pie"><i>3</i><div class="btn pri">Revisar</div></div></div>
+<div class="n"><ol><li>La tabla de 4 columnas pasa a una columna: etiqueta con unidad, campo de 48 px y rango debajo</li><li>El error marca el campo (borde grueso) y escribe el mensaje justo debajo; no solo color</li><li>«Revisar» queda fijo al pie y no se desactiva; al pulsarlo lleva al primer error</li><li>Teclado numérico con punto decimal en todos los campos</li></ol></div></div></section>
+
+<section class="wf" id="m3"><h2>M3 · Revisión y confirmación</h2><div class="row">
+<div class="tel"><div class="top">Revise antes de guardar</div><div class="cuerpo">
+<div class="hint"><i>1</i>Una toma guardada no se edita ni se borra.</div>
+<div class="card"><b>FC</b> 135 lpm<br><b>SpO2</b> 97 %<br><b>Temp</b> 36.8 °C</div>
+<div class="hint"><i>2</i>3 signos. Los demás quedan sin valor y no se envían.</div></div>
+<div class="pie"><div class="btn pri">Confirmar y guardar</div><div class="btn">Corregir valores</div></div></div>
+<div class="n"><ol><li>Solo los signos con valor, cada uno con su unidad</li><li>Los botones van apilados y a ancho completo; el que guarda va primero</li><li>Al confirmar, ambos botones se desactivan y dice «Guardando la toma…»</li></ol></div></div></section>
+
+<section class="wf" id="m4"><h2>M4 · Resultado con alerta crítica</h2><div class="row">
+<div class="tel"><div class="top">Toma guardada</div><div class="cuerpo">
+<div class="ban"><i>1</i><b>▲ CRÍTICA · FC 135 lpm</b><br>Se generó una alerta. Avise al médico.</div>
+<div class="card"><span class="chip crit">▲ FC 135 lpm · CRÍTICA</span><span class="chip">✓ SpO2 97 % · Normal</span><span class="chip">✓ Temp 36.8 °C · Normal</span></div>
+<div class="ban w"><i>2</i>El aviso a M21 quedó pendiente (RF-07). La toma sí se guardó; avise al médico por otro medio.</div></div>
+<div class="pie"><div class="btn pri">Ver alertas</div><div class="btn">Volver a las tomas</div></div></div>
+<div class="n"><ol><li>El mensaje de éxito va primero; el nivel crítico se dice con texto y símbolo, no solo color</li><li>Solo si M21 no respondió: el aviso dice qué hacer, con borde punteado para distinguirlo (si respondió, no aparece)</li><li>Dos salidas, a ancho completo</li></ol></div></div></section>
+
+<section class="wf" id="m5"><h2>M5 · Sin conexión al guardar</h2><div class="row">
+<div class="tel"><div class="top">No se guardó la toma</div><div class="cuerpo">
+<div class="ban"><i>1</i><b>Sin conexión.</b> La toma NO se guardó. Los valores siguen en esta pantalla.</div>
+<div class="card"><b>FC</b> 135 lpm · <b>SpO2</b> 97 % · <b>Temp</b> 36.8 °C</div>
+<div class="ban w"><i>2</i>No cierre esta pantalla: si sale, los valores se pierden. Anótelos en papel si no vuelve la conexión.</div></div>
+<div class="pie"><div class="btn pri">Reintentar</div><div class="btn">Corregir valores</div></div></div>
+<div class="n"><ol><li>Estado explícito «NO se guardó»; nunca queda dudoso</li><li>Los valores se conservan solo en la pantalla (no en el almacenamiento del navegador)</li><li>Reintento manual, no automático, para no guardar dos veces la misma toma</li></ol></div></div></section>
+</body></html>

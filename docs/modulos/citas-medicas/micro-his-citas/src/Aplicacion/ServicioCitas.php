@@ -10,6 +10,7 @@ interface RepositorioCitas
 {
     public function medicoVigente(string $medico, string $especialidad): bool;                     // R-04, R-05
     public function cruce(string $medico, string $paciente, int $inicio, int $fin): ?string;       // 'medico', 'paciente' o null
+    /** Inserta solo si sigue sin cruce, en la misma operación; si otra solicitud ganó el horario, lanza HorarioTomado (D7). */
     public function guardar(string $medico, string $paciente, string $especialidad, Horario $h, string $motivo): int;
     public function estado(int $id): ?string;
     /** Cambia el estado solo si sigue siendo $de; guarda el motivo de cancelación (R-10). false = cambió antes. */
@@ -19,6 +20,8 @@ interface Reloj { public function ahora(): int; }
 
 /** Fallo técnico de la base: no es una regla de negocio. */
 final class ErrorPersistencia extends \RuntimeException {}
+/** La base no aceptó la cita: entre la consulta de cruces y el INSERT otra solicitud tomó el horario (semana 6). */
+final class HorarioTomado extends \RuntimeException {}
 
 /** Casos de uso CU-01 a CU-03 de la semana 1, con CU-04 (validar disponibilidad) incluido en solicitar. */
 final class ServicioCitas
@@ -33,7 +36,8 @@ final class ServicioCitas
         $cruce = $this->repo->cruce($medico, $paciente, $inicio, $fin);
         if ($cruce === 'medico') throw new ReglaDeDominio('E4', 'El médico ya tiene una cita en ese horario.');
         if ($cruce === 'paciente') throw new ReglaDeDominio('E5', 'El paciente ya tiene una cita en ese horario.');
-        return $this->repo->guardar($medico, $paciente, $especialidad, $horario, $motivo);
+        try { return $this->repo->guardar($medico, $paciente, $especialidad, $horario, $motivo); }
+        catch (HorarioTomado) { throw new ReglaDeDominio('E6', 'Otra persona tomó el horario: elige otro.'); }
     }
 
     public function confirmar(int $id): void { $this->cambiar($id, EstadoCita::Confirmada, null); }

@@ -1,0 +1,62 @@
+@startuml isp-despues
+' Catálogo de medicamentos - Semana 2 - ISP: DESPUÉS
+title DESPUÉS: interfaces de rol (ISP)
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Dominio del catálogo" {
+  interface BusquedaCatalogo {
+    +buscarVigentes(hospitalId, texto, fecha)
+    +vigentePorCodigo(hospitalId, codigo, fecha)
+  }
+  interface HistorialCatalogo {
+    +historial(hospitalId, codigo)
+  }
+  interface ControlEquivalencia {
+    +equivalenteVigente(hospitalId, clave, desde)
+  }
+  interface EscrituraCatalogo {
+    +siguienteCodigo(hospitalId)
+    +agregar(medicamento)
+    +reemplazarVigente(anteriorCerrada, nueva)
+    +cerrar(cerrada)
+    +eliminar(hospitalId, codigo)
+  }
+  interface RepositorioMedicamentos
+  interface ConsultaUsoPrescripciones <<puerto>> {
+    +fueUsado(hospitalId, codigo)
+  }
+}
+
+RepositorioMedicamentos -up-|> BusquedaCatalogo
+RepositorioMedicamentos -up-|> HistorialCatalogo
+RepositorioMedicamentos -up-|> ControlEquivalencia
+RepositorioMedicamentos -up-|> EscrituraCatalogo
+
+class BuscarMedicamentosVigentes
+class ConsultarHistorial
+class RegistrarMedicamento
+class EliminarRegistroSinUso
+
+BuscarMedicamentosVigentes ..> BusquedaCatalogo
+ConsultarHistorial ..> HistorialCatalogo
+RegistrarMedicamento ..> ControlEquivalencia
+RegistrarMedicamento ..> EscrituraCatalogo
+EliminarRegistroSinUso ..> ConsultaUsoPrescripciones
+EliminarRegistroSinUso ..> EscrituraCatalogo
+
+class RepositorioMedicamentosPdo
+class RepositorioMedicamentosEnMemoria
+RepositorioMedicamentos <|.down. RepositorioMedicamentosPdo
+RepositorioMedicamentos <|.down. RepositorioMedicamentosEnMemoria
+
+note bottom of ConsultaUsoPrescripciones
+  Lo implementa un adaptador hacia
+  prescripciones-alergias (pendiente
+  de acordar con su dueño).
+end note
+note left of RepositorioMedicamentos
+  Precio y existencias ya no están:
+  pertenecen a farmacia/inventario.
+end note
+@enduml

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MicroHis\Citas\Persistencia;
 
-use MicroHis\Citas\Aplicacion\RepositorioCitas;
+use MicroHis\Citas\Aplicacion\{HorarioTomado, RepositorioCitas};
 use MicroHis\Citas\Dominio\Horario;
 
 /** Adaptador en memoria del puerto RepositorioCitas: cumple el mismo contrato que RepositorioPdo, sin base. Para pruebas y demos. */
@@ -28,6 +28,7 @@ final class RepositorioEnMemoria implements RepositorioCitas
 
     public function guardar(string $medico, string $paciente, string $especialidad, Horario $h, string $motivo): int
     {
+        if ($this->cruce($medico, $paciente, $h->inicio, $h->fin) !== null) throw new HorarioTomado('Otra solicitud tomó el horario.');   // misma barrera que PDO
         $this->citas[count($this->citas) + 1] = ['medico' => $medico, 'paciente' => $paciente, 'inicio' => $h->inicio, 'fin' => $h->fin, 'estado' => 'scheduled'];
         return count($this->citas);
     }
