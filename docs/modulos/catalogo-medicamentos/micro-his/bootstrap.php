@@ -15,9 +15,12 @@ use Catalogo\Application\RegistrarMedicamento;
 use Catalogo\Application\RegistrarNuevaVersion;
 use Catalogo\Domain\Puertos\Reloj;
 use Catalogo\Persistence\ConexionPdo;
+use Catalogo\Persistence\DatosEjemplo;
 use Catalogo\Persistence\GeneradorUuidV4;
 use Catalogo\Persistence\RelojSistema;
+use Catalogo\Persistence\RepositorioMedicamentosEnMemoria;
 use Catalogo\Persistence\RepositorioMedicamentosPdo;
+use Catalogo\Persistence\UsoPrescripcionesEnMemoria;
 use Catalogo\Persistence\UsoPrescripcionesPdo;
 
 require_once __DIR__ . '/autoload.php';
@@ -27,13 +30,20 @@ require_once __DIR__ . '/autoload.php';
  *   nueva_version: RegistrarNuevaVersion, baja: DarDeBajaMedicamento, historial: ConsultarHistorial,
  *   eliminar: EliminarRegistroSinUso, reloj: Reloj}
  */
-function crearAplicacion(?array $config = null, ?Reloj $reloj = null): array
+function crearAplicacion(?array $config = null, ?Reloj $reloj = null, string $almacen = 'pdo'): array
 {
     $config ??= require __DIR__ . '/config.php';
-    $pdo = ConexionPdo::crear($config['bd'], $config['bd']['base']);
-    $repo = new RepositorioMedicamentosPdo($pdo);
-    $uso = new UsoPrescripcionesPdo($pdo);
     $ids = new GeneradorUuidV4();
+    if ($almacen === 'memoria') {
+        // Mismo contrato que PDO (pruebas/contrato): se cambia el adaptador sin tocar casos de uso.
+        $repo = new RepositorioMedicamentosEnMemoria();
+        DatosEjemplo::cargar($repo, $ids);
+        $uso = new UsoPrescripcionesEnMemoria();
+    } else {
+        $pdo = ConexionPdo::crear($config['bd'], $config['bd']['base']);
+        $repo = new RepositorioMedicamentosPdo($pdo);
+        $uso = new UsoPrescripcionesPdo($pdo);
+    }
     $reloj ??= new RelojSistema($config['zona_horaria']);
 
     return [
