@@ -3,6 +3,9 @@
 // R-01 (fórmula), R-02 («no aplica»), R-05 (hora del corte), R-06 (aviso a los 15 min) y R-09 (consolidar no cambia camas).
 const ESTADOS = { disponible: 'Disponibles', ocupada: 'Ocupadas', mantenimiento: 'Mantenimiento', inactiva: 'Inactivas' };
 const SALAS = { A: ['Medicina interna', [5, 6, 1, 0]], B: ['Cirugía', [0, 6, 2, 0]], C: ['Pediatría', [0, 0, 3, 1]] };
+// Semana 12 (B-08): camas cuyo estado no coincide con sus estancias abiertas (R-04, semana 6) y dónde se corrige.
+const INCONSISTENTES = { A: [['A/104', 'ocupada con 2 estancias abiertas: dos pacientes en una cama', 'Admisión', 'cerrar la estancia que sobra']],
+  B: [['B/203', 'disponible con una estancia abierta', 'Admisión', 'cerrar la estancia o pasar la cama a ocupada']] };
 const ROLES = { jefatura: 'jefatura de enfermería', admin: 'administrador' };
 const FUENTE = 'catálogo de camas y estancias de admisión';
 let ahora = 10 * 60 + 39; // reloj del prototipo: 10:39; avanza un minuto al generar un corte
@@ -50,7 +53,18 @@ const vistas = {
   sala: (id) => (SALAS[id] ? [`Sala ${id}`, `<p><a href="#salas">‹ Ocupación</a></p><h1 tabindex="-1">${id} · ${SALAS[id][0]}</h1>${cabecera()}
     <p><strong>${ocupacion(id)}</strong><br><small>ocupadas ÷ (disponibles + ocupadas) (R-01)</small></p>
     <table><tbody>${Object.entries(ESTADOS).map(([e, t]) => `<tr><td>${t}</td><td>${cuentas(id)[e]}</td></tr>`).join('')}</tbody></table>
-    <p><small>Mantenimiento e inactivas no cuentan en el porcentaje.</small></p>`, avisarViejo] : vistas.salas()),
+    <p><small>Mantenimiento e inactivas no cuentan en el porcentaje.</small></p>
+    <h2>Camas por revisar (R-04)</h2>${(INCONSISTENTES[id] ?? []).length ? `<ul>${INCONSISTENTES[id].map(([cama, motivo, donde]) =>
+      `<li><strong>${cama}</strong>: ${motivo}. <a href="#corregir/${id}/${cama.slice(2)}">Dónde se corrige: ${donde}, cama ${cama}</a></li>`).join('')}</ul>`
+      : '<p>Ninguna: el estado de cada cama coincide con sus estancias abiertas.</p>'}`, avisarViejo] : vistas.salas()),
+
+  corregir: (id, codigo) => {
+    const f = (INCONSISTENTES[id] ?? []).find(([cama]) => cama === `${id}/${codigo}`);
+    if (!f) return vistas.salas();
+    return [`Corregir ${f[0]}`, `<p><a href="#sala/${id}">‹ Sala ${id}</a></p><h1 tabindex="-1">La cama ${f[0]} se corrige en ${f[2]}</h1>
+      <p>Qué pasa: ${f[1]}. Qué hacer: ${f[3]}.</p><p>El tablero solo marca la diferencia y no cambia ninguna cama (R-09).</p>
+      <div class="acciones"><a class="boton" href="#sala/${id}">Volver a la sala ${id}</a></div>`];
+  },
 
   corte: () => (rol !== 'admin' ? vistas.salas() : ['Generar corte', `<p><a href="#salas">‹ Ocupación</a></p>
     <h1 tabindex="-1">Generar un corte ahora</h1><p>Último corte: ${hora(minutoCorte())}. Se leerán las camas y estancias actuales.</p>

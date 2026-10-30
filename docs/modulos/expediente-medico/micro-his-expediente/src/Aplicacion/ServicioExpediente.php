@@ -18,6 +18,8 @@ interface IndiceCentral
     public function expedientesExternos(string $idGlobal, string $hospital): array;   // [['hospital', 'expediente'], ...] de otros hospitales
 }
 interface Auditoria { public function registrar(string $profesional, string $operacion, string $paciente, string $resultado): void; }
+/** Interfaz Repository de la base HOSPITAL (semana 4): expedientes y auditoría del tenant. CENTRAL queda aparte: tiene otro dueño. */
+interface RepositorioExpedientes extends ExpedientesHospital, Auditoria {}
 interface Reloj { public function ahora(): int; }
 
 final class ErrorPersistencia extends \RuntimeException {}   // fallo técnico de una base: no es una regla de negocio
@@ -56,5 +58,9 @@ final class ServicioExpediente
     {
         try { $r = $caso(); $this->auditoria->registrar($profesional, $operacion, $paciente, 'ok'); return $r; }
         catch (ReglaDeDominio $e) { $this->auditoria->registrar($profesional, $operacion, $paciente, $e->codigo); throw $e; }
+        catch (ErrorPersistencia $e) {   // semana 6: el fallo técnico también deja su evento (RNF-04), salvo que la caída sea la propia auditoría
+            try { $this->auditoria->registrar($profesional, $operacion, $paciente, 'E8'); } catch (ErrorPersistencia) {}
+            throw $e;
+        }
     }
 }

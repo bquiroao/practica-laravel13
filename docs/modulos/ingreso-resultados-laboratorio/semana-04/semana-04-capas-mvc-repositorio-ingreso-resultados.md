@@ -80,3 +80,7 @@ Riesgos: acoplamiento por el esquema compartido (mitigado versionando el esquema
 ## 9. Conclusión
 
 Separar controlador, caso de uso y repositorio permite cambiar la entrada o el almacenamiento sin tocar las reglas. La suite de contrato es lo que garantiza que dos adaptadores sean realmente intercambiables.
+
+## Revisión y evidencia actualizada
+
+[Revisión del 28-10-2026](REVISION.md): 46 aserciones, demo y lint, con precisiones de concurrencia, propiedad e integración compartida.

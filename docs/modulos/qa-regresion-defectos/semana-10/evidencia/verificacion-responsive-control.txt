@@ -1,0 +1,76 @@
+$ node verificar-responsive.cjs <copia del prototipo con 4 defectos sembrados> ...
+# Contraprueba: radios de 30 px, cabecera del caso no fija, «Registrar» con disabled, chip «Bloquea» solo con icono
+OK    m1-campanas-base-320.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-360.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-390.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-430.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-768.png                 desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-base-1024.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-carga-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-vacio-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-sin-conexion-320.png         desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m1-campanas-lider-390.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+FALLA m2-ejecutar-base-320.png                 desborde=0  toque<44=6  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+        objetivo chico: label「No」alto 30
+        objetivo chico: label「Sí, datos clínicos」alto 30
+FALLA m2-ejecutar-base-360.png                 desborde=0  toque<44=4  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+FALLA m2-ejecutar-base-430.png                 desborde=0  toque<44=6  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+        objetivo chico: label「No」alto 30
+        objetivo chico: label「Sí, datos clínicos」alto 30
+FALLA m2-ejecutar-base-1024.png                desborde=0  toque<44=6  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+        objetivo chico: label「No」alto 30
+        objetivo chico: label「Sí, datos clínicos」alto 30
+FALLA m2-ejecutar-error-360.png                desborde=0  toque<44=4  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+FALLA m2-ejecutar-confirmar-360.png            desborde=0  toque<44=4  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+FALLA m2-ejecutar-confirmar-768.png            desborde=0  toque<44=6  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=NO  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+        objetivo chico: label「No」alto 30
+        objetivo chico: label「Sí, datos clínicos」alto 30
+FALLA m2-ejecutar-verifica-390.png             desborde=0  toque<44=4  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=1  chips-mudos=0
+        objetivo chico: label「Pasa」alto 30
+        objetivo chico: label「Falla」alto 30
+        objetivo chico: label「Bloqueado」alto 30
+        objetivo chico: label「No aplica」alto 30
+OK    m3-registro-exito-360.png                desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-clinica-320.png    desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-reenviado-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-rechazado-360.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+OK    m3-registro-pendiente-1024.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=0
+FALLA m4-trazabilidad-base-320.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-base-390.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-base-430.png             desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-base-1024.png            desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-cerrar-390.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-cerrar-768.png           desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-cerrada-390.png          desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+FALLA m4-trazabilidad-producto-360.png         desborde=0  toque<44=0  fuente<16=0  alcance=sí  datos-en-url=0  caso-arriba=sí  disabled=0  chips-mudos=1
+
+Vistas: 32  Fallan: 16

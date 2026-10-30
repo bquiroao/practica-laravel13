@@ -1,0 +1,51 @@
+@startuml semana-04-repositorio-compartido
+' Admisión hospitalaria y asignación de cama — Semana 4
+' PROPUESTA: integración con un repositorio de datos compartido (PostgreSQL federado CENTRAL + HOSPITAL).
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+title Integración por repositorio de datos compartido (propuesta)
+
+component "Admisión y\nasignación de cama" as ADM #EEF8F1
+component "Catálogo de salas\ny camas (Josué)" as CAT
+component "Pacientes" as PAC
+component "Dashboard\nde ocupación" as DSH
+component "Traslados / altas" as TRA
+
+database "HOSPITAL (por hospital)" as H {
+  folder "esquema admision\n(dueño: Admisión)" as SA {
+    [admision]
+    [asignacion_cama\nux_asignacion_cama_activa] as ASG
+    [evento_admision]
+    [v_asignaciones_activas\n(vista publicada)] as VAA
+  }
+  folder "esquema catalogo\n(dueño: Josué)" as SC {
+    [cama / sala / ward] as CAMA
+    [v_camas_operativas\n(vista publicada)] as VCO
+  }
+  folder "esquema pacientes\n(dueño: Pacientes)" as SP {
+    [paciente]
+    [v_paciente_estado\n(código + activo)] as VPE
+  }
+}
+database "CENTRAL" as C {
+  [hospital (tenant)\nusuario / rol] as TEN
+}
+
+ADM --> ASG : lee y escribe\n(solo su esquema)
+ADM ..> VCO : SELECT\n(GRANT SELECT)
+ADM ..> VPE : SELECT
+ADM ..> TEN : valida tenant y rol
+CAT --> CAMA : lee y escribe
+PAC --> VPE : publica
+CAT ..> VAA : SELECT: saber qué\ncama está ocupada
+DSH ..> VAA : SELECT
+DSH ..> VCO : SELECT
+TRA ..> ADM : cierra la asignación\npor contrato (pendiente)
+
+note bottom of SA
+  Reglas de propiedad: cada módulo escribe SOLO en su esquema;
+  los demás leen vistas publicadas (contrato de datos).
+  Sin claves foráneas entre esquemas: la consistencia entre
+  módulos se valida en el caso de uso y con eventos.
+end note
+@enduml

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA y regresión · prototipo navegable</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<a class="oculto-visual" href="#contenido">Saltar al contenido</a>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">QA · Hospital Regional del Norte</span></button>
+  <span class="rol-actual" id="rol"></span>
+  <span class="avatar" id="avatar" aria-label="Sin sesión">—</span>
+</header>
+<div class="red" id="red" role="status" hidden>Sin conexión · los resultados esperan en este equipo</div>
+<main id="contenido" tabindex="-1" aria-busy="false"></main>
+<div id="capa"></div>
+<p id="vivo" class="oculto-visual" role="status" aria-live="polite"></p>
+<nav class="nav-inferior" id="nav" aria-label="Secciones" hidden></nav>
+<script src="api-simulada.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

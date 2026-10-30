@@ -1,0 +1,15 @@
+@startuml migracion-etapas
+' Semana 5 - Migración por etapas, cada una con criterio de avance medible
+start
+:Etapa 0 — Micro-HIS (hoy)\nCasos de uso + puertos, API v1, pruebas de contrato;
+:Etapa 1 — Módulo dentro del monolito Laravel\nmismas tablas propias, API v1 como rutas internas;
+if (¿Gatillo medible cumplido?\n(ver tabla de gatillos)) then (no)
+  :Se queda como módulo del monolito\n(revisión trimestral de métricas);
+  stop
+else (sí)
+endif
+:Etapa 2 — Separar el proceso de envío/escalamiento\n(worker) con bandeja en la misma BD;
+:Etapa 3 — Servicio con BD propia\nproductores usan solo la API v1 o la bandeja;
+:Etapa 4 — (opcional) cola de mensajes\nsolo si la bandeja no alcanza el volumen;
+stop
+@enduml

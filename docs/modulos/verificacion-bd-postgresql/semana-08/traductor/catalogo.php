@@ -1,0 +1,65 @@
+<?php
+// Catálogo de la semana 8: restricción de PostgreSQL → [código de error, mensaje para el usuario, campo que se resalta].
+// 'unicas' cubre las 31 restricciones UNIQUE, EXCLUDE e índices únicos de las migraciones (siempre HTTP 409).
+// 'checks' son reglas por patrón del nombre de la restricción CHECK (siempre HTTP 422); la primera que coincide gana.
+// 'disparadores' son las reglas que lanzan los triggers con RAISE EXCEPTION (SQLSTATE P0001): [patrón del texto, HTTP, código, mensaje].
+return [
+    'unicas' => [
+        // CENTRAL
+        'networks_name_unique' => ['red_duplicada', 'Ya existe una red con ese nombre', 'name'],
+        'hospitals_network_code_unique' => ['hospital_duplicado', 'Ya existe un hospital con ese código en la red', 'code'],
+        'central_users_subject_unique' => ['usuario_duplicado', 'Esa identidad ya está registrada', 'subject'],
+        'central_users_email_lower_unique' => ['correo_duplicado', 'Ese correo ya está registrado', 'email'],
+        'hospital_memberships_active_open_unique' => ['membresia_duplicada', 'El usuario ya tiene ese rol activo en el hospital', null],
+        'patient_hospital_links_hospital_patient_unique' => ['vinculo_duplicado', 'El paciente ya está vinculado a ese hospital', null],
+        'mpi_identifiers_active_identity_unique' => ['identificador_duplicado', 'Ese identificador ya está activo para un paciente', null],
+        'break_glass_reviews_supersedes_id_unique' => ['revision_ya_reemplazada', 'Esa revisión ya fue reemplazada por otra', null],
+        'sync_nodes_hospital_id_unique' => ['nodo_duplicado', 'El hospital ya tiene un nodo de sincronización', null],
+        'sync_checkpoints_node_channel_unique' => ['punto_control_duplicado', 'Ya existe un punto de control para ese canal', null],
+        'central_inbox_messages_source_event_unique' => ['evento_duplicado', 'Ese evento ya se había recibido', null],
+        // HOSPITAL
+        'local_user_refs_central_user_unique' => ['usuario_local_duplicado', 'Ese usuario ya existe en el hospital', null],
+        'local_user_refs_membership_unique' => ['usuario_local_duplicado', 'Esa membresía ya está asociada a un usuario del hospital', null],
+        'specialties_code_unique' => ['especialidad_duplicada', 'Ya existe una especialidad con ese código', 'code'],
+        'doctor_profiles_license_number_unique' => ['medico_duplicado', 'Ya existe un médico con ese colegiado', 'license_number'],
+        'doctor_profiles_active_open_user_unique' => ['medico_duplicado', 'Ese usuario ya tiene un perfil de médico activo', null],
+        'doctor_specialties_active_period_exclusion' => ['especialidad_duplicada', 'El médico ya tiene esa especialidad en esas fechas', null],
+        'doctor_specialties_primary_period_exclusion' => ['especialidad_duplicada', 'El médico ya tiene otra especialidad principal en esas fechas', null],
+        'local_patients_global_id_unique' => ['paciente_duplicado', 'Ese paciente ya está registrado en el hospital', null],
+        'local_patients_code_unique' => ['paciente_duplicado', 'Ya existe un paciente con ese código', 'code'],
+        'care_assignments_active_equivalent_unique' => ['asignacion_duplicada', 'Esa asignación ya está activa para el episodio', null],
+        'appointments_doctor_active_period_exclusion' => ['cita_conflicto_medico', 'El médico ya tiene una cita en ese horario', null],
+        'appointments_patient_active_period_exclusion' => ['cita_conflicto_paciente', 'El paciente ya tiene una cita en ese horario', null],
+        'wards_code_unique' => ['servicio_duplicado', 'Ya existe un servicio con ese código', 'code'],
+        'beds_ward_code_unique' => ['cama_duplicada', 'Ya existe una cama con ese código en el servicio', 'code'],
+        'bed_stays_bed_active_period_exclusion' => ['cama_ocupada', 'La cama ya está ocupada en ese período', null],
+        'bed_stays_open_care_episode_unique' => ['episodio_con_cama', 'El episodio ya tiene una cama asignada', null],
+        'medical_records_local_patient_id_unique' => ['expediente_duplicado', 'El paciente ya tiene expediente', null],
+        'medical_records_record_number_unique' => ['expediente_duplicado', 'Ya existe un expediente con ese número', 'record_number'],
+        'clinical_notes_record_version_unique' => ['version_duplicada', 'Otra persona guardó antes una versión de la nota; recargue y vuelva a intentar', null],
+        'clinical_notes_supersedes_unique' => ['nota_ya_corregida', 'Esa nota ya fue corregida por otra versión', null],
+        'allergies_active_equivalent_unique' => ['alergia_duplicada', 'El paciente ya tiene registrada esa alergia', null],
+        'vital_signs_supersedes_unique' => ['registro_ya_corregido', 'Ese registro de signos vitales ya fue corregido', null],
+    ],
+    'checks' => [
+        ['/_birth_date_check$/', 'fecha_nacimiento_invalida', 'La fecha de nacimiento no puede ser futura'],
+        ['/_(valid_period|period_check|period)$/', 'periodo_invalido', 'La fecha de fin debe ser posterior a la de inicio'],
+        ['/_status_check$/', 'estado_invalido', 'El estado indicado no está permitido'],
+        ['/_(reason|content|type)_check$/', 'texto_vacio', 'Falta un texto: no puede quedar en blanco'],
+        ['/_version_check$/', 'version_invalida', 'El número de versión no es válido'],
+        ['/^vital_signs_(temperature|heart_rate|respiratory_rate|systolic_bp|diastolic_bp|blood_pressure|oxygen_saturation|weight|height|glucose)_check$/', 'medida_fuera_de_rango', 'La medida está fuera del rango permitido'],
+    ],
+    'disparadores' => [
+        ['/_author_assignment_trigger/', 403, 'autor_sin_asignacion', 'No tiene una asignación activa en este episodio'],
+        ['/_record_episode_patient_trigger|diagnoses_note_episode_author_trigger/', 422, 'episodio_no_corresponde', 'El episodio, la nota o el autor no corresponden a este paciente'],
+        ['/_self_supersedes_trigger|a correction must supersede/', 422, 'correccion_invalida', 'Una corrección debe reemplazar a la versión vigente, no a sí misma'],
+        ['/_(version_coherence|supersedes_version)_trigger/', 409, 'version_incoherente', 'La versión indicada no sigue a la versión que se corrige'],
+        ['/_(signed|validated|finalized)_immutable|_evidence_immutable|_patient_immutable|are immutable|append-only/', 409, 'registro_inmutable', 'El registro ya no admite cambios; registre una corrección o una nueva versión'],
+        ['/_delete_protection/', 409, 'no_se_elimina', 'Este registro no se puede eliminar; cancélelo o corríjalo'],
+        ['/(appointments|care_assignments)_specialty_trigger/', 422, 'medico_sin_especialidad', 'El médico no tiene esa especialidad vigente en la fecha indicada'],
+        ['/bed_stays_episode_period_trigger/', 422, 'estancia_fuera_de_episodio', 'La estancia debe quedar dentro del período del episodio'],
+        ['/normal grants require/', 403, 'consentimiento_requerido', 'Se necesita un consentimiento vigente que cubra este acceso'],
+        ['/break-glass reviews require/', 422, 'revision_sin_acceso_de_emergencia', 'La revisión necesita un acceso de emergencia asociado'],
+        ['/only one current break-glass review/', 409, 'revision_vigente_existente', 'Ese acceso de emergencia ya tiene una revisión vigente'],
+    ],
+];

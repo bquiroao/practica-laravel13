@@ -1,0 +1,33 @@
+@startuml flujo-consulta-clinica
+' Catálogo de medicamentos - Semana 8 - User flow del rol CONSULTA_CLINICA
+title User flow · Personal clínico de consulta (CONSULTA_CLINICA)
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+start
+:Inicio: Catálogo > Buscar (W1)
+(sin botones de registro, baja ni eliminar);
+:Escribe texto o elige forma farmacéutica;
+:Estado de carga;
+if (¿Error 503?) then (sí)
+  :"El catálogo no responde. Reintentar"
+  (conserva el texto escrito);
+  stop
+else (no)
+endif
+if (¿Resultados?) then (no)
+  :Estado vacío: "No hay medicamentos vigentes
+  con ese criterio. Pruebe con el principio activo";
+  stop
+else (sí)
+  :Lista con código, nombre, concentración,
+  forma/vía y "vigente al 2026-10-15";
+  :Abre el detalle de solo lectura;
+  note right
+    Protección de datos: el catálogo no muestra
+    pacientes ni prescripciones; solo el producto.
+  end note
+  stop
+endif
+@enduml

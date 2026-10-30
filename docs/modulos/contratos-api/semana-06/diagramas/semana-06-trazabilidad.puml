@@ -1,0 +1,31 @@
+@startuml semana-06-trazabilidad
+title Semana 6 — Hilo trazable de «marcar obsoleta» con el cambio de auditoría (R-10)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontSize 11
+actor "Responsable de integración\n(S1, CU-02 y CU-04)" as A
+rectangle "Requisitos" {
+  card "RF-03 aprobar, RF-06 obsoleta\nR-05, R-08 (S1-S2)" as RF
+  card "R-10: aprobar y marcar obsoleta\nquedan en la auditoría\n(H-03 de la S13)" as R10 #FFF3CD
+}
+rectangle "Contrato API (S5, PR #354)" {
+  card "POST /versiones/{id}/aprobacion\nPOST /versiones/{id}/obsolescencia\n200 | 403 E5 | 404 NF | 409 E7 | 503 E8" as API
+}
+rectangle "Micro-HIS por capas (S3-S4)" {
+  component "Presentación\nRutas -> ControladorDocumentacion\nVistaJson" as P
+  component "Aplicación\nServicioRevision (sin cambios)\npuerto RevisionPublicaciones (ISP)" as AP
+  component "Dominio\nEstadoVersion, VersionNueva" as D
+  component "Persistencia\nRepositorioPdo | RepositorioEnMemoria\nreviewed_by y obsoleted_by" as PE #FFF3CD
+}
+database "doc_versions\n+ obsoleted_by" as DB #FFF3CD
+card "Pruebas: 28 de 28\nS13: H-03 no reproducido\nS14: M-02 pasa a 8 de 10" as T
+A --> RF
+RF --> R10
+R10 --> API
+API --> P
+P --> AP
+AP --> D
+AP --> PE
+PE --> DB
+PE ..> T : verifica
+@enduml

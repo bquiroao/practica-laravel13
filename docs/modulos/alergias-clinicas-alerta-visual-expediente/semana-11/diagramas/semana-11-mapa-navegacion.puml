@@ -1,0 +1,29 @@
+@startuml semana-11-mapa-navegacion
+' Mapa de navegación del prototipo (rutas por hash)
+hide empty description
+state "Expediente\n#/expediente/{PAC}" as EXP
+state "Alerta pendiente\n(ALTA o CRÍTICA)" as PEN
+state "Alerta reconocida" as REC
+state "Sin alergias registradas\n(no verificado)" as VAC
+state "Registro paso 1\n#/registrar/{PAC}/1" as P1
+state "Registro paso 2 + resumen\n#/registrar/{PAC}/2" as P2
+state "ALERTA_CAMBIO\n(lo nuevo marcado)" as CAM #fde8e8
+state "Alergias no disponibles\n(503)" as SIN
+state "Sin permiso\n(enfermería)" as PER
+
+[*] --> EXP
+EXP --> PEN : nivel ≥ ALTA
+EXP --> VAC : PAC-00452
+EXP --> SIN : sin conexión
+PEN --> REC : He leído (huella vigente)
+PEN --> CAM : He leído (huella vieja)
+CAM --> REC : vuelve a leer y reconoce
+EXP --> P1 : Registrar alergia (médico)
+P1 --> P1 : error de campo (foco al campo)
+P1 --> P2 : Siguiente
+P2 --> P1 : Atrás
+P2 --> EXP : Guardar → «Alergia registrada»
+P2 --> SIN : sin conexión al guardar
+SIN --> EXP : Reintentar
+P1 --> PER : rol enfermería
+@enduml

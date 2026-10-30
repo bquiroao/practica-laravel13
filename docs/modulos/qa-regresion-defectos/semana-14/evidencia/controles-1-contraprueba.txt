@@ -1,0 +1,39 @@
+$ psql -f herramientas/validar-controles.sql
+--- controles con los positivos sembrados ---
+ control |   tenant   | defecto | caso_id | campana |        nombre         
+---------+------------+---------+---------+---------+-----------------------
+ CD-01   | hosp-norte |      12 | TC-107  |       3 | Sembrada B (en curso)
+(1 fila)
+
+ control |   tenant   | campana |                 nombre                 
+---------+------------+---------+----------------------------------------
+ CD-02   | hosp-norte |       2 | Sembrada A (cerrada GO sin aplicables)
+(1 fila)
+
+ control |   tenant   | campana | caso_id | defecto | de_la_campana 
+---------+------------+---------+---------+---------+---------------
+ CD-03   | hosp-norte |       1 | TC-107  |      11 |             2
+ CD-03   | hosp-norte |       3 | TC-107  |      11 |             2
+(2 filas)
+
+ control | intento | tenant_campana 
+---------+---------+----------------
+(0 filas)
+
+--- después del ROLLBACK (base real) ---
+ control | tenant | defecto | caso_id | campana | nombre 
+---------+--------+---------+---------+---------+--------
+(0 filas)
+
+ control | tenant | campana | nombre 
+---------+--------+---------+--------
+(0 filas)
+
+ control | tenant | campana | caso_id | defecto | de_la_campana 
+---------+--------+---------+---------+---------+---------------
+(0 filas)
+
+ control | intento | tenant_campana 
+---------+---------+----------------
+(0 filas)
+

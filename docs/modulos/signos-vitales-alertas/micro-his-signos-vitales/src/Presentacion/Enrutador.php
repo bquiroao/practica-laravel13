@@ -6,11 +6,13 @@ namespace SignosVitales\Presentacion;
 
 final class Peticion {
     public function __construct(public readonly string $metodo, public readonly string $ruta, public readonly array $consulta,
-                                public readonly string $usuarioDemo, public readonly string $cuerpo) {}
+                                public readonly string $usuarioDemo, public readonly string $cuerpo,
+                                public readonly ?string $claveIdempotencia = null, public readonly string $idSolicitud = '') {}
 
     public static function desdeGlobales(): self {
         return new self($_SERVER['REQUEST_METHOD'] ?? 'GET', (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), $_GET,
-                        (string) ($_SERVER['HTTP_X_USUARIO_DEMO'] ?? ''), (string) file_get_contents('php://input'));
+                        (string) ($_SERVER['HTTP_X_USUARIO_DEMO'] ?? ''), (string) file_get_contents('php://input'), $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? null,
+                        preg_match('/^[A-Za-z0-9-]{8,64}$/', $_SERVER['HTTP_X_REQUEST_ID'] ?? '') ? $_SERVER['HTTP_X_REQUEST_ID'] : bin2hex(random_bytes(8)));
     }
 }
 

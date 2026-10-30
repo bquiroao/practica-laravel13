@@ -1,0 +1,3 @@
+$ php semana-06/evidencia/probar-auditoria.php   # antes del cambio, sobre develop 093fff0
+consulta local con CENTRAL caída = 200 | eventos nuevos: 1 [m1 consultar p1 ok]
+consulta longitudinal con CENTRAL caída = 503 E8 | eventos nuevos: 0 []

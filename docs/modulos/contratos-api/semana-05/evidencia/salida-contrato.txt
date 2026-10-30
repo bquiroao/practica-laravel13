@@ -1,0 +1,20 @@
+$ npx @redocly/cli@1.34.3 bundle api/openapi.yaml --ext json -o openapi.json && php evidencia/verificar-contrato.php openapi.json
+OK    enviar versión: POST /documentos/guia-citas/versiones -> 201 (documentados: 201, 409, 422, 503)
+OK    versión sin formato x.y.z (R-01): POST /documentos/guia-citas/versiones -> 422 E2 (documentados: 201, 409, 422, 503)
+OK    versión repetida (R-02): POST /documentos/guia-citas/versiones -> 409 E3 (documentados: 201, 409, 422, 503)
+OK    aprobar lo propio (R-05): POST /versiones/1/aprobacion -> 403 E5 (documentados: 200, 403, 404, 409, 503)
+OK    aprobar: POST /versiones/1/aprobacion -> 200 (documentados: 200, 403, 404, 409, 503)
+OK    aprobar otra vez (R-03): POST /versiones/1/aprobacion -> 409 E7 (documentados: 200, 403, 404, 409, 503)
+OK    consultar vigente: GET /documentos/guia-citas -> 200 (documentados: 200, 404, 503)
+OK    rol fuera de la audiencia (R-07): GET /documentos/guia-citas -> 404 E6 (documentados: 200, 404, 503)
+OK    enviar la 1.1.0: POST /documentos/guia-citas/versiones -> 201 (documentados: 201, 409, 422, 503)
+OK    rechazar sin motivo: POST /versiones/2/rechazo -> 422 E2 (documentados: 200, 404, 409, 422, 503)
+OK    rechazar con motivo: POST /versiones/2/rechazo -> 200 (documentados: 200, 404, 409, 422, 503)
+OK    marcar obsoleta (R-08): POST /versiones/1/obsolescencia -> 200 (documentados: 200, 404, 409, 503)
+OK    marcar obsoleta otra vez: POST /versiones/1/obsolescencia -> 409 E7 (documentados: 200, 404, 409, 503)
+OK    consultar la obsoleta, con aviso: GET /documentos/guia-citas/versiones/1.0.0 -> 200 (documentados: 200, 404, 503)
+OK    versión inexistente: POST /versiones/99/aprobacion -> 404 NF (documentados: 200, 403, 404, 409, 503)
+OK    base caída: POST /documentos/guia-citas/versiones -> 503 E8 (documentados: 201, 409, 422, 503)
+OK    operaciones documentadas = acciones del controlador: enviar, aprobar, rechazar, obsoleta, consultar, consultar
+OK    ruta no documentada: DELETE /documentos/guia-citas -> 404
+RESULTADO: el Micro-HIS cumple el contrato

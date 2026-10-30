@@ -1,0 +1,19 @@
+$ php semana-07/evidencia/medir-acoplamiento.php   # sobre develop 402fd68
+Tipo                         Capa           Ce  Ca     I  Usa
+Corte                        Dominio         2   6  0.25  OcupacionSala, ReglaDeDominio
+ConsolidadorOcupacion        Aplicacion      5   1  0.83  FuenteCamas, EscritorCortes, Reloj, Corte, OcupacionSala
+ControladorOcupacion         Presentacion    5   0  1.00  ConsolidadorOcupacion, ConsultaOcupacion, VistaJson, ReglaDeDominio, ErrorPersistencia
+RepositorioOcupacion         Aplicacion      3   2  0.60  FuenteCamas, EscritorCortes, LectorCortes
+ConsultaOcupacion            Aplicacion      2   1  0.67  LectorCortes, Reloj
+EscritorCortes               Aplicacion      1   2  0.33  Corte
+LectorCortes                 Aplicacion      1   2  0.33  Corte
+ReglaDeDominio               Dominio         0   3  0.00  -
+RepositorioPdo               Persistencia    3   0  1.00  RepositorioOcupacion, ErrorPersistencia, Corte
+VistaJson                    Presentacion    2   1  0.67  Corte, ReglaDeDominio
+ErrorPersistencia            Aplicacion      0   2  0.00  -
+FuenteCamas                  Aplicacion      0   2  0.00  -
+OcupacionSala                Dominio         0   2  0.00  -
+Reloj                        Aplicacion      0   2  0.00  -
+RepositorioEnMemoria         Persistencia    2   0  1.00  RepositorioOcupacion, Corte
+Rutas                        Presentacion    0   0     -  -
+Mayor acoplamiento: Corte

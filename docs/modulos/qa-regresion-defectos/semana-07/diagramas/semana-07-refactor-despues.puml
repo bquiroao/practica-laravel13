@@ -1,0 +1,43 @@
+@startuml semana-07-refactor-despues
+!pragma layout smetana
+title Después: el caso de uso orquesta (Ce 17 · 34 ramas · Dq 0 · 130 líneas) y el Dominio decide (SolicitudResultado)
+skinparam defaultFontSize 10
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Aplicación" #F5F9FF {
+  class RegistrarResultado {
+    + ejecutar(...): Salida
+    - registrar(): permiso → idempotencia → campaña admite →
+      SolicitudResultado::desde → defecto a verificar →
+      resolverDefecto → almacén → transacción
+    - defectoAVerificar() · repetido() · huellaSolicitud()
+  }
+  class Salida {
+    + {static} rechazo(ReglaRechazada)
+    EVIDENCIA_DEMASIADO_GRANDE → 413
+  }
+}
+package "Dominio" #FFF8E1 {
+  class SolicitudResultado #E1EFE8 {
+    + resultado: Resultado
+    + evidencias: list<EvidenciaVerificable>
+    + referencias: list<ReferenciaExterna>
+    + motivo: ?string
+    + {static} desde(datos): self
+    + resolverDefecto(?verificado, …): ?Defecto
+    - {static} evidencias(): list
+  }
+  class FabricaEvidencias
+  class Defecto
+}
+RegistrarResultado --> SolicitudResultado : usa
+RegistrarResultado ..> Salida
+SolicitudResultado --> FabricaEvidencias
+SolicitudResultado --> Defecto
+note right of SolicitudResultado
+  Mismo orden de reglas que antes:
+  CAR-01 (37 escenarios) idénticos;
+  M34 y M35 cambian el orden y se detectan.
+end note
+@enduml

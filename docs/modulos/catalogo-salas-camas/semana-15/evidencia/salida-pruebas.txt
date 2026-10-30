@@ -1,0 +1,37 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 matriz de transiciones 4 x 4 sin base de datos: 16 casos (R-05, R-06)
+OK    U-02 la cama nace disponible y su código es único solo dentro de su sala (R-02, R-04)
+OK    U-03 motivo de solo espacios = E2; la cama no cambia ni deja historial (R-09)
+OK    U-04 cada código de rechazo (E5, E6, E2, E3, E4, NF, E7) tiene su HTTP fijo (RNF-04)
+PEND. U-05 capacidad de sala: CapacidadSala llega con la semana 6 (PR #433, sin integrar)
+== Caja blanca
+OK    CB-01 cambiarEstado: 6 caminos básicos (V(G) = 5 más la salida del dominio); solo C5 y C6 escriben
+OK    CB-02 condiciones: MC/DC de «código vacío || nombre vacío» y orden sala -> código -> duplicado en registrarCama
+== Caja negra (HTTP)
+OK    CN-01 equivalencia del estado destino: válida (maintenance) e inválidas (occupied a mano, AVAILABLE, vacío, borrada)
+FALLA CN-02 límites del código de sala: vacío, un espacio, 1 carácter y « A» frente a la sala A existente (R-01)
+      obtenido: 422 E2, 422 E2, 201, 201
+OK    CN-03 límites del motivo: vacío, solo espacios y 1 carácter (RF-03, R-09)
+FALLA CN-04 permisos: sin X-Tenant-ID ni permiso de catálogo, y con el tenant de otro hospital = 403 (RNF-01, R-07)
+      obtenido: 201, 201
+OK    CN-05 errores del cliente: ruta desconocida, cama inexistente y cuerpo que no es JSON
+FALLA CN-06 base no disponible al arrancar = 503 E8, sin detalles técnicos (E8, RNF-04)
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 9 de 12 pruebas pasan; 3 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-catalogo-camas/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # el mismo archivo contra el Micro-HIS de la semana 6 (PR #433, sin integrar), en una copia temporal
+OK    U-05 capacidad de sala: 0 y texto = E2; 1 de 2 admite; 2 de 2 = E9; sin tope admite (semana 6)
+FALLA CN-02 límites del código de sala: vacío, un espacio, 1 carácter y « A» frente a la sala A existente (R-01)
+FALLA CN-04 permisos: sin X-Tenant-ID ni permiso de catálogo, y con el tenant de otro hospital = 403 (RNF-01, R-07)
+FALLA CN-06 base no disponible al arrancar = 503 E8, sin detalles técnicos (E8, RNF-04)
+RESULTADO: 10 de 13 pruebas pasan; 3 fallan (ver defectos)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal del Micro-HIS de develop (el del repositorio no se modifica)
+M1: inactiva -> mantenimiento permitida en EstadoCama -> fallan: U-01
+M2: ServicioCatalogo ignora el false de cambiarEstado (sin E7) -> fallan: CB-01

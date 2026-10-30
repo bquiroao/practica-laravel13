@@ -21,13 +21,38 @@ const medico = (id) => `${MEDICOS[id][0]} · ${MEDICOS[id][1]}`;
 const valido = (p, m, h) => Boolean(PACIENTES[p] && MEDICOS[m] && /^\d{4}$/.test(h ?? ''));
 const atras = (href, texto) => `<p><a href="${href}">‹ ${texto}</a></p>`;
 
+// Semana 12: cancelar desde la agenda (CU-03) con motivo; la médica solo ve y cancela sus citas (R-09); una cancelada no tiene acción (R-07).
+const clave = (c) => `${c.hora}-${c.medico}`;
+const activa = (k) => citas.find((c) => clave(c) === k && c.estado !== 'Cancelada' && (rol === 'recepcion' || c.medico === 'M03'));
+const accionCancelar = (c) => (activa(clave(c)) ? `<a class="boton" href="#cancelar/${clave(c)}" aria-label="Cancelar la cita de las ${franja(c.hora).slice(0, 5)} de ${paciente(c.paciente)}">Cancelar</a>` : '—');
+
 const vistas = {
+  cancelar: (k) => {
+    const c = activa(k ?? '');
+    if (!c) return vistas.agenda();
+    return ['Cancelar cita', `${atras('#agenda', 'Agenda')}<h1 tabindex="-1">¿Cancelar la cita de ${PACIENTES[c.paciente]}?</h1>
+      <p class="impacto">${franja(c.hora)} · ${medico(c.medico)} · ${c.estado}<br>El horario queda libre para otro paciente (R-08).</p>
+      <form id="paso" novalidate><label for="motivo">Motivo de la cancelación *</label>
+      <textarea id="motivo" rows="2" aria-describedby="error-motivo"></textarea><p id="error-motivo" class="error"></p>
+      <div class="acciones"><button class="peligro">Cancelar la cita de ${PACIENTES[c.paciente]}</button><a class="boton" href="#agenda">Volver</a></div></form>`,
+      () => alEnviar(() => { const m = document.getElementById('motivo'); if (m.value.trim()) return `cancelada/${k}`;
+        m.setAttribute('aria-invalid', 'true'); document.getElementById('error-motivo').textContent = 'Error: escribe el motivo de la cancelación; queda en la auditoría (R-10).'; m.focus(); return ''; })];
+  },
+
+  cancelada: (k) => {
+    const c = activa(k ?? '');
+    if (!c) return vistas.agenda();
+    c.estado = 'Cancelada'; libres[c.medico] = [...libres[c.medico], c.hora].sort();
+    const [, html] = vistas.agenda();
+    return ['Cita cancelada', html, () => avisar(`Cita de ${PACIENTES[c.paciente]} a las ${franja(c.hora).slice(0, 5)} cancelada. El horario quedó libre.`)];
+  },
+
   agenda: () => {
     const visibles = citas.filter((c) => rol === 'recepcion' || c.medico === 'M03').sort((a, b) => a.hora.localeCompare(b.hora));
     return ['Agenda', `<h1 tabindex="-1">Agenda · Mié 28/10/2026</h1>
-      <table><thead><tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr></thead><tbody>
+      <table><thead><tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
       ${visibles.map((c) => `<tr><td><strong>${franja(c.hora)}</strong></td><td data-etiqueta="Paciente">${paciente(c.paciente)}</td>
-        <td data-etiqueta="Médico">${medico(c.medico)}</td><td data-etiqueta="Estado">${c.estado}</td></tr>`).join('')}</tbody></table>
+        <td data-etiqueta="Médico">${medico(c.medico)}</td><td data-etiqueta="Estado">${c.estado}</td><td>${accionCancelar(c)}</td></tr>`).join('')}</tbody></table>
       ${rol === 'recepcion' ? '<div class="acciones"><a class="boton principal" href="#nueva">+ Nueva cita</a></div>' : ''}`];
   },
 

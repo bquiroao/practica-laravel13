@@ -1,0 +1,48 @@
+@startuml repositorio-compartido
+' Catálogo de medicamentos - Semana 4 - Integración con un repositorio de datos compartido (PROPUESTA)
+title Repositorio de datos compartido: el catálogo es dueño y único escritor (propuesta)
+skinparam componentStyle rectangle
+
+package "Módulos del HIS (Laravel 12)" {
+  [Catálogo de medicamentos] as CAT
+  [prescripciones-alergias] as PRE
+  [Farmacia / dispensación\n(si existe)] as FAR
+}
+
+database "PostgreSQL federado" {
+  frame "Base HOSPITAL (por hospital)" {
+    rectangle "Esquema catalogo\n(dueño: Catálogo)" as ESQ {
+      card "medicamentos\n(versiones, EXCLUDE)" as T
+      card "medicamentos_codigos\n(hospital_id, codigo) PK" as K
+      card "v_medicamentos_vigentes\n(vista de solo lectura)" as V
+    }
+    rectangle "Esquema prescripciones\n(dueño: prescripciones-alergias)" as ESP {
+      card "prescripcion_items\n(hospital_id, codigo_medicamento)\nFK -> medicamentos_codigos\nON DELETE RESTRICT" as PI
+    }
+  }
+  frame "Base CENTRAL" {
+    card "Catálogo de referencia nacional\n(principios activos, opcional)" as REF
+  }
+}
+
+CAT --> T : lee y escribe\n(RepositorioMedicamentosPdo)
+CAT --> K : crea el código en el alta
+T --> V : publica
+PRE --> V : SELECT (rol de solo lectura)
+FAR --> V : SELECT (rol de solo lectura)
+PRE --> PI : escribe sus datos
+PI --> K : FK (RN-02 también en la base)
+CAT ..> REF : validar principio activo\n(postgres_fdw, pendiente)
+
+note right of V
+  Contrato de datos versionado: columnas
+  estables (codigo, version, nombre, principio,
+  concentración, forma, vía, vigencia).
+  Los otros módulos NO leen la tabla.
+end note
+note bottom of K
+  Ancla para claves foráneas: una fila por
+  código y hospital. Si una prescripción lo usa,
+  la base impide borrarlo (refuerza RN-02).
+end note
+@enduml

@@ -8,24 +8,21 @@ use Medicos\Aplicacion\{AsociarEspecialidad, ConsultarDisponibilidad, ErrorPersi
 use Medicos\Dominio\ErrorDominio;
 
 final class MedicosControlador {
-    private const ESTADOS = ['acceso_denegado' => 403, 'medico_no_encontrado' => 404, 'usuario_no_disponible' => 409, 'medico_duplicado' => 409, 'especialidad_duplicada' => 409];
     public function __construct(private RegistrarMedico $registrar, private AsociarEspecialidad $asociar, private ConsultarDisponibilidad $disponibilidad, private array $usuarios) {} // usuarios de demostración hasta integrar RBAC (no son credenciales)
-    public function atender(string $metodo, string $ruta, string $usuarioDemo, string $cuerpo = '', array $consulta = []): array {
-        $usuario = $this->usuarios[$usuarioDemo] ?? null;
-        $entrada = $metodo === 'POST' ? json_decode($cuerpo, true) : [];
-        try {
-            if ($metodo === 'POST' && $ruta === '/api/v1/medicos') { $accion = fn () => [201, $this->registrar->ejecutar($entrada, $usuario)]; }
-            elseif ($metodo === 'POST' && preg_match('#^/api/v1/medicos/([\w-]+)/especialidades$#', $ruta, $m)) { $accion = fn () => [201, $this->asociar->ejecutar($m[1], $entrada, $usuario)]; }
-            elseif ($metodo === 'GET' && $ruta === '/api/v1/disponibilidad') {
-                $accion = fn () => [200, ['franjas' => $this->disponibilidad->ejecutar((string) ($consulta['especialidad'] ?? ''), (string) ($consulta['desde'] ?? ''), (string) ($consulta['hasta'] ?? ''), $usuario)]];
-            } else { return in_array($ruta, ['/api/v1/medicos', '/api/v1/disponibilidad'], true) ? [405, ['codigo' => 'metodo_no_permitido']] : [404, ['codigo' => 'ruta_no_encontrada']]; }
-            if ($usuario === null) { return [401, ['codigo' => 'sin_sesion']]; }
-            if (!is_array($entrada)) { return [400, ['codigo' => 'json_invalido']]; }
-            return $accion();
-        } catch (ErrorDominio $e) {
-            return [self::ESTADOS[$e->codigo] ?? 422, ['codigo' => $e->codigo, 'mensaje' => $e->getMessage()]];
-        } catch (ErrorPersistencia) {
-            return [500, ['codigo' => 'error_persistencia', 'mensaje' => 'No se pudo completar; intente de nuevo']];
-        }
+    public function registrar(Peticion $p): array { return $this->conCuerpo($p, fn (array $e, Usuario $u) => VistaJson::creada($this->registrar->ejecutar($e, $u))); }
+    public function asociar(Peticion $p, string $medicoId): array { return $this->conCuerpo($p, fn (array $e, Usuario $u) => VistaJson::creada($this->asociar->ejecutar($medicoId, $e, $u))); }
+    public function disponibilidad(Peticion $p): array {
+        $q = fn (string $k) => (string) ($p->consulta[$k] ?? '');
+        return $this->conUsuario($p, fn (Usuario $u) => VistaJson::lista($this->disponibilidad->ejecutar($q('especialidad'), $q('desde'), $q('hasta'), $u)));
+    }
+    private function conCuerpo(Peticion $p, callable $accion): array {
+        return $this->conUsuario($p, fn (Usuario $u) => is_array($e = json_decode($p->cuerpo, true)) ? $accion($e, $u) : VistaJson::error('json_invalido'));
+    }
+    private function conUsuario(Peticion $p, callable $accion): array {
+        $usuario = $this->usuarios[$p->usuarioDemo] ?? null;
+        if ($usuario === null) { return VistaJson::error('sin_sesion'); }
+        try { return $accion($usuario); }
+        catch (ErrorDominio $e) { return VistaJson::error($e->codigo, $e->getMessage()); }
+        catch (ErrorPersistencia) { return VistaJson::error('error_persistencia', 'No se pudo completar; intente de nuevo'); }
     }
 }

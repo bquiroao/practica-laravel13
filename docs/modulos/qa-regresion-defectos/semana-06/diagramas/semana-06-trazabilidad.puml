@@ -1,0 +1,78 @@
+@startuml semana-06-trazabilidad
+!pragma layout smetana
+left to right direction
+title Trazabilidad de punta a punta (en verde: el cambio R-15)
+skinparam defaultFontSize 10
+skinparam rectangleRoundCorner 8
+
+rectangle "Actores (S1)" as A #F5F9FF {
+  rectangle "Tester" as A1
+  rectangle "Líder QA" as A2
+  rectangle "Desarrollador" as A3
+}
+rectangle "Casos de uso (S1)" as U #F5F9FF {
+  rectangle "CU-05/06 Registrar resultado\ncon evidencia y defecto" as U5
+  rectangle "CU-04 Iniciar campaña" as U4
+  rectangle "CU-08/09 Clasificar, corregir" as U8
+  rectangle "CU-10 Cerrar GO / NO-GO\n«R-15 en S6»" as U10 #E1EFE8
+}
+rectangle "Reglas → RF (S1, S2)" as R #FFF8E1 {
+  rectangle "R-05/RF-05 evidencia fail-closed" as R5
+  rectangle "R-03/RF-03 críticos de la matriz" as R3
+  rectangle "R-07,08/RF-07,08 severidad;\nsolo QA cierra" as R7
+  rectangle "R-09 + R-15 «S6»: crítico abierto,\nMAYOR en caso crítico, tasa" as R9 #E1EFE8
+  rectangle "R-11,12/RF-11,12 inmutable,\nidempotente" as R11
+}
+rectangle "SOLID: LSP (S2)" as D #FFF8E1 {
+  rectangle "EvidenciaVerificable:\nmétodos final, sin instanceof" as D1
+}
+rectangle "Capas (S3, S4)" as C #EEF7EE {
+  rectangle "Dominio: Campana::cerrar\n(+ mayoresEnCriticos «S6»)" as C1 #E1EFE8
+  rectangle "Aplicación: RegistrarResultado,\nCerrarCampana «S6», Trazabilidad «S6»" as C2
+  rectangle "Presentación MVC" as C3
+}
+rectangle "Repository (S4)" as P #EEF7EE {
+  rectangle "RepositorioDefectos\n+ mayoresAbiertos() «S6»\nPDO e InMemory" as P1 #E1EFE8
+  rectangle "RepositorioCampanas\n(sin cambiar intentos)" as P2
+}
+rectangle "Contrato API (S5) 1.1.0" as API #F5F9FF {
+  rectangle "POST /campanas/{id}/resultados" as AP5
+  rectangle "POST /campanas/{id}/cierre «S6»" as AP10 #E1EFE8
+  rectangle "GET /trazabilidad + bloquea_go «S6»" as AP11 #E1EFE8
+}
+rectangle "Evidencia" as T #EEEEEE {
+  rectangle "APP-04,11 · CLI-05 · AHT-02" as T5
+  rectangle "DOM-03 · APP-06 · INT-02" as T3
+  rectangle "DOM-07,08 · APP-08" as T7
+  rectangle "CAM-01..05 · DOM-05,06\nM30–M33" as T9 #E1EFE8
+  rectangle "INT-03,05 · APP-03,15 · CON-05" as T11
+}
+
+A1 --> U5
+A2 --> U4
+A2 --> U10
+A3 --> U8
+U5 --> R5
+U5 --> R11
+U4 --> R3
+U8 --> R7
+U10 --> R9
+R5 --> D1
+D1 --> C1
+R9 --> C1
+R3 --> C2
+R7 --> C1
+R11 --> P2
+C1 --> P1
+C2 --> P1
+C2 --> P2
+C3 --> AP5
+C3 --> AP10
+C3 --> AP11
+P1 --> T9
+P2 --> T11
+AP5 --> T5
+AP10 --> T9
+R3 --> T3
+R7 --> T7
+@enduml

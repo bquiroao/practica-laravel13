@@ -1,0 +1,8 @@
+[OK]    Mismo resultado antes/después para «Medicina interna general»: B-201, B-202
+[OK]    Mismo resultado antes/después para «Medicina interna con aislamiento»: B-210
+[OK]    Mismo resultado antes/después para «Cirugía general»: C-101
+[OK]    Mismo resultado antes/después para «UCI»: U-01
+[OK]    B-201 rechazada con motivo: El paciente requiere una cama de aislamiento.
+[OK]    Criterio nuevo agregado sin modificar EvaluadorElegibilidad: B-201
+
+Resultado: todas las verificaciones pasaron.

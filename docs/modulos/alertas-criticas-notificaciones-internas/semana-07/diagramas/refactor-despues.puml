@@ -1,0 +1,32 @@
+@startuml refactor-despues
+' Semana 7 - DESPUÉS (conceptual): la decisión se vuelve una regla pura del dominio
+skinparam classAttributeIconSize 0
+package "Domain" #FFF7E0 {
+  enum DecisionTrasEntrega {
+    TERMINAR
+    SUBIR_NIVEL
+    AGOTAR
+  }
+  class ReglaEscalamientoInmediato {
+    + decidir(nivel, entregados, fallidos, hayDestinatarios) : DecisionTrasEntrega
+  }
+}
+package "Application" #EAF7EE {
+  class NotificarNivel {
+    + ejecutar(alerta, momento)
+    ' solo orquesta: pide destinatarios, despacha,
+    ' registra y aplica la decisión
+  }
+}
+NotificarNivel --> ReglaEscalamientoInmediato : pregunta qué hacer
+ReglaEscalamientoInmediato --> DecisionTrasEntrega
+note right of ReglaEscalamientoInmediato
+  Tabla de verdad (RN-03, RN-05, RN-08):
+  sin destinatarios, nivel<2 → SUBIR_NIVEL
+  sin destinatarios, nivel=2 → AGOTAR
+  sin fallidos               → TERMINAR
+  fallidos, nivel<2          → SUBIR_NIVEL
+  fallidos, nivel=2, alguien recibió → TERMINAR
+  fallidos, nivel=2, nadie recibió   → AGOTAR
+end note
+@enduml

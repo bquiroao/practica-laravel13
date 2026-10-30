@@ -1,0 +1,15 @@
+@startsalt w1-bandeja
+{+
+  {* Alertas críticas | HOSP-GUA-01 | enf.turno01 ▾ }
+  {/ <b>Pendientes (2)</b> | Acusadas | Cerradas }
+  ==
+  {#
+   . | <b>Paciente</b> | <b>Prioridad</b> | <b>Estado</b> | <b>Vence en</b>
+   (1) | PAC-00451 | ‼ CRITICA | ENVIADA · nivel 0 | 09:12
+   (2) | PAC-00452 | ! ALTA | ESCALADA · nivel 1 | 24:40
+  }
+  ==
+  {[Actualizar] | Última actualización 10:03 }
+  ⓘ Ayuda: «Vence en» = tiempo para acusar antes de escalar
+}
+@endsalt

@@ -7,7 +7,8 @@ use MicroHis\ContratosApi\Dominio\{Audiencia, EstadoVersion, ReglaDeDominio, Ver
 
 // Puertos por cliente (ISP de la semana 2): los define la aplicación y los implementa la persistencia.
 interface EscritorVersiones { public function versiones(string $slug): array; public function guardarEnRevision(VersionNueva $v, string $autor): int; }
-/** datosRevision: ['autor', 'estado'] o null. cambiarEstado: solo si sigue siendo $de (concurrencia optimista); false = otra persona lo cambió antes. */
+/** datosRevision: ['autor', 'estado', 'revisor', 'obsoleta_por'] o null. cambiarEstado: solo si sigue siendo $de (concurrencia optimista);
+ *  false = otra persona lo cambió antes. Marcar obsoleta no borra quién aprobó o rechazó (R-10, semana 6). */
 interface RevisionPublicaciones { public function datosRevision(int $id): ?array; public function cambiarEstado(int $id, string $de, string $a, string $revisor, ?string $motivo): bool; }
 /** Versiones publicadas u obsoletas, cada una con 'version', 'tipo', 'estado' y 'audiencia' (lista de role_code). */
 interface LectorDocumentos { public function consultables(string $slug): array; }

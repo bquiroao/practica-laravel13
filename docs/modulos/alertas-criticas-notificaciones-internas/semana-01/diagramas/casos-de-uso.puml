@@ -1,0 +1,61 @@
+@startuml casos-de-uso
+' Semana 1 - Alertas críticas y notificaciones internas
+' Casos de uso del proceso «detección, envío, acuse y escalamiento de una alerta crítica»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F4F8FF
+  BorderColor #2F5597
+}
+
+actor "Sistema origen\n(laboratorio / alergias)" as SO
+actor "Enfermería de turno" as ENF
+actor "Médico tratante" as MED
+actor "Jefe de servicio" as JEF
+actor "Coordinación médica\nde turno" as COO
+actor "Administrador de\nreglas de alerta" as ADM
+actor "Reloj del sistema\n(planificador)" as RLJ
+
+rectangle "Alertas críticas y notificaciones internas" {
+  usecase "CU-01 Registrar alerta crítica" as CU01
+  usecase "CU-02 Resolver destinatarios" as CU02
+  usecase "CU-03 Enviar notificación interna" as CU03
+  usecase "CU-09 Reintentar entrega fallida" as CU09
+  usecase "CU-04 Acusar alerta" as CU04
+  usecase "CU-05 Escalar alerta no acusada" as CU05
+  usecase "CU-06 Cerrar alerta" as CU06
+  usecase "CU-07 Consultar historial de la alerta" as CU07
+  usecase "CU-08 Configurar regla de escalamiento" as CU08
+}
+
+SO --> CU01
+CU01 ..> CU02 : <<include>>
+CU01 ..> CU03 : <<include>>
+CU09 ..> CU03 : <<extend>>\n(entrega fallida)
+RLJ --> CU05
+CU05 ..> CU02 : <<include>>
+CU05 ..> CU03 : <<include>>
+
+ENF --> CU04
+MED --> CU04
+JEF --> CU04
+COO --> CU04
+MED --> CU06
+JEF --> CU06
+ENF --> CU07
+MED --> CU07
+JEF --> CU07
+ADM --> CU08
+
+note right of CU05
+  RN-04 / RN-05: vencido el plazo de acuse
+  (CRITICA 15 min, ALTA 30 min) sube un nivel.
+  Nivel 0 enfermería + médico, nivel 1 jefe
+  de servicio, nivel 2 coordinación médica.
+end note
+note right of CU04
+  RN-06: el acuse es idempotente;
+  una alerta acusada ya no se escala.
+end note
+@enduml

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo – Reportes operativos exportables (Semana 11)</title>
+<style>
+  :root { --fondo:#f4f6f8; --tarjeta:#fff; --tinta:#1b2733; --suave:#56657a; --linea:#c9d3de; --azul:#0b5cad; --ok:#176a3a; --okbg:#e3f4e9; --crit:#a4161a; --critbg:#fde4e4; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.45 system-ui,sans-serif; background:var(--fondo); color:var(--tinta); }
+  header { background:var(--azul); color:#fff; padding:.75rem 1rem; display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  header h1 { font-size:1.1rem; margin:0; }
+  main { max-width:980px; margin:0 auto; padding:1rem; }
+  section[hidden] { display:none; }
+  .tarjeta { background:var(--tarjeta); border:1px solid var(--linea); border-radius:8px; padding:1rem; margin-bottom:1rem; }
+  .rejilla { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.75rem; }
+  label { display:block; font-weight:600; margin-bottom:.2rem; }
+  input, select { width:100%; min-height:44px; padding:.5rem; font-size:1rem; border:2px solid var(--linea); border-radius:6px; background:#fff; }
+  input[aria-invalid="true"] { border-color:var(--crit); }
+  .ayuda { color:var(--suave); font-size:.85rem; }
+  button { min-height:44px; padding:.5rem 1rem; font-size:1rem; border-radius:6px; border:2px solid var(--azul); background:var(--azul); color:#fff; cursor:pointer; }
+  button.sec { background:#fff; color:var(--azul); }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #ffb300; outline-offset:2px; }
+  .barra { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem; }
+  .msg { padding:.75rem 1rem; border-radius:6px; border-left:6px solid; margin:.75rem 0; }
+  .msg.err { background:var(--critbg); border-color:var(--crit); color:var(--crit); }
+  .msg.ok { background:var(--okbg); border-color:var(--ok); color:var(--ok); }
+  .tabla { overflow-x:auto; } table { width:100%; border-collapse:collapse; } th, td { text-align:left; padding:.4rem; border-bottom:1px solid var(--linea); white-space:nowrap; }
+  code { word-break:break-all; font-size:.8rem; }
+  @media (max-width:430px) { main { padding:.5rem; } button { width:100%; } .rejilla { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header><h1>Reportes operativos</h1><span>Hospital 1 · <em>prototipo con datos ficticios</em></span></header>
+<main>
+  <p id="estado" role="status" aria-live="polite" class="ayuda"></p>
+
+  <section data-pantalla="catalogo" aria-labelledby="t-cat">
+    <h2 id="t-cat">1. Catálogo de reportes</h2>
+    <div class="rejilla" id="tarjetas"></div>
+  </section>
+
+  <section data-pantalla="filtros" aria-labelledby="t-fil" hidden>
+    <h2 id="t-fil">2. Filtros</h2>
+    <p class="ayuda" id="reporte-actual"></p>
+    <div id="error" class="msg err" role="alert" tabindex="-1" hidden></div>
+    <form id="form" novalidate class="tarjeta"><div class="rejilla">
+      <div><label for="rol">Rol</label><select id="rol"><option value="jefatura">Jefatura (ve datos personales)</option><option value="auditor">Auditor (sin datos personales)</option></select></div>
+      <div><label for="desde">Desde</label><input id="desde" inputmode="numeric" placeholder="AAAA-MM-DD" aria-describedby="a-fecha" value="2026-10-01"></div>
+      <div><label for="hasta">Hasta</label><input id="hasta" inputmode="numeric" placeholder="AAAA-MM-DD" aria-describedby="a-fecha" value="2026-10-25"><span id="a-fecha" class="ayuda">Máximo 92 días, sin fechas futuras (hoy es 2026-10-25).</span></div>
+      <div><label for="extra" id="l-extra">Filtro opcional</label><select id="extra"></select></div></div>
+      <div class="barra"><button type="submit">Generar reporte</button><button type="button" class="sec" data-ir="catalogo">Cancelar</button></div></form>
+  </section>
+
+  <section data-pantalla="resultado" aria-labelledby="t-res" hidden>
+    <h2 id="t-res">3. Vista previa y exportación</h2>
+    <div class="tarjeta"><div class="tabla"><table><thead id="cabeza"></thead><tbody id="cuerpo"></tbody></table></div></div>
+    <div class="tarjeta"><p id="resumen"></p><p>Huella SHA-256: <code id="hash"></code></p><div id="reproduccion" role="status" aria-live="polite"></div>
+      <div class="barra"><button type="button" id="descargar">Descargar CSV</button><button type="button" class="sec" id="reproducir">Reproducir exportación</button><button type="button" class="sec" data-ir="catalogo">Otro reporte</button></div></div>
+  </section>
+</main>
+
+<script id="reglas" type="application/json">
+{"corte":"2026-10-25 12:00:00","hospital":"hosp-1","max_dias":92,
+ "catalogo":{"censo":{"titulo":"Censo por servicio","columnas":{"paciente":true,"documento":true,"servicio":false,"cama":false,"fecha":false},"filtro":["servicio",["medicina","cirugia","pediatria"]]},
+             "egresos":{"titulo":"Egresos","columnas":{"paciente":true,"documento":true,"tipo_alta":false,"fecha":false},"filtro":["tipo_alta",["medica","voluntaria","referencia","defuncion"]]}},
+ "datos":{"censo":[["hosp-1","Luis Pérez","2222","cirugia","B2","2026-10-21","2026-10-21 09:30:00"],["hosp-1","Ana López","1111","medicina","A1","2026-10-20","2026-10-20 08:00:00"],
+                   ["hosp-2","Otra Persona","9999","medicina","C3","2026-10-21","2026-10-21 10:00:00"],["hosp-1","Dato Tardío","4444","medicina","A2","2026-10-21","2026-10-25 15:00:00"]],
+          "egresos":[["hosp-1","Rosa Díaz","3333","medica","2026-10-22","2026-10-22 11:00:00"]]}}
+</script>
+<script id="logica">
+// Lógica pura (sin DOM): misma regla que Filtros::desde, Archivo::generar y Csv del Micro-HIS (más la validez del calendario).
+const REGLAS = JSON.parse(document.getElementById('reglas').textContent);
+const HOY = REGLAS.corte.slice(0, 10);
+function fechaReal(s) { if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d = new Date(s + 'T00:00:00Z'); return !isNaN(d) && d.toISOString().slice(0, 10) === s; }
+function validar(f, extraNombre, extraValores) {   // devuelve {campo, mensaje} o null
+  for (const c of ['desde', 'hasta']) if (!fechaReal(f[c])) return { campo: c, mensaje: 'Fecha obligatoria AAAA-MM-DD y real en el calendario' };
+  if (f.desde > f.hasta) return { campo: 'desde', mensaje: 'desde debe ser menor o igual a hasta' };
+  if ((Date.parse(f.hasta) - Date.parse(f.desde)) / 86400000 > REGLAS.max_dias) return { campo: 'hasta', mensaje: 'Máximo ' + REGLAS.max_dias + ' días' };
+  if (f.hasta > HOY) return { campo: 'hasta', mensaje: 'No se aceptan fechas futuras' };
+  if (f.extra && !extraValores.includes(f.extra)) return { campo: extraNombre, mensaje: 'Filtro no permitido para este reporte' };
+  return null;
+}
+function filtrar(codigo, f, extraNombre) {   // hospital, rango y registradas hasta el corte (+ filtro opcional)
+  const orden = codigo === 'censo' ? ['hospital_id', 'paciente', 'documento', 'servicio', 'cama', 'fecha', 'registrado_en'] : ['hospital_id', 'paciente', 'documento', 'tipo_alta', 'fecha', 'registrado_en'];
+  return REGLAS.datos[codigo].map(r => Object.fromEntries(orden.map((c, i) => [c, r[i]])))
+    .filter(r => r.hospital_id === REGLAS.hospital && r.fecha >= f.desde && r.fecha <= f.hasta && r.registrado_en <= REGLAS.corte && (!f.extra || r[extraNombre] === f.extra));
+}
+function comparar(a, b) {   // como el operador <=> de PHP para listas de textos: numérico si ambos lo son
+  for (let i = 0; i < a.length; i++) { const n = /^-?\d+(\.\d+)?$/.test(a[i]) && /^-?\d+(\.\d+)?$/.test(b[i]); const d = n ? Number(a[i]) - Number(b[i]) : (a[i] < b[i] ? -1 : a[i] > b[i] ? 1 : 0); if (d) return d < 0 ? -1 : 1; }
+  return 0;
+}
+function generarCsv(codigo, filas, verPersonales) {
+  const cols = Object.keys(REGLAS.catalogo[codigo].columnas), pers = REGLAS.catalogo[codigo].columnas;
+  const datos = filas.map(r => cols.map(c => (!verPersonales && pers[c]) ? '***' : String(r[c]))).sort(comparar);
+  const celda = v => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  return [cols].concat(datos).map(f => f.map(celda).join(',')).join('\n');
+}
+</script>
+<script id="ui">
+const $ = id => document.getElementById(id);
+let actual = null, ultimo = null;
+function ir(p) { document.querySelectorAll('[data-pantalla]').forEach(s => s.hidden = s.dataset.pantalla !== p); $('estado').textContent = ''; const h = document.querySelector('[data-pantalla="' + p + '"] h2'); h.tabIndex = -1; h.focus(); }
+async function sha(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+$('tarjetas').innerHTML = Object.entries(REGLAS.catalogo).map(([k, r]) => '<div class="tarjeta"><h3>' + r.titulo + '</h3><p class="ayuda">Columnas: ' + Object.keys(r.columnas).join(', ') + '</p><button type="button" data-reporte="' + k + '">Elegir ' + r.titulo + '</button></div>').join('');
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.ir) ir(b.dataset.ir);
+  if (b.dataset.reporte) { actual = b.dataset.reporte; const [n, vals] = REGLAS.catalogo[actual].filtro; $('reporte-actual').textContent = REGLAS.catalogo[actual].titulo; $('l-extra').textContent = 'Filtro opcional: ' + n;
+    $('extra').innerHTML = '<option value="">(todos)</option>' + vals.map(v => '<option>' + v + '</option>').join(''); $('error').hidden = true; ir('filtros'); $('desde').focus(); }
+});
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const [n, vals] = REGLAS.catalogo[actual].filtro, f = { desde: $('desde').value.trim(), hasta: $('hasta').value.trim(), extra: $('extra').value };
+  ['desde', 'hasta'].forEach(c => $(c).removeAttribute('aria-invalid'));
+  const malo = validar(f, n, vals), caja = $('error');
+  if (malo) {   // ERROR CRÍTICO: no se genera ni se registra nada (RF-02, RF-10); el foco va al mensaje
+    if ($(malo.campo)) $(malo.campo).setAttribute('aria-invalid', 'true');
+    caja.textContent = 'Filtro inválido en «' + malo.campo + '»: ' + malo.mensaje + '. No se generó ningún archivo.'; caja.hidden = false; caja.focus(); return;
+  }
+  caja.hidden = true;
+  const ver = $('rol').value === 'jefatura', filas = filtrar(actual, f, n), csv = generarCsv(actual, filas, ver), cols = Object.keys(REGLAS.catalogo[actual].columnas);
+  ultimo = { actual, f, n, ver, csv, hash: await sha(csv), id: 'exp-' + Math.random().toString(16).slice(2, 14) };
+  $('cabeza').innerHTML = '<tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+  $('cuerpo').innerHTML = csv.split('\n').slice(1).map(l => '<tr>' + l.split(',').map(c => '<td>' + c + '</td>').join('') + '</tr>').join('') || '<tr><td colspan="' + cols.length + '">Sin filas en el rango.</td></tr>';
+  $('resumen').textContent = (csv.split('\n').length - 1) + ' filas · corte ' + REGLAS.corte + ' · exportación ' + ultimo.id + (ver ? '' : ' · datos personales enmascarados');
+  $('hash').textContent = ultimo.hash; $('reproduccion').textContent = ''; ir('resultado'); $('estado').textContent = 'Exportación registrada.';
+});
+$('reproducir').addEventListener('click', async () => {   // vuelve a generar con los filtros y el corte guardados y compara la huella (RF-08)
+  const csv = generarCsv(ultimo.actual, filtrar(ultimo.actual, ultimo.f, ultimo.n), ultimo.ver), h = await sha(csv);
+  $('reproduccion').innerHTML = '<div class="msg ' + (h === ultimo.hash ? 'ok' : 'err') + '">' + (h === ultimo.hash ? 'Coincide: la exportación se reproduce idéntica aunque lleguen datos nuevos después del corte.' : 'No coincide.') + '</div>';
+});
+$('descargar').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ultimo.csv], { type: 'text/csv' })); a.download = ultimo.id + '.csv'; a.click(); });
+ir('catalogo');
+</script>
+</body>
+</html>

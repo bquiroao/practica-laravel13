@@ -1,0 +1,55 @@
+@startuml actividad-alerta-critica
+' Semana 1 - Actividad: detección, envío, acuse y escalamiento de una alerta crítica
+skinparam ActivityBackgroundColor #F4F8FF
+skinparam ActivityBorderColor #2F5597
+skinparam ActivityDiamondBackgroundColor #FFF4E0
+
+|Sistema origen|
+start
+:Detecta evento crítico\n(p. ej. potasio 6.8 mmol/L, PAC-00451);
+:Envía evento con id de origen,\ncódigo de paciente, prioridad y tenant;
+|Módulo de alertas|
+if (¿Datos completos y válidos? [RN-01]) then (no)
+  :Rechaza el evento con error\nde validación (excepción);
+  stop
+else (sí)
+endif
+if (¿Evento ya registrado\n(mismo origen + id)? [RN-02]) then (sí)
+  :Devuelve la alerta existente\n(no duplica);
+  stop
+else (no)
+endif
+:CU-01 Crea alerta en estado CREADA\ny registra evento «creada»;
+:CU-02 Resuelve destinatarios de nivel 0\npor rol y servicio;
+if (¿Hay destinatarios disponibles? [RN-03]) then (no)
+  :Registra «sin destinatarios»\ny pasa a nivel 1;
+else (sí)
+endif
+repeat :CU-03 Envía por el puerto de notificación\n(adaptador simulado);
+  backward :CU-09 Espera intervalo y reintenta;
+repeat while (¿Entrega fallida y intentos < 3? [RN-08]) is (sí) not (no)
+if (¿Se agotaron los 3 intentos? [RN-08]) then (sí)
+  :Registra «entrega fallida»\ny escala de inmediato;
+else (no)
+  :Alerta ENVIADA, inicia plazo\nde acuse según prioridad [RN-04];
+endif
+|Destinatario|
+if (¿Acusa antes de que venza el plazo?) then (sí)
+  :CU-04 Acusa la alerta [RN-06, RN-07]\n→ queda ACUSADA con quién y cuándo;
+  :CU-06 Atiende y cierra con nota [RN-09]\n→ queda CERRADA y se registra;
+  :Resultado: alerta atendida\ncon historial completo;
+  stop
+else (no, vence el plazo)
+  |Reloj del sistema|
+  :Revisa alertas vencidas\n(reloj inyectable);
+  if (¿Nivel actual < 2? [RN-05]) then (sí)
+    :CU-05 Escala un nivel, notifica al nuevo\nnivel y reinicia el plazo → ESCALADA;
+    :Vuelve a esperar acuse\ndel nuevo nivel;
+    detach
+  else (no)
+    :Registra «escalamiento agotado»\npara supervisión;
+    :Resultado: alerta sin atención visible\nen el tablero de coordinación;
+    stop
+  endif
+endif
+@enduml

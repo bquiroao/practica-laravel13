@@ -1,0 +1,17 @@
+@startsalt semana-08-wireframe-w1-alerta-critica
+{+
+  {/ <b>Expediente | Alergias | Notas | Signos }
+  ..
+  <b>Expediente PAC-00451</b> | . | "Buscar paciente   "
+  ==
+  {+
+    <b>[CRÍTICA] Alergia que pone en riesgo la vida</b> | (1)
+    • Penicilina — Pone en riesgo la vida — reacción: Edema de glotis | (2)
+    • Ibuprofeno — Moderada — reacción: Urticaria
+    [He leído las alergias de este paciente] | (3)
+    <i>¿Por qué debo confirmar?</i> | (4)
+  }
+  ..
+  Resto del expediente (visible debajo, no bloqueado) | (5)
+}
+@endsalt

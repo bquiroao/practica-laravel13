@@ -1,0 +1,45 @@
+@startuml c4-componentes
+' Semana 3 - C4 nivel 3 (componentes) del núcleo del Micro-HIS
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+
+Container(consola, "Consola (Presentation)", "PHP CLI", "ConsolaAlertas")
+ContainerDb(bd, "micro_alertas", "PostgreSQL 16")
+
+Container_Boundary(app, "Application") {
+  Component(registrar, "RegistrarAlertaCritica", "Caso de uso", "CU-01, RN-02")
+  Component(acusar, "AcusarAlerta", "Caso de uso", "CU-04, RN-06, RN-07")
+  Component(escalar, "EscalarAlertasVencidas", "Caso de uso", "CU-05, RN-04, RN-05")
+  Component(cerrar, "CerrarAlerta / ConsultarHistorial / ListarAlertas", "Casos de uso", "CU-06, CU-07")
+  Component(notificar, "NotificarNivel", "Servicio de aplicación", "CU-02, CU-03, RN-03")
+  Component(despachador, "DespachadorNotificaciones", "Servicio de aplicación", "CU-09, RN-08")
+}
+Container_Boundary(dom, "Domain") {
+  Component(alerta, "Alerta + PoliticaEscalamiento", "Entidad y reglas", "RN-01 a RN-11")
+  Component(puertos, "Puertos", "Interfaces", "AlertaRepository, PuertoNotificacion, DirectorioDestinatarios, Reloj")
+}
+Container_Boundary(per, "Persistence (adaptadores)") {
+  Component(pdo, "PdoAlertaRepository", "PDO pgsql")
+  Component(sim, "NotificadorSimulado", "Bitácora")
+  Component(dir, "DirectorioDestinatariosEnMemoria", "Configuración ficticia")
+  Component(reloj, "RelojSistema / RelojFijo", "Reloj")
+}
+
+Rel(consola, registrar, "usa")
+Rel(consola, acusar, "usa")
+Rel(consola, escalar, "usa")
+Rel(consola, cerrar, "usa")
+Rel(registrar, notificar, "usa")
+Rel(escalar, notificar, "usa")
+Rel(notificar, despachador, "usa")
+Rel(registrar, alerta, "crea")
+Rel(acusar, alerta, "modifica")
+Rel(escalar, alerta, "evalúa y sube nivel")
+Rel(registrar, puertos, "depende de")
+Rel(despachador, puertos, "depende de")
+Rel(pdo, puertos, "implementa")
+Rel(sim, puertos, "implementa")
+Rel(dir, puertos, "implementa")
+Rel(reloj, puertos, "implementa")
+Rel(pdo, bd, "SQL preparado")
+@enduml

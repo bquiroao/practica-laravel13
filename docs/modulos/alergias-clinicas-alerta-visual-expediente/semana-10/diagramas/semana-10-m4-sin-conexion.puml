@@ -1,0 +1,19 @@
+@startsalt semana-10-m4-sin-conexion
+{+
+  {< <b>PAC-00451</b> }
+  ==
+  {+
+    <b>Sin conexión.</b> | (1)
+    Las alergias no se pudieron cargar.
+    No administre sin verificar con el paciente.
+  }
+  [      Reintentar      ] | (2)
+  ..
+  {+
+    <b>No se confirmó el guardado.</b> | (3)
+    Penicilina — Pone en riesgo la vida
+    Sus datos siguen aquí.
+  }
+  [   Reintentar guardado   ] | (4)
+}
+@endsalt

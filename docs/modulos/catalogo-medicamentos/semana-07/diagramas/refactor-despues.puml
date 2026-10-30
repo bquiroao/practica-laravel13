@@ -1,0 +1,38 @@
+@startuml refactor-despues
+' Catálogo de medicamentos - Semana 7 - Refactor: DESPUÉS (separado en capas)
+title DESPUÉS: cada responsabilidad en su capa (ya implementado en el Micro-HIS)
+skinparam classAttributeIconSize 0
+hide empty members
+left to right direction
+package UI {
+  class ApiMedicamentos <<controlador>>
+}
+package Aplicacion {
+  class RegistrarNuevaVersion <<caso de uso>>
+}
+package Dominio {
+  class Medicamento {
+    +nuevaVersion(): [cerrada, nueva]
+  }
+  class Vigencia {
+    +seCruzaCon()
+  }
+  interface HistorialCatalogo
+  interface ControlEquivalencia
+  interface EscrituraCatalogo {
+    +reemplazarVigente(cerrada, nueva)
+  }
+}
+package Persistencia {
+  class RepositorioMedicamentosPdo
+}
+ApiMedicamentos --> RegistrarNuevaVersion : hospital del token
+RegistrarNuevaVersion --> Medicamento
+Medicamento --> Vigencia
+RegistrarNuevaVersion --> HistorialCatalogo
+RegistrarNuevaVersion --> ControlEquivalencia
+RegistrarNuevaVersion --> EscrituraCatalogo
+RepositorioMedicamentosPdo ..|> HistorialCatalogo
+RepositorioMedicamentosPdo ..|> ControlEquivalencia
+RepositorioMedicamentosPdo ..|> EscrituraCatalogo
+@enduml

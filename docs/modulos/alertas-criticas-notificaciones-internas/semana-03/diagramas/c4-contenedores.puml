@@ -1,0 +1,23 @@
+@startuml c4-contenedores
+' Semana 3 - C4 nivel 2 (contenedores) del Micro-HIS Alertas críticas y notificaciones internas
+!include <C4/C4_Container>
+LAYOUT_TOP_DOWN()
+
+Person(personal, "Personal clínico", "Enfermería de turno, médico tratante, jefe de servicio, coordinación médica (usuarios ficticios)")
+System_Ext(origen, "Sistema origen", "ingreso-resultados-laboratorio / alergias clínicas (contrato por confirmar)")
+System_Ext(planificador, "Planificador", "Ejecuta «escalar» cada minuto (en el curso: a mano, con reloj fijo)")
+
+System_Boundary(mh, "Micro-HIS Alertas críticas y notificaciones internas") {
+  Container(consola, "Consola", "PHP 8.2+ CLI", "consola.php + ConsolaAlertas: registrar, acusar, cerrar, escalar, historial, listar")
+  Container(nucleo, "Núcleo de la aplicación", "PHP 8.2+ vanilla", "Application (casos de uso) + Domain (Alerta, reglas, puertos)")
+  ContainerDb(bd, "micro_alertas", "PostgreSQL 16 (Docker, puerto 55444)", "alerta_critica, alerta_destinatario, alerta_evento (propuesta Micro-HIS)")
+  Container(bitacora, "Notificador simulado", "Archivo var/notificaciones-simuladas.log", "Registra lo «enviado»; no hay correo, SMS ni push reales")
+}
+
+Rel(origen, consola, "Evento crítico", "comando registrar")
+Rel(personal, consola, "Acusa, cierra y consulta", "CLI")
+Rel(planificador, consola, "Revisa plazos vencidos", "escalar")
+Rel(consola, nucleo, "Invoca casos de uso", "llamada PHP")
+Rel(nucleo, bd, "Lee y escribe", "PDO pgsql, prepare() + execute()")
+Rel(nucleo, bitacora, "Entrega por PuertoNotificacion", "con hasta 3 intentos")
+@enduml

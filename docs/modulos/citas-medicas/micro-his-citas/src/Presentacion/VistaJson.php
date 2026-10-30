@@ -8,7 +8,7 @@ use MicroHis\Citas\Dominio\ReglaDeDominio;
 /** Vista (MVC): convierte el resultado del caso de uso en la respuesta HTTP. Es la única dueña de los códigos y textos al usuario. */
 final class VistaJson
 {
-    private const HTTP = ['E2' => 422, 'E3' => 422, 'E4' => 409, 'E5' => 409, 'E7' => 422, 'NF' => 404];
+    private const HTTP = ['E2' => 422, 'E3' => 422, 'E4' => 409, 'E5' => 409, 'E6' => 409, 'E7' => 422, 'NF' => 404];
 
     public function exito(int $status, array $datos = []): array { return ['status' => $status] + $datos; }
     public function rechazo(ReglaDeDominio $e): array { return ['status' => self::HTTP[$e->codigo], 'error' => $e->codigo, 'mensaje' => $e->getMessage()]; }

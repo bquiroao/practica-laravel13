@@ -1,0 +1,23 @@
+Prueba de la API en vivo - Catálogo de medicamentos
+Base: http://127.0.0.1:8085 · 2026-10-30 06:13:51 UTC
+
+OK    GET    /api/v1/medicamentos?q=amoxi                   -> 200 (esperado 200) id=evidencia-0001
+      Búsqueda de vigentes (consulta clínica) · 2 resultado(s)
+OK    GET    /api/v1/medicamentos?q=amoxi                   -> 401 (esperado 401) id=evidencia-0002
+      Sin token · NO_AUTENTICADO: Falta un token válido (Authorization: Bearer ...)
+OK    POST   /api/v1/medicamentos                           -> 403 (esperado 403) id=evidencia-0003
+      Rol sin permiso para registrar · PROHIBIDO: El rol CONSULTA_CLINICA no puede realizar «registrar»
+OK    POST   /api/v1/medicamentos                           -> 201 (esperado 201) id=evidencia-0004
+      Alta válida · MED-000107
+OK    POST   /api/v1/medicamentos                           -> 409 (esperado 409) id=evidencia-0005
+      Alta duplicada de Amoxicilina 500 mg · DUPLICADO: Ya existe MED-000102 con el mismo principio activo, concentración, forma y vía vigente en esas fec…
+OK    POST   /api/v1/medicamentos                           -> 422 (esperado 422) id=evidencia-0006
+      Datos inválidos · VALIDACION: Hay datos inválidos
+OK    GET    /api/v1/medicamentos/MED-000102                -> 404 (esperado 404) id=evidencia-0007
+      Otro hospital (tenant) · NO_ENCONTRADO: No existe el medicamento MED-000102 en este hospital
+OK    GET    /api/v1/medicamentos/MED-000104/versiones      -> 200 (esperado 200) id=evidencia-0008
+      Historial (auditor) · 2 resultado(s)
+OK    DELETE /api/v1/medicamentos/MED-000101                -> 409 (esperado 409) id=evidencia-0009
+      Eliminar código usado · EN_USO: MED-000101 ya se usó en prescripciones: no se puede eliminar, dé de baja su vigencia
+
+Resumen: 9 de 9 respuestas con el código esperado

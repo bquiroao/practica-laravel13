@@ -1,0 +1,25 @@
+@startuml semana-03-dependencias
+' Dependencias entre paquetes: siempre hacia el Dominio
+skinparam packageStyle rectangle
+package "Presentation\nsrc/Presentacion/Consola" as P
+package "Application\nsrc/Aplicacion" as A
+package "Domain\nsrc/Dominio" as D {
+  interface RepositorioAlergias
+  interface DirectorioPacientes
+  interface Reloj
+}
+package "Persistence\nsrc/Persistencia" as I
+component "bootstrap.php\n(Composition Root)" as R
+P --> A : usa casos de uso
+A --> D : usa entidades, reglas\ne interfaces
+I ..|> D : implementa interfaces\n(inversión de dependencias)
+R --> P
+R --> A
+R --> I
+note right of D
+  El Dominio no importa nada de
+  Application, Persistence ni PDO.
+  Ninguna capa interior conoce a
+  una exterior.
+end note
+@enduml

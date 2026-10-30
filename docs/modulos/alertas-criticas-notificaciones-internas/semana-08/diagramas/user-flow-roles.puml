@@ -1,0 +1,36 @@
+@startuml user-flow-roles
+' Semana 8 - User flow por rol autorizado
+|Enfermería de turno|
+start
+:Recibe aviso «[CRITICA] PAC-00451»;
+:Abre la bandeja (estado de carga);
+if (¿Hay alertas pendientes?) then (no)
+  :Estado vacío «Sin alertas pendientes»;
+  stop
+endif
+:Abre la tarjeta: prioridad, tiempo restante;
+:Pulsa «Acusar»;
+if (¿Respuesta?) then (sin conexión)
+  :Error recuperable: «No se registró, reintente»\n(reintentar es seguro: acuse idempotente);
+  :Reintenta;
+elseif (403 RN-07)
+  :«No fue notificado de esta alerta»\nayuda: a quién corresponde;
+  stop
+else (200)
+endif
+:Confirmación «Acuse registrado 10:05»;
+|Médico tratante|
+:Ve la alerta ACUSADA;
+:Abre «Cerrar» → escribe nota obligatoria;
+if (¿Nota vacía?) then (sí)
+  :Mensaje en el campo: «La nota es obligatoria»;
+else (no)
+  :Confirma cierre;
+  :Éxito: alerta CERRADA con historial;
+endif
+|Jefe de servicio|
+:(Si vence el plazo) recibe escalamiento nivel 1;
+:Aviso «Escalada: nadie acusó en 15 min»;
+:Acusa y atiende;
+stop
+@enduml

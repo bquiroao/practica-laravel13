@@ -9,7 +9,7 @@ use MicroHis\ContratosApi\Dominio\VersionNueva;
 /** Adaptador en memoria de la interfaz Repository: cumple el mismo contrato que RepositorioPdo, sin base. Para pruebas y demos. */
 final class RepositorioEnMemoria implements RepositorioDocumentos
 {
-    /** @var array<int, array{slug: string, tipo: string, version: string, autor: string, estado: string, audiencia: string[], revisor: ?string, motivo: ?string}> */
+    /** @var array<int, array{slug: string, tipo: string, version: string, autor: string, estado: string, audiencia: string[], revisor: ?string, obsoleta_por: ?string, motivo: ?string}> */
     private array $versiones = [];
 
     public function versiones(string $slug): array
@@ -19,17 +19,19 @@ final class RepositorioEnMemoria implements RepositorioDocumentos
     public function guardarEnRevision(VersionNueva $v, string $autor): int
     {
         $this->versiones[count($this->versiones) + 1] = ['slug' => $v->slug, 'tipo' => $v->tipo, 'version' => $v->version, 'autor' => $autor,
-                                                         'estado' => 'in_review', 'audiencia' => $v->audiencia, 'revisor' => null, 'motivo' => null];
+                                                         'estado' => 'in_review', 'audiencia' => $v->audiencia, 'revisor' => null, 'obsoleta_por' => null, 'motivo' => null];
         return count($this->versiones);
     }
     public function datosRevision(int $id): ?array
     {
-        return isset($this->versiones[$id]) ? ['autor' => $this->versiones[$id]['autor'], 'estado' => $this->versiones[$id]['estado']] : null;
+        $v = $this->versiones[$id] ?? null;
+        return $v === null ? null : ['autor' => $v['autor'], 'estado' => $v['estado'], 'revisor' => $v['revisor'], 'obsoleta_por' => $v['obsoleta_por']];
     }
     public function cambiarEstado(int $id, string $de, string $a, string $revisor, ?string $motivo): bool
     {
         if (($this->versiones[$id]['estado'] ?? null) !== $de) return false;   // concurrencia optimista, igual que el UPDATE ... WHERE status = ?
-        $this->versiones[$id] = ['estado' => $a, 'revisor' => $revisor, 'motivo' => $motivo ?? $this->versiones[$id]['motivo']] + $this->versiones[$id];
+        $quien = $a === 'obsolete' ? 'obsoleta_por' : 'revisor';   // igual que las dos columnas de PDO (R-10)
+        $this->versiones[$id] = ['estado' => $a, $quien => $revisor, 'motivo' => $motivo ?? $this->versiones[$id]['motivo']] + $this->versiones[$id];
         return true;
     }
     public function consultables(string $slug): array
