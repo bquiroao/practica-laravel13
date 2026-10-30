@@ -36,6 +36,15 @@ final class FormularioVersion extends Formulario
         return ['digest' => $d['digest'], 'entorno' => $d['entorno']];
     }
 
+    /** @return array<string, string> semana 6: digest, entorno, guia y smoke */
+    public static function despliegue(Solicitud $s): array
+    {
+        $d = self::objeto($s);
+        self::tipos($d, ['digest' => 'texto', 'entorno' => 'texto', 'guia' => 'texto', 'smoke' => 'texto'], ['digest', 'entorno', 'guia', 'smoke']);
+
+        return $d;
+    }
+
     public static function gate(Solicitud $s): int
     {
         $d = self::objeto($s);

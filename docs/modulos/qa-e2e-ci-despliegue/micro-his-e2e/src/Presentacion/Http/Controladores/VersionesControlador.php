@@ -8,6 +8,7 @@ use E2e\Aplicacion\CasosDeUso\ConsultarTrazabilidad;
 use E2e\Aplicacion\CasosDeUso\EvaluarGate;
 use E2e\Aplicacion\CasosDeUso\IniciarEjecucion;
 use E2e\Aplicacion\CasosDeUso\PlanificarPruebas;
+use E2e\Aplicacion\CasosDeUso\RegistrarDespliegue;
 use E2e\Aplicacion\CasosDeUso\RegistrarVersion;
 use E2e\Presentacion\Http\Formularios\EntradaInvalida;
 use E2e\Presentacion\Http\Formularios\FormularioVersion;
@@ -26,6 +27,7 @@ final class VersionesControlador
         private readonly IniciarEjecucion $iniciar,
         private readonly EvaluarGate $gate,
         private readonly ConsultarTrazabilidad $trazabilidad,
+        private readonly RegistrarDespliegue $desplegar,
         private readonly SalidaVista $vista = new SalidaVista(),
         private readonly ErrorVista $error = new ErrorVista(),
     ) {
@@ -78,6 +80,18 @@ final class VersionesControlador
         }
 
         return $this->vista->mostrar($this->gate->ejecutar($i->usuario, $i->tenant, $p['version'], $ejecucion));
+    }
+
+    /** @param array<string, string> $p semana 6: CU-11 */
+    public function desplegar(Solicitud $s, Identidad $i, array $p): Respuesta
+    {
+        try {
+            $d = FormularioVersion::despliegue($s);
+        } catch (EntradaInvalida $e) {
+            return $this->error->entrada($e);
+        }
+
+        return $this->vista->mostrar($this->desplegar->ejecutar($i->usuario, $i->tenant, $p['version'], $d));
     }
 
     /** @param array<string, string> $p */

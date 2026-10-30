@@ -123,6 +123,20 @@ foreach ($fabricas as $nombre => $fabrica) {
         igual([], $p['evaluaciones']->deVersion('hosp-sur', '2.4.0'), 'otro tenant');
     });
 
+    prueba($id(8), "[$nombre] Despliegues (semana 6): se agregan en orden; vigente() es el último DESPLEGADO del entorno, no un REVERTIDO", function () use ($fabrica, $version, $ejecucion, $hora): void {
+        $p = $fabrica();
+        $v = $version($p);
+        $e = $ejecucion($p, $v);
+        $p['evaluaciones']->guardar(new Decision(Decision::APROBADO, ['a_criticos' => true], [], 'hosp-norte', '2.4.0', (int) $e->id, $v->digest, 'gate-2026.1', $hora, 'resp-release'));
+        $d = static fn (string $estado): \E2e\Dominio\Modelo\Despliegue => new \E2e\Dominio\Modelo\Despliegue(null, 'hosp-norte', '2.4.0', $v->digest, 'produccion', 'guia-2026.1',
+            'ops-luis', $estado, $estado === 'REVERTIDO' ? '2.3.0' : null, $hora);
+        $primero = $p['despliegues']->registrar($d('DESPLEGADO'));
+        $p['despliegues']->registrar($d('REVERTIDO'));
+        igual([2, $primero->id, null, null], [count($p['despliegues']->deVersion('hosp-norte', '2.4.0')), $p['despliegues']->vigente('hosp-norte', 'produccion')?->id,
+            $p['despliegues']->vigente('hosp-norte', 'staging'), $p['despliegues']->vigente('hosp-sur', 'produccion')], 'despliegues');
+        igual('2.3.0', $p['despliegues']->deVersion('hosp-norte', '2.4.0')[1]->revertidoA, 'revertido a');
+    });
+
     prueba($id(7), "[$nombre] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (versión, ejecución, resultado, traza)", function () use ($fabrica, $version, $resultado): void {
         $p = $fabrica();
         lanza(RuntimeException::class, static fn () => $p['transaccion']->ejecutar(static function () use ($p, $version): void {

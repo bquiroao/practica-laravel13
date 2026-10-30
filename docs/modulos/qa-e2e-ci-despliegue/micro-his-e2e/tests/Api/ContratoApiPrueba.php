@@ -48,9 +48,10 @@ $normalizar = static fn (string $ruta): string => preg_replace(['/\{\w+\}/', '/\
 $casoDeUso = ['registrarEscenario' => CasosDeUso\RegistrarEscenario::class, 'registrarVersion' => CasosDeUso\RegistrarVersion::class,
     'planificarPruebas' => CasosDeUso\PlanificarPruebas::class, 'iniciarEjecucion' => CasosDeUso\IniciarEjecucion::class,
     'evaluarGate' => CasosDeUso\EvaluarGate::class, 'consultarTrazabilidad' => CasosDeUso\ConsultarTrazabilidad::class,
-    'reportarResultado' => CasosDeUso\ReportarResultado::class, 'cerrarEjecucion' => CasosDeUso\CerrarEjecucion::class];
+    'reportarResultado' => CasosDeUso\ReportarResultado::class, 'cerrarEjecucion' => CasosDeUso\CerrarEjecucion::class,
+    'registrarDespliegue' => CasosDeUso\RegistrarDespliegue::class];
 
-prueba('API-01', 'Contrato = código: las 8 operaciones son las 8 rutas del código, y cada x-permiso es la constante PERMISO de su caso de uso', function () use ($apiContrato, $normalizar, $casoDeUso): void {
+prueba('API-01', 'Contrato = código: las operaciones son las rutas del código, y cada x-permiso es la constante PERMISO de su caso de uso', function () use ($apiContrato, $normalizar, $casoDeUso): void {
     $contrato = $apiContrato();
     $deContrato = array_map($normalizar, array_keys($contrato));
     $deCodigo = array_map(static fn (array $r): string => $r[0] . ' ' . $normalizar(Rutas::BASE . $r[1]), Rutas::tabla());

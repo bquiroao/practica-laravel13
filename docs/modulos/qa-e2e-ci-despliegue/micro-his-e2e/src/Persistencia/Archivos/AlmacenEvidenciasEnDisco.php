@@ -22,7 +22,9 @@ final class AlmacenEvidenciasEnDisco implements AlmacenEvidencias
         if (!is_dir(dirname($archivo)) && !@mkdir(dirname($archivo), 0770, true) && !is_dir(dirname($archivo))) {
             throw new AlmacenNoDisponible('no se pudo crear el directorio del almacén');
         }
-        if (!is_file($archivo) && @file_put_contents($archivo, $bytes, LOCK_EX) !== strlen($bytes)) {
+        // Semana 6: si ya existe pero NO verifica (se corrompió), se repara con los bytes correctos, que son los que llegan.
+        // Antes se dejaba como estaba y ese artefacto no se podía volver a guardar nunca: el resultado quedaba pendiente para siempre.
+        if (!$this->confirmada($sha) && @file_put_contents($archivo, $bytes, LOCK_EX) !== strlen($bytes)) {
             throw new AlmacenNoDisponible('no se pudo escribir el artefacto');
         }
         if (!$this->confirmada($sha)) {

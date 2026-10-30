@@ -1,0 +1,62 @@
+@startuml semana-06-trazabilidad
+title Diagrama trazable: actor → caso de uso → regla y RF → DIP → capa → Repository → contrato → prueba (en verde, el cambio de la semana 6)
+skinparam defaultFontSize 10
+left to right direction
+skinparam rectangleRoundCorner 8
+
+rectangle "Actores" {
+  rectangle "Pipeline CI" as A1
+  rectangle "Responsable\nde release" as A2
+  rectangle "Operador de\ndespliegue" as A3 #DDEFE4
+}
+rectangle "Casos de uso (S1)" {
+  rectangle "CU-05 Reportar\nresultado" as C5
+  rectangle "CU-09 Evaluar\ngate" as C9
+  rectangle "CU-11 Desplegar" as C11 #DDEFE4
+}
+rectangle "Reglas y RF (S1-S2)" {
+  rectangle "R-05/R-06/R-12\nRF-05, RF-06, RF-13" as R1
+  rectangle "R-03/R-09\nRF-09" as R2
+  rectangle "R-11\nRF-12" as R3 #DDEFE4
+}
+rectangle "DIP (S2): puertos\ndel dominio" {
+  rectangle "AlmacenEvidencias\nReloj" as P1
+  rectangle "QualityGate\n(pura)" as P2
+  rectangle "Despliegue::registrar\n(pura)" as P3 #DDEFE4
+}
+rectangle "Capas y Repository (S3-S4)" {
+  rectangle "ReportarResultado →\nRepositorioEjecuciones" as L1
+  rectangle "EvaluarGate →\nRepositorioEvaluaciones" as L2
+  rectangle "RegistrarDespliegue →\nRepositorioDespliegues" as L3 #DDEFE4
+}
+rectangle "Contrato (S5-S6)" {
+  rectangle "POST /ejecuciones/{id}\n/resultados" as K1
+  rectangle "POST /versiones/{v}\n/gate" as K2
+  rectangle "POST /versiones/{v}\n/despliegues (1.1.0)" as K3 #DDEFE4
+}
+rectangle "Pruebas" {
+  rectangle "APP-03..05, CLI-01..05\nINT-05, M10-M13" as T1
+  rectangle "DOM-08..10, APP-02\nM7-M9" as T2
+  rectangle "CAM-01..06, INT-10\nCON-08, M26-M30" as T3 #DDEFE4
+}
+
+A1 --> C5
+A2 --> C9
+A3 --> C11
+C5 --> R1
+C9 --> R2
+C11 --> R3
+R1 --> P1
+R2 --> P2
+R3 --> P3
+P1 --> L1
+P2 --> L2
+P3 --> L3
+L1 --> K1
+L2 --> K2
+L3 --> K3
+K1 --> T1
+K2 --> T2
+K3 --> T3
+C11 ..> C9 : <<include>>\núltimo gate APROBADO
+@enduml

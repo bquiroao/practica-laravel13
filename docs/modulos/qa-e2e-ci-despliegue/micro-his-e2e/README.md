@@ -24,13 +24,13 @@ Implementa el flujo de las semanas 1 y 2:
 src/
   Dominio/        Modelo (EscenarioE2E, Version, Ejecucion, ResultadoEscenario, Evidencia, PoliticaGate, Decision, QualityGate),
                   Puertos (repositorios, Reloj), Excepciones
-  Aplicacion/     CasosDeUso (8), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
+  Aplicacion/     CasosDeUso (9; RegistrarDespliegue desde la semana 6), Puertos (PoliticaAcceso, AlmacenEvidencias, RegistroAuditoria, Transaccion), Resultados\Salida
   Persistencia/   Pdo, EnMemoria, Archivos (almacén por contenido), Configuracion, FabricaAdaptadores
   Cliente/        ReportadorCi (lado del pipeline: reintentos idempotentes y bandeja de pendientes), transportes
   Presentacion/   Http: Kernel (autentica y enruta), Formularios (forma, 400), Controladores (MVC), Vistas (códigos HTTP)
 bootstrap/        autoload.php, contenedor.php (raíz de composición)
 database/         schema.sql, datos-demo.sql / datos-demo.php, integracion-compartida.sql (semana 4)
-api/              openapi.yaml (contrato 1.0.0, semana 5; verificado por tests/Api)
+api/              openapi.yaml (contrato 1.1.0: 1.0.0 en la semana 5 + despliegues en la 6; verificado por tests/Api)
 bin/              instalar-base.php, demo-http.sh, medir.php y proxy-ingesta.php (frontera de microservicio, semana 5)
 tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, Persistencia/, Contratos/ (memoria y PDO), Mvc/,
                   Presentacion/, Arquitectura/, Integracion/
@@ -41,7 +41,7 @@ tests/            ejecutar.php, mutaciones.php, Dobles/, Dominio/, Aplicacion/, 
 ```bash
 php tests/ejecutar.php                                       # sin base: dominio, aplicación (dobles), HTTP y arquitectura
 E2E_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php     # + integración (recrea el esquema e2e)
-E2E_DB_DSN=... php tests/mutaciones.php                      # 25 defectos sembrados: la suite debe detectarlos todos
+E2E_DB_DSN=... php tests/mutaciones.php                      # 31 defectos sembrados: la suite debe detectarlos todos
 E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTTP real (php -S + curl)
 ```
 
@@ -57,3 +57,4 @@ E2E_DB_DSN=... bash bin/demo-http.sh                         # recorrido por HTT
 | `POST /api/v1/e2e/ejecuciones/{id}/cierre` | CerrarEjecucion | `e2e.ejecutar` |
 | `POST /api/v1/e2e/versiones/{v}/gate` | EvaluarGate | `e2e.evaluar` |
 | `GET /api/v1/e2e/versiones/{v}/trazabilidad` | ConsultarTrazabilidad | `e2e.consultar` |
+| `POST /api/v1/e2e/versiones/{v}/despliegues` (semana 6) | RegistrarDespliegue | `e2e.desplegar` |

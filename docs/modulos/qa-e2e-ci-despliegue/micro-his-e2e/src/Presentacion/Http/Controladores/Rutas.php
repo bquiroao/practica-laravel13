@@ -21,6 +21,7 @@ final class Rutas
             ['POST', "/versiones/$v/plan", 'versiones', 'planificar'],
             ['POST', "/versiones/$v/ejecuciones", 'versiones', 'iniciarEjecucion'],
             ['POST', "/versiones/$v/gate", 'versiones', 'evaluarGate'],
+            ['POST', "/versiones/$v/despliegues", 'versiones', 'desplegar'],
             ['GET', "/versiones/$v/trazabilidad", 'versiones', 'trazabilidad'],
             ['POST', '/ejecuciones/(?<id>\d+)/resultados', 'ejecuciones', 'reportar'],
             ['POST', '/ejecuciones/(?<id>\d+)/cierre', 'ejecuciones', 'cerrar'],

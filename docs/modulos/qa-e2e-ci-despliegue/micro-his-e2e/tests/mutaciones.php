@@ -54,6 +54,16 @@ $mutaciones = [
     'M23 el reportador reintenta un 4xx' => ['src/Cliente/ReportadorCi.php', "if (\$r['estado'] < 500 && \$r['estado'] !== 429) {", 'if (false) {'],
     'M24 el contrato no documenta el 413 de reportar' => ['api/openapi.yaml', "        '413':\n          \$ref: '#/components/responses/Error'\n", ''],
     'M25 el kernel acepta cualquier X-Request-ID' => ['src/Presentacion/Http/Kernel.php', "preg_match('/^[A-Za-z0-9-]{8,64}\$/', \$propio)", "preg_match('/^.+\$/s', \$propio)"],
+    // Semana 6: cambio práctico, despliegue reproducible (R-11).
+    'M26 se despliega con la PRIMERA evaluación, no con la última' => ['src/Aplicacion/CasosDeUso/RegistrarDespliegue.php', 'end($evaluaciones)', 'reset($evaluaciones)'],
+    'M27 no se compara el digest instalado con el evaluado' => ['src/Dominio/Modelo/Despliegue.php', 'if ($digest !== $version->digest || $ultima->digest !== $version->digest) {', 'if (false) {'],
+    'M28 la aprobación no vence' => ['src/Dominio/Modelo/Despliegue.php', 'if ($ahora->getTimestamp() - $ultima->evaluadaEn->getTimestamp() > $vigenciaHoras * 3600) {', 'if (false) {'],
+    'M29 un smoke que falla deja el despliegue DESPLEGADO' => ['src/Dominio/Modelo/Despliegue.php', "\$revertido = \$smoke === 'FALLA';", '$revertido = false;'],
+    'M30 la base acepta un despliegue sin gate aprobado (esquema)' => ['database/schema.sql',
+        'CREATE TRIGGER despliegues_exigir_gate BEFORE INSERT ON despliegues FOR EACH ROW EXECUTE FUNCTION despliegues_exigir_gate();', ''],
+    'M31 el almacén no repara un artefacto corrupto' => ['src/Persistencia/Archivos/AlmacenEvidenciasEnDisco.php',
+        'if (!$this->confirmada($sha) && @file_put_contents($archivo, $bytes, LOCK_EX) !== strlen($bytes)) {',
+        'if (!is_file($archivo) && @file_put_contents($archivo, $bytes, LOCK_EX) !== strlen($bytes)) {'],
 ];
 
 function copiar(string $origen, string $destino): void
