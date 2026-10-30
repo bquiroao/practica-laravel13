@@ -1,0 +1,80 @@
+@startuml semana-01-actividad
+' Registro de alergia y emisión de alerta al consultar el expediente
+skinparam ActivityBackgroundColor #F7F9FC
+skinparam ActivityBorderColor #34495E
+
+|Médico tratante|
+start
+:Abre «Registrar alergia» del paciente\n(código PAC-NNNNN);
+:Escribe alérgeno, tipo, severidad,\nreacción y fecha de inicio;
+|Sistema de alergias|
+if (¿El paciente existe en este hospital?) then (no)
+  :Responde 404 PACIENTE_NO_ENCONTRADO;
+  stop
+endif
+if (¿El paciente está activo? [RN-06]) then (no)
+  :Rechaza PACIENTE_INACTIVO;
+  stop
+endif
+repeat
+  if (¿Alérgeno con código o nombre? [RN-01]) then (no)
+    :ALERGENO_REQUERIDO;
+  elseif (¿Tipo y severidad permitidos? [RN-02]) then (no)
+    :TIPO_INVALIDO / SEVERIDAD_INVALIDA;
+  elseif (¿Reacción vacía o > 500 caracteres? [RN-04]) then (sí)
+    :REACCION_EN_BLANCO / DEMASIADO_LARGA;
+  elseif (¿Fecha futura o mal escrita? [RN-05]) then (sí)
+    :FECHA_INICIO_FUTURA / FECHA_INVALIDA;
+  else (válida)
+    break
+  endif
+  |Médico tratante|
+  :Corrige el campo indicado\n(lo escrito se conserva);
+  |Sistema de alergias|
+repeat while (reintenta)
+if (¿Hay una alergia activa equivalente? [RN-03]) then (sí)
+  :Rechaza 409 ALERGIA_DUPLICADA;
+  stop
+endif
+|Base HOSPITAL|
+:INSERT en allergies\n(verified_by = médico) [RN-07];
+if (¿La base respondió?) then (no)
+  |Sistema de alergias|
+  :503 PERSISTENCIA_NO_DISPONIBLE\n(no se guarda nada);
+  stop
+endif
+|Sistema de alergias|
+:Recalcula la alerta del paciente [RN-08];
+:Resultado 1: alergia registrada y alerta nueva;
+
+|Enfermería|
+:Abre el expediente del paciente\n(acceso autorizado por expediente-medico);
+|Sistema de alergias|
+:Lee las alergias activas;
+if (¿Hay alergias activas?) then (no)
+  :Muestra «Sin alergias registradas»\n(no verificado: no es «sin alergias») [RN-08];
+  :Resultado 2: alerta SIN_REGISTRO;
+  stop
+endif
+:Nivel = el mayor de todas las reglas\n(desconocida = ALTA; anafilaxia = CRÍTICA);
+if (¿Nivel ALTA o CRÍTICA? [RN-09]) then (no)
+  :Muestra alerta informativa o moderada;
+  :Resultado 3: alerta visible sin bloqueo;
+  stop
+endif
+if (¿Este usuario ya reconoció esta huella?) then (sí)
+  :Muestra la alerta como reconocida;
+  stop
+endif
+:Muestra alerta destacada y pide reconocimiento;
+|Enfermería|
+:Pulsa «He leído las alergias»;
+|Sistema de alergias|
+if (¿La huella sigue vigente?) then (no)
+  :409 ALERTA_CAMBIO: vuelve a mostrar\nla alerta actualizada;
+  stop
+endif
+:Guarda el reconocimiento (usuario + huella);
+:Resultado 4: alerta reconocida;
+stop
+@enduml
