@@ -31,10 +31,10 @@ final readonly class Despliegue
     }
 
     /**
-     * @param Decision|null   $ultima    la ÚLTIMA evaluación del gate de la versión (una posterior reemplaza a la anterior)
+     * @param list<Decision>  $evaluaciones las del gate de la versión, en orden: cuenta la ÚLTIMA (semana 7: lo decide el dominio)
      * @param Despliegue|null $vigente   lo que hoy está DESPLEGADO en ese entorno (para revertir)
      */
-    public static function registrar(Version $version, ?Decision $ultima, string $digest, string $entorno, string $guia, string $smoke,
+    public static function registrar(Version $version, array $evaluaciones, string $digest, string $entorno, string $guia, string $smoke,
         ?Despliegue $vigente, \DateTimeImmutable $ahora, int $vigenciaHoras, string $operador): self
     {
         $campos = [];
@@ -50,6 +50,7 @@ final readonly class Despliegue
         if ($campos !== []) {
             throw new ReglaRechazada('DATOS_INVALIDOS', $campos);
         }
+        $ultima = $evaluaciones === [] ? null : $evaluaciones[array_key_last($evaluaciones)];
         if ($ultima === null || $ultima->valor !== Decision::APROBADO) {
             throw new ReglaRechazada('GATE_NO_APROBADO');
         }
