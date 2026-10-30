@@ -1,0 +1,22 @@
+# PostgreSQL 16 solo para el Micro-HIS de Alertas críticas y notificaciones internas.
+# Puerto 55444 (55440-55443, 5433, 55431 y 55433 ya están ocupados por otros módulos).
+services:
+  postgres-alertas:
+    image: postgres:16
+    container_name: shi-alertas-criticas-pg
+    environment:
+      POSTGRES_USER: alertas
+      POSTGRES_PASSWORD: alertas_local
+      POSTGRES_DB: micro_alertas
+    ports:
+      - "55444:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alertas -d micro_alertas"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - alertas-pg-datos:/var/lib/postgresql/data
+
+volumes:
+  alertas-pg-datos:
