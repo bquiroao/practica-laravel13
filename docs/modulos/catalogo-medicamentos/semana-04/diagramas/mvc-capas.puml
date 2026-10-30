@@ -1,0 +1,85 @@
+@startuml mvc-capas
+' Catálogo de medicamentos - Semana 4 - MVC sobre las capas y el patrón Repository
+title Entrada MVC, casos de uso e interfaz Repository con dos adaptadores
+skinparam classAttributeIconSize 0
+hide empty members
+left to right direction
+
+package "Presentation (MVC)" {
+  class "public/index.php" as Front <<front controller>>
+  class Router {
+    +agregar(metodo, patron, accion)
+    +despachar(Peticion): Respuesta
+  }
+  class ControladorMedicamentos <<controller>> {
+    +buscar()
+    +nuevo()
+    +registrar()
+    +detalle()
+    +formularioVersion()
+    +registrarVersion()
+    +baja()
+    +eliminar()
+  }
+  class Vista <<view>> {
+    +e(valor): string
+    +mostrar(plantilla, datos, titulo)
+  }
+  class Csrf
+  class Peticion
+  class Respuesta
+}
+package "Application" {
+  class RegistrarMedicamento
+  class BuscarMedicamentosVigentes
+  class RegistrarNuevaVersion
+  class DarDeBajaMedicamento
+  class ConsultarHistorial
+  class EliminarRegistroSinUso
+  class MedicamentoVista <<reutilizable>>
+  class OpcionesCatalogo <<reutilizable>>
+}
+package "Domain" {
+  interface RepositorioMedicamentos <<Repository>>
+  interface ConsultaUsoPrescripciones <<puerto>>
+  class Medicamento <<model>>
+}
+package "Persistence" {
+  class RepositorioMedicamentosPdo
+  class RepositorioMedicamentosEnMemoria
+  class UsoPrescripcionesPdo
+  class UsoPrescripcionesEnMemoria
+}
+
+Front --> Router
+Router --> ControladorMedicamentos
+ControladorMedicamentos --> Vista
+ControladorMedicamentos --> Csrf
+ControladorMedicamentos ..> Peticion
+ControladorMedicamentos ..> Respuesta
+ControladorMedicamentos --> RegistrarMedicamento
+ControladorMedicamentos --> BuscarMedicamentosVigentes
+ControladorMedicamentos --> RegistrarNuevaVersion
+ControladorMedicamentos --> DarDeBajaMedicamento
+ControladorMedicamentos --> ConsultarHistorial
+ControladorMedicamentos --> EliminarRegistroSinUso
+ControladorMedicamentos --> MedicamentoVista
+ControladorMedicamentos --> OpcionesCatalogo
+RegistrarMedicamento --> RepositorioMedicamentos : interfaces de rol
+EliminarRegistroSinUso --> ConsultaUsoPrescripciones
+RegistrarMedicamento ..> Medicamento
+RepositorioMedicamentosPdo ..|> RepositorioMedicamentos
+RepositorioMedicamentosEnMemoria ..|> RepositorioMedicamentos
+UsoPrescripcionesPdo ..|> ConsultaUsoPrescripciones
+UsoPrescripcionesEnMemoria ..|> ConsultaUsoPrescripciones
+
+note bottom of ControladorMedicamentos
+  Sin SQL ni reglas: solo elige caso de uso,
+  vista y código HTTP (422/409/404/403/503).
+  Verificado por pruebas/unitarias/arquitectura.php
+end note
+note bottom of RepositorioMedicamentosEnMemoria
+  Mismo contrato que PDO: pruebas/contrato/repositorio.php
+  ejecuta los mismos 7 casos contra ambos.
+end note
+@enduml
