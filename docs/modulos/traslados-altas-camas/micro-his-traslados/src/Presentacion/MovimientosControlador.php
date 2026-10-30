@@ -15,8 +15,9 @@ final class MovimientosControlador {
         return $this->conUsuario($p, function (Usuario $u) use ($p) {
             $entrada = json_decode($p->cuerpo, true);
             if (!is_array($entrada)) { return VistaJson::error('json_invalido'); }
-            $r = $this->registrar->ejecutar($entrada, $u);
-            return $r['aplicado'] ? VistaJson::creada($r) : VistaJson::error((string) $r['rechazo']);
+            if ($p->claveIdempotencia !== null && !preg_match('/^[A-Za-z0-9-]{8,64}$/', $p->claveIdempotencia)) { return VistaJson::error('idempotency_key_invalida'); }
+            $r = $this->registrar->ejecutar($entrada, $u, $p->claveIdempotencia);
+            return isset($r['repetida']) ? [200, $r] : ($r['aplicado'] ? VistaJson::creada($r) : VistaJson::error((string) $r['rechazo']));
         });
     }
 

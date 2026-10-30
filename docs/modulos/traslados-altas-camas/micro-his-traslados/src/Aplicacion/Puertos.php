@@ -11,7 +11,9 @@ interface RepositorioMovimientos {
     /** @return array{orden_id: string, requisito_cama: ?string, tipo_alta: ?string, motivo: ?string}|null */
     public function ordenVigente(string $episodio, string $tipo): ?array;
     /** Cierra la estancia de origen, deja libre para limpieza esa cama, abre la nueva y ocupa el destino, marca la orden y, si es alta, cierra el episodio: todo o nada. */
-    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en): void;
+    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en, ?string $clave = null): void;
+    /** Semana 5: movimiento ya aplicado con esa clave de idempotencia: care_episode_id, tipo, origen_id, destino_id (o null). La clave se guarda en la misma transacción. */
+    public function ordenPorClave(string $clave): ?array;
 }
 
 /** Datos que otros módulos poseen y este solo lee: episodio, estancia abierta y estado de la cama. */

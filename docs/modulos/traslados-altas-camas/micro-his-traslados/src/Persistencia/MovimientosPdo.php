@@ -24,9 +24,13 @@ final class MovimientosPdo implements RepositorioMovimientos, FuenteClinica {
         return $this->uno('SELECT bed_stay_id, bed_id FROM bed_stays WHERE care_episode_id = ? AND ended_at IS NULL', [$episodio]);
     }
 
+    public function ordenPorClave(string $clave): ?array {
+        return $this->uno('SELECT o.care_episode_id, o.tipo, c.origen_id, c.destino_id FROM claves_idempotencia c JOIN ordenes_movimiento o ON o.orden_id = c.orden_id WHERE c.clave = ?', [$clave]);
+    }
+
     public function cama(string $id): ?array { return $this->uno('SELECT bed_id, status, type FROM beds WHERE bed_id = ?', [$id]); }
 
-    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en): void {
+    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en, ?string $clave = null): void {
         $cuando = $en->format('c');
         try {
             $this->pdo->beginTransaction();
@@ -37,6 +41,7 @@ final class MovimientosPdo implements RepositorioMovimientos, FuenteClinica {
                 $this->ejecutar('UPDATE beds SET status = ? WHERE bed_id = ?', ['occupied', $r->destinoId]);
             }
             $this->ejecutar('UPDATE ordenes_movimiento SET estado = ? WHERE orden_id = ?', ['aplicada', $orden]);
+            if ($clave !== null) { $this->ejecutar('INSERT INTO claves_idempotencia VALUES (?, ?, ?, ?)', [$clave, $orden, $r->origenId, $r->destinoId]); }
             if ($tipo === 'alta') { $this->ejecutar('UPDATE care_episodes SET status = ?, ended_at = ? WHERE care_episode_id = ?', ['closed', $cuando, $episodio]); }
             $this->pdo->commit();
         } catch (\PDOException $e) {
