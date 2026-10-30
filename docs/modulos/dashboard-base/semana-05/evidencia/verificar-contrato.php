@@ -32,6 +32,9 @@ $casos = [['inicio del rol', 'GET', '/dashboard', '/dashboard', $todos, $app],
     ['tarjeta sin permiso (R-07)', 'GET', '/dashboard/tarjetas/pacientes', '/dashboard/tarjetas/{id}', $sesion('h1', 'citas.ver'), $app],
     ['tarjeta desconocida (H-03)', 'GET', '/dashboard/tarjetas/otra', '/dashboard/tarjetas/{id}', $todos, $app],
     ['tarjeta sin sesión', 'GET', '/dashboard/tarjetas/pacientes', '/dashboard/tarjetas/{id}', $sesion('', 'pacientes.ver'), $app],
+    ['navegar a un módulo del rol (S6)', 'GET', '/dashboard/navegacion/citas', '/dashboard/navegacion/{modulo}', $sesion('h1', 'citas.ver'), $app],
+    ['módulo que el rol no permite (S6, E6)', 'GET', '/dashboard/navegacion/camas', '/dashboard/navegacion/{modulo}', $sesion('h1', 'citas.ver'), $app],
+    ['módulo inexistente (S6, NF)', 'GET', '/dashboard/navegacion/usuarios', '/dashboard/navegacion/{modulo}', $todos, $app],
     ['fuente de la tarjeta caída (R-03)', 'GET', '/dashboard/tarjetas/pacientes', '/dashboard/tarjetas/{id}', $todos, $rota]];
 foreach ($casos as [$nombre, $metodo, $ruta, $plantilla, $datos, $controlador]) {
     [$accion, $parametros] = Rutas::resolver($metodo, $ruta);

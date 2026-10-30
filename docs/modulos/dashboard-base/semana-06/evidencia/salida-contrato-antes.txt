@@ -1,0 +1,12 @@
+$ php semana-05/evidencia/verificar-contrato.php openapi.json   # con navegar en el código y el contrato de la semana 5 sin cambiar
+OK    inicio del rol: GET /dashboard -> 200 (documentados: 200, 401)
+OK    sin hospital seleccionado (R-01): GET /dashboard -> 401 E1 (documentados: 200, 401)
+OK    tarjeta con resumen: GET /dashboard/tarjetas/citas_hoy -> 200 «resumen» (documentados: 200, 401, 403, 503)
+OK    tarjeta vacía, no error (R-05): GET /dashboard/tarjetas/camas_disponibles -> 200 «vacio» (documentados: 200, 401, 403, 503)
+OK    tarjeta sin permiso (R-07): GET /dashboard/tarjetas/pacientes -> 403 E4 (documentados: 200, 401, 403, 503)
+OK    tarjeta desconocida (H-03): GET /dashboard/tarjetas/otra -> 403 E4 (documentados: 200, 401, 403, 503)
+OK    tarjeta sin sesión: GET /dashboard/tarjetas/pacientes -> 401 E1 (documentados: 200, 401, 403, 503)
+OK    fuente de la tarjeta caída (R-03): GET /dashboard/tarjetas/pacientes -> 503 E5 «error» (documentados: 200, 401, 403, 503)
+FALLA operaciones documentadas = acciones del controlador: inicio, tarjeta; sin documentar: navegar
+OK    ruta no documentada: GET /pacientes -> 404
+RESULTADO: 1 escenario(s) fuera del contrato
