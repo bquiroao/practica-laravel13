@@ -1,0 +1,12 @@
+Contraste WCAG 2.x - Catálogo de medicamentos (semana 9)
+
+Texto normal                                  #1b1f24 sobre #ffffff = 16.56:1 (mínimo 4.5:1) CUMPLE
+Enlaces y color primario                      #0b5cad sobre #ffffff =  6.67:1 (mínimo 4.5:1) CUMPLE
+Texto del botón principal                     #ffffff sobre #0b5cad =  6.67:1 (mínimo 4.5:1) CUMPLE
+Mensajes de error                             #a4161a sobre #ffffff =  7.75:1 (mínimo 4.5:1) CUMPLE
+Texto sobre caja de alerta                    #1b1f24 sobre #fbeeee = 14.64:1 (mínimo 4.5:1) CUMPLE
+Texto del botón de peligro                    #ffffff sobre #a4161a =  7.75:1 (mínimo 4.5:1) CUMPLE
+Texto sobre caja de aviso                     #1b1f24 sobre #eef7f0 = 15.14:1 (mínimo 4.5:1) CUMPLE
+Borde de campos (no texto, 1.4.11)            #6b7280 sobre #ffffff =  4.83:1 (mínimo 3.0:1) CUMPLE
+Indicador de foco actual (no texto, 1.4.11)   #f2b705 sobre #ffffff =  1.82:1 (mínimo 3.0:1) NO CUMPLE
+Indicador de foco propuesto (B-01)            #1d4ed8 sobre #ffffff =  6.70:1 (mínimo 3.0:1) CUMPLE

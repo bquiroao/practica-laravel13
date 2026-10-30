@@ -1,0 +1,43 @@
+@startuml semana-08-user-flow
+title User flow por rol — «creación de sala y cama con control de estado operativo»
+|Administrador de hospital|
+start
+:Abre «Catálogo de camas» (W1);
+if (¿Permiso de gestión en este hospital? (R-07)) then (no)
+  :«No tienes acceso al catálogo de este hospital»;
+  stop
+endif
+:W1 carga (esqueleto) → vacío o lista de salas;
+if (¿Qué necesita?) then (crear sala)
+  :W2 «Nueva sala»: código y nombre;
+  if (¿Datos completos y código libre? (R-01)) then (sí)
+    :Confirma → «Sala A creada» (éxito);
+  else (no)
+    :Error junto al campo; conserva lo escrito;
+  endif
+else (crear cama)
+  :W3 «Nueva cama»: sala activa y código;
+  if (¿Sala activa y código libre en la sala? (R-02, R-03)) then (sí)
+    :Confirma → cama «disponible» (R-04);
+  else (no)
+    :Error junto al campo, con la causa;
+  endif
+endif
+stop
+|Supervisor de enfermería|
+start
+:Abre una cama desde W1 (el administrador también puede);
+if (¿La cama está ocupada? (R-06)) then (sí)
+  :Acción deshabilitada: «La gestiona admisión»;
+  stop
+endif
+:W4 «Cambiar estado»: solo destinos permitidos (R-05) y motivo (R-09);
+note right: supervisor: disponible ↔ mantenimiento\nadministrador: además inactiva y reactivar
+:Confirma el cambio;
+if (¿Otra persona la cambió antes? (E7)) then (sí)
+  :W5 «La cama cambió»: muestra el estado nuevo y ofrece recargar;
+else (no)
+  :«Cama A/101 en mantenimiento» (éxito) y queda en el historial;
+endif
+stop
+@enduml

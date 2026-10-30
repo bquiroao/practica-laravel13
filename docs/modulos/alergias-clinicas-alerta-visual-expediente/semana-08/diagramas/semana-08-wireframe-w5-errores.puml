@@ -1,0 +1,22 @@
+@startsalt semana-08-wireframe-w5-errores
+{+
+  <b>Errores recuperables</b>
+  ==
+  {+
+    <b>Se registró otra alergia mientras leía.</b> (ALERTA_CAMBIO) | (1)
+    Revise la lista actualizada; lo nuevo está marcado. | .
+    • <b>NUEVA</b> Látex — Grave
+    [He leído las alergias de este paciente]
+  }
+  ..
+  {+
+    <b>Alergias no disponibles.</b> No se guardó nada. (PERSISTENCIA_NO_DISPONIBLE) | (2)
+    Verifique con el paciente antes de indicar. | [Reintentar]
+  }
+  ..
+  {+
+    <b>Esta alergia ya está registrada.</b> (ALERGIA_DUPLICADA) | (3)
+    [Ver Ibuprofeno — Moderada]
+  }
+}
+@endsalt

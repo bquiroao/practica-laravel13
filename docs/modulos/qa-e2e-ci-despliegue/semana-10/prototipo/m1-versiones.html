@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versiones · Calidad de versiones</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">Calidad · Hospital Regional del Norte</span></button>
+  <span class="rol-actual" data-estado="base carga vacio sin-conexion">Release</span>
+  <span class="rol-actual" data-estado="ops">Operaciones</span>
+  <span class="avatar" data-estado="base carga vacio sin-conexion" aria-label="resp-release">RR</span>
+  <span class="avatar" data-estado="ops" aria-label="ops-luis">OL</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span>Sin conexión. Mostrando lo recibido a las 14:32.</span>
+  <button type="button">Reintentar</button>
+</div>
+
+<main>
+  <h1>Versiones</h1>
+  <p class="sub" data-estado="base sin-conexion">2 necesitan tu atención</p>
+  <p class="sub" data-estado="ops">1 lista para desplegar</p>
+
+  <div data-estado="carga" aria-busy="true">
+    <p class="meta">Cargando versiones…</p>
+    <div class="tarjeta"><div class="esq"></div><div class="esq" style="width:60%"></div></div>
+    <div class="tarjeta"><div class="esq"></div><div class="esq" style="width:60%"></div></div>
+  </div>
+
+  <section class="aviso atencion" data-estado="vacio">
+    <h2>Ninguna versión espera evaluación</h2>
+    <p>Cuando el pipeline complete una ejecución, aparecerá aquí.</p>
+  </section>
+
+  <div data-estado="base sin-conexion ops">
+    <article class="tarjeta">
+      <div class="fila"><strong>2.5.1</strong><span class="chip en-curso derecha">▶ En curso</span></div>
+      <div class="meta">Ejecución #15 · staging · 4 de 6 con resultado</div>
+      <div class="progreso" aria-hidden="true"><span style="width:67%"></span></div>
+      <a class="btn bloque" href="m2-ejecucion.html">Ver ejecución #15</a>
+    </article>
+
+    <article class="tarjeta" data-estado="base sin-conexion">
+      <div class="fila"><strong>2.5.0</strong><span class="chip rechazado derecha">✕ Rechazado</span></div>
+      <div class="meta">Gate del 29/10 14:51 · causa: E2E-102 «Prescribir con alergia» falla</div>
+      <p class="extra meta">Política gate-2026.1 · ejecución #14</p>
+    </article>
+
+    <article class="tarjeta">
+      <div class="fila"><strong>2.4.1</strong><span class="chip aprobado derecha">✓ Aprobado</span></div>
+      <div class="meta">La aprobación vence en 41 h (01/11 07:12)</div>
+      <a class="btn primario bloque" href="m4-desplegar.html" data-estado="ops">Desplegar 2.4.1</a>
+      <p class="meta" data-estado="base sin-conexion">Lista para que Operaciones la despliegue.</p>
+    </article>
+
+    <article class="tarjeta">
+      <div class="fila"><strong>2.4.0</strong><span class="chip desplegado derecha">✓ Desplegada</span></div>
+      <div class="meta">En producción desde el 27/10 · guía guia-2026.2</div>
+    </article>
+  </div>
+</main>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-versiones.html" aria-current="page"><span class="ico" aria-hidden="true">☰</span>Versiones</a>
+  <a href="m2-ejecucion.html"><span class="ico" aria-hidden="true">▶</span>Ejecución</a>
+  <a href="m3-gate.html" data-estado="base carga vacio sin-conexion"><span class="ico" aria-hidden="true">⚖</span>Gate</a>
+  <a href="m4-desplegar.html" data-estado="ops"><span class="ico" aria-hidden="true">⇪</span>Desplegar</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

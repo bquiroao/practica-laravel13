@@ -1,0 +1,72 @@
+@startuml semana-01-casos-de-uso
+!pragma layout smetana
+title Módulo QA funcional, pruebas manuales y matriz de regresión — Casos de uso\n«Diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad»
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F4F8F2
+  BorderColor #3B6E2E
+}
+
+actor "Analista QA\n(diseña casos)" as Analista
+actor "Líder QA\n(aprueba, planifica,\nclasifica y decide)" as Lider
+actor "Tester\n(ejecuta y reporta)" as Tester
+actor "Desarrollador\n(corrige)" as Dev
+actor "Responsable de\nproducto (consulta)" as Producto
+actor "Servicio RBAC\n(autorización)" as RBAC <<sistema>>
+actor "Almacén de\nevidencias" as Almacen <<sistema>>
+actor "Módulo Auditoría\n(bitácora)" as Auditoria <<sistema>>
+
+rectangle " " {
+  usecase "CU-01\nDiseñar caso de\nprueba manual" as CU01
+  usecase "CU-02\nAprobar caso\n(versión publicada)" as CU02
+  usecase "CU-03\nPlanificar campaña desde\nla matriz de regresión" as CU03
+  usecase "CU-04\nIniciar campaña\n(congela alcance y build)" as CU04
+  usecase "CU-05\nEjecutar caso y\nregistrar resultado" as CU05
+  usecase "CU-06\nAdjuntar evidencia" as CU06
+  usecase "CU-07\nReportar defecto" as CU07
+  usecase "CU-08\nClasificar defecto\n(severidad y prioridad)" as CU08
+  usecase "CU-09\nCorregir defecto" as CU09
+  usecase "CU-10\nVerificar corrección\n(re-ejecución)" as CU10
+  usecase "CU-11\nCerrar campaña\n(GO / NO-GO)" as CU11
+  usecase "CU-12\nConsultar trazabilidad\ny cobertura" as CU12
+  usecase "CU-13\nAutorizar operación\n(permiso + tenant)" as CU13
+  usecase "CU-14\nRegistrar traza\nen Auditoría" as CU14
+}
+
+Analista --> CU01
+Lider --> CU02
+Lider --> CU03
+Analista --> CU03
+Lider --> CU04
+Tester --> CU05
+Lider --> CU08
+Dev --> CU09
+Tester --> CU10
+Lider --> CU11
+Producto --> CU12
+Lider --> CU12
+Analista --> CU12
+
+CU05 ..> CU06 : <<include>>\n[FALLA o BLOQUEADO]
+CU07 ..> CU05 : <<extend>>\n[FALLA]
+CU10 ..> CU05 : <<include>>
+CU05 ..> CU13 : <<include>>
+CU04 ..> CU14 : <<include>>
+CU05 ..> CU14 : <<include>>
+CU08 ..> CU14 : <<include>>
+CU11 ..> CU14 : <<include>>
+
+CU13 --> RBAC
+CU06 --> Almacen
+CU14 --> Auditoria
+
+note as N1
+  Sistema: HIS · módulo QA y regresión (tenant = hospital o red).
+  Todos los casos de uso primarios incluyen CU-13
+  (autorizar: permiso + tenant); solo se dibuja desde CU-05.
+  No hay «editar resultado» ni «borrar evidencia» (R-11).
+end note
+N1 .. CU13
+@enduml

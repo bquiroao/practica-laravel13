@@ -25,14 +25,18 @@ final class PoliticaAsignacion
         $this->reglas = $lista;
     }
 
-    /** @throws ErrorPersistencia si una regla no puede consultar sus datos */
+    /** Fail-closed (semana 7): si una regla no puede leer sus datos, la asignación se rechaza con 500. */
     public function evaluar(SolicitudAsignacion $solicitud): ?ErrorAsignacion
     {
-        foreach ($this->reglas as $regla) {
-            $error = $regla->evaluar($solicitud);
-            if ($error !== null) {
-                return $error;
+        try {
+            foreach ($this->reglas as $regla) {
+                $error = $regla->evaluar($solicitud);
+                if ($error !== null) {
+                    return $error;
+                }
             }
+        } catch (ErrorPersistencia) {
+            return new ErrorAsignacion('ERROR_PERSISTENCIA', 500);
         }
 
         return null;

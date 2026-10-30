@@ -1,0 +1,25 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php bin/validar-integracion-central.php
+aplicada la migración real 2026_08_11_000000_create_network_registry.php
+aplicada la migración real 2026_08_11_000100_create_identity_and_memberships.php
+aplicado database/integracion-central.sql
+
+[OK  ] Las tablas qa_* tienen FK reales a hospitals y central_users (6)
+[OK  ] El autor no puede ser su propio aprobador (CHECK)
+[OK  ] Un analista (qa_analyst) no puede figurar como aprobador
+[OK  ] Un qa_lead activo planifica una campaña en su hospital
+[OK  ] Un tester NO puede planificar (no es qa_lead)
+[OK  ] Un tester con membresía activa qa_tester registra un intento
+[OK  ] Un tester de OTRO hospital no registra en éste (42501)
+[OK  ] Una membresía revocada no sirve (42501)
+[OK  ] Una membresía vencida (valid_to pasado) no sirve (42501)
+[OK  ] Un usuario central inactivo pierde el acceso aunque su membresía siga activa
+[OK  ] La misma Idempotency-Key en el mismo hospital se rechaza (23505)
+[OK  ] UPDATE y DELETE de un intento se rechazan (solo agregar)
+[OK  ] El rol del módulo lee personas por la vista qa_usuarios (id, nombre, estado)
+[OK  ] El rol del módulo NO lee central_users (correo, subject) (42501)
+[OK  ] El rol del módulo NO modifica membresías (42501)
+[OK  ] El rol del módulo registra intentos por sí mismo (el trigger consulta la membresía con SECURITY DEFINER)
+[OK  ] El rol del módulo no puede borrar intentos ni siquiera con privilegios de la tabla
+[OK  ] PUBLIC no tiene privilegios sobre las tablas qa_*
+
+Todas las afirmaciones se cumplen.

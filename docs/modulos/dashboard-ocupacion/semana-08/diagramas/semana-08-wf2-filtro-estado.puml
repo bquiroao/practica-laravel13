@@ -1,0 +1,13 @@
+@startsalt
+title W2 — Filtrar por estado de cama (CU-03)
+{+
+  {* Inicio | <b>Ocupación</b> | Ayuda }
+  Estado de cama: | { (X) disponible | () ocupada | () mantenimiento | () inactiva } | [Quitar filtro]
+  {#
+    <b>Sala</b> | <b>Disponibles</b> | <b>Ocupación</b>
+    A · Medicina interna | 5 | 54.5 %
+  }
+  <i>1 de 3 salas con camas disponibles · corte de las 10:35.</i>
+  <i>Sin resultados: «Ninguna sala tiene camas disponibles en este corte».</i>
+}
+@endsalt

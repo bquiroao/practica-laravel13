@@ -1,0 +1,25 @@
+@startuml semana-03-c4-contexto
+!pragma layout smetana
+!include <C4/C4_Context>
+
+title C4 · Nivel 1 — Contexto del Micro-HIS Prescripciones electrónicas con validación de alergias
+
+Person(medico, "Médico prescriptor", "Verifica antes de firmar y emite.")
+Person(farmacia, "Farmacéutico / enfermería", "Consulta la prescripción y su verificación.")
+
+System(presc, "Micro-HIS Prescripciones", "Emite prescripciones con verificación obligatoria de alergias y bloqueo seguro.")
+
+System_Ext(expediente, "Expediente clínico", "Tabla allergies (código o nombre, severidad, estado).")
+System_Ext(catalogo, "Catálogo de medicamentos", "Principio activo, grupo, dosis máxima, vías.")
+System_Ext(rbac, "RBAC", "Decide prescripcion.emitir / override / consultar.")
+System_Ext(identidad, "Identidad (JWT)", "Usuario y hospital del token (simulado con tokens demo).")
+System_Ext(auditoria, "Módulo Auditoría", "Recibe PRESCRIPCION_EMITIDA / BLOQUEADA / VERIFICACION_NO_DISPONIBLE.")
+
+Rel(medico, presc, "Verifica y emite", "HTTPS/JSON")
+Rel(farmacia, presc, "Consulta", "HTTPS/JSON")
+Rel(presc, expediente, "Lee alergias activas", "puerto FuenteAlergias; si falla → 503")
+Rel(presc, catalogo, "Lee medicamento y grupo", "puerto CatalogoMedicamentos")
+Rel(presc, rbac, "Pide decisión", "puerto PoliticaAcceso")
+Rel(presc, identidad, "Valida token", "Autenticador")
+Rel(presc, auditoria, "Envía trazas", "bandeja local (outbox)")
+@enduml

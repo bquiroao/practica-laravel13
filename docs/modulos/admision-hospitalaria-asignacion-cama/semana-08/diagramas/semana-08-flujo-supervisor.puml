@@ -1,0 +1,30 @@
+@startuml semana-08-flujo-supervisor
+' Admisión hospitalaria y asignación de cama — Semana 8
+' User flow del rol SUPERVISOR_CAMAS.
+skinparam activity {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+  DiamondBackgroundColor #FFF6DD
+}
+title User flow — Supervisor(a) de camas
+
+start
+if (¿Qué necesita?) then (admitir)
+  :Mismo flujo del admisionista
+  (W-01 a W-05);
+  stop
+else (revisar una admisión)
+endif
+:Busca la admisión por id o desde el resultado;
+if (¿Es de su hospital?) then (no)
+  :«Admisión no encontrada»
+  (no revela otros hospitales);
+  stop
+else (sí)
+endif
+:Detalle (W-06) con pestaña «Trazabilidad»;
+:Eventos en orden: ADMISION_CREADA,
+CAMA_ASIGNADA (usuario, rol, fecha, id de solicitud);
+note right: Solo lectura. Los eventos\nno se pueden editar (RN-05).
+stop
+@enduml

@@ -1,0 +1,74 @@
+@startuml semana-04-capas
+' Admisión hospitalaria y asignación de cama — Semana 4
+' Capas, responsabilidades y objetos reutilizables. Dos entradas (consola y web MVC) usan los mismos casos de uso.
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+title Capas del Micro-HIS y objetos reutilizables (semana 4)
+
+package "Presentation — entrada y salida" #EEF4FA {
+  package "Web MVC" {
+    [public/index.php] as Index
+    [Router] as Router
+    [AdmisionController\n(sin SQL ni reglas)] as Ctrl
+    [Vista + plantillas\n(salida escapada)] as Vista
+  }
+  [AplicacionConsola] as Cli
+  [Servicios] as Serv
+  [UsuariosFicticios] as Usu
+  [MapaErrores\ncódigo -> HTTP] as Mapa
+}
+
+package "Application — orquestación" #EEF8F1 {
+  [AdmitirPacienteYAsignarCama] as UC1
+  [ConsultarCamasDisponibles] as UC2
+  [ContextoUsuario\n(rol + tenant)] as Ctx
+}
+
+package "Domain — reglas" #FFF8E8 {
+  [Admision / EventoAdmision] as Ent
+  [EvaluadorElegibilidad\n+ criterios (OCP)] as Eval
+  interface "AdmisionRepository" as IRepo
+  interface "CatalogoCamas" as ICat
+  interface "DirectorioPacientes" as IDir
+}
+
+package "Persistence — adaptadores" #F8EEF4 {
+  [PdoAdmisionRepository\nPdoCatalogoCamas\nPdoDirectorioPacientes] as Pdo
+  [InMemoryAdmisionRepository\nInMemoryCatalogoCamas\nInMemoryDirectorioPacientes] as Mem
+}
+database "PostgreSQL 16\n:55443" as BD
+
+Index --> Router
+Router --> Ctrl
+Ctrl --> Vista
+Ctrl --> Serv
+Ctrl --> Usu
+Ctrl --> Mapa
+Cli --> Serv
+Cli --> Usu
+Serv --> UC1
+Serv --> UC2
+UC1 --> Ctx
+UC1 --> Ent
+UC1 --> Eval
+UC2 --> Eval
+UC1 --> IRepo
+UC1 --> ICat
+UC1 --> IDir
+Pdo ..|> IRepo
+Mem ..|> IRepo
+Pdo --> BD
+
+note right of Mem
+  Mismo contrato que PDO:
+  pruebas/contrato/ corre las mismas
+  verificaciones contra los dos.
+  Se elige con ADMISION_ALMACEN.
+end note
+note bottom of Serv
+  Reutilizados por las dos entradas:
+  Servicios, UsuariosFicticios y los
+  casos de uso. La API de la semana 5
+  reutiliza además MapaErrores.
+end note
+@enduml

@@ -1,0 +1,55 @@
+Prueba de herramientas/controles-detectivos.sql sobre una base temporal con database/schema.sql (PostgreSQL 18)
+
+== 1. Base vacía: ningún control debe devolver filas
+ cadena | secuencia | siguiente 
+--------+-----------+-----------
+(0 filas)
+
+ alerta 
+--------
+(0 filas)
+
+ emisor | correcciones | total | porcentaje 
+--------+--------------+-------+------------
+(0 filas)
+
+ cadena | dia | lecturas | emisores 
+--------+-----+----------+----------
+(0 filas)
+
+ emisor | recurso | veces 
+--------+---------+-------
+(0 filas)
+
+
+== 2. Con controles-detectivos-datos-prueba.sql: cada control devuelve SU caso
+    cadena    | secuencia | siguiente 
+--------------+-----------+-----------
+ hosp-oriente |         2 |         4
+(1 fila)
+
+ alerta 
+--------
+(0 filas)
+
+  emisor  | correcciones | total | porcentaje 
+----------+--------------+-------+------------
+ svc-rbac |            1 |     2 |      50.00
+(1 fila)
+
+   cadena   |          dia           | lecturas | emisores 
+------------+------------------------+----------+----------
+ hosp-norte | 2026-10-26 00:00:00-06 |        3 |        1
+(1 fila)
+
+    emisor     | recurso  | veces 
+---------------+----------+-------
+ svc-pacientes | P-000001 |     1
+(1 fila)
+
+
+== 3. Se deshabilita el trigger de UPDATE/DELETE: C-D3 debe alertar
+                       alerta                        
+-----------------------------------------------------
+ FALTA o DESHABILITADO: audit_logs_sin_update_delete
+(1 fila)

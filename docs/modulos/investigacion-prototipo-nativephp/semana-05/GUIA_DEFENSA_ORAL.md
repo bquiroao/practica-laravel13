@@ -1,0 +1,1 @@
+Explicar el mismo flujo de semana 2 y el adaptador HTTP detrás del puerto. HIS es dueño del dato y notificación pertenece al SO cliente. Mostrar GET, errores, autorización tenant, timeout y snapshot obsoleto. Defender no extraer microservicio sin medición. Contrato válido y regresión PHP no demuestran endpoint ni runtime NativePHP; implementar issues después de revisar diseño.

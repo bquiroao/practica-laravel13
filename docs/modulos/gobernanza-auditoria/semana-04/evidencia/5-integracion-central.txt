@@ -1,0 +1,14 @@
+$ AUDITORIA_DB_DSN=… php bin/validar-integracion-central.php
+aplicada la migración real 2026_08_11_000000_create_network_registry.php
+aplicada la migración real 2026_08_11_000100_create_identity_and_memberships.php
+aplicada la migración real 2026_08_11_000400_create_central_sync_tables.php
+aplicado database/integracion-central.sql
+
+[OK  ] Un movimiento de un hospital registrado y de un usuario que NO está en central_users se acepta (sin FK de usuario)
+[OK  ] Un hospital_id que no existe en hospitals se rechaza (FK, SQLSTATE 23503)
+[OK  ] UPDATE rechazado por el trigger (solo inserción)
+[OK  ] El mismo (emisor, event_id) se rechaza (SQLSTATE 23505)
+[OK  ] La bandeja compartida entrega solo los eventos «auditoria.movimiento», con el hospital del NODO de origen
+[OK  ] PUBLIC no tiene ningún privilegio sobre audit_logs
+
+Todo lo que afirma el análisis se cumple.

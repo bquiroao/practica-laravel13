@@ -1,0 +1,57 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend del centro de documentación (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [VistaMisDocumentos] as VD
+  [VistaDocumento\n(secciones, selector de versión,\naviso de obsoleta)] as VV
+  [ClienteDocumentacion\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorDocumentacion] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ServicioPublicacion] as SP
+    [ServicioRevision] as SR
+    [ServicioConsulta\n(vigente y obsoleta por lector:\nfuente única)] as SC #FFF3CD
+    interface "EscritorVersiones\nRevisionPublicaciones\nLectorDocumentos" as P
+  }
+  package "Dominio" {
+    [VersionNueva] as VN
+    [EstadoVersion] as EV
+    [Audiencia] as AU
+  }
+  package "Persistencia" {
+    [RepositorioPdo] as PDO
+    [RepositorioEnMemoria] as MEM
+  }
+}
+database "doc_versions,\ndoc_audiences" as DB
+VD --> CL
+VV --> CL : slug, versión
+CL --> R : HTTP JSON
+R --> C
+C --> SP
+C --> SR
+C --> SC
+C --> V
+SP --> P
+SR --> P
+SC --> P
+SP --> VN
+SR --> EV
+SC --> AU
+SC --> EV
+PDO ..|> P
+MEM ..|> P
+PDO --> DB
+note right of VV
+  Después: muestra «vigente» y «obsoleta»
+  tal como los devuelve la consulta;
+  ya no los calcula ni filtra la audiencia.
+end note
+@enduml

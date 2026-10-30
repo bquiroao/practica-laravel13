@@ -1,0 +1,28 @@
+AR-01 · El punto de entrada real (crearKernel) acepta siempre los tokens de demostración
+  «Bearer token-superadmin» (un texto fijo del config) + X-Tenant-ID: * → HTTP 200: lectura de TODA la red
+  tokens de demostración en config.php: 5 · crearKernel() elige el autenticador según el entorno: NO (siempre AutenticadorTokenDemo)
+
+AR-02 · La verificación carga la cadena COMPLETA en memoria (PdoBitacora::cadena → fetchAll)
+  memoria medida por movimiento hidratado: 866 bytes (20 000 objetos)
+  cadena de   100.000 movimientos → ≈     83 MB solo en objetos (memory_limit por defecto de PHP: 128 MB)
+  cadena de 1.000.000 movimientos → ≈    826 MB solo en objetos (memory_limit por defecto de PHP: 128 MB)
+  cadena de 5.000.000 movimientos → ≈   4130 MB solo en objetos (memory_limit por defecto de PHP: 128 MB)
+  SQL de cadena(): SELECT … ORDER BY secuencia + fetchAll() (sin lotes)
+
+AR-03 · DEF-07-01 sigue abierto: el cursor acepta una fecha imposible
+  leer(«2026-13-45T99:00:00Z|1») → 2027-02-18T03:00:00+00:00 (debería ser null → 422)
+
+AR-04 · El recurso es texto libre: el mismo paciente con otro formato no aparece en «¿quién vio la ficha?»
+  registrar recurso «paciente:P-000001» → HTTP 201
+  registrar recurso «P-000001» → HTTP 201
+  registrar recurso «Paciente:p-000001» → HTTP 201
+  buscar recurso=paciente:P-000001 → 1 de 3 accesos al mismo paciente
+
+AR-05 · La bitácora se observa a sí misma: cada consulta aparece en la siguiente y la cadena crece con las lecturas
+  1.ª consulta: 4 filas · 2.ª: 5 filas; la primera fila de la 2.ª es «AUDITORIA_CONSULTADA»
+  la cadena de Oriente tiene 6 movimientos: 3 de los emisores y el resto, lecturas
+
+AR-06 · El event_id es único por emisor en TODA la red, no por hospital
+  svc-pacientes en Oriente registra evt-0001 → HTTP 201
+  svc-pacientes en Norte registra OTRO hecho con evt-0001 → HTTP 409 {"error":"EVENTO_EN_CONFLICTO"}
+  ¿el contrato dice que event_id debe ser único en toda la red? NO

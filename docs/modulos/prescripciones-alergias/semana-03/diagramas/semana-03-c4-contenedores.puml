@@ -1,0 +1,24 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS Prescripciones
+
+Person(medico, "Médico / farmacia", "Usuarios del hospital.")
+System_Ext(identidad, "Identidad (JWT)", "Simulada con tokens demo.")
+System_Ext(rbac, "RBAC", "Simulado con PoliticaAccesoEstatica.")
+System_Ext(auditoria, "Módulo Auditoría", "Consumirá la bandeja (semana 5).")
+
+System_Boundary(sistema, "Micro-HIS Prescripciones (PHP 8.2+ vanilla, sin framework)") {
+    Container(cliente, "Cliente HTTP", "curl / SPA Vue (semana 8+)", "Envía Authorization: Bearer, X-Tenant-ID e Idempotency-Key.")
+    Container(api, "API Prescripciones", "PHP · public/index.php · php -S", "Kernel, acciones y cuatro capas.")
+    ContainerDb(bd, "Base del hospital", "PostgreSQL 18 · esquema prescripciones", "allergies, medications, allergen_groups, prescriptions (inmutable por trigger), prescription_items, prescription_audit_outbox.")
+}
+
+Rel(medico, cliente, "Usa")
+Rel(cliente, api, "POST /verificaciones · POST /prescripciones · GET /prescripciones/{id}", "HTTP/JSON")
+Rel(api, bd, "SELECT / INSERT con sentencias preparadas", "PDO pgsql")
+Rel(api, identidad, "Autenticador")
+Rel(api, rbac, "PoliticaAcceso")
+Rel_L(auditoria, bd, "Lee la bandeja", "futuro")
+@enduml

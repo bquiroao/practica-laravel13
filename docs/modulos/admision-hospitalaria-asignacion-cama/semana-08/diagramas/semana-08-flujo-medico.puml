@@ -1,0 +1,29 @@
+@startuml semana-08-flujo-medico
+' Admisión hospitalaria y asignación de cama — Semana 8
+' User flow del rol MEDICO (solo consulta, RN-06).
+skinparam activity {
+  BackgroundColor #F4F8FB
+  BorderColor #2B5D7D
+  DiamondBackgroundColor #FFF6DD
+}
+title User flow — Médico tratante
+
+start
+:Abre la admisión de su paciente (W-06);
+if (¿Existe en su hospital?) then (no)
+  :«Admisión no encontrada»;
+  stop
+else (sí)
+endif
+:Ve código de paciente, cama, servicio,
+estado, fecha y responsable;
+note right: Sin nombres ni diagnóstico\nen esta pantalla (RNF-03).
+if (¿Intenta admitir o ver trazabilidad?) then (sí)
+  :La acción NO aparece en su menú;
+  :Si llega por enlace directo:
+  «Su rol no permite esta operación» (403);
+  stop
+else (no)
+endif
+stop
+@enduml

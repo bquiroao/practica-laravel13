@@ -1,0 +1,24 @@
+@startsalt w2-resultados
+' W2 Resultados: carga, lista y estado vacío
+{+
+  {* Catálogo de medicamentos | Buscar | Registrar | Ayuda }
+  ==
+  Buscar: "amoxi  " [Buscar]
+  .
+  <b>Estado de carga:</b> <&loop-circular> Buscando…  (botón Buscar deshabilitado)
+  --
+  <b>2 resultados vigentes al 2026-10-15
+  {#
+    <b>Código | <b>Nombre | <b>Concentración | <b>Forma / vía | <b>Versión
+    MED-000103 | Amoxicilina 250 mg/5 mL suspensión | 250 mg/5mL | SUSPENSION / ORAL | 1
+    MED-000102 | Amoxicilina 500 mg cápsula | 500 mg | CAPSULA / ORAL | 1
+  }
+  --
+  <b>Estado vacío (otra búsqueda: "omepra"):
+  {+
+    No hay medicamentos vigentes con ese criterio.
+    Puede estar dado de baja: pruebe con otra fecha.
+    [Registrar medicamento] | [Buscar en otra fecha]
+  }
+}
+@endsalt

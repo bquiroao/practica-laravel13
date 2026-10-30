@@ -1,0 +1,1 @@
+Se utilizó IA para inspeccionar el prototipo de contrato existente y preparar el plan, checklist y plantillas de hallazgos/acta. La regresión PHP se ejecutó durante la preparación. No se atribuyen participantes, reunión formal, aprobaciones ni ejecución nativa no realizadas. La estudiante debe revisar las observaciones antes de convocar y defender la revisión.

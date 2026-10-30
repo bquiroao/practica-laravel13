@@ -1,0 +1,16 @@
+# PostgreSQL 16 solo para el Micro-HIS de este módulo (puerto 55442 del equipo).
+services:
+  db:
+    image: postgres:16
+    container_name: micro-alergias-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres   # clave local de desarrollo, no es una credencial real
+      POSTGRES_DB: micro_alergias
+    ports:
+      - "55442:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d micro_alergias"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

@@ -1,0 +1,5 @@
+$ php semana-06/evidencia/probar-navegacion.php   # después del cambio
+GET /dashboard/navegacion/citas -> 200 «Citas»
+GET /dashboard/navegacion/camas -> 403 E6
+GET /dashboard/navegacion/usuarios -> 404 NF
+GET /dashboard/navegacion/citas (sin hospital) -> 401 E1

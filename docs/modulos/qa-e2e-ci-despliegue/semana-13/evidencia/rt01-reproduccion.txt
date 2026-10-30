@@ -1,0 +1,3 @@
+1.er registro del despliegue: HTTP 201
+reintento idéntico (la respuesta se perdió): HTTP 201
+despliegues en la trazabilidad: 2 (esperado: 1)

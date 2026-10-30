@@ -1,0 +1,23 @@
+@startsalt w6-baja-eliminar
+' W6 Baja con motivo y eliminación protegida
+{+
+  {* Catálogo de medicamentos | Buscar | Registrar | Ayuda }
+  ==
+  <b>Dar de baja MED-000101 · Paracetamol 500 mg tableta
+  Fecha de baja | "2026-11-01" | <i>vacío = hoy
+  Motivo * | "Retiro del formulario              "
+  <i>5 a 200 caracteres. El historial se conserva.
+  [Dar de baja] | [Cancelar]
+  --
+  <b>Eliminar registro erróneo
+  {+
+    <color:#A4161A><b>No se puede eliminar MED-000101
+    Ya se usó en prescripciones. Para que deje de usarse, dele de baja.
+    [Ir a dar de baja]
+  }
+  --
+  <b>Si nunca se usó (otro código):
+  Escriba el código para confirmar | "MED-000108 "
+  [Eliminar definitivamente] | [Cancelar]
+}
+@endsalt

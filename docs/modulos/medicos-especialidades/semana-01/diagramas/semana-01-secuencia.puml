@@ -1,0 +1,69 @@
+@startuml semana-01-secuencia
+title Secuencia — registrar médico (CU-01), asociar especialidad (CU-03) y consultar disponibilidad (CU-06)
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber "S00"
+
+actor "Administrador /\nRecepcionista" as U
+participant "Pantalla" as UI
+participant "Controlador\nMédicos" as Ctl
+participant "Identidad y\npermisos (RBAC)" as Rbac
+participant "Casos de uso\n(Registrar, Asociar,\nConsultarDisponibilidad)" as CU
+database "BD del hospital\n(médicos, especialidades,\nhorarios, ausencias)" as BD
+participant "Citas médicas\n(M05)" as Cit
+
+== CU-01 Registrar médico ==
+U -> UI : datos del médico
+UI -> Ctl : POST /api/v1/medicos + token
+Ctl -> Rbac : verificar(token, rol, hospital)
+alt D1 sin sesión o sin permiso
+  Ctl --> UI : E1 401 / 403
+else autorizado
+  Ctl -> CU : registrar(datos)
+  CU -> CU : D2 validar formato
+  CU -> BD : existe colegiado o documento en el hospital? [CU-02]
+  alt E2 dato inválido · E3 duplicado
+    CU --> Ctl : dato_invalido · medico_duplicado
+    Ctl --> UI : 422 / 409
+  else válido y único
+    CU -> BD : INSERT médico «activo» (UNIQUE protege si dos lo registran a la vez)
+    Ctl --> UI : 201 {medico_id}
+  end
+end
+== CU-03 Asociar especialidad (y CU-04 horario) ==
+U -> Ctl : POST /api/v1/medicos/{id}/especialidades {especialidad, desde, hasta, principal}
+Ctl -> CU : asociar(...)
+CU -> BD : especialidad activa en catálogo? vigencia cruzada?
+alt D4 especialidad inválida · D5 vigencia cruzada
+  CU --> Ctl : E4 especialidad_invalida · E5 especialidad_duplicada
+  Ctl --> UI : 422 / 409
+else válida
+  CU -> BD : INSERT asociación + bloques de horario semanal
+  Ctl --> UI : 201
+end
+== CU-06 Consultar disponibilidad ==
+U -> Ctl : GET /api/v1/disponibilidad?especialidad&desde&hasta[&medico]
+Ctl -> CU : consultar(...)
+CU -> CU : D6 validar rango (futuro, máx. 14 días)
+alt rango inválido
+  CU --> Ctl : E6 rango_invalido
+  Ctl --> UI : 422
+else válido
+  CU -> BD : médicos activos con especialidad vigente, horarios y ausencias
+  CU -> Cit : citasActivas(médicos, rango)
+  alt D7 Citas no responde en 2 s
+    CU --> Ctl : E7 citas_no_disponible
+    Ctl --> UI : 503 (no se inventa disponibilidad)
+  else citas recibidas
+    CU -> CU : franjas = horario − ausencias − citas [CU-07]
+    alt D8 sin franjas
+      Ctl --> UI : E8 200 {franjas: [], proxima_fecha}
+    else hay franjas
+      Ctl --> UI : R 200 {franjas: [{medico, inicio, fin, especialidad}]}
+    end
+  end
+end
+UI --> U : resultado o error con su motivo
+@enduml

@@ -1,0 +1,22 @@
+@startuml semana-03-c4-componentes
+' Semana 3 — Dashboard de ocupación hospitalaria (tarea Odoo 2490): C4 nivel 3
+!include <C4/C4_Component>
+title C4 componentes — Micro-HIS Dashboard de ocupación hospitalaria
+Person(usr, "Personal de admisión / supervisión", "Consolida y consulta la ocupación")
+Container_Boundary(micro, "Micro-HIS Ocupación (PHP 8.2+ vanilla)") {
+  Component(ctrl, "ControladorOcupacion", "Presentación", "Entrada, traducción E3 y E8 a HTTP")
+  Component(cons, "ConsolidadorOcupacion", "Aplicación", "CU-01 con CU-04")
+  Component(cons2, "ConsultaOcupacion", "Aplicación", "CU-02 con CU-03")
+  Component(dom, "OcupacionSala, Corte", "Dominio", "R-01 a R-07")
+  Component(repo, "RepositorioPdo", "Persistencia", "PDO con sentencias preparadas; solo SELECT sobre camas")
+}
+ContainerDb(db, "Base HOSPITAL", "PostgreSQL (SQLite en pruebas)", "wards, beds, bed_stays, occupancy_snapshots")
+Rel(usr, ctrl, "consolidar, consultar")
+Rel(ctrl, cons, "llama")
+Rel(ctrl, cons2, "llama")
+Rel(cons, dom, "calcula por sala")
+Rel(cons2, dom, "aviso y filtro")
+Rel(cons, repo, "FuenteCamas, EscritorCortes")
+Rel(cons2, repo, "LectorCortes")
+Rel(repo, db, "SQL preparado")
+@enduml

@@ -1,0 +1,40 @@
+@startuml semana-08-flujo-analista-producto
+!pragma layout smetana
+title User flow · Analista QA (diseñar caso) y Responsable de producto (consultar trazabilidad) (W1, W5)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+|Analista QA|
+start
+:INICIO · «Casos» → [Nuevo caso];
+:Título, precondiciones, pasos (acción + resultado esperado), prioridad, requisitos RF-xx;
+if (¿Formato válido? (UI)) then (no)
+  #FDECEC:Errores junto a cada campo (M-04);
+  stop
+else (sí)
+endif
+:[Guardar borrador];
+switch (Respuesta)
+case (201)
+  #E8F5E9:BORRADOR · «Un Líder QA distinto de usted debe aprobarlo» (M-05);
+case (409 CASO_EXISTENTE)
+  #FFF4E5:«TC-200 ya existe» [Abrir TC-200] (M-06);
+case (422)
+  #FDECEC:Los campos que el servidor rechazó (detalle) (M-04);
+endswitch
+stop
+
+|Responsable de producto|
+start
+:INICIO · «Campañas cerradas y en curso» (solo lectura);
+:Abre la trazabilidad de la campaña del build a liberar;
+:Por requisito: casos → último resultado → evidencias (huella) → defectos con «bloquea el GO»;
+if (¿Decisión?) then (GO)
+  #E8F5E9:Puede liberar (decisión fuera del módulo);
+else (NO_GO o en curso)
+  #FFF4E5:Ve las causas y los defectos que bloquean (M-16);
+endif
+stop
+@enduml

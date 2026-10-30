@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Signos vitales y alertas por valores anormales (Micro-HIS)
+  version: 1.0.0
+  description: Captura de signos vitales, evaluación de umbrales y generación de alerta. Las alertas críticas se envían a M21 por bandeja de salida.
+servers: [{ url: http://localhost:8080 }]
+paths:
+  /api/v1/signos-vitales/tomas:
+    parameters:
+      - { name: X-Usuario-Demo, in: header, required: true, schema: { type: string }, description: "Identidad de demostración; se reemplaza por el token del módulo RBAC" }
+      - { name: X-Request-Id, in: header, schema: { type: string, pattern: "^[A-Za-z0-9-]{8,64}$" }, description: "Correlación; si falta, el servidor genera uno y lo devuelve" }
+    post:
+      summary: Registrar una toma (CU-01 a CU-04)
+      parameters:
+        - { name: Idempotency-Key, in: header, schema: { type: string, pattern: "^[A-Za-z0-9-]{8,64}$" }, description: "Reintentar con la misma clave no crea otra toma" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paciente_id, episodio_id, mediciones]
+              properties:
+                paciente_id: { type: string }
+                episodio_id: { type: string }
+                mediciones:
+                  type: object
+                  description: "Signo → valor. pas y pad en mmHg, fc lpm, fr rpm, temp °C, spo2 %"
+                  additionalProperties: false
+                  properties: { pas: { type: number }, pad: { type: number }, fc: { type: number }, fr: { type: number }, temp: { type: number }, spo2: { type: number } }
+            example: { paciente_id: pac-adulto, episodio_id: epi-1, mediciones: { fc: 135, spo2: 97 } }
+      responses:
+        "201": { description: "Toma creada", content: { application/json: { schema: { $ref: "#/components/schemas/TomaCreada" } } } }
+        "200": { description: "Clave de idempotencia ya usada: misma toma, nada nuevo", content: { application/json: { schema: { $ref: "#/components/schemas/TomaRepetida" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+    get:
+      summary: Consultar las tomas del episodio (CU-05)
+      parameters:
+        - { name: paciente_id, in: query, required: true, schema: { type: string } }
+        - { name: episodio_id, in: query, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "Tomas, la más reciente primero", content: { application/json: { schema: { $ref: "#/components/schemas/ListaTomas" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+components:
+  responses:
+    Error: { description: "Error con código estable", content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  schemas:
+    Clasificacion: { type: string, enum: [normal, anormal, critica, sin_rango] }
+    TomaCreada:
+      type: object
+      properties:
+        toma_id: { type: string }
+        clasificaciones: { type: object, additionalProperties: { $ref: "#/components/schemas/Clasificacion" } }
+        alertas:
+          type: array
+          items: { type: object, properties: { signo: { type: string }, nivel: { type: string, enum: [anormal, critica] }, valor: { type: number } } }
+    TomaRepetida: { type: object, properties: { toma_id: { type: string }, repetida: { type: boolean, enum: [true] } } }
+    ListaTomas:
+      type: object
+      properties:
+        total: { type: integer }
+        tomas:
+          type: array
+          items: { type: object, properties: { toma_id: { type: string }, tomada_en: { type: string, format: date-time }, autor_id: { type: string }, mediciones: { type: object } } }
+    Error:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+          enum: [json_invalido, idempotency_key_invalida, sin_sesion, acceso_denegado, ruta_no_encontrada, metodo_no_permitido, episodio_no_disponible,
+                 medicion_invalida, toma_vacia, signo_repetido, error_persistencia]
+        mensaje: { type: string }
+        campos: { type: array, items: { type: string }, description: "Signos con problema (por ejemplo [fc])" }

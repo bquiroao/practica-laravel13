@@ -1,0 +1,33 @@
+@startuml semana-01-casos-de-uso
+title Órdenes de laboratorio desde EMR\nCasos de uso
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Profesional clínico\nsolicitante" as Clinico
+actor "Proceso autorizado\nde laboratorio" as Laboratorio
+
+rectangle "Módulo de órdenes de laboratorio desde EMR" {
+  usecase "CU-01: Emitir orden\ndesde el expediente" as CU1
+  usecase "CU-02: Consultar seguimiento\nde órdenes" as CU2
+  usecase "CU-03: Actualizar estado\nde seguimiento" as CU3
+  usecase "Validar autorización\ny contexto del EMR\n(R-01, R-02)" as Validar
+  usecase "Validar pruebas vigentes\n(R-03)" as Pruebas
+  usecase "Persistir orden y partidas\ncomo una unidad (R-04)" as Persistir
+}
+
+Clinico --> CU1
+Clinico --> CU2
+Laboratorio --> CU3
+CU1 ..> Validar : <<include>>
+CU2 ..> Validar : <<include>>
+CU3 ..> Validar : <<include>>
+CU1 ..> Pruebas : <<include>>
+CU1 ..> Persistir : <<include>>
+
+note bottom of CU3
+  El catálogo, la recepción de muestras
+  y los resultados están fuera del módulo.
+  Las transiciones requieren contrato acordado.
+end note
+@enduml

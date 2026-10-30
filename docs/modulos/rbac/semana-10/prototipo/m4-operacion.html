@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signos vitales · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<!-- Ana solo tiene una sección permitida (Pacientes): sin barra de navegación inferior. -->
+<body class="sin-nav">
+<header class="barra">
+  <a class="atras btn texto" href="#" aria-label="Volver a la lista de pacientes" style="color:#fff">←</a>
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual">Enfermería</span>
+  <span class="avatar" role="img" aria-label="Ana Pérez, enfermería" style="background:#2E8B87">AP</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión
+  <button>Reintentar</button>
+</div>
+<div class="red lenta" role="status" data-estado="carga">
+  <span aria-hidden="true">◔</span> Conexión lenta: verificando permisos…
+</div>
+
+<main>
+  <p class="meta" style="margin:0">Paciente de prueba (ficticio)</p>
+  <h1 style="margin-top:0">P-00123 · Signos vitales</h1>
+
+  <!-- 403: va ARRIBA, recibe el foco y se anuncia (BL-03). Sin rol, sin permiso, sin motivo (R-08). -->
+  <section class="aviso error" role="alert" tabindex="-1" aria-labelledby="den" data-estado="denegado">
+    <h2 id="den" style="color:var(--peligro)">No se guardó: acceso denegado</h2>
+    <p style="margin:0 0 8px">Si necesitas este acceso, comparte esta referencia con tu administrador.</p>
+    <div class="referencia">0c56479a · 1c07 · 4cb5 · a895 · 75ecaa973bb6</div>
+    <div class="acciones">
+      <button class="btn primario">Compartir referencia</button>
+      <button class="btn">Copiar</button>
+    </div>
+    <p class="ayuda" style="margin-bottom:0">Se comparte solo la referencia y el hospital, nunca datos del paciente. Este intento quedó registrado.</p>
+  </section>
+
+  <!-- fail-closed: sin decisión del PDP, sin acciones -->
+  <section class="tarjeta" data-estado="carga" aria-busy="true">
+    <div class="esq" style="width:45%"></div><div class="esq" style="width:70%"></div>
+    <div class="esq btn-esq"></div>
+    <p class="meta" style="margin:8px 0 0">Las acciones aparecen cuando confirmamos tus permisos.</p>
+  </section>
+
+  <form class="tarjeta" data-estado="base sin-conexion denegado">
+    <h2>Registrar signos vitales</h2>
+    <div class="fila" style="gap:12px">
+      <div style="flex:1"><label for="pa">Presión</label><input id="pa" inputmode="numeric" value="120/80"></div>
+      <div style="flex:1"><label for="fc">Pulso</label><input id="fc" inputmode="numeric" value="78"></div>
+    </div>
+    <div class="fila" style="gap:12px">
+      <div style="flex:1"><label for="t">Temp. °C</label><input id="t" inputmode="decimal" value="36.8"></div>
+      <div style="flex:1"><label for="sat">SpO₂ %</label><input id="sat" inputmode="numeric" value="97"></div>
+    </div>
+    <p class="ayuda" data-estado="sin-conexion">Lo escrito se conserva en esta pantalla. No se guarda en el teléfono.</p>
+  </form>
+
+  <p class="meta extra" data-estado="base">Última toma: 08:00 · Ana Pérez</p>
+</main>
+
+<div class="accion-fija">
+  <button class="btn primario" data-estado="base">Guardar signos vitales</button>
+  <button class="btn" aria-disabled="true" data-estado="sin-conexion">Guardar · requiere conexión</button>
+  <div class="esq btn-esq" style="flex:1;margin:0" data-estado="carga"></div>
+  <button class="btn" data-estado="denegado">Volver a la lista</button>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movimiento #1 · Bitácora · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<!-- Estados: base (original corregido) · correccion (#2, con su motivo) · carga · no-encontrado · sin-conexion -->
+<header class="barra">
+  <a class="atras btn texto" href="m2-resultados.html" aria-label="Volver a la lista" style="color:#fff">‹</a>
+  <span class="hospital" style="cursor:default"><span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span></span>
+  <span class="avatar" role="img" aria-label="Auditor de oriente">AO</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Para abrir un movimiento hace falta conexión.
+</div>
+
+<main>
+  <!-- En el teléfono el detalle es una pantalla completa (no un panel lateral): «‹» vuelve a la lista en la misma posición -->
+  <div data-estado="carga" aria-busy="true">
+    <p class="meta" role="status">Abriendo el movimiento…</p>
+    <div class="tarjeta"><div class="esq" style="width:50%"></div><div class="esq" style="width:80%"></div><div class="esq" style="width:60%"></div><div class="esq" style="width:70%"></div></div>
+  </div>
+
+  <div class="aviso error" role="alert" data-estado="no-encontrado sin-conexion">
+    <h2 data-estado="no-encontrado">Este movimiento no existe o no pertenece a su hospital</h2>
+    <h2 data-estado="sin-conexion">No se pudo abrir el movimiento</h2>
+    <div class="acciones">
+      <a class="btn primario" href="m2-resultados.html" data-estado="no-encontrado">Volver a la lista</a>
+      <a class="btn primario" href="m3-detalle.html" data-estado="sin-conexion">Reintentar</a>
+    </div>
+  </div>
+
+  <div data-estado="base">
+    <h1>Movimiento #1</h1>
+    <div class="aviso atencion">
+      <strong>Corregido por #2.</strong> Este movimiento se conserva sin cambios; el motivo está en la corrección.
+      <div class="acciones"><a class="btn" href="m3-detalle.html?estado=correccion">Ver #2</a></div>
+    </div>
+    <div class="tarjeta">
+      <dl class="datos">
+        <dt>Acción</dt><dd>Consulta de paciente <span class="codigo meta">(PACIENTE_CONSULTADO)</span></dd>
+        <dt>Usuario</dt><dd>u-equivocado</dd>
+        <dt>Fecha y hora</dt><dd>21/10/2026 08:00 (hora de Guatemala)</dd>
+        <dt>Resultado</dt><dd><span class="res exito"><span aria-hidden="true">✓</span> Éxito</span></dd>
+        <dt>Recurso</dt><dd>paciente:P-000001</dd>
+      </dl>
+    </div>
+    <details class="mas">
+      <summary>Origen e integridad</summary>
+      <dl class="datos">
+        <dt>Módulo · emisor</dt><dd>pacientes · svc-pacientes</dd>
+        <dt>Evento · correlación</dt><dd>ev-1 · corr-0001</dd>
+        <dt>Secuencia</dt><dd>1</dd>
+        <dt>Sello</dt><dd class="sello">95fe2d97c398c68c417e48bb704102a4fc5dce45babad33d2ddffadf29bac689</dd>
+      </dl>
+      <button class="btn" style="margin-top:8px">Copiar sello</button>
+    </details>
+  </div>
+
+  <div data-estado="correccion">
+    <h1>Movimiento #2</h1>
+    <div class="aviso atencion">
+      <strong>Corrige a #1.</strong> Motivo: «El integrador atribuyó la consulta al usuario equivocado».
+      <div class="acciones"><a class="btn" href="m3-detalle.html">Ver #1</a></div>
+    </div>
+    <div class="tarjeta">
+      <dl class="datos">
+        <dt>Acción</dt><dd>Consulta de paciente <span class="codigo meta">(PACIENTE_CONSULTADO)</span></dd>
+        <dt>Usuario</dt><dd>u-correcto</dd>
+        <dt>Fecha y hora</dt><dd>21/10/2026 09:00 (hora de Guatemala)</dd>
+        <dt>Resultado</dt><dd><span class="res exito"><span aria-hidden="true">✓</span> Éxito</span></dd>
+        <dt>Recurso</dt><dd>paciente:P-000001</dd>
+      </dl>
+    </div>
+    <details class="mas"><summary>Origen e integridad</summary><p class="meta">Secuencia 2 · sello 6b38b759…76ef3cd</p></details>
+  </div>
+  <p class="meta" data-estado="base correccion">Abrir este detalle quedó registrado en la bitácora.</p>
+</main>
+<script src="estado.js"></script>
+</body>
+</html>

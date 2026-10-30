@@ -1,0 +1,1 @@
+PASS OpenAPI 3.1.0: estructura/referencias válidas; GET/POST, sesión, sin actor en cuerpo, idempotencia y errores explícitos. Validación estática, no servidor operativo.

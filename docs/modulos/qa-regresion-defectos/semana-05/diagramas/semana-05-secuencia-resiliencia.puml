@@ -1,0 +1,36 @@
+@startuml semana-05-secuencia-resiliencia
+!pragma layout smetana
+title Resiliencia de «registrar resultado»: red perdida, almacén caído y bandeja
+skinparam defaultFontSize 11
+
+actor Tester
+participant "ClienteQa" as C
+participant "Bandeja" as B
+participant "API QA" as S
+participant "Almacén" as AL
+database "PostgreSQL" as BD
+
+Tester -> C : registrar FALLA + captura
+C -> S : POST + Idempotency-Key K
+S -> AL : PUT captura
+AL --> S : 201 {huella}
+S -> BD : intento + defecto + traza (1 transacción)
+S --> C : 201 ... se PIERDE en la red
+C -> S : reintento con la MISMA K
+S -> BD : ¿K ya existe? sí, misma huella
+S --> C : 200 RESULTADO_YA_REGISTRADO
+C --> Tester : CONFIRMADO (un solo intento, un solo defecto)
+
+== Almacén caído ==
+Tester -> C : registrar FALLA + captura
+C -> S : POST + K2 (×3)
+S -> AL : PUT
+AL --> S : 500 / tiempo agotado / circuito abierto
+S --> C : 503 EVIDENCIA_NO_DISPONIBLE (nada escrito)
+C -> B : guardar(K2, petición completa)
+C --> Tester : PENDIENTE
+... el almacén vuelve ...
+C -> S : reenviarPendientes(): POST + K2
+S --> C : 201
+C -> B : quitar(K2)
+@enduml

@@ -1,0 +1,45 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+title Integración por repositorio de datos compartido: la base CENTRAL de la red del HIS
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+rectangle "Módulo QA\n(rol app_qa)" as Qa #F5F9FF
+rectangle "Identidad y RBAC\n(dueño de C0/C1)" as Ident #FFFFFF
+rectangle "MPI, Consentimiento,\nSincronización (C2–C4)" as Otros #FFFFFF
+
+database "Base central (repositorio compartido · database/migrations/central)" as BD {
+  package "C0 · Red (Identidad)" #FFF8E1 {
+    rectangle "networks · hospitals" as Hosp
+  }
+  package "C1 · Identidad y membresías" #FFF8E1 {
+    rectangle "central_users\n(email, subject: datos personales)" as Users
+    rectangle "hospital_memberships\n(role_code, status, valid_from/valid_to)" as Memb
+  }
+  package "C2–C4 · otros módulos" #FFF8E1 {
+    rectangle "mpi_* · consent_* · central_sync_*" as C24
+  }
+  package "QA (propuesta)" #EEF7EE {
+    rectangle "qa_casos · qa_campanas · qa_intentos\n(trigger de solo agregar)" as QaT
+    rectangle "FUNCIÓN qa_miembro_activo()\nSECURITY DEFINER" as Fn
+    rectangle "VISTA qa_usuarios\n(user_id, display_name, status)" as Vista
+  }
+}
+
+Ident --> Hosp : escribe (dueño)
+Ident --> Users : escribe (dueño)
+Ident --> Memb : escribe (dueño)
+Otros --> C24 : escribe (dueños)
+Qa --> QaT : SELECT · INSERT (dueño)
+Qa --> Vista : SELECT (sin privilegios sobre central_users)
+Vista ..> Users : lee 3 columnas
+QaT ..> Hosp : FK hospital_id (el tenant)
+QaT ..> Users : FK autor / aprobador / líder / tester
+QaT ..> Fn : trigger BEFORE INSERT
+Fn ..> Memb : ¿membresía activa y vigente\ncon el rol qa_tester / qa_lead?
+
+note bottom of BD
+  bin/validar-integracion-central.php aplica las migraciones REALES C0 y C1
+  y database/integracion-central.sql en un esquema temporal: 18 afirmaciones, 18 OK.
+end note
+@enduml

@@ -1,0 +1,6 @@
+RNF-03 / M-03 - p95 de la búsqueda (Micro-HIS, adaptador PDO, base de prueba)
+Fecha: 2026-10-30 07:23:35 UTC · PHP 8.4.26 · 16.15 (Debian 16.15-1.pgdg13+2)
+Versiones en la tabla: 5000 (carga en 22.4 s)
+Búsquedas medidas: 200 (10 términos, un tercio a fecha 2026-03-01)
+p50 = 5.4 ms · p95 = 6.4 ms · máximo = 12.3 ms
+Umbral RNF-03: p95 <= 300 ms -> CUMPLE

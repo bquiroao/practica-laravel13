@@ -1,0 +1,67 @@
+@startuml semana-04-mvc
+!pragma layout smetana
+title MVC en la entrada: antes (semana 3) y después (semana 4)
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Antes · semana 3" #FDECEC {
+  class AccionesQa {
+    + rutas(): list<Ruta>
+    + disenar() · aprobar() · planificar() · iniciar()
+    + registrar(): lee JSON, Idempotency-Key, base64…
+    + clasificar() · corregir() · cerrar() · trazabilidad()
+    - cuerpo(): array|Respuesta
+  }
+  class TraductorSalida {
+    + traducir(Salida): Respuesta
+  }
+  AccionesQa --> TraductorSalida
+  note bottom of AccionesQa
+    Una clase con 9 acciones, el parseo de cada
+    cuerpo, la decodificación base64 y las rutas.
+    Validar la forma de un resultado obligaba
+    a pasar por HTTP.
+  end note
+}
+
+package "Después · semana 4" #EEF7EE {
+  abstract class Formulario {
+    # objeto(Solicitud): array
+    # tipos(datos, tipos, obligatorios)
+  }
+  class FormularioResultado {
+    + {static} desde(Solicitud): {clave, datos}
+  }
+  class "FormularioCaso · FormularioCampana ·\nFormularioClasificacion · FormularioBuild" as OtrosF
+  class EntradaInvalida <<excepción 400>>
+  class CampanasControlador {
+    + planificar() · iniciar() · registrar() · cerrar() · trazabilidad()
+  }
+  class "CasosControlador · DefectosControlador" as OtrosC
+  class SalidaVista {
+    + mostrar(Salida, ?location): Respuesta
+  }
+  class ErrorVista {
+    + entrada(EntradaInvalida): Respuesta
+  }
+  class Rutas {
+    + {static} definir(controladores): list<Ruta>
+  }
+  Formulario <|-- FormularioResultado
+  Formulario <|-- OtrosF
+  FormularioResultado ..> EntradaInvalida : lanza
+  CampanasControlador --> FormularioResultado : lee la entrada
+  CampanasControlador --> SalidaVista : responde
+  CampanasControlador --> ErrorVista
+  OtrosC --> OtrosF
+  OtrosC --> SalidaVista
+  Rutas --> CampanasControlador
+  Rutas --> OtrosC
+}
+
+class "Casos de uso (Aplicación)\nM de MVC: el Modelo" as M #F5F9FF
+CampanasControlador --> M : ejecutar()
+OtrosC --> M
+AccionesQa --> M
+@enduml

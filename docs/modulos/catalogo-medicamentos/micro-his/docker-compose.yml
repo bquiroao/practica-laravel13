@@ -1,0 +1,23 @@
+# PostgreSQL 16 del Micro-HIS Catálogo de medicamentos (solo desarrollo local).
+# Puerto 55445 del equipo -> 5432 del contenedor. Credenciales ficticias de desarrollo.
+services:
+  bd-catalogo-medicamentos:
+    image: postgres:16
+    container_name: micro-his-catalogo-medicamentos-bd
+    environment:
+      POSTGRES_USER: catalogo
+      POSTGRES_PASSWORD: catalogo_local
+      POSTGRES_DB: micro_medicamentos
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C.UTF-8"
+    ports:
+      - "55445:5432"
+    volumes:
+      - datos-catalogo-medicamentos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalogo -d micro_medicamentos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  datos-catalogo-medicamentos:

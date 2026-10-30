@@ -1,0 +1,35 @@
+$ QA_DB_DSN=... php tests/ejecutar.php --solo=CAM   # ANTES de implementar R-15
+Micro-HIS QA funcional y regresión - pruebas (PHP 8.4.26)
+
+== Cambio práctico de la semana 6 (R-15): MAYOR abierto en caso crítico bloquea el GO ==
+[FALLA] CAM-01   Dominio: GO con 0 críticos y tasa 100 %, pero 1 MAYOR abierto en un caso crítico → NO_GO con su propia causa
+         -> decisión: esperado array (
+  0 => 'NO_GO',
+  1 => 1.0,
+  2 => 
+  array (
+    0 => '1 defecto MAYOR abierto en un caso crítico de la matriz',
+  ),
+), obtenido array (
+  0 => 'GO',
+  1 => 1.0,
+  2 => 
+  array (
+  ),
+) (Arnes.php:41)
+[FALLA] CAM-02   Caso de uso: MAYOR abierto en TC-107 (crítico en «expediente») → NO_GO; MAYOR abierto en TC-109 (no crítico) → GO
+         -> MAYOR en TC-107: esperado 'NO_GO', obtenido 'GO' (Arnes.php:41)
+[FALLA] CAM-03   Un MAYOR CORREGIDO todavía bloquea (no está cerrado); uno CERRADO por la re-ejecución, no
+         -> MAYOR CORREGIDO: esperado 'NO_GO', obtenido 'GO' (Arnes.php:41)
+[FALLA] CAM-04   Trazabilidad: cada defecto dice si bloquea el GO (CRÍTICA abierto, o MAYOR abierto en caso crítico)
+         -> bloquea_go: esperado array (
+  0 => true,
+  1 => false,
+), obtenido array (
+  0 => NULL,
+  1 => NULL,
+) (Arnes.php:41)
+[FALLA] CAM-05   Repository: mayoresAbiertos cuenta solo MAYOR no cerrados de los casos pedidos, en memoria y en PostgreSQL
+         -> Call to undefined method Qa\Persistencia\EnMemoria\RepositorioDefectosEnMemoria::mayoresAbiertos() (MayorEnCriticoPrueba.php:73)
+
+Total: 5  Pasan: 0  Fallan: 5  Omitidas: 0

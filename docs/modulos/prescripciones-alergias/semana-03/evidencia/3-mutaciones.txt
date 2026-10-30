@@ -1,0 +1,17 @@
+$ PRESCRIPCIONES_DB_DSN=… php tests/mutaciones.php
+[DETECTA  ] M1 el adaptador PDO devuelve vacío si allergies falla (fail-open) falla: PER-01, INT-06
+[DETECTA  ] M2 la aplicación trata la fuente caída como «sin alergias»     falla: APP-04, APP-13, HTTP-03, INT-06
+[DETECTA  ] M3 la coincidencia directa deja de bloquear                    falla: DOM-03, APP-05, APP-10, HTTP-02, HTTP-08, INT-03
+[DETECTA  ] M4 la severidad «unknown» se trata como leve                   falla: DOM-04, APP-07, INT-03
+[DETECTA  ] M5 la dosis máxima se duplica                                  falla: DOM-02, APP-09
+[DETECTA  ] M6 no se exige confirmar «sin alergias conocidas»              falla: APP-08, HTTP-02
+[DETECTA  ] M7 la advertencia no exige el permiso override                 falla: APP-06
+[DETECTA  ] M8 sin idempotencia                                            falla: APP-12, HTTP-01
+[DETECTA  ] M9 no se verifica el hospital del paciente                     falla: APP-11, APP-16, HTTP-02
+[DETECTA  ] M10 el bloqueo no deja traza                                   falla: APP-05, INT-03
+[DETECTA  ] M11 el kernel no compara X-Tenant-ID con el token              falla: HTTP-04
+[DETECTA  ] M12 el SQL de la consulta ignora el hospital                   falla: INT-01
+[DETECTA  ] M13 la carrera de idempotencia no se traduce a ClaveEnUso      falla: INT-04
+[DETECTA  ] M14 el esquema sin el trigger de inmutabilidad                 falla: INT-02
+----------------------------------------------------------------------------------------------------
+Mutaciones: 14  Detectadas: 14  Sobreviven: 0

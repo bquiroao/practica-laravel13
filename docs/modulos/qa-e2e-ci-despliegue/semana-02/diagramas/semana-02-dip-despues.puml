@@ -1,0 +1,52 @@
+@startuml semana-02-dip-despues
+title DESPUÉS de DIP · la política posee las abstracciones; los detalles dependen de ellas (las flechas suben)
+skinparam defaultFontSize 11
+hide empty members
+
+package "Alto nivel (Dominio + Aplicación)" #EEF0F8 {
+  class EvaluarGate <<caso de uso CU-09>> {
+    + ejecutar(ejecucion, digest, politica): Decision
+  }
+  class QualityGate <<regla R-09>> {
+    + {static} evaluar(politica, ejecucion, digest, ahora, confirmada): Decision
+  }
+  interface FuenteResultados {
+    + ejecucion(id): Ejecucion
+  }
+  interface AlmacenEvidencias {
+    + confirmada(sha256): bool
+  }
+  interface Reloj {
+    + ahora(): DateTimeImmutable
+  }
+  interface RepositorioEvaluaciones {
+    + guardar(Decision)
+    + deEjecucion(id): Decision[]
+  }
+  EvaluarGate -down-> QualityGate
+  EvaluarGate -down-> FuenteResultados
+  EvaluarGate -down-> AlmacenEvidencias
+  EvaluarGate -down-> Reloj
+  EvaluarGate -down-> RepositorioEvaluaciones
+}
+
+package "Bajo nivel (Adaptadores)" #DDEFE4 {
+  class ReporteJUnit
+  class ReporteJson <<otro proveedor de CI>>
+  class FuenteEnMemoria
+  class AlmacenEnDisco <<por contenido>>
+  class AlmacenEnMemoria
+  class RelojSistema
+  class RelojFijo
+  class EvaluacionesEnMemoria
+}
+ReporteJUnit .up.|> FuenteResultados
+ReporteJson .up.|> FuenteResultados
+FuenteEnMemoria .up.|> FuenteResultados
+AlmacenEnDisco .up.|> AlmacenEvidencias
+AlmacenEnMemoria .up.|> AlmacenEvidencias
+RelojSistema .up.|> Reloj
+RelojFijo .up.|> Reloj
+EvaluacionesEnMemoria .up.|> RepositorioEvaluaciones
+
+@enduml

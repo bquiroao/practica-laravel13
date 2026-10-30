@@ -1,0 +1,298 @@
+/* Prototipo responsive de la consola de release del módulo QA E2E, CI y despliegue (semanas 10 y 11). Mobile-first: la base es 320 px y cada breakpoint AGREGA.
+   Base compartida con los demás prototipos del HIS. Colores con las correcciones de la semana 9 (B-02, B-05, B-14). */
+:root {
+  --texto: #2B2F33;
+  --secundario: #5F6670;      /* antes #8A8F96 (3.26:1) → 5.80:1, semana 9 B-02 */
+  --borde: #767C82;           /* antes #9AA0A6 (2.64:1) → 4.22:1, semana 9 B-05 */
+  --borde-suave: #D5D8DC;     /* separadores decorativos, no identifican controles */
+  --fondo: #F2F3F5;
+  --superficie: #FFFFFF;
+  --primario: #3D4F6B;
+  --peligro: #A33A3A;
+  --error-fondo: #FDECEC;
+  --ok: #1F6B43;              /* antes #2E8B57 (4.25:1) → 6.48:1, semana 9 B-05 */
+  --ok-fondo: #E7F4EC;
+  --aviso-fondo: #FFF4E5;
+  --aviso-borde: #E8C48A;
+  --red-fondo: #2B2F33;
+  --toque: 48px;              /* objetivo táctil mínimo */
+  --margen: 16px;
+  --barra: 56px;
+  --nav: 64px;
+  font-size: 16px;            /* 16 px en campos: iOS no hace zoom al enfocar */
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto); background: var(--fondo); line-height: 1.4;
+  padding-bottom: calc(var(--nav) + 80px);
+}
+body.sin-nav { padding-bottom: 96px; }
+[hidden] { display: none !important; }
+.oculto-visual { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- barra superior: hospital o red SIEMPRE visible (W4) ---------- */
+.barra {
+  position: sticky; top: 0; z-index: 20; height: var(--barra);
+  display: flex; align-items: center; gap: 8px; padding: 0 8px 0 var(--margen);
+  background: var(--primario); color: #fff;
+}
+.barra .atras { min-width: var(--toque); height: var(--toque); margin-left: -12px; background: none; border: 0; color: #fff; font-size: 1.4rem; }
+.hospital {
+  flex: 1; min-width: 0; height: var(--toque); display: flex; align-items: center; gap: 4px;
+  background: none; border: 0; color: #fff; font: inherit; font-weight: 700; text-align: left; padding: 0;
+}
+.hospital span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hospital .corto { display: inline; }
+.hospital .largo { display: none; }
+.avatar {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff;
+  background: #5B7083; color: #fff; font-weight: 700; display: grid; place-items: center; font-size: .9rem;
+}
+.rol-actual { display: none; font-size: .9rem; white-space: nowrap; }
+
+/* ---------- estado de la red ---------- */
+.red {
+  position: sticky; top: var(--barra); z-index: 19; display: flex; gap: 8px; align-items: center;
+  padding: 10px var(--margen); background: var(--red-fondo); color: #fff; font-size: .95rem;
+}
+.red.lenta { background: var(--aviso-fondo); color: var(--texto); border-bottom: 1px solid var(--aviso-borde); }
+.red button { margin-left: auto; min-height: 44px; background: none; color: inherit; border: 1px solid currentColor; border-radius: 8px; padding: 0 12px; font: inherit; font-weight: 600; }
+
+/* ---------- contenido ---------- */
+main { padding: var(--margen); max-width: 600px; margin: 0 auto; }
+h1 { font-size: 1.35rem; margin: 4px 0 12px; }
+h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.sub { color: var(--secundario); font-size: .95rem; margin: -6px 0 12px; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde-suave); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.fila { display: flex; align-items: center; gap: 8px; }
+.fila .derecha { margin-left: auto; }
+.meta { color: var(--secundario); font-size: .9rem; }
+.extra { display: none; }   /* datos de prioridad 3: aparecen desde 431 px */
+
+/* ---------- controles ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: var(--toque); padding: 0 18px; border-radius: 10px; font: inherit; font-weight: 700;
+  border: 1px solid var(--borde); background: var(--superficie); color: var(--texto); text-decoration: none;
+}
+.btn.primario { background: var(--primario); border-color: var(--primario); color: #fff; }
+.btn.peligro { background: var(--peligro); border-color: var(--peligro); color: #fff; }
+.btn.bloque { width: 100%; }
+.btn[aria-disabled="true"] { background: #E4E6EA; border-color: #C9CDD2; color: var(--secundario); }
+.btn.texto { border: 0; background: none; color: var(--primario); padding: 0 8px; }
+.icono { width: var(--toque); padding: 0; border-radius: 50%; }
+label, .etiqueta { display: block; font-weight: 700; font-size: .95rem; margin: 14px 0 6px; color: var(--secundario); }
+input, select, textarea {
+  width: 100%; min-height: var(--toque); font: inherit; font-size: 1rem; color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 10px; padding: 10px 12px; background: var(--superficie);
+}
+textarea { min-height: 96px; resize: vertical; }
+input[type=search] { margin-bottom: 12px; }
+.ayuda { color: var(--secundario); font-size: .9rem; margin-top: 6px; }
+p.error { color: var(--peligro); font-size: .9rem; margin-top: 6px; }
+.casilla { display: flex; gap: 12px; align-items: center; min-height: var(--toque); margin-top: 8px; font-weight: 400; color: var(--texto); }
+.casilla input { width: 24px; height: 24px; min-height: 0; flex: none; accent-color: var(--primario); }
+
+/* ---------- estados: icono + texto (1.4.1) ---------- */
+.estado { display: inline-flex; gap: 4px; align-items: center; font-weight: 700; font-size: .9rem; padding: 2px 10px; border-radius: 999px; }
+.estado.activo { background: var(--ok-fondo); color: var(--ok); }
+.estado.vencido { background: var(--fondo); color: var(--secundario); }
+.estado.revocado { background: var(--error-fondo); color: var(--peligro); }
+
+/* ---------- avisos ---------- */
+.aviso { border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid; }
+.aviso.ok { background: var(--ok-fondo); border-color: #9CCFB1; color: var(--ok); }
+.aviso.error { background: var(--error-fondo); border-color: #E3A3A3; }
+.aviso.atencion { background: var(--aviso-fondo); border-color: var(--aviso-borde); }
+.aviso h2 { font-size: 1.05rem; }
+.aviso .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.referencia {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .95rem; letter-spacing: .02em;
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px; word-break: break-all;
+}
+.cerrar { float: right; margin: -8px -8px 0 0; }
+
+/* ---------- esqueletos ---------- */
+.esq { height: 16px; border-radius: 8px; background: #E4E6EA; margin: 10px 0; }
+.esq.btn-esq { height: var(--toque); border-radius: 10px; }
+
+/* ---------- barra de acción fija (pulgar) ---------- */
+.accion-fija {
+  position: fixed; left: 0; right: 0; bottom: var(--nav); z-index: 15;
+  padding: 12px var(--margen); background: var(--superficie); border-top: 1px solid var(--borde-suave);
+  display: flex; gap: 8px;
+}
+body.sin-nav .accion-fija { bottom: 0; }
+.accion-fija .btn { flex: 1; }
+
+/* ---------- navegación inferior: solo secciones permitidas ---------- */
+.nav-inferior {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; height: var(--nav);
+  display: flex; background: var(--superficie); border-top: 1px solid var(--borde-suave);
+}
+.nav-inferior a {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: var(--secundario); text-decoration: none; font-size: .8rem; font-weight: 600;
+}
+.nav-inferior a .ico { font-size: 1.3rem; line-height: 1; }
+.nav-inferior a[aria-current="page"] { color: var(--primario); box-shadow: inset 0 3px 0 var(--primario); }
+
+/* ---------- pasos ---------- */
+.pasos { display: flex; gap: 6px; margin: 0 0 6px; padding: 0; list-style: none; }
+.pasos li { flex: 1; height: 6px; border-radius: 3px; background: #C9CDD2; }
+.pasos li.hecho { background: var(--primario); }
+.paso-texto { color: var(--secundario); font-size: .9rem; margin-bottom: 8px; }
+
+/* ---------- hoja inferior (bottom sheet) ---------- */
+.velo { position: fixed; inset: 0; z-index: 30; background: rgba(43, 47, 51, .55); }
+.hoja {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 92vh; overflow: auto;
+  background: var(--superficie); border-radius: 16px 16px 0 0; padding: 8px var(--margen) var(--margen);
+}
+.hoja .asa { width: 40px; height: 4px; border-radius: 2px; background: #C9CDD2; margin: 4px auto 12px; }
+.hoja .acciones { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }  /* Cancelar abajo: donde cae el pulgar */
+
+/* ---------- resultados de búsqueda ---------- */
+.resultado { display: flex; gap: 12px; align-items: center; min-height: 64px; padding: 8px 12px; border: 1px solid var(--borde-suave); border-radius: 10px; margin-bottom: 8px; background: var(--superficie); }
+.resultado[aria-selected="true"] { border: 2px solid var(--primario); }
+.resultado .avatar { border-color: var(--borde-suave); }
+
+dl.datos { margin: 0; }
+dl.datos dt { color: var(--secundario); font-size: .85rem; font-weight: 700; margin-top: 10px; }
+dl.datos dd { margin: 2px 0 0; word-break: break-word; }
+
+table.tabla { display: none; }
+
+/* =========================================================================
+   BREAKPOINTS (ver semana-10-movil-qa-e2e.md §3)
+   ========================================================================= */
+
+/* S · 360–430: teléfono estándar. Nombre largo del hospital si cabe. */
+@media (min-width: 360px) {
+  .hospital .corto { display: none; }
+  .hospital .largo { display: inline; }
+}
+
+/* M · 431–767: teléfono grande / horizontal. Aparecen los datos de prioridad 3. */
+@media (min-width: 431px) {
+  .extra { display: block; }
+  .rol-actual { display: inline; }
+  .hoja .acciones { flex-direction: row-reverse; justify-content: flex-start; }
+}
+
+/* L · 768–1023: tableta. La hoja inferior pasa a diálogo centrado; navegación lateral. */
+@media (min-width: 768px) {
+  body { padding-bottom: 24px; }
+  main, .red { margin-left: 96px; }
+  .nav-inferior { top: var(--barra); bottom: 0; right: auto; width: 96px; height: auto; flex-direction: column; justify-content: flex-start; border-top: 0; border-right: 1px solid var(--borde-suave); }
+  .nav-inferior a { flex: none; height: 80px; }
+  .nav-inferior a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--primario); }
+  .accion-fija { position: static; padding: 0 var(--margen); border: 0; background: none; justify-content: flex-end; margin: 0 0 0 96px; max-width: 760px; }
+  .accion-fija .btn { flex: none; }
+  .hoja { left: 50%; right: auto; bottom: auto; top: 50%; transform: translate(-50%, -50%); width: 560px; border-radius: 16px; }
+  .hoja .asa { display: none; }
+  main { max-width: 760px; margin-right: auto; }
+  body.sin-nav main, body.sin-nav .red, body.sin-nav .accion-fija { margin-left: auto; margin-right: auto; }
+}
+
+/* XL · ≥1024: escritorio (W1–W6 de la semana 8). Las tarjetas de resultados vuelven a ser tabla. */
+@media (min-width: 1024px) {
+  main { max-width: 960px; }
+  .accion-fija { max-width: 960px; }
+  .solo-movil { display: none; }
+  table.tabla { display: table; width: 100%; border-collapse: collapse; background: var(--superficie); border: 1px solid var(--borde-suave); border-radius: 12px; overflow: hidden; }
+  .tabla th { text-align: left; background: var(--fondo); color: var(--secundario); font-size: .9rem; padding: 12px; }
+  .tabla td { padding: 10px 12px; border-top: 1px solid var(--borde-suave); }
+}
+
+
+/* =========================================================================
+   Propio de la consola de release (QA E2E, CI y despliegue)
+   ========================================================================= */
+:root { --foco-color: #3D4F6B; --aviso-texto: #5E3A00; --chip-aviso: #8A4A12; --placeholder: #6B7178; --curso-fondo: #E6ECF5; }
+:focus-visible { outline: 3px solid var(--foco-color); outline-offset: 2px; }
+::placeholder { color: var(--placeholder); opacity: 1; }   /* antes #A0A4A8 (2.51:1) → 4.93:1, semana 9 B-05 */
+
+/* Contexto de la versión: QUÉ se evalúa o despliega queda pegado bajo la barra (W3–W5) */
+.contexto { position: sticky; top: var(--barra); z-index: 18; background: var(--superficie); border-bottom: 1px solid var(--borde-suave); padding: 8px var(--margen); }
+.contexto .version { font-weight: 700; }
+.contexto .meta { display: block; }
+
+/* Chips de estado del dominio: palabra + icono, nunca solo color (1.4.1, semana 9 B-10) */
+.chip { display: inline-flex; gap: 4px; align-items: center; font-weight: 700; font-size: .85rem; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+.chip.pasa, .chip.aprobado, .chip.desplegado { background: var(--ok-fondo); color: var(--ok); }
+.chip.falla, .chip.rechazado, .chip.revertido { background: var(--error-fondo); color: var(--peligro); }
+.chip.inestable, .chip.sin-plan, .chip.vence { background: var(--aviso-fondo); color: var(--chip-aviso); }
+.chip.en-curso { background: var(--curso-fondo); color: var(--primario); }
+.chip.pendiente, .chip.omitido { background: #E4E6EA; color: var(--texto); }
+
+/* Progreso de la ejecución (W3): número + barra */
+.progreso { height: 8px; border-radius: 4px; background: #E4E6EA; margin: 10px 0 4px; overflow: hidden; }
+.progreso span { display: block; height: 100%; background: var(--primario); }
+
+/* Resultado de un escenario: tarjeta en móvil, fila de tabla desde XL */
+.escenario .titulo { font-weight: 700; }
+.escenario .evidencias { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.escenario .evidencias .btn { min-height: var(--toque); font-weight: 600; }
+
+/* Reglas del gate (W4): cada una con su texto «cumple / no cumple» (semana 9 B-10) */
+ul.reglas { list-style: none; padding: 0; margin: 0 0 12px; }
+ul.reglas li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; background: var(--superficie); border: 1px solid var(--borde-suave); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+ul.reglas .valor { color: var(--secundario); font-size: .9rem; grid-column: 1; }
+ul.reglas .resultado-regla { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-weight: 700; }
+ul.reglas .cumple { color: var(--ok); }
+ul.reglas .no-cumple { color: var(--peligro); }
+
+/* Digest completo, en bloques de 8, monoespaciado (semana 9 B-08). Nunca «…». */
+.digest { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .95rem; line-height: 1.7; word-break: break-all; }
+.digest .bloque { display: inline-block; padding: 0 2px; margin-right: 4px; border-radius: 4px; }
+.digest .bloque.distinto { outline: 2px solid var(--peligro); background: var(--error-fondo); color: var(--peligro); font-weight: 700; }
+.digest .bloque.distinto::after { content: " distinto"; font-family: system-ui, sans-serif; font-size: .75rem; }
+textarea.digest-campo { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; min-height: 96px; }
+
+/* Región viva: solo los CAMBIOS, no la tabla completa (semana 9 B-06) */
+.vivo { border-left: 4px solid var(--primario); background: var(--curso-fondo); padding: 8px 12px; border-radius: 0 10px 10px 0; margin-bottom: 12px; }
+.vivo:empty { display: none; }
+
+/* Plegables con summary como objetivo táctil */
+details.mas { margin: 8px 0 12px; }
+details.mas summary { min-height: var(--toque); display: flex; align-items: center; font-weight: 700; color: var(--primario); cursor: pointer; }
+
+fieldset.opciones { border: 0; padding: 0; margin: 12px 0 0; min-width: 0; }
+fieldset.opciones legend { font-weight: 700; color: var(--secundario); font-size: .95rem; padding: 0; margin-bottom: 6px; }
+.opciones .grupo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opciones label.opcion { margin: 0; display: flex; gap: 10px; align-items: center; min-height: var(--toque); padding: 0 12px;
+  border: 1px solid var(--borde); border-radius: 10px; background: var(--superficie); color: var(--texto); font-weight: 600; }
+.opciones label.opcion input { width: 22px; height: 22px; min-height: 0; margin: 0; accent-color: var(--primario); flex: none; }
+.opciones label.opcion:has(input:checked) { border: 2px solid var(--primario); background: var(--fondo); }
+
+/* M · 431–767 */
+@media (min-width: 431px) {
+  ul.reglas li { grid-template-columns: 1fr auto auto; }
+}
+/* L · ≥768: el contexto respeta la navegación lateral */
+@media (min-width: 768px) {
+  .contexto { margin-left: 96px; }
+}
+/* Enlaces dentro de la tabla de escritorio: también objetivo de 44 px (verificación de la semana 10, primera corrida) */
+.tabla td a { display: inline-flex; align-items: center; min-height: var(--toque); }
+/* El desplazamiento a un error deja libre lo que tapan la barra de acción y la navegación (R-F1, semana 10) */
+html { scroll-padding-top: calc(var(--barra) + 64px); scroll-padding-bottom: calc(var(--nav) + 84px); }
+@media (min-width: 768px) { html { scroll-padding-bottom: 24px; } }
+/* La región viva existe siempre (así el lector la registra), pero sin un mensaje visible no ocupa lugar (semana 10) */
+.vivo:not(:has(> :not([hidden]))) { border: 0; padding: 0; margin: 0; background: none; }
+
+/* =========================================================================
+   Semana 11 · prototipo navegable
+   ========================================================================= */
+.ingreso { display: grid; gap: 10px; }
+.ingreso .btn { justify-content: flex-start; text-align: left; }
+.ingreso .btn small { display: block; font-weight: 400; color: var(--secundario); }
+.cargando { color: var(--secundario); }
+ol.linea { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--borde-suave); }
+ol.linea li { position: relative; padding: 0 0 14px 18px; }
+ol.linea li::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--primario); }
+ol.linea li.pendiente::before { background: var(--superficie); border: 2px solid var(--primario); }
+ol.linea .que { font-weight: 700; }
+.rol-cambio { margin-top: 16px; }

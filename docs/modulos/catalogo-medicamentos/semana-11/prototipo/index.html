@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prototipo · Catálogo de medicamentos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="cabecera">
+    <a class="marca" href="#/buscar">Catálogo de medicamentos</a>
+    <nav aria-label="Principal">
+      <a href="#/buscar">Buscar</a>
+      <a href="#/nuevo" data-solo="QF_CATALOGO">Registrar</a>
+    </nav>
+    <label class="rol">Rol de prueba
+      <select id="rol">
+        <option value="QF_CATALOGO">QF del catálogo</option>
+        <option value="CONSULTA_CLINICA">Consulta clínica</option>
+        <option value="AUDITOR_CALIDAD">Auditor de calidad</option>
+      </select>
+    </label>
+    <span class="tenant">Hospital Norte (ficticio)</span>
+  </header>
+  <div id="avisos" class="avisos" role="status" aria-live="polite"></div>
+  <main id="contenido" tabindex="-1"></main>
+  <footer class="pie">Prototipo navegable · datos ficticios · sin conexión a servidor</footer>
+  <script src="datos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

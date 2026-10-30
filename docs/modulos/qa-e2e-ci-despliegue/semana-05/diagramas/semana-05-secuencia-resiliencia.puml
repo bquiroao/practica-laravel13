@@ -1,0 +1,37 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia del reporte: respuesta perdida, red caída y reenvío al final del job
+skinparam defaultFontSize 11
+autonumber "R00"
+
+participant "Job E2E" as JOB
+participant "ReportadorCi" as REP
+participant "bandeja.jsonl" as BAN
+participant "API QA E2E" as API
+database "e2e" as BD
+
+== Respuesta perdida (CLI-02) ==
+JOB -> REP : reportar(ejecución, E2E-104, FALLA, traza)
+REP -> REP : clave = ci-sha256(ejecución|escenario)
+REP -> API : POST /resultados (Idempotency-Key: clave)
+API -> BD : registrar (una transacción)
+API --x REP : 201 se pierde en la red
+REP -> REP : espera 200 ms
+REP -> API : POST /resultados (MISMA clave)
+API -> BD : ¿clave existe? sí, mismo contenido
+API --> REP : 200 RESULTADO_YA_REPORTADO (no duplica)
+REP --> JOB : CONFIRMADO
+
+== API caída (CLI-03) ==
+JOB -> REP : reportar(ejecución, E2E-102, PASA)
+REP -x API : intento 1, 2 y 3 sin respuesta (200 y 400 ms entre medio)
+REP -> BAN : guardar(pedido con SU clave)
+REP --> JOB : PENDIENTE (el job sigue)
+
+== Paso final del job ==
+JOB -> REP : reenviarPendientes()
+REP -> BAN : todos()
+REP -> API : POST /resultados (la clave guardada)
+API --> REP : 201
+REP -> BAN : reemplazar([])
+REP --> JOB : 1 confirmado, 0 pendientes
+@enduml

@@ -1,0 +1,4 @@
+MODO REPRODUCCION: PASS significa defecto observado, no corregido.
+PASS D01 gateway lanza y el flujo no devuelve error explicito
+PASS D02 notificador lanza y no devuelve capacidad no disponible
+2 casos, 0 fallidos.
