@@ -40,6 +40,8 @@ const vistas = {
       ${destinos.map((d, i) => `<label><input type="radio" name="destino" value="${d}"${i ? '' : ' checked'}> ${NOMBRES[d]}</label>`).join('')}
       </fieldset><label for="motivo">Motivo *</label><textarea id="motivo" rows="2" aria-describedby="error-motivo">${esc(borrador)}</textarea>
       <p id="error-motivo" class="error"></p><p id="impacto" class="impacto"></p>
+      <div id="confirmacion" hidden><label><input type="checkbox" id="confirmo" aria-describedby="error-confirmo"> Confirmo que la cama queda fuera de servicio hasta que se reactive</label>
+      <p id="error-confirmo" class="error"></p></div>
       <div class="acciones"><button class="principal" id="confirmar"></button><a class="boton" href="#sala/${codigo[0]}">Volver sin cambiar</a></div></form>`,
       () => prepararFormulario(codigo, c)];
   },
@@ -74,6 +76,7 @@ function prepararFormulario(codigo, c) {
     const despues = disponibles + Number(destino === 'd') - Number(c.estado === 'd');
     document.getElementById('impacto').textContent = `La sala ${codigo[0]} pasará de ${disponibles} a ${despues} camas disponibles.`;
     document.getElementById('confirmar').textContent = VERBOS[destino];
+    document.getElementById('confirmacion').hidden = destino !== 'i'; // semana 12: inactivar pide confirmación explícita
   };
   form.addEventListener('change', actualizar);
   form.addEventListener('submit', (e) => {
@@ -83,6 +86,13 @@ function prepararFormulario(codigo, c) {
       motivo.setAttribute('aria-invalid', 'true');
       document.getElementById('error-motivo').textContent = 'Error: escribe el motivo del cambio; queda en el historial (R-09).';
       motivo.focus();
+      return;
+    }
+    const confirmo = document.getElementById('confirmo');
+    if (form.destino.value === 'i' && !confirmo.checked) {
+      confirmo.setAttribute('aria-invalid', 'true');
+      document.getElementById('error-confirmo').textContent = 'Error: confirma que la cama queda fuera de servicio; inactivar la saca de la capacidad de la sala.';
+      confirmo.focus();
       return;
     }
     const simular = document.getElementById('simular-conflicto').checked;
