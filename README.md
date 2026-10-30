@@ -1,4 +1,6 @@
-# Proyecto Final ASII 2026 — Sistema Hospitalario Integrado
+# Proyecto Final ASII 2026 — Hospital Nido
+
+**Hospital Nido** (*nido*: protección y cuidado) es el Sistema Hospitalario Integrado que une los 30 módulos de `docs/modulos/` en una sola plataforma: Laravel 12 (API REST, MVC) + React con TypeScript. El plan de integración, la fase actual y de qué módulo sale cada pantalla están en [docs/hospital-nido/PLAN.md](docs/hospital-nido/PLAN.md).
 
 Repositorio base para el **Proyecto Final de Análisis de Sistemas II 2026**. Este repositorio es una base limpia para que cada estudiante implemente un **módulo vertical individual** del Sistema Hospitalario Integrado, usando ramas, worktrees, pull requests, documentación y evidencia de pruebas.
 
@@ -8,13 +10,13 @@ Repositorio base para el **Proyecto Final de Análisis de Sistemas II 2026**. Es
 
 | Área | Estado real |
 |---|---|
-| Stack backend | Laravel 12, PHP 8.2+, JWT, Spatie Laravel Permission y Stancl Tenancy. |
-| Stack frontend | Vue 3, Vite, Pinia, Vue Router y Axios. |
-| Seguridad base | JWT, middleware de tenant por `X-Tenant-ID`, base RBAC con roles/permisos. |
+| Stack backend | Laravel 12, PHP 8.2+, API REST con arquitectura MVC (modelos Eloquent, controladores, Form Requests, API Resources y servicios con las reglas de negocio), JWT (`tymon/jwt-auth`). |
+| Stack frontend | React 19 + TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod, Tailwind 4 (componentes al estilo shadcn/ui). |
+| Seguridad base | JWT de 15 minutos emitido **por hospital** (claim `hid`), hospital en `X-Tenant-ID`, RBAC propio sobre `hospital_memberships` (roles, permisos y matriz editable por el administrador de red), límite de intentos de login y bitácora encadenada de solo inserción. |
 | Base de datos | PostgreSQL federado: una base CENTRAL (red, identidad, MPI, consentimientos, auditoría, sincronización) y una base clínica HOSPITAL por hospital. Migraciones en `database/migrations/{central,hospital,framework}` con pruebas de integridad en `tests/Database`. |
 | Esquema en curso | Listo: CENTRAL completo y HOSPITAL hasta expediente, alergias y signos vitales. Pendiente: medicamentos/prescripciones, laboratorio, auditoría local, modelos Eloquent, factories y seeders (`openspec/changes/postgresql-federated-schema-rebuild/tasks.md`). |
-| API actual | Las rutas de autenticación bajo `/api/v1` existen pero **no funcionan** (HTTP 500): dependen de los modelos `User`/`Tenant` del esquema SQLite anterior, que se eliminaron. Queda pendiente definir dónde viven las credenciales (`central_users` no guarda contraseñas) y crear los modelos nuevos. |
-| Módulos clínicos | Pendientes: faltan controllers, endpoints, pantallas, flujos, pruebas funcionales y contratos por módulo. |
+| API actual | Fase 1 lista: autenticación por hospital, cambio de hospital, usuarios, roles y permisos, y auditoría (ver «API disponible»). Las credenciales viven en `user_credentials` (CENTRAL). |
+| Módulos clínicos | Se integran por fases (2 a 8) según [docs/hospital-nido/PLAN.md](docs/hospital-nido/PLAN.md); sus pantallas ya existen en el menú con la marca «pronto». |
 | Documentación nueva | Este README, el plan semanal, la guía de worktrees y las plantillas de issues/PR son la base de trabajo ASII. |
 
 ## Trabajo individual por módulos verticales
@@ -100,7 +102,7 @@ Reglas estrictas:
 
 Guía detallada: [`docs/worktree-guide.md`](docs/worktree-guide.md).
 
-## Instalación rápida Laravel/Vue
+## Instalación rápida Laravel/React
 
 Requisitos: PHP 8.2+ con extensiones `pdo_pgsql` y `pgsql`, Composer 2, Node.js 20+, npm y PostgreSQL 15+. No se usa SQLite ni MySQL.
 
@@ -123,7 +125,13 @@ composer migrate:hospital    # esquema clínico del hospital
 composer migrate:framework   # sessions, cache y jobs (en CENTRAL)
 ```
 
-No hay seeders todavía. Las pruebas usan dos bases desechables definidas en `phpunit.xml` (puertos 55431 y 55433, con `btree_gist` instalado en la base HOSPITAL):
+Catálogo de roles y permisos (siempre) y red de demostración (solo en `local`/`testing`): cuatro hospitales y un usuario por rol, todos con la contraseña `NidoDemo2026` (`admin@nido.test`, `admin.hospital@nido.test`, `medico@nido.test`, `enfermeria@nido.test`, `recepcion@nido.test`, `laboratorio@nido.test`, `bioquimico@nido.test`, `farmacia@nido.test`, `direccion@nido.test`, `calidad@nido.test`):
+
+```bash
+php artisan db:seed
+```
+
+Las pruebas usan dos bases desechables definidas en `phpunit.xml` (puertos 55431 y 55433, con `btree_gist` instalado en la base HOSPITAL):
 
 ```bash
 composer test
@@ -150,19 +158,28 @@ npm run build
 php artisan test
 ```
 
-## API base disponible
+## API disponible
 
-Todas las rutas actuales están bajo `/api/v1` y requieren `X-Tenant-ID` cuando aplica.
+Todas las rutas están bajo `/api/v1`. Salvo `/hospitales`, requieren `X-Tenant-ID` con el id del hospital; las protegidas, además, `Authorization: Bearer <token>` de ese mismo hospital.
 
-| Método | Ruta | Autenticación |
+| Método | Ruta | Acceso |
 |---|---|---|
-| POST | `/auth/register` | No |
-| POST | `/auth/login` | No |
-| GET | `/auth/me` | Bearer JWT |
-| POST | `/auth/refresh` | JWT refresh |
-| POST | `/auth/logout` | Bearer JWT |
+| GET | `/hospitales` | Público (lista para el login) |
+| POST | `/auth/login` | Hospital |
+| GET | `/auth/me` | Sesión |
+| GET | `/auth/hospitales` | Sesión (hospitales donde el usuario tiene rol) |
+| POST | `/auth/cambiar-hospital` | Sesión |
+| POST | `/auth/refresh` | Sesión |
+| POST | `/auth/logout` | Sesión |
+| GET / POST | `/usuarios` | `usuarios.ver` / `usuarios.gestionar` |
+| PATCH | `/usuarios/{id}/estado` | `usuarios.gestionar` |
+| GET | `/roles` | `roles.ver` |
+| PUT | `/roles/{rol}/permisos` | `roles.configurar` (administrador de red) |
+| POST | `/membresias` | `roles.asignar` |
+| POST | `/membresias/{id}/revocar` | `roles.revocar` |
+| GET | `/auditoria`, `/auditoria/verificacion` | `auditoria.consultar` |
 
-Los endpoints clínicos de pacientes, admisiones, EMR, laboratorio, reportes y auditoría están pendientes y se construirán por módulos.
+Los errores de regla de negocio responden `{ "message", "code" }` (p. ej. `AUTOASIGNACION`, `ASIGNACION_DUPLICADA`, `MOTIVO_INSUFICIENTE`); los de validación, el formato estándar de Laravel con mensajes en español.
 
 ## Plan semanal ASII
 

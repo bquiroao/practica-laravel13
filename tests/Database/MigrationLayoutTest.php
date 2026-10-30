@@ -46,7 +46,11 @@ class MigrationLayoutTest extends TestCase
 
         $this->assertStringNotContainsString('database/database.sqlite', $composer);
         $this->assertStringNotContainsString('db:demo', $composer);
-        $this->assertStringNotContainsString('->call(', file_get_contents(base_path('database/seeders/DatabaseSeeder.php')));
+        // Hospital Nido: DatabaseSeeder llama a los seeders federados nuevos, nunca a los heredados de SQLite.
+        $seeder = file_get_contents(base_path('database/seeders/DatabaseSeeder.php'));
+        foreach (['DemoDataSeeder2026', 'RoleSeeder', 'TenantSeeder'] as $legacy) {
+            $this->assertStringNotContainsString($legacy, $seeder);
+        }
     }
 
     /** @return list<string> */

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hospital Nido">
+  <circle cx="32" cy="32" r="32" fill="#0F5257"/>
+  <path d="M12 34c0 11 9 18 20 18s20-7 20-18" fill="none" stroke="#A8C3B1" stroke-width="4" stroke-linecap="round"/>
+  <path d="M16 39c4 5 9 7 16 7s12-2 16-7" fill="none" stroke="#F4EDE4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 36s-10-6-10-13a5.5 5.5 0 0 1 10-3 5.5 5.5 0 0 1 10 3c0 7-10 13-10 13z" fill="#F4EDE4"/>
+  <path d="M30 22h4v3h3v4h-3v3h-4v-3h-3v-4h3z" fill="#0F5257"/>
+</svg>
