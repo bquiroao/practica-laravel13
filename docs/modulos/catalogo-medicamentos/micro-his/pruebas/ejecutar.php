@@ -20,6 +20,7 @@ foreach (array_slice($argv, 1) as $arg) {
         $opciones[$m[1]] = $m[2];
     } elseif ($arg === '--sin-bd') {
         $opciones['sin-bd'] = true;
+        putenv('CATALOGO_SIN_BD=1'); // la prueba de contrato corre entonces solo contra InMemory
     }
 }
 
