@@ -53,6 +53,10 @@ const vistas = {
       <h2 tabindex="-1">${TARJETAS[id].titulo}</h2><div class="cuerpo" aria-live="polite"></div></section>`).join('')}</div>`,
     () => tarjetasDelRol().forEach(cargarTarjeta)],
 
+  'sesion-terminada': () => ['Sesión terminada', `<h1 tabindex="-1">Tu sesión terminó</h1>
+    <p>Por seguridad, la sesión se cerró y se limpiaron sus datos (R-07). Vuelve a iniciar sesión para continuar.</p>
+    <div class="acciones"><a class="boton principal" href="#inicio">Iniciar sesión</a></div>`],
+
   modulo: (id) => {
     if (!MODULOS[id]) return vistas.inicio();
     if (!permitido(id)) return ['Sin acceso', `<h1 tabindex="-1">No tienes acceso a esa sección</h1>
@@ -79,6 +83,20 @@ function mostrar() {
   document.querySelector('main h1').focus();
   despues?.();
 }
+
+// Semana 12 (B-04): aviso 2 minutos antes de que venza la sesión, antes del 401 (R-01, R-07). Tab no sale del aviso y Esc lo cierra.
+const aviso = document.getElementById('aviso-sesion');
+let antesDelAviso = null;
+const cerrarAviso = () => { aviso.hidden = true; antesDelAviso?.focus(); };
+document.getElementById('simular-sesion').addEventListener('click', () => { antesDelAviso = document.activeElement; aviso.hidden = false; document.getElementById('seguir').focus(); });
+document.getElementById('seguir').addEventListener('click', cerrarAviso);
+document.getElementById('salir').addEventListener('click', () => { aviso.hidden = true; location.hash = 'sesion-terminada'; });
+aviso.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') cerrarAviso();
+  if (e.key !== 'Tab') return;
+  const [primero, ultimo] = [document.getElementById('seguir'), document.getElementById('salir')];
+  if (e.shiftKey ? document.activeElement === primero : document.activeElement === ultimo) { e.preventDefault(); (e.shiftKey ? ultimo : primero).focus(); }
+});
 
 document.getElementById('rol').addEventListener('change', (e) => {
   rol = e.target.value;

@@ -38,3 +38,5 @@ nav a[aria-current="page"] { font-weight: 600; text-decoration: underline 2px #2
 .tarjeta h2 { font-size: 1rem; margin: 0 0 8px; }
 .numero { font-size: 2rem; font-weight: 700; }
 .esqueleto { height: 2.5rem; border-radius: 4px; background: #e2e8f0; }
+#aviso-sesion { position: fixed; left: 16px; right: 16px; bottom: 16px; max-width: 420px; background: #fff; border: 2px solid #b45309; border-radius: 8px; padding: 12px; box-shadow: 0 4px 16px rgb(15 23 42 / 25%); }   /* semana 12, B-04 */
+#aviso-sesion h2 { font-size: 1rem; margin: 0 0 4px; }
