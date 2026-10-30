@@ -1,0 +1,20 @@
+$ node semana-11/evidencia/capturar.mjs semana-11/prototipo/index.html semana-12/capturas 01-...=agenda 02-...=cancelar/0800-M03 03-...@<enviar> 04-...@<motivo y enviar> 05-...@<rol médica>   # Edge sin interfaz
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-agenda-con-cancelar (#agenda) | 320 | 320 | 320 | no | Agenda · Citas · Hospital HIS | H1
+01-agenda-con-cancelar (#agenda) | 360 | 360 | 360 | no | Agenda · Citas · Hospital HIS | H1
+01-agenda-con-cancelar (#agenda) | 430 | 430 | 430 | no | Agenda · Citas · Hospital HIS | H1
+02-cancelar-cita (#cancelar/0800-M03) | 320 | 320 | 320 | no | Cancelar cita · Citas · Hospital HIS | H1
+02-cancelar-cita (#cancelar/0800-M03) | 360 | 360 | 360 | no | Cancelar cita · Citas · Hospital HIS | H1
+02-cancelar-cita (#cancelar/0800-M03) | 430 | 430 | 430 | no | Cancelar cita · Citas · Hospital HIS | H1
+03-cancelar-sin-motivo (#cancelar/0800-M03) | 320 | 320 | 320 | no | Cancelar cita · Citas · Hospital HIS | TEXTAREA
+03-cancelar-sin-motivo (#cancelar/0800-M03) | 360 | 360 | 360 | no | Cancelar cita · Citas · Hospital HIS | TEXTAREA
+03-cancelar-sin-motivo (#cancelar/0800-M03) | 430 | 430 | 430 | no | Cancelar cita · Citas · Hospital HIS | TEXTAREA
+04-cita-cancelada (#cancelar/0800-M03) | 320 | 320 | 320 | no | Cita cancelada · Citas · Hospital HIS | H1
+04-cita-cancelada (#cancelar/0800-M03) | 360 | 360 | 360 | no | Cita cancelada · Citas · Hospital HIS | H1
+04-cita-cancelada (#cancelar/0800-M03) | 430 | 430 | 430 | no | Cita cancelada · Citas · Hospital HIS | H1
+05-medica-solo-sus-citas (#agenda) | 320 | 320 | 320 | no | Agenda · Citas · Hospital HIS | H1
+05-medica-solo-sus-citas (#agenda) | 360 | 360 | 360 | no | Agenda · Citas · Hospital HIS | H1
+05-medica-solo-sus-citas (#agenda) | 430 | 430 | 430 | no | Agenda · Citas · Hospital HIS | H1
+
+$ node -e "<contraste WCAG de #ffffff sobre #b91c1c>"
+contraste #ffffff sobre #b91c1c = 6.47:1 (WCAG 1.4.3 pide 4.5:1)
