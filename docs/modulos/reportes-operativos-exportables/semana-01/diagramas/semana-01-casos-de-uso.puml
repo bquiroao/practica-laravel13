@@ -1,0 +1,47 @@
+@startuml semana-01-casos-de-uso
+left to right direction
+title Casos de uso — «filtrado y exportación reproducible de un reporte operativo»
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #EEF2F7
+  BorderColor #3D4F6B
+}
+skinparam ArrowColor #3D4F6B
+
+actor "Jefatura / Administración\n(actor principal)" as Adm
+actor "Auditor" as Aud
+actor "Identidad y permisos\n(RBAC) <<sistema>>" as Rbac
+actor "Módulos fuente\n(admisiones, camas, citas)\n<<sistema>>" as Src
+actor "Bitácora de auditoría\n(M22) <<sistema>>" as Bit
+
+rectangle "Módulo Reportes operativos exportables" {
+  usecase "CU-01\nConsultar reporte\ncon filtros" as CU01 #D6E8FF
+  usecase "CU-02\nValidar filtros\ny alcance" as CU02
+  usecase "CU-03\nExportar reporte\n(CSV o PDF)" as CU03 #D6E8FF
+  usecase "CU-04\nRegistrar exportación\n(filtros, corte, hash)" as CU04
+  usecase "CU-05\nReproducir una\nexportación anterior" as CU05
+  usecase "CU-06\nEnmascarar datos personales\n--\npunto de extensión:\nrol sin permiso de datos personales" as CU06
+}
+
+Adm --> CU01
+Adm --> CU03
+Aud --> CU05
+CU01 ..> CU02 : <<include>>
+CU03 ..> CU02 : <<include>>
+CU03 ..> CU04 : <<include>>
+CU05 ..> CU04 : <<include>>\n(lee el registro)
+CU06 ..> CU03 : <<extend>>
+CU01 --> Rbac : sesión, rol\ny hospital
+CU01 --> Src : vistas de\nsolo lectura
+CU04 --> Bit : evento de\nexportación
+
+note bottom of CU03
+  Objetivo: que cualquier exportación se pueda
+  volver a generar idéntica (mismo hash) con los
+  mismos filtros y la misma fecha de corte.
+  Fuera del límite: indicadores y gráficas (M23),
+  editar datos de otros módulos.
+end note
+@enduml

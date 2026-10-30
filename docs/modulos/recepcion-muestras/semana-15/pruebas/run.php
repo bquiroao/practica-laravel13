@@ -1,0 +1,34 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/../../semana-03/ejemplo/bootstrap.php';
+use MicroHis\Domain\{ReceptionRequest,SpecimenType,ReceptionStatus,SpecimenAcceptancePolicy,SpecimenReception};
+use MicroHis\Application\{ReceiveSpecimen,SpecimenRepository,SpecimenIdentifierGenerator};
+use MicroHis\Persistence\PdoSpecimenRepository;
+use MicroHis\Infrastructure\Identity\RandomSpecimenIdentifierGenerator;
+function eq(mixed $e,mixed $a):void{if($e!==$a)throw new RuntimeException('Resultado inesperado');}
+function invalid(callable $f):void{try{$f();}catch(InvalidArgumentException){return;}throw new RuntimeException('Se esperaba entrada invalida');}
+function request(SpecimenType $type=SpecimenType::BLOOD,bool $label=true,bool $container=true,bool $seal=true,?string $reason=null,string $order='ORD-DEMO'):ReceptionRequest{return new ReceptionRequest($order,'PAT-DEMO','EX-DEMO',$type,$label,$container,$seal,$reason);}
+final class ID implements SpecimenIdentifierGenerator{public int $calls=0;public function __construct(private string $value='SP-DEMO'){}public function generate():string{$this->calls++;return $this->value;}}
+final class Store implements SpecimenRepository{public array $rows=[];public bool $fail=false;public function save(SpecimenReception $r):void{if($this->fail)throw new RuntimeException('Fallo simulado');$this->rows[]=$r;}}
+function useCase(SpecimenRepository $r,?SpecimenIdentifierGenerator $id=null):ReceiveSpecimen{return new ReceiveSpecimen(new SpecimenAcceptancePolicy(),$r,$id??new ID());}
+function db():PDO{$p=new PDO('sqlite::memory:',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);$p->exec(file_get_contents(__DIR__.'/../../semana-03/ejemplo/database/schema.sql'));return $p;}
+$tests=[];
+$tests['U01 referencias y motivo vacios bloqueados']=function(){foreach(['',' ','  '] as $v){invalid(fn()=>request(order:$v));invalid(fn()=>request(reason:$v));}invalid(fn()=>new ReceptionRequest('O',' ','E',SpecimenType::BLOOD,true,true,true));invalid(fn()=>new ReceptionRequest('O','P',' ',SpecimenType::BLOOD,true,true,true));};
+$tests['U02 rechazo acumula no conformidades']=function(){$d=(new SpecimenAcceptancePolicy())->decide(request(label:false,container:false,seal:false,reason:' Motivo demo '));eq(ReceptionStatus::REJECTED,$d->status);eq(4,count($d->reasons));eq('Motivo demo',$d->reasons[0]);};
+$tests['U03 identificador formato y muestra de unicidad']=function(){$g=new RandomSpecimenIdentifierGenerator();$ids=[];for($i=0;$i<100;$i++){$id=$g->generate();eq(1,preg_match('/^SP-[A-F0-9]{32}$/',$id));$ids[]=$id;}eq(100,count(array_unique($ids)));};
+$tests['U04 modelo no acepta rechazo sin motivos']=function(){invalid(fn()=>new SpecimenReception('SP','O','P','E',SpecimenType::BLOOD,ReceptionStatus::REJECTED,[],new DateTimeImmutable()));invalid(fn()=>new SpecimenReception('SP','O','P','E',SpecimenType::BLOOD,ReceptionStatus::ACCEPTED,['Motivo'],new DateTimeImmutable()));};
+$tests['W01 rama sello solo aplica a sangre']=function(){$p=new SpecimenAcceptancePolicy();eq(ReceptionStatus::REJECTED,$p->decide(request(seal:false))->status);foreach([SpecimenType::URINE,SpecimenType::SWAB] as $t)eq(ReceptionStatus::ACCEPTED,$p->decide(request(type:$t,seal:false))->status);};
+$tests['W02 decision aceptada y rechazada se guardan una vez']=function(){foreach([true,false] as $label){$r=new Store();$id=new ID();$o=useCase($r,$id)->execute(request(label:$label));eq(1,$id->calls);eq(1,count($r->rows));eq($label?ReceptionStatus::ACCEPTED:ReceptionStatus::REJECTED,$o->status);}};
+$tests['W03 fallo save no devuelve recepcion exitosa']=function(){$r=new Store();$r->fail=true;$caught=false;try{useCase($r)->execute(request());}catch(RuntimeException $e){$caught=$e->getMessage()==='Fallo simulado';}eq(true,$caught);eq([],$r->rows);};
+$tests['B01 recepcion conforme PDO conserva referencias']=function(){$p=db();$o=useCase(new PdoSpecimenRepository($p))->execute(request());eq(ReceptionStatus::ACCEPTED,$o->status);$row=$p->query('SELECT * FROM specimen_receptions')->fetch(PDO::FETCH_ASSOC);eq('ORD-DEMO',$row['order_reference']);eq('PAT-DEMO',$row['patient_reference']);eq('EX-DEMO',$row['exam_code']);eq('[]',$row['rejection_reasons']);};
+$tests['B02 sin etiqueta y recipiente dan rechazo persistido']=function(){foreach([request(label:false),request(container:false)] as $req){$p=db();$o=useCase(new PdoSpecimenRepository($p))->execute($req);eq(ReceptionStatus::REJECTED,$o->status);eq('rejected',$p->query('SELECT status FROM specimen_receptions')->fetchColumn());eq(1,count(json_decode($p->query('SELECT rejection_reasons FROM specimen_receptions')->fetchColumn(),true)));}};
+$tests['B03 motivo manual se conserva sin aceptar']=function(){$p=db();useCase(new PdoSpecimenRepository($p))->execute(request(reason:'No conformidad demo'));eq('rejected',$p->query('SELECT status FROM specimen_receptions')->fetchColumn());eq(['No conformidad demo'],json_decode($p->query('SELECT rejection_reasons FROM specimen_receptions')->fetchColumn(),true));};
+$tests['B04 colision PDO no sobrescribe registro']=function(){$p=db();$u=useCase(new PdoSpecimenRepository($p));$u->execute(request());$caught=false;try{$u->execute(request(order:'OTRA-ORDEN'));}catch(PDOException){$caught=true;}eq(true,$caught);eq(1,(int)$p->query('SELECT count(*) FROM specimen_receptions')->fetchColumn());eq('ORD-DEMO',$p->query('SELECT order_reference FROM specimen_receptions')->fetchColumn());};
+$tests['B05 tipos validos equivalentes y tipo desconocido']=function(){foreach(SpecimenType::cases() as $t){eq(ReceptionStatus::ACCEPTED,useCase(new Store())->execute(request(type:$t))->status);}eq(null,SpecimenType::tryFrom('unknown'));};
+$tests['B06 fallo PDO sin esquema no finge exito']=function(){$p=new PDO('sqlite::memory:',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);$caught=false;try{useCase(new PdoSpecimenRepository($p))->execute(request());}catch(PDOException){$caught=true;}eq(true,$caught);};
+if(in_array('--defectos',$argv,true)){$tests=[];
+$tests['D01 orden inexistente aceptada sin verificacion externa']=function(){$r=new Store();eq(ReceptionStatus::ACCEPTED,useCase($r)->execute(request(order:'ORDEN-NO-EXISTE'))->status);eq(1,count($r->rows));};
+$tests['D02 identificador solo espacios aceptado']=function(){$r=new Store();$o=useCase($r,new ID('   '))->execute(request());eq('   ',$o->identifier);eq(1,count($r->rows));};
+$tests['D03 rechazo con motivo solo espacios aceptado por modelo']=function(){$o=new SpecimenReception('SP','O','P','E',SpecimenType::BLOOD,ReceptionStatus::REJECTED,[' '],new DateTimeImmutable());eq([' '],$o->reasons);};
+echo "REPRODUCCION: PASS indica defecto observado, no corregido.\n";}
+$failed=0;foreach($tests as $id=>$f){try{$f();echo "PASS $id\n";}catch(Throwable $e){$failed++;echo "FAIL $id: {$e->getMessage()}\n";}}echo count($tests)." casos, $failed fallidos.\n";exit($failed===0?0:1);

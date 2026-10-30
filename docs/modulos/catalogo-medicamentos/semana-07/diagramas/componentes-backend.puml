@@ -1,0 +1,58 @@
+@startuml componentes-backend
+' Catálogo de medicamentos - Semana 7 - Componentes backend (Laravel 12) propios del módulo
+title Componentes backend del Catálogo de medicamentos (Laravel 12)
+skinparam componentStyle rectangle
+
+package "HTTP (Presentation)" {
+  [RequestId\n(middleware)] as MRID
+  [TenantDesdeToken\n(middleware)] as MTEN
+  [CatalogoPolicy\n(permisos por rol)] as POL
+  [CatalogoMedicamentosController\n(API /api/v1)] as CTRL
+  [Solicitudes de formato\n(FormRequest)] as REQ
+  [MedicamentoResource\n(JSON de salida)] as RES
+}
+package "Application" {
+  [Casos de uso\nCU-01..CU-06, RF-09] as CU
+}
+package "Domain" {
+  [Modelo y reglas\nRN-01..RN-06] as DOM
+  interface "BusquedaCatalogo" as IB
+  interface "HistorialCatalogo" as IH
+  interface "ControlEquivalencia" as IC
+  interface "EscrituraCatalogo" as IE
+  interface "ConsultaUsoPrescripciones" as IU
+}
+package "Persistence" {
+  [RepositorioMedicamentosPdo] as RPDO
+  [UsoPrescripcionesAdaptador] as RUSO
+}
+database "HOSPITAL\nesquema catalogo" as BD
+component "prescripciones-alergias" as PRE <<otro módulo>>
+
+MRID --> MTEN
+MTEN --> CTRL : Identidad\n(usuario, rol, hospital)
+CTRL --> POL : ¿puede?
+CTRL --> REQ : formato y tipos
+CTRL --> CU : comando / consulta
+CTRL --> RES : arreglo plano
+CU --> DOM
+CU --> IB
+CU --> IH
+CU --> IC
+CU --> IE
+CU --> IU
+RPDO ..|> IB
+RPDO ..|> IH
+RPDO ..|> IC
+RPDO ..|> IE
+RUSO ..|> IU
+RPDO --> BD
+RUSO --> PRE : vista o API\n(pendiente de acordar)
+
+note right of REQ
+  Solo formato (tipos, presencia).
+  Los límites y reglas siguen en
+  el dominio (Limites, RN-05):
+  no se duplican.
+end note
+@enduml

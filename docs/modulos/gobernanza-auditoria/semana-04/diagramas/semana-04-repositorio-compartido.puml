@@ -1,0 +1,60 @@
+@startuml semana-04-repositorio-compartido
+!pragma layout smetana
+title Integración con el repositorio de datos compartido del HIS (base central)
+skinparam defaultFontSize 11
+skinparam componentBackgroundColor #F5F9FF
+skinparam componentBorderColor #2F5D8A
+skinparam databaseBackgroundColor #FFF8E1
+
+node "Nodo de hospital (base del hospital)" as NH {
+  component "Pacientes" as Pac
+  component "Citas" as Cit
+  component "RBAC (PEP local)" as Rb
+  component "Outbox / emisor de sincronización" as Out
+}
+
+database "REPOSITORIO COMPARTIDO — base central (PostgreSQL)" as Central {
+  frame "Datos de referencia (otros dueños)" {
+    [networks · hospitals] as Hosp
+    [central_users · hospital_memberships] as Usr
+    [mpi_* · patient_consents · cross_hospital_access_audits] as Otras
+  }
+  frame "Integración" {
+    [sync_nodes] as Nodos
+    [central_inbox_messages\n(source_node_id, event_id) único] as Bandeja
+  }
+  frame "Dueño: módulo Gobernanza y auditoría" #E8F5E9 {
+    [audit_logs\nsolo inserción · sello encadenado\nFK hospital_id → hospitals\nusuario_id SIN FK] as Logs
+    [vista auditoria_bandeja_pendiente] as Vista
+  }
+}
+
+node "Servicio de auditoría (este módulo)" as SA {
+  component "Consumidor de la bandeja\n(FOR UPDATE SKIP LOCKED)" as Cons
+  component "RegistrarMovimiento\n(mismas reglas, sello, idempotencia)" as Reg
+  component "PdoBitacora" as PB
+  component "API /api/v1/auditoria\n(consulta, detalle, verificación)" as API
+}
+
+actor "Super administrador / auditor" as SAd
+
+Pac --> Out : movimiento
+Cit --> Out
+Rb --> Out
+Out --> Bandeja : event_type = «auditoria.movimiento»\nevent_id = uuid del emisor
+Bandeja ..> Nodos : source_node_id → hospital del NODO
+Vista ..> Bandeja : filtra los pendientes de auditoría
+Cons --> Vista : toma un lote
+Cons --> Reg : hospital = el del nodo,\nnunca el del payload
+Reg --> PB
+PB --> Logs : INSERT (único escritor)
+Logs ..> Hosp : FK hospital_id
+SAd --> API
+API --> PB : SELECT por alcance
+
+note bottom of Logs
+  Propiedad: solo app_auditoria tiene INSERT y SELECT.
+  Pacientes, Citas, RBAC… no tienen ningún GRANT sobre audit_logs:
+  escriben a través del caso de uso (bandeja hoy, API en la semana 5).
+end note
+@enduml

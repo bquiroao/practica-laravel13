@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="800" viewBox="0 0 1640 800" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 10 - Wireframes móviles a 360 px: usuarios, tenants, autenticación y revocación</title>
+  <rect width="1640" height="800" fill="#f4f4f4"/>
+  <text x="820" y="26" text-anchor="middle" font-size="17" font-weight="bold">Semana 10 - Pantallas móviles (ancho base 360 px)</text>
+
+  <g transform="translate(20,50)">
+    <rect width="360" height="720" rx="14" fill="#fff" stroke="#333"/>
+    <text x="180" y="-8" text-anchor="middle" font-weight="bold">P1 Ingreso al hospital</text>
+    <rect y="0" width="360" height="48" rx="14" fill="#1f4e79"/><text x="16" y="30" fill="#fff" font-weight="bold">Acceso seguro</text>
+    <text x="16" y="82" font-weight="bold">1. Hospital (tenant)</text>
+    <rect x="16" y="92" width="328" height="48" rx="6" fill="#fff" stroke="#333"/><text x="28" y="122">Hospital San Rafael</text><text x="322" y="122">▾</text>
+    <text x="16" y="172" font-weight="bold">2. Correo institucional</text>
+    <rect x="16" y="182" width="328" height="48" rx="6" fill="#fff" stroke="#333"/><text x="28" y="212" fill="#777">nombre@hospital.org</text>
+    <text x="16" y="262" font-weight="bold">3. Contraseña</text>
+    <rect x="16" y="272" width="328" height="48" rx="6" fill="#fff" stroke="#333"/><text x="28" y="302" fill="#777">••••••••</text><text x="290" y="302" fill="#1f4e79">Mostrar</text>
+    <rect x="16" y="340" width="328" height="52" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="28" y="362" fill="#c0392b" font-weight="bold">No fue posible iniciar sesión.</text><text x="28" y="380" fill="#c0392b">Revisa hospital, correo y contraseña.</text>
+    <rect x="16" y="410" width="328" height="52" rx="6" fill="#1f4e79"/><text x="180" y="442" text-anchor="middle" fill="#fff" font-weight="bold">Ingresar</text>
+    <text x="180" y="490" text-anchor="middle" fill="#1f4e79">¿Problemas para ingresar? Contacta al administrador</text>
+    <rect x="16" y="640" width="328" height="56" rx="6" fill="#fff8dc" stroke="#b8860b"/><text x="28" y="664">Sin conexión: no se puede iniciar sesión.</text><text x="28" y="682" fill="#1f4e79">Reintentar</text>
+  </g>
+
+  <g transform="translate(420,50)">
+    <rect width="360" height="720" rx="14" fill="#fff" stroke="#333"/>
+    <text x="180" y="-8" text-anchor="middle" font-weight="bold">P2 Usuarios del tenant</text>
+    <rect width="360" height="48" rx="14" fill="#1f4e79"/><text x="16" y="30" fill="#fff" font-weight="bold">Hospital San Rafael</text><text x="300" y="30" fill="#fff">☰</text>
+    <rect x="16" y="64" width="328" height="44" rx="6" fill="#fff" stroke="#333"/><text x="28" y="92" fill="#777">Buscar por nombre o correo</text>
+    <rect x="16" y="118" width="90" height="34" rx="17" fill="#1f4e79"/><text x="61" y="140" text-anchor="middle" fill="#fff">Activos</text>
+    <rect x="114" y="118" width="110" height="34" rx="17" fill="#fff" stroke="#333"/><text x="169" y="140" text-anchor="middle">Pendientes</text>
+    <rect x="16" y="170" width="328" height="96" rx="8" fill="#fff" stroke="#999"/>
+    <text x="28" y="196" font-weight="bold">Ana Morales</text><text x="28" y="216">Rol: Laboratorio</text><text x="28" y="236" fill="#777">ana.morales@hospital.org</text>
+    <rect x="262" y="180" width="70" height="24" rx="12" fill="#e6f4ea" stroke="#2e7d32"/><text x="297" y="197" text-anchor="middle" fill="#2e7d32">Activo</text>
+    <text x="270" y="250" fill="#1f4e79">Ver ›</text>
+    <rect x="16" y="278" width="328" height="96" rx="8" fill="#fff" stroke="#999"/>
+    <text x="28" y="304" font-weight="bold">Luis Pérez</text><text x="28" y="324">Rol: Recepción</text><text x="28" y="344" fill="#777">luis.perez@hospital.org</text>
+    <rect x="236" y="288" width="96" height="24" rx="12" fill="#fff8dc" stroke="#b8860b"/><text x="284" y="305" text-anchor="middle">Sesión activa</text>
+    <text x="270" y="358" fill="#1f4e79">Ver ›</text>
+    <text x="180" y="410" text-anchor="middle" fill="#777">Mostrando 2 de 18 · Cargar más</text>
+    <rect x="270" y="580" width="74" height="56" rx="28" fill="#1f4e79"/><text x="307" y="614" text-anchor="middle" fill="#fff" font-weight="bold">+ Alta</text>
+    <line x1="0" y1="660" x2="360" y2="660" stroke="#ddd"/><text x="16" y="690" fill="#555">Inicio · Usuarios · Sesiones</text>
+  </g>
+
+  <g transform="translate(820,50)">
+    <rect width="360" height="720" rx="14" fill="#fff" stroke="#333"/>
+    <text x="180" y="-8" text-anchor="middle" font-weight="bold">P3 Alta de usuario (paso 3 de 3)</text>
+    <rect width="360" height="48" rx="14" fill="#1f4e79"/><text x="16" y="30" fill="#fff" font-weight="bold">‹ Alta · Revisar y confirmar</text>
+    <rect x="16" y="62" width="100" height="6" fill="#2e7d32"/><rect x="124" y="62" width="100" height="6" fill="#2e7d32"/><rect x="232" y="62" width="100" height="6" fill="#1f4e79"/>
+    <text x="16" y="92" fill="#555">1 Identidad · 2 Acceso · 3 Revisar</text>
+    <rect x="16" y="108" width="328" height="170" rx="8" fill="#f7f9fc" stroke="#999"/>
+    <text x="28" y="134" font-weight="bold">Identidad</text><text x="28" y="154">Carlos Ruiz</text><text x="28" y="172" fill="#777">carlos.ruiz@hospital.org</text>
+    <text x="28" y="204" font-weight="bold">Acceso en este hospital</text><text x="28" y="224">Hospital San Rafael</text><text x="28" y="242">Rol inicial: Laboratorio</text>
+    <text x="290" y="134" fill="#1f4e79">Editar</text><text x="290" y="204" fill="#1f4e79">Editar</text>
+    <rect x="16" y="296" width="328" height="64" rx="6" fill="#eaf2fb" stroke="#1f4e79"/><text x="28" y="320">El acceso se limita a este hospital.</text><text x="28" y="340">La contraseña la define el usuario al activar.</text>
+    <rect x="16" y="560" width="328" height="52" rx="6" fill="#1f4e79"/><text x="180" y="592" text-anchor="middle" fill="#fff" font-weight="bold">Confirmar alta</text>
+    <rect x="16" y="624" width="328" height="52" rx="6" fill="#fff" stroke="#333"/><text x="180" y="656" text-anchor="middle">Cancelar</text>
+    <text x="180" y="702" text-anchor="middle" fill="#777">Borrador guardado sin datos secretos</text>
+  </g>
+
+  <g transform="translate(1220,50)">
+    <rect width="360" height="720" rx="14" fill="#fff" stroke="#333"/>
+    <text x="180" y="-8" text-anchor="middle" font-weight="bold">P4 Sesiones y revocación</text>
+    <rect width="360" height="48" rx="14" fill="#1f4e79"/><text x="16" y="30" fill="#fff" font-weight="bold">‹ Luis Pérez · Sesiones</text>
+    <rect x="16" y="62" width="328" height="34" rx="6" fill="#fff8dc" stroke="#b8860b"/><text x="28" y="84">Conexión limitada · Reintentando…</text>
+    <rect x="16" y="110" width="328" height="116" rx="8" fill="#fff" stroke="#999"/>
+    <text x="28" y="136" font-weight="bold">Esta sesión</text><text x="28" y="156">Hospital San Rafael</text><text x="28" y="176" fill="#777">Expira en 28 min</text>
+    <rect x="28" y="186" width="304" height="30" rx="6" fill="#fff" stroke="#c0392b"/><text x="180" y="206" text-anchor="middle" fill="#c0392b">Cerrar sesión</text>
+    <rect x="16" y="240" width="328" height="116" rx="8" fill="#fff" stroke="#999"/>
+    <text x="28" y="266" font-weight="bold">Otra sesión · jti …a91f</text><text x="28" y="286">Hospital San Rafael</text><text x="28" y="306" fill="#777">Expira en 3 h</text>
+    <rect x="28" y="316" width="304" height="30" rx="6" fill="#fff" stroke="#c0392b"/><text x="180" y="336" text-anchor="middle" fill="#c0392b">Revocar sesión</text>
+    <rect x="16" y="380" width="328" height="170" rx="10" fill="#fff" stroke="#c0392b" stroke-width="2"/>
+    <text x="28" y="408" font-weight="bold">¿Revocar esta sesión?</text><text x="28" y="430">Dejará de tener acceso de inmediato.</text>
+    <rect x="28" y="448" width="150" height="40" rx="6" fill="#fff" stroke="#333"/><text x="103" y="473" text-anchor="middle">Cancelar</text>
+    <rect x="186" y="448" width="146" height="40" rx="6" fill="#c0392b"/><text x="259" y="473" text-anchor="middle" fill="#fff" font-weight="bold">Revocar</text>
+    <text x="28" y="520" fill="#777">Estado: pendiente de confirmar · Reintentar</text>
+  </g>
+</svg>

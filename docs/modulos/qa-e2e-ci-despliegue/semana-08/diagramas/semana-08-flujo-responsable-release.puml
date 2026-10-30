@@ -1,0 +1,36 @@
+@startuml semana-08-flujo-responsable-release
+!pragma layout smetana
+title User flow · Responsable de release: evaluar el quality gate de una versión (W4, W6)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Versiones» → filtra «listas para evaluar» (ejecución COMPLETADA sin evaluar);
+if (¿Hay alguna?) then (no)
+  :VACÍO · «Ninguna versión espera evaluación.» (M-09);
+  stop
+else (sí)
+endif
+:Abre la versión 2.5.0 → pestaña «Quality gate»;
+:CARGA · «Calculando la vista previa…» (la UI muestra lo que decidiría la política vigente gate-2026.1);
+:Lee las 5 reglas con su valor: críticos, % no críticos, inestables, digest, antigüedad;
+if (¿Alguna regla falla?) then (sí)
+  :Cada causa con su enlace al escenario y su evidencia (W6);
+  :AYUDA · «El gate no se negocia: para aprobar, corrija y ejecute de nuevo» (A-03);
+else (no)
+endif
+:CONFIRMACIÓN · «Registrar la decisión RECHAZADO / APROBADO para 2.5.0 (ejecución #14). No se edita después.» [Registrar decisión];
+switch (Respuesta)
+case (200 GATE_EVALUADO)
+  #E8F5E9:ÉXITO · decisión registrada, con hora y política; si es APROBADO, vence en 72 h (M-10);
+case (409 EJECUCION_NO_COMPLETADA)
+  #FFF4E5:«La ejecución #14 sigue EN_CURSO: faltan 2 resultados» (M-11);
+case (409 EJECUCION_DE_OTRA_VERSION)
+  #FDECEC:«La ejecución #14 es de otra versión»; recarga la lista (M-12);
+case (503)
+  #FFF4E5:«No se pudo registrar; no se guardó nada» [Reintentar] (M-13);
+endswitch
+stop
+@enduml

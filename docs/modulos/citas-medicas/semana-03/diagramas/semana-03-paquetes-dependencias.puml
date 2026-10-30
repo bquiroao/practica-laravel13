@@ -1,0 +1,25 @@
+@startuml semana-03-paquetes-dependencias
+' Semana 3 — Citas médicas y agenda (tarea Odoo 2460): regla de dependencias
+title Paquetes y dependencias — todas apuntan hacia el dominio
+package Presentacion {
+  class ControladorCitas
+}
+package Aplicacion {
+  class ServicioCitas
+  interface RepositorioCitas <<puerto>>
+  interface Reloj <<puerto>>
+}
+package Dominio {
+  enum EstadoCita
+  class Horario
+}
+package Persistencia {
+  class RepositorioPdo
+}
+ControladorCitas ..> ServicioCitas
+ServicioCitas ..> EstadoCita
+ServicioCitas ..> Horario
+ServicioCitas --> RepositorioCitas
+ServicioCitas --> Reloj
+RepositorioPdo ..|> RepositorioCitas
+@enduml

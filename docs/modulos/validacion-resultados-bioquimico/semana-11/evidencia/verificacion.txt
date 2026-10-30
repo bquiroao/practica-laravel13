@@ -1,0 +1,5 @@
+Edge headless + Playwright; 2026-10-27
+PASS desktop 1366x900: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.
+PASS movil 375x812: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.
+PASS movil-320 320x812: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.
+PASS movil-430 430x900: validación, inmutabilidad final, conflicto sin éxito, recarga v2, motivo obligatorio, cancelar conserva motivo, rechazo trazable, rol restringido, sin desbordamiento horizontal ni errores JS.

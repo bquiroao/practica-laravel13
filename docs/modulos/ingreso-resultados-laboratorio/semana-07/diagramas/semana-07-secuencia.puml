@@ -1,0 +1,29 @@
+﻿@startuml
+title Semana 7 - Secuencia antes y después del refactor
+skinparam shadowing false
+autonumber
+actor "Técnico/a" as U
+participant "ResultController" as C
+participant "CaptureOrCorrectResult\n(antes)" as Before
+participant "EntryService\n(después)" as After
+participant "ResultValue / ReferenceRange\n(después)" as Domain
+database "Repositorio" as R
+
+== Antes ==
+U -> C : correct(item, expected, value, reason, actor)
+C -> Before : correct(5 parámetros escalares)
+Before -> R : currentFor(item)
+Before -> Before : valida blancos + estado + versión
+Before -> R : appendCorrection(...)
+Before --> C : ResultOperation + mensaje de UI
+
+== Después ==
+U -> C : correct(item, expected, value, reason, actor)
+C -> After : correct(CorrectCommand)
+After -> Domain : parse(value) + classify(range)
+After -> R : currentFor(item)
+After -> After : valida estado y versión
+After -> R : appendCorrection(...)
+After --> C : Outcome(reason + datos)
+C -> C : OutcomeView mapea texto y código
+@enduml

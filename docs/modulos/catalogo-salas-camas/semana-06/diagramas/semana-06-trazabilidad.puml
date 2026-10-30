@@ -1,0 +1,32 @@
+@startuml semana-06-trazabilidad
+title Semana 6 — Hilo trazable de «registrar cama» con el cambio de capacidad (E9)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontSize 11
+actor "Administrador\n(S1, CU-02)" as A
+rectangle "Requisitos" {
+  card "RF-02 cama en sala activa\nR-02, R-03, R-04 (S1-S2)" as RF2
+  card "RF-07 / R-10 propuestos (S6)\nno más camas en uso\nque la capacidad" as RF7 #FFF3CD
+}
+rectangle "Contrato API (S5, PR #350)" {
+  card "POST /salas/{sala}/camas\n201 | 409 E3 | 422 E2, E4 | 503 E8\n+ 409 E9 (pendiente en el OpenAPI)" as API
+}
+rectangle "Micro-HIS por capas (S3-S4)" {
+  component "Presentación\nRutas -> ControladorCatalogo\nVistaJson: E9 -> 409" as P
+  component "Aplicación\nServicioCatalogo::registrarCama\npuerto RepositorioCatalogo (DIP)" as AP
+  component "Dominio\nCapacidadSala (nueva, SRP)\nEstadoCama" as D #FFF3CD
+  component "Persistencia\nRepositorioPdo | RepositorioEnMemoria\nguardarCama(): bool" as PE
+}
+database "wards.capacity\nbeds" as DB
+card "Pruebas: 36 de 36\n4 nuevas del cambio por adaptador" as T
+A --> RF2
+RF2 --> RF7
+RF7 --> API
+API --> P
+P --> AP
+AP --> D
+AP --> PE
+PE --> DB
+D ..> T : verifica
+PE ..> T : verifica
+@enduml

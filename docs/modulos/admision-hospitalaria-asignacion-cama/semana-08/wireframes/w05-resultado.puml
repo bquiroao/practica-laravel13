@@ -1,0 +1,13 @@
+@startsalt w05-resultado
+' W-05 Éxito
+{+
+  <b>✓ Admisión ACTIVA</b>
+  ==
+  Paciente | <b>PAC-00451</b>
+  Cama asignada | <b>B-201</b> (Medicina interna)
+  Registrada | 02/03/2026 08:15 UTC · usr-adm-01
+  Id | a2d9805c-…
+  --
+  [Nueva admisión] | [Ver detalle]
+}
+@endsalt

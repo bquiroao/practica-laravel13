@@ -1,0 +1,35 @@
+# Líneas de la semana 8 citadas en los hallazgos.
+# Origen: commit 7bef826 (rama semana-8-citas-medicas, PR #203). Comando: git show 7bef826:<archivo> | grep -nE '<patrón>'
+
+[H-01] semana-08-flujo-ux.md
+31:| [W2](diagramas/semana-08-wf2-nueva-cita.png) | Nueva cita | Formulario → buscando horarios (indicador) → lista de horarios libres o «No hay horarios libres esta semana» | «El médico no tiene esa especialidad vigente» (E3); «El motivo es obligatorio» (E2) | Médicos con especialidad vigente (R-04, R-05); solo horarios futuros (R-01) que ya excluyen cruces (R-02, R-03); motivo obligatorio (R-06) | Elegir especialidad filtra los médicos; elegir médico carga sus horarios; nada se guarda hasta W3 |
+
+[H-01] semana-08-wf3-confirmar-solicitud.puml
+12:  <color:green>✓ Cita programada para el 28/10 a las 08:30.</color> | [Ver en la agenda]
+
+[H-02] semana-08-wf4-cancelar-cita.puml
+9:  [No cancelar] | [Cancelar cita]
+
+[H-02] semana-08-wf2-nueva-cita.puml
+11:  [Cancelar] | . | [Revisar y confirmar]
+
+[H-03] semana-08-wf1-agenda.puml
+8:    08:00–08:30 | P-0012 · A. Pérez | M-03 · Cardiología | Programada | [Confirmar] [Cancelar]
+9:    09:00–09:30 | P-0047 · L. Gómez | M-03 · Cardiología | Confirmada | [Cancelar]
+
+[H-04, H-07] semana-08-wf2-nueva-cita.puml
+5:  Paciente * | "P-0012 · A. Pérez  " | <i>Busca por código o nombre (mín. 3 letras)</i>
+10:  Motivo * | "control de presión     " | <i>Obligatorio (R-06)</i>
+
+[H-08] semana-08-wf5-error-recuperable.puml
+10:  No perdiste lo que escribiste. Intenta de nuevo en unos segundos.
+
+[foco] menciones de «foco» en la semana 8
+GUIA_DEFENSA_ORAL.md: 0
+semana-08-user-flow.puml: 0
+semana-08-wf1-agenda.puml: 0
+semana-08-wf2-nueva-cita.puml: 0
+semana-08-wf3-confirmar-solicitud.puml: 0
+semana-08-wf4-cancelar-cita.puml: 0
+semana-08-wf5-error-recuperable.puml: 0
+semana-08-flujo-ux.md: 0

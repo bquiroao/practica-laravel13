@@ -1,0 +1,23 @@
+@startsalt m3-alta-pasos
+' M3 Móvil: alta en 2 pasos para reducir carga cognitiva
+scale 2
+{+
+  {* < Cancelar | Registrar · paso 1 de 2 }
+  ==
+  <b>Producto
+  Principio activo *
+  "Loratadina          "
+  Concentración *
+  {"10     " | ^mg^ }
+  Forma farmacéutica *
+  ^Tableta^
+  Vía *
+  ^Oral^
+  .
+  [Siguiente: presentación >]
+  --
+  <i>Paso 2: nombre, presentación, registro y fecha.
+  <i>El borrador se guarda en este dispositivo
+  <i>si se pierde la conexión.
+}
+@endsalt

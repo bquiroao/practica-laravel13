@@ -1,0 +1,22 @@
+@startsalt w5-detalle-version
+' W5 Detalle con historial y confirmación de nueva versión
+{+
+  {* Catálogo de medicamentos | Buscar | Registrar | Ayuda }
+  ==
+  <b>MED-000104 · Ibuprofeno 400 mg tableta · TABLETA / ORAL
+  {#
+    <b>Versión | <b>Presentación | <b>Desde | <b>Hasta | <b>Vigente hoy
+    1 | Caja con 20 tabletas | 2026-01-01 | 2026-07-01 | no
+    2 | Caja con 30 tabletas | 2026-07-01 | (abierta) | <b>sí
+  }
+  [Nueva versión] | [Dar de baja] | [Eliminar registro erróneo]
+  --
+  <b>Diálogo de confirmación (al enviar la nueva versión):
+  {+
+    <b>¿Registrar la versión 3?
+    La versión 2 dejará de estar vigente el 2026-11-01.
+    Desde ese día la búsqueda mostrará solo la versión 3.
+    [Confirmar] | [Volver]
+  }
+}
+@endsalt

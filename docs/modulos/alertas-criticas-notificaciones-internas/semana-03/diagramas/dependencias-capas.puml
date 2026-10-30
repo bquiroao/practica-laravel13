@@ -1,0 +1,52 @@
+@startuml dependencias-capas
+' Semana 3 - Dependencias entre capas: todas apuntan hacia el dominio
+skinparam packageStyle rectangle
+skinparam linetype ortho
+package "Presentation" as P #EAF1FB {
+  [consola.php] as C
+  [ConsolaAlertas] as CA
+}
+package "Composition Root" as R #F3F3F3 {
+  [bootstrap.php] as B
+}
+package "Application" as A #EAF7EE {
+  [Casos de uso] as UC
+  [NotificarNivel\nDespachadorNotificaciones] as SV
+}
+package "Domain" as D #FFF7E0 {
+  [Alerta, PoliticaEscalamiento,\nCodigoPaciente, enums] as E
+  interface "AlertaRepository" as IR
+  interface "PuertoNotificacion" as IN
+  interface "DirectorioDestinatarios" as ID
+  interface "Reloj" as IRE
+}
+package "Persistence" as PE #FBEDEA {
+  [PdoAlertaRepository\nConexionPdo] as PDO
+  [NotificadorSimulado] as NS
+  [DirectorioDestinatariosEnMemoria] as DM
+  [RelojSistema / RelojFijo] as RL
+}
+C --> B : arma
+C --> CA
+CA --> UC : invoca
+B ..> UC : crea
+B ..> PDO : elige
+B ..> NS : elige
+B ..> DM : elige
+B ..> RL : elige
+UC --> SV
+UC --> E
+UC --> IR
+UC --> IRE
+SV --> IN
+SV --> ID
+PDO ..|> IR
+NS ..|> IN
+DM ..|> ID
+RL ..|> IRE
+note bottom of D
+  Domain no importa nada de Application,
+  Persistence ni Presentation (verificable
+  con grep, ver README).
+end note
+@enduml

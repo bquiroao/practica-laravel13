@@ -1,0 +1,53 @@
+@startuml semana-02-clases-antes
+!pragma layout smetana
+title ANTES de LSP — una jerarquía «Evidencia» para todo lo que se adjunta
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #FDF6F0
+skinparam classBorderColor #A0522D
+
+abstract class Evidencia {
+  {abstract} +tipo(): string
+  {abstract} +contenido(): string
+  +hash(): string
+  +tamano(): int
+}
+note top of Evidencia
+  Contrato que asumen los clientes:
+  contenido() no lanza ni cambia;
+  hash() = sha256(contenido()).
+end note
+
+class Captura
+class RegistroTexto
+class EnlaceExterno #FDECEC {
+  -url: string
+  +contenido(): string  «descarga la URL cada vez»
+  +hash(): string  «sha256 de la URL»
+}
+class CapturaConDatosClinicos #FDECEC {
+  +contenido(): string  «LANZA AccesoDenegado sin permiso»
+}
+
+Evidencia <|-- Captura
+Evidencia <|-- RegistroTexto
+Evidencia <|-- EnlaceExterno
+Evidencia <|-- CapturaConDatosClinicos
+
+class ServicioCampanaAntes {
+  +registrar(caso, resultado, Evidencia[])
+  +verificarIntegridad(intento): string
+  +informe(): string
+}
+ServicioCampanaAntes ..> Evidencia : usa hash(), tamano()
+
+note bottom of EnlaceExterno
+  Debilita la postcondición de hash():
+  el log del CI rota y la verificación
+  sigue diciendo INTEGRA (LSP-03).
+end note
+note bottom of CapturaConDatosClinicos
+  Agrega una excepción que la base no
+  declara: el informe de la campaña
+  se rompe (LSP-04).
+end note
+@enduml

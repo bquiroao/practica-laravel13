@@ -1,0 +1,1 @@
+Mostrar flujo de seis pantallas y separar diseño favorable, brecha observada y prueba pendiente. Defender prioridad de identificación, resultado de guardado desconocido y borrador seguro. Explicar contraste parcial medido y por qué SVG no prueba teclado/lector. Cada hallazgo tiene criterio de aceptación futuro, sin declararlo resuelto.

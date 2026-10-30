@@ -1,0 +1,35 @@
+$ QA_DB_DSN=... php herramientas/medir-sqa.php
+Tablero SQA · 2026-10-29 17:36
+
+M-1  OK     Pruebas en verde
+       valor:  100/100
+       umbral: 100 %, 0 omitidas
+       fuente: tests/ejecutar.php con PostgreSQL
+
+M-2  OK     Mutaciones detectadas
+       valor:  35/35
+       umbral: 100 % y corrida ≤ 7 días
+       fuente: tests/mutaciones.php, corrida del 2026-10-29
+
+M-3  FUERA  Reglas R-01..R-15 con prueba
+       valor:  12/15 (faltan R-13, R-14, R-15)
+       umbral: 15/15
+       fuente: descripciones de prueba() en tests/
+
+M-4  FUERA  Hallazgos críticos de revisión abiertos
+       valor:  1 críticos (RT-01), 3 mayores
+       umbral: 0 críticos
+       fuente: semana-13/herramientas/sonda-revision.php
+
+M-5  OK     RNF-08: trazabilidad de 500 casos
+       valor:  memoria p95 103 ms (500 casos) · PostgreSQL p95 140 ms (500 casos)
+       umbral: p95 < 1000 ms en PostgreSQL
+       fuente: campaña sintética de 500 casos, 20 consultas
+
+M-6  OK     Accesibilidad: violaciones de axe-core
+       valor:  0 violaciones, 0 de 56 comprobaciones fallan
+       umbral: 0 violaciones y corrida ≤ 7 días
+       fuente: semana-12/herramientas/recorrido.cjs, corrida del 2026-10-29
+
+Fuera de umbral o sin dato: 2 de 6
+(código de salida: 2)

@@ -1,0 +1,27 @@
+@startuml semana-04-repositorio-compartido
+' Semana 4 — Catálogo de salas, wards y camas (tarea Odoo 2446): integración con un repositorio de datos compartido
+title Repositorio de datos compartido — base HOSPITAL (una por tenant)
+component "Catálogo de salas y camas" as cat
+component "Admisión y traslados" as adm
+component "Dashboard de ocupación" as ocu
+interface "RepositorioCatalogo" as rc
+interface "Repositorio de estancias" as re
+interface "FuenteCamas (solo lectura)" as fc
+database "Base HOSPITAL" {
+  [wards]
+  [beds]
+  [bed_stays]
+  [bed_status_history]
+}
+cat --> rc
+adm --> re
+ocu --> fc
+rc --> [wards] : escribe (dueño)
+rc --> [beds] : alta y cambios manuales
+rc --> [bed_status_history] : escribe
+re --> [bed_stays] : escribe (dueño)
+re --> [beds] : ocupada / disponible
+fc ..> [beds] : lee
+fc ..> [bed_stays] : lee
+note bottom of [beds] : un dueño por columna; todos cambian status con UPDATE ... WHERE status = ?
+@enduml

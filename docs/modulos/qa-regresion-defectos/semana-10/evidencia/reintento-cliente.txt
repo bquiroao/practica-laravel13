@@ -1,0 +1,14 @@
+$ php tests/ejecutar.php --solo=CLI   # ¿es seguro reintentar con señal débil? (cliente de la semana 5)
+Micro-HIS QA funcional y regresión - pruebas (PHP 8.4.26)
+
+== Cliente-servidor: cliente con bandeja, almacén remoto y circuito ==
+[PASA ] CLI-01   Los reintentos llevan la MISMA Idempotency-Key y el mismo X-Request-ID; la red cae dos veces y al tercero registra
+[PASA ] CLI-02   Respuesta perdida: el servidor registró, el cliente reintenta y recibe 200 RESULTADO_YA_REGISTRADO; hay UN intento y UN defecto
+[PASA ] CLI-03   Sin respuesta en ningún intento → PENDIENTE en la bandeja; reenviarPendientes() lo registra UNA vez y vacía la bandeja
+[PASA ] CLI-04   Un 4xx no se reintenta ni se encola: FALLA sin evidencia → RECHAZADO en una llamada
+[PASA ] CLI-05   Almacén caído (503): PENDIENTE sin nada escrito; cuando vuelve, el reenvío registra el resultado y su defecto una sola vez
+[PASA ] CLI-06   Un pendiente que llega después del cierre se RECHAZA (409) y sale de la bandeja: el tester se entera, no se pierde en silencio
+[PASA ] CLI-07   Una operación SIN clave (cerrar) que pierde la respuesta → INCIERTO tras UNA llamada, sin reintento ni bandeja
+[PASA ] CLI-08   TransporteHttpStream contra un puerto cerrado: FallaTransporte en menos de 5 s
+
+Total: 8  Pasan: 8  Fallan: 0  Omitidas: 0

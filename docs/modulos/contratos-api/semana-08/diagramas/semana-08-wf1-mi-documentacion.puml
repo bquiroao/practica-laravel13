@@ -1,0 +1,14 @@
+@startsalt
+title W1 — Mi documentación (lector por rol)
+{+
+  {* Inicio | <b>Documentación</b> | Ayuda }
+  Tus roles: <b>médico</b> | Buscar: | "citas       " | Tipo: ^Todos^
+  {#
+    <b>Documento</b> | <b>Tipo</b> | <b>Vigente</b> | <b>Actualizado</b>
+    guia-citas | Manual | 1.1.0 | 26/10/2026
+    citas-api | OpenAPI | 2.0.0 | 20/10/2026
+  }
+  <i>Cargando: filas de esqueleto. Vacío: «Aún no hay documentos para tus roles».</i>
+  <i>Solo aparece lo que tu rol puede ver; lo demás no se lista (R-06, R-07).</i>
+}
+@endsalt

@@ -1,0 +1,38 @@
+@startuml semana-07-refactor-antes
+!pragma layout smetana
+title ANTES — las decisiones clínicas viven en la Aplicación, repartidas en dos casos de uso
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+
+package "Aplicación" #FDECEC {
+  class EmitirPrescripcion {
+    + MIN_JUSTIFICACION = 20
+    - emitir(SolicitudEmision) : Resultado
+    .. Ce 15 · 17 ramas · Dc 9 · 4 preocupaciones ..
+    .. decide: «sin evaluar y sin confirmar» ..
+    .. decide: estado === BLOQUEO ..
+    .. decide: ADVERTENCIA && (len < 20 || !override) ..
+    .. arma la Prescripcion con 12 argumentos ..
+  }
+  class VerificarAlergiasPrevia {
+    + ejecutar(...) : Resultado
+    .. Dc 1: repite «evaluado ? estado : CONFIRMACION_REQUERIDA» ..
+  }
+}
+package "Dominio" #FFF8E1 {
+  class ResultadoVerificacion
+  class ExpedienteAlergias
+  class Prescripcion
+}
+
+EmitirPrescripcion --> ResultadoVerificacion : compara estados
+EmitirPrescripcion --> ExpedienteAlergias : lee «evaluado»
+EmitirPrescripcion --> Prescripcion : new (12 argumentos)
+VerificarAlergiasPrevia --> ExpedienteAlergias : lee «evaluado»
+
+note bottom of VerificarAlergiasPrevia
+  Dos lugares interpretan «alergias no evaluadas».
+  Un cambio en uno (p. ej. aceptar la confirmación
+  en la previa) no se refleja en el otro.
+end note
+@enduml

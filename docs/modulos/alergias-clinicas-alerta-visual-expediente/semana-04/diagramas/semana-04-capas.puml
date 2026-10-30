@@ -1,0 +1,54 @@
+@startuml semana-04-capas
+' Capas del Micro-HIS después de la semana 4
+skinparam packageStyle rectangle
+package "Presentation" {
+  [ComandoConsola] as CLI
+  [Router] as R
+  [ControladorAlerta] as CA
+  [ControladorAlergia] as CG
+  [FormularioAlergia\n(solo formato)] as F
+  [Vista + vistas/*.php\n(salida escapada)] as V
+  [TraductorErrores\n(reutilizable)] as T
+}
+package "Application" {
+  [RegistrarAlergia] as RA
+  [ConsultarAlertaExpediente] as CO
+  [ReconocerAlerta] as RE
+}
+package "Domain" {
+  [Alergia, Alergeno, Severidad,\nNivelAlerta, AlertaExpediente,\nReconocimiento] as E
+  [CalculadorAlerta + reglas] as CAL
+  interface RepositorioAlergias as IA
+  interface RepositorioReconocimientos as IR
+  interface DirectorioPacientes as IP
+}
+package "Persistence" {
+  [Pdo*] as PDO
+  [*EnMemoria] as MEM
+}
+R --> CA
+R --> CG
+CG --> F
+CA --> V
+CG --> V
+CA --> T
+CG --> T
+CLI --> RA
+CA --> CO
+CA --> RE
+CG --> RA
+RA --> E
+RA --> CAL
+CO --> CAL
+RE --> CAL
+RA --> IA
+CO --> IR
+RE --> IR
+RA --> IP
+PDO ..|> IA
+PDO ..|> IR
+PDO ..|> IP
+MEM ..|> IA
+MEM ..|> IR
+MEM ..|> IP
+@enduml

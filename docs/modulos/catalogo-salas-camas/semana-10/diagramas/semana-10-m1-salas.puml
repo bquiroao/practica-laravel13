@@ -1,0 +1,21 @@
+@startsalt
+title M1 — Salas (320 px)
+{+
+  [≡ Menú] | <b>Camas · H. Central</b>
+  "Buscar sala o cama   "
+  ---
+  {+
+    <b>A · Medicina interna</b>
+    <b>5 disponibles</b> de 11 operativas
+    1 no operativa · 6 ocupadas | [Ver camas >]
+  }
+  {+
+    <b>B · Cirugía</b>
+    <b>0 disponibles</b> de 6 operativas
+    2 no operativas · 6 ocupadas | [Ver camas >]
+  }
+  ---
+  [+ Nueva sala o cama]
+  <i>Sin conexión: «Mostrando datos de las 10:35» y [Reintentar].</i>
+}
+@endsalt

@@ -1,0 +1,24 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Médicos — prototipo navegable (semana 11)</title>
+<style>
+:root{--ink:#222;--mut:#555;--err:#b00020;--ac:#0b5ed7;--nav:#12303b}*{box-sizing:border-box}
+body{margin:0;font:16px/1.4 Arial,sans-serif;color:var(--ink);background:#fafafa;padding-bottom:64px}
+header{background:var(--nav);color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center}header label{margin:0;font-weight:normal}header select{width:auto;min-height:40px}
+main{padding:16px;max-width:960px;margin:auto}h1{font-size:20px;margin:0 0 4px}main:focus{outline:none}
+label{display:block;font-weight:bold;margin:12px 0 4px}input,select,button{font:inherit;min-height:44px;width:100%;padding:8px 10px;border:1px solid #777;border-radius:6px;background:#fff}
+input[type=checkbox]{width:24px;min-height:24px}.chk{display:flex;gap:10px;align-items:center;font-weight:normal}
+button,.btn{background:var(--nav);color:#fff;border:0;font-weight:bold;cursor:pointer;display:inline-block;text-align:center;text-decoration:none;padding:10px 16px;border-radius:6px;min-height:44px}
+button.s,.btn.s{background:#fff;color:var(--nav);border:2px solid var(--nav)}button:disabled{background:#767676;cursor:not-allowed}:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.h{color:var(--mut);font-size:14px}.m{color:var(--err);font-size:14px;margin-top:4px}[aria-invalid=true]{border:2px solid var(--err)}
+.al{border:2px solid var(--err);background:#fdecee;border-radius:6px;padding:12px;margin:12px 0}.ok{border:2px solid #146c2e;background:#e8f5ec;border-radius:6px;padding:12px;margin:12px 0}
+.g{display:grid;gap:0 12px}.cards{display:grid;gap:10px;margin:16px 0;padding:0;list-style:none}.card{background:#fff;border:1px solid #bbb;border-radius:8px;padding:12px}.card b{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.chips button{width:auto;min-width:72px;background:#fff;color:var(--nav);border:2px solid var(--nav)}
+table{display:none;width:100%;border-collapse:collapse;margin:16px 0;background:#fff}td,th{border:1px solid #999;padding:8px;text-align:left}th{background:#e6e6e6}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #999}.tabs a{flex:1;min-height:56px;display:flex;align-items:center;justify-content:center;color:var(--nav);font-weight:bold;text-decoration:none}.tabs a[aria-current]{background:#d8eeea}
+.demo{padding:12px;border:1px dashed #777;background:#fff}
+@media(min-width:431px){.g{grid-template-columns:1fr 1fr}.g .full{grid-column:1/-1}}
+@media(min-width:768px){.cards.t{display:none}table.t{display:table}.tabs{position:static;border:0;background:transparent;padding:0}.tabs a{flex:0 0 auto;padding:0 16px;color:#fff}.tabs a[aria-current]{background:#0b3a40}body{padding-bottom:0}}
+</style>
+<header><b>Médicos</b><nav class="tabs" id="tabs" aria-label="Secciones"></nav><div><label for="rol">Rol (demostración)</label><select id="rol"><option value="admin">Administración</option><option value="recepcion">Recepción</option><option value="medico">Médico</option></select></div></header>
+<main id="vista" tabindex="-1"></main>
+<aside class="demo" style="max-width:960px;margin:32px auto 0"><b>Panel de demostración</b><label class="chk"><input type="checkbox" id="citasCaida"> Simular: Citas no responde (503)</label><label class="chk"><input type="checkbox" id="sinConexion"> Simular: sin conexión</label></aside>
+<script src="api-simulada.js"></script><script src="app.js"></script></html>

@@ -1,0 +1,28 @@
+@startuml semana-02-clases-antes
+title Antes de SRP — servicio de órdenes acoplado
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class ServicioOrdenesTodoEnUno {
+  +emitir(actor, paciente, episodio, pruebas)
+  +validarPermisoYContexto()
+  +validarCatalogo()
+  +guardarOrdenYPartidas()
+  +consultarSeguimiento(paciente, episodio)
+  +validarOrigenYTransicion()
+  +actualizarEstado()
+}
+
+ServicioOrdenesTodoEnUno ..> AutorizacionClinica : acoplado
+ServicioOrdenesTodoEnUno ..> ContextoEMR : valida directamente
+ServicioOrdenesTodoEnUno ..> CatalogoPruebas : consulta
+ServicioOrdenesTodoEnUno ..> BaseHOSPITAL : escribe y consulta
+ServicioOrdenesTodoEnUno ..> PoliticaEstados : decide transiciones
+
+note right of ServicioOrdenesTodoEnUno
+Una clase cambia por reglas clínicas,
+catálogo, persistencia, consulta y
+contrato de estados.
+Ejemplo conceptual; no es código ejecutable.
+end note
+@enduml

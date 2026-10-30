@@ -1,0 +1,46 @@
+@startuml semana-03-paquetes-dependencias
+!pragma layout smetana
+title Paquetes y regla de dependencias del Micro-HIS QA (verificada por ARQ-01..ARQ-07)
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+
+rectangle "bootstrap/contenedor.php\n(raíz de composición)" as Raiz #EEEEEE
+package "Presentacion\\Http" #E8F0FB {
+  rectangle "Kernel · AccionesQa ·\nTraductorSalida" as Pres
+}
+package "Aplicacion" #F5F9FF {
+  rectangle "CasosDeUso (9) ·\nResultados\\Salida" as App
+  rectangle "Puertos\n(AlmacenEvidencias, PoliticaAcceso,\nRegistroAuditoria, Transaccion)" as PApp
+}
+package "Dominio" #FFF8E1 {
+  rectangle "Modelo · Evidencia ·\nExcepciones" as Dom
+  rectangle "Puertos\n(RepositorioCasos, RepositorioCampanas,\nRepositorioDefectos, Reloj)" as PDom
+}
+package "Persistencia" #EEF7EE {
+  rectangle "Pdo · Archivos ·\nConfiguracion" as Per
+}
+database "PostgreSQL\nesquema qa" as BD
+folder "Almacén\n<tenant>/<sha256>" as Disco
+
+Pres --> App
+App --> PApp
+App --> Dom
+App --> PDom
+PApp --> Dom
+Per ..|> PApp : implementa
+Per ..|> PDom : implementa
+Per --> Dom
+Per --> BD : PDO, sentencias preparadas
+Per --> Disco
+Raiz --> Pres
+Raiz --> Per
+Raiz --> App
+
+note right of Dom
+  Dominio no depende de nada (ARQ-01).
+  PDO y SQL solo en Persistencia (ARQ-05).
+  Presentación no conoce Persistencia (ARQ-04):
+  solo la raíz de composición las une.
+  Nadie pregunta por el subtipo de evidencia (ARQ-07).
+end note
+@enduml

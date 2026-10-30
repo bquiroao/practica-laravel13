@@ -1,0 +1,49 @@
+@startuml semana-04-mvc
+!pragma layout smetana
+title MVC en la entrada del Micro-HIS Prescripciones
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 11
+
+class Kernel {
+  + manejar(Solicitud) : Respuesta
+  .. ruta → token → X-Tenant-ID ..
+}
+class FormularioPrescripcion <<entrada>> {
+  + {static} emision(Solicitud, Identidad) : SolicitudEmision
+  + {static} verificacion(Solicitud) : EntradaVerificacion
+  + {static} id(parametros) : int
+  .. solo formato: JSON, tipos, Idempotency-Key ..
+  .. usuario y hospital = Identidad ..
+}
+class PrescripcionesControlador <<Controller>> {
+  + verificar(Solicitud, Identidad) : Respuesta
+  + emitir(Solicitud, Identidad) : Respuesta
+  + consultar(Solicitud, Identidad, parametros) : Respuesta
+  .. sin SQL, sin new, sin códigos (ARQ-07) ..
+}
+class PrescripcionVista <<View>> {
+  + {static} verificacion(Resultado) : Respuesta
+  + {static} emision(Resultado) : Respuesta
+  + {static} detalle(Resultado) : Respuesta
+  .. Resultado → estado HTTP; Location solo en 201 ..
+}
+class ErrorVista <<View>> {
+  + {static} entradaInvalida(EntradaInvalida) : Respuesta
+}
+package "Model (Aplicación + Dominio)" #F5F9FF {
+  class EmitirPrescripcion
+  class VerificarAlergiasPrevia
+  class ConsultarPrescripcion
+  class Resultado
+}
+
+Kernel --> PrescripcionesControlador : despacha
+PrescripcionesControlador --> FormularioPrescripcion : lee
+PrescripcionesControlador --> EmitirPrescripcion : ejecutar()
+PrescripcionesControlador --> VerificarAlergiasPrevia
+PrescripcionesControlador --> ConsultarPrescripcion
+PrescripcionesControlador --> PrescripcionVista : presenta
+PrescripcionesControlador --> ErrorVista : 400 de formato
+EmitirPrescripcion --> Resultado
+PrescripcionVista --> Resultado : traduce
+@enduml

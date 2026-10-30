@@ -1,0 +1,15 @@
+@startsalt
+title W1 — Ocupación por sala (último corte)
+{+
+  {* Inicio | <b>Ocupación</b> | Ayuda }
+  Hospital: <b>Hospital Central</b> | Corte: <b>10:35</b> (hace 4 min) | [Actualizar]
+  {#
+    <b>Sala</b> | <b>Disponibles</b> | <b>Ocupadas</b> | <b>Mantenimiento</b> | <b>Inactivas</b> | <b>Ocupación</b>
+    A · Medicina interna | 5 | 6 | 1 | 0 | 54.5 %
+    B · Cirugía | 0 | 6 | 2 | 0 | 100.0 %
+    C · Pediatría | 0 | 0 | 3 | 1 | no aplica
+  }
+  <i>Fuente: catálogo de camas y estancias de admisión. Ocupación = ocupadas ÷ (disponibles + ocupadas) (R-01).</i>
+  <i>Cargando: filas de esqueleto. Vacío: «Aún no hay datos de ocupación: el primer corte llega en 5 minutos» (E4).</i>
+}
+@endsalt

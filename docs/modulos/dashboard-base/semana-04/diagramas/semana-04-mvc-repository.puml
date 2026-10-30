@@ -1,0 +1,32 @@
+@startuml semana-04-mvc-repository
+title MVC y Repository — Micro-HIS Dashboard base
+package "Entrada" {
+  class "public/index.php" as Front <<front controller>>
+}
+package Presentacion {
+  class Rutas
+  class ControladorDashboard <<controlador>>
+  class VistaJson <<vista>>
+}
+package "Modelo (Aplicación y Dominio)" {
+  class ServicioDashboard
+  interface FuenteConteos <<repository de solo lectura>>
+  interface Reloj <<puerto>>
+  class "EstadoTarjeta, Tarjeta, Catalogo" as Reglas
+}
+package Persistencia {
+  class RepositorioPdo
+  class RepositorioEnMemoria
+}
+Front ..> Rutas : resolver(método, ruta)
+Front ..> ControladorDashboard : atender(acción, datos)
+Front ..> VistaJson : emitir(respuesta)
+ControladorDashboard --> ServicioDashboard
+ControladorDashboard --> VistaJson
+ServicioDashboard --> FuenteConteos
+ServicioDashboard --> Reloj
+ServicioDashboard ..> Reglas
+RepositorioPdo ..|> FuenteConteos
+RepositorioEnMemoria ..|> FuenteConteos
+note bottom of ControladorDashboard : sin SQL ni reglas de negocio
+@enduml

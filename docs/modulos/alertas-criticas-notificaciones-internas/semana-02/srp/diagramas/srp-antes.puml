@@ -1,0 +1,38 @@
+@startuml srp-antes
+' Semana 2 - SRP: diseño ANTES (una clase con siete razones de cambio)
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFF0F0
+  BorderColor #C00000
+}
+class GestorAlertas {
+  - pdo : PDO
+  + registrar(datos : array) : array
+  + acusar(idAlerta : string, usuario : string) : void
+  + revisarVencidas() : void
+  - validar(datos : array) : void
+  - existeDuplicado(origen, idOrigen) : bool
+  - destinatariosFijos(nivel : int) : array
+  - enviarCorreo(usuario, texto) : bool
+  - guardarHistorial(evento, actor) : void
+}
+note right of GestorAlertas
+  Razones de cambio mezcladas:
+  1. reglas de validación (RN-01)
+  2. deduplicación con SQL (RN-02)
+  3. quién recibe (RN-03), con usuarios fijos
+  4. canal de envío: llama mail() directo
+  5. reintentos con sleep(60) (RN-08)
+  6. plazos y escalamiento con time() (RN-04, RN-05)
+  7. SQL de alertas e historial (RN-10)
+end note
+class PDO <<externo>>
+GestorAlertas --> PDO : SQL directo
+class "mail()" as MAIL <<función PHP>>
+class "time() / sleep()" as TIEMPO <<función PHP>>
+hide MAIL members
+hide TIEMPO members
+hide PDO members
+GestorAlertas ..> MAIL : envío real
+GestorAlertas ..> TIEMPO : reloj real
+@enduml

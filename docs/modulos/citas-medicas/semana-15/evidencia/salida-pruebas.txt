@@ -1,0 +1,41 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 matriz de estados 4 x 4: 3 permitidos y 13 E7 (R-07)
+OK    U-02 límites del horario: inicio = ahora, fin = inicio y fin < inicio = E2; 1 segundo después admite (R-01)
+OK    U-03 cruce en [inicio, fin): contigua admite; 1 segundo cruzado = E4 (médico) y E5 (paciente) (R-02, R-03)
+OK    U-04 cancelar: motivo vacío = E2 sin cambio; con motivo queda guardado y el horario se libera (R-07, R-10)
+PEND. U-05 horario tomado al guardar: HorarioTomado llega con la semana 6 (PR #435, sin integrar)
+OK    U-06 cada código de rechazo (E7, E2, E3, E4, E5, NF) tiene su HTTP fijo
+== Caja blanca
+OK    CB-01 solicitar: 6 caminos básicos (V(G) = 5 más la salida del dominio); solo C6 escribe
+OK    CB-02 cambiar(): NF, E7 del dominio sin escribir, E7 de la carrera tras intentar y éxito; la condición del motivo en cancelar
+== Caja negra (HTTP)
+FALLA CN-01 equivalencia: vigente; médico inactivo; especialidad que no tiene; paciente vacío (R-04, R-05, RF-01)
+      obtenido: 201, 422 E3, 422 E3, 201
+OK    CN-02 límites: inicio pasado y fin = inicio = 422; contigua admite; 1 segundo cruzado = 409 E4 (R-01, R-02)
+OK    CN-03 cruce del paciente con otro médico = 409 E5; cancelar libera el horario (R-03, R-07)
+FALLA CN-04 permisos: otro hospital agenda; el médico m1 cancela una cita de m2 = 403 (RNF-01, CP-04)
+      obtenido: 201, 200
+OK    CN-05 errores: cita inexistente, ruta desconocida, confirmar cancelada, cancelar sin motivo y cuerpo que no es JSON
+FALLA CN-06 confirmar una cita cuyo horario ya pasó = 422 (R-01, H-03 de la semana 13)
+      obtenido: 200
+FALLA CN-07 base no disponible al arrancar = 503 E8, sin detalles técnicos
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 10 de 14 pruebas pasan; 4 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-citas/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # el mismo archivo contra el Micro-HIS de la semana 6 (PR #435, sin integrar), en una copia temporal
+OK    U-05 si otra solicitud gana el horario al guardar = E6 (semana 6)
+FALLA CN-01 equivalencia: vigente; médico inactivo; especialidad que no tiene; paciente vacío (R-04, R-05, RF-01)
+FALLA CN-04 permisos: otro hospital agenda; el médico m1 cancela una cita de m2 = 403 (RNF-01, CP-04)
+FALLA CN-06 confirmar una cita cuyo horario ya pasó = 422 (R-01, H-03 de la semana 13)
+FALLA CN-07 base no disponible al arrancar = 503 E8, sin detalles técnicos
+RESULTADO: 11 de 15 pruebas pasan; 4 fallan (ver defectos)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal del Micro-HIS de develop (el del repositorio no se modifica)
+M1: confirmada -> completada permitida en EstadoCita -> fallan: U-01
+M2: Horario admite inicio = ahora (< en lugar de <=) -> fallan: U-02 CB-01

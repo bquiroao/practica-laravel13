@@ -1,0 +1,8 @@
+$ php semana-06/evidencia/probar-capacidad.php   # después del cambio
+POST /salas A con capacidad 2 -> PDO 201 | InMemory 201
+POST /salas/A/camas 101 -> PDO 201 | InMemory 201
+POST /salas/A/camas 102 -> PDO 201 | InMemory 201
+POST /salas/A/camas 103 (sala llena) -> PDO 409 E9 | InMemory 409 E9
+PATCH /salas/A/camas/102/estado inactiva -> PDO 200 | InMemory 200
+POST /salas/A/camas 103 (la inactiva no cuenta) -> PDO 201 | InMemory 201
+POST /salas B con capacidad 0 -> PDO 422 E2 | InMemory 422 E2

@@ -1,0 +1,25 @@
+Copia SIN defecto (referencia):
+   M1  ÁMBAR 93/93 · 18 omitidas
+   M2  ÁMBAR no medido
+   M3  ROJO  9/12 detectadas · especificidad 2/2
+   M4  ROJO  11/12
+   M5  VERDE 4/4
+   M6  ÁMBAR 4/4 guardas · 20/23 códigos
+   M7  ROJO  1 críticos · 2 mayores · 3 menores · 1 obs.
+
+D1 · la coincidencia por nombre deja de normalizar (mayúsculas y espacios)
+   M1  ROJO  91/93 · 18 omitidas   (referencia: 93/93 · 18 omitidas)
+   M3  ROJO  7/12 detectadas · especificidad 2/2   (referencia: 9/12 detectadas · especificidad 2/2)
+
+D2 · el repositorio devuelve prescripciones de otro hospital
+   M1  ROJO  89/93 · 18 omitidas   (referencia: 93/93 · 18 omitidas)
+   M4  ROJO  9/12   (referencia: 11/12)
+
+D3 · el Expediente caído se lee como «sin alergias» (fail-open)
+   M1  ROJO  86/93 · 18 omitidas   (referencia: 93/93 · 18 omitidas)
+   M5  ROJO  2/4   (referencia: 4/4)
+
+D4 · el contrato agrega un código de error que ninguna prueba afirma
+   M6  ÁMBAR 4/4 guardas · 20/24 códigos   (referencia: 4/4 guardas · 20/23 códigos)
+
+Defectos inyectados: 4  Sin detectar: 0

@@ -1,0 +1,21 @@
+$ php bin/acoplamiento.php 14   (ANTES del refactor)
+Micro-HIS Prescripciones — acoplamiento por clase (65 clases en src/)
+--------------------------------------------------------------------------------------------------------------------------------
+Clase                          Capa            Ce   Ca  Ramas   Dc  P  Preocupaciones que mezcla
+EvaluacionClinica              Aplicacion       8    2      7    0  5  medicamentos · dosis · alergias · validacion previa · bloqueo seguro
+EmitirPrescripcion             Aplicacion      15    2     17    9  4  prescripciones · alergias · validacion previa · bloqueo seguro
+VerificadorAlergias            Dominio          5    3      7    0  4  medicamentos · alergias · validacion previa · bloqueo seguro
+PdoRepositorioPrescripciones   Persistencia     6    1      6    1  3  prescripciones · validacion previa · bloqueo seguro
+PdoCatalogoMedicamentos        Persistencia     5    1      7    0  3  medicamentos · alergias · validacion previa
+CatalogoEnMemoria              Persistencia     4    1      7    0  3  medicamentos · alergias · validacion previa
+Prescripcion                   Dominio          1    4      0    2  3  prescripciones · validacion previa · bloqueo seguro
+FabricaAdaptadores             Persistencia    19    0      2    0  2  medicamentos · alergias
+VerificarAlergiasPrevia        Aplicacion       7    1      6    1  2  validacion previa · bloqueo seguro
+HttpFuenteAlergias             Persistencia     5    1     27    0  2  alergias · bloqueo seguro
+PdoFuenteAlergias              Persistencia     4    1      1    0  2  alergias · bloqueo seguro
+CatalogoMedicamentos           Aplicacion       2    3      0    0  2  medicamentos · alergias
+ValidadorPrescripcion          Dominio          1    1     26    0  2  medicamentos · dosis
+Alergia                        Dominio          0   10      6    0  2  alergias · bloqueo seguro
+--------------------------------------------------------------------------------------------------------------------------------
+Ce total: 151 · Clases que mezclan ≥ 4 preocupaciones: 3
+Decisiones clínicas (Dc) en Aplicación y Presentación: 10 · en el Dominio: 7

@@ -1,0 +1,69 @@
+@startuml semana-04-mvc
+!pragma layout smetana
+title MVC en la entrada del Micro-HIS Auditoría (semana 4)
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #F5F9FF
+skinparam classBorderColor #2F5D8A
+
+package "Presentación / Http" {
+  class Kernel <<front controller>> {
+    + manejar(Solicitud) : Respuesta
+    -- ruta 404/405 → hospital 400 → token 401 → tenant 403
+  }
+  class Rutas {
+    + definir(AuditoriaControlador) : list<Ruta>
+  }
+  class AuditoriaControlador <<Controller>> {
+    + registrar(Solicitud, Identidad) : Respuesta
+    + consultar(Solicitud, Identidad) : Respuesta
+    + verDetalle(Solicitud, Identidad, params) : Respuesta
+    + verificar(Solicitud, Identidad) : Respuesta
+    -- formulario → caso de uso → vista; nada más
+  }
+  class FormularioMovimientos <<entrada>> {
+    + registro() : ComandoRegistrar
+    + consulta() : ComandoConsultar
+    + detalle() : ComandoDetalle
+    + verificacion() : ComandoVerificar
+    -- solo FORMATO; actor y hospital del token
+  }
+  class EntradaInvalida <<excepción>>
+  class MovimientosVista <<View>> {
+    + registro(Resultado) : Respuesta
+    + lista / detalle / verificacion
+    -- Location solo con 201
+  }
+  class ErrorVista <<View>> {
+    + deResultado(Resultado) : Respuesta
+    + entradaInvalida(e) : Respuesta
+    -- categoría → código HTTP
+  }
+}
+
+package "Aplicación (el Model, junto con el Dominio)" {
+  class RegistrarMovimiento <<caso de uso>>
+  class ConsultarMovimientos <<caso de uso>>
+  class VerDetalleMovimiento <<caso de uso>>
+  class VerificarIntegridad <<caso de uso>>
+  class Resultado
+}
+
+Kernel --> Rutas
+Rutas --> AuditoriaControlador
+AuditoriaControlador ..> FormularioMovimientos : 1. arma el comando
+FormularioMovimientos ..> EntradaInvalida : lanza
+AuditoriaControlador --> RegistrarMovimiento : 2. ejecuta
+AuditoriaControlador --> ConsultarMovimientos
+AuditoriaControlador --> VerDetalleMovimiento
+AuditoriaControlador --> VerificarIntegridad
+AuditoriaControlador ..> MovimientosVista : 3. presenta
+MovimientosVista ..> ErrorVista : si es error
+Kernel ..> ErrorVista : 400/401/403/404/405/500
+RegistrarMovimiento ..> Resultado
+
+note bottom of AuditoriaControlador
+  ARQ-07: solo recibe casos de uso; sin SQL,
+  sin «new», sin códigos de negocio, sin Respuesta::json.
+  ARQ-08: Respuesta::json solo existe en las Vistas.
+end note
+@enduml

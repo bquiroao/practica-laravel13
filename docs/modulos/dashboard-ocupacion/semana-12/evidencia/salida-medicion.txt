@@ -1,0 +1,11 @@
+$ node semana-11/evidencia/capturar.mjs semana-11/prototipo/index.html semana-12/capturas 01-...=sala/A 02-...=sala/A@<abrir «Dónde se corrige»> 03-...=sala/C   # Edge sin interfaz
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-sala-a-por-revisar (#sala/A) | 320 | 320 | 320 | no | Sala A · Ocupación · Hospital HIS | H1
+01-sala-a-por-revisar (#sala/A) | 360 | 360 | 360 | no | Sala A · Ocupación · Hospital HIS | H1
+01-sala-a-por-revisar (#sala/A) | 430 | 430 | 430 | no | Sala A · Ocupación · Hospital HIS | H1
+02-donde-se-corrige (#sala/A) | 320 | 320 | 320 | no | Corregir A/104 · Ocupación · Hospital HIS | H1
+02-donde-se-corrige (#sala/A) | 360 | 360 | 360 | no | Corregir A/104 · Ocupación · Hospital HIS | H1
+02-donde-se-corrige (#sala/A) | 430 | 430 | 430 | no | Corregir A/104 · Ocupación · Hospital HIS | H1
+03-sala-c-sin-inconsistencias (#sala/C) | 320 | 320 | 320 | no | Sala C · Ocupación · Hospital HIS | H1
+03-sala-c-sin-inconsistencias (#sala/C) | 360 | 360 | 360 | no | Sala C · Ocupación · Hospital HIS | H1
+03-sala-c-sin-inconsistencias (#sala/C) | 430 | 430 | 430 | no | Sala C · Ocupación · Hospital HIS | H1

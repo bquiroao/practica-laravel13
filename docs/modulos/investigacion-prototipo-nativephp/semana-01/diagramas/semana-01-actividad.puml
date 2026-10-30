@@ -1,0 +1,36 @@
+@startuml
+skinparam activityBackgroundColor #F8F9FA
+skinparam activityBorderColor #3F51B5
+skinparam shadowing false
+
+start
+:A-01 / R-01: Identificar flujo HIS acotado;
+if (D-01: ¿El caso es representativo y acotado?) then (Sí)
+  :A-02: Definir alcance y criterio de éxito;
+  :A-03: Preparar prototipo nativo;
+  :A-04: Iniciar app NativePHP;
+  :A-05: Solicitar operación del flujo;
+  if (D-02 / R-04: ¿Autenticación y conectividad válidas?) then (Sí)
+    :A-06 / R-02: Consumir servicio del backend Laravel;
+    if (D-03 / R-03: ¿Respuesta válida según reglas del HIS?) then (Sí)
+      :A-07: Mostrar resultado al operador;
+      :A-08: Registrar evidencia de ejecución;
+      :A-09: Evaluar viabilidad técnica;
+      if (D-04 / R-05: ¿Seguridad, mantenimiento y complejidad aceptables?) then (Sí)
+        :A-10 / R-06: Resultado viable como prototipo;
+      else (No)
+        :A-11 / R-06: Resultado viable parcialmente o no viable;
+      endif
+    else (No)
+      :E-03: Registrar error de validación de negocio;
+      :A-12: Resultado no viable sin ajustes;
+    endif
+  else (No)
+    :E-02: Registrar error técnico de autenticación o conectividad;
+    :A-13: Resultado pendiente de corregir integración;
+  endif
+else (No)
+  :E-01: Redefinir o descartar el flujo;
+endif
+stop
+@enduml

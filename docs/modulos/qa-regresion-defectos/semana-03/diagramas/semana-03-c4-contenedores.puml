@@ -1,0 +1,26 @@
+@startuml semana-03-c4-contenedores
+!pragma layout smetana
+!include <C4/C4_Container>
+
+title C4 · Nivel 2 — Contenedores del Micro-HIS QA y regresión
+
+Person(usuarios, "Equipo QA, desarrollo y producto", "Cinco roles autorizados.")
+System_Ext(identidad, "Identidad (JWT)", "Simulada con tokens demo.")
+System_Ext(rbac, "RBAC", "Simulado con PoliticaAccesoEstatica.")
+System_Ext(auditoria, "Módulo Auditoría", "Consumirá la bandeja.")
+
+System_Boundary(sistema, "Micro-HIS QA (PHP 8.2+ vanilla, sin framework)") {
+    Container(cliente, "Cliente HTTP", "curl / SPA (semanas 8–11)", "Authorization: Bearer, X-Tenant-ID, Idempotency-Key en resultados.")
+    Container(api, "API QA", "PHP · public/index.php · php -S", "Kernel, acciones y cuatro capas.")
+    ContainerDb(bd, "Base del módulo", "PostgreSQL 18 · esquema qa", "casos_prueba (versión aprobada inmutable), matriz_regresion, campanas, campana_alcance, intentos y evidencias (solo agregar), defectos, defecto_historial, auditoria_bandeja.")
+    ContainerDb(archivos, "Almacén de evidencias", "Disco · <tenant>/<sha256>", "Direccionado por contenido; en el HIS, almacén de objetos.")
+}
+
+Rel(usuarios, cliente, "Usa")
+Rel(cliente, api, "/api/v1/qa/casos · /campanas · /resultados · /defectos · /trazabilidad", "HTTP/JSON")
+Rel(api, bd, "SELECT / INSERT / UPDATE condicionado, con sentencias preparadas", "PDO pgsql")
+Rel(api, archivos, "Escribe y verifica la huella ANTES de la transacción")
+Rel(api, identidad, "Autenticador")
+Rel(api, rbac, "PoliticaAcceso")
+Rel_L(auditoria, bd, "Lee la bandeja", "futuro")
+@enduml

@@ -1,0 +1,83 @@
+$ php tests/ejecutar.php --solo=UNI,CB,CN   # ANTES de corregir el código
+PHP Warning:  Undefined array key "campana" in micro-his-qa\tests\Semana15\PruebasSemana15Prueba.php on line 144
+
+Warning: Undefined array key "campana" in micro-his-qa\tests\Semana15\PruebasSemana15Prueba.php on line 144
+Micro-HIS QA funcional y regresión - pruebas (PHP 8.4.26)
+
+== Semana 15: unitarias, caja blanca y caja negra trazadas a RF/RNF (y los hallazgos de la revisión) ==
+[FALLA] UNI-01   RF-10 · R-09 (RT-01): un defecto sin clasificar cuenta con su severidad PROPUESTA; CRÍTICA propuesta = crítico abierto hasta que el Líder QA lo reclasifique
+         -> Call to undefined method Qa\Dominio\Modelo\Defecto::severidadEfectiva() (PruebasSemana15Prueba.php:47)
+[FALLA] UNI-02   RF-10 · R-09 (RT-05): sin ningún caso aplicable (todo NO_APLICA) la campaña cierra NO_GO con su propia causa, nunca GO
+         -> decisión: esperado array (
+  0 => 'NO_GO',
+  1 => 0.0,
+  2 => 
+  array (
+    0 => 'ningún caso aplicable: no hay ejecución que respalde la liberación',
+  ),
+), obtenido array (
+  0 => 'GO',
+  1 => 1.0,
+  2 => 
+  array (
+  ),
+) (Arnes.php:41)
+[FALLA] UNI-03   RF-09 · R-08 (RT-06): marcar CORREGIDO exige un build x.y.z(+commit), el mismo formato que iniciar una campaña
+         -> build «ya quedó»: se esperaba Qa\Dominio\Excepciones\ReglaRechazada y no se lanzó nada (Arnes.php:68)
+[FALLA] UNI-04   RF-10 · R-15: un MAYOR propuesto y sin clasificar bloquea el GO si su caso es crítico en la matriz; en un caso no crítico, no
+         -> Call to undefined method Qa\Dominio\Modelo\Defecto::bloqueaGo() (PruebasSemana15Prueba.php:68)
+[FALLA] CB-01    RF-10 · R-09/R-15 · Cobertura de ramas de Campana::cerrar: cada una de las 7 decisiones se toma por verdadero y por falso
+         -> r4 nada aplica: esperado array (
+  0 => 'NO_GO',
+  1 => 1,
+), obtenido array (
+  0 => 'GO',
+  1 => 0,
+) (Arnes.php:41)
+[FALLA] CB-02    RF-10 · R-09/R-15 · MC/DC de Defecto::bloqueaGo = (CRÍTICA ∧ no cerrado) ∨ (MAYOR ∧ no cerrado ∧ caso crítico), con la severidad efectiva
+         -> Call to undefined method Qa\Dominio\Modelo\Defecto::bloqueaGo() (PruebasSemana15Prueba.php:127)
+[FALLA] CB-03    RF-11 · D-23 (RT-02) · Caminos de la trazabilidad: defectos de esta campaña, abiertos de otra (se muestran) y cerrados de otra (no); sin duplicados
+         -> TC-107: el abierto de A y el de B, una vez cada uno: esperado array (
+  0 => 
+  array (
+    0 => 1,
+    1 => 1,
+    2 => true,
+  ),
+  1 => 
+  array (
+    0 => 3,
+    1 => 2,
+    2 => true,
+  ),
+), obtenido array (
+  0 => 
+  array (
+    0 => 3,
+    1 => NULL,
+    2 => false,
+  ),
+) (Arnes.php:41)
+[PASA ] CN-01    RF-04 · RF-05 · Clases de equivalencia del resultado: PASA y FALLA válidas 201; FALLA sin evidencia, NO_APLICA sin motivo y valor fuera del enum 422 (regla); tipo equivocado 400 (forma, D-13)
+[PASA ] CN-02    RF-10 · RF-05 · Valores límite: tasa justo en el umbral → GO y un punto por debajo → NO_GO; evidencia de 5 MB exactos → 201 y de 5 MB + 1 byte → 413
+[PASA ] CN-03    RF-14 · R-13 · Permisos por rol y tenant: cada rol solo hace lo suyo (403), el producto solo consulta, y otro hospital no ve la campaña
+[PASA ] CN-04    RF-04 · RF-06 · RNF-03 · Errores: campaña inexistente 404, cuerpo que no es JSON 400, campaña cerrada 409, almacén caído 503 sin escribir nada
+[FALLA] CN-05    RF-10 · RF-11 · D-23 (RT-01, RT-02): lo que la trazabilidad marca como bloqueante es exactamente lo que el cierre cuenta
+         -> CRÍTICA propuesta sin clasificar: la trazabilidad la marca y el cierre la cuenta: esperado array (
+  0 => 1,
+  1 => false,
+  2 => 'NO_GO',
+  3 => 
+  array (
+    0 => '1 defecto crítico abierto',
+  ),
+), obtenido array (
+  0 => 0,
+  1 => NULL,
+  2 => 'GO',
+  3 => 
+  array (
+  ),
+) (Arnes.php:41)
+
+Total: 12  Pasan: 4  Fallan: 8  Omitidas: 0

@@ -1,0 +1,16 @@
+@startsalt
+title M2 — Expediente HC-000123 (profesional tratante)
+{+
+  [< Pacientes] | <b>HC-000123</b>
+  <b>M. López R.</b> · 54 años | [Mostrar nombre]
+  Tu atención: E-77 (activa)
+  ---
+  <b>12/10/2026</b> · E-77 en curso
+  Medicina interna · Nota de ingreso | [>]
+  <b>03/04/2025</b> · E-41
+  Consulta externa · Control | [>]
+  ---
+  [Historia de otros hospitales]
+  <i>Este acceso queda en la auditoría.</i>
+}
+@endsalt

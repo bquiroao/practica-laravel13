@@ -1,0 +1,34 @@
+@startuml semana-05-secuencia-api
+autonumber
+actor "Cliente\n(navegador o app)" as C
+participant "KernelApi" as K
+participant "AutenticadorTokens" as A
+participant "Permisos" as P
+participant "RegistrarAlergia" as R
+participant "TraductorErrores" as T
+C -> K : POST /api/v1/pacientes/PAC-00451/alergias\nAuthorization, X-Request-Id, JSON
+K -> K : X-Request-Id (recibido o nuevo)
+K -> A : identificar(token)
+alt token inválido
+  K --> C : 401 NO_AUTENTICADO
+end
+K -> K : ¿hospital del token = este hospital?
+alt otro hospital
+  K --> C : 403 TENANT_DISTINTO
+end
+K -> P : permite(rol, alergias.registrar)
+alt sin permiso
+  K --> C : 403 PERMISO_DENEGADO
+end
+K -> K : json_decode (400 si es inválido)
+K -> R : ejecutar(SolicitudRegistro)
+alt excepción de dominio o de persistencia
+  R --> K : excepción
+  K -> T : traducir(e)
+  K --> C : 409 / 422 / 404 / 503 {error:{codigo,mensaje,request_id}}
+else éxito
+  R --> K : AlertaExpediente
+  K --> C : 201 + Location + X-Request-Id
+end
+K -> K : registro de acceso (request_id, método,\nruta con PAC-*, estado, ms)
+@enduml

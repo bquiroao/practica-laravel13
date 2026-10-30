@@ -1,0 +1,43 @@
+@startuml diagrama-trazable
+' Semana 6 - Trazabilidad: actor → CU → RF/RNF → regla → clase → capa → endpoint → prueba
+left to right direction
+skinparam rectangleBackgroundColor #F4F8FF
+skinparam rectangleBorderColor #2F5597
+actor "Sistema origen" as SO
+actor "Enfermería / médico" as ENF
+actor "Planificador" as PL
+rectangle "CU-01 Registrar" as CU01
+rectangle "CU-04 Acusar" as CU04
+rectangle "CU-05 Escalar" as CU05
+rectangle "RF-01/RF-02\nRN-01, RN-02" as R1
+rectangle "RF-06\nRN-06, RN-07" as R4
+rectangle "RF-07, RNF-04\nRN-04, RN-05" as R5
+rectangle "RegistrarAlertaCritica\n+ Alerta::crear" as C1
+rectangle "AcusarAlerta\n+ Alerta::acusar" as C4
+rectangle "EscalarAlertasVencidas\n+ PoliticaEscalamiento" as C5
+rectangle "AlertaRepository\n(PDO / InMemory)" as REP
+rectangle "POST /api/v1/alertas" as E1
+rectangle "POST /api/v1/alertas/{id}/acuse" as E4
+rectangle "POST /api/v1/escalamientos" as E5
+rectangle "CA-01..03\nregistrar-pruebas" as P1
+rectangle "CA-07..09\nacuse-escalamiento-pruebas" as P4
+rectangle "CA-10..13\npolitica-pruebas" as P5
+SO --> CU01
+ENF --> CU04
+PL --> CU05
+CU01 --> R1
+CU04 --> R4
+CU05 --> R5
+R1 --> C1
+R4 --> C4
+R5 --> C5
+C1 --> REP
+C4 --> REP
+C5 --> REP
+C1 --> E1
+C4 --> E4
+C5 --> E5
+E1 --> P1
+E4 --> P4
+E5 --> P5
+@enduml

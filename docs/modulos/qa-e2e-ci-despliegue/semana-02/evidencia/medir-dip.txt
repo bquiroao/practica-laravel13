@@ -1,0 +1,10 @@
+$ php medir-dip.php
+Dependencia del nivel alto hacia un detalle     Antes Después
+Instancias de clases concretas (new)                3        0
+E/S, red, entorno o reloj del sistema               9        0
+Imports de adaptadores                              0        0
+
+Antes:   new GitHubActionsApi, new S3Cliente, new PDO
+         getenv(), simplexml_load_string(), file_get_contents(), getenv(), getenv(), time(), strtotime(), getenv(), date()
+Después: ninguna (Dominio y Aplicación solo conocen las interfaces de Dominio/Puertos.php)
+(código de salida: 0)

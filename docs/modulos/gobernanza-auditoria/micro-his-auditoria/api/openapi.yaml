@@ -1,0 +1,428 @@
+openapi: 3.1.0
+info:
+  title: API de Gobernanza y auditoría de movimientos — Sistema Hospitalario Integrado
+  version: 1.2.0
+  summary: Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas.
+  description: |
+    Bitácora de movimientos del HIS. Los módulos emisores REGISTRAN movimientos con una cuenta de
+    servicio; el super administrador y los auditores CONSULTAN por rango de fechas (obligatorio),
+    usuario, módulo, acción, resultado y recurso, siempre dentro de su alcance (un hospital, o la red con
+    `X-Tenant-ID: *`). No existe ninguna operación para modificar ni borrar un movimiento.
+
+    Reglas transversales:
+    - Toda petición exige `X-Tenant-ID` (400) y `Authorization: Bearer` (401). El token debe
+      corresponder a ese hospital (403 `TENANT_NO_COINCIDE`); `*` solo para el super administrador.
+    - El permiso de cada operación está en `x-permiso` y lo decide RBAC (403 `ACCESO_DENEGADO`).
+    - Toda respuesta trae `X-Request-ID` (se respeta el del cliente si cumple el patrón).
+    - Los errores no revelan detalles internos: 500 `ERROR_INTERNO`, 503 `SERVICIO_NO_DISPONIBLE`.
+
+    1.1.0 (semana 6, compatible con 1.0.0): CORRECCIÓN TRAZABLE. Un emisor corrige un movimiento
+    suyo enviando otro movimiento con `corrige_evento` (el event_id del original) y `motivo_correccion`.
+    El original no cambia; queda marcado con `corregido_por`. A lo sumo una corrección por movimiento
+    (409 `YA_CORREGIDO`); para volver a corregir, se corrige la corrección.
+  contact:
+    name: Boris Alexander Quiroa Orellana (@bquiroao)
+  license:
+    name: Uso académico — Análisis de Sistemas II 2026
+    identifier: CC-BY-4.0
+servers:
+  - url: http://127.0.0.1:8088
+    description: Micro-HIS local (php -S)
+security:
+  - bearer: []
+tags:
+  - name: registro
+    description: Escritura de los módulos emisores (solo inserción).
+  - name: consulta
+    description: Lectura de gobernanza; cada lectura queda auditada (AUDITORIA_CONSULTADA).
+  - name: integridad
+    description: Verificación de la cadena de sellos y anclas externas.
+paths:
+  /api/v1/auditoria/movimientos:
+    post:
+      operationId: registrarMovimiento
+      tags: [registro]
+      summary: Registra un movimiento (idempotente por event_id).
+      description: |
+        Reintentar con el MISMO `event_id` y el mismo contenido devuelve 200 `YA_REGISTRADO` con el
+        id y el sello originales; con otro contenido, 409. El emisor y el hospital salen del token y
+        de `X-Tenant-ID`, nunca del cuerpo.
+      x-permiso: auditoria.registrar
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovimientoEntrada'
+      responses:
+        '201':
+          description: Registrado.
+          headers:
+            Location:
+              schema: {type: string}
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovimientoRegistrado'
+        '200':
+          description: Reintento de un movimiento ya registrado (mismo event_id y contenido). Sin Location.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/MovimientoRegistrado'
+                  - type: object
+                    properties:
+                      codigo: {const: YA_REGISTRADO}
+        '400':
+          $ref: '#/components/responses/FormatoInvalido'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/RutaNoEncontrada'
+        '409':
+          description: EVENTO_EN_CONFLICTO — el event_id ya existe con otro contenido; YA_CORREGIDO — el original ya tiene una corrección.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          $ref: '#/components/responses/DatosInvalidos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+    get:
+      operationId: consultarMovimientos
+      tags: [consulta]
+      summary: Consulta filtrada por rango de fechas (obligatorio), usuario, módulo, acción, resultado y recurso.
+      description: |
+        Fechas en la hora local del hospital (America/Guatemala); `hasta` incluye el día completo.
+        Hasta 50 movimientos, del más reciente al más antiguo; `cursor_siguiente` continúa. Un
+        parámetro no soportado da 422 `FILTRO_NO_SOPORTADO`. La consulta queda auditada; si no se
+        puede auditar, no se entregan resultados (503).
+      x-permiso: auditoria.consultar
+      x-permiso-red: auditoria.consultar_red
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - {name: desde, in: query, required: true, schema: {type: string, format: date}}
+        - {name: hasta, in: query, required: true, schema: {type: string, format: date}}
+        - {name: usuario, in: query, schema: {type: string, maxLength: 64}}
+        - {name: modulo, in: query, schema: {type: string, maxLength: 64}}
+        - {name: accion, in: query, schema: {type: string, maxLength: 64}}
+        - {name: resultado, in: query, schema: {type: string, enum: [exito, denegado, error]}}
+        - {name: recurso, in: query, description: '1.2.0: «¿quién vio la ficha de este paciente?», p. ej. paciente:P-000001', schema: {type: string, maxLength: 128}}
+        - {name: cursor, in: query, schema: {type: string}}
+      responses:
+        '200':
+          description: Una página de movimientos (puede estar vacía).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagina'
+        '400':
+          $ref: '#/components/responses/FormatoInvalido'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/RutaNoEncontrada'
+        '422':
+          $ref: '#/components/responses/DatosInvalidos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/auditoria/movimientos/{id}:
+    get:
+      operationId: verDetalleMovimiento
+      tags: [consulta]
+      summary: Detalle de un movimiento dentro del alcance (incluye secuencia y sello).
+      description: Fuera del alcance responde EXACTAMENTE lo mismo que si no existiera (404).
+      x-permiso: auditoria.consultar
+      x-permiso-red: auditoria.consultar_red
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - {name: id, in: path, required: true, schema: {type: integer, minimum: 1}}
+      responses:
+        '200':
+          description: El movimiento.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  movimiento:
+                    $ref: '#/components/schemas/MovimientoCompleto'
+        '400':
+          $ref: '#/components/responses/FormatoInvalido'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          description: MOVIMIENTO_NO_ENCONTRADO (o fuera del alcance), RUTA_NO_ENCONTRADA.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '405':
+          $ref: '#/components/responses/MetodoNoPermitido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/auditoria/verificaciones:
+    post:
+      operationId: verificarIntegridad
+      tags: [integridad]
+      summary: Recalcula la cadena de sellos de un hospital; con un ancla, detecta también el truncamiento.
+      x-permiso: auditoria.verificar
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hospital: {type: [string, 'null'], description: null = cadena de nivel red}
+                ancla:
+                  $ref: '#/components/schemas/AnclaEntrada'
+      responses:
+        '200':
+          description: INTEGRA, ALTERADA (primera secuencia rota) o TRUNCADA (faltan filas después del ancla).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verificacion'
+        '400':
+          $ref: '#/components/responses/FormatoInvalido'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/RutaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+  /api/v1/auditoria/anclas:
+    get:
+      operationId: obtenerAncla
+      tags: [integridad]
+      summary: Cabeza de una cadena (secuencia y sello) para publicarla fuera de la base.
+      x-permiso: auditoria.verificar
+      parameters:
+        - $ref: '#/components/parameters/XTenantID'
+        - $ref: '#/components/parameters/XRequestID'
+        - {name: hospital, in: query, schema: {type: string}, description: 'Sin el parámetro, la cadena de red.'}
+      responses:
+        '200':
+          description: El ancla (no revela contenido, solo un hash).
+          headers:
+            Cache-Control:
+              schema: {const: no-store}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ancla'
+        '400':
+          $ref: '#/components/responses/FormatoInvalido'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/Prohibido'
+        '404':
+          $ref: '#/components/responses/RutaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoDisponible'
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: En el HIS, JWT del módulo de autenticación; en el micro-HIS, tokens de demostración.
+  parameters:
+    XTenantID:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Hospital del alcance; `*` = toda la red (solo super administrador).
+      schema: {type: string, minLength: 1}
+    XRequestID:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: Se respeta si cumple el patrón; si no, el servidor genera uno. Repetirlo en los reintentos.
+      schema: {type: string, pattern: '^[A-Za-z0-9-]{8,64}$'}
+  headers:
+    XRequestID:
+      schema: {type: string}
+  schemas:
+    MovimientoEntrada:
+      type: object
+      required: [event_id, hospital, usuario, modulo, accion, ocurrido_en, resultado]
+      additionalProperties: true
+      properties:
+        event_id: {type: string, maxLength: 64, description: Estable entre reintentos (uuid recomendado).}
+        hospital: {type: [string, 'null'], description: Debe ser el del token.}
+        usuario: {type: string, maxLength: 64}
+        modulo: {type: string, maxLength: 32, description: Debe ser el de la cuenta de servicio.}
+        accion: {type: string, maxLength: 64, description: Del catálogo del módulo.}
+        ocurrido_en: {type: string, format: date-time, description: ISO 8601 con zona; no más de 5 min en el futuro.}
+        resultado: {type: string, enum: [exito, denegado, error]}
+        recurso: {type: [string, 'null'], maxLength: 128}
+        correlation_id: {type: [string, 'null'], maxLength: 64}
+        detalle:
+          type: object
+          description: Referencias y resumen (≤ 4 KB). Prohibidas las claves password, contrasena, token, secreto, clave y diagnostico.
+        corrige_evento:
+          type: string
+          maxLength: 64
+          description: '1.1.0 — event_id de un movimiento ANTERIOR del mismo emisor y hospital que este corrige. Si no existe (o es de otro hospital o emisor), 422.'
+        motivo_correccion:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: '1.1.0 — obligatorio con corrige_evento, prohibido sin él.'
+    MovimientoRegistrado:
+      type: object
+      required: [id, secuencia, sello]
+      properties:
+        id: {type: integer}
+        secuencia: {type: integer, minimum: 1}
+        sello: {type: string, pattern: '^[0-9a-f]{64}$'}
+    ResumenMovimiento:
+      type: object
+      properties:
+        id: {type: integer}
+        ocurrido_en: {type: string, format: date-time}
+        hospital: {type: [string, 'null']}
+        usuario: {type: string}
+        modulo: {type: string}
+        accion: {type: string}
+        resultado: {type: string}
+        recurso: {type: [string, 'null']}
+        corrige_a: {type: [integer, 'null'], description: '1.1.0 — id del movimiento que esta corrección corrige.'}
+        corregido_por: {type: [integer, 'null'], description: '1.1.0 — id de la corrección de este movimiento, si la tiene.'}
+    MovimientoCompleto:
+      allOf:
+        - $ref: '#/components/schemas/ResumenMovimiento'
+        - type: object
+          properties:
+            emisor: {type: string}
+            event_id: {type: string}
+            correlation_id: {type: [string, 'null']}
+            detalle: {type: object}
+            secuencia: {type: integer}
+            sello: {type: string}
+            motivo_correccion: {type: [string, 'null']}
+    Pagina:
+      type: object
+      required: [movimientos, cursor_siguiente]
+      properties:
+        movimientos:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ResumenMovimiento'
+        cursor_siguiente: {type: [string, 'null']}
+    AnclaEntrada:
+      type: object
+      required: [secuencia, sello]
+      properties:
+        secuencia: {type: integer, minimum: 1}
+        sello: {type: string, pattern: '^[0-9a-f]{64}$'}
+    Ancla:
+      type: object
+      properties:
+        hospital: {type: [string, 'null']}
+        secuencia: {type: integer, minimum: 0}
+        sello: {type: [string, 'null']}
+        emitida_en: {type: string, format: date-time}
+    Verificacion:
+      type: object
+      required: [estado, verificados]
+      properties:
+        estado: {type: string, enum: [INTEGRA, ALTERADA, TRUNCADA]}
+        verificados: {type: integer}
+        primera_secuencia: {type: integer}
+        esperada_hasta: {type: integer}
+        ancla_confirmada: {type: integer}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum: [CUERPO_INVALIDO, FORMATO_INVALIDO, HOSPITAL_REQUERIDO, NO_AUTENTICADO, TENANT_NO_COINCIDE, ACCESO_DENEGADO,
+            MODULO_NO_PERMITIDO, RUTA_NO_ENCONTRADA, MOVIMIENTO_NO_ENCONTRADO, METODO_NO_PERMITIDO, EVENTO_EN_CONFLICTO,
+            DATOS_INVALIDOS, FILTRO_NO_SOPORTADO, YA_CORREGIDO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE]
+        campos:
+          type: object
+          additionalProperties: {type: string}
+  responses:
+    FormatoInvalido:
+      description: HOSPITAL_REQUERIDO, CUERPO_INVALIDO o FORMATO_INVALIDO.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoAutenticado:
+      description: NO_AUTENTICADO — sin token o token inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Prohibido:
+      description: TENANT_NO_COINCIDE, ACCESO_DENEGADO o MODULO_NO_PERMITIDO.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RutaNoEncontrada:
+      description: RUTA_NO_ENCONTRADA.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    MetodoNoPermitido:
+      description: METODO_NO_PERMITIDO — p. ej. PUT o DELETE sobre un movimiento (no existen).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DatosInvalidos:
+      description: DATOS_INVALIDOS (con campos) o FILTRO_NO_SOPORTADO.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ErrorInterno:
+      description: ERROR_INTERNO — sin detalles.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoDisponible:
+      description: SERVICIO_NO_DISPONIBLE — la base no respondió; reintentar (el registro es idempotente).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

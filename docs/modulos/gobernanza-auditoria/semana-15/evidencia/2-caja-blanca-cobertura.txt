@@ -1,0 +1,13 @@
+$ phpdbg -qrr herramientas/cobertura-caja-blanca.php
+Pruebas de caja blanca
+[PASA ] CB-01  Caminos básicos de RegistrarMovimiento::ejecutar(): los 11 caminos factibles, cada uno con su salida
+[PASA ] CB-02  MC/DC: «original ≠ null Y de otro hospital» y «mismo contenido Y misma referencia»: cada condición cambia la salida sola
+[PASA ] CB-03  Ramas de VerificarIntegridad: recalcular() (vacía, íntegra, hueco, sello roto con MC/DC del «||», ancla truncada, distinta, confirmada, secuencia 0) y las salidas de ejecutar() (sin permiso, base caída)
+
+Cobertura de líneas lograda por CB-01..CB-03
+------------------------------------------------------------------------------------------------
+src/Aplicacion/CasosDeUso/RegistrarMovimiento.php     11/11   100.0 %
+src/Aplicacion/CasosDeUso/VerificarIntegridad.php     16/16   100.0 %
+src/Aplicacion/Servicios/CadenaSellada.php             6/6    100.0 %
+------------------------------------------------------------------------------------------------
+TOTAL                                                 33/33   100.0 %
