@@ -17,4 +17,12 @@ return [
     'zona_horaria' => 'America/Guatemala',
     // Semana 4: identidad fija de demostración para la entrada web (sin autenticación todavía).
     'web' => ['hospital' => '11111111-1111-4111-8111-111111111111', 'usuario' => 'qf.norte'],
+    // Semana 5: tokens FICTICIOS de la API (solo desarrollo). El tenant sale del token.
+    'api' => ['tokens' => [
+        'tok-qf-norte-0001' => ['usuario' => 'qf.norte', 'rol' => 'QF_CATALOGO', 'hospital' => '11111111-1111-4111-8111-111111111111'],
+        'tok-consulta-norte-0001' => ['usuario' => 'enf.norte', 'rol' => 'CONSULTA_CLINICA', 'hospital' => '11111111-1111-4111-8111-111111111111'],
+        'tok-auditor-norte-0001' => ['usuario' => 'auditor.norte', 'rol' => 'AUDITOR_CALIDAD', 'hospital' => '11111111-1111-4111-8111-111111111111'],
+        'tok-prescripciones-norte-0001' => ['usuario' => 'sistema.prescripciones', 'rol' => 'SISTEMA_PRESCRIPCIONES', 'hospital' => '11111111-1111-4111-8111-111111111111'],
+        'tok-qf-sur-0001' => ['usuario' => 'qf.sur', 'rol' => 'QF_CATALOGO', 'hospital' => '22222222-2222-4222-8222-222222222222'],
+    ]],
 ];
