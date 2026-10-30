@@ -2,6 +2,5 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/login', 'app')->name('login');
-
-Route::view('/{any?}', 'app')->where('any', '.*');
+// La SPA de React atiende todas las rutas web, menos /api (E-07).
+Route::view('/{any?}', 'app')->where('any', '(?!api(?:/|$)).*');

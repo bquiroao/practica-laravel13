@@ -1,11 +1,44 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../js/**/*.{ts,tsx}';
 
+/*
+ * Hospital Nido: protección y cuidado. Paleta provisional hasta tener el diseño de Stitch:
+ * teal profundo (primario), salvia y arena (apoyo), coral SOLO para alertas críticas.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Nunito', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    --color-nido-50: #eef6f6;
+    --color-nido-100: #d5e9e9;
+    --color-nido-200: #a9d1d2;
+    --color-nido-300: #74b1b3;
+    --color-nido-500: #1f7a7f;
+    --color-nido-600: #146469;
+    --color-nido-700: #0f5257;
+    --color-nido-800: #0b3f43;
+    --color-nido-900: #082e31;
+
+    --color-salvia: #a8c3b1;
+    --color-arena: #f4ede4;
+    --color-critico: #e4572e;
+    --color-aviso: #c98a0b;
+    --color-normal: #2f855a;
+
+    --radius-nido: 0.75rem;
+}
+
+@layer base {
+    html {
+        color-scheme: light;
+    }
+
+    body {
+        @apply bg-arena text-slate-800;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-nido-500;
+    }
 }

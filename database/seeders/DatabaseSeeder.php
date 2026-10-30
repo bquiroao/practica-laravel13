@@ -8,6 +8,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Federated seeders are added with their connection-pinned schemas.
+        $this->call(RbacCatalogSeeder::class);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call(DemoNetworkSeeder::class);
+        }
     }
 }

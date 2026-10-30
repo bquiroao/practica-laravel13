@@ -26,7 +26,8 @@ class ApiBoundaryTest extends TestCase
     {
         return [
             'login sin X-Tenant-ID' => ['POST', '/api/v1/auth/login', ['email' => 'ana@hospital.test', 'password' => 'x'], []],
-            'registro con X-Tenant-ID vacío' => ['POST', '/api/v1/auth/register', ['name' => 'Ana'], ['X-Tenant-ID' => '']],
+            // Hospital Nido: ya no hay autorregistro (el administrador da de alta a los usuarios); se prueba el login.
+            'login con X-Tenant-ID vacío' => ['POST', '/api/v1/auth/login', ['email' => 'ana@hospital.test'], ['X-Tenant-ID' => '']],
             'refresh sin tenant ni token' => ['POST', '/api/v1/auth/refresh', [], []],
             'login con inyección SQL y sin tenant' => ['POST', '/api/v1/auth/login', ['email' => "x' OR 1=1; DROP TABLE local_patients; --", 'password' => str_repeat('a', 10000)], []],
         ];
