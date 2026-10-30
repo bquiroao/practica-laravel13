@@ -1,0 +1,7 @@
+Trazabilidad requisito -> prueba (M-02) - Catálogo de medicamentos
+
+RN    6 de  6 con prueba
+CA   12 de 13 con prueba · sin prueba: CA-12
+RNF   3 de  8 con prueba · sin prueba: RNF-03, RNF-05, RNF-06, RNF-07, RNF-08
+
+Cobertura total: 21 de 27 (78 %)
