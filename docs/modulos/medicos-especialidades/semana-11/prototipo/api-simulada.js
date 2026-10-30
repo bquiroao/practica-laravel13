@@ -26,7 +26,8 @@ window.ApiSimulada = (() => {
   const nuevoId = (p) => `${p}-${Math.random().toString(36).slice(2, 8)}`;
   const nombre = (m) => db.usuarios[m.usuario];
   return {
-    db, HOY,
+    db, HOY, miMedico: () => 'med-ana',   // el médico que inició sesión (demostración)
+    
     usuariosLibres: () => Object.entries(db.usuarios).filter(([u]) => !db.medicos.some((m) => m.usuario === u)),
     listarMedicos: () => db.medicos.map((m) => ({ id: m.id, nombre: nombre(m), colegiado: m.colegiado, especialidades: m.asig.map((a) => db.especialidades[a.esp].nombre) })),
     registrarMedico: (rol, e) => llamar(rol, ['admin'], () => {
@@ -66,7 +67,8 @@ window.ApiSimulada = (() => {
       }
       return r(200, { franjas, total: franjas.length });
     }),
-    registrarAusencia: (rol, id, e, simular = false) => llamar(rol, ['admin'], () => {
+    registrarAusencia: (rol, id, e, simular = false) => llamar(rol, ['admin', 'medico'], () => {
+      if (rol === 'medico' && id !== 'med-ana') { return err(403, 'acceso_denegado', 'Solo puede registrar sus propias ausencias'); }   // cambio de la semana 12
       const m = db.medicos.find((x) => x.id === id);
       if (!m) { return err(404, 'medico_no_encontrado', 'El médico no existe o no está activo'); }
       if (!fechaOk(e.desde) || !fechaOk(e.hasta) || e.hasta <= e.desde) { return err(422, 'vigencia_invalida', 'La ausencia necesita fecha de fin posterior'); }

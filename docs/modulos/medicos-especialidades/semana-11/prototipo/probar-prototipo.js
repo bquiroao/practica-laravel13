@@ -1,11 +1,11 @@
 // Semana 11: recorre el prototipo en escritorio y en celular (camino feliz y error crítico) y guarda las capturas.  Uso: node probar-prototipo.js   (necesita playwright)
-const { chromium } = require('playwright'); const sal = __dirname + '/../capturas/';
+const { chromium } = require('playwright'); const sal = __dirname + '/../capturas/', sal12 = __dirname + '/../../semana-12/capturas/';
 (async () => {
   const b = await chromium.launch(); let total = 0, fallas = 0;
   for (const [tipo, ancho, alto] of [['escritorio', 1280, 800], ['movil', 390, 844]]) {
     const p = await b.newPage({ viewport: { width: ancho, height: alto } }); await p.goto('file://' + __dirname + '/index.html');
     const ver = async (id, ok, d) => { total++; fallas += ok ? 0 : 1; console.log(`${id.padEnd(7)} ${ok ? 'PASA ' : 'FALLA'} [${tipo}] ${d}`); };
-    const txt = (s) => p.locator(s).innerText(); const rol = (r) => p.selectOption('#rol', r); const ir = async (h, titulo) => { await p.evaluate((x) => (location.hash = x), h); await p.waitForSelector(`h1:has-text("${titulo}")`); }; const foto = (n) => p.screenshot({ path: `${sal}${tipo}-${n}.png`, fullPage: true });
+    const txt = (s) => p.locator(s).innerText(); const rol = (r) => p.selectOption('#rol', r); const ir = async (h, titulo) => { await p.evaluate((x) => (location.hash = x), h); await p.waitForSelector(`h1:has-text("${titulo}")`); }; const foto12 = (n) => p.screenshot({ path: `${sal12}${tipo}-${n}.png`, fullPage: true }); const foto = (n) => p.screenshot({ path: `${sal}${tipo}-${n}.png`, fullPage: true });
     // Error de colegiado repetido (con el foco en el campo)
     await ir('#/medicos/nuevo', 'Registrar médico'); await p.selectOption('#usuario', 'u-sofia'); await p.fill('#col', '11111'); await p.click('#ok');
     await p.waitForSelector('#col[aria-invalid=true]');
@@ -33,6 +33,12 @@ const { chromium } = require('playwright'); const sal = __dirname + '/../captura
     await ver('E2E-10', (await txt('#aviso')).includes('Sin conexión'), 'sin conexión: no muestra franjas guardadas'); await p.uncheck('#sinConexion');
     await ir('#/ausencias', 'Sin permiso');
     await ver('E2E-11', (await txt('#vista')).includes('Sin permiso') && !(await txt('#tabs')).includes('Ausencias'), 'recepción no ve la pestaña ni entra a Ausencias');
+    // Cambio de la semana 12: el médico registra sus propias ausencias (y solo las suyas)
+    await rol('medico'); await ir('#/ausencias', 'Registrar ausencia');
+    await ver('E2E-12', (await p.locator('#med').count()) === 0 && (await txt('#vista')).includes('solo puede registrar sus propias ausencias') && (await txt('#tabs')).includes('Ausencias'), 'médico: ve la pestaña Ausencias y su nombre fijo, sin elegir a otro médico');
+    await p.click('#rev'); await p.waitForSelector('#conf'); await p.check('#ent'); await foto12('cambio-medico-conflicto'); await p.click('#reg'); await p.waitForSelector('.ok');
+    const a = await p.evaluate(() => ApiSimulada.db.ausencias.at(-1)); await ver('E2E-13', (await txt('.ok')).includes('2 citas') && a.medico === 'med-ana' && a.desde === '2026-11-02' && a.hasta === '2026-11-09', 'médico: registra su ausencia con las 2 citas en conflicto; «último día 08» se envía como hasta 09'); await foto12('cambio-medico-exito');
+    await ver('E2E-14', await p.evaluate(() => ApiSimulada.registrarAusencia('medico', 'med-luis', { desde: '2026-11-02', hasta: '2026-11-09' }).then((r) => r.estado)) === 403, 'médico: la API rechaza con 403 una ausencia de otro médico');
     await p.close();
   }
   await b.close(); console.log(`\nTotal: ${total}  Pasan: ${total - fallas}  Fallan: ${fallas}`); process.exit(fallas ? 1 : 0);

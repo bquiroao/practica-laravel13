@@ -38,7 +38,7 @@ flowchart LR
 |---|---|---|
 | Administración | Disponibilidad, Médicos, Ausencias | Todo el flujo |
 | Recepción | Disponibilidad | Consultar franjas |
-| Médico | Disponibilidad | Consultar franjas |
+| Médico | Disponibilidad, Ausencias (solo las suyas, desde la semana 12) | Consultar franjas y registrar sus ausencias |
 
 ## 3. Capturas
 

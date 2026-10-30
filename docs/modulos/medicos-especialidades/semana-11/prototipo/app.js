@@ -2,7 +2,7 @@
 const A = window.ApiSimulada, $ = (s) => document.querySelector(s);
 const e = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const NIVEL = { admin: 'Administración', recepcion: 'Recepción', medico: 'Médico' };
-const TABS = [['#/disponibilidad', 'Disponibilidad', ['admin', 'recepcion', 'medico']], ['#/medicos', 'Médicos', ['admin']], ['#/ausencias', 'Ausencias', ['admin']]];
+const TABS = [['#/disponibilidad', 'Disponibilidad', ['admin', 'recepcion', 'medico']], ['#/medicos', 'Médicos', ['admin']], ['#/ausencias', 'Ausencias', ['admin', 'medico']]];
 const vista = $('#vista'); let rol = 'admin';
 const opciones = (lista, sel) => lista.map(([v, t]) => `<option value="${e(v)}"${v === sel ? ' selected' : ''}>${e(t)}</option>`).join('');
 const campo = (id, rotulo, ctl, ayuda = '') => `<div><label for="${id}">${rotulo}</label>${ctl}${ayuda ? `<div class="h" id="${id}-a">${ayuda}</div>` : ''}<div class="m" id="${id}-e" role="alert"></div></div>`;
@@ -68,13 +68,14 @@ const vistas = {
     };
   },
   ausencias() {
-    vista.innerHTML = `<h1>Registrar ausencia</h1><p class="h">* Campo obligatorio</p><form id="f" novalidate>${campo('med', 'Médico *', `<select id="med">${opciones(medicosOpc())}</select>`)}
+    vista.innerHTML = `<h1>Registrar ausencia</h1><p class="h">* Campo obligatorio</p><form id="f" novalidate>${rol === 'medico' ? `<p><b>Médico</b><br>${e(A.db.usuarios[A.db.medicos.find((x) => x.id === A.miMedico()).usuario])} (solo puede registrar sus propias ausencias)</p>` : campo('med', 'Médico *', `<select id="med">${opciones(medicosOpc())}</select>`)}
       ${campo('desde', 'Primer día *', '<input id="desde" type="date" value="2026-11-02">')}${campo('hasta', 'Último día *', '<input id="hasta" type="date" value="2026-11-08">')}${campo('motivo', 'Motivo', '<input id="motivo" value="Congreso">')}
       <button id="rev" style="margin-top:14px">Revisar</button></form><div id="aviso" aria-live="polite"></div>`;
+    const medId = () => (rol === 'medico' ? A.miMedico() : $('#med').value);
     const datos = () => ({ desde: $('#desde').value, hasta: $('#hasta').value ? new Date(Date.parse($('#hasta').value) + 864e5).toISOString().slice(0, 10) : '', motivo: $('#motivo').value });   // el último día es inclusivo; el servidor usa [desde, hasta)
     $('#f').onsubmit = async (ev) => {
       ev.preventDefault(); limpiar();
-      const r = await enviar($('#rev'), () => A.registrarAusencia(rol, $('#med').value, datos(), true));
+      const r = await enviar($('#rev'), () => A.registrarAusencia(rol, medId(), datos(), true));
       if (r.estado === 0) { return aviso('al', 'Sin conexión. No se guardó nada; reintente.'); }
       if (r.estado !== 200) { return fallo('hasta', 'El último día debe ser igual o posterior al primero.'); }
       const c = r.cuerpo.citas_en_conflicto;
@@ -83,7 +84,7 @@ const vistas = {
         + '<button id="reg" style="margin-top:14px"' + (c.length ? ' disabled' : '') + '>Registrar ausencia</button>';
       if (c.length) { $('#conf').focus(); $('#ent').onchange = (x) => ($('#reg').disabled = !x.target.checked); $('#copiar').onclick = () => navigator.clipboard?.writeText(c.join('\n')); }
       $('#reg').onclick = async () => {
-        const g = await enviar($('#reg'), () => A.registrarAusencia(rol, $('#med').value, datos()));
+        const g = await enviar($('#reg'), () => A.registrarAusencia(rol, medId(), datos()));
         if (g.estado === 201) { return aviso('ok', `<b>Ausencia registrada.</b> ${g.cuerpo.citas_en_conflicto.length} citas deben reprogramarse. <a href="#/disponibilidad">Ver disponibilidad</a>`); }
         aviso('al', g.estado === 0 ? 'No sabemos si se guardó. Compruebe en Disponibilidad antes de reintentar (no se reintenta solo).' : e(g.cuerpo.mensaje));
       };
