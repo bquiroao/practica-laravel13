@@ -176,9 +176,9 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no 
 | | `admision-hospitalaria-asignacion-cama` | 🟦 **Disponible** (sección 7.2) |
 | | `traslados-altas-camas` | ✅ Integrado |
 | | `dashboard-ocupacion` | ✅ Integrado |
-| Clínico | `expediente-medico` | 🔜 En el plan |
-| | `notas-soap-diagnosticos` | 🔜 En el plan |
-| | `signos-vitales-alertas` | 🔜 En el plan |
+| Clínico | `expediente-medico` | ✅ Integrado |
+| | `notas-soap-diagnosticos` | ✅ Integrado |
+| | `signos-vitales-alertas` | ✅ Integrado |
 | | `alergias-clinicas-alerta-visual-expediente` | 🟦 **Disponible** (sección 7.5) |
 | | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
 | | `prescripciones-alergias` | ⏳ Espera a los catálogos de medicamentos y alergias |
@@ -359,7 +359,10 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - la tabla de alertas;
   - el reconocimiento y el escalamiento;
   - la pantalla y el contador de la campana.
-- **Se conecta con:** signos vitales fuera de rango y resultados críticos de laboratorio. Para no acoplar los módulos, esos módulos **disparan un evento de Laravel** con el valor anormal, y este módulo lo escucha para crear la alerta. El evento quedará documentado en `PLAN.md` cuando se integren los signos vitales.
+- **Se conecta con:** signos vitales fuera de rango (ya integrado) y resultados críticos de laboratorio. Para no acoplar los módulos, se usan **eventos de Laravel**:
+  - al guardar una toma con valores anormales o críticos, `VitalSignService` dispara `App\Events\VitalSignsOutOfRange`;
+  - el evento trae hospital, paciente, código del paciente, episodio, toma y la lista de hallazgos (`signo`, `etiqueta`, `valor`, `nivel`: `anormal` o `critica`), y `isCritical()`;
+  - para crear la alerta, registra un *listener* en `AppServiceProvider` con `Event::listen(VitalSignsOutOfRange::class, …)`.
 
 ### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente`
 - **Ya existe:**
@@ -372,7 +375,7 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - **el banner visual**, siempre visible en la ficha del paciente y en el expediente.
 - **Se conecta con:**
   - la ficha del paciente (`resources/js/pages/patients/PatientDetailPage.tsx`);
-  - el expediente (en el plan);
+  - el expediente (`resources/js/pages/records/RecordPage.tsx`), que ya tiene marcado con un comentario el lugar del banner, debajo del nombre del paciente;
   - prescripciones, que bloquearán una receta que choque con una alergia.
 - **Acuerdo de integración:** exporta un componente `AllergyBanner` en `resources/js/modules/allergies/` que reciba el id del paciente, para que las demás pantallas solo tengan que colocarlo.
 
@@ -422,7 +425,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **117 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **125 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
 
 ---
 
@@ -476,3 +479,8 @@ Todas las rutas están bajo `/api/v1`.
 | PATCH | `/camas/{id}/estado` | `camas.gestionar` |
 | POST | `/internamientos/{episodio}/traslado` · `/internamientos/{episodio}/alta` | `traslados.gestionar` |
 | GET | `/ocupacion` | `ocupacion.ver` |
+| GET | `/expediente/{paciente}` (notas, diagnósticos, signos vitales y atenciones) | `expediente.leer` |
+| POST | `/expediente/{paciente}/notas` · PUT `/notas/{id}` (borrador; `sign: true` firma) | `notas.registrar` (+ `notas.firmar` para firmar) |
+| POST | `/notas/{id}/correccion` | `notas.firmar` |
+| POST | `/expediente/{paciente}/signos` | `signos_vitales.registrar` |
+| POST | `/expediente/{paciente}/consulta` · `/episodios/{id}/terminar` | `notas.registrar` |

@@ -11,7 +11,7 @@ import { cn } from '@/lib/cn';
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const variants: Record<Variant, string> = {
-    primary: 'bg-nido-700 text-white hover:bg-nido-800 disabled:bg-nido-300',
+    primary: 'bg-nido-700 text-white hover:bg-nido-800 disabled:bg-slate-300 disabled:text-slate-700',
     secondary: 'bg-white text-nido-800 ring-1 ring-inset ring-nido-200 hover:bg-nido-50',
     ghost: 'text-nido-800 hover:bg-nido-50',
     danger: 'bg-critico text-white hover:brightness-95',
@@ -21,7 +21,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLBut
     function Button({ variant = 'primary', loading, size = 'md', className, children, disabled, ...props }, ref) {
         return (
             <button ref={ref} disabled={disabled || loading}
-                className={cn('inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition disabled:cursor-not-allowed',
+                className={cn('inline-flex items-center justify-center gap-2 rounded-lg font-semibold disabled:cursor-not-allowed',
                     size === 'sm' ? 'h-8 px-3 text-sm' : 'h-10 px-4 text-sm', variants[variant], className)} {...props}>
                 {loading && <Loader2 className="size-4 animate-spin" aria-hidden />}
                 {children}

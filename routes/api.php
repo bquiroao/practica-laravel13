@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
+use App\Http\Controllers\Api\V1\Clinical\RecordController;
 use App\Http\Controllers\Api\V1\Clinical\SpecialtyController;
 use App\Http\Controllers\Api\V1\HospitalController;
 use Illuminate\Support\Facades\Route;
@@ -71,5 +72,14 @@ Route::middleware('tenant')->group(function (): void {
         Route::post('/internamientos/{episode}/traslado', [BedController::class, 'transfer'])->middleware('permiso:traslados.gestionar')->whereUuid('episode');
         Route::post('/internamientos/{episode}/alta', [BedController::class, 'discharge'])->middleware('permiso:traslados.gestionar')->whereUuid('episode');
         Route::get('/ocupacion', [BedController::class, 'occupancy'])->middleware('permiso:ocupacion.ver');
+
+        // Fase 4: expediente médico, notas SOAP y diagnósticos, y signos vitales.
+        Route::get('/expediente/{patient}', [RecordController::class, 'show'])->middleware('permiso:expediente.leer')->whereUuid('patient');
+        Route::post('/expediente/{patient}/notas', [RecordController::class, 'storeNote'])->middleware('permiso:notas.registrar')->whereUuid('patient');
+        Route::put('/notas/{note}', [RecordController::class, 'updateNote'])->middleware('permiso:notas.registrar')->whereUuid('note');
+        Route::post('/notas/{note}/correccion', [RecordController::class, 'correctNote'])->middleware('permiso:notas.firmar')->whereUuid('note');
+        Route::post('/expediente/{patient}/signos', [RecordController::class, 'storeVitals'])->middleware('permiso:signos_vitales.registrar')->whereUuid('patient');
+        Route::post('/expediente/{patient}/consulta', [RecordController::class, 'startConsultation'])->middleware('permiso:notas.registrar')->whereUuid('patient');
+        Route::post('/episodios/{episode}/terminar', [RecordController::class, 'endConsultation'])->middleware('permiso:notas.registrar')->whereUuid('episode');
     });
 });

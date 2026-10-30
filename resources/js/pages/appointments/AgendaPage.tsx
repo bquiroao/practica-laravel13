@@ -91,6 +91,7 @@ export function AgendaPage() {
                                         </div>
                                         <p className="text-sm text-slate-600">{a.specialty?.name} · {a.doctor?.name}</p>
                                         <p className="text-xs text-slate-500">Motivo: {a.reason}{a.status_reason ? ` · ${a.status_reason}` : ''}</p>
+                                        {can('expediente.leer') && a.status !== 'cancelled' && <Link to={`/expediente/${a.patient?.id}`} className="text-xs font-semibold text-nido-700 underline">Abrir expediente</Link>}
                                     </div>
                                     {can('citas.gestionar') && a.next.length > 0 && (
                                         <div className="flex flex-wrap gap-2">

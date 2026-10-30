@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\DomainRuleException;
 use App\Http\Middleware\AuthenticateWithJwt;
 use App\Http\Middleware\RequirePermission;
 use App\Http\Middleware\ResolveHospital;
@@ -27,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Una regla de negocio rechazada es una respuesta normal (422/409), no un error del sistema: no va al log.
+        $exceptions->dontReport(DomainRuleException::class);
         // Todo /api responde JSON (también 404 y 405), sin trazas ni detalles de la base.
         $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
         // E-07: una ruta de API inexistente da 404 y un método equivocado 405, siempre en JSON.

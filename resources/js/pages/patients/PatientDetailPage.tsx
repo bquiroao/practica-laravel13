@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarPlus, Pencil, Phone, MapPin, ShieldAlert } from 'lucide-react';
+import { CalendarPlus, FileText, Pencil, Phone, MapPin, ShieldAlert } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
 import { api, errorMessage } from '@/lib/api';
 import { appointmentStatus, formatDate, formatTime, patientStatus, sexLabels, weekdayDate } from '@/lib/format';
@@ -44,6 +44,9 @@ export function PatientDetailPage() {
                     <div className="flex flex-wrap gap-2">
                         {can('citas.gestionar') && p.status === 'active' && (
                             <Link to={`/citas/nueva?paciente=${p.id}`}><Button><CalendarPlus className="size-4" aria-hidden /> Agendar cita</Button></Link>
+                        )}
+                        {can('expediente.leer') && (
+                            <Link to={`/expediente/${p.id}`}><Button variant="secondary"><FileText className="size-4" aria-hidden /> Expediente</Button></Link>
                         )}
                         {can('pacientes.gestionar') && (
                             <Link to={`/pacientes/${p.id}/editar`}><Button variant="secondary"><Pencil className="size-4" aria-hidden /> Editar datos</Button></Link>
