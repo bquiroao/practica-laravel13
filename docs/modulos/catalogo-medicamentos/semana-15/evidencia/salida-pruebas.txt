@@ -1,0 +1,96 @@
+Pruebas del Micro-HIS Catálogo de medicamentos
+Fecha: 2026-10-30 07:22:20 UTC · PHP 8.4.26
+
+OK       api/api :: GET búsqueda 200 con datos y meta (CU-02)
+OK       api/api :: Sin token 401 y token desconocido 401 con formato único de error
+OK       api/api :: RNF-01 permisos por rol: consulta clínica no registra (403); auditor ve historial
+OK       api/api :: RNF-02 el tenant sale del token: el Sur no ve MED-000102 (404) y hospital_id del cuerpo se ignora
+OK       api/api :: POST alta 201 con Location (CA-01)
+OK       api/api :: 422 con detalles por campo y 409 DUPLICADO con código existente (CA-02, CA-04)
+OK       api/api :: Versión 201, baja 200, eliminar usado 409 y sin uso 204
+OK       api/api :: Errores de protocolo: 415, 400, 404 de ruta y 405
+OK       api/api :: Error de persistencia: 503 con Retry-After y sin detalle técnico (CA-13)
+OK       api/api :: Observabilidad: X-Request-Id del cliente se reutiliza y el registro no lleva el token
+OK       caja-blanca/caminos :: CB-01 Vigencia::seCruzaCon - las 4 combinaciones de "hasta" nulo y cada condición verdadera y falsa
+OK       caja-blanca/caminos :: CB-02 RegistrarNuevaVersion::ejecutar - los 7 caminos independientes
+OK       caja-blanca/caminos :: CB-03 CriterioBusqueda::desdeFiltros - cada decisión verdadera y falsa
+OK       caja-negra/api-equivalencia-limites :: CN-01 RF-02 nombre: límites 2, 3, 150 y 151 caracteres (clases inválida / válida / válida / inválida)
+OK       caja-negra/api-equivalencia-limites :: CN-02 RF-02 concentración: 0, 0.001, 999999.999, 1000000, 1.2345 y texto
+OK       caja-negra/api-equivalencia-limites :: CN-03 RF-04 búsqueda: texto de 1, 2, 60 y 61 caracteres y fechas válida e inválida
+OK       caja-negra/api-equivalencia-limites :: CN-04 RNF-01 CA-12 matriz de permisos: 4 roles × buscar, historial y registrar
+OK       caja-negra/api-equivalencia-limites :: CN-05 RNF-02 CA-12 tenant: el Sur recibe 404 en códigos del Norte y no los ve en la búsqueda
+OK       caja-negra/api-equivalencia-limites :: CN-06 RNF-05 toda respuesta lleva X-Request-Id, también 401, 404, 409 y 204
+OK       caja-negra/api-equivalencia-limites :: CN-07 RNF-08 un error inesperado responde 500 INTERNO sin SQL ni trazas
+OK       caja-negra/api-equivalencia-limites :: CN-08 RF-08 errores del flujo: eliminar usado 409 EN_USO; baja repetida 409 YA_DADO_DE_BAJA
+DEFECTO  caja-negra/defecto-arranque :: [DEFECTO D-02] RNF-05 el 503 por base caída al arrancar también lleva X-Request-Id
+         FallaPrueba: No se cumplió: lleva X-Request-Id
+OK       contrato/repositorio :: [PDO] búsqueda por texto, mayúsculas y acentos
+OK       contrato/repositorio :: [InMemory] búsqueda por texto, mayúsculas y acentos
+OK       contrato/repositorio :: [PDO] % _ y ! son texto literal
+OK       contrato/repositorio :: [InMemory] % _ y ! son texto literal
+OK       contrato/repositorio :: [PDO] vigencia a una fecha y por forma
+OK       contrato/repositorio :: [InMemory] vigencia a una fecha y por forma
+OK       contrato/repositorio :: [PDO] límite de 50 resultados con el mismo orden
+OK       contrato/repositorio :: [InMemory] límite de 50 resultados con el mismo orden
+OK       contrato/repositorio :: [PDO] consulta por código, historial y equivalencia
+OK       contrato/repositorio :: [InMemory] consulta por código, historial y equivalencia
+OK       contrato/repositorio :: [PDO] restricciones con los mismos códigos de error
+OK       contrato/repositorio :: [InMemory] restricciones con los mismos códigos de error
+OK       contrato/repositorio :: [PDO] eliminar borra solo ese código de ese hospital
+OK       contrato/repositorio :: [InMemory] eliminar borra solo ese código de ese hospital
+OK       integracion/persistencia-pdo :: Camino feliz con base: el alta se guarda y se lee igual (CA-01)
+OK       integracion/persistencia-pdo :: RN-03 búsqueda: solo vigentes, sin mayúsculas y por fecha (CA-06, CA-07)
+OK       integracion/persistencia-pdo :: RN-03 % y _ se buscan como texto literal (CA-08)
+OK       integracion/persistencia-pdo :: RNF-02 el otro hospital no ve ni cruza datos
+OK       integracion/persistencia-pdo :: RNF-04 la base rechaza un solape de versiones con 409, no con 500
+OK       integracion/persistencia-pdo :: RNF-04 la base rechaza un duplicado vigente con 409 (segunda línea de RN-04)
+OK       integracion/persistencia-pdo :: RN-01 reemplazarVigente es atómico: si falla la nueva, la anterior sigue abierta
+OK       integracion/persistencia-pdo :: RN-02 con base: no elimina MED-000101 usado en PRE-000231 (CA-11)
+OK       integracion/persistencia-pdo :: RN-05 las columnas de la base coinciden con Limites del dominio
+OK       integracion/persistencia-pdo :: RN-05 el valor máximo del dominio cabe en la base (límite superior)
+OK       integracion/persistencia-pdo :: Error de persistencia con base caída: ErrorPersistencia (CA-13)
+OK       unitarias/arquitectura :: Domain no depende de Application, Persistence, Presentation ni PDO
+OK       unitarias/arquitectura :: Application no depende de Persistence, Presentation ni PDO
+OK       unitarias/arquitectura :: Presentation no tiene SQL, PDO ni acceso directo a Persistence o al modelo
+OK       unitarias/casos-de-uso :: CU-01 camino feliz: asigna el siguiente código y versión 1 (CA-01)
+OK       unitarias/casos-de-uso :: CU-01 datos inválidos: 422 sin tocar el repositorio (CA-02)
+OK       unitarias/casos-de-uso :: RN-04 rechaza el duplicado vigente e informa el código existente (CA-04)
+OK       unitarias/casos-de-uso :: RN-04 acepta la misma clave si la otra ya terminó su vigencia (CA-05)
+OK       unitarias/casos-de-uso :: RN-04 la clave es por hospital: el Sur puede tener la misma (RNF-02)
+OK       unitarias/casos-de-uso :: CU-03 nueva versión: reemplaza en una sola operación y conserva el código (CA-09)
+OK       unitarias/casos-de-uso :: CU-03 nueva versión equivalente a OTRO código vigente es DUPLICADO
+OK       unitarias/casos-de-uso :: CU-04 la baja saca al medicamento de la búsqueda de hoy pero no del pasado (CA-06)
+OK       unitarias/casos-de-uso :: RN-02 no elimina un código usado en prescripciones (CA-11)
+OK       unitarias/casos-de-uso :: Error de persistencia: se propaga como ErrorPersistencia sin datos parciales (CA-13)
+OK       unitarias/controlador-web :: GET /medicamentos?q=amoxi lista solo vigentes (200)
+OK       unitarias/controlador-web :: Búsqueda sin criterio muestra el formulario vacío y sin resultados
+OK       unitarias/controlador-web :: POST válido redirige al detalle (303, patrón PRG)
+OK       unitarias/controlador-web :: POST inválido: 422, errores por campo y salida escapada (XSS)
+OK       unitarias/controlador-web :: POST duplicado: 409 con el código existente
+OK       unitarias/controlador-web :: POST sin token CSRF: 403 y no se guarda
+OK       unitarias/controlador-web :: Eliminar un código usado: 409 en la misma página de detalle
+OK       unitarias/controlador-web :: Código inexistente 404 y método no permitido 405
+OK       unitarias/dominio :: RN-03 la vigencia es [desde, hasta): el día hasta ya no está vigente
+OK       unitarias/dominio :: RN-01 vigencias contiguas no se cruzan; abiertas sí
+OK       unitarias/dominio :: RN-05 la ficha válida se acepta y normaliza la concentración
+OK       unitarias/dominio :: RN-05 devuelve todos los errores por campo en una sola respuesta (CA-02, CA-03)
+OK       unitarias/dominio :: RN-05 límites exactos: 150 caracteres y 999999.999 se aceptan; 1000000 no
+OK       unitarias/dominio :: RN-04 la clave ignora mayúsculas y espacios del principio activo
+OK       unitarias/dominio :: RN-01 la nueva versión cierra la anterior el día en que empieza (CA-09)
+OK       unitarias/dominio :: RN-01 una versión que no empieza después de la vigente es SOLAPE_VIGENCIA (CA-10)
+OK       unitarias/dominio :: RN-02 la baja cierra la vigencia y una versión cerrada no admite cambios
+OK       unitarias/dominio :: RN-02 baja con fecha no posterior o motivo corto es ErrorValidacion
+OK       unitarias/dominio :: RN-03 el criterio toma % y _ como texto literal
+OK       unitarias/dominio :: RN-03 el criterio exige texto o forma y valida la fecha
+OK       unitarias/dominio :: RN-06 el código tiene el formato MED-000000
+OK       unitarias/semana15-reglas :: U-01 RN-03 vigencia: un día antes, el primer día, el último y el día hasta (límites)
+OK       unitarias/semana15-reglas :: U-02 RN-04 la clave normaliza espacios internos, mayúsculas y letras acentuadas en mayúscula
+OK       unitarias/semana15-reglas :: U-03 RN-05 concentración: equivalencias "500" = "500.000" = "0500" y coma decimal
+OK       unitarias/semana15-reglas :: U-04 RN-01 cerrar una versión no cambia su código, versión ni ficha
+OK       unitarias/semana15-reglas :: U-05 RNF-06 PDO e InMemory implementan la misma interfaz Repository con los mismos métodos
+DEFECTO  unitarias/semana15-reglas :: [DEFECTO D-01] RF-02 con concentración 0 y sin unidad se informan los dos errores
+         FallaPrueba: No se cumplió: error del valor (hoy no se informa)
+DEFECTO  unitarias/semana15-reglas :: [DEFECTO D-03] RF-01 dos altas simultáneas: la segunda debe recibir el siguiente código libre
+         Catalogo\Domain\Errores\ErrorReglaNegocio: Otra persona registró este código o versión al mismo tiempo. Intente de nuevo.
+
+Resumen: 88 pruebas, 85 correctas, 0 fallas, 0 archivos omitidos, 3 defectos abiertos documentados

@@ -1,0 +1,37 @@
+[DETECTA  ] M1 los datos de un escenario no tienen que ser sintéticos (R-01)  falla: DOM-01, HTTP-03
+[DETECTA  ] M2 el plan no exige los críticos (R-02)                           falla: DOM-02, APP-09
+[DETECTA  ] M3 el plan congelado se puede cambiar (R-02)                       falla: DOM-03
+[DETECTA  ] M4 se ejecuta sobre cualquier digest (R-03)                        falla: DOM-04, APP-09
+[DETECTA  ] M5 un PASA tras reintentar cuenta como PASA (R-06)                 falla: DOM-05, DOM-08, APP-02, APP-11, CAR-01
+[DETECTA  ] M6 se admite un segundo resultado del mismo escenario (R-04)       falla: DOM-06, APP-05, CAR-01
+[DETECTA  ] M7 el gate no compara el digest (R-03)                             falla: DOM-10
+[DETECTA  ] M8 el gate acepta un crítico que no pasa (R-09a)                  falla: DOM-08, APP-02, APP-11
+[DETECTA  ] M9 el gate no mira la antigüedad (R-09e)                          falla: DOM-08, APP-02, CAR-01, CAM-02
+[DETECTA  ] M10 la evidencia que no se confirma se ignora (no fail-closed)     falla: APP-04, CAR-01, HTTP-03, API-03, CLI-05
+[DETECTA  ] M11 sin idempotencia (R-12)                                        falla: APP-03, CAR-01, CLI-02
+[DETECTA  ] M12 el almacén se usa antes de revisar las reglas (huérfanos)    falla: APP-05, CAR-01
+[DETECTA  ] M13 la traza va fuera de la transacción                           falla: APP-01, APP-08, INT-01
+[DETECTA  ] M14 los resultados se pueden modificar (esquema)                   falla: INT-02
+[DETECTA  ] M15 la base acepta una ejecución con otro digest (esquema)        falla: INT-03
+[DETECTA  ] M16 el adaptador PDO no traduce la clave repetida                  falla: CON-04-PDO, INT-05
+[DETECTA  ] M17 el adaptador en memoria no condiciona el cierre al estado anterior falla: CON-05-MEM
+[DETECTA  ] M18 el formulario no revisa los tipos                              falla: MVC-01, MVC-02, MVC-04
+[DETECTA  ] M19 la evaluación no se publica en el repositorio compartido      falla: INT-08, INT-09
+[DETECTA  ] M20 el repositorio compartido no filtra por hospital               falla: INT-09
+[DETECTA  ] M21 el controlador de versiones se salta el formulario             falla: MVC-04, HTTP-02
+[DETECTA  ] M22 el reportador cambia la clave en cada reintento (R-12)         falla: CLI-01, CLI-02
+[DETECTA  ] M23 el reportador reintenta un 4xx                                 falla: CLI-04
+[DETECTA  ] M24 el contrato no documenta el 413 de reportar                    falla: API-03
+[DETECTA  ] M25 el kernel acepta cualquier X-Request-ID                        falla: OBS-01
+[DETECTA  ] M26 se despliega con la PRIMERA evaluación, no con la última     falla: CAR-01, CAM-02
+[DETECTA  ] M27 no se compara el digest instalado con el evaluado              falla: CAR-01, CAM-03
+[DETECTA  ] M28 la aprobación no vence                                        falla: CAR-01, CAM-04
+[DETECTA  ] M29 un smoke que falla deja el despliegue DESPLEGADO               falla: CAR-01, CAM-05
+[DETECTA  ] M30 la base acepta un despliegue sin gate aprobado (esquema)       falla: INT-10
+[DETECTA  ] M31 el almacén no repara un artefacto corrupto                    falla: PER-05
+[DETECTA  ] M32 la misma clave en OTRA ejecución se toma como el mismo reporte falla: DOM-11
+[DETECTA  ] M33 preparar() no valida las evidencias                            falla: CAR-01, HTTP-03, API-03
+[DETECTA  ] M34 la vista previa del gate registra la evaluación               falla: APP-11
+[DETECTA  ] M35 un reintento idéntico del despliegue se registra otra vez (DEF-01) falla: UNI-01, UNI-03, BLA-01, NEG-01
+----------------------------------------------------------------------------------------------------
+Mutaciones: 35  Detectadas: 35  Sobreviven: 0

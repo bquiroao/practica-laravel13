@@ -12,3 +12,4 @@ Captura de signos vitales del paciente, evaluación de cada valor contra los ran
 | 7 | Diseño de componentes backend y frontend, contratos de entrada y salida, y refactor de la política de alertas con comparación antes/después ejecutable | [semana-07-componentes-refactor.md](semana-07/semana-07-componentes-refactor.md) | — | — |
 | 8 | Diseño de experiencia de usuario: flujo por rol, 6 wireframes anotados, mensajes de error y reglas de interacción | [semana-08-diseno-ux.md](semana-08/semana-08-diseno-ux.md) | — | — |
 | 9 | Evaluación de usabilidad y accesibilidad: checklist de 26 puntos (Nielsen y WCAG 2.2), 8 hallazgos y backlog priorizado | [semana-09-evaluacion-usabilidad-accesibilidad.md](semana-09/semana-09-evaluacion-usabilidad-accesibilidad.md) | — | — |
+| 10 | Diseño para móvil (320–430 px): 5 pantallas, reglas de breakpoint y 2 escenarios con decisiones de contenido y error | [semana-10-diseno-movil.md](semana-10/semana-10-diseno-movil.md) | — | — |

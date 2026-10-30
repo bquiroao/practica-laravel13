@@ -31,3 +31,4 @@ textarea { width: 100%; font: inherit; border: 1px solid #64748b; border-radius:
   .acciones > * { flex: 1 1 100%; }
 }
 .estado.alerta { border-left-color: #b91c1c; }
+main h2 { font-size: 1.05rem; margin: 16px 0 8px; }   /* semana 12: el subtítulo no supera al h1 */

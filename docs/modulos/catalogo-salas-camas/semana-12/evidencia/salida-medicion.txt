@@ -1,0 +1,14 @@
+$ node semana-11/evidencia/capturar.mjs semana-11/prototipo/index.html semana-12/capturas 01-...=cambiar/A101@<acción> 02-... 03-... 04-...   # Edge sin interfaz
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-inactivar-pide-confirmacion (#cambiar/A101) | 320 | 320 | 320 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+01-inactivar-pide-confirmacion (#cambiar/A101) | 360 | 360 | 360 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+01-inactivar-pide-confirmacion (#cambiar/A101) | 430 | 430 | 430 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | H1
+02-inactivar-sin-confirmar (#cambiar/A101) | 320 | 320 | 320 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | INPUT
+02-inactivar-sin-confirmar (#cambiar/A101) | 360 | 360 | 360 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | INPUT
+02-inactivar-sin-confirmar (#cambiar/A101) | 430 | 430 | 430 | no | Cambiar A/101 · Catálogo de camas · Hospital HIS | INPUT
+03-inactivar-confirmado (#cambiar/A101) | 320 | 320 | 320 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+03-inactivar-confirmado (#cambiar/A101) | 360 | 360 | 360 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+03-inactivar-confirmado (#cambiar/A101) | 430 | 430 | 430 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+04-mantenimiento-sin-cambios (#cambiar/A101) | 320 | 320 | 320 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+04-mantenimiento-sin-cambios (#cambiar/A101) | 360 | 360 | 360 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1
+04-mantenimiento-sin-cambios (#cambiar/A101) | 430 | 430 | 430 | no | Cambio guardado · Catálogo de camas · Hospital HIS | H1

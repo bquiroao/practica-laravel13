@@ -1,0 +1,50 @@
+@startuml dependencias-capas
+' Catálogo de medicamentos - Semana 3 - Dependencias entre capas
+title Dependencias del Micro-HIS: todas apuntan hacia el dominio
+skinparam packageStyle rectangle
+
+package "Presentation" as P {
+  [ConsolaCatalogo]
+  [bin/catalogo.php]
+}
+package "Composition Root" as R {
+  [bootstrap.php]
+}
+package "Application" as A {
+  [Casos de uso]
+  [MedicamentoVista]
+}
+package "Domain" as D {
+  [Modelo: Medicamento, Vigencia,\nFichaMedicamento, CriterioBusqueda]
+  interface "RepositorioMedicamentos\n(BusquedaCatalogo, HistorialCatalogo,\nControlEquivalencia, EscrituraCatalogo)" as IRepo
+  interface "ConsultaUsoPrescripciones\nReloj · GeneradorId" as IPuertos
+  [Errores: ErrorValidacion,\nErrorReglaNegocio, ErrorNoEncontrado,\nErrorPersistencia]
+}
+package "Persistence" as S {
+  [RepositorioMedicamentosPdo]
+  [UsoPrescripcionesPdo]
+  [ConexionPdo · RelojSistema ·\nGeneradorUuidV4 · DatosEjemplo]
+}
+database "PostgreSQL 16" as BD
+
+[bin/catalogo.php] --> [bootstrap.php]
+[bin/catalogo.php] --> [ConsolaCatalogo]
+[ConsolaCatalogo] --> [Casos de uso]
+[ConsolaCatalogo] --> [MedicamentoVista]
+[Casos de uso] --> [Modelo: Medicamento, Vigencia,\nFichaMedicamento, CriterioBusqueda]
+[Casos de uso] --> IRepo
+[Casos de uso] --> IPuertos
+[RepositorioMedicamentosPdo] ..|> IRepo
+[UsoPrescripcionesPdo] ..|> IPuertos
+[RepositorioMedicamentosPdo] --> BD
+[UsoPrescripcionesPdo] --> BD
+[bootstrap.php] --> [Casos de uso] : crea
+[bootstrap.php] --> [RepositorioMedicamentosPdo] : crea
+
+note bottom of D
+  Domain no importa nada de otras capas.
+  Verificable: ninguna clase de src/Domain
+  ni src/Application usa PDO ni Persistence
+  (ver README, sección "Verificar dependencias").
+end note
+@enduml

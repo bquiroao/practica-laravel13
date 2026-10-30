@@ -1,0 +1,13 @@
+@startsalt m3-cierre-movil
+{+
+  {* ← | <b>Cerrar alerta</b> }
+  ==
+  PAC-00451 · ACUSADA 10:05
+  Nota (obligatoria)
+  {+ "                        " }
+  {+ "                        " }
+  ==
+  [<b>Cerrar alerta</b>]
+  [Cancelar]
+}
+@endsalt

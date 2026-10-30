@@ -1,0 +1,30 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia — respuesta perdida, reintento idempotente y envío a M21 con reintento
+skinparam defaultFontName Arial
+autonumber
+actor "Enfermería" as E
+participant "Cliente" as C
+participant "API Signos vitales" as A
+database "Base" as B
+participant "Despachador" as D
+participant "M21" as M
+E -> C : registra FC 140
+C -> A : POST /tomas\nIdempotency-Key: cama4-0800, X-Request-Id: r1
+A -> B : BEGIN; toma + medición + alerta «pendiente_envio»; COMMIT
+A --x C : 201 (se pierde la respuesta: corte de red)
+C -> A : reintento con la MISMA clave (X-Request-Id: r2)
+A -> B : existe(toma k…)?
+B --> A : sí
+A --> C : 200 {toma_id: k…, repetida: true}
+note right of C : 1 toma y 1 alerta, no 2
+loop cada 30 s
+  D -> B : SELECT alertas «pendiente_envio»
+  D -> M : publicar(alerta_id, paciente, signo, nivel)
+  alt M21 caído o sin respuesta en 2 s
+    D -> D : reintento con espera 30 s, 1 min, 2 min…
+  else recibido
+    M --> D : 202
+    D -> B : estado_envio = «enviada»
+  end
+end
+@enduml

@@ -1,0 +1,27 @@
+@startuml cliente-servidor
+' Semana 5 - Vista cliente-servidor del módulo (despliegue de curso)
+node "Clientes" {
+  [Navegador (MVC, semana 4)] as NAV
+  [Sistema origen\n(token tok-lab-*)] as LAB
+  [Planificador\n(token tok-plan)] as PLAN
+  [App clínica futura\n(token por rol)] as APP
+}
+node "Servidor PHP 8.2+ (php -S en el curso)" {
+  [public/index.php] as IDX
+  [ApiAlertas\n/api/v1/*] as API
+  [AlertaController\n/ (HTML)] as MVC
+  [Casos de uso + Dominio] as NUC
+}
+database "PostgreSQL 16\nmicro_alertas" as BD
+file "var/notificaciones-simuladas.log" as LOG
+NAV --> IDX : HTTP GET/POST (HTML)
+LAB --> IDX : JSON + Bearer
+PLAN --> IDX : POST escalamientos
+APP --> IDX : GET / POST JSON
+IDX --> API : /api/*
+IDX --> MVC : resto
+API --> NUC
+MVC --> NUC
+NUC --> BD : PDO preparado
+NUC --> LOG : PuertoNotificacion (simulado)
+@enduml

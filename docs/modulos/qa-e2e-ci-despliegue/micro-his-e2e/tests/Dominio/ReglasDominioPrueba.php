@@ -9,6 +9,7 @@ use E2e\Dominio\Modelo\EscenarioE2E;
 use E2e\Dominio\Modelo\Evidencia;
 use E2e\Dominio\Modelo\PoliticaGate;
 use E2e\Dominio\Modelo\QualityGate;
+use E2e\Dominio\Modelo\ReporteResultado;
 use E2e\Dominio\Modelo\Resultado;
 use E2e\Dominio\Modelo\ResultadoEscenario;
 use E2e\Dominio\Modelo\Version;
@@ -122,4 +123,24 @@ prueba('DOM-10', 'R-03 en el gate (defensa en profundidad): una ejecución cuyo 
     $otro->completar($hora);
     $d = QualityGate::evaluar(new PoliticaGate('p', 0.0, 0, 24), $otro, $v, $hora, static fn (): bool => true, 'rel');
     igual([Decision::RECHAZADO, false, ['la ejecución probó otro digest']], [$d->valor, $d->reglas['digest'], $d->causas], 'decisión');
+});
+
+prueba('DOM-11', 'R-12 (semana 7): ReporteResultado::repite exige la MISMA ejecución y el MISMO contenido; con la clave en otra ejecución es un conflicto aunque la huella coincida', function () use ($hora): void {
+    $datos = ['escenario' => 'E2E-101', 'resultado' => 'PASA', 'intentos' => 1, 'evidencias' => [['tipo' => 'log', 'bytes' => 'ok']]];
+    $reporte = ReporteResultado::desde(7, 'reintento-0001', $datos);
+    $previo = static fn (string $huella): ResultadoEscenario => ResultadoEscenario::desde('E2E-101', true, 'PASA', 1, [], 'reintento-0001', $huella, $hora);
+    igual([true, false, false], [
+        $reporte->repite(7, $previo($reporte->huella)),                                   // reintento idéntico
+        $reporte->repite(8, $previo($reporte->huella)),                                   // misma huella guardada en OTRA ejecución (fila importada o alterada)
+        $reporte->repite(7, $previo(ReporteResultado::desde(7, 'reintento-0001', ['resultado' => 'FALLA'] + $datos)->huella)),   // otro contenido
+    ], 'repite');
+    igual(['DATOS_INVALIDOS', ['Idempotency-Key']], (static function (): array {
+        try {
+            ReporteResultado::desde(7, 'corta', []);
+        } catch (ReglaRechazada $e) {
+            return [$e->codigo, $e->detalle];
+        }
+
+        return [];
+    })(), 'clave con formato inválido');
 });

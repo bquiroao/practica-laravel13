@@ -4,7 +4,7 @@ declare(strict_types=1);
 // El mismo guion (camino feliz y reglas) contra los adaptadores PDO e InMemory, error de persistencia, MVC y dependencias. Datos ficticios.
 require __DIR__ . '/../bootstrap.php';
 
-use MicroHis\Citas\Aplicacion\{ErrorPersistencia, Reloj, RepositorioCitas};
+use MicroHis\Citas\Aplicacion\{ErrorPersistencia, HorarioTomado, Reloj, RepositorioCitas};
 use MicroHis\Citas\Dominio\Horario;
 use MicroHis\Citas\Persistencia\{RepositorioEnMemoria, RepositorioPdo};
 use MicroHis\Citas\Presentacion\Rutas;
@@ -35,6 +35,8 @@ foreach (['PDO' => new RepositorioPdo($db), 'InMemory' => $memoria] as $adaptado
     prueba("[$adaptador] regla: cancelar una cita ya cancelada = 422 E7 (R-07)", $error($app->atender('cancelar', ['id' => 1, 'motivo' => 'x'])) === '422 E7');
     prueba("[$adaptador] contrato: [2000,3000) y [3000,4000) no se cruzan; cambiar desde un estado viejo devuelve false",
            $repo->cruce('m1', 'p9', 3000, 4000) === null && $repo->cambiarEstado(2, 'confirmed', 'cancelled', 'x') === false);
+    try { $repo->guardar('m1', 'p8', 'cardio', Horario::validar(2500, 2600, 1000), 'x'); $tomado = false; } catch (HorarioTomado) { $tomado = true; }
+    prueba("[$adaptador] cambio S6: guardar sobre un horario ya tomado lanza HorarioTomado (barrera de E6, D7)", $tomado);
 }
 prueba('[PDO e InMemory] feliz: el motivo queda en appointment_cancellations y en las cancelaciones en memoria (R-10)',
        $db->query('SELECT reason FROM appointment_cancellations')->fetchColumn() === 'viaje del paciente' && $memoria->cancelaciones() === [['cita' => 1, 'motivo' => 'viaje del paciente']]);

@@ -5,13 +5,19 @@ const PACIENTES = {
   P1: { nombre: 'M. López', nac: 1990, doc: '4521', expediente: null },
   P2: { nombre: 'M. López Ruiz', nac: 1972, doc: '0987', expediente: 'HC-000123' },
   P3: { nombre: 'R. Díaz', nac: 2015, doc: '3310', expediente: 'HC-000098' },
+  P4: { nombre: 'A. Pérez Gil', nac: 1958, doc: '7742', expediente: 'HC-000105' },
 };
-const ATENCIONES = { 'HC-000123': 'E-77' }; // atención activa de la Dra. Ruiz (R-05)
-const EPISODIOS = { 'HC-000123': [['12/10/2026', 'E-77 · en curso', 'Medicina interna', 'Nota de ingreso'], ['03/04/2025', 'E-41', 'Consulta externa', 'Control']] };
-const EXTERNOS = { 'HC-000123': { vigencia: '31/12/2026', episodios: [['20/08/2025', 'Hospital Regional Norte', 'Urgencias', 'Diagnósticos y alergias']] } };
+const ATENCIONES = { 'HC-000123': 'E-77', 'HC-000105': 'E-80' }; // atención activa de la Dra. Ruiz (R-05)
+const EPISODIOS = { 'HC-000123': [['12/10/2026', 'E-77 · en curso', 'Medicina interna', 'Nota de ingreso'], ['03/04/2025', 'E-41', 'Consulta externa', 'Control']],
+  'HC-000105': [['12/10/2026', 'E-80 · en curso', 'Emergencias', 'Ingreso inconsciente']] };
+const EXTERNOS = { 'HC-000123': { vigencia: '31/12/2026', episodios: [['20/08/2025', 'Hospital Regional Norte', 'Urgencias', 'Diagnósticos y alergias']] },
+  'HC-000105': { vigencia: null, episodios: [['14/06/2026', 'Hospital Regional Norte', 'Cardiología', 'Diagnósticos y alergias']] } };
 const ROLES = { tratante: 'profesional tratante (Dra. Ruiz)', admision: 'personal de admisión' };
 let rol = 'tratante';
 let siguiente = 124; // próximo número de expediente
+const EMERGENCIAS = {}; // semana 12, cambio solicitado: emergencia sin consentimiento de 1 hora (R-07, CU-04, W4 de la semana 8)
+const MINIMO = 20; // caracteres de justificación (semana 9, B-05)
+const reloj = () => new Date(2026, 9, 12, 10, 40); // reloj fijo, como el Reloj inyectado de la semana 2 (RNF-02)
 
 const abreviado = (nombre) => nombre.replace(/^(\S+ \S+)( (\S)\S*)?$/, (_, a, __, b) => (b ? `${a} ${b}.` : a));
 const tarjetaPaciente = (p, accion = '') => `<section class="paciente"><strong>${p.nombre}</strong> (ficticio) · nac. ${p.nac}<br>
@@ -61,10 +67,43 @@ const vistas = {
 
   externa: (hc) => {
     if (rol !== 'tratante' || !ATENCIONES[hc] || !EXTERNOS[hc]) return vistas.pacientes();
+    // E5: sin consentimiento no se ve nada; la única salida es la emergencia justificada (R-07).
+    if (!EXTERNOS[hc].vigencia && !EMERGENCIAS[hc]) return ['Sin consentimiento', `<p><a href="#expediente/${hc}">‹ ${hc}</a></p>
+      <h1 tabindex="-1">El paciente no ha dado consentimiento para ver su historia de otros hospitales</h1>
+      <p>Si el paciente puede decidir, pídele el consentimiento en admisión. Este intento quedó en la auditoría.</p>
+      <div class="acciones"><a class="boton principal" href="#expediente/${hc}">Volver al expediente</a>
+      <a class="boton" href="#emergencia/${hc}">Es una emergencia</a></div>`];
     return ['Otros hospitales', `<p><a href="#expediente/${hc}">‹ ${hc}</a></p><h1 tabindex="-1">Historia de otros hospitales</h1>
-      <p>Consentimiento vigente hasta ${EXTERNOS[hc].vigencia} (R-06). Solo se muestra el alcance consentido.</p>
+      <p>${EXTERNOS[hc].vigencia ? `Consentimiento vigente hasta ${EXTERNOS[hc].vigencia} (R-06). Solo se muestra el alcance consentido.`
+        : `<strong>Acceso de emergencia hasta las ${EMERGENCIAS[hc]}</strong>, sin consentimiento · revisión pendiente de un auditor (R-07).`}</p>
       ${episodios(EXTERNOS[hc].episodios, ['Fecha', 'Hospital de origen', 'Episodio', 'Alcance'])}`,
       () => avisar(`${EXTERNOS[hc].episodios.length} episodio externo.`)];
+  },
+
+  emergencia: (hc) => {
+    if (rol !== 'tratante' || !ATENCIONES[hc] || !EXTERNOS[hc] || EXTERNOS[hc].vigencia) return vistas.pacientes();
+    return ['Acceso de emergencia', `<p><a href="#externa/${hc}">‹ Otros hospitales</a></p><h1 tabindex="-1">¿Ver la historia externa de ${hc} como emergencia?</h1>
+      <p class="impacto">Sin consentimiento del paciente. El acceso dura 1 hora, quedará registrado y será revisado por un auditor (R-07, R-08).</p>
+      <label for="justificacion"><strong>Justificación</strong> (mínimo ${MINIMO} caracteres)</label>
+      <textarea id="justificacion" rows="3" aria-describedby="cuenta ejemplo"></textarea>
+      <p id="cuenta">Faltan ${MINIMO} caracteres.</p><p id="ejemplo"><small>Ejemplo: «paciente inconsciente, se necesitan alergias».</small></p>
+      <div class="acciones"><a class="boton principal" href="#expediente/${hc}">Cancelar</a><button id="confirmar">Abrir por 1 hora</button></div>`,
+      () => {
+        const campo = document.getElementById('justificacion');
+        const cuenta = document.getElementById('cuenta');
+        const faltan = () => Math.max(0, MINIMO - campo.value.trim().length);
+        campo.addEventListener('input', () => { cuenta.className = ''; cuenta.textContent = faltan() ? `Faltan ${faltan()} caracteres.` : 'Justificación completa.'; });
+        document.getElementById('confirmar').addEventListener('click', () => {
+          if (faltan()) { // E6: sin justificación suficiente no se concede nada
+            cuenta.className = 'error'; cuenta.textContent = `No se abrió: faltan ${faltan()} caracteres.`;
+            campo.setAttribute('aria-invalid', 'true'); campo.focus();
+            return avisar(cuenta.textContent);
+          }
+          EMERGENCIAS[hc] = new Date(reloj().getTime() + 3600e3).toTimeString().slice(0, 5);
+          location.hash = `externa/${hc}`;
+          setTimeout(() => avisar(`Acceso de emergencia hasta las ${EMERGENCIAS[hc]}. Quedó en la auditoría con revisión pendiente.`));
+        });
+      }];
   },
 };
 

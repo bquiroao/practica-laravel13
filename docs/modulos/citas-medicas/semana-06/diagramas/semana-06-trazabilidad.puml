@@ -1,0 +1,32 @@
+@startuml semana-06-trazabilidad
+title Semana 6 — Hilo trazable de «solicitar cita» con el cambio de concurrencia (E6)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontSize 11
+actor "Recepcionista\n(S1, CU-01 con CU-04)" as A
+rectangle "Requisitos" {
+  card "RF-01 a RF-04\nR-01 a R-06 (S1-S2)" as RF
+  card "D7 / RNF-04: la base es\nla última barrera ante\ncitas cruzadas -> E6" as D7 #FFF3CD
+}
+rectangle "Contrato API (S5, PR #351)" {
+  card "POST /citas\n201 {id} | 409 E4, E5 | 422 E2, E3 | 503 E8\n+ 409 E6 (pendiente en el OpenAPI)" as API
+}
+rectangle "Micro-HIS por capas (S3-S4)" {
+  component "Presentación\nRutas -> ControladorCitas\nVistaJson: E6 -> 409" as P
+  component "Aplicación\nServicioCitas::solicitar\npuertos RepositorioCitas y Reloj (DIP)\nHorarioTomado -> E6" as AP #FFF3CD
+  component "Dominio\nHorario, EstadoCita" as D
+  component "Persistencia\nRepositorioPdo | RepositorioEnMemoria\nguardar(): INSERT ... WHERE NOT EXISTS" as PE #FFF3CD
+}
+database "appointments" as DB
+card "Pruebas: 30 de 30\nS13: H-02 no reproducido" as T
+A --> RF
+RF --> D7
+D7 --> API
+API --> P
+P --> AP
+AP --> D
+AP --> PE
+PE --> DB
+AP ..> T : verifica
+PE ..> T : verifica
+@enduml

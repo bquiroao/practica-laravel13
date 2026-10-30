@@ -1,0 +1,6 @@
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\bootstrap.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\cli.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\Persistence\InMemoryRepository.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\Presentation\JsonView.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\Presentation\ReceptionController.php
+No syntax errors detected in C:\Users\azul1\OneDrive\Desktop\shi-semana-4-recepcion-muestras-mvc-mercedes-lopez\docs\modulos\recepcion-muestras\semana-04\mvc\tests\run.php

@@ -45,6 +45,12 @@ final readonly class ResultadoEscenario
         return new self(null, $escenario, $critico, $resultado, $intentos, $evidencias, $clave, $huella, $ahora);
     }
 
+    /** @param list<Evidencia> $evidencias las confirmadas por el almacén */
+    public function conEvidencias(array $evidencias): self
+    {
+        return new self($this->id, $this->escenario, $this->critico, $this->resultado, $this->intentos, $evidencias, $this->clave, $this->huella, $this->reportadoEn);
+    }
+
     public function conId(int $id): self
     {
         return new self($id, $this->escenario, $this->critico, $this->resultado, $this->intentos, $this->evidencias, $this->clave, $this->huella,

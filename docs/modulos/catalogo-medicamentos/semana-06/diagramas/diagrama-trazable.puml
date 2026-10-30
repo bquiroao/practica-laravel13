@@ -1,0 +1,57 @@
+@startuml diagrama-trazable
+' Catálogo de medicamentos - Semana 6 - Trazabilidad actor -> CU -> requisito -> regla -> diseño -> API -> prueba
+title Trazabilidad de «alta, búsqueda y control de vigencia» (primer parcial)
+left to right direction
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+skinparam defaultTextAlignment center
+
+actor "QF_CATALOGO" as QF
+actor "CONSULTA_CLINICA" as CLI
+
+rectangle "CU-01\nRegistrar" as CU01
+rectangle "CU-02\nBuscar vigentes" as CU02
+rectangle "CU-03\nNueva versión" as CU03
+
+rectangle "RF-01 alta\nRF-02 validar\nRF-03 duplicado" as RFA
+rectangle "RF-04 búsqueda\nRNF-03 p95 ≤ 300 ms" as RFB
+rectangle "RF-05 versión\nRNF-04 integridad" as RFC
+
+rectangle "RN-04 sin duplicados\nRN-05 límites" as RNA
+rectangle "RN-03 vigentes a\nuna fecha, % _ literales" as RNB
+rectangle "RN-01 una sola\nversión vigente" as RNC
+
+rectangle "RegistrarMedicamento\nClaveEquivalencia\nFichaMedicamento\n(ISP: ControlEquivalencia\n+ EscrituraCatalogo)" as DA
+rectangle "BuscarMedicamentosVigentes\nCriterioBusqueda\n(ISP: BusquedaCatalogo)" as DB
+rectangle "RegistrarNuevaVersion\nMedicamento::nuevaVersion\nVigencia + EXCLUDE" as DC
+
+rectangle "POST /api/v1/medicamentos\n201 · 409 DUPLICADO · 422" as AA
+rectangle "GET /api/v1/medicamentos\n200 con meta.fecha" as AB
+rectangle "POST /api/v1/medicamentos/{codigo}/versiones\n201 · 409 SOLAPE_VIGENCIA" as AC
+
+rectangle "casos-de-uso.php CA-01, CA-04\napi.php 201/409/422" as PA
+rectangle "contrato/repositorio.php\n(PDO = InMemory)\npersistencia-pdo.php CA-08" as PB
+rectangle "dominio.php CA-09, CA-10\npersistencia-pdo.php atomicidad" as PC
+
+QF --> CU01
+QF --> CU03
+QF --> CU02
+CLI --> CU02
+CU01 --> RFA
+CU02 --> RFB
+CU03 --> RFC
+RFA --> RNA
+RFB --> RNB
+RFC --> RNC
+RNA --> DA
+RNB --> DB
+RNC --> DC
+DA --> AA
+DB --> AB
+DC --> AC
+AA --> PA
+AB --> PB
+AC --> PC
+@enduml

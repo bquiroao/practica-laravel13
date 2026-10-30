@@ -1,0 +1,19 @@
+$ node semana-11/evidencia/capturar.mjs semana-11/prototipo/index.html semana-12/capturas 01-...=inicio@<simular aviso> 02-...@<Tab desde «Cerrar sesión»> 03-...@<Seguir conectado> 04-...@<Cerrar sesión>   # Edge sin interfaz; el título agrega aviso visible y foco
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-aviso-sesion (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+01-aviso-sesion (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+01-aviso-sesion (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+02-tab-no-sale-del-aviso (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+02-tab-no-sale-del-aviso (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+02-tab-no-sale-del-aviso (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | aviso visible: true | foco: seguir | BUTTON
+03-seguir-conectado (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1
+03-seguir-conectado (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1
+03-seguir-conectado (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1
+04-sesion-terminada (#inicio) | 320 | 320 | 320 | no | Sesión terminada · Hospital HIS | H1
+04-sesion-terminada (#inicio) | 360 | 360 | 360 | no | Sesión terminada · Hospital HIS | H1
+04-sesion-terminada (#inicio) | 430 | 430 | 430 | no | Sesión terminada · Hospital HIS | H1
+
+$ node semana-11/evidencia/capturar.mjs ... 05-esc-cierra=inicio@<abrir aviso y pulsar Esc>   # sin capturas en el commit, solo la medición
+05-esc-cierra (#inicio) | 320 | 320 | 320 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1
+05-esc-cierra (#inicio) | 360 | 360 | 360 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1
+05-esc-cierra (#inicio) | 430 | 430 | 430 | no | Inicio · Hospital HIS | aviso visible: false | foco: H1 | H1

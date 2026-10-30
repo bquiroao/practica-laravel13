@@ -1,0 +1,77 @@
+[
+  {
+    "file": "01-invitacion-320.svg",
+    "width": 320,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "01-invitacion-375.svg",
+    "width": 375,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "01-invitacion-430.svg",
+    "width": 430,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "02-credencial-320.svg",
+    "width": 320,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "02-credencial-375.svg",
+    "width": 375,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "02-credencial-430.svg",
+    "width": 430,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "03-login-320.svg",
+    "width": 320,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "03-login-375.svg",
+    "width": 375,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "03-login-430.svg",
+    "width": 430,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "04-sesion-320.svg",
+    "width": 320,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "04-sesion-375.svg",
+    "width": 375,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "04-sesion-430.svg",
+    "width": 430,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "05-recuperacion-320.svg",
+    "width": 320,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "05-recuperacion-375.svg",
+    "width": 375,
+    "textOutsideCanvas": []
+  },
+  {
+    "file": "05-recuperacion-430.svg",
+    "width": 430,
+    "textOutsideCanvas": []
+  }
+]

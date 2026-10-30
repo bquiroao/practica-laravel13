@@ -43,6 +43,12 @@ foreach (['PDO' => new RepositorioPdo($db), 'InMemory' => $memoria] as $adaptado
 
 prueba('[InMemory] regla: con un solo registro el texto va en singular («1 cita hoy») (R-09)', crearControlador(new RepositorioEnMemoria([], [['2026-10-26 08:00', 'scheduled']]), $reloj)->atender('tarjeta', $tarjeta('citas_hoy'))['texto'] === '1 cita hoy');
 
+// Cambio práctico de la semana 6: CU-03 navegar a un módulo, por la ruta real (E6 si el rol no lo permite, NF si no existe).
+$navegar = function (string $modulo, array $sesion) use ($memoria, $reloj) { [$a, $p] = Rutas::resolver('GET', "/dashboard/navegacion/$modulo"); return crearControlador($memoria, $reloj)->atender($a, $p + $sesion); };
+prueba('cambio S6: navegar a un módulo del rol = 200 con su título (CU-03)', $navegar('citas', $soloCitas) === ['status' => 200, 'ruta' => '/citas', 'titulo' => 'Citas']);
+prueba('cambio S6: escribir a mano un módulo que el rol no permite = 403 E6 (CU-03, R-02)', array_intersect_key($navegar('camas', $soloCitas), ['status' => 0, 'error' => 0]) === ['status' => 403, 'error' => 'E6']);
+prueba('cambio S6: un módulo que no existe = 404 NF, y sin hospital = 401 E1 (CU-05)', [$navegar('usuarios', $soloCitas)['error'], $navegar('citas', ['hospital' => ''] + $soloCitas)['error']] === ['NF', 'E1']);
+
 // 3. Error de persistencia: un doble que falla solo en camas y una PDOException real.
 $camasCaidas = new class implements FuenteConteos {
     public function conteo(string $t, string $dia): int { return $t === 'camas_disponibles' ? throw new ErrorPersistencia('SQLSTATE[08006] conexión perdida') : 4; }

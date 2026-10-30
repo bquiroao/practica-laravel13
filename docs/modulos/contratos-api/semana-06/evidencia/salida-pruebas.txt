@@ -1,0 +1,30 @@
+$ php micro-his-contratos-api/pruebas/pruebas.php   # después del cambio; exit 0
+OK    [PDO] feliz: «ana» envía guia-citas 1.0.0 = 201 en revisión y «luis» la aprueba = 200 (CA-01, CA-04)
+OK    [PDO] feliz: un médico ve la vigente 1.1.0 y enfermería la 1.0.0 de su audiencia (CA-05, R-06)
+OK    [PDO] feliz: la 1.0.0 obsoleta se consulta con aviso y la vigente 1.1.0 (CA-07, R-08)
+OK    [PDO] regla: versión sin formato x.y.z o sin audiencia = 422 E2 (CA-02, R-01)
+OK    [PDO] regla: versión igual a la vigente = 409 E3 (CA-03, R-02)
+OK    [PDO] regla: «ana» aprueba su propia versión = 403 E5 (CA-04, R-05)
+OK    [PDO] regla: rechazar sin motivo = 422 E2 (RF-03)
+OK    [PDO] regla: rol fuera de la audiencia = 404 E6, igual que un documento inexistente (CA-06, R-07)
+OK    [PDO] regla: una versión obsoleta no vuelve a publicarse = 409 E7 (R-03, R-08)
+OK    [PDO] contrato: la 1.2.0 en revisión no es consultable, una versión inexistente es null y un estado viejo devuelve false
+OK    [PDO] cambio S6: la 1.1.0 aprobada por luis y marcada obsoleta por marta conserva a los dos (R-10)
+OK    [InMemory] feliz: «ana» envía guia-citas 1.0.0 = 201 en revisión y «luis» la aprueba = 200 (CA-01, CA-04)
+OK    [InMemory] feliz: un médico ve la vigente 1.1.0 y enfermería la 1.0.0 de su audiencia (CA-05, R-06)
+OK    [InMemory] feliz: la 1.0.0 obsoleta se consulta con aviso y la vigente 1.1.0 (CA-07, R-08)
+OK    [InMemory] regla: versión sin formato x.y.z o sin audiencia = 422 E2 (CA-02, R-01)
+OK    [InMemory] regla: versión igual a la vigente = 409 E3 (CA-03, R-02)
+OK    [InMemory] regla: «ana» aprueba su propia versión = 403 E5 (CA-04, R-05)
+OK    [InMemory] regla: rechazar sin motivo = 422 E2 (RF-03)
+OK    [InMemory] regla: rol fuera de la audiencia = 404 E6, igual que un documento inexistente (CA-06, R-07)
+OK    [InMemory] regla: una versión obsoleta no vuelve a publicarse = 409 E7 (R-03, R-08)
+OK    [InMemory] contrato: la 1.2.0 en revisión no es consultable, una versión inexistente es null y un estado viejo devuelve false
+OK    [InMemory] cambio S6: la 1.1.0 aprobada por luis y marcada obsoleta por marta conserva a los dos (R-10)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException al guardar la audiencia = 503 E8, sin versión a medias (transacción)
+OK    MVC: las rutas llevan a su acción con slug, versión o id, y una ruta desconocida responde 404
+OK    MVC: el controlador no tiene SQL, PDO, versiones, audiencias ni throw
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

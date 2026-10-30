@@ -1,0 +1,1346 @@
+[
+    {
+        "branch":  "semana-10-ingreso-resultados-movilidad-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-10/semana-10-movilidad-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-10/wireframes/01-bandeja-320.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-10/wireframes/01-bandeja-375.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-10/wireframes/01-bandeja-430.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-10-nativephp-movilidad-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-10/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-10/evidencia/01-destino-375.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-10/evidencia/02-confirmar-375.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-10/evidencia/03-resultado-375.png"
+                     ]
+    },
+    {
+        "branch":  "semana-10-ordenes-emr-movilidad-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-10/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-10/wireframes/01-episodio-320.svg",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-10/wireframes/01-episodio-375.svg",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-10/wireframes/01-episodio-430.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-10-recepcion-muestras-movilidad-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-10/semana-10-movilidad-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-10/wireframes/M1-buscar-orden-item.svg",
+                         "docs/modulos/recepcion-muestras/semana-10/wireframes/M2-verificar-muestra.svg",
+                         "docs/modulos/recepcion-muestras/semana-10/wireframes/M3-decision-rechazo.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-10-usuarios-tenants-movilidad-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-10/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-10/evidencia/01-invitacion-375.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-10/evidencia/02-credencial-375.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-10/evidencia/03-login-375.png"
+                     ]
+    },
+    {
+        "branch":  "semana-10-validacion-resultados-movilidad-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  10,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-10/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-10/wireframes/01-bandeja-320.svg",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-10/wireframes/01-bandeja-375.svg",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-10/wireframes/01-bandeja-430.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-11-ingreso-resultados-prototipo-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-11/README.md",
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-11/semana-11-prototipo-navegable-ingreso-resultados.md"
+                      ],
+        "prototype":  "docs/modulos/ingreso-resultados-laboratorio/semana-11/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-11/evidencia/desktop-captura.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-11/evidencia/desktop-conflicto.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-11/evidencia/desktop-historial.png"
+                     ]
+    },
+    {
+        "branch":  "semana-11-nativephp-prototipo-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-11/README.md"
+                      ],
+        "prototype":  "docs/modulos/investigacion-prototipo-nativephp/semana-11/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-11/evidencia/desktop-actual.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-11/evidencia/desktop-obsoleto.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-11/evidencia/desktop-permiso-denegado.png"
+                     ]
+    },
+    {
+        "branch":  "semana-11-ordenes-emr-prototipo-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-11/README.md"
+                      ],
+        "prototype":  "docs/modulos/ordenes-laboratorio-emr/semana-11/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-11/evidencia/desktop-recuperado.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-11/evidencia/desktop-seguimiento.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-11/evidencia/desktop-timeout.png"
+                     ]
+    },
+    {
+        "branch":  "semana-11-recepcion-muestras-prototipo-navegable-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-11/semana-11-prototipo-navegable-recepcion-muestras.md"
+                      ],
+        "prototype":  "public/prototipos/recepcion-semana-11/index.html",
+        "review":  "Recorrido de navegador correcto en cuatro anchos. Búsqueda inválida corregida; camino feliz y código duplicado verificados.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-11/evidencia/desktop-camino-feliz.png",
+                         "docs/modulos/recepcion-muestras/semana-11/evidencia/desktop-error-critico.png",
+                         "docs/modulos/recepcion-muestras/semana-11/evidencia/desktop-rechazo.png"
+                     ]
+    },
+    {
+        "branch":  "semana-11-usuarios-tenants-prototipo-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-11/README.md"
+                      ],
+        "prototype":  "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-11/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-11/evidencia/desktop-fallo-revocacion.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-11/evidencia/desktop-revocada.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-11/evidencia/desktop-sesion.png"
+                     ]
+    },
+    {
+        "branch":  "semana-11-validacion-resultados-prototipo-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  11,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-11/README.md"
+                      ],
+        "prototype":  "docs/modulos/validacion-resultados-bioquimico/semana-11/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-11/evidencia/desktop-camino-feliz.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-11/evidencia/desktop-error-critico.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-11/evidencia/movil-camino-feliz.png"
+                     ]
+    },
+    {
+        "branch":  "semana-12-ingreso-resultados-evaluacion-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-12/README.md"
+                      ],
+        "prototype":  "docs/modulos/ingreso-resultados-laboratorio/semana-12/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-12/evidencia/desktop-captura.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-12/evidencia/desktop-conflicto.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-12/evidencia/desktop-historial.png"
+                     ]
+    },
+    {
+        "branch":  "semana-12-nativephp-evaluacion-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-12/README.md"
+                      ],
+        "prototype":  "docs/modulos/investigacion-prototipo-nativephp/semana-12/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-12/evidencia/desktop-actual.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-12/evidencia/desktop-obsoleto.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-12/evidencia/desktop-permiso-denegado.png"
+                     ]
+    },
+    {
+        "branch":  "semana-12-ordenes-emr-evaluacion-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-12/README.md"
+                      ],
+        "prototype":  "docs/modulos/ordenes-laboratorio-emr/semana-12/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-12/evidencia/desktop-recuperado.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-12/evidencia/desktop-seguimiento.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-12/evidencia/desktop-timeout.png"
+                     ]
+    },
+    {
+        "branch":  "semana-12-recepcion-muestras-evaluacion-parcial-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-12/semana-12-defensa-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-12-usuarios-tenants-evaluacion-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-12/README.md"
+                      ],
+        "prototype":  "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-12/prototipo/index.html",
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-12/evidencia/desktop-fallo-revocacion.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-12/evidencia/desktop-revocada.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-12/evidencia/desktop-sesion.png"
+                     ]
+    },
+    {
+        "branch":  "semana-12-validacion-resultados-evaluacion-parcial-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  12,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-12/semana-12-defensa-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-ingreso-resultados-revision-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-13/semana-13-revision-tecnica-ingreso.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-nativephp-revision-tecnica-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-13/semana-13-revision-tecnica-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-ordenes-laboratorio-emr-revision-tecnica-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-13/semana-13-revision-tecnica-ordenes-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-recepcion-muestras-revision-tecnica-formal-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-13/semana-13-revision-tecnica-formal.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-usuarios-tenants-revision-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-13/semana-13-revision-tecnica-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-13-validacion-resultados-revision-tecnica-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  13,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-13/semana-13-revision-tecnica-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-ingreso-resultados-sqa-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-14/semana-14-plan-sqa-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-nativephp-sqa-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-14/semana-14-plan-sqa-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-ordenes-laboratorio-emr-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-14/semana-14-plan-sqa-ordenes-laboratorio-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-recepcion-muestras-sqa-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-14/semana-14-plan-sqa-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-usuarios-tenants-sqa-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-14/semana-14-plan-sqa-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-14-validacion-resultados-bioquimico-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  14,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-14/semana-14-plan-sqa-validacion-bioquimica.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-15-ingreso-resultados-pruebas-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-15/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega. Defectos abiertos reproducidos: ver informe integral.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-15/evidencia/captura-defectos.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-15/evidencia/captura-suite.png"
+                     ]
+    },
+    {
+        "branch":  "semana-15-nativephp-pruebas-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-15/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega. Defectos abiertos reproducidos: ver informe integral.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-15/evidencia/captura-defectos.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-15/evidencia/captura-suite.png"
+                     ]
+    },
+    {
+        "branch":  "semana-15-ordenes-laboratorio-emr-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-15/semana-15-pruebas-ordenes-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-15/evidencia/capturas/captura-regresion-semana-02.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-15/evidencia/capturas/captura-semana-15.png"
+                     ]
+    },
+    {
+        "branch":  "semana-15-recepcion-muestras-pruebas-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-15/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega. Defectos abiertos reproducidos: ver informe integral.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-15/evidencia/captura-defectos.png",
+                         "docs/modulos/recepcion-muestras/semana-15/evidencia/captura-suite.png"
+                     ]
+    },
+    {
+        "branch":  "semana-15-usuarios-tenants-pruebas-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-15/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega. Defectos abiertos reproducidos: ver informe integral.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-15/evidencia/captura-defectos.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-15/evidencia/captura-suite.png"
+                     ]
+    },
+    {
+        "branch":  "semana-15-validacion-resultados-bioquimico-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  15,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-15/semana-15-pruebas-validacion-bioquimica.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-15/evidencia/capturas/captura-regresion-semana-02.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-15/evidencia/capturas/captura-semana-15.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-gestion-usuarios-tenants-autenticacion-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/semana-01-uml-usuarios-tenants-autenticacion.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/diagramas/semana-01-actividad-autenticacion.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-01/diagramas/semana-01-actividad-revocacion.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-ingreso-resultados-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-01/semana-01-uml-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/semana-01-casos-de-uso.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-01/diagramas/semana-01-secuencia.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-investigacion-prototipo-nativephp-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-01/semana-01-uml-investigacion-prototipo-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-01/diagramas/semana-01-casos-de-uso.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-01/diagramas/semana-01-secuencia.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-ordenes-laboratorio-emr-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-01/semana-01-uml-ordenes-laboratorio-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/semana-01-casos-de-uso.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-01/diagramas/semana-01-secuencia.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-recepcion-muestras-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-01/semana-01-uml-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/recepcion-muestras/semana-01/diagramas/semana-01-casos-de-uso.png",
+                         "docs/modulos/recepcion-muestras/semana-01/diagramas/semana-01-secuencia.png"
+                     ]
+    },
+    {
+        "branch":  "semana-1-validacion-resultados-bioquimico-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  1,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-01/semana-01-uml-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-01/diagramas/semana-01-actividad.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-01/diagramas/semana-01-casos-de-uso.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-01/diagramas/semana-01-secuencia.png"
+                     ]
+    },
+    {
+        "branch":  "semana-2-gestion-usuarios-tenants-srp-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-02/semana-02-srp-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-2-ingreso-resultados-lsp-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-02/semana-02-lsp-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-2-investigacion-prototipo-nativephp-isp-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-02/semana-02-isp-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-2-ordenes-laboratorio-emr-srp-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-02/semana-02-srp-ordenes-laboratorio-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-2-recepcion-muestras-lsp-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-02/semana-02-lsp-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-2-validacion-resultados-dip-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  2,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-02/semana-02-dip-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-3-gestion-usuarios-tenants-arquitectura-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-03/semana-03-arquitectura-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-03/diagramas/semana-03-componentes.svg",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-03/diagramas/semana-03-secuencia.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-3-ingreso-resultados-laboratorio-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-03/semana-03-arquitectura-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-03/diagramas/semana-03-componentes.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-03/diagramas/semana-03-contexto.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-3-nativephp-arquitectura-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-03/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-3-ordenes-emr-arquitectura-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-03/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-3-recepcion-muestras-arquitectura-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-03/semana-03-arquitectura-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-3-validacion-resultados-arquitectura-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  3,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-03/semana-03-arquitectura-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-4-gestion-usuarios-tenants-mvc-repositorio-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-04/semana-04-mvc-repositorio-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-4-ingreso-resultados-mvc-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-04/semana-04-capas-mvc-repositorio-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "2 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-04/diagramas/semana-04-capas-mvc-repository.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-04/diagramas/semana-04-repositorio-compartido.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-4-nativephp-mvc-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-04/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-4-ordenes-emr-mvc-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-04/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-4-recepcion-muestras-mvc-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-04/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-4-validacion-resultados-mvc-repositorio-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  4,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-04/semana-04-mvc-repositorio-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-5-gestion-usuarios-tenants-api-cliente-servidor-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-05/semana-05-api-cliente-servidor-usuarios-tenants.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-05/diagramas/semana-05-cliente-servidor.svg",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-05/diagramas/semana-05-secuencia-api.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-5-ingreso-resultados-api-microservicio-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-05/semana-05-api-microservicio-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "2 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-05/diagramas/semana-05-componentes.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-05/diagramas/semana-05-secuencia.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-5-nativephp-api-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-05/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-5-ordenes-emr-api-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-05/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-5-recepcion-muestras-api-microservicio-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-05/semana-05-api-microservicio-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-05/diagramas/semana-05-componentes.svg",
+                         "docs/modulos/recepcion-muestras/semana-05/diagramas/semana-05-secuencia.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-5-validacion-resultados-api-microservicio-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  5,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-05/semana-05-api-microservicio-validacion-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "2 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-05/diagramas/semana-05-componentes.svg",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-05/diagramas/semana-05-secuencia.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-6-ingreso-resultados-evaluacion-parcial-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  6,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-06/semana-06-evaluacion-parcial-arquitectura-ingreso.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-06/diagramas/semana-06-arquitectura-trazable.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-6-nativephp-evaluacion-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  6,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-06/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-6-ordenes-emr-evaluacion-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  6,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-06/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-6-recepcion-muestras-defensa-arquitectura-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  6,
+        "documents":  [
+
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-6-usuarios-tenants-evaluacion-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  6,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-06/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-6-validacion-resultados-evaluacion-parcial-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  6,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-06/semana-06-evaluacion-parcial-arquitectura-validacion.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-06/diagramas/semana-06-arquitectura-trazable.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-7-gestion-usuarios-tenants-componentes-refactorizacion-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-07/semana-07-componentes-refactorizacion.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-7-ingreso-resultados-componentes-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-07/semana-07-componentes-refactorizacion-ingreso.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-07/diagramas/semana-07-componentes.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-07/diagramas/semana-07-secuencia.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-7-nativephp-componentes-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-07/semana-07-componentes-refactor-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-7-ordenes-emr-componentes-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-07/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-7-recepcion-muestras-componentes-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-07/semana-07-componentes-y-refactor-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+
+                     ]
+    },
+    {
+        "branch":  "semana-7-validacion-resultados-componentes-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  7,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-07/semana-07-componentes-refactorizacion-validacion.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-07/diagramas/semana-07-componentes.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-ingreso-resultados-ux-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-08/semana-08-ux-ingreso-resultados.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-08/wireframes/01-bandeja-pendientes.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-08/wireframes/02-captura-resultado.svg",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-08/wireframes/03-confirmar-captura.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-nativephp-ux-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-08/semana-08-ux-nativephp.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-08/wireframes/06-evidencia.svg",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-08/wireframes/01-inicio.svg",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-08/wireframes/02-destino.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-ordenes-laboratorio-emr-ux-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-08/semana-08-ux-ordenes-emr.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-08/wireframes/01-inicio-expediente.svg",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-08/wireframes/02-seleccionar-pruebas.svg",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-08/wireframes/03-confirmar-orden.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-recepcion-muestras-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-08/semana-08-ux-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-08/wireframes/01-iniciar-recepcion.svg",
+                         "docs/modulos/recepcion-muestras/semana-08/wireframes/02-verificar-muestra.svg",
+                         "docs/modulos/recepcion-muestras/semana-08/wireframes/03-confirmar-aceptacion.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-usuarios-tenants-ux-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-08/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-08/wireframes/01-usuarios.svg",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-08/wireframes/02-invitacion.svg",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-08/wireframes/03-credencial.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-8-validacion-resultados-bioquimico-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  8,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-08/semana-08-ux-validacion-bioquimica.md"
+                      ],
+        "prototype":  null,
+        "review":  "Entrega de diseño/documentación: estructura y enlaces revisados; no equivale a integración funcional.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-08/wireframes/01-bandeja-pendientes.svg",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-08/wireframes/02-revision-contexto.svg",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-08/wireframes/03-confirmar-validacion.svg"
+                     ]
+    },
+    {
+        "branch":  "semana-9-ingreso-resultados-accesibilidad-mercedes-lopez",
+        "module":  "ingreso-resultados-laboratorio",
+        "label":  "Ingreso de resultados de laboratorio",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/ingreso-resultados-laboratorio/semana-09/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-09/evidencia/01-bandeja-pendientes.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-09/evidencia/02-captura-resultado.png",
+                         "docs/modulos/ingreso-resultados-laboratorio/semana-09/evidencia/03-confirmar-captura.png"
+                     ]
+    },
+    {
+        "branch":  "semana-9-nativephp-accesibilidad-mercedes-lopez",
+        "module":  "investigacion-prototipo-nativephp",
+        "label":  "Investigación y prototipo NativePHP",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/investigacion-prototipo-nativephp/semana-09/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-09/evidencia/01-inicio.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-09/evidencia/02-destino.png",
+                         "docs/modulos/investigacion-prototipo-nativephp/semana-09/evidencia/03-confirmacion.png"
+                     ]
+    },
+    {
+        "branch":  "semana-9-ordenes-emr-accesibilidad-mercedes-lopez",
+        "module":  "ordenes-laboratorio-emr",
+        "label":  "Órdenes de laboratorio desde EMR",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/ordenes-laboratorio-emr/semana-09/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/ordenes-laboratorio-emr/semana-09/evidencia/01-inicio-expediente.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-09/evidencia/02-seleccionar-pruebas.png",
+                         "docs/modulos/ordenes-laboratorio-emr/semana-09/evidencia/03-confirmar-orden.png"
+                     ]
+    },
+    {
+        "branch":  "semana-9-recepcion-muestras-accesibilidad-mercedes-lopez",
+        "module":  "recepcion-muestras",
+        "label":  "Recepción de muestras y códigos identificadores",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/recepcion-muestras/semana-09/README.md",
+                          "docs/modulos/recepcion-muestras/semana-09/semana-09-usabilidad-accesibilidad-recepcion-muestras.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/recepcion-muestras/semana-09/evidencia/01-iniciar-recepcion.png",
+                         "docs/modulos/recepcion-muestras/semana-09/evidencia/02-verificar-muestra.png",
+                         "docs/modulos/recepcion-muestras/semana-09/evidencia/03-confirmar-aceptacion.png"
+                     ]
+    },
+    {
+        "branch":  "semana-9-usuarios-tenants-accesibilidad-mercedes-lopez",
+        "module":  "gestion-usuarios-tenants-autenticacion",
+        "label":  "Usuarios, tenants y autenticación",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-09/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-09/evidencia/01-usuarios.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-09/evidencia/02-invitacion.png",
+                         "docs/modulos/gestion-usuarios-tenants-autenticacion/semana-09/evidencia/03-credencial.png"
+                     ]
+    },
+    {
+        "branch":  "semana-9-validacion-resultados-accesibilidad-mercedes-lopez",
+        "module":  "validacion-resultados-bioquimico",
+        "label":  "Validación de resultados por bioquímico",
+        "week":  9,
+        "documents":  [
+                          "docs/modulos/validacion-resultados-bioquimico/semana-09/README.md"
+                      ],
+        "prototype":  null,
+        "review":  "1 verificaciones ejecutables correctas. Consultar alcance y límites en la entrega.",
+        "previews":  [
+                         "docs/modulos/validacion-resultados-bioquimico/semana-09/evidencia/01-bandeja-pendientes.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-09/evidencia/02-revision-contexto.png",
+                         "docs/modulos/validacion-resultados-bioquimico/semana-09/evidencia/03-confirmar-validacion.png"
+                     ]
+    }
+]

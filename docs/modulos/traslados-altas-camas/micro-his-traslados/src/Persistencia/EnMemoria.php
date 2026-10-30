@@ -9,6 +9,7 @@ use Traslados\Dominio\Resultado;
 
 final class EnMemoria implements RepositorioMovimientos, FuenteClinica {
     public bool $fallarAlAplicar = false;
+    private array $claves = [];   // clave de idempotencia => [orden, origen, destino]
 
     /** episodios: id => estado · ordenes: id => [episodio, tipo, estado, requisito_cama, tipo_alta, motivo] · estancias: id => [episodio, cama, abierta] · camas: id => [estado, tipo] */
     public function __construct(private array $episodios, private array $ordenes, private array $estancias, private array $camas) {}
@@ -39,14 +40,21 @@ final class EnMemoria implements RepositorioMovimientos, FuenteClinica {
         return null;
     }
 
+    public function ordenPorClave(string $clave): ?array {
+        if (!isset($this->claves[$clave])) { return null; }
+        [$orden, $origen, $destino] = $this->claves[$clave];
+        return ['care_episode_id' => $this->ordenes[$orden][0], 'tipo' => $this->ordenes[$orden][1], 'origen_id' => $origen, 'destino_id' => $destino];
+    }
+
     public function cama(string $id): ?array { return isset($this->camas[$id]) ? ['bed_id' => $id, 'status' => $this->camas[$id][0], 'type' => $this->camas[$id][1]] : null; }
 
-    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en): void {
+    public function aplicar(string $episodio, string $orden, string $tipo, Resultado $r, string $estanciaOrigen, string $estanciaNueva, \DateTimeImmutable $en, ?string $clave = null): void {
         if ($this->fallarAlAplicar) { throw new ErrorPersistencia('Falla simulada al aplicar'); } // antes de tocar nada: todo o nada
         $this->estancias[$estanciaOrigen][2] = false;
         $this->camas[$r->origenId][0] = 'maintenance';
         if ($r->destinoId !== null) { $this->estancias[$estanciaNueva] = [$episodio, $r->destinoId, true]; $this->camas[$r->destinoId][0] = 'occupied'; }
         $this->ordenes[$orden][2] = 'aplicada';
         if ($tipo === 'alta') { $this->episodios[$episodio] = 'closed'; }
+        if ($clave !== null) { $this->claves[$clave] = [$orden, $r->origenId, $r->destinoId]; }
     }
 }

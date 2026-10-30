@@ -14,14 +14,15 @@ final class OcupacionSala
 {
     public const ESTADOS = ['available', 'occupied', 'maintenance', 'inactive'];
 
-    /** @param list<array{cama: string, estado: string, con_estancia: bool}> $camas */
+    /** @param list<array{cama: string, estado: string, estancias: int}> $camas */
     public static function calcular(array $camas): array
     {
         $n = array_fill_keys(self::ESTADOS, 0); $inconsistentes = [];
         foreach ($camas as $c) {
             $n[$c['estado']]++;
-            // R-04: «ocupada» exige estancia abierta y viceversa. Se marca; el tablero no la corrige (R-09).
-            if (($c['estado'] === 'occupied') !== $c['con_estancia']) $inconsistentes[] = $c['cama'];
+            // R-04: «ocupada» exige exactamente una estancia abierta, y otra cama, ninguna: dos estancias son dos pacientes
+            // en una cama (semana 6). Se marca; el tablero no la corrige (R-09).
+            if ($c['estancias'] !== ($c['estado'] === 'occupied' ? 1 : 0)) $inconsistentes[] = $c['cama'];
         }
         $operativas = $n['available'] + $n['occupied'];   // mantenimiento e inactivas se muestran aparte
         return $n + ['ocupacion' => $operativas === 0 ? 'no aplica' : round(100 * $n['occupied'] / $operativas, 1), 'inconsistentes' => $inconsistentes];

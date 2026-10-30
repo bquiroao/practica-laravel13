@@ -1,0 +1,63 @@
+@startuml secuencia-alta-medicamento
+' Catálogo de medicamentos - Semana 1
+' Secuencia de CU-01 Registrar medicamento (incluye RN-04 y RN-05)
+autonumber
+skinparam sequenceMessageAlign left
+title CU-01 Registrar medicamento - secuencia
+
+actor "Químico farmacéutico\n(QF_CATALOGO)" as QF
+participant "Interfaz del\ncatálogo" as UI
+participant "Controlador\nMedicamentos" as CTRL
+participant "RegistrarMedicamento\n(caso de uso)" as CU
+participant "Medicamento\n(dominio)" as MED
+participant "Repositorio\nMedicamentos" as REPO
+database "BD HOSPITAL\n(tabla propuesta\nmedicamentos)" as BD
+
+QF -> UI : Completa el formulario de alta
+UI -> UI : Valida campos obligatorios\n(apoyo visual, no reemplaza al servidor)
+UI -> CTRL : POST alta(datos, token)
+CTRL -> CTRL : Obtiene rol y hospital (tenant)\ndel token
+alt rol distinto de QF_CATALOGO
+  CTRL --> UI : 403 Acceso denegado
+  UI --> QF : "No tiene permiso para registrar"
+else rol autorizado
+  CTRL -> CU : ejecutar(hospitalId, datos, usuario)
+  CU -> MED : crear(datos, vigenteDesde)
+  MED -> MED : Valida longitudes, rangos,\nunidad, forma y vía (RN-05)
+  alt datos inválidos
+    MED --> CU : ErrorValidacion(campos)
+    CU --> CTRL : ErrorValidacion
+    CTRL --> UI : 422 errores por campo
+    UI --> QF : Marca cada campo con su mensaje
+  else datos válidos
+    MED --> CU : medicamento (versión 1, vigencia abierta)
+    CU -> REPO : existeEquivalenteVigente(hospitalId, clave, desde)
+    REPO -> BD : SELECT preparado\n(clave + rango de vigencia)
+    BD --> REPO : filas
+    alt existe equivalente vigente (RN-04)
+      REPO --> CU : código existente
+      CU --> CTRL : ErrorReglaNegocio(DUPLICADO)
+      CTRL --> UI : 409 duplicado con código existente
+      UI --> QF : "Ya existe MED-000101 vigente"
+    else no existe
+      CU -> REPO : siguienteCodigo(hospitalId)
+      REPO --> CU : MED-000107
+      CU -> REPO : guardar(medicamento)
+      REPO -> BD : INSERT preparado
+      alt falla la base de datos
+        BD --> REPO : excepción PDO
+        REPO --> CU : ErrorPersistencia
+        CU --> CTRL : ErrorPersistencia
+        CTRL --> UI : 503 sin datos parciales
+        UI --> QF : "No se pudo guardar, intente de nuevo"
+      else guardado
+        BD --> REPO : OK
+        REPO --> CU : OK
+        CU --> CTRL : medicamento registrado
+        CTRL --> UI : 201 código, versión 1, vigencia
+        UI --> QF : Confirmación con el código asignado
+      end
+    end
+  end
+end
+@enduml

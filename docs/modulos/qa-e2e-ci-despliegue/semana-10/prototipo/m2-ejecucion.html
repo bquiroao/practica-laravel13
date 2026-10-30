@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ejecución #15 · 2.5.1 · Calidad de versiones</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <a class="btn atras" href="m1-versiones.html" aria-label="Volver a las versiones">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">Calidad · Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Release</span>
+  <span class="avatar" aria-label="resp-release">RR</span>
+</header>
+
+<div class="contexto">
+  <span class="version">Ejecución #15 · versión 2.5.1</span>
+  <span class="meta">staging · digest sha256:3c81…  <span data-estado="base pausada nuevo sin-conexion">· en curso</span><span data-estado="completada">· completada 15:20</span></span>
+</div>
+
+<div class="red lenta" role="status" data-estado="sin-conexion">
+  <span>Sin conexión. Mostrando lo recibido a las 14:32; se reintenta solo.</span>
+</div>
+
+<main>
+  <div class="fila">
+    <h1>Resultados</h1>
+    <span class="chip en-curso derecha" data-estado="base pausada nuevo sin-conexion">▶ En curso</span>
+    <span class="chip pasa derecha" data-estado="completada">■ Completada</span>
+  </div>
+  <div class="progreso" aria-hidden="true">
+    <span style="width:67%" data-estado="base pausada sin-conexion"></span>
+    <span style="width:83%" data-estado="nuevo"></span>
+    <span style="width:100%" data-estado="completada"></span>
+  </div>
+  <p class="meta">
+    <span data-estado="base pausada sin-conexion">4 de 6 con resultado</span><span data-estado="nuevo">5 de 6 con resultado</span><span data-estado="completada">6 de 6 con resultado</span>
+    <span data-estado="base nuevo"> · se actualiza cada 15 s</span><span data-estado="pausada"> · actualización en pausa desde las 14:40</span>
+  </p>
+
+  <!-- Semana 9 B-06: pausa visible; la región viva anuncia SOLO los cambios -->
+  <button class="btn bloque" type="button" data-estado="base nuevo" aria-pressed="false">⏸ Pausar actualización</button>
+  <button class="btn bloque" type="button" data-estado="pausada" aria-pressed="true">▶ Reanudar actualización</button>
+  <div class="vivo" aria-live="polite" role="status"><span data-estado="nuevo">Nuevo: E2E-106 «Traslado de cama» FALLA.</span></div>
+
+  <h2 style="margin-top:16px">Escenarios</h2>
+  <div class="solo-movil">
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-101 · crítico</span><span class="chip pasa derecha">✓ Pasa</span></div>
+    <div class="meta">Admitir paciente · 1 intento</div>
+    <div class="evidencias"><a class="btn" href="#">Descargar traza de E2E-101</a></div>
+  </article>
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-102 · crítico</span><span class="chip pasa derecha">✓ Pasa</span></div>
+    <div class="meta">Prescribir con alergia · 1 intento</div>
+    <details class="mas"><summary>Evidencias de E2E-102 (2)</summary>
+      <div class="evidencias">
+        <a class="btn" href="#">Descargar traza de E2E-102</a>
+        <a class="btn" href="#">Descargar log de E2E-102</a>
+      </div>
+      <p class="meta">Huella de la traza: <span class="digest">4be107c2 9d…</span></p>
+    </details>
+  </article>
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-103</span><span class="chip inestable derecha">≈ Inestable</span></div>
+    <div class="meta">Resultado de laboratorio · 3 intentos</div>
+    <p class="ayuda">Pasó al reintentar: cuenta como no aprobado y el gate acepta hasta 2.</p>
+  </article>
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-104</span><span class="chip pasa derecha">✓ Pasa</span></div>
+    <div class="meta">Epicrisis · 1 intento</div>
+  </article>
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-106</span>
+      <span class="chip pendiente derecha" data-estado="base pausada sin-conexion">… Pendiente</span>
+      <span class="chip falla derecha" data-estado="nuevo completada">✕ Falla</span></div>
+    <div class="meta">Traslado de cama</div>
+    <div class="evidencias" data-estado="nuevo completada"><a class="btn" href="#">Descargar captura de E2E-106</a></div>
+  </article>
+  <article class="tarjeta escenario">
+    <div class="fila"><span class="titulo">E2E-108</span>
+      <span class="chip pendiente derecha" data-estado="base pausada sin-conexion nuevo">… Pendiente</span>
+      <span class="chip pasa derecha" data-estado="completada">✓ Pasa</span></div>
+    <div class="meta">Alta</div>
+  </article>
+
+  </div>
+  <table class="tabla" aria-label="Resultados de la ejecución #15">
+    <thead><tr><th>Escenario</th><th>Título</th><th>Resultado</th><th>Intentos</th><th>Evidencia</th></tr></thead>
+    <tbody>
+      <tr><td>E2E-101 · crítico</td><td>Admitir paciente</td><td>✓ Pasa</td><td>1</td><td><a href="#">Traza de E2E-101</a></td></tr>
+      <tr><td>E2E-102 · crítico</td><td>Prescribir con alergia</td><td>✓ Pasa</td><td>1</td><td><a href="#">Traza de E2E-102</a> · <a href="#">Log de E2E-102</a></td></tr>
+      <tr><td>E2E-103</td><td>Resultado de laboratorio</td><td>≈ Inestable</td><td>3</td><td>—</td></tr>
+      <tr><td>E2E-104</td><td>Epicrisis</td><td>✓ Pasa</td><td>1</td><td>—</td></tr>
+      <tr><td>E2E-106</td><td>Traslado de cama</td><td>… Pendiente</td><td>—</td><td>—</td></tr>
+      <tr><td>E2E-108</td><td>Alta</td><td>… Pendiente</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<div class="accion-fija" data-estado="completada">
+  <a class="btn primario" href="m3-gate.html">Evaluar el gate de 2.5.1</a>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-versiones.html"><span class="ico" aria-hidden="true">☰</span>Versiones</a>
+  <a href="m2-ejecucion.html" aria-current="page"><span class="ico" aria-hidden="true">▶</span>Ejecución</a>
+  <a href="m3-gate.html"><span class="ico" aria-hidden="true">⚖</span>Gate</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

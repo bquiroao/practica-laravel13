@@ -1,0 +1,22 @@
+@startuml flujo-auditor
+' Catálogo de medicamentos - Semana 8 - User flow del rol AUDITOR_CALIDAD
+title User flow · Auditor de calidad (AUDITOR_CALIDAD)
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+start
+:Inicio: Catálogo > Buscar (W1);
+:Elige "Vigentes a la fecha" = 2026-03-10
+(ayuda: "muestra lo que estaba vigente ese día");
+:Busca "ibupro";
+:Resultado: MED-000104 versión 1 (vigente en esa fecha);
+:Abre el historial (W5): versiones, fechas
+y motivo de cierre;
+if (¿Necesita evidencia?) then (sí)
+  :Copia el código y el request_id
+  mostrados en pantalla para su informe;
+else (no)
+endif
+stop
+@enduml
