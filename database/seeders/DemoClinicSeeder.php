@@ -6,9 +6,13 @@ use App\Models\Central\CentralUser;
 use App\Models\Central\Hospital;
 use App\Models\Central\HospitalMembership;
 use App\Models\Hospital\Appointment;
+use App\Models\Hospital\Bed;
+use App\Models\Hospital\BedStay;
+use App\Models\Hospital\CareEpisode;
 use App\Models\Hospital\DoctorProfile;
 use App\Models\Hospital\LocalPatient;
 use App\Models\Hospital\Specialty;
+use App\Models\Hospital\Ward;
 use App\Services\Hospital\UserRefSync;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +80,8 @@ class DemoClinicSeeder
                 ]);
         }
 
+        $this->seedBeds($hospital, $patients, $refs);
+
         // Algunas citas en los próximos días hábiles, dentro del horario.
         if ($appointments && $profiles !== [] && ! Appointment::query()->exists()) {
             $tz = $hospital->timezone ?: 'America/Guatemala';
@@ -94,6 +100,47 @@ class DemoClinicSeeder
                     'reason' => $reasons[$n], 'booked_by_user_ref_id' => $booker->local_user_ref_id,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Salas y camas, y tres pacientes internados. Los internamientos son datos de ejemplo cargados directamente:
+     * el flujo real de admisión lo integra su propio módulo.
+     *
+     * @param  list<LocalPatient>  $patients
+     */
+    private function seedBeds(Hospital $hospital, array $patients, UserRefSync $refs): void
+    {
+        if (Ward::query()->exists()) {
+            return;
+        }
+        $layout = [
+            ['MED-1', 'Medicina interna', 'Segundo nivel, ala norte', 8, 'standard', ['201', '202', '203', '204', '205', '206']],
+            ['CIR-1', 'Cirugía', 'Tercer nivel', 6, 'standard', ['301', '302', '303', '304']],
+            ['PED-1', 'Pediatría', 'Primer nivel', 6, 'pediatrica', ['101', '102', '103', '104']],
+            ['UCI', 'Cuidados intensivos', 'Segundo nivel, ala sur', 4, 'uci', ['U-1', 'U-2', 'U-3']],
+        ];
+        $beds = [];
+        foreach ($layout as [$code, $name, $location, $capacity, $type, $codes]) {
+            $ward = Ward::query()->create(['code' => $code, 'name' => $name, 'location' => $location, 'capacity' => $capacity, 'status' => 'active']);
+            foreach ($codes as $bedCode) {
+                $beds[$code.'/'.$bedCode] = Bed::query()->create(['ward_id' => $ward->ward_id, 'code' => $bedCode, 'type' => $type, 'status' => 'available']);
+            }
+        }
+        $beds['CIR-1/304']->forceFill(['status' => 'maintenance', 'status_reason' => 'Reparación del respaldo'])->save();
+
+        $doctorId = HospitalMembership::query()->current()->where('hospital_id', $hospital->hospital_id)->where('role_code', 'medico')->value('user_id');
+        if ($doctorId === null) {
+            return;
+        }
+        $ref = $refs->forUser(CentralUser::query()->findOrFail($doctorId), $hospital);
+        foreach ([[3, 'MED-1/201', 'Neumonía adquirida en la comunidad', 3], [7, 'CIR-1/301', 'Postoperatorio de apendicectomía', 1], [2, 'PED-1/101', 'Deshidratación moderada', 2]] as [$n, $bed, $reason, $days]) {
+            $since = now()->subDays($days);
+            $episode = CareEpisode::query()->create(['local_patient_id' => $patients[$n]->local_patient_id, 'type' => 'inpatient', 'status' => 'open',
+                'started_at' => $since, 'reason' => $reason]);
+            BedStay::query()->create(['care_episode_id' => $episode->care_episode_id, 'bed_id' => $beds[$bed]->bed_id,
+                'assigned_by_user_ref_id' => $ref->local_user_ref_id, 'started_at' => $since, 'reason' => 'Ingreso']);
+            $beds[$bed]->forceFill(['status' => 'occupied'])->save();
         }
     }
 }

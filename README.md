@@ -172,10 +172,10 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no 
 | Pacientes y agenda | `pacientes` | ✅ Integrado |
 | | `medicos-especialidades` | ✅ Integrado |
 | | `citas-medicas` | ✅ Integrado |
-| Camas | `catalogo-salas-camas` | 🔜 En el plan |
+| Camas | `catalogo-salas-camas` | ✅ Integrado |
 | | `admision-hospitalaria-asignacion-cama` | 🟦 **Disponible** (sección 7.2) |
-| | `traslados-altas-camas` | 🔜 En el plan |
-| | `dashboard-ocupacion` | 🔜 En el plan |
+| | `traslados-altas-camas` | ✅ Integrado |
+| | `dashboard-ocupacion` | ✅ Integrado |
 | Clínico | `expediente-medico` | 🔜 En el plan |
 | | `notas-soap-diagnosticos` | 🔜 En el plan |
 | | `signos-vitales-alertas` | 🔜 En el plan |
@@ -334,8 +334,9 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - **AU-01:** un episodio cerrado sin fecha de fin se guarda;
   - **AU-05:** una cama con estancia abierta sigue figurando como disponible.
 - **Se conecta con:**
-  - el catálogo de salas y camas (en el plan), que da de alta salas y camas en `/camas`;
-  - traslados y altas (en el plan), que cierran o mueven la estancia.
+  - el catálogo de salas y camas (integrado), que da de alta salas y camas en `/camas`;
+  - traslados y altas (integrado, `BedMovementService`), que cierran o mueven la estancia;
+  - la pantalla `/camas` (`resources/js/pages/beds/BedsPage.tsx`): agrega ahí el botón «Admitir paciente» en las camas disponibles.
 - **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas trabajan sobre esa estancia.
 
 ### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos`
@@ -421,7 +422,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **109 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **117 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
 
 ---
 
@@ -470,3 +471,8 @@ Todas las rutas están bajo `/api/v1`.
 | GET | `/disponibilidad?especialidad=&desde=[&medico=]` | `citas.ver` |
 | GET / POST | `/citas` (`?desde=&hasta=&medico=&paciente=`) | `citas.ver` / `citas.gestionar` |
 | POST | `/citas/{id}/estado` | `citas.gestionar` |
+| GET | `/camas` (mapa: salas, camas y quién las ocupa) | `camas.ver` |
+| POST | `/salas` · `/salas/{id}/camas` | `camas.gestionar` |
+| PATCH | `/camas/{id}/estado` | `camas.gestionar` |
+| POST | `/internamientos/{episodio}/traslado` · `/internamientos/{episodio}/alta` | `traslados.gestionar` |
+| GET | `/ocupacion` | `ocupacion.ver` |

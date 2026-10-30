@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
+use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
 use App\Http\Controllers\Api\V1\Clinical\SpecialtyController;
@@ -61,5 +62,14 @@ Route::middleware('tenant')->group(function (): void {
         Route::get('/citas', [AppointmentController::class, 'index'])->middleware('permiso:citas.ver');
         Route::post('/citas', [AppointmentController::class, 'store'])->middleware('permiso:citas.gestionar');
         Route::post('/citas/{appointment}/estado', [AppointmentController::class, 'transition'])->middleware('permiso:citas.gestionar')->whereUuid('appointment');
+
+        // Fase 3: catálogo de salas y camas, traslados y altas, y ocupación.
+        Route::get('/camas', [BedController::class, 'index'])->middleware('permiso:camas.ver');
+        Route::post('/salas', [BedController::class, 'storeWard'])->middleware('permiso:camas.gestionar');
+        Route::post('/salas/{ward}/camas', [BedController::class, 'storeBed'])->middleware('permiso:camas.gestionar')->whereUuid('ward');
+        Route::patch('/camas/{bed}/estado', [BedController::class, 'updateBedStatus'])->middleware('permiso:camas.gestionar')->whereUuid('bed');
+        Route::post('/internamientos/{episode}/traslado', [BedController::class, 'transfer'])->middleware('permiso:traslados.gestionar')->whereUuid('episode');
+        Route::post('/internamientos/{episode}/alta', [BedController::class, 'discharge'])->middleware('permiso:traslados.gestionar')->whereUuid('episode');
+        Route::get('/ocupacion', [BedController::class, 'occupancy'])->middleware('permiso:ocupacion.ver');
     });
 });

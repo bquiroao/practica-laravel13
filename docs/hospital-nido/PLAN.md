@@ -34,7 +34,7 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 |---|---|---|---|
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
-| 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | Pendiente |
+| 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas; prescripciones-alergias cuando existan los catálogos de medicamentos y alergias | Pendiente |
 | 5 | Laboratorio, de la orden a la validación | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico (sobre el catálogo de pruebas) | Pendiente |
 | 6 | Reportes | reportes-operativos-exportables | Pendiente |
@@ -113,6 +113,36 @@ Son 30 módulos: 4 + 3 + 3 + 4 + 4 + 1 + 4 + 1 en las fases, más los 6 disponib
 - `php artisan test`: 109 correctas y 2 incompletas (AU-01 episodios y AU-05 camas, de la fase 3).
 - Se cerró **AU-02**: código y nombres de paciente en blanco.
 - Recorrido en Chrome: 30/30, sin violaciones WCAG A/AA y sin desborde a 375 px.
+
+## Fase 3: qué se entregó
+
+**Catálogo de salas y camas** (módulo catalogo-salas-camas):
+- salas con capacidad opcional;
+- camas con código único dentro de su sala y tipo (general, UCI, aislamiento, pediátrica);
+- la capacidad no se puede superar, ni con dos altas a la vez (la sala se bloquea al agregar una cama);
+- cambios de estado con motivo, por transiciones permitidas;
+- una cama ocupada no se cambia desde el catálogo.
+
+**Traslados y altas** (módulo traslados-altas-camas):
+- trabajan sobre la estancia abierta que crea la admisión;
+- el traslado cierra la estancia y abre otra en una cama disponible, en una sola transacción, y puede exigir cama de UCI;
+- el alta registra su tipo (médica, voluntaria, referencia o defunción) y un resumen, cierra el episodio y deja la cama en mantenimiento para limpieza;
+- la defunción marca la ficha del paciente como fallecido.
+
+**Ocupación** (módulo dashboard-ocupacion):
+- porcentaje sobre las camas operativas;
+- «ocupada» se cuenta por la estancia abierta, no por el estado guardado;
+- avisa de las camas cuyo estado no coincide (relacionado con AU-05).
+
+**Pantallas:**
+- mapa de camas por sala con colores, filtro por estado y detalle con las acciones permitidas;
+- tablero de ocupación que se actualiza cada minuto.
+
+**Verificación:**
+- 8 pruebas Feature nuevas (`BedTest`);
+- recorrido en Chrome: 15/15, sin violaciones WCAG A/AA y sin desborde a 375 px.
+- Las pruebas del esquema que revierten migraciones por pasos ahora cuentan los pasos solas, así una migración nueva no las rompe.
+- Los internamientos de la demostración se cargan como datos de ejemplo; el flujo real de admisión lo integra su propio módulo.
 
 ## Pendientes conocidos
 
