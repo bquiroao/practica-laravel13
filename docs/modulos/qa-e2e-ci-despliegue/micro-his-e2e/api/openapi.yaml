@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS QA E2E, CI y guía de despliegue
-  version: 1.1.0
+  version: 1.2.0
   summary: Planificación de pruebas, ejecución E2E, conservación de evidencia y quality gates por versión.
   description: |
     Contrato del módulo QA E2E del Sistema Hospitalario Integrado. Lo consumen tres roles humanos (Ingeniero de
@@ -178,6 +178,42 @@ paths:
       responses:
         '200':
           description: Evaluación guardada (se agrega; nunca reemplaza a la anterior)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/gate/vista-previa:
+    post:
+      operationId: previsualizarGate
+      summary: Semana 12 (B-01) lo que el gate decidiría ahora con la política vigente, SIN guardar nada (misma función que evaluarGate)
+      tags: [gate]
+      x-permiso: e2e.evaluar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoGate'
+      responses:
+        '200':
+          description: Decisión prevista (codigo GATE_PREVISTO); no se guarda evaluación, estado ni traza
           content:
             application/json:
               schema:

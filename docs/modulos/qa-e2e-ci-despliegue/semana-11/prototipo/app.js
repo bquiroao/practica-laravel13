@@ -209,8 +209,18 @@
       pintar(`<h1>Registrar la decisión del gate</h1>
         <p class="sub">La calcula el servidor con la política vigente al registrar; esta pantalla no aprueba ni rechaza por su cuenta.</p>
         <section class="tarjeta"><h2>Ejecución #${e.id}</h2><p>${cuenta('PASA')} pasan · ${cuenta('FALLA')} fallan · ${cuenta('INESTABLE')} inestables · ${Object.keys(t.plan).length - e.resultados.length} sin resultado</p></section>
-        <h2>Reglas que se evalúan</h2><ul class="reglas" id="reglas">${Object.entries(REGLAS).map(([k, n]) => `<li><span>${n}</span><span class="valor">se calcula al registrar</span></li>`).join('')}</ul>
-        <div id="resultado"></div>`);
+        <h2 id="titulo-reglas">Si se registra ahora</h2><ul class="reglas" id="reglas"></ul>
+        <div id="prevista"></div><div id="resultado"></div>`);
+      // Semana 12 (B-01): la vista previa la calcula el SERVIDOR con la misma función que el registro; nada se guarda.
+      const pintarReglas = (d) => { $('#reglas').innerHTML = Object.entries(REGLAS).map(([k, n]) => `<li><span>${n}</span><span class="valor">regla ${k.split('_')[0]}</span><span class="resultado-regla ${d.reglas[k] ? 'cumple">✓ cumple' : 'no-cumple">✕ no cumple'}</span></li>`).join(''); };
+      const vp = await api('POST', `/versiones/${encodeURIComponent(version)}/gate/vista-previa`, { ejecucion: e.id });
+      const prevista = vp.estado === 200 ? vp.cuerpo.decision : null;
+      if (prevista) {
+        pintarReglas(vp.cuerpo);
+        $('#prevista').innerHTML = `<section class="aviso ${prevista === 'APROBADO' ? 'ok' : 'error'}"><h2>Resultado esperado: ${chip[prevista][1]}</h2><p>${vp.cuerpo.causas.length ? 'Causas: ' + esc(vp.cuerpo.causas.join('; ')) + '.' : 'Todas las reglas se cumplen.'} Si al registrar el servidor decide otra cosa, se muestra la decisión real.</p></section>`;
+      } else {
+        $('#prevista').innerHTML = aviso('atencion', vp.cuerpo.error);
+      }
       marco({ atras: '#/versiones', seccion: 'gate', contexto: $('#contexto').innerHTML.replace(/^<div class="contexto">|<\/div>$/g, ''),
         accion: `<button class="btn primario" type="button" id="registrar">Registrar la decisión del gate…</button>` });
       $('#registrar').addEventListener('click', () => dialogo({
@@ -221,8 +231,11 @@
           const s = await api('POST', `/versiones/${encodeURIComponent(version)}/gate`, { ejecucion: e.id });
           if (s.estado !== 200) { $('#resultado').innerHTML = aviso('error', s.cuerpo.error); $('#aviso').focus(); return; }
           const d = s.cuerpo;
-          $('#reglas').innerHTML = Object.entries(REGLAS).map(([k, n]) => `<li><span>${n}</span><span class="valor">regla ${k.split('_')[0]}</span><span class="resultado-regla ${d.reglas[k] ? 'cumple">✓ cumple' : 'no-cumple">✕ no cumple'}</span></li>`).join('');
-          $('#resultado').innerHTML = `<section class="aviso ${d.decision === 'APROBADO' ? 'ok' : 'error'}" id="aviso" tabindex="-1" role="status"><h2>Decisión registrada: ${chip[d.decision][1]}</h2>
+          pintarReglas(d);
+          $('#titulo-reglas').textContent = 'Reglas evaluadas';
+          $('#prevista').innerHTML = '';
+          const cambio = prevista && prevista !== d.decision ? ` La vista previa decía ${chip[prevista][1]}: la decisión cambió al registrar.` : ' Coincide con la vista previa.';
+          $('#resultado').innerHTML = `<section class="aviso ${d.decision === 'APROBADO' ? 'ok' : 'error'}" id="aviso" tabindex="-1" role="status"><h2>Decisión registrada: ${chip[d.decision][1]}</h2><p>${cambio}</p>
             <p>Política ${esc(d.politica)}.${d.causas.length ? ' Causas: ' + esc(d.causas.join('; ')) + '.' : ''} ${d.decision === 'APROBADO' ? `Vence en ${VIGENCIA_H} h.` : 'Para aprobar, corrija y ejecute otra versión.'}</p></section>`;
           $('#accion').innerHTML = '';
           $('#aviso').focus();
