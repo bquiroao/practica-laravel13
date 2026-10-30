@@ -70,4 +70,18 @@ final readonly class Despliegue
     {
         return new self($id, $this->tenant, $this->version, $this->digest, $this->entorno, $this->guia, $this->operador, $this->estado, $this->revertidoA, $this->en);
     }
+
+    /** Semana 15 (DEF-01): ventana en la que un registro idéntico se toma como reintento del operador, no como otro despliegue. */
+    public const VENTANA_REINTENTO_MIN = 15;
+
+    /**
+     * DEF-01 (RT-01 de la revisión técnica): el operador reintenta cuando se le corta la red. Mismo digest, entorno, guía y
+     * resultado del smoke, dentro de la ventana, es el MISMO despliegue. Fuera de la ventana, o con algo distinto, es otro.
+     */
+    public static function esReintento(?self $ultimo, string $digest, string $entorno, string $guia, string $smoke, \DateTimeImmutable $ahora): bool
+    {
+        return $ultimo !== null && $ultimo->digest === $digest && $ultimo->entorno === $entorno && $ultimo->guia === $guia
+            && $ultimo->estado === ($smoke === 'PASA' ? self::DESPLEGADO : self::REVERTIDO)
+            && $ahora->getTimestamp() - $ultimo->en->getTimestamp() <= self::VENTANA_REINTENTO_MIN * 60;
+    }
 }

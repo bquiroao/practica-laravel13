@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * Defectos sembrados a propósito (34, sembrados de la semana 3 a la 12; en la 7 se reubicaron los del código refactorizado): cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
+ * Defectos sembrados a propósito (35, sembrados de la semana 3 a la 15; en la 7 se reubicaron los del código refactorizado): cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
  * de uso o una restricción del esquema) y corre la suite sobre la copia. Si la suite sigue en verde, falta una prueba.
  *   E2E_DB_DSN=... php tests/mutaciones.php      (sin base, las mutaciones del esquema sobreviven: corren solo con PostgreSQL)
  * Código de salida: cantidad de mutaciones que sobreviven.
@@ -73,6 +73,9 @@ $mutaciones = [
     // Semana 12: la vista previa del gate no debe tener efectos.
     'M34 la vista previa del gate registra la evaluación' => ['src/Aplicacion/CasosDeUso/EvaluarGate.php',
         'return $this->salida(\'GATE_PREVISTO\', $v, $e, $d);', 'return $this->ejecutar($usuario, $tenant, $numero, $ejecucionId);'],
+    // Semana 15: DEF-01, el reintento de un despliegue no se duplica.
+    'M35 un reintento idéntico del despliegue se registra otra vez (DEF-01)' => ['src/Dominio/Modelo/Despliegue.php',
+        'return $ultimo !== null && $ultimo->digest === $digest', 'return false && $ultimo->digest === $digest'],
 ];
 
 function copiar(string $origen, string $destino): void
