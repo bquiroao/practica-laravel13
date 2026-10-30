@@ -1,0 +1,17 @@
+PASS: camino feliz registra evidencia
+PASS: notificador doble confirma envío
+PASS: PDO guarda evaluación
+PASS: PDO guarda evento técnico
+PASS: notificación sin identificador
+PASS: regla rechaza ID no demo
+PASS: entrada inválida no consulta HIS
+PASS: no aceptar soporte nativo inventado
+PASS: estado desconocido no genera éxito
+PASS: rechazos no notifican
+PASS: HIS sin dato no inventa estado
+PASS: error PDO en segundo INSERT explícito
+PASS: rollback elimina primera escritura
+PASS: sin evento parcial
+PASS: falla de persistencia no notifica
+PASS: capacidad ausente separada de lectura
+OK: 16 aserciones. PDO SQLite real temporal; HIS y notificador dobles.

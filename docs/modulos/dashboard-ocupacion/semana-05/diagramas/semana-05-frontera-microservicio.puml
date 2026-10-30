@@ -1,0 +1,19 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — servicio de ocupación como modelo de lectura (solo si se cumplen los criterios de la §3)
+[Catálogo de camas] as cat
+[Admisión y estancias] as adm
+queue "Eventos\n(cama.estado_cambiado, estancia.abierta, estancia.cerrada)" as ev
+node "Servicio de ocupación" {
+  [Proyector de eventos] as proy
+  [API /ocupacion] as api
+  database "Modelo de lectura\n(camas por sala y cortes)" as dbo
+}
+[SPA y pantallas de jefatura] as spa
+cat --> ev : outbox -> publica
+adm --> ev : outbox -> publica
+ev --> proy : consume (idempotente por id de evento)
+proy --> dbo : actualiza la proyección
+api --> dbo : lee y consolida cortes
+spa --> api : GET /ocupacion (el mismo contrato)
+note right of api : cada corte guarda su hora (R-05)\ny avisa a los 15 min (R-06)
+@enduml

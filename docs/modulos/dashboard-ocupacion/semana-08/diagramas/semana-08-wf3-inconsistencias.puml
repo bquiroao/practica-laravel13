@@ -1,0 +1,12 @@
+@startsalt
+title W3 — Inconsistencias cama-estancia (administrador, E1)
+{+
+  <b>2 camas no coinciden con sus estancias</b> · corte de las 10:35
+  {#
+    <b>Cama</b> | <b>Estado en el catálogo</b> | <b>Estancia abierta</b> | <b>Dónde se corrige</b>
+    A/103 | ocupada | no | Admisión: registrar o cerrar la estancia
+    A/108 | disponible | sí | Catálogo o admisión
+  }
+  <i>El tablero solo marca la diferencia; no cambia estados (R-04, R-09). No se muestra ningún paciente (R-07).</i>
+}
+@endsalt

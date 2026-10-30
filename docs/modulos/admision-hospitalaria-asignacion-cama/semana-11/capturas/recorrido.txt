@@ -1,0 +1,24 @@
+== desktop 1280x800
+  codigo invalido al salir del campo: aria-invalid= true describedby= error-paciente ayuda-paciente
+  01 datos: titulo="Nueva admisión · Admisión hospitalaria" foco=SELECT#servicio scroll_horizontal=no (1280/1280)
+  02 camas: titulo="Elegir cama · Admisión hospitalaria" foco=H1 scroll_horizontal=no (1280/1280)
+  03 confirmar: titulo="Confirmar admisión · Admisión hospitalaria" foco=H1 scroll_horizontal=no (1280/1280)
+  boton tras clic: disabled= True texto= Guardando…
+  04 resultado: titulo="Admisión registrada · Admisión hospitalaria" foco=H1 scroll_horizontal=no (1280/1280)
+  05 error critico: titulo="Elegir cama · Admisión hospitalaria" foco=DIV#aviso scroll_horizontal=no (1280/1280)
+  aviso: La cama B-201 ya fue asignada a otra admisión. | cama perdida: B-201 | alternativas: Camas disponibles (1) ['B-202']
+  06 recuperado: titulo="Admisión registrada · Admisión hospitalaria" foco=H1 scroll_horizontal=no (1280/1280)
+  resultado: Paciente PAC-00452 en cama B-202 (Medicina interna).
+  errores JavaScript/consola: ninguno
+== movil 375x760
+  codigo invalido al salir del campo: aria-invalid= true describedby= error-paciente ayuda-paciente
+  01 datos: titulo="Nueva admisión · Admisión hospitalaria" foco=SELECT#servicio scroll_horizontal=no (375/375)
+  02 camas: titulo="Elegir cama · Admisión hospitalaria" foco=H1 scroll_horizontal=no (375/375)
+  03 confirmar: titulo="Confirmar admisión · Admisión hospitalaria" foco=H1 scroll_horizontal=no (375/375)
+  boton tras clic: disabled= True texto= Guardando…
+  04 resultado: titulo="Admisión registrada · Admisión hospitalaria" foco=H1 scroll_horizontal=no (375/375)
+  05 error critico: titulo="Elegir cama · Admisión hospitalaria" foco=DIV#aviso scroll_horizontal=no (375/375)
+  aviso: La cama B-201 ya fue asignada a otra admisión. | cama perdida: B-201 | alternativas: Camas disponibles (1) ['B-202']
+  06 recuperado: titulo="Admisión registrada · Admisión hospitalaria" foco=H1 scroll_horizontal=no (375/375)
+  resultado: Paciente PAC-00452 en cama B-202 (Medicina interna).
+  errores JavaScript/consola: ninguno

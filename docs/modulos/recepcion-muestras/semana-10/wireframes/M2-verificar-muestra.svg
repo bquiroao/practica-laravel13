@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="700" viewBox="0 0 720 700" font-family="Segoe UI, Arial, sans-serif" font-size="14">
+  <title>Pantalla M2 - Verificar muestra (360 px)</title>
+  <rect width="720" height="700" fill="#f6f7f9"/>
+  <text x="20" y="28" font-size="16" font-weight="bold">M2 - Verificar vínculo e integridad</text>
+  <rect x="20" y="44" width="360" height="640" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+  <rect x="20" y="44" width="360" height="52" rx="14" fill="#1f4e79"/>
+  <text x="36" y="76" fill="#fff" font-weight="bold">‹ Verificar muestra</text>
+  <text x="300" y="76" fill="#fff" font-size="12">Paso 2 de 3</text>
+  <rect x="36" y="108" width="328" height="92" rx="8" fill="#eef5ff" stroke="#1f4e79"/>
+  <text x="48" y="130" font-weight="bold">Resumen fijo (siempre visible)</text>
+  <text x="48" y="150">Orden ORD-0000 · EX-HEMO · Sangre</text>
+  <text x="48" y="170">Paciente: P. G*** (iniciales)</text>
+  <text x="48" y="190">Recipiente nuevo: código se asigna al guardar</text>
+  <text x="36" y="226" font-weight="bold">Etiqueta visible</text>
+  <rect x="36" y="234" width="158" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="115" y="264" text-anchor="middle">Sí</text>
+  <rect x="206" y="234" width="158" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="285" y="264" text-anchor="middle">No</text>
+  <text x="36" y="308" font-weight="bold">Recipiente íntegro</text>
+  <rect x="36" y="316" width="158" height="48" rx="6" fill="#1f4e79"/><text x="115" y="346" text-anchor="middle" fill="#fff">✓ Sí</text>
+  <rect x="206" y="316" width="158" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="285" y="346" text-anchor="middle">No</text>
+  <text x="36" y="390" font-weight="bold">Sello íntegro (solo sangre)</text>
+  <rect x="36" y="398" width="158" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="115" y="428" text-anchor="middle">Sí</text>
+  <rect x="206" y="398" width="158" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/><text x="285" y="428" text-anchor="middle">No</text>
+  <rect x="36" y="464" width="328" height="56" rx="8" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="48" y="486" font-weight="bold">⚠ Falta responder: etiqueta y sello</text>
+  <text x="48" y="506" font-size="12">El foco pasa al primer campo sin responder.</text>
+  <rect x="36" y="540" width="328" height="48" rx="6" fill="#bbb"/>
+  <text x="200" y="570" text-anchor="middle" fill="#333" font-weight="bold">Continuar (deshabilitado)</text>
+  <text x="36" y="610" font-size="12" fill="#555">Se habilita al responder todo; el motivo lo indica el texto.</text>
+
+  <g font-size="13">
+    <text x="410" y="80" font-weight="bold">Decisiones de contenido</text>
+    <text x="410" y="104">1. Formulario de una columna, una pregunta</text>
+    <text x="410" y="124">   por fila; botones Sí/No de 48 px.</text>
+    <text x="410" y="148">2. El resumen queda fijo: el operador no</text>
+    <text x="410" y="168">   pierde el contexto al desplazarse.</text>
+    <text x="410" y="192">3. Sello solo si el tipo es sangre (regla</text>
+    <text x="410" y="212">   de la Semana 3); en orina no se muestra.</text>
+    <text x="410" y="236">4. Etiquetas encima del campo, no como</text>
+    <text x="410" y="256">   marcador dentro del campo.</text>
+    <text x="410" y="290" font-weight="bold">Accesibilidad</text>
+    <text x="410" y="312">· Área táctil mínima 48 x 48 px.</text>
+    <text x="410" y="334">· Selección con marca y texto, no solo color.</text>
+    <text x="410" y="356">· Foco al primer campo pendiente.</text>
+    <text x="410" y="378">· Mensaje de error asociado al campo.</text>
+    <text x="410" y="420" fill="#721c24" font-weight="bold">Propuesta conceptual, sin implementar.</text>
+  </g>
+</svg>

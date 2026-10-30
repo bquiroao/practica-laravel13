@@ -1,0 +1,25 @@
+Semana 2 · LSP · QA y regresión — verificación (PHP 8.4.26)
+
+[PASA ] CA-01   RF-01 · Caso incompleto: 422 con cada campo (paso sin resultado esperado, prioridad, ningún requisito)
+[PASA ] CA-02   RF-02 · El autor no aprueba su caso; editar un caso aprobado crea la versión 2 y la 1 sigue aprobada
+[PASA ] CA-03   RF-03 · Iniciar: falta un crítico afectado → ALCANCE_INCOMPLETO con su id; sin build; caso sin aprobar; válida → EN_CURSO
+[PASA ] CA-04   RF-04 · Un resultado fuera de una campaña EN_CURSO o de un caso fuera del alcance → 409
+[PASA ] CA-05   RF-05 · FALLA sin evidencia o con SOLO un enlace → 422; NO_APLICA sin motivo → 422; > 5 MB → 413; bytes que no son imagen → TIPO_NO_PERMITIDO
+[PASA ] CA-06   RF-06 · Almacén de evidencias caído: 503 EVIDENCIA_NO_DISPONIBLE y NINGÚN intento registrado (fail-closed)
+[PASA ] CA-07   RF-07 · Una FALLA sin defecto → 422 DEFECTO_REQUERIDO; con defecto → 201 y el intento lo referencia
+[PASA ] CA-08   RF-08 · CRÍTICA sin pasos o sin evidencia → DEFECTO_INCOMPLETO; cambiar la severidad propuesta exige motivo y queda en el historial
+[PASA ] CA-09   RF-09 · El desarrollador solo marca CORREGIDO; cierra una re-ejecución PASA; una FALLA lo reabre; verificar sin corregir → rechazo
+[PASA ] CA-10   RF-10 · Cerrar: pendientes → CASOS_PENDIENTES; 38/40 con 0 críticos = 95 % → GO; 37/40 → NO_GO; 40/40 con 1 crítico → NO_GO; cuenta el ÚLTIMO intento
+[PASA ] CA-11   RF-12 · Un intento es inmutable (todas sus propiedades readonly) y un intento nuevo NO borra el anterior
+[PASA ] CA-12   RF-13 · Idempotencia: la misma clave y contenido devuelve la misma respuesta sin duplicar; otro contenido → 409 CLAVE_REUTILIZADA
+[PASA ] CA-13   RF-14 · Sin qa.ejecutar en el tenant → 403 y nada registrado
+[PASA ] CA-14   RNF-04 · Evidencia con datos clínicos: el informe se genera sin su contenido; verla exige qa.ver_evidencia_clinica
+[PASA ] CA-15   RNF-02 · Integridad: la evidencia guardada se relee y coincide; si alguien la altera en el almacén → ALTERADA
+[PASA ] LSP-01  ANTES: la misma suite de contrato sobre los 4 subtipos de Evidencia → 2 la rompen (EnlaceExterno, CapturaConDatosClinicos)
+[PASA ] LSP-02  DESPUÉS: la misma suite sobre los 8 subtipos (4 tipos × 2 clasificaciones) → 0 violaciones; los 4 métodos del contrato son final
+[PASA ] LSP-03  Consecuencia: el log del CI rota. ANTES la verificación dice INTEGRA (falso); DESPUÉS la copia guardada no cambia y una alteración real da ALTERADA
+[PASA ] LSP-04  Consecuencia: una captura con datos clínicos. ANTES el informe de la campaña LANZA (no hay informe); DESPUÉS se genera
+[PASA ] LSP-05  Sustitución: un tipo nuevo (ResultadoJUnit de PHPUnit) se registra, se verifica y se informa sin cambiar ningún caso de uso
+[PASA ] LSP-06  Los casos de uso no preguntan por el subtipo: 0 instanceof y 0 menciones a Captura o ResultadoJUnit en la Aplicación
+
+Total: 21  Pasan: 21  Fallan: 0

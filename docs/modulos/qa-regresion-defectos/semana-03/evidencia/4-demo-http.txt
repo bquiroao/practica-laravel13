@@ -1,0 +1,144 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" bash bin/demo-http.sh
+Esquema «qa» creado y datos de demostración cargados.
+
+### 1. El Analista QA diseña TC-200 (queda BORRADOR)
+> POST /api/v1/qa/casos
+HTTP/1.1 201 Created
+Location: /api/v1/qa/casos/TC-200
+{"codigo":"CASO_DISENADO","id":"TC-200","version":1,"estado":"BORRADOR"}
+
+
+### 2. El Analista QA no puede aprobar (no tiene qa.aprobar): 403
+> POST /api/v1/qa/casos/TC-200/aprobacion
+HTTP/1.1 403 Forbidden
+{"error":"PERMISO_DENEGADO"}
+
+
+### 3. El Líder QA lo aprueba
+> POST /api/v1/qa/casos/TC-200/aprobacion
+HTTP/1.1 200 OK
+{"codigo":"CASO_APROBADO","id":"TC-200","version":1,"aprobador":"lider-qa"}
+
+
+### 4. Campaña sin los críticos de la matriz: se planifica...
+> POST /api/v1/qa/campanas
+HTTP/1.1 201 Created
+Location: /api/v1/qa/campanas/1/trazabilidad
+{"codigo":"CAMPANA_PLANIFICADA","id":1,"estado":"PLANIFICADA","alcance":{"TC-109":1}}
+
+
+### 5. ...pero no inicia: faltan TC-107 y TC-108 (422)
+> POST /api/v1/qa/campanas/1/inicio
+HTTP/1.1 422 Unprocessable Content
+{"error":"ALCANCE_INCOMPLETO","detalle":["TC-107","TC-108"]}
+
+
+### 6. Campaña completa: planificar (201 + Location)
+> POST /api/v1/qa/campanas
+HTTP/1.1 201 Created
+Location: /api/v1/qa/campanas/2/trazabilidad
+{"codigo":"CAMPANA_PLANIFICADA","id":2,"estado":"PLANIFICADA","alcance":{"TC-107":1,"TC-108":1,"TC-200":1}}
+
+
+### 7. Iniciar sobre el build 1.4.0
+> POST /api/v1/qa/campanas/2/inicio
+HTTP/1.1 200 OK
+{"codigo":"CAMPANA_INICIADA","id":2,"estado":"EN_CURSO","build":"1.4.0+abc1234"}
+
+
+### 8. FALLA sin evidencia: 422
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 422 Unprocessable Content
+{"error":"EVIDENCIA_REQUERIDA"}
+
+
+### 9. FALLA con captura y defecto: 201
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 201 Created
+{"codigo":"RESULTADO_REGISTRADO","intento":1,"caso":"TC-107","numero":1,"resultado":"FALLA","evidencias":1,"defecto":1,"defecto_verificado":null,"defecto_estado":"NUEVO"}
+
+
+### 10. Reintento con la misma Idempotency-Key: 200, el mismo intento
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 200 OK
+{"codigo":"RESULTADO_YA_REGISTRADO","intento":1,"caso":"TC-107","numero":1,"resultado":"FALLA","evidencias":1,"defecto":1}
+
+
+### 11. TC-108 y TC-200 pasan
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 201 Created
+{"codigo":"RESULTADO_REGISTRADO","intento":2,"caso":"TC-108","numero":1,"resultado":"PASA","evidencias":0,"defecto":null,"defecto_verificado":null}
+
+
+### 11b.
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 201 Created
+{"codigo":"RESULTADO_REGISTRADO","intento":3,"caso":"TC-200","numero":1,"resultado":"PASA","evidencias":0,"defecto":null,"defecto_verificado":null}
+
+
+### 12. El Líder QA confirma la severidad CRÍTICA
+> POST /api/v1/qa/defectos/1/clasificacion
+HTTP/1.1 200 OK
+{"codigo":"DEFECTO_CLASIFICADO","id":1,"estado":"ABIERTO","severidad":"CRITICA","prioridad":"ALTA"}
+
+
+### 13. Cerrar ahora: NO_GO (1 crítico abierto, tasa 66,7 %)
+> POST /api/v1/qa/campanas/2/cierre
+HTTP/1.1 200 OK
+{"codigo":"CAMPANA_CERRADA","id":2,"decision":"NO_GO","tasa_aprobados":0.6667,"umbral":0.95,"causas":["1 defecto crítico abierto","tasa de aprobados 66.7 % menor que el umbral 95.0 %"]}
+
+
+### 14. El desarrollador no puede registrar resultados (403)
+> POST /api/v1/qa/campanas/2/resultados
+HTTP/1.1 403 Forbidden
+{"error":"PERMISO_DENEGADO"}
+
+
+### 15. El desarrollador marca el defecto CORREGIDO en 1.4.1
+> POST /api/v1/qa/defectos/1/correccion
+HTTP/1.1 200 OK
+{"codigo":"DEFECTO_CORREGIDO","id":1,"estado":"CORREGIDO"}
+
+
+### 16. Nueva campaña sobre 1.4.1
+> POST /api/v1/qa/campanas
+HTTP/1.1 201 Created
+Location: /api/v1/qa/campanas/3/trazabilidad
+{"codigo":"CAMPANA_PLANIFICADA","id":3,"estado":"PLANIFICADA","alcance":{"TC-107":1,"TC-108":1}}
+
+
+### 16b.
+> POST /api/v1/qa/campanas/3/inicio
+HTTP/1.1 200 OK
+{"codigo":"CAMPANA_INICIADA","id":3,"estado":"EN_CURSO","build":"1.4.1+def5678"}
+
+
+### 17. Re-ejecución de TC-107 que verifica el defecto 1: PASA lo CIERRA
+> POST /api/v1/qa/campanas/3/resultados
+HTTP/1.1 201 Created
+{"codigo":"RESULTADO_REGISTRADO","intento":4,"caso":"TC-107","numero":1,"resultado":"PASA","evidencias":0,"defecto":null,"defecto_verificado":{"id":1,"estado":"CERRADO"}}
+
+
+### 17b.
+> POST /api/v1/qa/campanas/3/resultados
+HTTP/1.1 201 Created
+{"codigo":"RESULTADO_REGISTRADO","intento":5,"caso":"TC-108","numero":1,"resultado":"PASA","evidencias":0,"defecto":null,"defecto_verificado":null}
+
+
+### 18. Cerrar: GO
+> POST /api/v1/qa/campanas/3/cierre
+HTTP/1.1 200 OK
+{"codigo":"CAMPANA_CERRADA","id":3,"decision":"GO","tasa_aprobados":1.0,"umbral":0.95,"causas":[]}
+
+
+### 19. Trazabilidad de la campaña 2 (Responsable de producto)
+> GET /api/v1/qa/campanas/2/trazabilidad
+HTTP/1.1 200 OK
+{"codigo":"TRAZABILIDAD","campana":2,"nombre":"Regresión H4","estado":"CERRADA","build":"1.4.0+abc1234","decision":{"valor":"NO_GO","tasa_aprobados":0.6667,"causas":["1 defecto crítico abierto","tasa de aprobados 66.7 % menor que el umbral 95.0 %"]},"casos":[{"caso":"TC-107","version":1,"requisitos":["RF-07"],"intentos":1,"ultimo_resultado":"FALLA","evidencias":[{"tipo":"captura","huella":"f679f9dee80e8f369f6a8a335a2836e974549becc5101af1d23dee016d468eea","tamano":29,"clasificacion":"GENERAL"}],"defectos":[{"id":1,"severidad":"CRITICA","clasificado":true,"estado":"CERRADO"}]},{"caso":"TC-108","version":1,"requisitos":["RF-07","RF-08"],"intentos":1,"ultimo_resultado":"PASA","evidencias":[],"defectos":[]},{"caso":"TC-200","version":1,"requisitos":["RF-07"],"intentos":1,"ultimo_resultado":"PASA","evidencias":[],"defectos":[]}],"requisitos":{"RF-07":["TC-107","TC-108","TC-200"],"RF-08":["TC-108"]}}
+
+
+### 20. Sin token válido: 401
+> GET /api/v1/qa/campanas/2/trazabilidad
+HTTP/1.1 401 Unauthorized
+{"error":"NO_AUTENTICADO"}
+

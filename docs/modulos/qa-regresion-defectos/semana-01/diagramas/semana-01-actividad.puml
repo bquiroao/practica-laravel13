@@ -1,0 +1,206 @@
+@startuml semana-01-actividad
+!pragma layout smetana
+title Módulo QA y regresión — Actividad\n«Diseño de casos manuales, campaña de regresión, evidencia, defectos y trazabilidad»
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F4F8F2
+skinparam ActivityBorderColor #3B6E2E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:A-01 Recibir la solicitud con token y tenant (X-Tenant-ID);
+if (D-01 ¿Token válido?) then (no)
+  #FDECEC:E-01 401 «sesión no válida»;
+  stop
+else (sí)
+endif
+:A-02 Pedir autorización al Servicio RBAC
+(qa.disenar | qa.aprobar | qa.planificar | qa.ejecutar |
+qa.clasificar | qa.corregir | qa.cerrar | qa.consultar);
+if (D-02 ¿Permiso concedido en este tenant?) then (no)
+  #FDECEC:E-02 403 genérico + referencia;
+  stop
+else (sí)
+endif
+
+switch (D-03 ¿Qué operación?)
+case (Diseñar y aprobar caso)
+  :A-03 Validar el caso: título, precondiciones,
+pasos con resultado esperado, prioridad y
+al menos un requisito (RF) trazado;
+  if (D-04 ¿Caso completo y trazado?) then (no)
+    #FDECEC:E-03 422 con los campos inválidos;
+    stop
+  else (sí)
+  endif
+  :Guardar como BORRADOR (versión n);
+  if (D-05 ¿Quien aprueba es distinto del autor?) then (no)
+    #FDECEC:E-04 409 APROBACION_POR_AUTOR
+(segregación de funciones);
+    stop
+  else (sí)
+  endif
+  #E8F5E9:F-01 Caso APROBADO (versión n publicada,
+editarlo crea la versión n+1);
+  stop
+
+case (Iniciar campaña)
+  if (D-06 ¿La campaña es del tenant?) then (no)
+    #FDECEC:E-05 404 idéntico a «no existe»;
+    stop
+  else (sí)
+  endif
+  if (D-07 ¿Está PLANIFICADA?) then (no)
+    #FDECEC:E-06 409 ESTADO_NO_PERMITE_INICIAR;
+    stop
+  else (sí)
+  endif
+  :A-04 Comparar el alcance con la matriz de regresión:
+casos críticos de cada funcionalidad afectada por el build;
+  if (D-08 ¿Build informado y alcance que cubre
+todos los casos críticos afectados?) then (no)
+    #FDECEC:E-07 422 ALCANCE_INCOMPLETO
+(lista los casos críticos que faltan);
+    stop
+  else (sí)
+  endif
+  if (D-09 ¿Todos los casos del alcance están APROBADOS?) then (no)
+    #FDECEC:E-08 422 CASO_NO_APROBADO;
+    stop
+  else (sí)
+  endif
+  :A-05 Congelar el alcance, la versión de cada caso y el build;
+  #E8F5E9:F-02 Campaña EN_CURSO;
+  stop
+
+case (Registrar resultado)
+  if (D-10 ¿Campaña EN_CURSO y caso dentro de su alcance?) then (no)
+    #FDECEC:E-09 409 CAMPANA_NO_ADMITE_RESULTADOS;
+    stop
+  else (sí)
+  endif
+  switch (D-11 ¿Resultado?)
+  case (PASA)
+    :La evidencia es opcional
+(se recomienda en los casos críticos);
+  case (NO_APLICA)
+    if (D-12 ¿Trae motivo?) then (no)
+      #FDECEC:E-10 422 MOTIVO_REQUERIDO;
+      stop
+    else (sí)
+    endif
+  case (FALLA o BLOQUEADO)
+    if (D-13 ¿Trae evidencia?) then (no)
+      #FDECEC:E-11 422 EVIDENCIA_REQUERIDA;
+      stop
+    else (sí)
+    endif
+    if (D-14 ¿Tipo y tamaño permitidos?) then (no)
+      #FDECEC:E-12 415 / 413;
+      stop
+    else (sí)
+    endif
+    :A-06 Guardar la evidencia en el almacén
+y calcular su hash SHA-256;
+    if (D-15 ¿El almacén confirmó?) then (no)
+      #FDECEC:E-13 503 EVIDENCIA_NO_DISPONIBLE
+(sin evidencia no hay FALLA: nada se registra);
+      stop
+    else (sí)
+    endif
+    if (D-16 ¿FALLA con un defecto vinculado
+(nuevo o uno abierto existente)?) then (no)
+      #FDECEC:E-14 422 DEFECTO_REQUERIDO;
+      stop
+    else (sí)
+    endif
+  endswitch
+  :A-07 Registrar el INTENTO (inmutable; un intento
+anterior del mismo caso sigue visible) + traza;
+  #E8F5E9:F-03 201 resultado registrado;
+  stop
+
+case (Clasificar defecto)
+  if (D-17 ¿Severidad CRÍTICA?) then (sí)
+    if (D-18 ¿Tiene pasos para reproducir y evidencia?) then (no)
+      #FDECEC:E-15 422 DEFECTO_INCOMPLETO;
+      stop
+    else (sí)
+    endif
+  else (no)
+  endif
+  if (D-19 ¿Cambia la severidad propuesta por el tester?) then (sí)
+    if (D-20 ¿Trae motivo?) then (no)
+      #FDECEC:E-10 422 MOTIVO_REQUERIDO;
+      stop
+    else (sí)
+    endif
+  else (no)
+  endif
+  :A-08 Guardar la clasificación en el historial del defecto;
+  #E8F5E9:F-04 Defecto ABIERTO con severidad y prioridad;
+  stop
+
+case (Marcar corregido)
+  if (D-25 ¿Defecto ABIERTO o REABIERTO?) then (no)
+    #FDECEC:E-19 409 ESTADO_NO_PERMITE_CORREGIR;
+    stop
+  else (sí)
+  endif
+  :A-12 Registrar el build que trae la corrección;
+  #E8F5E9:F-08 Defecto CORREGIDO
+(el desarrollador no puede cerrarlo);
+  stop
+
+case (Verificar corrección)
+  if (D-21 ¿Defecto CORREGIDO por el desarrollador?) then (no)
+    #FDECEC:E-16 409 ESTADO_NO_PERMITE_VERIFICAR;
+    stop
+  else (sí)
+  endif
+  :A-09 Re-ejecutar el caso que lo detectó (nuevo intento);
+  if (D-22 ¿El caso PASA?) then (sí)
+    #E8F5E9:F-05 Defecto CERRADO (verificado);
+    stop
+  else (no)
+    #FFF4E5:F-05b Defecto REABIERTO
+(nuevo intento FALLA con su evidencia);
+    stop
+  endif
+
+case (Cerrar campaña)
+  if (D-23 ¿Todos los casos tienen resultado
+o un NO_EJECUTADO justificado?) then (no)
+    #FDECEC:E-17 409 CASOS_PENDIENTES;
+    stop
+  else (sí)
+  endif
+  :A-10 Calcular: defectos críticos abiertos y tasa
+de aprobados (último intento de cada caso);
+  if (D-24 ¿0 críticos abiertos y tasa ≥ umbral?) then (sí)
+    :A-11 Congelar el informe;
+    #E8F5E9:F-06 Campaña CERRADA · GO;
+    stop
+  else (no)
+    :A-11 Congelar el informe con las causas;
+    #FFF4E5:F-07 Campaña CERRADA · NO-GO;
+    stop
+  endif
+
+case (Consultar trazabilidad)
+  if (D-26 ¿Requisito o build del tenant?) then (no)
+    #FDECEC:E-05 404 idéntico a «no existe»;
+    stop
+  else (sí)
+  endif
+  :A-13 Recorrer requisito → casos → intentos
+→ evidencias → defectos (y al revés);
+  #E8F5E9:F-09 200 cadena completa + requisitos SIN caso;
+  stop
+endswitch
+
+note right
+  En todas las ramas que escriben, si la base
+  no confirma la transacción: E-18 503 y nada
+  queda a medias (resultado + evidencia + traza).
+end note
+@enduml

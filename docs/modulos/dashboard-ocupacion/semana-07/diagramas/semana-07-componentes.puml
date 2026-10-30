@@ -1,0 +1,57 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend del tablero de ocupación (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [EncabezadoCorte\n(hora, fuente, aviso)] as EC
+  [TablaSalas\n(filtro por estado)] as TS
+  [DetalleSala] as DS
+  [ClienteOcupacion\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorOcupacion] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ConsolidadorOcupacion] as CO
+    [ConsultaOcupacion] as CQ
+    interface "FuenteCamas\nEscritorCortes\nLectorCortes" as P
+    interface Reloj as RL
+  }
+  package "Dominio" {
+    [OcupacionSala\n(R-01, R-02 y nivel:\nfuente única)] as OS #FFF3CD
+    [Corte\n(R-05, R-06 aviso a 15 min)] as CT #FFF3CD
+  }
+  package "Persistencia" {
+    [RepositorioPdo] as PDO
+    [RepositorioEnMemoria] as MEM
+  }
+}
+database "wards, beds, bed_stays,\noccupancy_snapshots" as DB
+EC --> CL
+TS --> CL : estado
+DS --> CL
+CL --> R : HTTP JSON
+R --> C
+C --> CO
+C --> CQ
+C --> V
+CO --> P
+CQ --> P
+CO --> RL
+CQ --> RL
+CO --> OS
+CO --> CT
+CQ --> CT
+PDO ..|> P
+MEM ..|> P
+PDO --> DB
+note right of TS
+  Después: muestra ocupación, «no aplica»,
+  nivel y aviso tal como los devuelve la
+  consulta; ya no recalcula R-01 ni R-06.
+end note
+@enduml

@@ -6,10 +6,12 @@ namespace MicroHis\DashboardOcupacion\Aplicacion;
 use MicroHis\DashboardOcupacion\Dominio\{Corte, OcupacionSala};
 
 // Puertos por cliente (ISP de la semana 2). Ninguno permite cambiar el estado de una cama (R-09).
-/** Camas de las salas activas (R-03), con 'sala', 'cama' (null si la sala no tiene), 'estado' y 'con_estancia'. */
+/** Camas de las salas activas (R-03), con 'sala', 'cama' (null si la sala no tiene), 'estado' y 'estancias' (abiertas). */
 interface FuenteCamas { public function camasDeSalasActivas(): array; }
 interface EscritorCortes { public function guardarCorte(Corte $corte): void; }
 interface LectorCortes { public function ultimoCorte(): ?Corte; }
+/** Interfaz Repository del módulo, en el límite de Aplicación: la unión de los tres puertos de datos. La implementan PDO e InMemory. */
+interface RepositorioOcupacion extends FuenteCamas, EscritorCortes, LectorCortes {}
 interface Reloj { public function ahora(): int; }
 
 final class ErrorPersistencia extends \RuntimeException {}   // fallo técnico de la base: no es una regla de negocio

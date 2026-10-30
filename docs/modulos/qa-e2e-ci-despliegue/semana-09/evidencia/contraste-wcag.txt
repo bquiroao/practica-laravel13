@@ -1,0 +1,32 @@
+ID    Uso                                                                                           Actual  Mín. Estado    Propuesto  Nuevo Estado  
+----------------------------------------------------------------------------------------------------------------------------------------------------
+C-01  Etiquetas de campo: «Id», «Digest instalado», «Smoke posterior» (10 pt negrita)                 3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-02  Encabezados de tabla (10 pt negrita)                                                            2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-03  Datos de contexto: commit y digest, «4 de 6…», historial, detalle de la línea de tiempo (10 pt)    3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-04  Columnas «Por qué está» y «Umbral» (10.5 pt)                                                    3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-05  Títulos de estado sobre gris: CARGA, SIN PERMISO (10 pt negrita)                                2.93   4.5 FALLA       #5F6670   5.22 CUMPLE  
+C-06  Títulos de estado sobre ámbar: CONGELADO, SIN CONEXIÓN, 409 (10 pt negrita)                     3.00   4.5 FALLA       #5F6670   5.34 CUMPLE  
+C-07  Títulos de estado sobre rosa: ABORTADA, NO DESPLEGABLE (10 pt negrita)                          2.85   4.5 FALLA       #5F6670   5.08 CUMPLE  
+C-08  Títulos de estado sobre verde: ÉXITO (10 pt negrita)                                            2.88   4.5 FALLA       #5F6670   5.12 CUMPLE  
+C-09  Chip «pendiente» (9 pt negrita)                                                                 3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-10  Placeholder «Buscar por id, título o RF…» (11 pt itálica)                                       2.51   4.5 FALLA       #6B7178   4.93 CUMPLE  
+C-11  Chips PASA y «APROBADO · vence en 41 h» (9 pt negrita)                                          3.75   4.5 FALLA       #1F6B43   5.72 CUMPLE  
+C-12  «✓» de las reglas que cumplen (10.5 pt negrita)                                                 4.25   4.5 FALLA       #1F6B43   6.48 CUMPLE  
+C-13  Chips EN CURSO, SIN PLAN e INESTABLE (9 pt negrita)                                             3.99   4.5 FALLA       #8A4A12   6.30 CUMPLE  
+C-14  Borde de campo de texto, selector y casilla                                                     2.64   3.0 FALLA       #767C82   4.22 CUMPLE  
+C-15  Pista bajo el campo «Formato guia-AAAA.N» (10 pt itálica)                                       3.26   4.5 FALLA       #5F6670   5.80 CUMPLE  
+C-16  Texto general (10.5–11 pt)                                                                     13.49   4.5 CUMPLE            —                
+C-17  Cabecera: módulo, hospital y usuario (12 pt negrita)                                            8.30   4.5 CUMPLE            —                
+C-18  Botón primario «Guardar plan» (11 pt negrita)                                                   8.30   4.5 CUMPLE            —                
+C-19  Botón «Registrar RECHAZADO» (11 pt negrita)                                                     6.51   4.5 CUMPLE            —                
+C-20  Error junto al campo (10 pt)                                                                    6.51   4.5 CUMPLE            —                
+C-21  Borde de campo con error                                                                        6.51   3.0 CUMPLE            —                
+C-22  Chip FALLA y RECHAZADO (9 pt negrita)                                                           5.70   4.5 CUMPLE            —                
+C-23  Aviso de REVERTIDO sobre ámbar (10 pt)                                                          5.44   4.5 CUMPLE            —                
+C-24  Enlaces: evidencia, «Política gate-2026.1» (10–10.5 pt)                                         8.30   4.5 CUMPLE            —                
+C-25  Texto de estado sobre ámbar / rosa / verde (10.5 pt)                                           12.41   4.5 CUMPLE            —                
+C-26  Chips de módulos afectados (9 pt negrita)                                                      10.79   4.5 CUMPLE            —                
+C-27  Barra de progreso: relleno contra el carril                                                     6.64   3.0 CUMPLE            —                
+C-28  Botón deshabilitado «Registrar escenario» / «Registrar despliegue»                              2.11   0.0 EXENTO            —                
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Pares que fallan con los colores actuales: 15 · Propuestas que no cumplen: 0

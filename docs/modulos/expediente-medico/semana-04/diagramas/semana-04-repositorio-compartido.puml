@@ -1,0 +1,27 @@
+@startuml semana-04-repositorio-compartido
+title Repositorio de datos compartido — bases HOSPITAL (una por tenant) y CENTRAL
+component "Admisión y pacientes" as adm
+component "Asignaciones de atención" as asi
+component "Expediente médico" as exp
+component "Índice maestro (MPI) y consentimientos" as mpi
+database "Base HOSPITAL" {
+  [local_patients]
+  [care_assignments]
+  [medical_records]
+  [audit_events]
+}
+database "Base CENTRAL" {
+  [consents]
+  [mpi_records]
+}
+adm --> [local_patients] : escribe (dueño)
+asi --> [care_assignments] : escribe (dueño)
+mpi --> [consents] : escribe (dueño)
+mpi --> [mpi_records] : escribe (dueño)
+exp ..> [local_patients] : lee (RepositorioExpedientes)
+exp ..> [care_assignments] : lee asignaciones activas
+exp --> [medical_records] : escribe (dueño)
+exp --> [audit_events] : solo agrega
+exp ..> [consents] : lee vigencia (IndiceCentral)
+exp ..> [mpi_records] : lee otros hospitales
+@enduml

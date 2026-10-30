@@ -1,0 +1,7 @@
+Fecha: 2026-10-29 04:56:50 | PHP 8.4.26 | --solo=semana04 --evidencia=../semana-04/evidencia/salida-pruebas-reconocimiento.txt
+== semana04
+[OK] T-15 RN-09: tras reconocer, la misma huella queda reconocida solo para ese usuario
+[OK] T-16 RN-09: una alergia nueva cambia la huella y el reconocimiento anterior deja de valer
+[OK] T-17 reconocer dos veces la misma huella no duplica filas (idempotente)
+[OK] T-18 una alerta MODERADA no admite reconocimiento (no hay nada que confirmar)
+RESULTADO: 4 pruebas, 4 correctas, 0 fallidas, 0 omitidas, 0 con defecto registrado

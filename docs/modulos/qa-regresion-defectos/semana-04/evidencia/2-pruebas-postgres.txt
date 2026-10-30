@@ -1,0 +1,95 @@
+$ QA_DB_DSN="pgsql:host=127.0.0.1;port=55432;dbname=micro_his_qa" php tests/ejecutar.php   # PostgreSQL 18
+Micro-HIS QA funcional y regresión - pruebas (PHP 8.4.26)
+
+== Dominio: reglas de casos, campañas, evidencias y defectos ==
+[PASA ] DOM-01   R-01: un caso sin pasos, sin resultado esperado, con prioridad o requisito inválido se rechaza con TODOS los campos
+[PASA ] DOM-02   R-02: el autor no aprueba su propio caso; un aprobado no se vuelve a aprobar; aprobar devuelve OTRA instancia
+[PASA ] DOM-03   R-03: no inicia si falta un crítico de la matriz (los lista), sin build válido o con un caso no aprobado
+[PASA ] DOM-04   R-04: solo una campaña EN_CURSO admite resultados, y solo de su alcance
+[PASA ] DOM-05   R-09: GO con 0 críticos y tasa ≥ umbral; cuenta el ÚLTIMO intento de cada caso y excluye NO_APLICA
+[PASA ] DOM-06   R-09: NO_GO por crítico abierto y por tasa bajo el umbral (con las dos causas); no cierra con casos pendientes
+[PASA ] DOM-07   R-07: CRÍTICA exige pasos y evidencia; cambiar la severidad propuesta exige motivo
+[PASA ] DOM-08   R-08: el desarrollador solo marca CORREGIDO; PASA en la re-ejecución cierra y FALLA reabre
+[PASA ] DOM-09   Evidencias (semana 2): la fábrica valida el formato por la firma; la huella es sha256 del contenido
+
+== Aplicación: camino feliz, reglas de dominio y errores de persistencia (dobles) ==
+[PASA ] APP-01   Camino feliz completo: diseñar → aprobar → planificar → iniciar → FALLA con defecto → clasificar → corregir → re-ejecutar PASA → GO
+[PASA ] APP-02   Trazabilidad: requisito → caso → último intento → evidencia (solo huella) → defecto
+[PASA ] APP-03   Idempotencia (R-12): la misma clave y el mismo contenido devuelve el MISMO intento; con otro contenido, 409
+[PASA ] APP-15   Idempotencia ANTES que el estado: un reintento que llega después de cerrar la campaña o el defecto devuelve el mismo intento, no 409
+[PASA ] APP-04   R-05: FALLA o BLOQUEADO sin evidencia → 422; una referencia externa NO cuenta como evidencia
+[PASA ] APP-05   R-06: FALLA sin defecto → 422; R-10: NO_APLICA sin motivo → 422
+[PASA ] APP-06   R-03 en el caso de uso: no inicia sin los críticos de la matriz y devuelve cuáles faltan
+[PASA ] APP-07   R-02 y R-04 en el caso de uso: autor no aprueba (409); campaña planificada no admite resultados (409)
+[PASA ] APP-08   R-08: re-ejecutar PASA sobre un defecto que no está CORREGIDO → 409; FALLA en la re-ejecución lo REABRE sin pedir otro defecto
+[PASA ] APP-09   Permisos y tenant: sin permiso → 403; el tester de otro hospital ve la campaña como inexistente (404)
+[PASA ] APP-10   Evidencia > 5 MB → 413 sin escribir nada; formato inválido → 422
+[PASA ] APP-11   Almacén de evidencias caído (fail-closed): 503 y NO queda intento, defecto ni traza
+[PASA ] APP-12   La traza falla dentro de la transacción: 503 y se deshacen el intento y el defecto (nada a medias)
+[PASA ] APP-13   La base no responde al leer: cada caso de uso devuelve 503 ERROR_PERSISTENCIA, nunca una excepción
+[PASA ] APP-14   Doble cierre concurrente: el segundo choca con el estado guardado (409), no deja dos decisiones
+
+== Persistencia: PDO con sentencias preparadas (dobles de PDO) y almacén de evidencias ==
+[PASA ] PER-01   Base caída: cada adaptador PDO lanza ErrorPersistencia SIN el host ni la contraseña del mensaje del driver
+[PASA ] PER-02   Listas vacías no van a la base (ni un IN () inválido): críticos, varios casos y críticos abiertos
+[PASA ] PER-03   Transacción: si el COMMIT falla se hace rollback y sale ErrorPersistencia; si el trabajo lanza, se propaga tal cual
+[PASA ] PER-04   FabricaConexion: DSN inválido → ErrorPersistencia sin el DSN ni la clave
+[PASA ] PER-05   Sentencias preparadas: ningún adaptador PDO concatena datos en el SQL (solo «?» y nombres de columna)
+[PASA ] PER-06   Almacén en disco: direccionado por contenido, idempotente, verifica lo escrito y rechaza rutas manipuladas
+[PASA ] PER-07   Los adaptadores implementan los puertos del dominio y de la aplicación (sustituibles por los dobles)
+
+== Repository: la misma suite de contrato para los adaptadores InMemory y PDO ==
+[PASA ] CON-01-MEM [memoria] Casos: lo guardado vuelve igual (pasos, requisitos en orden), por tenant
+[PASA ] CON-02-MEM [memoria] Casos: guardar una versión que ya existe → CASO_EXISTENTE; aprobar dos veces → ESTADO_NO_PERMITE_APROBAR
+[PASA ] CON-03-MEM [memoria] Matriz: críticos de varias funcionalidades, sin repetir, ordenados; lista vacía → []
+[PASA ] CON-04-MEM [memoria] Campañas: crear asigna id; otro tenant no la ve; el estado avanza solo desde el anterior; la decisión persiste
+[PASA ] CON-05-MEM [memoria] Intentos: vuelven en orden con evidencias y referencias; la clave es por tenant y única; el número no se repite
+[PASA ] CON-06-MEM [memoria] Defectos: estado, severidad y prioridad persisten; otro tenant no lo ve; críticos abiertos por caso
+[PASA ] CON-07-MEM [memoria] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (campaña, defecto, traza)
+[PASA ] CON-01-PDO [pdo] Casos: lo guardado vuelve igual (pasos, requisitos en orden), por tenant
+[PASA ] CON-02-PDO [pdo] Casos: guardar una versión que ya existe → CASO_EXISTENTE; aprobar dos veces → ESTADO_NO_PERMITE_APROBAR
+[PASA ] CON-03-PDO [pdo] Matriz: críticos de varias funcionalidades, sin repetir, ordenados; lista vacía → []
+[PASA ] CON-04-PDO [pdo] Campañas: crear asigna id; otro tenant no la ve; el estado avanza solo desde el anterior; la decisión persiste
+[PASA ] CON-05-PDO [pdo] Intentos: vuelven en orden con evidencias y referencias; la clave es por tenant y única; el número no se repite
+[PASA ] CON-06-PDO [pdo] Defectos: estado, severidad y prioridad persisten; otro tenant no lo ve; críticos abiertos por caso
+[PASA ] CON-07-PDO [pdo] Transacción: si el trabajo lanza, no queda nada de lo escrito dentro (campaña, defecto, traza)
+
+== MVC: formularios, controladores y vistas ==
+[PASA ] MVC-01   Formulario de caso: solo FORMA; tipos equivocados y obligatorios ausentes → 400 con los campos; un título vacío pasa (lo rechaza el dominio)
+[PASA ] MVC-02   Formulario de resultado: Idempotency-Key obligatoria, base64 estricto, verifica_defecto entero
+[PASA ] MVC-03   Vista: cada tipo de salida tiene su código HTTP; Location solo en 201; los errores usan la clave «error»
+[PASA ] MVC-04   Controlador: una entrada mal formada se responde 400 SIN llamar al caso de uso (nada escrito, nada trazado)
+[PASA ] MVC-05   Modo «memoria» de producción: el mismo Kernel funciona sin base (QA_PERSISTENCIA=memoria, datos-demo.php)
+
+== Presentación: HTTP ==
+[PASA ] HTTP-01  Recorrido HTTP: planificar 201 + Location, iniciar 200, resultado 201 con evidencia base64, trazabilidad 200
+[PASA ] HTTP-02  Autenticación y tenant: sin token 401 (WWW-Authenticate), sin X-Tenant-ID 400, tenant ajeno 403
+[PASA ] HTTP-03  Rutas: 404 desconocida, 405 método equivocado, y toda respuesta lleva X-Request-ID
+[PASA ] HTTP-04  Formato: JSON roto 400, lista en vez de objeto 400, base64 inválido 400, sin Idempotency-Key 400
+[PASA ] HTTP-05  Traducción de la salida: 403 sin permiso, 404 inexistente, 409 regla de estado, 422 regla de datos, 503 base caída
+[PASA ] HTTP-06  Una excepción inesperada se convierte en 500 genérico sin detalles internos
+
+== Regla de dependencias entre capas ==
+[PASA ] ARQ-01   Dominio no depende de Aplicacion, Persistencia, Presentacion
+[PASA ] ARQ-02   Aplicacion no depende de Persistencia, Presentacion
+[PASA ] ARQ-03   Persistencia no depende de Presentacion
+[PASA ] ARQ-04   Presentacion no depende de Persistencia
+[PASA ] ARQ-05   PDO y SQL solo existen en Persistencia
+[PASA ] ARQ-06   Sin framework: ningún archivo usa Composer ni namespaces de terceros
+[PASA ] ARQ-08   MVC: los controladores no tienen SQL ni reglas; solo usan formularios, casos de uso y vistas
+[PASA ] ARQ-09   Repository: los adaptadores EnMemoria y Pdo implementan exactamente los mismos puertos
+[PASA ] ARQ-07   LSP (semana 2): fuera de la fábrica, nadie pregunta por el subtipo de evidencia (instanceof Captura/RegistroTexto/ResultadoJUnit)
+
+== Integración con PostgreSQL real ==
+[PASA ] INT-01   Camino feliz en PostgreSQL: la campaña, sus intentos, la evidencia, el defecto y su historial quedan guardados
+[PASA ] INT-02   R-03 con la matriz real: faltan los críticos de «expediente» y «agenda-camas»
+[PASA ] INT-03   R-11 en la base: UPDATE o DELETE de un intento, una evidencia o el historial se rechazan aunque se salten la aplicación
+[PASA ] INT-04   R-02 en la base: una versión aprobada no cambia, el autor no puede figurar como aprobador y nada se borra
+[PASA ] INT-05   R-12: la clave de idempotencia es única en la base; el reintento devuelve el mismo intento
+[PASA ] INT-06   Atomicidad real: si la traza falla, PostgreSQL deshace el defecto y el intento (ROLLBACK)
+[PASA ] INT-07   Tenant: la campaña de hosp-norte no existe para hosp-sur, ni por id ni en la trazabilidad
+[PASA ] INT-08   Concurrencia: dos cierres sobre la misma campaña, solo uno escribe (UPDATE condicionado al estado anterior)
+[PASA ] INT-09   La traza de auditoría va a la bandeja en la misma transacción, sin datos clínicos (solo identificadores)
+[PASA ] INT-10   datos-demo.php (memoria) y datos-demo.sql (PostgreSQL) describen los mismos casos y la misma matriz
+
+Total: 75  Pasan: 75  Fallan: 0  Omitidas: 0

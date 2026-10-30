@@ -1,0 +1,21 @@
+@startsalt w1-buscar
+' W1 Buscar medicamentos: estado inicial (vacío) y ayuda contextual
+{+
+  {* Catálogo de medicamentos | Buscar | Registrar | Ayuda }
+  {/ <b>Hospital Norte (ficticio) · qf.norte (QF_CATALOGO) }
+  ==
+  <b>Buscar medicamentos vigentes
+  .
+  Nombre, principio activo o código
+  {+ "amoxi                          " }
+  <i>Mínimo 2 caracteres. % y _ se buscan como texto.
+  .
+  Forma farmacéutica | ^Todas^
+  Vigentes a la fecha | "2026-10-15" | <i>(vacío = hoy)
+  .
+  [Buscar] | [Limpiar]
+  --
+  <i>Estado inicial: todavía no hay búsqueda.
+  <i>Consejo: busque por principio activo para ver todas las presentaciones.
+}
+@endsalt

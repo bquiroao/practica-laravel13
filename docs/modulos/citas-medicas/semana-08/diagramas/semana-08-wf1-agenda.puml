@@ -1,0 +1,14 @@
+@startsalt
+title W1 — Agenda del día
+{+
+  {* Inicio | <b>Agenda</b> | Ayuda }
+  Hospital: <b>Hospital Central</b> | Día: ^28/10/2026^ | Médico: ^Todos^ | [+ Nueva cita]
+  {#
+    <b>Hora</b> | <b>Paciente</b> | <b>Médico · especialidad</b> | <b>Estado</b> | <b>Acciones</b>
+    08:00–08:30 | P-0012 · A. Pérez | M-03 · Cardiología | Programada | [Confirmar] [Cancelar]
+    09:00–09:30 | P-0047 · L. Gómez | M-03 · Cardiología | Confirmada | [Cancelar]
+    10:00–10:30 | P-0050 · R. Díaz | M-05 · Pediatría | Cancelada | —
+  }
+  <i>Cargando: filas de esqueleto. Vacío: «No hay citas para este día». El médico ve solo sus citas.</i>
+}
+@endsalt

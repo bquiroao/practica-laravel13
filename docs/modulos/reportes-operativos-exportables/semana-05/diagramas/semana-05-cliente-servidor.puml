@@ -1,0 +1,19 @@
+@startuml semana-05-cliente-servidor
+!include <C4/C4_Container>
+title Cliente-servidor y frontera de microservicio evaluada — Reportes operativos (semana 5)
+Person(adm, "Jefatura / Administración / Auditoría")
+Container(cli, "Cliente web del HIS", "Vue / app", "Formulario de filtros; descarga el CSV y guarda el id de la exportación")
+System_Ext(rbac, "RBAC", "Token, rol, hospital y permiso de datos personales")
+System_Boundary(shi, "SHI — monolito modular (hoy)") {
+  Boundary(frontera, "Frontera candidata, NO se divide aún", "Servicio de reportes") {
+    Container(api, "Módulo Reportes", "PHP 8.2, REST /api/v1", "Filtros → catálogo → archivo con hash → registro")
+    ContainerDb(prop, "exportaciones_reporte", "Tabla propia", "Filtros, corte, hash, usuario y hospital")
+  }
+  ContainerDb(vistas, "vw_censo_servicio, vw_egresos", "Vistas de otros módulos", "Solo lectura")
+}
+Rel(adm, cli, "usa")
+Rel(cli, api, "GET exportar / POST reproducir", "HTTPS + X-Request-Id")
+Rel(api, rbac, "valida token", "sync")
+Rel(api, vistas, "SELECT filtrado por hospital y corte", "SQL de solo lectura")
+Rel(api, prop, "INSERT antes de entregar el archivo", "SQL")
+@enduml

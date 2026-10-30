@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="700" viewBox="0 0 720 700" font-family="Segoe UI, Arial, sans-serif" font-size="14">
+  <title>Pantalla M4 - Confirmación y conexión limitada (360 px)</title>
+  <rect width="720" height="700" fill="#f6f7f9"/>
+  <text x="20" y="28" font-size="16" font-weight="bold">M4 - Guardado, custodia y conexión limitada</text>
+  <rect x="20" y="44" width="360" height="640" rx="14" fill="#fff" stroke="#333" stroke-width="2"/>
+  <rect x="20" y="44" width="360" height="52" rx="14" fill="#1f4e79"/>
+  <text x="36" y="76" fill="#fff" font-weight="bold">Resultado</text>
+  <rect x="36" y="108" width="328" height="56" rx="8" fill="#fff3cd" stroke="#8a6d00"/>
+  <text x="48" y="130" font-weight="bold">⚠ Sin conexión estable</text>
+  <text x="48" y="150" font-size="12">La decisión NO se ha guardado en el servidor.</text>
+  <rect x="36" y="176" width="328" height="96" rx="8" fill="#fff" stroke="#333"/>
+  <text x="48" y="198" font-weight="bold">Pendiente de envío</text>
+  <text x="48" y="218" font-size="13">Orden ORD-0000 · Sangre · RECHAZO</text>
+  <text x="48" y="238" font-size="13">Clave de envío: se reutiliza al reintentar</text>
+  <text x="48" y="258" font-size="13">Estado: PENDIENTE (no es aceptada ni rechazada)</text>
+  <rect x="36" y="288" width="328" height="52" rx="6" fill="#1f4e79"/>
+  <text x="200" y="320" text-anchor="middle" fill="#fff" font-weight="bold">Reintentar envío</text>
+  <rect x="36" y="352" width="328" height="48" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+  <text x="200" y="382" text-anchor="middle" font-weight="bold">Mantener la muestra aparte</text>
+  <text x="36" y="426" font-weight="bold">Cuando el envío tiene éxito</text>
+  <rect x="36" y="434" width="328" height="110" rx="8" fill="#d4edda" stroke="#155724"/>
+  <text x="48" y="456" font-weight="bold">✓ Guardado</text>
+  <text x="48" y="476" font-size="13">Código: SP-… (copiar)</text>
+  <text x="48" y="496" font-size="13">Registro guardado · Etiqueta: pendiente de imprimir</text>
+  <text x="48" y="516" font-size="13">Custodia: 11:42 · Recepción · Técnico/a (nombre)</text>
+  <text x="48" y="536" font-size="12" fill="#155724">Dos estados distintos: guardado e impreso.</text>
+  <text x="36" y="568" font-size="12" fill="#555">Tabla de custodia en tarjetas: hora, lugar, persona.</text>
+
+  <g font-size="13">
+    <text x="410" y="80" font-weight="bold">Recuperación ante conexión limitada</text>
+    <text x="410" y="104">1. Nunca se muestra «aceptada» o «rechazada»</text>
+    <text x="410" y="124">   hasta que el servidor confirma.</text>
+    <text x="410" y="148">2. Se conservan los datos capturados en el</text>
+    <text x="410" y="168">   dispositivo durante la sesión.</text>
+    <text x="410" y="192">3. El reintento usa la misma clave de</text>
+    <text x="410" y="212">   envío: no crea una segunda recepción</text>
+    <text x="410" y="232">   (CHG-CA-04 y CHG-CA-05, Semana 6).</text>
+    <text x="410" y="256">4. Mientras tanto la muestra se mantiene</text>
+    <text x="410" y="276">   aparte, sin procesar.</text>
+    <text x="410" y="316" font-weight="bold">Tabla de custodia</text>
+    <text x="410" y="338">En móvil, cada evento es una tarjeta con</text>
+    <text x="410" y="358">hora, lugar y persona; no una tabla ancha.</text>
+    <text x="410" y="398" fill="#721c24" font-weight="bold">Propuesta: el prototipo de la Semana 3 no</text>
+    <text x="410" y="418" fill="#721c24">tiene clave de envío ni custodia.</text>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+@startsalt semana-10-m2-registro-paso1
+{+
+  {< <b>Nueva alergia</b> · paso 1 de 2 }
+  ==
+  Nombre o código del alérgeno | (1)
+  "Penicilina            "
+  Severidad
+  (X) Pone en riesgo la vida | (2)
+  () Grave
+  () Moderada
+  () Leve
+  () Desconocida (se muestra como alta)
+  ..
+  [      Siguiente      ] | (3)
+}
+@endsalt

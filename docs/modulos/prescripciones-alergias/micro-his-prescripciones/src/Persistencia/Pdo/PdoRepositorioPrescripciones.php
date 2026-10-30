@@ -6,6 +6,8 @@ namespace Prescripciones\Persistencia\Pdo;
 
 use Prescripciones\Dominio\Excepciones\ClaveEnUso;
 use Prescripciones\Dominio\Excepciones\ErrorPersistencia;
+use Prescripciones\Dominio\Excepciones\YaAnulada;
+use Prescripciones\Dominio\Modelo\Anulacion;
 use Prescripciones\Dominio\Modelo\Hallazgo;
 use Prescripciones\Dominio\Modelo\Prescripcion;
 use Prescripciones\Dominio\Modelo\ResultadoVerificacion;
@@ -70,6 +72,19 @@ final class PdoRepositorioPrescripciones implements RepositorioPrescripciones
         }
     }
 
+    public function anular(Anulacion $a): void
+    {
+        try {
+            $this->pdo->prepare('INSERT INTO prescription_voids (prescription_id, reason, voided_by, voided_at) VALUES (:id, :motivo, :por, :en)')
+                ->execute(['id' => $a->prescripcionId, 'motivo' => $a->motivo, 'por' => $a->anuladaPor, 'en' => $a->anuladaEn->format('Y-m-d\TH:i:sP')]);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23505') {
+                throw new YaAnulada('La prescripción ya fue anulada.', 0, $e);
+            }
+            throw new ErrorPersistencia('No se pudo anular la prescripción.', 0, $e);
+        }
+    }
+
     /** @param array<string, mixed> $parametros */
     private function una(string $sql, array $parametros): ?Prescripcion
     {
@@ -83,8 +98,10 @@ final class PdoRepositorioPrescripciones implements RepositorioPrescripciones
             $items = $this->pdo->prepare('SELECT medication_code, dose, unit, frequency_hours, route, duration_days
                 FROM prescription_items WHERE prescription_id = :id ORDER BY line_no');
             $items->execute(['id' => $fila['prescription_id']]);
+            $anulacion = $this->pdo->prepare('SELECT reason, voided_by, voided_at FROM prescription_voids WHERE prescription_id = :id');
+            $anulacion->execute(['id' => $fila['prescription_id']]);
 
-            return $this->hidratar($fila, $items->fetchAll(\PDO::FETCH_ASSOC));
+            return $this->hidratar($fila, $items->fetchAll(\PDO::FETCH_ASSOC), $anulacion->fetch(\PDO::FETCH_ASSOC) ?: null);
         } catch (\PDOException $e) {
             throw new ErrorPersistencia('No se pudo leer la prescripción.', 0, $e);
         }
@@ -93,8 +110,9 @@ final class PdoRepositorioPrescripciones implements RepositorioPrescripciones
     /**
      * @param array<string, mixed>       $f
      * @param list<array<string, mixed>> $items
+     * @param array<string, mixed>|null  $v la fila de prescription_voids, si existe
      */
-    private function hidratar(array $f, array $items): Prescripcion
+    private function hidratar(array $f, array $items, ?array $v): Prescripcion
     {
         $hallazgos = array_map(static fn (array $h): Hallazgo => Hallazgo::desdeArreglo($h),
             json_decode((string) $f['allergy_findings'], true, 8, \JSON_THROW_ON_ERROR));
@@ -110,7 +128,7 @@ final class PdoRepositorioPrescripciones implements RepositorioPrescripciones
             $f['override_justification'],
             (bool) $f['no_known_allergies_confirmed'],
             new \DateTimeImmutable($f['issued_at']),
-            $f['status'],
+            $v === null ? null : new Anulacion((int) $f['prescription_id'], $f['hospital'], $v['reason'], $v['voided_by'], new \DateTimeImmutable($v['voided_at'])),
         );
     }
 }

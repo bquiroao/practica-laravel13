@@ -9,6 +9,7 @@ use SignosVitales\Dominio\{RangoSigno, Toma};
 /** Repository del agregado Toma (datos propios del módulo). Guarda todo o nada; si falla lanza ErrorPersistencia. */
 interface RepositorioTomas {
     public function guardar(Toma $toma): void;
+    public function existe(string $tomaId): bool;
     /** @return array<int, array{toma_id: string, tomada_en: string, autor_id: string, mediciones: array}> más reciente primero */
     public function deEpisodio(string $episodioId): array;
 }

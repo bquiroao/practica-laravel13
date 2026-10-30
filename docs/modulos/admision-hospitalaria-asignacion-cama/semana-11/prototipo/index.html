@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nueva admisión · Admisión hospitalaria</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <div class="demo" role="region" aria-label="Controles de demostración">
+    <strong>Prototipo · datos ficticios</strong>
+    <label>Rol <select id="demo-rol">
+      <option value="ADMISIONISTA">Admisionista (usr-adm-01)</option>
+      <option value="SUPERVISOR_CAMAS">Supervisor(a) (usr-sup-01)</option>
+      <option value="MEDICO">Médico (usr-med-01)</option>
+    </select></label>
+    <label><input type="checkbox" id="demo-conflicto"> Simular que otra admisión toma la cama al confirmar</label>
+  </div>
+  <header class="barra">
+    <span>Admisión hospitalaria · HOSP-01</span>
+    <span id="paso" aria-live="polite"></span>
+  </header>
+  <main id="vista" tabindex="-1"></main>
+  <div id="anuncio" class="solo-lector" aria-live="assertive"></div>
+  <script src="app.js"></script>
+</body>
+</html>

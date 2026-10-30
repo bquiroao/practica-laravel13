@@ -1,0 +1,20 @@
+@startuml semana-05-consistencia
+!pragma layout smetana
+title Consistencia: qué es atómico y qué es eventual
+skinparam defaultFontSize 11
+
+rectangle "UNA transacción (fuerte)\nintento + evidencias(huellas) + defecto\n+ historial + auditoria_bandeja" as TX #EEF7EE
+rectangle "Almacén de evidencias\n(antes de la transacción)" as AL #FFF8E1
+rectangle "Módulo Auditoría\n(lee la bandeja: eventual)" as AU #F5F9FF
+rectangle "Bandeja del cliente\n(reenvío idempotente: eventual)" as CB #E8F0FB
+
+AL --> TX : la huella confirmada entra al intento
+TX --> AU : outbox → envío posterior
+CB --> TX : misma Idempotency-Key = un solo intento
+
+note bottom of AL
+  Si la transacción falla después del PUT,
+  queda un archivo huérfano direccionado por su huella:
+  no se pierde ni cambia nada (limpieza periódica).
+end note
+@enduml

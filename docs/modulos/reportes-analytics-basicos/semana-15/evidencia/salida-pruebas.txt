@@ -1,0 +1,21 @@
+Ejecutado: 2026-10-27 06:54 · PHP 8.4.26
+
+== Unitarias: reglas, agregación y precisión (Domain) ==
+  OK    U-01 Filtros rechaza formato inválido, fecha imposible y período invertido (RF-02, RN-02)
+  OK    U-02 Indicador rechaza % fuera de 0-100 y ficha incompleta (RF-01, RF-03, RN-05)
+  OK    U-03 Desglose suma sus partes y rechaza valores negativos (RF-04, RN-07)
+  OK    U-04 RegistroOrigen acepta solo código de paciente PAC-NNNNN (RF-05, RN-09, RNF-03)
+  OK    U-05 Precisión: 2 de 3 camas = 66.7 % redondeado a un decimal (RF-01)
+  OK    U-06 Período sin estancias lanza SinDatos y nunca devuelve 0 (RN-06)
+== Caja blanca: ramas y condiciones ==
+  OK    CB-01 CalcularIndicador::ejecutar recorre sus 9 caminos
+  OK    CB-02 Condición «estancia en el período»: cada término cambia el resultado (A=2, B=0)
+== Caja negra: API v1 con la base de prueba (equivalencia, límites, permisos y errores) ==
+  OK    CN-01 Equivalencia del período: válido 200; invertido, formato inválido y fecha imposible 422 (RF-02)
+  OK    CN-02 Límites: un solo día 2.0 %; egreso el mismo día cuenta (2.0 %); día siguiente sin datos (RF-01, RN-06)
+  OK    CN-03 Permisos: Administrador y Jefe 200; Médico y rol desconocido 403 SIN_PERMISO (RF-07, RNF-02)
+  OK    CN-04 Errores: tipo inexistente 404, dimensión inválida 422, registros sin parte 422, fuente caída 503 sin detalles (RNF-02)
+  FALLA CN-05 [DEFECTO D-01] Una parte que no existe en el desglose debe responder 422, no 200 vacío (RF-05, RN-07)
+  FALLA CN-06 [DEFECTO D-02] Un período de más de 366 días debe responder 422, como dice el contrato API (RNF-01)
+
+RESULTADO: 14 pruebas, 12 correctas, 2 con defecto registrado

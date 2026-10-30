@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
 
-// Composición: el único lugar que conoce las cuatro capas y las conecta. $db es la base del hospital elegido (tenant).
-foreach (['Dominio/Dashboard', 'Aplicacion/ServicioDashboard', 'Persistencia/RepositorioPdo', 'Presentacion/ControladorDashboard'] as $a) require_once __DIR__ . "/src/$a.php";
+namespace MicroHis\DashboardBase;   // fábrica en el espacio de nombres del módulo: no choca con la de otros Micro-HIS
 
-function crearControlador(PDO $db, MicroHis\DashboardBase\Aplicacion\Reloj $reloj): MicroHis\DashboardBase\Presentacion\ControladorDashboard
+// Composición: único lugar que conoce las cuatro capas; aquí se elige el adaptador del Repository (PDO sobre la base del tenant, o InMemory).
+foreach (['Dominio/Dashboard', 'Aplicacion/ServicioDashboard', 'Persistencia/RepositorioPdo', 'Persistencia/RepositorioEnMemoria', 'Presentacion/VistaJson',
+          'Presentacion/Rutas', 'Presentacion/ControladorDashboard'] as $a) require_once __DIR__ . "/src/$a.php";
+
+function crearControlador(Aplicacion\FuenteConteos $repositorio, Aplicacion\Reloj $reloj): Presentacion\ControladorDashboard
 {
-    return new MicroHis\DashboardBase\Presentacion\ControladorDashboard(
-        new MicroHis\DashboardBase\Aplicacion\ServicioDashboard(new MicroHis\DashboardBase\Persistencia\RepositorioPdo($db), $reloj));
+    return new Presentacion\ControladorDashboard(new Aplicacion\ServicioDashboard($repositorio, $reloj), new Presentacion\VistaJson());
 }

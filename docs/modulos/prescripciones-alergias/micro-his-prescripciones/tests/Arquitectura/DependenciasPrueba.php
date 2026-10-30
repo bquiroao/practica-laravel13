@@ -112,3 +112,21 @@ prueba('ARQ-06','Sin framework: ningún archivo usa Composer ni namespaces de te
     afirmar(!is_file(dirname(__DIR__, 2) . '/composer.json'), 'no debe haber composer.json');
     igual([], $violaciones, 'archivos con dependencias de terceros');
 });
+
+prueba('ARQ-10', 'El Cliente se programa contra el contrato: no importa ninguna capa del servidor, y ninguna capa lo importa a él',
+    function () use ($archivosDe, $codigoDe): void {
+        $violaciones = [];
+        foreach ($archivosDe('Cliente') as $archivo) {
+            if (preg_match('/Prescripciones\\\\(Dominio|Aplicacion|Persistencia|Presentacion)\\\\/', $codigoDe($archivo), $m)) {
+                $violaciones[] = basename($archivo) . " → {$m[1]}";
+            }
+        }
+        foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
+            foreach ($archivosDe($capa) as $archivo) {
+                if (str_contains($codigoDe($archivo), 'Prescripciones\\Cliente\\')) {
+                    $violaciones[] = basename($archivo) . ' → Cliente';
+                }
+            }
+        }
+        igual([], $violaciones, 'violaciones');
+    });

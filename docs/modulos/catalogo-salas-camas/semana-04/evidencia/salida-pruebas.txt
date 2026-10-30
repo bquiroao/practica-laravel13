@@ -1,0 +1,29 @@
+OK    [PDO] feliz: registrar sala A y cama A/101 = 201
+OK    [PDO] feliz: la cama nace disponible (R-04)
+OK    [PDO] feliz: A/101 a mantenimiento = 200
+OK    [PDO] regla: sala A repetida = 409 E3 (R-01)
+OK    [PDO] regla: cama en sala inexistente = 422 E4 (R-03)
+OK    [PDO] regla: inactiva -> mantenimiento = 422 E6 (R-05)
+OK    [PDO] regla: cama ocupada no cambia a mano = 409 E5 (R-06)
+OK    [PDO] contrato: cambiar desde un estado que ya no es el actual devuelve false (E7)
+OK    [InMemory] feliz: registrar sala A y cama A/101 = 201
+OK    [InMemory] feliz: la cama nace disponible (R-04)
+OK    [InMemory] feliz: A/101 a mantenimiento = 200
+OK    [InMemory] regla: sala A repetida = 409 E3 (R-01)
+OK    [InMemory] regla: cama en sala inexistente = 422 E4 (R-03)
+OK    [InMemory] regla: inactiva -> mantenimiento = 422 E6 (R-05)
+OK    [InMemory] regla: cama ocupada no cambia a mano = 409 E5 (R-06)
+OK    [InMemory] contrato: cambiar desde un estado que ya no es el actual devuelve false (E7)
+OK    [PDO] feliz: el cambio queda en bed_status_history con su motivo (R-09)
+OK    [InMemory] feliz: el cambio queda en el historial con su motivo (R-09)
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException se traduce a 503 E8
+OK    MVC: las rutas llevan a su acción con los parámetros de la ruta
+OK    MVC: ruta desconocida = 404
+OK    MVC: el controlador no tiene SQL, PDO, estados de cama ni throw
+OK    dependencias: Dominio no usa Aplicacion, Persistencia, Presentacion
+OK    dependencias: Aplicacion no usa Persistencia, Presentacion
+OK    dependencias: Persistencia no usa Presentacion
+OK    dependencias: Presentacion no usa Persistencia
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

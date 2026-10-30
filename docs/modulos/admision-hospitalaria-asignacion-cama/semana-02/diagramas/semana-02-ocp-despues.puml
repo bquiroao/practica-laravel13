@@ -1,0 +1,56 @@
+@startuml semana-02-ocp-despues
+' Admisión hospitalaria y asignación de cama — Semana 2
+' DESPUÉS: el evaluador depende de una abstracción; cada criterio es una clase.
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F1F8F3
+  BorderColor #276749
+}
+title OCP — Diseño DESPUÉS
+
+class "AdmitirPacienteYAsignarCama" as CU {
+  +ejecutar(solicitud)
+}
+class EvaluadorElegibilidad {
+  -criterios: list<CriterioElegibilidadCama>
+  +motivosDeRechazo(cama, req): list<string>
+}
+interface CriterioElegibilidadCama {
+  +motivoDeRechazo(cama, req): ?string
+}
+class CriterioServicio
+class CriterioTipoCama
+class CriterioAislamiento <<extensión>>
+class "CriterioNuevo…" as CN <<futuro>>
+
+class CamaDisponible {
+  +codigo
+  +servicio
+  +tipo
+  +aislamiento
+}
+class Requerimiento {
+  +servicio
+  +tipo
+  +requiereAislamiento
+}
+
+CU --> EvaluadorElegibilidad : usa
+EvaluadorElegibilidad o--> "1..*" CriterioElegibilidadCama
+CriterioElegibilidadCama <|.. CriterioServicio
+CriterioElegibilidadCama <|.. CriterioTipoCama
+CriterioElegibilidadCama <|.. CriterioAislamiento
+CriterioElegibilidadCama <|.. CN
+CriterioElegibilidadCama ..> CamaDisponible
+CriterioElegibilidadCama ..> Requerimiento
+
+note bottom of EvaluadorElegibilidad
+  CERRADO a modificación: no cambia
+  cuando llega un criterio nuevo.
+end note
+note bottom of CN
+  ABIERTO a extensión: un criterio nuevo
+  es una clase nueva que se inyecta en
+  el Composition Root (bootstrap.php).
+end note
+@enduml

@@ -1,0 +1,39 @@
+$ PRESCRIPCIONES_DB_DSN=… php tests/mutaciones.php
+[DETECTA  ] M1 el adaptador PDO devuelve vacío si allergies falla (fail-open) falla: PER-01, INT-06
+[DETECTA  ] M2 la aplicación trata la fuente caída como «sin alergias»     falla: CB-01, APP-04, APP-13, ANU-06, JUS-02, CAR-01, CN-06, HTTP-03, CLI-05, INT-06
+[DETECTA  ] M3 la coincidencia directa deja de bloquear                    falla: DOM-03, UNI-04, UNI-05, CB-01, APP-05, APP-10, JUS-02, CAR-01, HTTP-02, HTTP-08, CLI-04, INT-03
+[DETECTA  ] M4 la severidad «unknown» se trata como leve                   falla: DOM-04, UNI-05, UNI-06, APP-07, CAR-01, INT-03
+[DETECTA  ] M5 la dosis máxima se duplica                                  falla: DOM-02, UNI-02, APP-09, CAR-01, CN-02
+[DETECTA  ] M6 no se exige confirmar «sin alergias conocidas»              falla: DOM-09, UNI-07, CB-01, CB-02, APP-08, CAR-01, HTTP-02
+[DETECTA  ] M7 la advertencia no exige el permiso override                 falla: DOM-09, UNI-07, CB-02, APP-06, JUS-03, CAR-01, CN-04
+[DETECTA  ] M8 sin idempotencia                                            falla: APP-17, CAR-01, CN-07
+[DETECTA  ] M9 no se verifica el hospital del paciente                     falla: CB-01, APP-11, APP-16, HTTP-02
+[DETECTA  ] M10 el bloqueo no deja traza                                   falla: CB-01, APP-05, CAR-01, INT-03
+[DETECTA  ] M11 el kernel no compara X-Tenant-ID con el token              falla: CN-05, HTTP-04
+[DETECTA  ] M12 el SQL de la consulta ignora el hospital                   falla: CON-PDO-04, INT-01
+[DETECTA  ] M13 la carrera de idempotencia no se traduce a ClaveEnUso      falla: CON-PDO-03, CON-PDO-08, INT-04
+[DETECTA  ] M14 el esquema sin el trigger de inmutabilidad                 falla: INT-02
+[DETECTA  ] M15 el controlador arma él mismo la respuesta de error         falla: ARQ-07, ARQ-08
+[DETECTA  ] M16 el repositorio InMemory ignora el hospital en porId        falla: CB-03, APP-03, CON-MEM-04, ANU-04, CN-05, HTTP-07
+[DETECTA  ] M17 el repositorio InMemory acepta una clave repetida          falla: CON-MEM-03
+[DETECTA  ] M18 regresión de H-4: la dosis no se normaliza                 falla: UNI-01, CON-PDO-01, CON-PDO-08, MVC-05, CAR-01, INT-09
+[DETECTA  ] M19 la vista pone Location también en un reintento (200)       falla: MVC-02, CAR-01, CN-07
+[DETECTA  ] M20 HttpFuenteAlergias trata un estado ≠ 200 como «sin alergias» falla: HFA-02, HFA-03
+[DETECTA  ] M21 HttpFuenteAlergias acepta «evaluado=false» con alergias    falla: HFA-02
+[DETECTA  ] M22 el circuito nunca se abre                                  falla: HFA-03
+[DETECTA  ] M23 el cliente reintenta también los 4xx                       falla: CLI-04
+[DETECTA  ] M24 el cliente informa INCIERTO cuando el servidor afirmó que no emitió falla: CLI-05
+[DETECTA  ] M25 el kernel acepta cualquier X-Request-ID (inyección de cabeceras) falla: OBS-01
+[DETECTA  ] M26 el registro de acceso guarda el cuerpo de la petición      falla: OBS-02
+[DETECTA  ] M27 el contrato documenta otro permiso para consultar          falla: API-01
+[DETECTA  ] M28 el mínimo de la justificación baja a 19                    falla: UNI-07, CB-02, APP-06, CAR-01, CN-03
+[DETECTA  ] M29 se consulta el permiso override aunque no haya advertencia falla: DOM-09, UNI-07
+[DETECTA  ] M30 la prescripción guarda la justificación cruda, no la de la decisión falla: APP-02, CAR-01
+[DETECTA  ] M31 la anulación no exige el motivo mínimo                     falla: UNI-08, CB-03, ANU-02, CN-03
+[DETECTA  ] M32 el repositorio InMemory acepta dos anulaciones             falla: CB-03, CON-MEM-08
+[DETECTA  ] M33 la anulación no deja traza                                 falla: CB-03, ANU-03, ANU-05, INT-10
+[DETECTA  ] M34 la previa promete que siempre se puede justificar          falla: UNI-07, JUS-01, JUS-03
+[DETECTA  ] M35 la previa pregunta a RBAC por override aunque no haya advertencia falla: JUS-02
+[DETECTA  ] M36 un reintento de OTRO prescriptor con la misma clave se trata como propio falla: CB-01, CB-02
+----------------------------------------------------------------------------------------------------
+Mutaciones: 36  Detectadas: 36  Sobreviven: 0

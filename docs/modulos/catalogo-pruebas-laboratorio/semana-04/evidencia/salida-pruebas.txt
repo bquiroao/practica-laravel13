@@ -1,0 +1,17 @@
+Micro-HIS Catálogo de pruebas de laboratorio — 2026-10-28 07:51:11 — PHP 8.4.26
+
+[OK]    T-01 Camino feliz: alta de HEM-001 crea la versión 1 (CU-01)
+[OK]    T-02 Regla RN-05: versión con el mismo desde se rechaza por vigencia superpuesta
+[OK]    T-03 Regla RN-05: versión que empieza después cierra la anterior el día previo
+[OK]    T-04 Reglas RN-03 y RN-04: devuelve todos los errores por campo
+[OK]    T-05 Error de persistencia (RN-07): la falla del repositorio llega como ErrorPersistencia
+[OK]    T-06 RN-06: detalle de una prueba antes de su vigencia responde no vigente con su vigencia (CU-05)
+[OK]    T-07 PDO: guarda dos pruebas y consulta solo las vigentes en la fecha (RN-06)
+[OK]    T-08 PDO: si el INSERT falla, el cierre de la versión anterior se revierte (RN-07)
+[OK]    T-09 Contrato InMemory: versiones, filtros y vigencia se comportan igual
+[OK]    T-09 Contrato PDO: versiones, filtros y vigencia se comportan igual
+[OK]    T-10 MVC: POST /pruebas válido responde 201 y la vista muestra el detalle
+[OK]    T-11 MVC: datos inválidos 422 y vigencia superpuesta 409 regresan al formulario con errores
+[OK]    T-12 MVC: el controlador no contiene SQL ni acceso a PDO
+
+Resultado: 13 pruebas, 13 correctas, 0 fallidas

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TC-107 · Ejecutar · QA y regresión</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body class="sin-nav">
+<header class="barra">
+  <a class="btn atras" href="m1-campanas.html" aria-label="Volver a las campañas">←</a>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. Norte</span><span class="largo">QA · Hospital Regional del Norte</span></button>
+  <span class="avatar" aria-label="tito-tester">TT</span>
+</header>
+<div class="caso-cabecera">
+  <span class="id">TC-107 · Una nota firmada no se edita</span>
+  <span class="meta">Versión 1 · build 1.4.0+abc1234 · RF-07 · <strong>crítico</strong></span>
+</div>
+
+<main>
+  <div class="aviso atencion" data-estado="verifica" role="note">
+    <h2>Este caso tiene el defecto #12 CORREGIDO</h2>
+    <p>Si esta ejecución pasa, ¿la registra como verificación del defecto #12? Así lo cierra.</p>
+    <label class="casilla"><input type="checkbox" checked> Sí, esta ejecución verifica el defecto #12</label>
+  </div>
+
+  <h2>Pasos</h2>
+  <ol class="pasos-caso">
+    <li>
+      <div><strong>1.</strong> Actualizar el texto de la nota firmada</div>
+      <p class="esperado">Esperado: se rechaza; se agrega una corrección.</p>
+      <div class="marcar" role="group" aria-label="Resultado del paso 1">
+        <button type="button" class="btn si" aria-pressed="false" data-estado="base falla error confirmar">✓ Como se esperaba</button>
+        <button type="button" class="btn no" aria-pressed="true" data-estado="base falla error confirmar">✕ Distinto</button>
+        <button type="button" class="btn si" aria-pressed="true" data-estado="verifica">✓ Como se esperaba</button>
+        <button type="button" class="btn no" aria-pressed="false" data-estado="verifica">✕ Distinto</button>
+      </div>
+    </li>
+  </ol>
+
+  <fieldset class="opciones">
+    <legend>Resultado</legend>
+    <div class="grupo" data-estado="base falla error confirmar">
+      <label class="opcion"><input type="radio" name="resultado" value="PASA"> Pasa</label>
+      <label class="opcion"><input type="radio" name="resultado" value="FALLA" checked> Falla</label>
+      <label class="opcion"><input type="radio" name="resultado" value="BLOQUEADO"> Bloqueado</label>
+      <label class="opcion"><input type="radio" name="resultado" value="NO_APLICA"> No aplica</label>
+    </div>
+    <div class="grupo" data-estado="verifica">
+      <label class="opcion"><input type="radio" name="resultado-v" value="PASA" checked> Pasa</label>
+      <label class="opcion"><input type="radio" name="resultado-v" value="FALLA"> Falla</label>
+      <label class="opcion"><input type="radio" name="resultado-v" value="BLOQUEADO"> Bloqueado</label>
+      <label class="opcion"><input type="radio" name="resultado-v" value="NO_APLICA"> No aplica</label>
+    </div>
+  </fieldset>
+
+  <div data-estado="base falla error confirmar">
+    <label for="evidencia">Evidencia (obligatoria si falla o está bloqueado)</label>
+    <input id="evidencia" type="file" accept="image/png,image/jpeg,text/plain,.xml" aria-describedby="ayuda-evidencia" data-estado="base falla confirmar">
+    <input id="evidencia-e" type="file" accept="image/png,image/jpeg,text/plain,.xml" aria-label="Evidencia (obligatoria si falla o está bloqueado)"
+      aria-describedby="error-evidencia ayuda-evidencia" aria-invalid="true" data-estado="error">
+    <p class="error" id="error-evidencia" data-estado="error">Falta la evidencia: una falla necesita al menos una captura, un log o un JUnit.</p>
+    <div class="adjunto" data-estado="base falla confirmar">
+      <span aria-hidden="true">🖼</span><span class="nombre">nota-editable.png</span><span class="meta">182 KB</span>
+      <button type="button" class="btn texto">Quitar</button>
+    </div>
+    <p class="ayuda" id="ayuda-evidencia">PNG, JPEG, texto o JUnit · máximo 5 MB.</p>
+
+    <fieldset class="opciones">
+      <legend>¿La evidencia muestra datos de pacientes?</legend>
+      <div class="grupo dos">
+        <label class="opcion"><input type="radio" name="clasif" value="GENERAL"> No</label>
+        <label class="opcion"><input type="radio" name="clasif" value="DATOS_CLINICOS" checked> Sí, datos clínicos</label>
+      </div>
+    </fieldset>
+    <p class="clinica" id="aviso-clinica">Solo quien tenga el permiso clínico verá el contenido. Si se queda sin conexión, esta evidencia <strong>no</strong> se guarda en el teléfono: no cierre esta pantalla hasta confirmar.</p>
+
+    <h2 style="margin-top:16px">Defecto</h2>
+    <label for="titulo">Título</label>
+    <input id="titulo" value="Se puede editar una nota firmada">
+    <label for="pasos">Pasos para reproducirlo</label>
+    <textarea id="pasos">Abrir la nota firmada
+Editar el texto</textarea>
+    <label for="severidad">Severidad propuesta</label>
+    <select id="severidad" aria-describedby="ayuda-sev"><option>Crítica</option><option selected>Mayor</option><option>Menor</option><option>Trivial</option></select>
+    <details class="mas" id="ayuda-sev"><summary>¿Qué severidad elijo?</summary>
+      <p><strong>Crítica:</strong> altera o expone datos clínicos. <strong>Mayor:</strong> una función clínica no se puede usar bien. <strong>Menor:</strong> hay una forma de seguir. <strong>Trivial:</strong> cosmético. El Líder QA la confirma.</p>
+    </details>
+  </div>
+</main>
+
+<div class="accion-fija">
+  <a class="btn primario" href="m2-ejecutar.html?estado=confirmar">Registrar…</a>
+</div>
+
+<div data-estado="confirmar">
+  <div class="velo"></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-confirmar">
+    <div class="asa"></div>
+    <h2 id="t-confirmar">¿Registrar este resultado?</h2>
+    <p><strong>TC-107 · Falla</strong> · 1 captura con datos clínicos · defecto «Se puede editar una nota firmada» (Mayor).</p>
+    <p class="meta">Un resultado no se puede editar después: si se equivoca, registre otro intento.</p>
+    <div class="acciones">
+      <a class="btn primario" href="m3-registro.html?estado=exito">Registrar</a>
+      <a class="btn" href="m2-ejecutar.html?estado=falla" autofocus>Volver</a>
+    </div>
+  </section>
+</div>
+<script src="estado.js"></script>
+</body>
+</html>

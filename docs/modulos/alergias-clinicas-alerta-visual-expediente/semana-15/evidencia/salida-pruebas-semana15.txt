@@ -1,0 +1,18 @@
+Fecha: 2026-10-29 07:04:18 | PHP 8.4.26 | --solo=semana15 --evidencia=../semana-15/evidencia/salida-pruebas-semana15.txt
+== semana15
+[OK] U-01 [RN-01, RN-03] Alergeno: normaliza mayúsculas y espacios, prefiere el código y exige uno de los dos
+[OK] U-02 [RN-08] ReglaPorSeveridad: las 5 severidades dan el nivel esperado
+[OK] U-03 [RN-04] Reacción: 500 caracteres se aceptan, 501 no; en blanco se rechaza
+[OK] U-04 [RN-09] Solo ALTA y CRITICA exigen reconocimiento
+[DEFECTO] [DEFECTO D-02] U-05 [RN-08] «Reacción anafiláctica» (con tilde) debe subir a CRITICA: nivel con «anafiláctica»: se esperaba 'CRITICA' y se obtuvo NULL
+[OK] CB-01 [RN-05] RegistrarAlergia::fecha(): los 5 caminos de la condición (nula, vacía, válida, desbordada, otro formato)
+[OK] CB-02 [RN-08, RN-09] CalculadorAlerta: ramas lista vacía, regla null, regla que sube, desempate y huella independiente del orden
+[OK] CB-03 [RNF-01] KernelApi: MC/DC de «hospital del token distinto O encabezado distinto»
+[OK] CN-01 [RF-01, RN-02] Equivalencia de severidad: 5 clases válidas → 201; inválidas → 422
+[OK] CN-02 [RF-01, RN-05] Límites de fecha: hoy → 201; mañana → 422; 2026-02-29 (no bisiesto) → 422
+[OK] CN-03 [RF-08, RN-07] Permisos: matriz rol × operación
+[OK] CN-04 [RNF-04, RNF-05] Errores: 401, 400, 404, 409 y 503 con el formato único
+[OK] CN-05 [RN-04] Límite de la reacción por la API: 500 → 201; 501 → 422
+[DEFECTO] [DEFECTO D-01] CN-06 [RF-03, RN-03] El mismo alérgeno por código+nombre y luego solo por nombre debe dar 409: segundo registro de Penicilina: se esperaba 409 y se obtuvo 201
+[DEFECTO] [DEFECTO D-03] CN-07 [RF-01] Un campo con tipo JSON incorrecto («reaccion»: 123) debe dar 400, no guardarse sin él: respuesta: se esperaba '400 FORMATO_INVALIDO' y se obtuvo '201 sin error: se guardó'
+RESULTADO: 15 pruebas, 12 correctas, 0 fallidas, 0 omitidas, 3 con defecto registrado

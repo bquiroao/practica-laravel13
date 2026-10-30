@@ -1,0 +1,12 @@
+@startsalt
+title W4 — Acceso de emergencia sin consentimiento (R-07)
+{+
+  <b>El paciente no ha dado consentimiento a este hospital</b> (E5)
+  Solo en una emergencia puedes acceder sin él. Quedará registrado y será revisado.
+  Justificación * | {+ "Paciente inconsciente; necesito alergias previas    " }
+  <i>Obligatoria (E6). Acceso por 1 hora como máximo; luego se cierra solo.</i>
+  [Cancelar] | [Confirmar acceso de emergencia]
+  ---
+  <i>Éxito: «Acceso de emergencia hasta las 11:40 · revisión pendiente».</i>
+}
+@endsalt

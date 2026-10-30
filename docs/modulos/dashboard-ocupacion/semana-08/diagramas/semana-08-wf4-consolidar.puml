@@ -1,0 +1,12 @@
+@startsalt
+title W4 — Consolidar ahora (administrador)
+{+
+  <b>¿Consolidar la ocupación ahora?</b>
+  Se leerán las camas y estancias actuales del Hospital Central.
+  No cambia ningún estado de cama (R-09). Último corte: 10:35.
+  [Cancelar] | [Consolidar]
+  ---
+  <i>Mientras consolida: «Consolidando…» y el botón deshabilitado.</i>
+  <i>Éxito: «Corte de las 10:40 guardado: 3 salas».</i>
+}
+@endsalt

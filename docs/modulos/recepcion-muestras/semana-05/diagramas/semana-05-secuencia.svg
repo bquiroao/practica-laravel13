@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="640" viewBox="0 0 940 640" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>Semana 5 - Secuencia de la recepción con idempotencia y falla de Órdenes</title>
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="470" y="24" text-anchor="middle" font-size="16" font-weight="bold">POST /specimen-receptions: idempotencia y falla de Órdenes</text>
+  <g font-weight="bold" text-anchor="middle">
+    <rect x="20" y="40" width="120" height="30" fill="#eef5ff" stroke="#333"/><text x="80" y="60">Cliente</text>
+    <rect x="200" y="40" width="130" height="30" fill="#eef5ff" stroke="#333"/><text x="265" y="60">API Recepción</text>
+    <rect x="400" y="40" width="130" height="30" fill="#eef5ff" stroke="#333"/><text x="465" y="60">ReceiveSpecimen</text>
+    <rect x="600" y="40" width="120" height="30" fill="#eef5ff" stroke="#333"/><text x="660" y="60">Órdenes</text>
+    <rect x="780" y="40" width="140" height="30" fill="#eef5ff" stroke="#333"/><text x="850" y="60">BD Recepción</text>
+  </g>
+  <g stroke="#999" stroke-dasharray="4,4"><path d="M80,70 V620"/><path d="M265,70 V620"/><path d="M465,70 V620"/><path d="M660,70 V620"/><path d="M850,70 V620"/></g>
+  <g stroke="#333" fill="none" marker-end="url(#a)">
+    <path d="M80,100 H265"/><path d="M265,130 H850"/><path d="M265,230 H465"/><path d="M465,260 H660"/>
+    <path d="M465,410 H850"/>
+  </g>
+  <g stroke="#333" fill="none" stroke-dasharray="5,3" marker-end="url(#a)">
+    <path d="M850,150 H265"/><path d="M265,170 H80"/><path d="M660,290 H465"/><path d="M265,330 H80"/>
+    <path d="M850,430 H465"/><path d="M265,470 H80"/>
+  </g>
+  <text x="90" y="94" font-size="12">POST + Idempotency-Key K1</text>
+  <text x="280" y="124" font-size="12">¿existe K1?</text>
+  <text x="560" y="144" font-size="12">K1 existe, mismo contenido</text>
+  <text x="90" y="164" font-size="12">200 recepción original</text>
+  <text x="90" y="190" font-size="12" fill="#721c24">K1 con contenido distinto: 409</text>
+  <text x="280" y="224" font-size="12">K1 nueva</text>
+  <text x="480" y="254" font-size="12">GET orden e ítem (timeout corto)</text>
+  <text x="480" y="284" font-size="12">timeout o error</text>
+  <text x="90" y="324" font-size="12" fill="#721c24">503 + Retry-After, no se guarda nada</text>
+  <text x="90" y="358" font-size="12" fill="#721c24">orden inexistente u otro hospital: 404 sin datos</text>
+  <text x="480" y="404" font-size="12">orden válida: guardar recepción + custodia + outbox</text>
+  <text x="480" y="424" font-size="12">una sola transacción</text>
+  <text x="560" y="446" font-size="12">ok</text>
+  <text x="90" y="464" font-size="12">201 + specimenId</text>
+  <rect x="20" y="520" width="900" height="80" fill="#fff8dc" stroke="#333"/>
+  <text x="32" y="544">Regla: una falla técnica nunca se convierte en rechazo clínico ni en aceptación.</text>
+  <text x="32" y="566">El hospital sale de la sesión, no del cuerpo de la petición. El reintento con la misma clave no crea una segunda recepción.</text>
+  <text x="32" y="588">Propuesta: el prototipo de la Semana 3 no tiene API, idempotencia, verificación de Órdenes ni outbox.</text>
+</svg>

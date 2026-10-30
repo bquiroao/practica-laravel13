@@ -1,0 +1,27 @@
+Esquema «e2e» creado y catálogo de demostración cargado.
+$ POST /versiones  (token-pipeline)
+{"codigo":"VERSION_REGISTRADA","numero":"2.4.0","digest":"sha256:50333226f021db85e436d040e924d56f0034fb247c7a05d0a91acb992602d325","estado":"CANDIDATA"}  -> HTTP 201
+
+$ POST /versiones/2.4.0/plan  (token-ing-qa)
+{"error":"PLAN_INCOMPLETO","detalle":["E2E-102"]}  -> HTTP 422
+
+$ POST /versiones/2.4.0/plan  (token-ing-qa)
+{"codigo":"PLAN_DEFINIDO","version":"2.4.0","plan":{"E2E-101":true,"E2E-102":true,"E2E-103":false,"E2E-104":false,"E2E-105":false,"E2E-106":false}}  -> HTTP 200
+
+$ POST /versiones/2.4.0/ejecuciones  (token-pipeline)
+{"codigo":"EJECUCION_INICIADA","id":1,"version":"2.4.0","digest":"sha256:50333226f021db85e436d040e924d56f0034fb247c7a05d0a91acb992602d325","escenarios":6}  -> HTTP 201
+
+$ POST /ejecuciones/1/resultados  (token-pipeline)
+{"codigo":"RESULTADO_REPORTADO","ejecucion":1,"escenario":"E2E-102","resultado":"INESTABLE","intentos":2,"evidencias":["1c139be0c3db2dc0d77c319cc269e9b5a544185ef9986680fd3fed4eafc48e8d"]}  -> HTTP 201
+
+(E2E-101, 103, 104, 105 y 106 reportados con PASA)
+
+$ POST /ejecuciones/1/cierre  (token-pipeline)
+{"codigo":"EJECUCION_COMPLETADA","id":1,"estado":"COMPLETADA"}  -> HTTP 200
+
+$ POST /versiones/2.4.0/gate  (token-pipeline)
+{"error":"PERMISO_DENEGADO"}  -> HTTP 403
+
+$ POST /versiones/2.4.0/gate  (token-release)
+{"codigo":"GATE_EVALUADO","version":"2.4.0","ejecucion":1,"decision":"RECHAZADO","reglas":{"digest":true,"a_criticos":false,"b_tasa":true,"c_inestables":true,"d_evidencia":true,"e_antiguedad":true},"causas":["críticos que no pasan: E2E-102"],"digest":"sha256:50333226f021db85e436d040e924d56f0034fb247c7a05d0a91acb992602d325","politica":"gate-2026.1"}  -> HTTP 200
+

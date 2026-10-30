@@ -1,0 +1,21 @@
+@startsalt m2-detalle
+' M2 Móvil: detalle con la versión vigente primero e historial plegado
+scale 2
+{+
+  {* < Volver | MED-000104 }
+  ==
+  <b>Ibuprofeno 400 mg tableta
+  Tableta · Oral
+  {+
+    <b>Vigente hoy: versión 2
+    Caja con 30 tabletas
+    Desde 2026-07-01 · sin fecha de fin
+  }
+  [Historial (2 versiones) ▸]
+  --
+  <i>Acciones solo para QF_CATALOGO:
+  [Nueva versión] | [Más acciones ▾]
+  --
+  <i>Datos ficticios. No hay datos de pacientes.
+}
+@endsalt

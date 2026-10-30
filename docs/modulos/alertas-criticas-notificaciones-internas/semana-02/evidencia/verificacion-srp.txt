@@ -1,0 +1,30 @@
+=== Verificación SRP — Alertas críticas y notificaciones internas ===
+PHP 8.4.26
+
+--- Estructural: dependencias externas por clase ---
+antes.php    GestorAlertas                4  PDO, time, sleep, mail
+despues.php  Reloj                        0  
+despues.php  PuertoNotificacion           0  
+despues.php  RelojSistema                 1  reloj real
+despues.php  RelojFijo                    0  
+despues.php  NotificadorSimulado          0  
+despues.php  DespachadorNotificaciones    0  
+despues.php  PoliticaEscalamiento         0  
+despues.php  Alerta                       0  
+[OK]    ANTES: GestorAlertas concentra 4 dependencias externas
+[OK]    DESPUÉS: Alerta no usa dependencias externas
+[OK]    DESPUÉS: PoliticaEscalamiento no usa dependencias externas
+[OK]    DESPUÉS: DespachadorNotificaciones no usa dependencias externas
+[OK]    DESPUÉS: ninguna clase tiene más de 1 dependencia externa
+
+--- Comportamiento (reloj fijo, notificador simulado) ---
+[OK]    CA-06 entrega fallida: 3 intentos para enf.turno01
+[OK]    CA-06 entrega correcta: 1 intento para med.tratante01
+[OK]    CA-06 el despachador reporta a enf.turno01 como fallido
+[OK]    CA-11 a las 10:14 no vence
+[OK]    CA-10 a las 10:15 vence
+[OK]    CA-10 queda ESCALADA en nivel 1
+[OK]    CA-08 acuse idempotente: un solo evento «acusada»
+[OK]    CA-12 acusada no escala a las 10:30
+
+RESULTADO: todas las comprobaciones pasaron

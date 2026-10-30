@@ -1,0 +1,21 @@
+@startsalt m4-confirmar-baja
+' M4 Móvil: hoja inferior de confirmación de baja
+scale 2
+{+
+  {* < Volver | MED-000101 }
+  ==
+  <i>(contenido del detalle atenuado)
+  --
+  {+
+    <b>Dar de baja MED-000101
+    Paracetamol 500 mg tableta
+    Fecha  "2026-11-01"
+    Motivo *
+    "Retiro del formulario   "
+    <i>Dejará de aparecer en búsquedas
+    <i>desde esa fecha. El historial se conserva.
+    [Confirmar baja]
+    [Cancelar]
+  }
+}
+@endsalt

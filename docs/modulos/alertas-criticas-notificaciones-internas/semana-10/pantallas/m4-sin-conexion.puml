@@ -1,0 +1,14 @@
+@startsalt m4-sin-conexion
+{+
+  {* ← | <b>PAC-00451</b> }
+  ==
+  {+ <b>⚠ Sin conexión</b>
+     El acuse no se registró.
+     Se reintentará al volver la señal.
+     [<b>Reintentar ahora</b>] }
+  ==
+  <b>‼ CRITICA</b> · ENVIADA · nivel 0
+  Datos guardados a las 10:03
+  (pueden estar desactualizados)
+}
+@endsalt

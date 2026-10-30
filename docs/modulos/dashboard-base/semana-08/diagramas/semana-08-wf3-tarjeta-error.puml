@@ -1,0 +1,13 @@
+@startsalt
+title W3 — Una tarjeta en error y las demás siguen (R-03)
+{+
+  {* Inicio | Pacientes | Citas | Camas | Ayuda | Cerrar sesión }
+  {#
+    <b>Pacientes</b> | <b>Citas de hoy</b> | <b>Camas disponibles</b>
+    <b>42</b> pacientes activos | No pudimos cargar las citas de hoy. | <b>7</b> camas disponibles
+    . | [Reintentar] | .
+  }
+  <i>Error de servidor o red (E5) o más de 10 s sin respuesta (E2): mismo mensaje, sin códigos técnicos (R-09).</i>
+  <i>«Reintentar» recarga solo esa tarjeta y se deshabilita mientras carga; nunca hay reintento automático (R-08).</i>
+}
+@endsalt

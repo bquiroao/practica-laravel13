@@ -1,0 +1,11 @@
+@startsalt
+title W4 — Cancelar cita (confirmación)
+{+
+  <b>Cancelar la cita de P-0047 · L. Gómez</b> | [?] Ayuda
+  28/10/2026, 09:00–09:30 · M-03 · Dra. Ruiz | .
+  Motivo de la cancelación * | "viaje del paciente     "
+  <i>Queda en la auditoría con tu usuario y la fecha (R-10). La cita no se borra (R-08).</i> | .
+  <i>El médico solo puede cancelar sus propias citas (R-09).</i> | .
+  [No cancelar] | [Cancelar cita]
+}
+@endsalt

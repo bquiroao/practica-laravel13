@@ -1,0 +1,17 @@
+[DETECTA  ] M1 la huella deja de ser final (un subtipo podría sobrescribirla, como EnlaceExterno) falla: LSP-02
+[DETECTA  ] M2 una captura con datos clínicos lanza al leer su contenido (como en el ANTES) falla: CA-14, LSP-02, LSP-04
+[DETECTA  ] M3 la huella se calcula sobre otra cosa que el contenido                       falla: CA-15, LSP-02, LSP-03, LSP-05
+[DETECTA  ] M4 una referencia externa cuenta como evidencia                                falla: CA-05
+[DETECTA  ] M5 con el almacén caído se registra igual (fail-open)                        falla: CA-06
+[DETECTA  ] M6 ver una evidencia clínica no exige el permiso especial                     falla: CA-14
+[DETECTA  ] M7 una FALLA no exige defecto                                                  falla: CA-07
+[DETECTA  ] M8 el autor puede aprobar su propio caso                                       falla: CA-02
+[DETECTA  ] M9 el alcance no exige los casos críticos de la matriz                        falla: CA-03
+[DETECTA  ] M10 el desarrollador puede cerrar el defecto al corregirlo                     falla: CA-09
+[DETECTA  ] M11 el criterio de salida exige superar el umbral (> en vez de ≥)            falla: CA-10
+[DETECTA  ] M12 cuenta el PRIMER intento de cada caso, no el último                       falla: CA-10
+[DETECTA  ] M13 sin idempotencia                                                           falla: CA-12
+[DETECTA  ] M14 una captura acepta cualquier archivo                                       falla: CA-05
+[DETECTA  ] M15 el informe lee el contenido de las evidencias                              falla: CA-14
+----------------------------------------------------------------------------------------------------
+Mutaciones: 15  Detectadas: 15  Sobreviven: 0

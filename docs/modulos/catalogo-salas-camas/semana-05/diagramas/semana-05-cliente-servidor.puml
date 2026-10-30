@@ -1,0 +1,24 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Catálogo de salas y camas (hoy: módulo dentro del HIS)
+actor "Administrador o supervisor" as u
+node "Navegador" {
+  [SPA Vue del HIS] as spa
+}
+node "Servidor del HIS" {
+  [Front controller /salas] as fc
+  [ControladorCatalogo + VistaJson] as ctl
+  [ServicioCatalogo + EstadoCama] as srv
+  [RepositorioPdo] as repo
+}
+database "Base HOSPITAL (tenant)" as db
+[RBAC y sesión] as rbac
+[Auditoría] as aud
+u --> spa
+spa --> fc : HTTPS JSON\nJWT + X-Tenant-ID + X-Request-Id
+fc --> ctl
+ctl --> srv
+srv --> repo
+repo --> db : wards, beds, bed_status_history
+fc ..> rbac : permiso de catálogo (semana 15)
+srv ..> aud : cambio de estado con motivo (R-09)
+@enduml

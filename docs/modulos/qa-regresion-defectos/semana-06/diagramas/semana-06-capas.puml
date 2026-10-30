@@ -1,0 +1,35 @@
+@startuml semana-06-capas
+!pragma layout smetana
+title Capas del Micro-HIS QA: en verde, lo que tocó el cambio R-15
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+
+package "Presentación" #F5F5F5 {
+  rectangle "Kernel · Formularios · Controladores · Vistas\n(sin cambios)" as P
+}
+package "Aplicación" #F5F9FF {
+  rectangle "CerrarCampana\n+ críticos de la matriz ∩ alcance\n+ mayoresAbiertos()" as AC #E1EFE8
+  rectangle "ConsultarTrazabilidad\n+ bloquea_go por defecto" as AT #E1EFE8
+  rectangle "RegistrarResultado · Planificar · Iniciar ·\nClasificar · Corregir · Diseñar · Aprobar\n(sin cambios)" as AO
+}
+package "Dominio" #FFF8E1 {
+  rectangle "Campana::cerrar(críticos, mayoresEnCriticos)\n+ causa R-15" as DC #E1EFE8
+  rectangle "RepositorioDefectos\n+ mayoresAbiertos(tenant, casos)" as DR #E1EFE8
+  rectangle "CasoPrueba · Intento · Defecto · Evidencia\n(sin cambios)" as DO
+}
+package "Persistencia" #EEF7EE {
+  rectangle "PdoRepositorioDefectos\n+ 1 consulta preparada" as PP #E1EFE8
+  rectangle "RepositorioDefectosEnMemoria\n+ 1 filtro" as PM #E1EFE8
+  rectangle "Esquema qa · resto de adaptadores\n(sin cambios: ninguna migración)" as PO
+}
+rectangle "api/openapi.yaml 1.0.0 → 1.1.0\n(campo nuevo bloquea_go; aditivo)" as API #E1EFE8
+
+P --> AC
+P --> AT
+AC --> DC
+AC --> DR
+AT --> DR
+PP ..|> DR
+PM ..|> DR
+P ..> API : API-01..03
+@enduml

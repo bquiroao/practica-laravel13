@@ -1,0 +1,74 @@
+@startuml semana-02-clases-despues
+!pragma layout smetana
+title DESPUÉS de LSP — un contrato que todo subtipo cumple
+skinparam defaultFontSize 11
+skinparam classBackgroundColor #F4F8F2
+skinparam classBorderColor #3B6E2E
+
+interface EvidenciaVerificable {
+  +tipo(): string
+  +contenido(): string
+  +huella(): string
+  +tamano(): int
+  +clasificacion(): Clasificacion
+}
+abstract class EvidenciaInmutable {
+  -bytes: string  «readonly»
+  -huella: string  «readonly»
+  #__construct(bytes, clasificacion)
+  +{final} contenido()
+  +{final} huella()
+  +{final} tamano()
+  +{final} clasificacion()
+}
+EvidenciaVerificable <|.. EvidenciaInmutable
+
+class Captura {
+  «valida PNG o JPEG
+  en el constructor»
+}
+class RegistroTexto {
+  «valida UTF-8
+  en el constructor»
+}
+class ResultadoJUnit {
+  +resumen(): array  «extensión»
+}
+EvidenciaInmutable <|-- Captura
+EvidenciaInmutable <|-- RegistroTexto
+EvidenciaInmutable <|-- ResultadoJUnit
+
+enum Clasificacion {
+  GENERAL
+  DATOS_CLINICOS
+}
+
+class ReferenciaExterna #FFF8E1 {
+  +url: string
+  +descripcion: string
+}
+note bottom of ReferenciaExterna
+  NO es una evidencia: es contexto.
+  Nunca cuenta para exigir evidencia.
+end note
+
+package "Aplicación (no pregunta por el subtipo)" {
+  class RegistrarResultado
+  class VerificarIntegridad
+  class GenerarInforme
+  class ConsultarEvidencia {
+    «protege DATOS_CLINICOS
+    con un permiso»
+  }
+  class ImportarLogRemoto {
+    «descarga UNA vez y crea
+    RegistroTexto + ReferenciaExterna»
+  }
+}
+RegistrarResultado ..> EvidenciaVerificable
+RegistrarResultado ..> ReferenciaExterna
+VerificarIntegridad ..> EvidenciaVerificable
+GenerarInforme ..> EvidenciaVerificable
+ConsultarEvidencia ..> EvidenciaVerificable
+ImportarLogRemoto ..> RegistroTexto
+@enduml

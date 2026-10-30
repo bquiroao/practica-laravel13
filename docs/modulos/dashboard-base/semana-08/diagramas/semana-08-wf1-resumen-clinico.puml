@@ -1,0 +1,14 @@
+@startsalt
+title W1 — Resumen inicial (personal clínico: médico)
+{+
+  {* Inicio | Pacientes | Citas | Ayuda | Cerrar sesión }
+  Hospital: <b>Hospital Central</b> | . | Rol: médico
+  {#
+    <b>Pacientes</b> | <b>Citas de hoy</b>
+    <b>42</b> pacientes activos | ░░░░░░░░ (cargando…)
+    [Ver pacientes] | .
+  }
+  <i>Sin permiso camas.ver: la tarjeta de camas no se muestra (R-02).</i>
+  <i>Vacío: «No hay citas hoy: agenda una.» con el botón [Agendar].</i>
+}
+@endsalt

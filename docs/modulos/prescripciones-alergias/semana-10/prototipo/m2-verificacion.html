@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificación de alergias · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<!-- Estados: carga · sin-hallazgos · advertencia · bloqueo · sin-registros · no-disponible · justificar · sin-override · confirmar -->
+<header class="barra">
+  <button class="atras" aria-label="Volver a los ítems" onclick="location.href='m1-prescribir.html'">‹</button>
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte"><span class="corto">H. R. Norte</span><span class="largo">Hospital Regional del Norte</span></button>
+  <span class="rol-actual">Médico</span>
+  <span class="avatar" role="img" aria-label="Dr. López, médico">DL</span>
+</header>
+
+<div class="alergias" role="region" aria-label="Alergias activas" data-estado="carga sin-hallazgos advertencia bloqueo no-disponible justificar sin-override">
+  <span aria-hidden="true">⚠</span>
+  <div>Alergias activas: Penicilina <span class="detalle">· moderada · exantema</span></div>
+</div>
+<div class="alergias sin-registros" role="region" aria-label="Alergias" data-estado="sin-registros confirmar">
+  <span aria-hidden="true">?</span>
+  <div>Sin alergias registradas <span class="detalle">· no significa que no tenga</span></div>
+</div>
+
+<main>
+  <div class="paciente"><div class="nombre">María E. · P-002</div><div class="meta">2 medicamentos: Cefalexina 500 mg, Paracetamol 500 mg</div></div>
+  <h1>Verificación de alergias</h1>
+
+  <!-- semana 9 B-12: el resultado se anuncia (role=status; el bloqueo, role=alert) -->
+  <div data-estado="carga" aria-busy="true" role="status">
+    <p class="meta">Verificando alergias…</p>
+    <div class="esq" style="width:70%"></div><div class="esq"></div><div class="esq" style="width:85%"></div>
+  </div>
+
+  <div class="veredicto ok" role="status" data-estado="sin-hallazgos">
+    <h2>✓ Sin conflictos</h2>
+    <p>Se compararon los 2 medicamentos con 1 alergia activa (Penicilina). Puede emitir.</p>
+  </div>
+
+  <div class="veredicto advertencia" role="status" data-estado="advertencia justificar sin-override">
+    <h2>⚠ Advertencia: 1 hallazgo</h2>
+    <div class="hallazgo">
+      <div class="med">Cefalexina 500 mg ↔ Penicilina</div>
+      <div>Reactividad cruzada (mismo grupo: betalactámicos) · severidad <b>moderada</b> · exantema</div>
+    </div>
+    <p style="margin-bottom:0">Para emitir, justifique por qué la necesita, o cambie el medicamento.</p>
+  </div>
+
+  <div class="veredicto bloqueo" role="alert" data-estado="bloqueo">
+    <h2>⛔ Bloqueo: no se puede prescribir</h2>
+    <div class="hallazgo">
+      <div class="med">Amoxicilina 500 mg ↔ Penicilina</div>
+      <div>Alergia activa · severidad <b>grave</b> · urticaria</div>
+    </div>
+    <p style="margin-bottom:0">No hay forma de forzarlo. Cambie el medicamento.</p>
+  </div>
+
+  <div class="veredicto sin-registros" role="status" data-estado="sin-registros confirmar">
+    <h2>? Sin alergias registradas</h2>
+    <p>El expediente de P-003 no tiene alergias registradas. <b>Eso no significa que no tenga alergias.</b> Confírmelo con el paciente o regístrelas.</p>
+  </div>
+
+  <div class="veredicto no-disponible" role="alert" data-estado="no-disponible">
+    <h2>✕ No se pudo consultar las alergias</h2>
+    <p>El expediente no respondió. No podrá emitir hasta que responda. Su borrador sigue aquí.</p>
+    <a class="btn primario" href="m2-verificacion.html?estado=carga">Reintentar</a>
+  </div>
+</main>
+
+<div class="accion-fija" data-estado="sin-hallazgos advertencia bloqueo sin-registros no-disponible">
+  <a class="btn primario" href="m3-emision.html?estado=emitiendo" data-estado="sin-hallazgos">Emitir</a>
+  <a class="btn primario" href="m2-verificacion.html?estado=justificar" data-estado="advertencia">Justificar y emitir</a>
+  <a class="btn primario" href="m2-verificacion.html?estado=confirmar" data-estado="sin-registros">Confirmar con el paciente</a>
+  <a class="btn" href="m1-prescribir.html" data-estado="advertencia bloqueo no-disponible">Cambiar medicamento</a>
+  <a class="btn" href="#" data-estado="sin-registros">Registrar alergia</a>
+</div>
+
+<!-- Hoja: justificar (con permiso override) -->
+<div class="velo" data-estado="justificar sin-override confirmar"></div>
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-just" data-estado="justificar">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-just">Emitir con advertencia</h2>
+  <p class="meta">Cefalexina ↔ Penicilina · moderada · exantema</p>
+  <p class="obligatorio">* obligatorio</p>
+  <label for="just">Justificación clínica *</label>
+  <textarea id="just" aria-required="true" aria-describedby="just-cont just-quien" autofocus>Sin alternativa: cultivo sensible solo a cefalosporinas</textarea>
+  <p class="contador ok" id="just-cont">52 / mínimo 20 ✓</p>
+  <p class="ayuda" id="just-quien">Queda guardada con la prescripción y la ven farmacia y enfermería.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m3-emision.html?estado=emitiendo">Emitir con justificación</a>
+    <a class="btn" href="m2-verificacion.html?estado=advertencia">Volver</a>
+  </div>
+</div>
+
+<!-- Hoja: sin permiso override. Reemplaza el área de texto: no se escribe en vano (semana 9 B-11) -->
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-sin" data-estado="sin-override">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-sin">No puede autorizar esta advertencia</h2>
+  <p>Su usuario no tiene el permiso para emitir con advertencia. Pida a un médico con ese permiso que la emita, o cambie el medicamento.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m1-prescribir.html">Cambiar medicamento</a>
+    <a class="btn" href="m2-verificacion.html?estado=advertencia" autofocus>Volver</a>
+  </div>
+</div>
+
+<!-- Hoja: confirmar «sin alergias conocidas». Casilla de 24 px y toda la frase es la etiqueta (semana 9 B-03) -->
+<div class="hoja" role="dialog" aria-modal="true" aria-labelledby="t-conf" data-estado="confirmar">
+  <div class="asa" aria-hidden="true"></div>
+  <h2 id="t-conf">Confirmar con el paciente</h2>
+  <p>«Sin registros» no es «sin alergias». Pregúntele al paciente o a su responsable.</p>
+  <label class="casilla"><input type="checkbox" id="conf"> Confirmé con el paciente (o su responsable) que no tiene alergias conocidas.</label>
+  <p class="ayuda">Se registra quién confirmó y cuándo.</p>
+  <div class="acciones">
+    <a class="btn primario" href="m3-emision.html?estado=emitiendo" aria-disabled="true" aria-describedby="conf-falta">Emitir</a>
+    <p class="por-que" id="conf-falta">Marque la confirmación para poder emitir.</p>
+    <a class="btn" href="m2-verificacion.html?estado=sin-registros" autofocus>Volver</a>
+  </div>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="#" aria-current="page"><span class="ico" aria-hidden="true">👤</span>Pacientes</a>
+  <a href="m4-prescripcion.html"><span class="ico" aria-hidden="true">℞</span>Prescripciones</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>
