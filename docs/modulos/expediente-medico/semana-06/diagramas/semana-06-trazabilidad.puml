@@ -1,0 +1,35 @@
+@startuml semana-06-trazabilidad
+title Semana 6 — Hilo trazable de «consultar el expediente longitudinal» con el cambio de auditoría (R-08)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontSize 11
+actor "Profesional tratante\n(S1, CU-02 y CU-03)" as A
+actor "Índice central\n(MPI y consentimientos)" as C
+rectangle "Requisitos" {
+  card "RF-02, RF-03\nR-05, R-06, R-10 (S1-S2)" as RF
+  card "R-08 / RF-05 / RNF-04: todo acceso\nqueda auditado, también el que\nfalla por CENTRAL caída (H-05)" as R8 #FFF3CD
+}
+rectangle "Contrato API (S5)" {
+  card "GET /patients/{id}/record/external\n200 externos o solo_local\n403 E4, E5 | 404 NF | 503 E8 (sin cambios)" as API
+}
+rectangle "Micro-HIS por capas (S3-S4)" {
+  component "Presentación\nRutas -> ControladorExpediente\nVistaJson" as P
+  component "Aplicación\nServicioExpediente::auditado\nErrorPersistencia -> evento E8\npuertos ExpedientesHospital,\nIndiceCentral, Auditoria (DIP)" as AP #FFF3CD
+  component "Dominio\nPaciente, Consentimiento" as D
+  component "Persistencia\nHospitalPdo | HospitalEnMemoria\nCentralPdo | CentralEnMemoria" as PE
+}
+database "HOSPITAL\naudit_events" as DBH
+database "CENTRAL" as DBC
+card "Pruebas: 27 de 27\nS13: H-05 no reproducido" as T
+A --> RF
+C --> RF
+RF --> R8
+R8 --> API
+API --> P
+P --> AP
+AP --> D
+AP --> PE
+PE --> DBH
+PE --> DBC
+AP ..> T : verifica
+@enduml

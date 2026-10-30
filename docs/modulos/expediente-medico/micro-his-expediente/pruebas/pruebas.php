@@ -52,6 +52,11 @@ $local = new HospitalPdo($h); $doble = new ControladorExpediente(new ServicioExp
 $r = $doble->atender('consultar', $pide('p1', 'm1', true));
 prueba('persistencia (doble): CENTRAL caída = 503 E8 sin detalles técnicos', $r['error'] === 'E8' && !str_contains($r['mensaje'], 'SQLSTATE'));
 prueba('persistencia (doble): con CENTRAL caída la consulta local sigue = 200', $doble->atender('consultar', $pide('p1'))['status'] === 200);
+// Cambio práctico de la semana 6: el intento fallido por CENTRAL caída también queda en la auditoría (R-08, RNF-04).
+prueba('[PDO] cambio S6: la consulta longitudinal con CENTRAL caída deja su evento E8', (int) $h->query("SELECT COUNT(*) FROM audit_events WHERE action = 'consultar_longitudinal' AND outcome = 'E8'")->fetchColumn() === 1);
+$mem = new HospitalEnMemoria(['p1' => ['g1', 'active', 'linked']], [['p1', 'm1']]); $mem->abrirExpediente('p1', 'EXP-p1');
+(new ControladorExpediente(new ServicioExpediente($mem, $caida, $mem, $reloj, 'h1'), new VistaJson()))->atender('consultar', $pide('p1', 'm1', true));
+prueba('[InMemory] cambio S6: la misma consulta deja el mismo evento', $mem->eventos === [['m1', 'consultar_longitudinal', 'p1', 'E8']]);
 $h->exec('DROP TABLE medical_records');
 prueba('persistencia (PDO real): PDOException en HOSPITAL se traduce a 503 E8', crearControlador($local, $caida, $reloj, 'h1')->atender('abrir', $pide('p2'))['error'] === 'E8');
 // 4. Entrada MVC: rutas, controlador sin SQL ni reglas, y regla de dependencias.
