@@ -45,6 +45,12 @@ final class RegistrarDespliegue
                 return Salida::noEncontrado();
             }
             $entorno = (string) ($datos['entorno'] ?? '');
+            // DEF-01 (semana 15): un reintento idéntico devuelve el despliegue ya registrado, sin otro registro ni traza.
+            $previos = array_values(array_filter($this->despliegues->deVersion($tenant, $numero), static fn (Despliegue $x): bool => $x->entorno === $entorno));
+            $ultimo = $previos === [] ? null : $previos[array_key_last($previos)];
+            if (Despliegue::esReintento($ultimo, (string) ($datos['digest'] ?? ''), $entorno, (string) ($datos['guia'] ?? ''), (string) ($datos['smoke'] ?? ''), $this->reloj->ahora())) {
+                return new Salida(Salida::OK, 'DESPLIEGUE_YA_REGISTRADO', $this->datos($ultimo));
+            }
             $nuevo = Despliegue::registrar($v, $this->evaluaciones->deVersion($tenant, $numero), (string) ($datos['digest'] ?? ''), $entorno,
                 (string) ($datos['guia'] ?? ''), (string) ($datos['smoke'] ?? ''), $this->despliegues->vigente($tenant, $entorno), $this->reloj->ahora(),
                 $this->vigenciaHoras, $usuario);
@@ -60,7 +66,13 @@ final class RegistrarDespliegue
             return Salida::persistencia();
         }
 
-        return new Salida(Salida::CREADO, 'DESPLIEGUE_REGISTRADO', ['id' => $d->id, 'version' => $d->version, 'digest' => $d->digest, 'entorno' => $d->entorno,
-            'estado' => $d->estado, 'guia' => $d->guia, 'revertido_a' => $d->revertidoA]);
+        return new Salida(Salida::CREADO, 'DESPLIEGUE_REGISTRADO', $this->datos($d));
+    }
+
+    /** @return array<string, mixed> */
+    private function datos(Despliegue $d): array
+    {
+        return ['id' => $d->id, 'version' => $d->version, 'digest' => $d->digest, 'entorno' => $d->entorno,
+            'estado' => $d->estado, 'guia' => $d->guia, 'revertido_a' => $d->revertidoA];
     }
 }
