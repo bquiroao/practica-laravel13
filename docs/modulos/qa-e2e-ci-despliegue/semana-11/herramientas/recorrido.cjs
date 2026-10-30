@@ -97,7 +97,8 @@ async function correr(navegador, nombre, vista) {
 
   await clic('Evaluar el gate de 2.4.1');
   await listo();
-  ok((await texto()).includes('se calcula al registrar'), 'A3 · el gate NO anticipa la decisión: las reglas «se calculan al registrar» (semana 9 H-09)');
+  ok((await texto()).includes('Resultado esperado: ✓ Aprobado') && (await pagina.$$('.resultado-regla.cumple')).length === 6,
+    'A3 · semana 12: la vista previa del SERVIDOR anticipa Aprobado, con las 6 reglas (B-01)');
   ok((await pagina.$$('#reglas li')).length === 6, 'A3 · se listan las 6 reglas del servidor (semanas 8 y 10 mostraban 5)');
   await clic('#registrar');
   ok(await pagina.evaluate(() => document.activeElement.id === 'd-no'), 'A3 · al abrir el diálogo, el foco está en «Volver»');
@@ -110,7 +111,7 @@ async function correr(navegador, nombre, vista) {
   await clic('#registrar');
   await clic('#d-si');
   await pagina.waitForSelector('#aviso');
-  ok((await texto()).includes('Decisión registrada: ✓ Aprobado'), 'A4 · la decisión la devuelve el servidor: Aprobado');
+  ok((await texto()).includes('Decisión registrada: ✓ Aprobado') && (await texto()).includes('Coincide con la vista previa'), 'A4 · la decisión la devuelve el servidor (Aprobado) y coincide con la vista previa');
   ok((await pagina.$$eval('.resultado-regla.cumple', (x) => x.length)) === 6, 'A4 · las 6 reglas, con «✓ cumple» en texto');
   ok(await pagina.evaluate(() => document.activeElement.id === 'aviso'), 'A4 · el foco va al resultado');
   await paso('a04-gate-aprobado', 'Gate registrado: Aprobado');

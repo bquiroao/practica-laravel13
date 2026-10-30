@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * Defectos sembrados a propósito (33, sembrados de la semana 3 a la 7; en la 7 se reubicaron los del código refactorizado): cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
+ * Defectos sembrados a propósito (34, sembrados de la semana 3 a la 12; en la 7 se reubicaron los del código refactorizado): cada mutación copia el módulo, cambia UNA cosa (una regla del dominio, un paso del caso
  * de uso o una restricción del esquema) y corre la suite sobre la copia. Si la suite sigue en verde, falta una prueba.
  *   E2E_DB_DSN=... php tests/mutaciones.php      (sin base, las mutaciones del esquema sobreviven: corren solo con PostgreSQL)
  * Código de salida: cantidad de mutaciones que sobreviven.
@@ -70,6 +70,9 @@ $mutaciones = [
     'M32 la misma clave en OTRA ejecución se toma como el mismo reporte' => ['src/Dominio/Modelo/ReporteResultado.php',
         'return $ejecucionPrevia === $this->ejecucion && $previo->huella === $this->huella;', 'return $previo->huella === $this->huella;'],
     'M33 preparar() no valida las evidencias' => ['src/Dominio/Modelo/Ejecucion.php', "            Evidencia::validar(\$a['tipo'], \$a['bytes']);\n", ''],
+    // Semana 12: la vista previa del gate no debe tener efectos.
+    'M34 la vista previa del gate registra la evaluación' => ['src/Aplicacion/CasosDeUso/EvaluarGate.php',
+        'return $this->salida(\'GATE_PREVISTO\', $v, $e, $d);', 'return $this->ejecutar($usuario, $tenant, $numero, $ejecucionId);'],
 ];
 
 function copiar(string $origen, string $destino): void

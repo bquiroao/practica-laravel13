@@ -47,7 +47,7 @@ $apiErrores = static function (): array {
 $normalizar = static fn (string $ruta): string => preg_replace(['/\{\w+\}/', '/\(\?<\w+>(?:[^()]|\((?:[^()])*\))*\)/'], '{p}', $ruta);
 $casoDeUso = ['registrarEscenario' => CasosDeUso\RegistrarEscenario::class, 'registrarVersion' => CasosDeUso\RegistrarVersion::class,
     'planificarPruebas' => CasosDeUso\PlanificarPruebas::class, 'iniciarEjecucion' => CasosDeUso\IniciarEjecucion::class,
-    'evaluarGate' => CasosDeUso\EvaluarGate::class, 'consultarTrazabilidad' => CasosDeUso\ConsultarTrazabilidad::class,
+    'evaluarGate' => CasosDeUso\EvaluarGate::class, 'previsualizarGate' => CasosDeUso\EvaluarGate::class, 'consultarTrazabilidad' => CasosDeUso\ConsultarTrazabilidad::class,
     'reportarResultado' => CasosDeUso\ReportarResultado::class, 'cerrarEjecucion' => CasosDeUso\CerrarEjecucion::class,
     'registrarDespliegue' => CasosDeUso\RegistrarDespliegue::class];
 

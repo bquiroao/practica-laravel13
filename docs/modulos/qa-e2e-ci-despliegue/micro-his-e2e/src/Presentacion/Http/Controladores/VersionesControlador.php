@@ -82,6 +82,18 @@ final class VersionesControlador
         return $this->vista->mostrar($this->gate->ejecutar($i->usuario, $i->tenant, $p['version'], $ejecucion));
     }
 
+    /** @param array<string, string> $p semana 12 (B-01): lo que el gate decidiría ahora, sin guardar nada */
+    public function previsualizarGate(Solicitud $s, Identidad $i, array $p): Respuesta
+    {
+        try {
+            $ejecucion = FormularioVersion::gate($s);
+        } catch (EntradaInvalida $e) {
+            return $this->error->entrada($e);
+        }
+
+        return $this->vista->mostrar($this->gate->previsualizar($i->usuario, $i->tenant, $p['version'], $ejecucion));
+    }
+
     /** @param array<string, string> $p semana 6: CU-11 */
     public function desplegar(Solicitud $s, Identidad $i, array $p): Respuesta
     {
