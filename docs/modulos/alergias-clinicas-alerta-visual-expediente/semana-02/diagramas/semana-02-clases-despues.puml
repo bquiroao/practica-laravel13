@@ -1,0 +1,29 @@
+@startuml semana-02-clases-despues
+' DESPUÉS: OCP. El calculador depende de una abstracción; las reglas se agregan como clases
+skinparam classAttributeIconSize 0
+interface ReglaNivelAlerta {
+  + nivelPara(alergia): ?NivelAlerta
+}
+class CalculadorAlerta {
+  - reglas: ReglaNivelAlerta[]
+  + calcular(codigoPaciente, activas): AlertaExpediente
+}
+class ReglaPorSeveridad
+class ReglaReaccionAnafilactica
+class "ReglaLatexEnQuirofano\n(solo en verificar.php)" as ReglaNueva #FFF8DB
+class "bootstrap.php\n(Composition Root)" as Root
+
+CalculadorAlerta o--> "1..*" ReglaNivelAlerta
+ReglaPorSeveridad ..|> ReglaNivelAlerta
+ReglaReaccionAnafilactica ..|> ReglaNivelAlerta
+ReglaNueva ..|> ReglaNivelAlerta
+Root ..> CalculadorAlerta : crea con\nla lista de reglas
+Root ..> ReglaPorSeveridad
+Root ..> ReglaReaccionAnafilactica
+note bottom of CalculadorAlerta
+  Cerrado a modificación: su SHA-256 se
+  comprueba en verificar.php (OCP-03).
+  Abierto a extensión: una regla nueva es
+  una clase nueva + una línea en el Root.
+end note
+@enduml
