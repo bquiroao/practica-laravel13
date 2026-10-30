@@ -1,0 +1,27 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Disponibilidad — Médicos (responsive)</title>
+<style>
+:root{--ink:#222;--mut:#555;--err:#b00020;--ac:#0b5ed7;--nav:#12303b}
+*{box-sizing:border-box}body{margin:0;font:16px/1.4 Arial,sans-serif;color:var(--ink);background:#fafafa;padding-bottom:64px}
+header{background:var(--nav);color:#fff;padding:12px 16px}header b{font-size:18px}
+main{padding:16px;max-width:960px;margin:auto}h1{font-size:20px;margin:0 0 4px}
+.f{display:grid;gap:12px;margin-top:12px}label{display:block;font-weight:bold;margin-bottom:4px}
+input,select,button{font:inherit;min-height:44px;width:100%;padding:8px 10px;border:1px solid #777;border-radius:6px;background:#fff}
+button{background:var(--nav);color:#fff;border:0;font-weight:bold}:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.h{color:var(--mut);font-size:14px}.cards{display:grid;gap:10px;margin:16px 0 0;padding:0;list-style:none}
+.card{background:#fff;border:1px solid #bbb;border-radius:8px;padding:12px}.card b{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.chips button{width:auto;min-width:72px;background:#fff;color:var(--nav);border:2px solid var(--nav)}
+table{display:none;width:100%;border-collapse:collapse;margin-top:16px;background:#fff}td,th{border:1px solid #999;padding:8px;text-align:left}th{background:#e6e6e6}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #999}.tabs a{flex:1;min-height:56px;display:flex;align-items:center;justify-content:center;color:var(--nav);font-weight:bold;text-decoration:none}
+.tabs a[aria-current]{background:#d8eeea}
+@media (min-width:431px){.f{grid-template-columns:1fr 1fr}.f .full{grid-column:1/-1}}
+@media (min-width:768px){.f{grid-template-columns:1fr 1fr 1fr auto;align-items:end}.f .full{grid-column:auto}button.buscar{width:auto;padding:8px 24px}
+ .cards{display:none}table{display:table}.tabs{position:static;border:0;background:transparent;padding:0 16px}.tabs a{flex:0 0 auto;padding:0 16px;color:#fff}.tabs a[aria-current]{background:#0b3a40}header{display:flex;align-items:center;gap:24px}body{padding-bottom:0}}
+</style>
+<header><b>Médicos</b><nav class="tabs" aria-label="Secciones"><a href="#" aria-current="page">Disponibilidad</a><a href="#">Médicos</a><a href="#">Ausencias</a></nav></header>
+<main><h1>Disponibilidad</h1><p class="h">* Campo obligatorio. Máximo 14 días.</p>
+<form class="f" onsubmit="return false"><div class="full"><label for="e">Especialidad *</label><select id="e"><option>Medicina interna</option></select></div>
+<div><label for="d">Desde *</label><input id="d" type="date" value="2026-11-02"></div><div><label for="h">Hasta *</label><input id="h" type="date" value="2026-11-06"></div>
+<div class="full"><button class="buscar">Buscar</button></div></form>
+<div aria-live="polite"><ul class="cards"><li class="card"><b>Dra. Ana Pérez</b><span class="h">lun 02/11/2026</span><div class="chips"><button>08:30</button><button>09:00</button><button>09:30</button></div></li>
+<li class="card"><b>Dr. Luis Gómez</b><span class="h">mar 03/11/2026</span><div class="chips"><button>10:00</button><button>10:30</button></div></li></ul>
+<table><tr><th>Fecha</th><th>Médico</th><th>Franjas libres (30 min)</th></tr><tr><td>lun 02/11/2026</td><td>Dra. Ana Pérez</td><td>08:30 · 09:00 · 09:30</td></tr><tr><td>mar 03/11/2026</td><td>Dr. Luis Gómez</td><td>10:00 · 10:30</td></tr></table></div></main></html>
