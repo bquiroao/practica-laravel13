@@ -1,0 +1,26 @@
+$ php bin/acoplamiento.php 14
+Micro-HIS Notas SOAP — acoplamiento por clase (92 clases en src/)
+-------------------------------------------------------------------------------------------------------------------------
+Clase                             Capa            Ce   Ca Líneas  P  Preocupaciones que mezcla
+CorregirNota                      Aplicacion      19    1     86  6  nota · diagnostico · acceso · expediente · bitacora · persistencia
+RegistrarNotaConDiagnostico       Aplicacion      18    1    101  6  nota · diagnostico · acceso · expediente · bitacora · persistencia
+ConjuntoAdaptadores               Aplicacion       7    1     45  6  nota · diagnostico · acceso · expediente · bitacora · persistencia
+FirmarNota                        Aplicacion       9    1     47  5  nota · diagnostico · acceso · bitacora · persistencia
+Kernel                            Presentacion    19    0    157  3  acceso · expediente · persistencia
+ConsultarNota                     Aplicacion       6    1     32  3  nota · diagnostico · acceso
+ListarNotasExpediente             Aplicacion       6    1     36  3  nota · diagnostico · acceso
+RepositorioDiagnosticosEnMemoria  Persistencia     5    1     49  2  diagnostico · persistencia
+RepositorioNotasConEventos        Aplicacion       5    0     51  2  nota · bitacora
+RepositorioNotasEnMemoria         Persistencia     5    2     83  2  nota · persistencia
+Diagnostico                       Dominio          3    7     46  2  nota · diagnostico
+NotaResultado                     Aplicacion       2    7     86  2  nota · diagnostico
+ResumenNotaResultado              Aplicacion       2    3     61  2  nota · diagnostico
+PdoRepositorioNotas               Persistencia     5    0    111  1  nota
+-------------------------------------------------------------------------------------------------------------------------
+Líneas de lógica repetidas entre casos de uso: 5
+  [ConsultarNota, FirmarNota, ListarNotasExpediente] if ($c->hospitalUsuario !== $c->hospitalSolicitud) {
+  [ConsultarNota, CorregirNota, FirmarNota, ListarNotasExpediente] throw new AccesoDenegado('El token no corresponde a este hospital.');
+  [ConsultarNota, FirmarNota] $nota = $this->notas->buscar($c->notaId) ?? throw new NotaNoEncontrada('La nota no existe…
+  [CorregirNota, RegistrarNotaConDiagnostico] $usuario = new UsuarioClinico($c->usuarioId, $c->hospitalUsuario, $c->roles);
+  [CorregirNota, RegistrarNotaConDiagnostico] $this->diagnosticos->guardar($diagnostico);
+Ce total: 225 · Ce medio: 2.45 · Clases que mezclan 4 o más preocupaciones: 4

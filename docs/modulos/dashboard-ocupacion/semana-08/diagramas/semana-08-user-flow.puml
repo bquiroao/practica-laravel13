@@ -1,0 +1,38 @@
+@startuml semana-08-user-flow
+title User flow por rol — «consolidación y consulta de ocupación por sala y estado de cama»
+|Jefatura de enfermería|
+start
+:Abre «Ocupación» (W1);
+if (¿Permiso de ocupación en este hospital? (R-08)) then (no)
+  :«No tienes acceso a la ocupación de este hospital» (E3);
+  stop
+endif
+:W1 carga (esqueleto) → vacío si aún no hay corte (E4) o tabla por sala;
+if (¿El último corte tiene más de 15 min? (R-06)) then (sí)
+  :Muestra el corte con aviso «Datos de las 10:20: pueden estar desactualizados»;
+endif
+if (¿Qué necesita?) then (camas libres)
+  :W2: filtra por «disponible» y ve solo esas salas (CU-03);
+else (ver todo)
+  :Revisa porcentajes; «no aplica» si la sala no tiene camas operativas (R-02);
+endif
+:Decide ingresos o traslados en admisión (fuera del tablero);
+stop
+|Administrador de hospital|
+start
+:Abre «Ocupación» (W1) con su permiso de administración;
+if (¿Hay inconsistencias cama-estancia? (E1)) then (sí)
+  :W3: lista de camas con la diferencia; el tablero no la corrige (R-04);
+endif
+if (¿Necesita un corte más reciente?) then (sí)
+  :W4: «Consolidar ahora» → confirma (solo lectura, R-09);
+  if (¿Se pudieron leer camas y estancias? (E2)) then (sí)
+    :«Corte de las 10:40 guardado: 3 salas» (éxito);
+  else (no)
+    :W5: «Se conserva el corte de las 10:35» y «Reintentar»;
+  endif
+else (no)
+  :Sigue con el corte vigente;
+endif
+stop
+@enduml

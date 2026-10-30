@@ -1,0 +1,19 @@
+@startsalt w04-conflicto-cama
+' W-04 Error recuperable: la cama fue tomada por otra admisión (409 CAMA_YA_ASIGNADA)
+{+
+  <b>Elegir cama para PAC-00452</b>
+  ==
+  {+
+  <color:#B91C1C><b>⚠ La cama B-201 ya fue asignada a otra admisión.</b></color>
+  Elija otra cama de la lista actualizada. Sus datos se conservaron.
+  }
+  {
+    <b>Camas disponibles (1)</b>
+    (X) B-202 · Medicina interna · General
+  }
+  [Confirmar con B-202] | [Cambiar requerimiento]
+  ==
+  <i>Variante reintentable (409 CONFLICTO / 503):</i>
+  «Otra admisión está usando la cama en este momento.» [Intentar de nuevo]
+}
+@endsalt

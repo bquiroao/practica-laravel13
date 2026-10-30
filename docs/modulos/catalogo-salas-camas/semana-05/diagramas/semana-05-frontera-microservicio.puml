@@ -1,0 +1,17 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — servicio de catálogo de camas (solo si se cumplen los criterios de la §3)
+node "HIS (monolito modular)" {
+  [Admisión] as adm
+  [Dashboard de ocupación] as ocu
+}
+node "Servicio de catálogo" {
+  [API /salas] as api
+  database "Base del catálogo" as dbc
+}
+queue "Eventos de cama\n(cama.estado_cambiado)" as ev
+api --> dbc : dueño de wards y beds
+adm --> api : HTTP: ocupar o liberar cama\n(timeout 2 s, idempotente)
+api --> ev : outbox -> publica
+ev --> ocu : consume y recalcula
+ev --> adm : consume
+@enduml

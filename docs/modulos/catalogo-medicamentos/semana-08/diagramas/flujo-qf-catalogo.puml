@@ -1,0 +1,57 @@
+@startuml flujo-qf-catalogo
+' Catálogo de medicamentos - Semana 8 - User flow del rol QF_CATALOGO
+title User flow · Químico farmacéutico del catálogo (QF_CATALOGO)
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #2B5C8A
+}
+start
+:Inicio: Catálogo > Buscar (W1);
+:Escribe nombre, principio activo o código
+(ayuda contextual: "mínimo 2 caracteres");
+:Estado de carga (spinner + texto "Buscando…");
+if (¿Resultados vigentes?) then (no)
+  :Estado vacío (W2): "No hay vigentes con ese criterio"
+  + acción "Registrar medicamento";
+  :Formulario de alta (W3);
+  repeat
+    :Completa la ficha, con validación en vivo
+    solo de formato (no bloquea);
+    :Envía;
+  repeat while (¿422 errores por campo?) is (sí: foco en el resumen,\nenlaces a cada campo)
+  if (¿409 DUPLICADO?) then (sí)
+    :W4: aviso recuperable "Ya existe MED-000102"
+    con botones "Ver existente" y "Corregir datos";
+    stop
+  else (no)
+    :Éxito: "Registrado MED-000107" (role=status)
+    y paso al detalle (W5);
+    stop
+  endif
+else (sí)
+  :Abre el detalle con historial (W5);
+  if (¿Qué necesita?) then (nueva versión)
+    :Formulario precargado con la versión vigente;
+    :Confirmación (W5): "La versión 1 se cerrará el 2026-11-01";
+    if (¿Confirma?) then (sí)
+      :Éxito: "Versión 2 registrada";
+    else (no)
+      :Vuelve sin cambios;
+    endif
+    stop
+  else (baja o eliminar)
+    :W6: baja con fecha y motivo obligatorio;
+    if (¿Eliminar un registro erróneo?) then (sí)
+      if (¿Usado en prescripciones?) then (sí)
+        :Bloqueado: "Se usó en prescripciones,
+        corresponde darlo de baja" + botón "Dar de baja";
+      else (no)
+        :Confirmación con el código escrito;
+      endif
+    else (no)
+      :Confirma la baja: deja de aparecer en búsquedas;
+    endif
+    stop
+  endif
+endif
+@enduml

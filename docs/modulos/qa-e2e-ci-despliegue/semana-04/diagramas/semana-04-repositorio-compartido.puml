@@ -1,0 +1,32 @@
+@startuml semana-04-repositorio-compartido
+title Integración con el repositorio de datos compartido del HIS (database/integracion-compartida.sql)
+skinparam defaultFontSize 11
+
+node "PostgreSQL del HIS" {
+  package "esquema e2e\n(dueño: módulo QA E2E)" #DDEFE4 {
+    database "escenarios · versiones · ejecuciones\nresultados · evidencias · evaluaciones" as E2E
+    component "trigger evaluaciones_publicar\n→ e2e.publicar_evaluacion()\nSECURITY DEFINER, search_path fijo" as T
+  }
+  package "esquema compartido\n(dueño: plataforma central)" #EEF0F8 {
+    database "calidad_versiones\n(solo agregar · RLS por tenant)" as CV
+  }
+}
+component "Micro-HIS QA E2E" as APP
+component "QA funcional y regresión" as QA
+component "Despliegue / guía final" as DEP
+component "Gobernanza y auditoría" as GOB
+
+APP --> E2E : PDO (rol propio)
+E2E --> T : AFTER INSERT\nen evaluaciones
+T --> CV : INSERT en la MISMA transacción
+QA --> CV : SELECT como his_lector_calidad\nSET his.tenant = '<hospital>'
+DEP --> CV : ¿el digest a desplegar\ntiene un APROBADO?
+GOB --> CV : historial de decisiones
+QA -[#A33A3A,dashed]-> E2E : PROHIBIDO\n(permission denied, INT-09)
+
+note right of CV
+  Solo lo necesario para decidir:
+  versión, digest, decisión, causas, política.
+  Sin evidencias ni resultados por escenario.
+end note
+@enduml

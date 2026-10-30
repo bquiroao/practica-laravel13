@@ -1,0 +1,54 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend del dashboard (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [Layout y menú] as LM
+  [TarjetaResumen\n(esqueleto, resumen, vacío,\nerror con «Reintentar»)] as TR
+  [CargadorConLimite\n(10 s, R-04)] as CG
+  [ClienteDashboard\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorDashboard] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ServicioDashboard] as S
+    interface "FuenteConteos" as P
+    interface Reloj as RL
+  }
+  package "Dominio" {
+    [Catalogo\n(menú y tarjetas por permiso:\nfuente única)] as CA #FFF3CD
+    [Tarjeta\n(textos y plurales:\nfuente única)] as T #FFF3CD
+    [EstadoTarjeta] as E
+  }
+  package "Persistencia" {
+    [RepositorioPdo] as PDO
+    [RepositorioEnMemoria] as MEM
+  }
+}
+database "local_patients,\nappointments, beds" as DB
+LM --> CL : menú del rol
+TR --> CG
+CG --> CL : una tarjeta
+CL --> R : HTTP JSON
+R --> C
+C --> S
+C --> V
+S --> P
+S --> RL
+S --> CA
+S --> T
+S --> E
+PDO ..|> P
+MEM ..|> P
+PDO --> DB
+note right of TR
+  Después: muestra «menu», «estado» y
+  «texto» tal como los devuelve el backend;
+  ya no copia TARJETAS ni PERMISOS.
+end note
+@enduml

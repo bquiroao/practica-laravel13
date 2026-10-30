@@ -1,0 +1,34 @@
+@startuml semana-03-c4-componentes
+' Admisión hospitalaria y asignación de cama — Semana 3
+' C4 nivel 3 (componentes) del Micro-HIS, con sus contenedores vecinos.
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Micro-HIS Admisión hospitalaria y asignación de cama — componentes (semana 3)
+
+Person(adm, "Admisionista / Supervisor(a) de camas", "Admite y asigna cama (usuarios ficticios)")
+System_Ext(catalogo, "Catálogo de salas y camas", "Módulo de Josué. Simulado con cama_catalogo (solo lectura)")
+System_Ext(pacientes, "Módulo Pacientes", "Simulado con paciente_ref (solo lectura)")
+ContainerDb(bd, "PostgreSQL 16", "Docker, puerto 55443", "admision, asignacion_cama, evento_admision + tablas simuladas")
+
+Container_Boundary(micro, "Micro-HIS (PHP 8.2+ vanilla)") {
+  Component(consola, "AplicacionConsola", "Presentation", "Traduce argumentos a casos de uso; sin SQL ni reglas")
+  Component(boot, "bootstrap.php", "Composition Root", "Elige las implementaciones concretas")
+  Component(admitir, "AdmitirPacienteYAsignarCama", "Application", "CU-01: orquesta validaciones y registro")
+  Component(consultar, "ConsultarCamasDisponibles", "Application", "CU-03: camas libres y compatibles")
+  Component(dominio, "Admision + EvaluadorElegibilidad", "Domain", "Reglas RN-03, RN-04, RN-05; criterios OCP")
+  Component(puertos, "AdmisionRepository, CatalogoCamas, DirectorioPacientes", "Domain (interfaces)", "Contratos de persistencia")
+  Component(pdo, "Adaptadores PDO", "Persistence", "prepare()+execute(), transacción, traducción de SQLSTATE")
+}
+
+Rel(adm, consola, "Ejecuta comandos", "CLI")
+Rel(boot, consola, "Entrega Servicios")
+Rel(consola, admitir, "ejecutar()")
+Rel(consola, consultar, "ejecutar()")
+Rel(admitir, dominio, "Usa")
+Rel(consultar, dominio, "Usa")
+Rel(admitir, puertos, "Depende de la interfaz")
+Rel(pdo, puertos, "Implementa")
+Rel(pdo, bd, "SQL", "PDO pgsql")
+Rel_R(bd, catalogo, "cama_catalogo simula")
+Rel_R(bd, pacientes, "paciente_ref simula")
+@enduml

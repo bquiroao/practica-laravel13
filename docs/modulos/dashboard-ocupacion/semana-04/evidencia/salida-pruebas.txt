@@ -1,0 +1,30 @@
+OK    [PDO] feliz: sin corte todavía, la consulta muestra el estado vacío (CA-04)
+OK    [PDO] feliz: consolidar = 201 con la hora y 2 salas activas (CU-01, R-03, R-05)
+OK    [PDO] feliz: sala A = 50.0 % con 2 disponibles, 2 ocupadas y 1 en mantenimiento aparte (CA-01, R-01)
+OK    [PDO] feliz: filtrar por «available» deja solo la sala A (CA-06, CU-03)
+OK    [PDO] regla: B sin camas operativas = «no aplica» y la sala inactiva C no aparece (CA-02, R-02, R-03)
+OK    [PDO] regla: A2 y A4 quedan marcadas como inconsistentes (CA-03, R-04)
+OK    [PDO] regla: sin aviso a los 5 minutos y con aviso a los 20 (CA-05, R-06)
+OK    [PDO] regla: filtrar por un estado que no existe = 422 E3
+OK    [PDO] regla: el corte solo guarda cifras por sala (R-07)
+OK    [PDO] contrato: las filas de camas son las de A y B, y el último corte vuelve igual que se guardó
+OK    [InMemory] feliz: sin corte todavía, la consulta muestra el estado vacío (CA-04)
+OK    [InMemory] feliz: consolidar = 201 con la hora y 2 salas activas (CU-01, R-03, R-05)
+OK    [InMemory] feliz: sala A = 50.0 % con 2 disponibles, 2 ocupadas y 1 en mantenimiento aparte (CA-01, R-01)
+OK    [InMemory] feliz: filtrar por «available» deja solo la sala A (CA-06, CU-03)
+OK    [InMemory] regla: B sin camas operativas = «no aplica» y la sala inactiva C no aparece (CA-02, R-02, R-03)
+OK    [InMemory] regla: A2 y A4 quedan marcadas como inconsistentes (CA-03, R-04)
+OK    [InMemory] regla: sin aviso a los 5 minutos y con aviso a los 20 (CA-05, R-06)
+OK    [InMemory] regla: filtrar por un estado que no existe = 422 E3
+OK    [InMemory] regla: el corte solo guarda cifras por sala (R-07)
+OK    [InMemory] contrato: las filas de camas son las de A y B, y el último corte vuelve igual que se guardó
+OK    [PDO] regla: consolidar no cambia ningún estado de cama (R-09)
+OK    [InMemory] contrato: una sala activa sin camas aparece con cama null, como en el LEFT JOIN
+OK    persistencia (doble): base caída = 503 E8 sin detalles técnicos
+OK    persistencia (PDO real): PDOException al leer = 503 E8
+OK    persistencia: tras ambos fallos se conserva el corte anterior (CA-07, R-09)
+OK    MVC: las rutas llevan a su acción, y una ruta desconocida responde 404
+OK    MVC: el controlador no tiene SQL, PDO, cálculo de ocupación ni throw
+OK    dependencias: el Dominio no usa otra capa, Aplicación solo usa Dominio, Persistencia y Presentación no se usan entre sí
+OK    PDO: ninguna consulta concatena variables en el SQL
+RESULTADO: todo correcto

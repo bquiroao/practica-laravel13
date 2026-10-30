@@ -1,0 +1,49 @@
+@startuml semana-05-secuencia-api
+' Admisión hospitalaria y asignación de cama — Semana 5
+' POST /api/v1/admisiones: autenticación, tenant del token, transacción y respuestas.
+skinparam responseMessageBelowArrow true
+autonumber
+title POST /api/v1/admisiones (semana 5)
+
+actor "Cliente" as C
+participant "ApiKernel" as K
+participant "AutenticadorTokens" as A
+participant "AdmitirPaciente\nYAsignarCama" as U
+participant "PdoAdmisionRepository" as R
+database "PostgreSQL" as BD
+
+C -> K : POST /api/v1/admisiones\nAuthorization: Bearer tok-adm-01\nX-Request-Id: req-…\n{codigo_paciente, servicio, tipo_cama,\n requiere_aislamiento, origen, cama_id}
+K -> K : X-Request-Id válido o se genera uno
+K -> A : contexto(Authorization, request_id)
+alt token ausente o desconocido
+  A --> K : NO_AUTENTICADO
+  K --> C : 401 + WWW-Authenticate: Bearer
+end
+A --> K : ContextoUsuario(usuario, rol, tenant del token)
+K -> K : JSON válido, sin tenant_id, campos y tipos
+alt cuerpo inválido
+  K --> C : 400 SOLICITUD_INVALIDA {detalles.campos}
+end
+K -> U : ejecutar(solicitud, contexto)
+U -> U : rol (RN-06), paciente (RN-02), cama del tenant (RN-04), compatibilidad (RN-03)
+alt regla vulnerada
+  U --> K : ACCESO_DENEGADO / PACIENTE_* / CAMA_NO_ELEGIBLE
+  K --> C : 403 / 404 / 409 / 422 {error}
+end
+U -> R : registrar(admisión)
+R -> BD : BEGIN; lock_timeout 2 s; INSERT ×4; COMMIT
+alt índice único ux_asignacion_cama_activa
+  BD --> R : 23505
+  R --> U : CamaYaAsignada
+  K --> C : 409 CAMA_YA_ASIGNADA (reintentable: false)
+else otra transacción tiene la cama
+  BD --> R : 55P03
+  K --> C : 409 CONFLICTO_CONCURRENCIA (reintentable: true)
+else falla técnica
+  R -> BD : ROLLBACK
+  K --> C : 503 ERROR_PERSISTENCIA (reintentable: true)
+end
+U --> K : ResultadoAdmision
+K -> K : registrar línea JSON {request_id, ruta, estado, duracion_ms}
+K --> C : 201 Location: /api/v1/admisiones/{id}\nX-Request-Id: req-…\n{datos}
+@enduml

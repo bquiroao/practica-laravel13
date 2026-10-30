@@ -1,0 +1,51 @@
+@startuml semana-07-componentes
+!pragma layout smetana
+title Componentes backend y frontend del módulo QA, con sus interfaces (contratos en contratos-entrada-salida.md)
+skinparam defaultFontSize 10
+skinparam componentStyle rectangle
+
+package "Frontend · SPA (semanas 8–11)" #E8F0FB {
+  component "[F1] VistaCampanas\n(planificar, iniciar, cerrar)" as F1
+  component "[F2] VistaEjecucion\n(registrar resultado + evidencia)" as F2
+  component "[F3] VistaDefectos\n(clasificar, corregir)" as F3
+  component "[F4] VistaTrazabilidad\n(RF → caso → resultado → defecto)" as F4
+  component "[F5] ClienteQa" as F5
+  component "[F6] BandejaPendientes\n(almacenamiento local)" as F6
+  F1 --> F5
+  F2 --> F5
+  F3 --> F5
+  F4 --> F5
+  F5 --> F6
+}
+
+package "Backend · API QA" #F5F9FF {
+  component "[B1] Kernel\n(ruta, token, tenant, X-Request-ID)" as B1
+  component "[B2] Controladores + Formularios + Vistas" as B2
+  component "[B3] Casos de uso (9)" as B3
+  component "[B4] SolicitudResultado «S7»\n(reglas del resultado)" as B4 #E1EFE8
+  component "[B5] Modelo: Campana, Defecto,\nCasoPrueba, Evidencia" as B5
+  component "[B6] Repositorios (PDO | memoria)" as B6
+  component "[B7] AlmacenEvidencias (disco | HTTP)" as B7
+  B1 --> B2
+  B2 --> B3
+  B3 --> B4
+  B3 --> B5
+  B4 --> B5
+  B3 --> B6
+  B3 --> B7
+}
+
+interface "HTTP/JSON\napi/openapi.yaml 1.1.0" as I1
+interface "RepositorioCasos ·\nRepositorioCampanas ·\nRepositorioDefectos" as I2
+interface "AlmacenEvidencias" as I3
+database "PostgreSQL (esquema qa)" as BD
+rectangle "Almacén de evidencias" as AL
+
+F5 ..> I1
+I1 - B1
+B6 ..> I2
+B3 ..> I2
+B7 ..> I3
+B6 --> BD
+B7 --> AL
+@enduml

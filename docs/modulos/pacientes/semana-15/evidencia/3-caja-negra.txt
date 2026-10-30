@@ -1,0 +1,14 @@
+$ php tests/ejecutar.php --solo=CN
+Micro-HIS Pacientes - pruebas (PHP 8.4.26)
+
+== Presentación: MVC, HTTP y observabilidad ==
+[PASA ] CN-01    Equivalencia · registro: 3 clases válidas (DPI, pasaporte, sin documento) y 10 inválidas, cada una con su código
+[PASA ] CN-02    Equivalencia · búsqueda y edición: por código, documento y nombre; criterio insuficiente; cambio con y sin motivo; documento ajeno, ausente y null
+[PASA ] CN-03    Valores límite · registro: nombres 100/101, teléfono 7/8/15/16, nacimiento hoy/mañana, pasaporte 5/6/20/21, DPI 12/13/14 y departamento 00/01/22/23
+[PASA ] CN-04    Valores límite · búsqueda, versión, claves y ruta: 2/3 letras, 20/21 resultados, If-Match vigente ±1 y 9/10 dígitos, Idempotency-Key 7/8/64/65, código 20/21
+[PASA ] CN-05    Permisos · tabla de decisión: 7 identidades × 6 operaciones; solo pasa quien tiene el permiso y cada rechazo no revela datos
+[PASA ] CN-06    Errores (conjetura): 400 sin hospital, 404 ruta, 405 método, 428 sin If-Match, 400 If-Match mal formado, 404 de otro hospital idéntico a inexistente, 503 sin detalles
+[PASA ] CN-07    Escenario de punta a punta · confidencialidad: proteger → buscar y leer reducido → 409 RESERVADO → editar sin verla → quitar la protección con motivo
+
+Total: 7  Pasan: 7  Fallan: 0  Omitidas: 0
+(código de salida: 0)

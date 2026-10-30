@@ -1,0 +1,24 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Centro de documentación y manuales por rol (hoy: módulo dentro del HIS)
+actor "Autor técnico o responsable de integración" as autor
+actor "Lector por rol" as lector
+node "Navegador" {
+  [SPA Vue del HIS] as spa
+}
+node "Servidor del HIS" {
+  [Front controller /documentos, /versiones] as fc
+  [ControladorDocumentacion + VistaJson] as ctl
+  [Publicación, Revisión y Consulta] as srv
+  [RepositorioPdo] as repo
+}
+database "Base del centro de documentación" as db
+[RBAC y sesión] as rbac
+autor --> spa
+lector --> spa
+spa --> fc : HTTPS JSON\nJWT + X-Tenant-ID + X-Request-Id
+fc --> ctl
+ctl --> srv
+srv --> repo
+repo --> db : doc_versions, doc_audiences
+fc ..> rbac : usuario y role_code (hoy X-Usuario y X-Roles)
+@enduml

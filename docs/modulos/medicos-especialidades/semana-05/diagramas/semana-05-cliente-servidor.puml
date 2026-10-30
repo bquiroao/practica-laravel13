@@ -1,0 +1,24 @@
+@startuml semana-05-cliente-servidor
+!include <C4/C4_Container>
+title Cliente-servidor y frontera evaluada: Médicos, especialidades y disponibilidad (semana 5)
+Person(adm, "Administrador de personal médico", "Registra médicos, especialidades, horario y ausencias")
+Person(rec, "Recepción o médico", "Consulta disponibilidad; el médico avisa sus ausencias")
+Container(cli, "Cliente web del HIS", "Vue", "Formularios y consulta; reintenta con Idempotency-Key")
+System_Ext(rbac, "RBAC (M02)", "Token con rol y hospital")
+System_Boundary(shi, "SHI: monolito modular (hoy)") {
+  Boundary(frontera, "Frontera evaluada: módulo Médicos (no se divide aún)", "candidata") {
+    Container(api, "API Médicos", "PHP 8.2, REST /api/v1", "Rutas por rol, casos de uso y Repository (semanas 3 y 4 pendientes)")
+    Container(cit, "Adaptador de Citas", "Puerto FuenteDeCitas", "Timeout de 2 s y un reintento solo en lectura")
+  }
+  ContainerDb(bd, "Base compartida", "PostgreSQL + RLS", "Tablas propias: doctor_profiles, doctor_specialties, horarios y ausencias (nuevas)")
+}
+System_Ext(m05, "Citas (M05)", "Dueño de appointments. Pregunta disponibilidad con token de servicio")
+Rel(adm, cli, "usa")
+Rel(rec, cli, "usa")
+Rel(cli, api, "JSON", "HTTPS, Bearer, X-Request-Id")
+Rel(api, rbac, "valida token y rol", "sync")
+Rel(api, bd, "una transacción por operación", "SQL")
+Rel(api, cit, "pide citas activas")
+Rel(cit, m05, "GET citas activas por médico y rango", "sync, timeout 2 s")
+Rel(m05, api, "GET /api/v1/disponibilidad", "token de servicio, solo lectura")
+@enduml

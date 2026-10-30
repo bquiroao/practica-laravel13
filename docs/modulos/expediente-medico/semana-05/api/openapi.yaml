@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Expediente médico electrónico base — Micro-HIS
+  version: 0.5.0
+  description: >
+    Contrato preliminar (semana 5) del flujo «apertura y consulta autorizada del expediente longitudinal».
+    Las rutas son las del front controller de la semana 4 (PR #349). Hoy el profesional y el hospital llegan en las
+    cabeceras X-Profesional y X-Tenant-ID; desde la semana 15 saldrán del JWT y de RBAC (hallazgo H-02 de la semana 13).
+    Sin asignación activa responde 403 E4, no E1 (hallazgo H-01). Datos ficticios.
+  license:
+    name: Uso académico
+    identifier: CC-BY-4.0
+servers:
+  - url: /
+    description: Mismo origen del front controller (demo local con php -S)
+security:
+  - jwt: []
+paths:
+  /patients/{id}/record:
+    post:
+      operationId: abrir
+      summary: Abrir el expediente de un paciente activo (CU-01, R-01 a R-03)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Profesional' }, { $ref: '#/components/parameters/Paciente' }]
+      responses:
+        '201':
+          description: Expediente abierto con número único (R-02); el intento queda auditado (R-08)
+          content:
+            application/json:
+              schema: { type: object, required: [expediente], properties: { expediente: { type: string, example: EXP-p1 } } }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+    get:
+      operationId: consultarLocal
+      summary: Expediente local, solo con una asignación de atención activa (CU-02, R-05)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Profesional' }, { $ref: '#/components/parameters/Paciente' }]
+      responses:
+        '200':
+          description: Número de expediente del hospital
+          content:
+            application/json:
+              schema: { type: object, required: [expediente], properties: { expediente: { type: string } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /patients/{id}/record/external:
+    get:
+      operationId: consultarLongitudinal
+      summary: Historia de otros hospitales con vínculo MPI y consentimiento vigente (CU-03, R-06, R-10)
+      parameters: [{ $ref: '#/components/parameters/Tenant' }, { $ref: '#/components/parameters/Profesional' }, { $ref: '#/components/parameters/Paciente' }]
+      responses:
+        '200':
+          description: 'Expedientes de otros hospitales, o {"solo_local": true} si el paciente no está vinculado al MPI'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [expediente]
+                properties:
+                  expediente: { type: string }
+                  solo_local: { const: true }
+                  externos:
+                    type: array
+                    items: { type: object, required: [hospital, expediente], properties: { hospital: { type: string }, expediente: { type: string } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    jwt: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Tenant: { name: X-Tenant-ID, in: header, required: true, description: Hospital que pide., schema: { type: string, example: h1 } }
+    Profesional: { name: X-Profesional, in: header, required: true, description: Profesional de la petición (sesión simulada)., schema: { type: string, example: m1 } }
+    Paciente: { name: id, in: path, required: true, schema: { type: string, example: p1 } }
+  responses:
+    Error:
+      description: 'Rechazo de negocio (E2 a E5, NF) o expediente no disponible (E8), sin detalles técnicos ni datos clínicos'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { error: E4, mensaje: No tienes una asignación de atención activa con este paciente. }
+  schemas:
+    Error:
+      type: object
+      required: [error, mensaje]
+      properties:
+        error: { type: string, enum: [E2, E3, E4, E5, E8, NF] }
+        mensaje: { type: string }

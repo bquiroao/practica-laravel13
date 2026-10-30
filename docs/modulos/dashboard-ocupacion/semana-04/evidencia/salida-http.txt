@@ -1,0 +1,6 @@
+GET /ocupacion -> 200 {"vacio":true}
+POST /ocupacion/cortes -> 201 {"hora":<ahora>,"salas":2}
+GET /ocupacion -> 200 {"vacio":false,"hora":<ahora>,"aviso_viejo":false,"salas":{"A":{"available":1,"occupied":1,"maintenance":0,"inactive":0,"ocupacion":50.0,"inconsistentes":[]},"B":{"available":0,"occupied":0,"maintenance":1,"inactive":0,"ocupacion":"no aplica","inconsistentes":[]}}}
+GET /ocupacion?estado=available -> 200 {"vacio":false,"hora":<ahora>,"aviso_viejo":false,"salas":{"A":{"available":1,"occupied":1,"maintenance":0,"inactive":0,"ocupacion":50.0,"inconsistentes":[]}}}
+GET /ocupacion?estado=libre -> 422 {"error":"E3","mensaje":"Ese estado de cama no existe."}
+DELETE /ocupacion -> 404 {}

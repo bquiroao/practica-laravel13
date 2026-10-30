@@ -1,0 +1,1 @@
+Se utilizó IA para adaptar UX previo a cinco pantallas en tres anchos, redactar breakpoints y escenarios. Datos/estados son ficticios; no se atribuyen pruebas de red, API, interacción o lector de pantalla. Se verifica estructura y encaje de textos. La estudiante debe revisar las decisiones.

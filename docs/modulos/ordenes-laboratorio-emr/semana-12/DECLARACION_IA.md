@@ -1,0 +1,1 @@
+Se utilizó IA para convertir el diseño UX previo en demo web local, preparar presentación, matriz, cambio simulado y verificación en navegador. CH-01 no se atribuye al docente/usuario. No se presentan API, persistencia, autorización clínica ni actualización real de estados como implementadas. La estudiante debe revisar el alcance y defender las decisiones.

@@ -1,0 +1,17 @@
+@startuml c4-contexto
+!include <C4/C4_Context>
+title C4 nivel 1 — Contexto del Catálogo de pruebas de laboratorio
+
+Person(jefe, "Jefe de laboratorio", "Registra pruebas, requisitos y vigencia")
+Person(medico, "Médico", "Consulta pruebas vigentes al ordenar")
+Person(laboratorista, "Laboratorista", "Consulta requisitos de muestra")
+System(catalogo, "Catálogo de pruebas de laboratorio", "Alta y consulta de pruebas con requisitos de muestra y vigencia (por hospital)")
+System_Ext(ordenes, "Órdenes de laboratorio", "Módulo del SHI que crea lab_order / lab_order_item")
+System_Ext(rbac, "RBAC y autenticación", "Módulo del SHI: JWT, roles y permisos")
+
+Rel(jefe, catalogo, "Registra y consulta")
+Rel(medico, catalogo, "Consulta vigentes")
+Rel(laboratorista, catalogo, "Consulta detalle")
+Rel(ordenes, catalogo, "Lee pruebas vigentes", "API REST, solo lectura")
+Rel(catalogo, rbac, "Valida token y permiso")
+@enduml

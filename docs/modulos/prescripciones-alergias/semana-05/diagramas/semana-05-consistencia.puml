@@ -1,0 +1,33 @@
+@startuml semana-05-consistencia
+!pragma layout smetana
+title Modelos de consistencia por interacción
+skinparam defaultFontSize 11
+
+rectangle "Leer alergias + guardar la prescripción\n(misma base del hospital)" as F1 #EEF7EE
+rectangle "Prescripción + ítems + traza en la bandeja\n(una transacción)" as F2 #EEF7EE
+rectangle "Bandeja → Auditoría (ASII-22)\n(outbox_event → central_inbox_messages)" as E1 #FFF8E1
+rectangle "Cliente ↔ API\n(reintento + Idempotency-Key)" as I1 #F5F9FF
+
+note right of F1
+  FUERTE. La verificación (R-03) y la emisión ven el mismo
+  estado. Si el Expediente fuera remoto, habría una ventana:
+  una alergia registrada entre la lectura y el INSERT.
+end note
+note right of F2
+  FUERTE (todo o nada): no existe una prescripción sin traza
+  ni una traza sin prescripción (APP-14, INT-05).
+end note
+note right of E1
+  EVENTUAL. Auditoría puede ir segundos atrás;
+  entrega al menos una vez y, con un consumidor
+  idempotente, efecto exactamente una vez.
+end note
+note right of I1
+  EXACTAMENTE UNA EMISIÓN por clave: el reintento
+  devuelve la misma prescripción; una clave con otro
+  contenido es 409. Un INCIERTO se resuelve reintentando.
+end note
+F1 -[hidden]down- F2
+F2 -[hidden]down- E1
+E1 -[hidden]down- I1
+@enduml

@@ -1,0 +1,11 @@
+@startsalt
+title W4 — Leer un documento (versión obsoleta con aviso)
+{+
+  <b>guia-citas</b> · versión: ^1.0.0 (obsoleta)^ | [Descargar]
+  <color:orange>Estás viendo una versión obsoleta. La vigente es la 1.1.0.</color> | [Ir a la 1.1.0]
+  ---
+  1. Cómo solicitar una cita
+  2. Errores frecuentes: E4 (médico ocupado), E5 (paciente ocupado)
+  <i>Los ejemplos usan datos ficticios (R-09).</i>
+}
+@endsalt

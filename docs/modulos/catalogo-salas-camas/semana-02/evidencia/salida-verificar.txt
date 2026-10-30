@@ -1,0 +1,16 @@
+OK   CA-01 registrar sala A                   antes=201 despues=201
+OK   CA-02 sala A repetida                    antes=409 despues=409
+OK   CA-02 sala sin código                    antes=422 despues=422
+OK   CA-03 cama en sala inexistente           antes=422 despues=422
+OK   CA-04 cama A/101 disponible              antes=201 despues=201
+OK   CA-04 cama A/101 repetida                antes=409 despues=409
+OK   CA-05 A/101 a mantenimiento              antes=200 despues=200
+OK   CA-06 mantenimiento a ocupada (manual)   antes=422 despues=422
+OK   CA-07 cambio sin motivo                  antes=422 despues=422
+OK   CA-07 cama inexistente                   antes=404 despues=404
+OK   CA-08 cama ocupada a mantenimiento       antes=409 despues=409
+OK   auditoría: 4 eventos iguales en antes y después
+OK   política aislada available -> maintenance = permitido
+OK   política aislada inactive -> maintenance = E6
+OK   política aislada occupied -> available = E5
+RESULTADO: todo correcto

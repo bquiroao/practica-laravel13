@@ -1,0 +1,14 @@
+@startsalt m2-detalle-movil
+{+
+  {* ← | <b>PAC-00451</b> }
+  ==
+  <b>‼ CRITICA</b> · ENVIADA · nivel 0
+  Vence en <b>09:12</b> → jefe de servicio
+  Potasio sérico 6.8 mmol/L
+  ==
+  [<b>   Acusar alerta   </b>]
+  ==
+  ▸ Historial (2)
+  ▸ Destinatarios notificados
+}
+@endsalt

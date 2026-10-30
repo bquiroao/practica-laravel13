@@ -1,0 +1,120 @@
+Micro-HIS Admisión hospitalaria y asignación de cama — pruebas
+PHP 8.4.26 · 2026-10-29 10:20 UTC
+
+# caja-blanca/prueba-ramas-admitir.php
+  [OK]      CB-01 D1 rol no permitido (MEDICO)
+  [OK]      CB-02 D2 formato de código inválido
+  [OK]      CB-03 D3 requerimiento inválido (tipo de cama)
+  [OK]      CB-04 D4 origen inválido
+  [OK]      CB-05 D5 paciente inexistente o inactivo
+  [OK]      CB-06 D6 paciente con admisión activa
+  [OK]      CB-07 D7 cama inexistente en el hospital
+  [OK]      CB-08 D8 cama ya ocupada (aviso temprano, no llega a registrar)
+  [OK]      CB-09 D9 cama no elegible (aislamiento)
+  [OK]      CB-10 todas las decisiones en el sentido feliz, con SUPERVISOR_CAMAS (segunda condición de D1)
+  [OK]      CB-11 CriterioAislamiento requiere=no cama=general
+  [OK]      CB-12 CriterioAislamiento requiere=sí cama=aislamiento
+  [OK]      CB-13 CriterioAislamiento requiere=sí cama=general
+  [OK]      CB-14 CriterioAislamiento requiere=no cama=aislamiento
+# caja-negra/prueba-api-caja-negra.php
+  [OK]      CN-01 Equivalencia del código de paciente: válido, formato inválido, inexistente, inactivo y de otro hospital (RF-02)
+  [OK]      CN-02 Límites del código: 4, 5 y 6 dígitos; PAC-00000 con formato válido pero inexistente (RF-02)
+  [OK]      CN-03 Permisos: matriz rol × endpoint (RN-06, RF-08, CA-08, CA-11)
+  [OK]      CN-04 Errores del contrato: 401, 400, 409, 422, 404 y 405 (RF-05, RNF-02, RNF-08)
+  [OK]      CN-05 Equivalencia de requiere_aislamiento: true, false, ausente e inválido (RF-03)
+  [DEFECTO] [DEFECTO D-05] Falta el parámetro servicio en GET /camas-disponibles: se espera 400 SOLICITUD_INVALIDA -> sigue abierto: esperado [400,"SOLICITUD_INVALIDA"], obtenido [422,"VALIDACION"]
+# contrato/prueba-contrato-repositorio.php
+  [OK]      [InMemory] registra y relee admisión, eventos y cama ocupada
+  [OK]      [PDO] registra y relee admisión, eventos y cama ocupada
+  [OK]      [InMemory] RN-01: la misma cama no se asigna dos veces y no queda nada de la segunda
+  [OK]      [PDO] RN-01: la misma cama no se asigna dos veces y no queda nada de la segunda
+  [OK]      [InMemory] RN-02: el mismo paciente no tiene dos admisiones activas
+  [OK]      [PDO] RN-02: el mismo paciente no tiene dos admisiones activas
+  [OK]      [InMemory] D-04: mismo paciente y misma cama a la vez responden igual (RN-02 primero)
+  [OK]      [PDO] D-04: mismo paciente y misma cama a la vez responden igual (RN-02 primero)
+  [OK]      [InMemory] otro hospital no ve la admisión; un id mal formado no existe
+  [OK]      [PDO] otro hospital no ve la admisión; un id mal formado no existe
+  [OK]      [InMemory] catálogo y directorio responden igual
+  [OK]      [PDO] catálogo y directorio responden igual
+# integracion/prueba-bootstrap.php
+  [OK]      bootstrap.php arma Servicios con PDO y consulta camas reales
+  [OK]      bootstrap.php con ADMISION_ALMACEN=memoria funciona sin base de datos
+# integracion/prueba-pdo-admision.php
+  [OK]      Camino feliz con PostgreSQL: admisión, asignación y dos eventos (CA-01)
+  [OK]      RN-02 en la base: segunda admisión activa del mismo paciente se rechaza
+  [OK]      RN-01: dos admisiones que pasaron la verificación previa no se quedan con la misma cama (CA-07)
+  [OK]      RN-01 simultáneo: con la cama bloqueada por otra transacción se responde conflicto, y al confirmar ella, cama ya asignada
+  [OK]      Error de persistencia a mitad de la transacción revierte todo (CA-12, RNF-08)
+  [OK]      RN-05: los eventos de trazabilidad no se pueden modificar
+  [OK]      Directorio PDO responde solo si el código existe y está activo (CA-03)
+# integracion/prueba-pdo-lectura.php
+  [OK]      Catálogo PDO lista solo las camas del hospital, ordenadas (RN-04)
+  [OK]      Catálogo PDO: id mal formado o de otro hospital no existe (CA-09)
+  [OK]      Error real de PostgreSQL al leer se convierte en ErrorPersistencia
+# unitarias/prueba-admision.php
+  [OK]      Admision::abrir deja la admisión ACTIVA con dos eventos de trazabilidad (RN-05)
+  [OK]      Regla de dominio: cama de otro hospital se trata como inexistente (RN-04, CA-09)
+  [OK]      Regla de dominio: cama no compatible se rechaza con sus motivos (RN-03)
+  [OK]      Una admisión reconstituida no trae eventos pendientes
+# unitarias/prueba-api.php
+  [OK]      POST /admisiones: 201, Location, X-Request-Id y solo datos mínimos (CA-01, RNF-03)
+  [OK]      Sin token o con token desconocido: 401 con WWW-Authenticate
+  [OK]      MEDICO: no puede admitir (403) pero sí consultar la admisión (200) (CA-08, CA-10)
+  [OK]      Tenant del token: HOSP-02 no ve HOSP-01 y no se acepta tenant_id en el cuerpo (CA-09)
+  [OK]      Cama ya asignada: 409 con el formato único de error (CA-07)
+  [OK]      Petición mal formada: 400 por JSON, campos o parámetro inválido
+  [OK]      Cama no compatible: 422 con los motivos (RN-03)
+  [OK]      Error de persistencia: 503 reintentable, sin detalles técnicos (CA-12)
+  [OK]      X-Request-Id inválido se reemplaza; el registro no contiene datos del paciente (RNF-05, RNF-03)
+  [OK]      Trazabilidad por API: supervisor 200 en orden; médico 403 (CA-11)
+# unitarias/prueba-caso-de-uso.php
+  [OK]      Camino feliz: PAC-00451 queda admitido en B-201 (CA-01)
+  [OK]      Regla de dominio RN-02: segunda admisión activa rechazada sin registrar (CA-04)
+  [OK]      Paciente inactivo PAC-00460 se rechaza (CA-03)
+  [OK]      Rol MEDICO no puede admitir (RN-06, CA-08)
+  [OK]      Usuario de HOSP-02 no alcanza camas de HOSP-01 (RN-04, CA-09)
+  [OK]      Error de persistencia (doble) se propaga y no devuelve resultado (CA-12)
+  [OK]      Conflicto detectado al guardar (doble) llega como CamaYaAsignada (CA-07)
+  [OK]      Camas disponibles: sin ocupadas y con aislamiento solo B-210 (CA-05, CA-06)
+# unitarias/prueba-consola.php
+  [OK]      Consola: admitir muestra la admisión ACTIVA con código y cama (CA-01)
+  [OK]      Consola: un MEDICO recibe ACCESO_DENEGADO y código de salida 1 (CA-08)
+  [OK]      Consola: error de persistencia sale con código 2 y pide reintentar (CA-12)
+  [OK]      Consola: sin camas compatibles muestra el estado vacío (E-05)
+# unitarias/prueba-consultas.php
+  [OK]      El médico consulta la admisión: código y cama, sin nombres (CA-10)
+  [OK]      Otro hospital no encuentra la admisión (RN-04, CA-09)
+  [OK]      Trazabilidad: el supervisor ve los eventos en orden; el médico no (CA-11)
+# unitarias/prueba-contexto.php
+  [OK]      ContextoUsuario permite los roles indicados y niega los demás (RN-06)
+  [OK]      El responsable conserva usuario, rol y solicitud (RN-05)
+  [OK]      GeneradorUuidV4 produce UUID versión 4 distintos
+# unitarias/prueba-elegibilidad.php
+  [OK]      Medicina interna general: solo B-201 y B-202 (CA-05)
+  [OK]      Con aislamiento: solo B-210 (CA-06)
+  [OK]      Cada rechazo trae su motivo (RN-03, RN-04)
+  [OK]      OCP: un criterio nuevo se agrega sin modificar el evaluador (RNF-06)
+# unitarias/prueba-limites-dominio.php
+  [OK]      U-01 Requerimiento: servicio de 3 y 40 letras válido; de 2 y 41, no (RF-03)
+  [OK]      U-02 CodigoPaciente: PAC-00000 y PAC-99999 son límites válidos; PAC-0000 y PAC-000000 no (RF-02)
+  [OK]      U-03 Admision::abrir rechaza una cama no operativa (RN-04)
+  [OK]      U-04 TenantId: HOSP-00 y HOSP-99 válidos; HOSP-100 y HOSP-1 no (RNF-02)
+# unitarias/prueba-mvc-controlador.php
+  [OK]      Web: GET /camas lista B-201 y B-202, no B-203 (CA-05)
+  [OK]      Web: POST /admisiones responde 201 y la cama asignada (CA-01)
+  [OK]      Web: cama tomada responde 409 y vuelve a la lista actualizada (CA-07, CU-05)
+  [OK]      Web: MEDICO recibe 403 y un código inválido 422 con la salida escapada (CA-08, CA-02)
+# unitarias/prueba-mvc-router.php
+  [OK]      Router despacha por método y ruta, y captura {id}
+  [OK]      Router responde 404 a rutas desconocidas y 405 a métodos no permitidos
+  [OK]      Vista escapa lo que imprime (sin extract)
+  [OK]      MapaErrores asigna un estado HTTP a cada código
+# unitarias/prueba-tokens.php
+  [OK]      El token define usuario, rol y hospital; el id de solicitud se conserva (RNF-02)
+  [OK]      Sin Bearer, con token desconocido o mal formado: NO_AUTENTICADO
+# unitarias/prueba-valores.php
+  [OK]      CodigoPaciente acepta PAC-00451 y rechaza formatos inválidos (CA-02)
+  [OK]      TenantId acepta HOSP-01 y compara por valor
+  [OK]      Requerimiento valida servicio y tipo de cama
+
+Total: 97 · OK: 96 · Fallas: 0 · Omitidas: 0 · Defectos abiertos: 1

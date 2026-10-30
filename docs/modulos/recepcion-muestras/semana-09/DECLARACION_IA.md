@@ -1,0 +1,1 @@
+IA utilizada para inspeccionar seis wireframes, consultar referencia W3C de evaluaciones previas, organizar checklist/hallazgos y automatizar capturas/mediciones. La estudiante revisa y defiende decisiones. No participaron usuarios de prueba ni revisores independientes; no se certifica WCAG, correspondencia clínica o seguridad real.

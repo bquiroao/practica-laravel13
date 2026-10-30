@@ -1,0 +1,896 @@
+{
+    "pasa sin evidencia": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "PASA",
+            "evidencias": 0,
+            "defecto": null,
+            "defecto_verificado": null
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "PASA",
+                0,
+                [],
+                0,
+                null,
+                null,
+                null
+            ]
+        ],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "pasa con captura": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "PASA",
+            "evidencias": 1,
+            "defecto": null,
+            "defecto_verificado": null
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "PASA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                null,
+                null,
+                null
+            ]
+        ],
+        "defectos": [],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "falla completa": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "FALLA",
+            "evidencias": 1,
+            "defecto": 1,
+            "defecto_verificado": null,
+            "defecto_estado": "NUEVO"
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                1,
+                null,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "NUEVO",
+                "MAYOR",
+                [
+                    "Abrir",
+                    "Editar"
+                ],
+                true
+            ]
+        ],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "falla con junit y log": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "FALLA",
+            "evidencias": 2,
+            "defecto": 1,
+            "defecto_verificado": null,
+            "defecto_estado": "NUEVO"
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                2,
+                [
+                    [
+                        "junit",
+                        "GENERAL",
+                        67
+                    ],
+                    [
+                        "registro",
+                        "DATOS_CLINICOS",
+                        15
+                    ]
+                ],
+                0,
+                1,
+                null,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "NUEVO",
+                "MAYOR",
+                [
+                    "Abrir",
+                    "Editar"
+                ],
+                true
+            ]
+        ],
+        "almacen": 2,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "falla sin evidencia": {
+        "tipo": "INVALIDO",
+        "codigo": "EVIDENCIA_REQUERIDA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "falla sin defecto": {
+        "tipo": "INVALIDO",
+        "codigo": "DEFECTO_REQUERIDO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "falla con defecto sin título": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "defecto.titulo",
+                "defecto.pasos"
+            ]
+        },
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "falla con severidad inválida": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "defecto.severidad"
+            ]
+        },
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "bloqueado sin evidencia": {
+        "tipo": "INVALIDO",
+        "codigo": "EVIDENCIA_REQUERIDA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "bloqueado solo con referencia": {
+        "tipo": "INVALIDO",
+        "codigo": "EVIDENCIA_REQUERIDA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "bloqueado con captura y referencia": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "BLOQUEADO",
+            "evidencias": 1,
+            "defecto": null,
+            "defecto_verificado": null
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "BLOQUEADO",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                1,
+                null,
+                null,
+                null
+            ]
+        ],
+        "defectos": [],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "referencia sin https": {
+        "tipo": "INVALIDO",
+        "codigo": "URL_INVALIDA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "no aplica sin motivo": {
+        "tipo": "INVALIDO",
+        "codigo": "MOTIVO_REQUERIDO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "no aplica con motivo": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "NO_APLICA",
+            "evidencias": 0,
+            "defecto": null,
+            "defecto_verificado": null
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "NO_APLICA",
+                0,
+                [],
+                0,
+                null,
+                null,
+                "El build no toca notas"
+            ]
+        ],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "resultado desconocido": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "resultado"
+            ]
+        },
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "caso fuera del alcance": {
+        "tipo": "CONFLICTO",
+        "codigo": "CAMPANA_NO_ADMITE_RESULTADOS",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "captura que no es imagen": {
+        "tipo": "INVALIDO",
+        "codigo": "TIPO_NO_PERMITIDO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "evidencia vacía": {
+        "tipo": "INVALIDO",
+        "codigo": "EVIDENCIA_VACIA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "tipo de evidencia desconocido": {
+        "tipo": "INVALIDO",
+        "codigo": "TIPO_NO_PERMITIDO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "clasificación desconocida": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "evidencias.clasificacion"
+            ]
+        },
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "evidencia de más de 5 MB": {
+        "tipo": "DEMASIADO_GRANDE",
+        "codigo": "EVIDENCIA_DEMASIADO_GRANDE",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "grande después de una inválida": {
+        "tipo": "INVALIDO",
+        "codigo": "TIPO_NO_PERMITIDO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "verifica corregido con PASA": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "PASA",
+            "evidencias": 0,
+            "defecto": null,
+            "defecto_verificado": {
+                "id": 1,
+                "estado": "CERRADO"
+            }
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "PASA",
+                0,
+                [],
+                0,
+                null,
+                1,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "CERRADO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "verifica corregido con FALLA": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "FALLA",
+            "evidencias": 1,
+            "defecto": null,
+            "defecto_verificado": {
+                "id": 1,
+                "estado": "REABIERTO"
+            }
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                null,
+                1,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "REABIERTO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "verifica corregido con BLOQUEADO": {
+        "tipo": "INVALIDO",
+        "codigo": "RESULTADO_NO_VERIFICA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "CORREGIDO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "verifica un abierto": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESTADO_NO_PERMITE_VERIFICAR",
+        "datos": [],
+        "intentos": [],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "ABIERTO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "verifica inexistente": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "verifica_defecto"
+            ]
+        },
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "verifica de otro caso": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "verifica_defecto"
+            ]
+        },
+        "intentos": [],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "CORREGIDO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "verifica como texto": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "verifica_defecto"
+            ]
+        },
+        "intentos": [],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "CORREGIDO",
+                "MAYOR",
+                [
+                    "paso"
+                ],
+                true
+            ]
+        ],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "repetición idéntica": {
+        "tipo": "OK",
+        "codigo": "RESULTADO_YA_REGISTRADO",
+        "datos": {
+            "intento": 1,
+            "caso": "TC-107",
+            "numero": 1,
+            "resultado": "FALLA",
+            "evidencias": 1,
+            "defecto": 1
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                1,
+                null,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "NUEVO",
+                "MAYOR",
+                [
+                    "Abrir",
+                    "Editar"
+                ],
+                true
+            ]
+        ],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "misma clave, otro contenido": {
+        "tipo": "CONFLICTO",
+        "codigo": "CLAVE_REUTILIZADA",
+        "datos": [],
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                1,
+                null,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "NUEVO",
+                "MAYOR",
+                [
+                    "Abrir",
+                    "Editar"
+                ],
+                true
+            ]
+        ],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "segundo intento del mismo caso": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REGISTRADO",
+        "datos": {
+            "intento": 2,
+            "caso": "TC-107",
+            "numero": 2,
+            "resultado": "PASA",
+            "evidencias": 0,
+            "defecto": null,
+            "defecto_verificado": null
+        },
+        "intentos": [
+            [
+                "TC-107",
+                1,
+                "FALLA",
+                1,
+                [
+                    [
+                        "captura",
+                        "GENERAL",
+                        25
+                    ]
+                ],
+                0,
+                1,
+                null,
+                null
+            ],
+            [
+                "TC-107",
+                2,
+                "PASA",
+                0,
+                [],
+                0,
+                null,
+                null,
+                null
+            ]
+        ],
+        "defectos": [
+            [
+                1,
+                "TC-107",
+                "NUEVO",
+                "MAYOR",
+                [
+                    "Abrir",
+                    "Editar"
+                ],
+                true
+            ]
+        ],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA",
+            "RESULTADO_REGISTRADO",
+            "RESULTADO_REGISTRADO"
+        ]
+    },
+    "almacén caído": {
+        "tipo": "NO_DISPONIBLE",
+        "codigo": "EVIDENCIA_NO_DISPONIBLE",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "traza que falla": {
+        "tipo": "NO_DISPONIBLE",
+        "codigo": "ERROR_PERSISTENCIA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 1,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "sin permiso": {
+        "tipo": "DENEGADO",
+        "codigo": "PERMISO_DENEGADO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "otro tenant": {
+        "tipo": "NO_ENCONTRADO",
+        "codigo": "NO_ENCONTRADO",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    },
+    "clave inválida": {
+        "tipo": "INVALIDO",
+        "codigo": "CLAVE_IDEMPOTENCIA_REQUERIDA",
+        "datos": [],
+        "intentos": [],
+        "defectos": [],
+        "almacen": 0,
+        "trazas": [
+            "CAMPANA_PLANIFICADA",
+            "CAMPANA_INICIADA"
+        ]
+    }
+}

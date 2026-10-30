@@ -1,0 +1,36 @@
+@startuml semana-08-user-flow
+title User flow por rol — «solicitud, validación de disponibilidad y confirmación o cancelación de cita»
+|Recepcionista|
+start
+:Abre «Agenda» (W1) del hospital de su sesión;
+if (¿Permiso de citas en este hospital? (R-09)) then (no)
+  :«No tienes acceso a la agenda de este hospital»;
+  stop
+endif
+:W1 carga (esqueleto) → «No hay citas para este día» o la agenda;
+if (¿Qué necesita?) then (nueva cita)
+  :W2: paciente, especialidad, médico vigente (R-04, R-05) y motivo (R-06);
+  :Elige un horario libre futuro de la lista (R-01);
+  :W3 «Revisa y confirma»: resumen de la cita;
+  if (¿Sigue libre para médico y paciente? (R-02, R-03)) then (sí)
+    :«Cita programada para el 28/10 a las 08:30» (éxito);
+  else (no)
+    :W5: «Ese horario se ocupó»; ofrece los siguientes libres y conserva lo llenado;
+  endif
+else (confirmar o cancelar)
+  :Elige una cita programada o confirmada en W1;
+  :Confirmar (programada → confirmada) o W4 «Cancelar» con motivo (R-07, R-10);
+endif
+stop
+|Médico|
+start
+:Abre «Mi agenda» (W1): solo sus citas (R-09);
+:Elige una de sus citas activas;
+:W4 «Cancelar cita»: motivo obligatorio (R-10);
+if (¿La cita cambió antes? (E7)) then (sí)
+  :W5: «La cita ya estaba cancelada o se modificó»; ofrece recargar;
+else (no)
+  :«Cita cancelada; el horario quedó libre» (R-08);
+endif
+stop
+@enduml

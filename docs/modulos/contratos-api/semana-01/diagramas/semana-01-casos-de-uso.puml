@@ -1,0 +1,41 @@
+@startuml semana-01-casos-de-uso
+' Semana 1 — Contratos API: centro de documentación por rol (tarea Odoo 2473)
+title Casos de uso — publicación y consulta de documentación y manuales diferenciados por rol
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Autor técnico" as Aut
+actor "Responsable de\nintegración" as Resp
+actor "Lector por rol" as Lec
+
+rectangle "Centro de documentación y manuales por rol" {
+  usecase "CU-01\nEnviar versión\na publicación" as CU01
+  usecase "CU-02\nAprobar o rechazar\npublicación" as CU02
+  usecase "CU-03\nConsultar documentación\nde mi rol" as CU03
+  usecase "CU-04\nMarcar versión\nobsoleta" as CU04
+  usecase "CU-05\nValidar documento" as CU05
+  usecase "CU-06\nAutorizar operación" as CU06
+}
+
+Aut --> CU01
+Resp --> CU02
+Resp --> CU04
+Lec --> CU03
+
+CU01 ..> CU05 : <<include>>
+CU01 ..> CU06 : <<include>>
+CU02 ..> CU06 : <<include>>
+CU03 ..> CU06 : <<include>>
+CU04 ..> CU06 : <<include>>
+
+note right of CU02
+  Nadie aprueba su propia
+  publicación (R-05).
+end note
+
+note right of CU03
+  Solo lo que incluye uno de sus
+  role_code activos; lo ajeno = 404
+  (R-06, R-07).
+end note
+@enduml

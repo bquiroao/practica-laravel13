@@ -1,0 +1,47 @@
+@startuml
+title Semana 5 - Invitación, autenticación y revocación REST
+autonumber
+
+actor Administrador
+actor Invitado
+participant "Cliente HIS" as Client
+participant "API /api/v1" as Api
+participant "Aplicación de identidad" as App
+database "Repositorios y DB" as DB
+participant "Middleware de sesión" as Middleware
+
+Administrador -> Client : inicia invitación en tenant activo
+Client -> Api : POST /tenants/{tenantId}/user-invitations\nBearer + Idempotency-Key
+Api -> App : validar sesión, tenant y users:invite
+App -> DB : transacción: invitación + membresía pendiente
+DB --> App : commit + invitationId
+App --> Api : estado pending, entrega queued
+Api --> Client : 202 Accepted
+
+Invitado -> Client : establece contraseña desde invitación
+Client -> Api : POST /auth/invitation-credentials\nAuthorization: Invitation <token>
+Api -> App : validar token, expiración y un solo uso
+App -> DB : transacción consume invitación + guarda hash
+DB --> App : commit
+Api --> Client : 204 No Content
+
+Invitado -> Client : inicia sesión en tenant elegido
+Client -> Api : POST /auth/sessions\nX-Tenant-ID + credenciales
+Api -> App : validar estado, tenant, membresía y secreto
+App -> DB : crea sesión con hash(token), expira +8h
+DB --> App : commit
+Api --> Client : 201 token opaco + expiresAt\nCache-Control: no-store
+
+Client -> Api : GET /auth/me\nAuthorization: Bearer <session>
+Api -> Middleware : validar hash, expiración, revocación y tenant
+Middleware -> DB : consulta de sesión
+DB --> Middleware : sesión activa
+Middleware --> Api : principal tenant-bound
+Api --> Client : 200 usuario y tenant mínimos
+
+Client -> Api : DELETE /auth/sessions/current\nAuthorization: Bearer <session>
+Api -> App : revocar sesión actual
+App -> DB : update revoked_at
+DB --> App : commit
+Api --> Client : 204 No Content
+@enduml

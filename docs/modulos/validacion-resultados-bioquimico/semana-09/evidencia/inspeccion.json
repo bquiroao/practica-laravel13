@@ -1,0 +1,68 @@
+[
+  {
+    "file": "01-bandeja-pendientes.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "02-revision-contexto.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "03-confirmar-validacion.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "04-rechazo-motivo.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "05-decision-registrada.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  },
+  {
+    "file": "06-error-recuperable.svg",
+    "headerFill": "rgb(23, 43, 77)",
+    "numberFill": "rgb(23, 43, 77)",
+    "overflow": [
+      "Perfil bioquímico"
+    ],
+    "interactive": 0,
+    "headerContrast": "1.18",
+    "numberContrast": "2.07"
+  }
+]

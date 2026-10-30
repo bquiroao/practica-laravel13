@@ -1,0 +1,22 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Dashboard de ocupación (hoy: módulo dentro del HIS)
+actor "Jefatura o administrador" as u
+node "Navegador" {
+  [SPA Vue: tablero por sala] as spa
+}
+[Temporizador (cada 5 min)] as tmp
+node "Servidor del HIS" {
+  [Front controller /ocupacion] as fc
+  [ControladorOcupacion + VistaJson] as ctl
+  [ConsolidadorOcupacion y ConsultaOcupacion] as srv
+  [RepositorioPdo: solo SELECT sobre camas] as repo
+}
+database "Base HOSPITAL (tenant)" as db
+u --> spa
+spa --> fc : GET /ocupacion[?estado=]\nJWT + X-Tenant-ID + X-Request-Id
+tmp --> fc : POST /ocupacion/cortes
+fc --> ctl
+ctl --> srv
+srv --> repo
+repo --> db : lee wards, beds y bed_stays;\nescribe occupancy_snapshots
+@enduml

@@ -1,0 +1,57 @@
+@startuml semana-07-componentes
+' Admisión hospitalaria y asignación de cama — Semana 7
+' Componentes frontend (propuesta Vue 3 del HIS) y backend (Micro-HIS), con sus contratos.
+skinparam componentStyle uml2
+title Componentes de Admisión hospitalaria y asignación de cama (semana 7)
+
+package "Frontend (propuesta Vue 3)" #EEF4FA {
+  component "VistaAdmision\n(orquesta los pasos)" as VA
+  component "FormularioRequerimiento\nprops: valores · emite: buscar" as FR
+  component "ListaCamasDisponibles\nprops: camas, cargando · emite: elegir" as LC
+  component "ConfirmacionAdmision\nprops: resumen · emite: confirmar, volver" as CA
+  component "AvisoConflictoCama\nprops: error · emite: reintentar" as AC
+  component "ResultadoAdmision\nprops: admision" as RA
+  component "useAdmisionApi()\n(composable HTTP)" as API_CLI
+}
+
+package "Backend (Micro-HIS)" #EEF8F1 {
+  component "ApiKernel\n/api/v1" as K
+  component "AutenticadorTokens" as AUT
+  component "AdmitirPacienteYAsignarCama" as UC1
+  component "ConsultarCamasDisponibles" as UC2
+  component "DisponibilidadCamas\n(después del refactor)" as DISP
+  component "Admision + EvaluadorElegibilidad" as DOM
+  component "AdmisionRepository\nCatalogoCamas · DirectorioPacientes" as PUER
+  component "Adaptadores PDO / InMemory" as ADP
+}
+
+interface "GET /camas-disponibles" as I1
+interface "POST /admisiones" as I2
+
+VA --> FR
+VA --> LC
+VA --> CA
+VA --> AC
+VA --> RA
+VA --> API_CLI
+API_CLI --> I1
+API_CLI --> I2
+I1 -- K
+I2 -- K
+K --> AUT
+K --> UC1
+K --> UC2
+UC1 --> DISP
+UC2 --> DISP
+UC1 --> DOM
+DISP --> DOM
+DISP --> PUER
+UC1 --> PUER
+ADP ..|> PUER
+
+note bottom of VA
+  Ningún componente de la UI decide reglas:
+  muestran estados (vacío, carga, éxito, error)
+  según el código de error de la API.
+end note
+@enduml

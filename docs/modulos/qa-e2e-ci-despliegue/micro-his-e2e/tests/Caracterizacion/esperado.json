@@ -1,0 +1,354 @@
+{
+    "R01 PASA al primer intento": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-101",
+            "resultado": "PASA",
+            "intentos": 1,
+            "evidencias": []
+        },
+        "guardados": 1,
+        "almacen": 0
+    },
+    "R02 PASA con 2 intentos y traza → INESTABLE": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-101",
+            "resultado": "INESTABLE",
+            "intentos": 2,
+            "evidencias": [
+                "da85dd75f4831cd6c9ca7e3ec62771e5cda169770d96d375ea6e405a7647f7bd"
+            ]
+        },
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R03 FALLA con traza": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-104",
+            "resultado": "FALLA",
+            "intentos": 1,
+            "evidencias": [
+                "da85dd75f4831cd6c9ca7e3ec62771e5cda169770d96d375ea6e405a7647f7bd"
+            ]
+        },
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R04 FALLA sin evidencia (se acepta; la regla d la ve el gate)": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-104",
+            "resultado": "FALLA",
+            "intentos": 1,
+            "evidencias": []
+        },
+        "guardados": 1,
+        "almacen": 0
+    },
+    "R05 OMITIDO con 0 intentos": {
+        "tipo": "CREADO",
+        "codigo": "RESULTADO_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-105",
+            "resultado": "OMITIDO",
+            "intentos": 0,
+            "evidencias": []
+        },
+        "guardados": 1,
+        "almacen": 0
+    },
+    "R06 resultado desconocido": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "resultado"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R07 INESTABLE como entrada": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "resultado"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R08 6 intentos": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "intentos"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R09 intentos que no son entero": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "intentos"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R10 PASA con 0 intentos": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "intentos"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R11 clave demasiado corta": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "Idempotency-Key"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R12 clave con caracteres inválidos": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "Idempotency-Key"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R13 misma clave y mismo contenido": {
+        "tipo": "OK",
+        "codigo": "RESULTADO_YA_REPORTADO",
+        "datos": {
+            "ejecucion": 1,
+            "escenario": "E2E-104",
+            "resultado": "FALLA",
+            "intentos": 1,
+            "evidencias": [
+                "d4368ea7b15c497e104a89717d7d2930d237710e35b30be0ff4ace5aebcc40ef"
+            ]
+        },
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R14 misma clave y otro contenido": {
+        "tipo": "CONFLICTO",
+        "codigo": "CLAVE_REUTILIZADA",
+        "datos": [],
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R15 escenario fuera del plan": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESCENARIO_FUERA_DEL_PLAN",
+        "datos": {
+            "detalle": [
+                "E2E-999"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R16 escenario ya reportado con otra clave": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESCENARIO_YA_REPORTADO",
+        "datos": {
+            "detalle": [
+                "E2E-104"
+            ]
+        },
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R17 ejecución inexistente": {
+        "tipo": "NO_ENCONTRADO",
+        "codigo": "NO_ENCONTRADO",
+        "datos": [],
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R18 ejecución completada": {
+        "tipo": "CONFLICTO",
+        "codigo": "EJECUCION_NO_ADMITE_RESULTADOS",
+        "datos": [],
+        "guardados": 6,
+        "almacen": 0
+    },
+    "R19 tipo de evidencia no permitido": {
+        "tipo": "INVALIDO",
+        "codigo": "TIPO_NO_PERMITIDO",
+        "datos": {
+            "detalle": [
+                "pdf"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R20 evidencia vacía": {
+        "tipo": "INVALIDO",
+        "codigo": "EVIDENCIA_VACIA",
+        "datos": [],
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R21 evidencia de más de 20 MB": {
+        "tipo": "DEMASIADO_GRANDE",
+        "codigo": "EVIDENCIA_DEMASIADO_GRANDE",
+        "datos": [],
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R22 almacén caído": {
+        "tipo": "NO_DISPONIBLE",
+        "codigo": "EVIDENCIA_NO_DISPONIBLE",
+        "datos": [],
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R23 sin permiso": {
+        "tipo": "DENEGADO",
+        "codigo": "PERMISO_DENEGADO",
+        "datos": [],
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R24 combinación: clave corta + ejecución inexistente": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "Idempotency-Key"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R25 combinación: resultado inválido + escenario fuera del plan": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESCENARIO_FUERA_DEL_PLAN",
+        "datos": {
+            "detalle": [
+                "E2E-999"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "R26 combinación: evidencia inválida + escenario ya reportado": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESCENARIO_YA_REPORTADO",
+        "datos": {
+            "detalle": [
+                "E2E-104"
+            ]
+        },
+        "guardados": 1,
+        "almacen": 1
+    },
+    "R27 combinación: ejecución completada + resultado inválido": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "resultado"
+            ]
+        },
+        "guardados": 6,
+        "almacen": 0
+    },
+    "R28 combinación: almacén caído + escenario fuera del plan": {
+        "tipo": "CONFLICTO",
+        "codigo": "ESCENARIO_FUERA_DEL_PLAN",
+        "datos": {
+            "detalle": [
+                "E2E-999"
+            ]
+        },
+        "guardados": 0,
+        "almacen": 0
+    },
+    "D01 desplegar sin evaluación": {
+        "tipo": "CONFLICTO",
+        "codigo": "GATE_NO_APROBADO",
+        "datos": []
+    },
+    "D02 desplegar aprobada": {
+        "tipo": "CREADO",
+        "codigo": "DESPLIEGUE_REGISTRADO",
+        "datos": {
+            "version": "2.4.0",
+            "digest": "sha256:4f1c0a7b2d9e8f6a5b3c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f00",
+            "entorno": "produccion",
+            "estado": "DESPLEGADO",
+            "guia": "guia-2026.1",
+            "revertido_a": null
+        }
+    },
+    "D03 desplegar con otro digest": {
+        "tipo": "CONFLICTO",
+        "codigo": "DIGEST_DISTINTO",
+        "datos": []
+    },
+    "D04 desplegar con la aprobación vencida": {
+        "tipo": "CONFLICTO",
+        "codigo": "APROBACION_VENCIDA",
+        "datos": []
+    },
+    "D05 desplegar con el último RECHAZADO": {
+        "tipo": "CONFLICTO",
+        "codigo": "GATE_NO_APROBADO",
+        "datos": []
+    },
+    "D06 desplegar con guía sin versión y smoke inválido": {
+        "tipo": "INVALIDO",
+        "codigo": "DATOS_INVALIDOS",
+        "datos": {
+            "detalle": [
+                "guia",
+                "smoke"
+            ]
+        }
+    },
+    "D07 desplegar con smoke que falla": {
+        "tipo": "CREADO",
+        "codigo": "DESPLIEGUE_REGISTRADO",
+        "datos": {
+            "version": "2.4.0",
+            "digest": "sha256:4f1c0a7b2d9e8f6a5b3c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f00",
+            "entorno": "produccion",
+            "estado": "REVERTIDO",
+            "guia": "guia-2026.1",
+            "revertido_a": null
+        }
+    }
+}

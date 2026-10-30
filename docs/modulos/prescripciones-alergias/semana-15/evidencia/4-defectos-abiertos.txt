@@ -1,0 +1,29 @@
+$ php tests/ejecutar.php --defectos --solo=DEF      # defectos ABIERTOS: fallar es lo esperado
+Micro-HIS Prescripciones - pruebas (PHP 8.4.26)
+
+== Defectos abiertos (fallan hasta que se corrijan; semana-15/registro-defectos.md) ==
+[FALLA] DEF-01   AR-01 · Fuera de desarrollo, crearKernel NO acepta los tokens de demostración (debería responder 401)
+         -> token-dr-lopez con PRESCRIPCIONES_ENTORNO=produccion: esperado 401, obtenido 200 (Arnes.php:41)
+[FALLA] DEF-03   AR-03 · Una alergia GRAVE registrada como «Amoxicilina trihidrato» advierte o bloquea la Amoxicilina
+         -> resultado SIN_HALLAZGOS: falso negativo (Arnes.php:48)
+[FALLA] DEF-04   AR-04 · «dias»: 7.0 es un entero válido según el contrato (JSON Schema) y debería aceptarse
+         -> dias 7.0: esperado 200, obtenido 422 (Arnes.php:41)
+[FALLA] DEF-05   AR-05 · El reintento de una anulación que SÍ llegó dice quién anuló (200 idempotente, o 409 con anulada_por)
+         -> reintento → 409 con las claves [error] (Arnes.php:48)
+[FALLA] DEF-06   AR-06 · El hallazgo informa el NOMBRE del alérgeno, no solo su código
+         -> alergeno_nombre (alergeno = J01CA04): esperado 'Amoxicilina', obtenido NULL (Arnes.php:41)
+[FALLA] DEF-07   SQA M6 · Cada código de error del contrato lo emite alguna parte del servidor (ninguno documentado en vano)
+         -> códigos del contrato que nada en src/ emite: esperado array (
+), obtenido array (
+  0 => 'SERVICIO_NO_DISPONIBLE',
+) (Arnes.php:41)
+[FALLA] DEF-08   NUEVO (caja negra, límites) · La dosis máxima diaria se aplica al TOTAL del medicamento: dos ítems de Paracetamol 1000 mg c/6 h (8000 mg/día) → 422
+         -> dos ítems de 4000 mg/día cada uno: esperado array (
+  0 => 422,
+  1 => 'DOSIS_EXCEDE_MAXIMO',
+), obtenido array (
+  0 => 200,
+  1 => 'SIN_HALLAZGOS',
+) (Arnes.php:41)
+
+Total: 7  Pasan: 0  Fallan: 7  Omitidas: 0

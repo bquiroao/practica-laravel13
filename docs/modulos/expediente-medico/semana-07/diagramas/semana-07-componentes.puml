@@ -1,0 +1,59 @@
+@startuml semana-07-componentes
+title Semana 7 — Componentes backend y frontend del expediente (después del refactor)
+skinparam shadowing false
+skinparam defaultFontSize 11
+skinparam componentStyle rectangle
+package "Frontend (prototipo S11, navegador)" {
+  [ListaPacientes] as LP
+  [ConfirmarApertura] as CA
+  [VistaExpediente\n(nombre abreviado, episodios)] as VE
+  [VistaHistoriaExterna] as VH
+  [ClienteExpediente\n(fetch + JSON)] as CL
+}
+package "Backend: Micro-HIS (S3-S4)" {
+  package "Presentación" {
+    [Rutas] as R
+    [ControladorExpediente] as C
+    [VistaJson] as V
+  }
+  package "Aplicación" {
+    [ServicioExpediente\n(autoriza R-05, R-06, R-10\ny audita R-08: fuente única)] as S #FFF3CD
+    interface "ExpedientesHospital\nAuditoria" as PH
+    interface IndiceCentral as PC
+    interface Reloj as RL
+  }
+  package "Dominio" {
+    [Paciente] as P
+    [Consentimiento] as CO
+  }
+  package "Persistencia" {
+    [HospitalPdo | HospitalEnMemoria] as H
+    [CentralPdo | CentralEnMemoria] as CE
+  }
+}
+database "HOSPITAL" as DBH
+database "CENTRAL" as DBC
+LP --> CL
+CA --> CL : paciente
+VE --> CL : paciente
+VH --> CL : paciente
+CL --> R : HTTP JSON
+R --> C
+C --> S
+C --> V
+S --> PH
+S --> PC
+S --> RL
+S --> P
+S --> CO
+H ..|> PH
+CE ..|> PC
+H --> DBH
+CE --> DBC
+note right of VE
+  Después: muestra lo que el backend
+  autorizó (200, 403 E4/E5, solo_local);
+  no decide con su propia tabla de
+  atenciones ni afirma auditorías.
+end note
+@enduml

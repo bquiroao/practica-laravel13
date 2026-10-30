@@ -1,0 +1,34 @@
+@startuml semana-08-flujo-desarrollador
+!pragma layout smetana
+title User flow · Desarrollador: seguir una ejecución y diagnosticar un escenario fallido con su evidencia (W3, W6)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · enlace del PR o «Versiones» → 2.5.0 → «Ejecución #14»;
+:CARGA · esqueleto de la lista de escenarios;
+while (¿La ejecución sigue EN_CURSO?) is (sí)
+  :ESTADO · barra «4 de 6 con resultado», actualización cada 15 s (sin recargar la página);
+  if (¿Se perdió la conexión?) then (sí)
+    #FFF4E5:Aviso «Sin conexión; mostrando lo último recibido a las 14:32» (M-20);
+  else (no)
+  endif
+endwhile (no)
+switch (Resultado del escenario)
+case (FALLA)
+  :Abre el escenario: intentos, evidencias (traza, captura, log) con su SHA-256;
+  :Descarga la traza; reproduce localmente;
+case (INESTABLE)
+  :AYUDA · «Pasó al reintentar: cuenta como no aprobado y el gate lo limita» (A-02);
+case (PASA / OMITIDO)
+  :Nada que hacer;
+endswitch
+if (¿Corrigió el código?) then (sí)
+  :El pipeline registra una versión NUEVA (otro commit y otro digest), no se reutiliza la anterior (M-21);
+else (no)
+endif
+:ESTADO · el desarrollador no ve [Evaluar gate] ni [Desplegar]: no tiene esos permisos;
+stop
+@enduml

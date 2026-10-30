@@ -1,0 +1,31 @@
+Hallazgos que las pruebas encontraron mientras se construía el Micro-HIS (salidas reales, antes de corregir).
+
+== H-1 · DOM-01 en rojo: requisitos duplicados se rechazaban en vez de deduplicarse ==
+$ php tests/ejecutar.php
+[FALLA] DOM-01   R-01: un caso sin pasos, sin resultado esperado, con prioridad o requisito inválido se rechaza con TODOS los campos
+         -> DATOS_INVALIDOS: requisitos (CasoPrueba.php:72)
+Causa: CasoPrueba::disenar() comparaba count(array_unique(válidos)) con count(requisitos); ["RF-07","RF-07"] daba 1 ≠ 2.
+Corrección: se cuentan los válidos SIN deduplicar para decidir, y se deduplica solo al construir el caso.
+VERDE tras la corrección: [PASA ] DOM-01
+
+== H-2 · Mutación M11 sobrevivía: la idempotencia previa no tenía una prueba que la distinguiera ==
+$ QA_DB_DSN=... php tests/mutaciones.php
+[SOBREVIVE] M11 sin idempotencia (R-12)
+Causa: sin la consulta previa, la restricción UNIQUE (tenant, idempotency_key) lanza ClaveEnUso y el caso de uso
+responde igual. Pero no siempre: si el reintento llega DESPUÉS de cerrar la campaña o el defecto, sin la consulta
+previa se evalúa el estado y responde 409 en lugar de devolver el intento original.
+Corrección: prueba nueva APP-15 (reintento por pérdida de red después del cierre).
+VERDE tras la corrección: [DETECTA  ] M11 sin idempotencia (R-12)   falla: APP-15
+
+== H-3 · Recorrido HTTP: JSON_INVALIDO en todo cuerpo con acentos ==
+$ bash bin/demo-http.sh
+### 1. El Analista QA diseña TC-200 (queda BORRADOR)
+HTTP/1.1 400 Bad Request
+{"error":"JSON_INVALIDO"}
+Causa: en Windows, Git Bash entrega a curl.exe los argumentos en la página de códigos ANSI; «diagnóstico» llegaba
+como bytes que no son UTF-8 y json_decode() los rechaza (correcto: el servidor no debe adivinar la codificación).
+Corrección: el script envía el cuerpo por stdin (--data-binary @-), que conserva los bytes UTF-8.
+VERDE tras la corrección: HTTP/1.1 201 Created {"codigo":"CASO_DISENADO",...}
+
+== H-4 · Texto de la decisión: «1 defectos críticos abiertos» ==
+Visto en el paso 13 del recorrido HTTP. Corrección: singular/plural en Campana::cerrar().

@@ -1,0 +1,90 @@
+@startuml semana-01-secuencia
+title Módulo Gobernanza y auditoría — Secuencia\n«Registro inmutable y consulta filtrada de movimientos por usuario, módulo y fechas»
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign left
+skinparam ParticipantBackgroundColor #F5F9FF
+skinparam ParticipantBorderColor #2F5D8A
+skinparam DatabaseBackgroundColor #F5F9FF
+autonumber "S-00"
+
+participant "Módulo emisor\n(p. ej. Pacientes)" as EM
+actor "Super administrador /\nauditor del hospital" as U
+participant "Interfaz\n(Vue)" as UI
+participant "API Auditoría\n(controlador)" as API
+participant "Servicio RBAC\n(PDP)" as RBAC
+participant "Caso de uso\nAuditoría" as CU
+database "audit_logs\n(base central, append-only)" as LOG
+
+== 1 · Registro inmutable (CU-01, CU-05) ==
+EM -> API : POST /api/v1/auditoria/movimientos\nBearer (cuenta de servicio) + X-Tenant-ID\n{event_id, usuario, módulo, acción, ocurrido_en, resultado, recurso}
+API -> API : ¿token válido? (si no: 401)
+API -> RBAC : decidir(auditoria.registrar, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : registrar(movimiento, emisor, hospital del token)
+CU -> CU : ¿hospital del movimiento = hospital del token? [R-05]\n¿módulo y acción del catálogo? ¿fecha no futura (tolerancia 5 min)?\n¿sin contraseñas, tokens ni datos clínicos? [R-01, R-07]
+alt movimiento inválido
+  CU --> API : 422 DATOS_INVALIDOS (campos)
+  API --> EM : 422
+else event_id ya registrado [R-04]
+  CU -> LOG : SELECT por (emisor, event_id)
+  LOG --> CU : movimiento existente
+  CU --> API : 200 YA_REGISTRADO (mismo contenido)\no 409 EVENTO_EN_CONFLICTO (contenido distinto)
+  API --> EM : 200 / 409
+else movimiento nuevo
+  CU -> LOG : BEGIN · leer último sello del hospital (FOR UPDATE)
+  CU -> CU : sello = sha256(sello anterior + contenido canónico) [R-03]
+  CU -> LOG : INSERT movimiento + secuencia + sello · COMMIT [R-02]
+  note right of LOG
+    UPDATE y DELETE los rechaza
+    un trigger: la tabla es append-only
+  end note
+  CU --> API : 201 {id, secuencia, sello}
+  API --> EM : 201
+end
+
+== 2 · Consulta filtrada (CU-02, CU-06, CU-07) ==
+U -> UI : elige hospital, desde, hasta, usuario y módulo
+UI -> UI : ¿desde y hasta completos y desde ≤ hasta? [R-06]
+UI -> API : GET /api/v1/auditoria/movimientos?desde=…&hasta=…&usuario=…&modulo=…\nBearer + X-Tenant-ID (o alcance=red)
+API -> RBAC : decidir(auditoria.consultar | consultar_red, hospital)
+alt sin permiso o auditor pidiendo alcance de red
+  RBAC --> API : DENEGADO (+ referencia)
+  API --> UI : 403
+  UI --> U : «No tiene acceso a esta bitácora» + referencia
+else permitido
+  RBAC --> API : PERMITIDO
+  API -> CU : consultar(filtros, alcance, actor)
+  CU -> CU : valida rango, convierte fechas locales a UTC\n(hasta = fin del día, inclusive) [R-06, R-09]
+  CU -> LOG : SELECT … WHERE hospital_id = :h AND ocurrido_en BETWEEN :d AND :h2\n[AND usuario = :u] [AND modulo = :m]\nORDER BY ocurrido_en DESC, secuencia DESC LIMIT 51
+  LOG --> CU : hasta 51 filas (la 51 indica que hay otra página)
+  CU -> LOG : INSERT AUDITORIA_CONSULTADA (actor, filtros, n resultados) [R-08]
+  CU --> API : 200 {movimientos (50), cursor_siguiente}
+  API --> UI : 200
+  UI --> U : tabla paginada, o «no hay movimientos con estos filtros»
+end
+
+== 3 · Detalle e integridad (CU-03, CU-04) ==
+U -> UI : abre un movimiento
+UI -> API : GET /api/v1/auditoria/movimientos/{id}
+API -> RBAC : decidir(auditoria.consultar, hospital)
+RBAC --> API : PERMITIDO
+API -> CU : detalle(id, alcance)
+CU -> LOG : SELECT por id dentro del alcance
+alt no existe o es de otro hospital
+  CU --> API : 404 (idéntico en ambos casos)
+else existe
+  CU -> LOG : INSERT AUDITORIA_CONSULTADA (detalle) [R-08]
+  CU --> API : 200 movimiento + sello + corrección (si la hay)
+end
+API --> UI : 404 / 200
+U -> UI : «Verificar integridad» de un hospital y rango
+UI -> API : POST /api/v1/auditoria/verificaciones {hospital, desde, hasta}
+API -> RBAC : decidir(auditoria.verificar, red)
+RBAC --> API : PERMITIDO
+API -> CU : verificar(hospital, rango)
+CU -> LOG : SELECT secuencia, contenido, sello ORDER BY secuencia
+CU -> CU : recalcula cada sello y compara [R-03]
+CU --> API : 200 ÍNTEGRA (n) | ALTERADA (primera secuencia rota)
+API --> UI : 200
+UI --> U : resultado de la verificación
+@enduml

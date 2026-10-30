@@ -1,0 +1,19 @@
+Ruta | Ancho | scrollWidth | clientWidth | Scroll horizontal | Título | Foco
+01-salas (#salas) | 320 | 320 | 320 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+01-salas (#salas) | 360 | 360 | 360 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+01-salas (#salas) | 430 | 430 | 430 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+02-filtro-disponible (#salas/disponible) | 320 | 320 | 320 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+02-filtro-disponible (#salas/disponible) | 360 | 360 | 360 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+02-filtro-disponible (#salas/disponible) | 430 | 430 | 430 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+03-detalle-sala-a (#sala/A) | 320 | 320 | 320 | no | Sala A · Ocupación · Hospital HIS | H1
+03-detalle-sala-a (#sala/A) | 360 | 360 | 360 | no | Sala A · Ocupación · Hospital HIS | H1
+03-detalle-sala-a (#sala/A) | 430 | 430 | 430 | no | Sala A · Ocupación · Hospital HIS | H1
+04-error-datos-viejos (#salas) | 320 | 320 | 320 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+04-error-datos-viejos (#salas) | 360 | 360 | 360 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+04-error-datos-viejos (#salas) | 430 | 430 | 430 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+05-corte-generado (#corte) | 320 | 320 | 320 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+05-corte-generado (#corte) | 360 | 360 | 360 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+05-corte-generado (#corte) | 430 | 430 | 430 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+06-corte-falla (#corte) | 320 | 320 | 320 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+06-corte-falla (#corte) | 360 | 360 | 360 | no | Ocupación por sala · Ocupación · Hospital HIS | H1
+06-corte-falla (#corte) | 430 | 430 | 430 | no | Ocupación por sala · Ocupación · Hospital HIS | H1

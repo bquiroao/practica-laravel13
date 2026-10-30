@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roles del hospital · HIS</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital activo: Hospital Regional de Oriente. Cambiar hospital">
+    <span class="corto">H. R. Oriente</span><span class="largo">Hospital Regional de Oriente</span> ▾
+  </button>
+  <span class="rol-actual">Administración</span>
+  <span class="avatar" role="img" aria-label="Carlos Méndez, administración">CM</span>
+</header>
+
+<div class="red" role="status" data-estado="sin-conexion">
+  <span aria-hidden="true">⦸</span> Sin conexión. Mostramos lo último que cargaste (hace 2 min).
+</div>
+
+<main>
+  <div class="fila">
+    <h1>Roles del hospital</h1>
+    <button class="btn texto icono derecha" aria-label="Ayuda: alcance de los roles">?</button>
+  </div>
+
+  <label for="buscar">Buscar persona</label>
+  <input id="buscar" type="search" value="Ana Pérez" autocomplete="off">
+
+  <!-- persona seleccionada: prioridad 1 = quién es -->
+  <section class="tarjeta" aria-labelledby="persona" data-estado="base sin-conexion">
+    <div class="fila">
+      <span class="avatar" aria-hidden="true" style="background:#2E8B87">AP</span>
+      <div>
+        <h2 id="persona" style="margin:0">Ana Pérez</h2>
+        <div class="meta">ana · Enfermería, piso 3</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- móvil y tableta: una tarjeta por membresía -->
+  <h2 class="solo-movil" data-estado="base sin-conexion">Roles en este hospital (3)</h2>
+  <ul class="solo-movil" style="list-style:none;padding:0;margin:0" data-estado="base sin-conexion">
+    <li class="tarjeta">
+      <div class="fila"><strong>Enfermería</strong><span class="estado activo derecha">● Activo</span></div>
+      <div class="meta">Desde 01/01/2026 · sin fin</div>
+      <div class="extra meta">Asignado por Carlos Méndez · ref. 142371fa…</div>
+      <div class="fila" style="margin-top:10px">
+        <button class="btn bloque" data-estado="base">Revocar rol</button>
+        <button class="btn bloque" aria-disabled="true" data-estado="sin-conexion">Revocar · requiere conexión</button>
+      </div>
+    </li>
+    <li class="tarjeta">
+      <div class="fila"><strong>Médico</strong><span class="estado vencido derecha">◌ Vencido</span></div>
+      <div class="meta">01/01/2026 – 30/06/2026</div>
+      <div class="meta">Sin acciones: el rol no está activo.</div>
+    </li>
+    <li class="tarjeta">
+      <div class="fila"><strong>Laboratorio</strong><span class="estado revocado derecha">⊘ Revocado</span></div>
+      <div class="meta">Revocado el 15/11/2026</div>
+      <div class="meta">Sin acciones: el rol no está activo.</div>
+    </li>
+  </ul>
+
+  <!-- escritorio (≥1024): la misma información como tabla -->
+  <table class="tabla" data-estado="base sin-conexion">
+    <caption class="oculto-visual">Roles de Ana Pérez en Hospital Regional de Oriente</caption>
+    <thead><tr><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Vigencia</th><th scope="col">Asignado por</th><th scope="col">Acción</th></tr></thead>
+    <tbody>
+      <tr><td>Enfermería</td><td><span class="estado activo">● Activo</span></td><td>01/01/2026 – sin fin</td><td>Carlos Méndez</td><td><button class="btn">Revocar rol</button></td></tr>
+      <tr><td>Médico</td><td><span class="estado vencido">◌ Vencido</span></td><td>01/01/2026 – 30/06/2026</td><td>Carlos Méndez</td><td class="meta">Sin acciones: rol no activo</td></tr>
+      <tr><td>Laboratorio</td><td><span class="estado revocado">⊘ Revocado</span></td><td>01/01/2026 – 15/11/2026</td><td>Carlos Méndez</td><td class="meta">Sin acciones: rol no activo</td></tr>
+    </tbody>
+  </table>
+
+  <div data-estado="carga" aria-busy="true">
+    <div class="tarjeta"><div class="esq" style="width:60%"></div><div class="esq" style="width:40%"></div></div>
+    <div class="tarjeta"><div class="esq" style="width:50%"></div><div class="esq" style="width:70%"></div><div class="esq btn-esq"></div></div>
+    <p class="meta" role="status">Cargando roles…</p>
+  </div>
+</main>
+
+<div class="accion-fija">
+  <a class="btn primario" href="m2-asignar.html?estado=paso1" data-estado="base carga">＋ Asignar rol</a>
+  <span class="btn" aria-disabled="true" data-estado="sin-conexion">＋ Asignar rol · requiere conexión</span>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-roles.html" aria-current="page"><span class="ico" aria-hidden="true">👥</span>Roles</a>
+  <a href="m5-auditoria.html"><span class="ico" aria-hidden="true">🔎</span>Auditoría</a>
+  <a href="#"><span class="ico" aria-hidden="true">☰</span>Más</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>
