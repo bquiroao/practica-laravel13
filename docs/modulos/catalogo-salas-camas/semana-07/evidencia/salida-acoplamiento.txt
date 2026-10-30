@@ -1,0 +1,13 @@
+$ php semana-07/evidencia/medir-acoplamiento.php   # sobre develop 402fd68
+Tipo                         Capa           Ce  Ca     I  Usa
+ControladorCatalogo          Presentacion    4   0  1.00  ServicioCatalogo, VistaJson, ReglaDeDominio, ErrorPersistencia
+ReglaDeDominio               Dominio         0   4  0.00  -
+ServicioCatalogo             Aplicacion      3   1  0.75  RepositorioCatalogo, ReglaDeDominio, EstadoCama
+RepositorioCatalogo          Aplicacion      0   3  0.00  -
+ErrorPersistencia            Aplicacion      0   2  0.00  -
+EstadoCama                   Dominio         1   1  0.50  ReglaDeDominio
+RepositorioPdo               Persistencia    2   0  1.00  RepositorioCatalogo, ErrorPersistencia
+VistaJson                    Presentacion    1   1  0.50  ReglaDeDominio
+RepositorioEnMemoria         Persistencia    1   0  1.00  RepositorioCatalogo
+Rutas                        Presentacion    0   0     -  -
+Mayor acoplamiento: ControladorCatalogo
