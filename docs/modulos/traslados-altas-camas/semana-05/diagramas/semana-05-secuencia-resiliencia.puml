@@ -1,0 +1,24 @@
+@startuml semana-05-secuencia-resiliencia
+title Resiliencia — respuesta perdida, reintento idempotente y falla a mitad de la transacción
+skinparam defaultFontName Arial
+autonumber
+actor "Enfermería" as E
+participant "Cliente" as C
+participant "API Traslados" as A
+database "Base" as B
+E -> C : traslada epi-1 a cama A2
+C -> A : POST /movimientos\nIdempotency-Key: mov-0800-epi1, X-Request-Id: r1
+A -> B : BEGIN; cierra estancia; A1 maintenance; abre estancia; A2 occupied; orden aplicada; guarda clave; COMMIT
+A --x C : 201 (se pierde la respuesta)
+C -> A : reintento con la MISMA clave (X-Request-Id: r2)
+A -> B : ordenPorClave(mov-0800-epi1)
+B --> A : mismo episodio y tipo → origen A1, destino A2
+A --> C : 200 {origen A1, destino A2, repetida: true}
+note right of C : 1 traslado, no 2
+== Falla a mitad ==
+C -> A : POST (otro movimiento)
+A -> B : BEGIN; cierra estancia; A1 maintenance; falla
+B --> A : error
+A -> B : ROLLBACK
+A --> C : 500 error_persistencia (nada cambió; se puede reintentar)
+@enduml
