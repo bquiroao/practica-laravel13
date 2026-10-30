@@ -1,0 +1,4 @@
+Escenarios: 300 · repeticiones: 50 · decisión: RECHAZADO
+mediana 0.32 ms · p95 0.41 ms · máximo 3.88 ms · umbral RNF-08: 1000 ms → CUMPLE
+Escenarios: 3000 · repeticiones: 20 · decisión: RECHAZADO
+mediana 4.10 ms · p95 6.20 ms · máximo 6.47 ms · umbral RNF-08: 1000 ms → CUMPLE
