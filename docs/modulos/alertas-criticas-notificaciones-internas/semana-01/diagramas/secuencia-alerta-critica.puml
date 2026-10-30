@@ -1,0 +1,82 @@
+@startuml secuencia-alerta-critica
+' Semana 1 - Secuencia: detección, envío, acuse y escalamiento de una alerta crítica
+autonumber
+skinparam sequenceMessageAlign center
+skinparam ParticipantBackgroundColor #F4F8FF
+skinparam ParticipantBorderColor #2F5597
+
+actor "Sistema origen" as SO
+participant "AlertaController" as CTL
+participant "RegistrarAlertaCritica" as REG
+participant "Alerta\n(dominio)" as AL
+participant "DirectorioDestinatarios" as DIR
+participant "DespachadorNotificaciones" as DES
+participant "PuertoNotificacion\n(simulado)" as NOT
+database "AlertaRepository" as REP
+actor "Enfermería de turno" as ENF
+participant "AcusarAlerta" as ACU
+actor "Reloj / planificador" as RLJ
+participant "EscalarAlertasVencidas" as ESC
+
+== CU-01 Registrar alerta crítica ==
+SO -> CTL : evento crítico (idOrigen, PAC-00451,\nprioridad CRITICA, tenant HOSP-GUA-01)
+CTL -> REG : ejecutar(datos)
+REG -> REP : buscarPorOrigen(tenant, origen, idOrigen)
+alt evento ya registrado [RN-02]
+  REP --> REG : alerta existente
+  REG --> CTL : alerta existente (sin duplicar)
+  CTL --> SO : 200 alerta existente
+else evento nuevo
+  REG -> AL : crear(datos, reloj.ahora())
+  alt datos inválidos [RN-01]
+    AL --> REG : ReglaDominioException
+    REG --> CTL : error de validación
+    CTL --> SO : 422 error de validación
+  else datos válidos
+    AL --> REG : alerta CREADA + evento «creada»
+    == CU-02 Resolver destinatarios ==
+    REG -> DIR : destinatarios(tenant, servicio, nivel 0)
+    DIR --> REG : enf.turno01, med.tratante01
+    == CU-03 Enviar (CU-09 reintentos) ==
+    REG -> DES : despachar(alerta, destinatarios)
+    loop por destinatario, hasta 3 intentos [RN-08]
+      DES -> NOT : enviar(destinatario, resumen)
+      NOT --> DES : entregado / fallido
+    end
+    DES --> REG : resultado de entrega
+    REG -> AL : marcarEnviada(ahora)
+    REG -> REP : guardar(alerta con historial)
+    CTL --> SO : 201 alerta ENVIADA
+  end
+end
+
+== CU-04 Acusar alerta ==
+ENF -> CTL : acusar(idAlerta) con su sesión
+CTL -> ACU : ejecutar(idAlerta, enf.turno01, tenant)
+ACU -> REP : buscar(idAlerta, tenant)
+ACU -> AL : acusar(usuario, ahora)
+alt ya acusada [RN-06]
+  AL --> ACU : sin cambios (idempotente)
+else no es destinatario o tenant distinto [RN-07]
+  AL --> ACU : ReglaDominioException
+  ACU --> CTL : 403 no autorizado
+else primer acuse
+  AL --> ACU : ACUSADA + evento «acusada»
+  ACU -> REP : guardar(alerta)
+end
+CTL --> ENF : respuesta (200 acusada o 403)
+
+== CU-05 Escalar alerta no acusada ==
+RLJ -> ESC : ejecutar(ahora fijo en pruebas)
+ESC -> REP : enviadasConPlazoVencido(ahora)
+loop por alerta vencida
+  ESC -> AL : escalar(ahora) [RN-05]
+  alt nivel < 2
+    ESC -> DIR : destinatarios(tenant, servicio, nivel + 1)
+    ESC -> DES : despachar(alerta, nuevos destinatarios)
+  else nivel máximo
+    AL --> ESC : evento «escalamiento agotado»
+  end
+  ESC -> REP : guardar(alerta)
+end
+@enduml
