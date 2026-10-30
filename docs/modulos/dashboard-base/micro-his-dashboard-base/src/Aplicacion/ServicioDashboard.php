@@ -11,7 +11,7 @@ interface Reloj { public function hoy(): string; }
 
 final class ErrorPersistencia extends \RuntimeException {}   // fallo técnico de la base: no es una regla de negocio
 
-/** CU-01, CU-02 y CU-04 de la semana 1, con CU-05 (validar sesión, hospital y permisos) incluido. */
+/** CU-01 a CU-04 de la semana 1, con CU-05 (validar sesión, hospital y permisos) incluido. */
 final class ServicioDashboard
 {
     public function __construct(private FuenteConteos $conteos, private Reloj $reloj) {}
@@ -33,6 +33,9 @@ final class ServicioDashboard
         catch (ErrorPersistencia) { return $this->vista($t, EstadoTarjeta::Error, null); }
         return $this->vista($t, EstadoTarjeta::deConteo($total), $total);
     }
+
+    /** CU-03 con CU-05: navegar a un módulo, elegido en el menú o escrito a mano. */
+    public function navegar(string $ruta, string $hospital, array $permisos): array { $this->exigirSesion($hospital); return Catalogo::destino($ruta, $permisos); }
 
     private function vista(Tarjeta $t, EstadoTarjeta $e, ?int $total): array { return ['id' => $t->id, 'estado' => $e->value, 'texto' => $t->texto($e, $total)]; }
 

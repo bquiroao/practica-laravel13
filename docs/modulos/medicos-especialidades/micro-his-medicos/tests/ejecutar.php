@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 // Pruebas sin dependencias:  php tests/ejecutar.php   (usa SQLite en memoria como base de prueba)
 use Medicos\Aplicacion\{AsociarEspecialidad, ConsultarDisponibilidad, ErrorPersistencia, RegistrarMedico, Usuario};
-use Medicos\Dominio\ErrorDominio;
-use Medicos\Persistencia\MedicosPdo;
-use Medicos\Presentacion\MedicosControlador;
+use Medicos\Dominio\{Agenda, ErrorDominio};
+use Medicos\Persistencia\{EnMemoria, MedicosPdo};
+use Medicos\Presentacion\{Enrutador, MedicosControlador, Peticion};
 require __DIR__ . '/../bootstrap.php';
 $conteo = ['PASA' => 0, 'FALLA' => 0];
 function prueba(string $id, string $que, callable $cuerpo): void {
@@ -18,9 +18,11 @@ function valor(PDO $pdo, string $sql): mixed { return $pdo->query($sql)->fetchCo
 $hoy = fn () => '2026-10-28';
 $ids = function () { static $n = 0; return 'id-' . ++$n; };
 [$admin, $recepcion] = [new Usuario('adm-1', 'admin'), new Usuario('rec-1', 'recepcion')];
-$registrar = fn (PDO $pdo) => new RegistrarMedico(new MedicosPdo($pdo), $hoy, $ids);
-$asociar = fn (PDO $pdo) => new AsociarEspecialidad(new MedicosPdo($pdo), $ids);
-$consultar = fn (PDO $pdo) => new ConsultarDisponibilidad(new MedicosPdo($pdo), $hoy);
+$repo = fn (PDO|MedicosPdo|EnMemoria $b) => $b instanceof PDO ? new MedicosPdo($b) : $b;   // los casos de uso aceptan cualquiera de los dos adaptadores
+$registrar = fn ($b) => new RegistrarMedico($repo($b), $repo($b), $hoy, $ids);
+$asociar = fn ($b) => new AsociarEspecialidad($r = $repo($b), $r, $ids);
+$consultar = fn ($b) => new ConsultarDisponibilidad($r = $repo($b), $r, $hoy);
+$app = fn (EnMemoria $m) => new Enrutador(new MedicosControlador($registrar($m), $asociar($m), $consultar($m), ['adm' => $admin, 'rec' => $recepcion]));
 
 prueba('APP-01', 'Camino feliz registro: Luis con colegiado 33333 y Pediatría principal → 1 perfil y 1 especialidad en la misma transacción', function () use ($registrar, $admin) {
     $pdo = base(); $r = $registrar($pdo)->ejecutar(['usuario_id' => 'u-luis', 'colegiado' => '33333', 'especialidad_id' => 'esp-ped'], $admin);
@@ -31,6 +33,7 @@ prueba('APP-02', 'Camino feliz disponibilidad (CA-07): horario 08:00–10:00 y c
     $f = $consultar(base())->ejecutar('MI', '2026-11-02', '2026-11-02', $recepcion);
     igual(['med-ana|2026-11-02 08:30', 'med-ana|2026-11-02 09:00', 'med-ana|2026-11-02 09:30'], array_map(fn ($x) => $x['medico_id'] . '|' . $x['inicio'], $f));
     igual('Dra. Ana Gómez', $f[0]['medico'], 'nombre desde local_user_refs');
+    igual(['2026-11-02 08:00', '2026-11-02 08:30'], Agenda::franjas('2026-11-02', [['08:00:00', '09:00:00']], []), 'horas con segundos, como las devuelve PostgreSQL');
     igual(['2026-11-09 09:00', '2026-11-09 09:30'], array_column($consultar(base())->ejecutar('MI', '2026-11-09', '2026-11-09', $recepcion), 'inicio'), 'cita 08:15–08:45 tapa 08:00 y 08:30');
 });
 prueba('DOM-01', 'Regla de dominio (CA-04, CA-05): MI otra vez o segunda principal → especialidad_duplicada; Cardiología inactiva → especialidad_invalida; PED no principal sí', function () use ($asociar, $admin) {
@@ -58,19 +61,36 @@ prueba('PER-01', 'Error de persistencia: falla el INSERT de la especialidad → 
     igual(ErrorPersistencia::class, codigoDe(fn () => $registrar($pdo)->ejecutar(['usuario_id' => 'u-luis', 'colegiado' => '33333', 'especialidad_id' => 'esp-ped'], $admin)));
     igual(0, (int) valor($pdo, "SELECT COUNT(*) FROM doctor_profiles WHERE local_user_ref_id = 'u-luis'"), 'sin perfil a medias');
 });
-prueba('HTTP-01', 'Presentación: 201, 200, 401, 400, 403, 404, 405, 409 y 422 con su código', function () use ($registrar, $asociar, $consultar, $admin, $recepcion) {
-    $pdo = base(); $api = new MedicosControlador($registrar($pdo), $asociar($pdo), $consultar($pdo), ['adm' => $admin, 'rec' => $recepcion]);
-    $q = ['especialidad' => 'MI', 'desde' => '2026-11-02', 'hasta' => '2026-11-02'];
-    igual([201, 201, 200], [$api->atender('POST', '/api/v1/medicos', 'adm', '{"usuario_id":"u-luis","colegiado":"33333"}')[0],
-        $api->atender('POST', '/api/v1/medicos/med-ana/especialidades', 'adm', '{"especialidad_id":"esp-ped","desde":"2026-11-01"}')[0], $api->atender('GET', '/api/v1/disponibilidad', 'rec', '', $q)[0]], 'éxitos');
-    igual([401, 400, 403, 404, 405, 409, 422], [$api->atender('GET', '/api/v1/disponibilidad', '', '', $q)[0], $api->atender('POST', '/api/v1/medicos', 'adm', '{')[0],
-        $api->atender('POST', '/api/v1/medicos', 'rec', '{}')[0], $api->atender('GET', '/x', 'adm')[0], $api->atender('DELETE', '/api/v1/medicos', 'adm')[0],
-        $api->atender('POST', '/api/v1/medicos', 'adm', '{"usuario_id":"u-eva","colegiado":"22222"}')[0], $api->atender('GET', '/api/v1/disponibilidad', 'rec', '', ['hasta' => 'x'] + $q)[0]], 'errores');
+prueba('REP-01', 'Contrato Repository: PDO y memoria responden igual a la misma secuencia (registro, asociación, rechazo, consultas)', function () use ($hoy, $asociar, $admin) {
+    $vistas = [];
+    foreach (['pdo' => new MedicosPdo(base()), 'memoria' => EnMemoria::desdePdo(base())] as $nombre => $r) {
+        $n = 0; $id = (new RegistrarMedico($r, $r, $hoy, function () use (&$n) { return 'rep-' . ++$n; }))->ejecutar(['usuario_id' => 'u-luis', 'colegiado' => '33333', 'especialidad_id' => 'esp-ped', 'desde' => '2026-11-01'], $admin)['medico_id'];
+        [$asociar($r)->ejecutar('med-ana', ['especialidad_id' => 'esp-ped', 'desde' => '2026-11-01'], $admin), codigoDe(fn () => $asociar($r)->ejecutar('med-ana', ['especialidad_id' => 'esp-mi', 'desde' => '2026-11-01'], $admin))];
+        $vistas[$nombre] = json_encode([$r->usuarioActivo('u-rev'), $r->especialidadActiva('esp-car'), $r->colegiadoRegistrado('33333'), $r->tienePerfilActivo('u-luis'), $r->medicoActivo('med-eva'),
+            $r->asignaciones('med-ana'), $r->asignaciones($id), $r->medicosConEspecialidad('PED'), $r->medicosConEspecialidad('MI'), $r->horarios(['med-ana', 'med-eva']), $r->citasActivas(['med-ana'], '2026-11-02', '2026-11-09')]);
+    }
+    igual($vistas['pdo'], $vistas['memoria'], 'pdo frente a memoria');
 });
-prueba('ARQ-01', 'Dependencias: Dominio no usa otras capas ni PDO; Aplicación y Presentación no tienen SQL', function () {
+prueba('MVC-01', 'Enrutador → controlador → vista: 201, 200, 401, 400, 403, 404, 405, 409 y 422', function () use ($app) {
+    $a = $app(EnMemoria::desdePdo(base()));
+    $pide = fn (string $m, string $ruta, string $u = 'adm', string $cuerpo = '', array $q = ['especialidad' => 'MI', 'desde' => '2026-11-02', 'hasta' => '2026-11-02']) => $a->atender(new Peticion($m, $ruta, $q, $u, $cuerpo))[0];
+    igual([201, 201, 200], [$pide('POST', '/api/v1/medicos', 'adm', '{"usuario_id":"u-luis","colegiado":"33333"}'),
+        $pide('POST', '/api/v1/medicos/med-ana/especialidades', 'adm', '{"especialidad_id":"esp-ped","desde":"2026-11-01"}'), $pide('GET', '/api/v1/disponibilidad', 'rec')], 'éxitos');
+    igual([401, 400, 403, 404, 404, 405, 409, 422], [$pide('GET', '/api/v1/disponibilidad', ''), $pide('POST', '/api/v1/medicos', 'adm', '{'), $pide('POST', '/api/v1/medicos', 'rec', '{}'),
+        $pide('GET', '/x'), $pide('POST', '/api/v1/medicos/med-x/especialidades', 'adm', '{"especialidad_id":"esp-ped","desde":"2026-11-01"}'), $pide('DELETE', '/api/v1/medicos'),
+        $pide('POST', '/api/v1/medicos', 'adm', '{"usuario_id":"u-eva","colegiado":"22222"}'), $pide('GET', '/api/v1/disponibilidad', 'rec', '', ['especialidad' => 'MI', 'desde' => 'x', 'hasta' => 'x'])], 'errores');
+});
+prueba('PER-02', 'Doble en memoria que falla al guardar → 500 error_persistencia por HTTP y no queda el médico', function () use ($app) {
+    $m = EnMemoria::desdePdo(base()); $m->fallarAlGuardar = true;
+    $r = $app($m)->atender(new Peticion('POST', '/api/v1/medicos', [], 'adm', '{"usuario_id":"u-luis","colegiado":"33333"}'));
+    igual([500, 'error_persistencia', false], [$r[0], $r[1]['codigo'], $m->colegiadoRegistrado('33333')]);
+});
+prueba('ARQ-01', 'Dependencias: Dominio aislado; Aplicación sin Persistencia ni SQL; controlador sin SQL ni reglas', function () {
     $codigo = fn (string $capa) => implode("\n", array_map('file_get_contents', glob(__DIR__ . "/../src/$capa/*.php")));
     igual(0, preg_match('/Aplicacion|Persistencia|Presentacion|PDO/', $codigo('Dominio')), 'Dominio');
     igual(0, preg_match('/\b(SELECT|INSERT|UPDATE|DELETE)\b/', $codigo('Aplicacion') . $codigo('Presentacion')), 'SQL fuera de Persistencia');
+    igual(0, preg_match('/Medicos\\\\Persistencia|\\\\PDO\b/', $codigo('Aplicacion')), 'Aplicación → Persistencia');
+    igual(0, preg_match('/Vigencia|Agenda|ReglasEspecialidad|active|scheduled|MINUTOS/', (string) file_get_contents(__DIR__ . '/../src/Presentacion/MedicosControlador.php')), 'reglas en el controlador');
 });
 
 printf("\nTotal: %d  Pasan: %d  Fallan: %d\n", array_sum($conteo), $conteo['PASA'], $conteo['FALLA']);

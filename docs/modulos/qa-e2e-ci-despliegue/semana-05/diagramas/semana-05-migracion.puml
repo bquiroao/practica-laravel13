@@ -1,0 +1,15 @@
+@startuml semana-05-migracion
+title Migración razonada: cada fase tiene una condición medible para avanzar y una para volver atrás
+skinparam defaultFontSize 11
+
+rectangle "F0 · Hoy\nmonolito modular + API 1.0.0\nalmacén en disco" as F0 #DDEFE4
+rectangle "F1 · CI reporta\njob E2E + ReportadorCi\n(requiere Actions habilitado)" as F1 #EEF0F8
+rectangle "F2 · Almacén de artefactos externo\nS3/MinIO detrás del MISMO puerto\nAlmacenEvidencias (adaptador HTTP)" as F2 #EEF0F8
+rectangle "F3 · Ingesta separada\nSOLO si C-1..C-5 cambian\ncola + outbox" as F3 #FBEBDD
+
+F0 --> F1 : el workflow corre\n(≥ 1 corrida en Actions)
+F1 --> F2 : el disco del servidor\nsupera el 70 % por artefactos
+F2 --> F3 : ≥ 3 de C-1..C-5 se cumplen\n(hoy: 0 de 5)
+F1 ..> F0 : si el job tarda > 20 % más\npor reportar
+F2 ..> F1 : si el p95 del reporte\nsupera 500 ms
+@enduml

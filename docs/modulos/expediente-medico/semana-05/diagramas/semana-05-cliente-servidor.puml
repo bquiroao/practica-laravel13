@@ -1,0 +1,24 @@
+@startuml semana-05-cliente-servidor
+title Cliente-servidor — Expediente médico electrónico base (hoy: módulo dentro del HIS)
+actor "Admisión o profesional tratante" as u
+node "Navegador" {
+  [SPA Vue del HIS] as spa
+}
+node "Servidor del HIS" {
+  [Front controller /patients/{id}/record] as fc
+  [ControladorExpediente + VistaJson] as ctl
+  [ServicioExpediente: atención activa, consentimiento, auditoría] as srv
+  [HospitalPdo] as hp
+  [CentralPdo] as cp
+}
+database "Base HOSPITAL (tenant)" as dbh
+database "Base CENTRAL" as dbc
+u --> spa
+spa --> fc : HTTPS JSON\nJWT + X-Tenant-ID + X-Request-Id
+fc --> ctl
+ctl --> srv
+srv --> hp
+srv --> cp
+hp --> dbh : pacientes, asignaciones, expedientes, auditoría
+cp --> dbc : consentimientos e índice MPI (solo lectura)
+@enduml

@@ -1,0 +1,16 @@
+@startsalt w5-escalamiento-coordinacion
+{+
+  {* Alertas críticas | HOSP-GUA-01 | coord.medico01 ▾ }
+  ==
+  {+ <b>⛔ Escalamiento agotado</b> (8) | PAC-00453 · CRITICA · nadie acusó en niveles 0, 1 y 2 }
+  ==
+  <b>Historial</b>
+  {#
+   10:00 | enviada | nivel 0
+   10:15 | escalada | a nivel 1 por plazo vencido
+   10:30 | escalada | a nivel 2 por plazo vencido
+   10:45 | escalamiento agotado | nivel 2
+  }
+  {[<b>Acusar y atender</b>] | [Ver destinatarios notificados] }
+}
+@endsalt

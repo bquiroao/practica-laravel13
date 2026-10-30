@@ -1,0 +1,15 @@
+@startsalt w4-estados
+{+
+  <b>Estados de la bandeja</b> (7)
+  ==
+  {+ <b>Cargando…</b> | ▒▒▒▒▒▒▒▒▒▒▒▒ | ▒▒▒▒▒▒▒▒ }
+  ==
+  {+ <b>Vacío</b> | Sin alertas pendientes para MED-INT. | [Ver cerradas] }
+  ==
+  {+ <b>Error recuperable</b> | No se pudo cargar (503). Sus datos no se perdieron. | [Reintentar] }
+  ==
+  {+ <b>Éxito</b> | ✓ Acuse registrado 10:05 }
+  ==
+  {+ <b>Sin permiso</b> | No fue notificado de esta alerta (RN-07). | Corresponde a: nivel 0 MED-INT }
+}
+@endsalt

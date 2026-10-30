@@ -1,3 +1,5 @@
+Aviso de actualización: este documento conserva el diseño inicial. La [entrega navegable final y sus reglas](README.md) precisa alcance: ítem demo fijo, estado pendiente sin selector clínico, corrección versionada y evidencia real de navegador. No se consideran implementadas otras propuestas de este documento.
+
 # Semana 11 — Prototipo navegable para ingreso de resultados de laboratorio
 
 | | |

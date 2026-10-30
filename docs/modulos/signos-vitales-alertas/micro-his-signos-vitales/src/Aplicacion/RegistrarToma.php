@@ -24,15 +24,18 @@ final class RegistrarToma {
         $this->evaluador = $evaluador ?? EvaluadorUmbrales::estandar();
     }
 
-    public function ejecutar(array $entrada, Usuario $usuario): array {
+    /** $clave: Idempotency-Key (semana 5). Reintentar con la misma clave no crea otra toma ni otra alerta. */
+    public function ejecutar(array $entrada, Usuario $usuario, ?string $clave = null): array {
         if ($usuario->rol !== 'enfermeria') { throw new ErrorDominio('acceso_denegado', 'Solo enfermería registra signos vitales'); }
         $paciente = (string) ($entrada['paciente_id'] ?? '');
         $episodio = exigirEpisodio($this->clinica, $paciente, (string) ($entrada['episodio_id'] ?? ''), $usuario);
+        $id = $clave === null ? ($this->nuevoId)() : 'k' . substr(hash('sha256', $usuario->id . '|' . $clave), 0, 15);
+        if ($clave !== null && $this->tomas->existe($id)) { return ['toma_id' => $id, 'repetida' => true]; }
         $valores = is_array($entrada['mediciones'] ?? null) ? $entrada['mediciones'] : [];
         $mediciones = array_map(fn ($tipo, $valor) => Medicion::desde((string) $tipo, $valor), array_keys($valores), $valores);
         $en = ($this->reloj)();
         $edad = (new \DateTimeImmutable($episodio['fecha_nacimiento']))->diff($en)->y;
-        $toma = Toma::registrar(($this->nuevoId)(), $paciente, (string) $entrada['episodio_id'], $usuario->id, $en,
+        $toma = Toma::registrar($id, $paciente, (string) $entrada['episodio_id'], $usuario->id, $en,
                                 $mediciones, $this->clinica->rangosPara($edad), $this->evaluador);
         $this->tomas->guardar($toma);
         return ['toma_id' => $toma->id, 'clasificaciones' => array_map(fn ($c) => $c->value, $toma->clasificaciones), 'alertas' => $toma->alertas()];

@@ -20,4 +20,10 @@ if (getenv('SV_ALMACEN') === 'memoria') {
 }
 $usuarios = ['enf-ana' => new Usuario('enf-ana', 'enfermeria', 'hosp-1'), 'dr-luis' => new Usuario('dr-luis', 'medico', 'hosp-1')];
 $controlador = new TomasControlador(new RegistrarToma($repo, $repo), new ConsultarTomas($repo, $repo), $usuarios);
-VistaJson::enviar((new Enrutador($controlador))->atender(Peticion::desdeGlobales()));
+$peticion = Peticion::desdeGlobales();
+$inicio = hrtime(true);
+$respuesta = (new Enrutador($controlador))->atender($peticion);
+VistaJson::enviar($respuesta, $peticion->idSolicitud);
+// Observabilidad (semana 5): una línea JSON por petición, sin datos clínicos ni del paciente.
+error_log(json_encode(['id' => $peticion->idSolicitud, 'metodo' => $peticion->metodo, 'ruta' => $peticion->ruta, 'estado' => $respuesta[0],
+                       'codigo' => $respuesta[1]['codigo'] ?? null, 'ms' => round((hrtime(true) - $inicio) / 1e6, 2)]));

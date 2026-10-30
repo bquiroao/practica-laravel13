@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campañas · QA y regresión</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <button class="hospital" aria-label="Hospital: Hospital Regional del Norte. Cambiar"><span class="corto">H. Norte</span><span class="largo">QA · Hospital Regional del Norte</span> ▾</button>
+  <span class="rol-actual">Tester</span>
+  <span class="avatar" aria-label="tito-tester">TT</span>
+</header>
+<div class="red" role="status" data-estado="sin-conexion">Sin conexión · se muestran las campañas de hace 4 min <button type="button">Reintentar</button></div>
+
+<main>
+  <h1>Mis campañas en curso</h1>
+  <p class="sub" data-estado="base sin-conexion lider">Elija una campaña para ver sus casos pendientes.</p>
+
+  <div data-estado="carga" role="status" aria-label="Cargando campañas">
+    <div class="tarjeta"><div class="esq" style="width:60%"></div><div class="esq"></div><div class="esq btn-esq"></div></div>
+    <div class="tarjeta"><div class="esq" style="width:50%"></div><div class="esq"></div><div class="esq btn-esq"></div></div>
+  </div>
+
+  <div class="aviso atencion" data-estado="vacio">
+    <h2>No tiene campañas en curso</h2>
+    <p>Cuando el Líder QA inicie una campaña con casos para usted, aparecerá aquí.</p>
+  </div>
+
+  <div data-estado="base sin-conexion lider">
+    <article class="tarjeta campana">
+      <div class="fila"><span class="nombre">Regresión H4</span><span class="chip en-curso derecha">● En curso</span></div>
+      <div class="meta">Build 1.4.0+abc1234 · 3 casos (2 críticos)</div>
+      <div class="progreso" role="progressbar" aria-label="Avance de la campaña" aria-valuenow="1" aria-valuemin="0" aria-valuemax="3"><span style="width:33%"></span></div>
+      <div class="meta">1 de 3 con resultado · <strong>2 pendientes</strong></div>
+      <p class="extra meta">Funcionalidades: expediente · Umbral de GO: 95 %</p>
+      <a class="btn primario bloque" href="m2-ejecutar.html" style="margin-top:10px">Ejecutar el siguiente caso</a>
+    </article>
+    <article class="tarjeta campana">
+      <div class="fila"><span class="nombre">Regresión agenda y camas</span><span class="chip planificada derecha">◷ Planificada</span></div>
+      <div class="meta">Todavía no inició: el Líder QA debe indicar el build.</div>
+    </article>
+    <article class="tarjeta campana" data-estado="lider">
+      <div class="fila"><span class="nombre">Regresión H4 (1.4.1)</span><span class="chip go derecha">✓ Liberar (GO)</span></div>
+      <div class="meta">Cerrada · tasa 100 % · 0 defectos que bloquean</div>
+      <a class="btn bloque" href="m4-trazabilidad.html" style="margin-top:10px">Ver trazabilidad</a>
+    </article>
+  </div>
+</main>
+
+<div class="accion-fija" data-estado="lider">
+  <a class="btn primario" href="m1-campanas.html?estado=lider">+ Planificar campaña</a>
+</div>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <a href="m1-campanas.html" aria-current="page"><span class="ico" aria-hidden="true">☰</span>Campañas</a>
+  <a href="m3-registro.html?estado=pendiente"><span class="ico" aria-hidden="true">⇅</span>Pendientes</a>
+  <a href="m4-trazabilidad.html"><span class="ico" aria-hidden="true">⌘</span>Trazabilidad</a>
+</nav>
+<script src="estado.js"></script>
+</body>
+</html>

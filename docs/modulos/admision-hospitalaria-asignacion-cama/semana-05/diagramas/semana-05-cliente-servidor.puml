@@ -1,0 +1,31 @@
+@startuml semana-05-cliente-servidor
+' Admisión hospitalaria y asignación de cama — Semana 5
+' C4 contenedores: diseño cliente-servidor del módulo.
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Cliente-servidor de Admisión hospitalaria y asignación de cama (semana 5)
+
+Person(adm, "Admisionista / Supervisor(a)", "Navegador o móvil del hospital")
+Person(med, "Médico tratante", "Solo consulta")
+
+System_Boundary(his, "HIS — módulo Admisión") {
+  Container(cliente, "Cliente web / móvil", "HTML (Micro-HIS) / Vue 3 (HIS real)", "Pantallas de admisión. No tiene reglas: llama a la API")
+  Container(api, "API REST de Admisión", "PHP 8.2+, /api/v1, JSON", "Autentica (Bearer), autoriza por rol, toma el tenant del token, X-Request-Id")
+  Container(app, "Casos de uso + dominio", "PHP", "Los MISMOS de la consola y la web MVC")
+  ContainerDb(bd, "Datos de Admisión", "PostgreSQL 16", "admision, asignacion_cama, evento_admision")
+}
+System_Ext(cat, "Catálogo de salas y camas", "Josué: dueño de las camas")
+System_Ext(pac, "Pacientes", "Dueño de los datos del paciente")
+System_Ext(dash, "Dashboard de ocupación", "Lee asignaciones activas")
+System_Ext(idp, "Identidad del HIS", "Emite el token con usuario, rol y hospital (propuesta)")
+
+Rel(adm, cliente, "Usa", "HTTPS")
+Rel(med, cliente, "Consulta", "HTTPS")
+Rel(cliente, api, "Llama", "HTTPS + JSON, Authorization: Bearer")
+Rel(cliente, idp, "Obtiene token")
+Rel(api, app, "ejecutar()")
+Rel(app, bd, "SQL", "PDO, transacción")
+Rel(app, cat, "Lee camas operativas", "repositorio compartido o API (pendiente)")
+Rel(app, pac, "Valida código activo", "solo lectura")
+Rel(dash, bd, "Lee v_asignaciones_activas (propuesta)")
+@enduml

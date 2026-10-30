@@ -1,0 +1,13 @@
+$ npx @redocly/cli@1.34.3 bundle api/openapi.yaml --ext json -o openapi.json && php evidencia/verificar-contrato.php openapi.json
+OK    alta de sala: POST /salas -> 201 (documentados: 201, 409, 422, 503)
+OK    sala repetida (R-01): POST /salas -> 409 E3 (documentados: 201, 409, 422, 503)
+OK    sala sin nombre: POST /salas -> 422 E2 (documentados: 201, 409, 422, 503)
+OK    alta de cama: POST /salas/A/camas -> 201 (documentados: 201, 409, 422, 503)
+OK    cama en sala inexistente (R-03): POST /salas/Z/camas -> 422 E4 (documentados: 201, 409, 422, 503)
+OK    cama a mantenimiento: PATCH /salas/A/camas/101/estado -> 200 (documentados: 200, 404, 409, 422, 503)
+OK    transición no permitida (R-05): PATCH /salas/A/camas/101/estado -> 422 E6 (documentados: 200, 404, 409, 422, 503)
+OK    cama inexistente: PATCH /salas/A/camas/999/estado -> 404 NF (documentados: 200, 404, 409, 422, 503)
+OK    base caída: POST /salas -> 503 E8 (documentados: 201, 409, 422, 503)
+OK    operaciones documentadas = acciones del controlador: registrarSala, registrarCama, cambiarEstado
+OK    ruta no documentada: GET /salas -> 404
+RESULTADO: el Micro-HIS cumple el contrato

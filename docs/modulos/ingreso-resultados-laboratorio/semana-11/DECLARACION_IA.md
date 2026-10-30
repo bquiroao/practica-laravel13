@@ -28,3 +28,5 @@ El contenido fue revisado y corregido manualmente para alinear el documento con 
 ## 4. Aceptación final
 
 La entrega final es responsabilidad del autor. Se verificó que la documentación respeta el alcance académico del módulo y mantiene una atención clara a seguridad, accesibilidad y diseño de experiencia.
+
+Revisión actual: se reutilizó prototipo propio de semana 12 para completar semana 11, con pruebas y capturas nuevas. Simulación de roles/guardado/concurrencia, sin identidad real ni catálogo clínico. La estudiante revisa y defiende decisiones.

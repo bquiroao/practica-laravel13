@@ -1,3 +1,4 @@
+IA utilizada para inspeccionar y continuar Micro-HIS de semana 3, añadir MVC/adaptador InMemory, elaborar análisis compartido y ejecutar pruebas/lint. La estudiante revisa y defiende decisiones. SQLite temporal real y datos ficticios; no identidad real, lector físico, cadena completa de custodia ni repositorio compartido desplegado.
 # Declaración de uso de inteligencia artificial — Semana 4
 
 | **Entrega** | Semana 4 — Arquitectura en capas, MVC y patrón Repository |

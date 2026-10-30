@@ -1,0 +1,36 @@
+@startuml
+skinparam shadowing false
+skinparam defaultFontSize 12
+title Flujo de usuario por rol — traslado o alta con liberación de cama
+
+|Médico|
+start
+:Abre al paciente;
+:W2 Orden médica\n(traslado: cama cualquiera o UCI;\nalta: tipo y motivo);
+:Orden vigente guardada;
+|Enfermería o admisión|
+:Abre al paciente (W1);
+if (¿Hay cama actual?) then (no)
+  :Mensaje «sin cama asignada»;
+  stop
+endif
+if (¿Hay orden vigente?) then (no)
+  :Mensaje «pida la orden al médico»;
+  stop
+else (sí)
+  if (¿Qué orden?) then (traslado)
+    :W3 Elige cama destino\n(solo disponibles del tipo pedido);
+  else (alta)
+    :Revisa tipo de alta y motivo;
+  endif
+endif
+:W4 Confirma\n(qué cama se libera, todo o nada);
+if (¿El servidor acepta?) then (sí)
+  :W5 Éxito: cama liberada\ny aviso a limpieza;
+else (rechazo)
+  :W5 Mensaje del rechazo\n(elegir otra cama o reintentar);
+endif
+|Los tres roles|
+:W6 Consulta el historial de camas;
+stop
+@enduml

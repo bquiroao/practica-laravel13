@@ -1,0 +1,84 @@
+{
+    "run": "run-101",
+    "artifact_digest": "sha256:50333226f021db85e436d040e924d56f0034fb247c7a05d0a91acb992602d325",
+    "state": "finished",
+    "finished_at": "2026-10-29T14:00:00Z",
+    "tests": [
+        {
+            "name": "Admitir paciente y asignar cama",
+            "labels": [
+                "critical",
+                "e2e"
+            ],
+            "status": "success",
+            "attempts": 1,
+            "artifacts": []
+        },
+        {
+            "name": "Prescribir con alergia registrada",
+            "labels": [
+                "critical",
+                "e2e"
+            ],
+            "status": "success",
+            "attempts": 1,
+            "artifacts": []
+        },
+        {
+            "name": "Ingresar resultado de laboratorio",
+            "labels": [
+                "e2e"
+            ],
+            "status": "flaky",
+            "attempts": 2,
+            "artifacts": [
+                {
+                    "sha256": "d0289c3db9ec45fa80a3c50c81db4341fb9dbf222afbb3d17f6bfd9793dedf36"
+                }
+            ]
+        },
+        {
+            "name": "Imprimir epicrisis",
+            "labels": [
+                "e2e"
+            ],
+            "status": "failed",
+            "attempts": 1,
+            "artifacts": [
+                {
+                    "sha256": "b832c9d296dd4cef5fd8c43a255f354a68ed6bc58113e79bd08be517824a7d29"
+                },
+                {
+                    "sha256": "dfa38f477cce71f74e2fb79e1098b017ff8dc368251ef41bfcace5a9295d58ae"
+                }
+            ]
+        },
+        {
+            "name": "Buscar paciente por documento",
+            "labels": [
+                "e2e"
+            ],
+            "status": "success",
+            "attempts": 1,
+            "artifacts": []
+        },
+        {
+            "name": "Agendar cita",
+            "labels": [
+                "e2e"
+            ],
+            "status": "success",
+            "attempts": 1,
+            "artifacts": []
+        },
+        {
+            "name": "Exportar reporte operativo",
+            "labels": [
+                "e2e"
+            ],
+            "status": "skipped",
+            "attempts": 0,
+            "artifacts": []
+        }
+    ]
+}

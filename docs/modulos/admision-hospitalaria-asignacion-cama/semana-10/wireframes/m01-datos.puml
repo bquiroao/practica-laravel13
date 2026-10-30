@@ -1,0 +1,19 @@
+@startsalt m01-datos
+' M-01 (360 px) Paso 1 de 3: datos mínimos
+{+
+  <b>Nueva admisión</b>   <size:11>Paso 1 de 3</size>
+  ==
+  Código de paciente
+  {"PAC-00451          "}
+  <size:11>PAC-NNNNN · sin nombres</size>
+  Servicio
+  ^Medicina interna     ^
+  Tipo de cama
+  ^General              ^
+  [ ] Requiere aislamiento
+  Origen
+  ^Emergencia           ^
+  ==
+  [     Buscar camas      ]
+}
+@endsalt

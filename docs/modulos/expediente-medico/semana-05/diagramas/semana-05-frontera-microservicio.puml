@@ -1,0 +1,20 @@
+@startuml semana-05-frontera-microservicio
+title Frontera evaluada — índice central (MPI y consentimientos) como servicio compartido entre hospitales
+node "HIS del hospital h1" {
+  [Expediente h1] as e1
+}
+node "HIS del hospital h2" {
+  [Expediente h2] as e2
+}
+node "Servicio de índice central" {
+  [API /mpi y /consents] as api
+  database "CENTRAL" as dbc
+}
+queue "Eventos\n(consentimiento.revocado)" as ev
+e1 --> api : HTTP: consentimiento vigente y expedientes externos\n(timeout 2 s, mTLS entre hospitales)
+e2 --> api : registra su expediente en el índice
+api --> dbc : dueño de consents y mpi_records
+api --> ev : outbox -> publica
+ev --> e1 : invalida su caché de consentimientos
+note bottom of e1 : el expediente local sigue en el HIS de cada hospital;\nsi CENTRAL cae, la consulta local responde (503 solo en la externa)
+@enduml

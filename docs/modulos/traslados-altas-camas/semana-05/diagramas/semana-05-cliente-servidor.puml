@@ -1,0 +1,19 @@
+@startuml semana-05-cliente-servidor
+!include <C4/C4_Container>
+title Cliente-servidor y frontera de microservicio evaluada — Traslados, altas y camas (semana 5)
+Person(enf, "Enfermería / Admisión")
+Container(cli, "Cliente web o móvil del HIS", "Vue / app", "Elige la cama destino; reintenta con Idempotency-Key")
+System_Ext(rbac, "RBAC", "Token, rol y hospital")
+System_Boundary(shi, "SHI — monolito modular (hoy)") {
+  Container(api, "Módulo Traslados y altas", "PHP 8.2, REST /api/v1/traslados-altas", "Enrutador → controlador → RegistrarMovimiento → Repository")
+  Boundary(frontera, "Frontera candidata, NO se divide aún", "Gestión de camas") {
+    Container(camas, "beds + bed_stays + care_episodes", "Tablas de otros dueños", "La transacción del movimiento las escribe")
+  }
+  ContainerDb(bd, "Base del hospital", "PostgreSQL (SQLite en la demo)", "ordenes_movimiento + claves_idempotencia (propias)")
+}
+Rel(enf, cli, "usa")
+Rel(cli, api, "POST JSON", "HTTPS + X-Request-Id")
+Rel(api, rbac, "valida token", "sync")
+Rel(api, bd, "UNA transacción: 5 tablas", "SQL")
+Rel(api, camas, "UPDATE status, cierra y abre estancia", "misma transacción")
+@enduml

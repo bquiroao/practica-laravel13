@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Reportes operativos: pantallas móviles de la semana 10</title>
+<style>
+body{margin:0;padding:16px;background:#fff;font:14px/1.4 Arial,sans-serif;color:#222}
+.wf{width:1130px;margin:0 0 28px;border:1px solid #bbb;padding:12px;background:#fafafa}
+h2{margin:0 0 10px;font-size:16px}.row{display:flex;gap:16px;align-items:flex-start}
+.tel{width:360px;min-height:560px;border:3px solid #333;border-radius:18px;background:#fff;display:flex;flex-direction:column;overflow:hidden;flex:none}
+.top{background:#333;color:#fff;padding:10px 14px;font-weight:bold;font-size:16px}.cuerpo{padding:12px 14px;flex:1}
+.pie{border-top:1px solid #bbb;padding:10px 14px;background:#f3f3f3}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #333;border-radius:6px;font:bold 16px Arial;margin:6px 0;background:#fff}.pri{background:#333;color:#fff}.off{border-color:#6b6b6b;color:#6b6b6b}
+.campo{display:flex;align-items:center;justify-content:space-between;height:48px;border:2px solid #666;border-radius:6px;padding:0 10px;font-size:18px;background:#fff}.err{border:3px solid #c0392b}
+.et{font-size:16px;font-weight:bold;margin-top:10px}.hint{color:#555;font-size:14px}.t{color:#a93226;font-size:14px;font-weight:bold}
+.card{border:1px solid #888;border-radius:6px;padding:8px 10px;margin:8px 0}.chip{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;border:1px solid #666;border-radius:22px;padding:0 14px;margin:2px;font-size:14px}.sel{background:#333;color:#fff;font-weight:bold}
+.ban{border:3px solid #333;padding:10px;margin:8px 0;font-size:16px}.ban.w{border-style:dashed}
+i{display:inline-block;width:20px;height:20px;border-radius:50%;background:#a93226;color:#fff;font:bold 14px/20px Arial;text-align:center;font-style:normal;margin-right:4px}
+.n{font-size:14px;max-width:260px}.n ol{margin:0;padding-left:20px}.n li{margin-bottom:6px}
+</style></head><body>
+
+<section class="wf" id="m1"><h2>M1 · Reporte y filtros (320 a 430 px)</h2><div class="row">
+<div class="tel"><div class="top">Reportes</div><div class="cuerpo">
+<div class="et"><i>1</i>Reporte</div><div><span class="chip sel" data-reporte="censo">Censo por servicio</span><span class="chip" data-reporte="egresos">Egresos</span></div>
+<div class="et"><i>2</i>Desde</div><div class="campo" data-tipo="fecha"><span>2026-10-01</span><span>▾</span></div>
+<div class="et">Hasta</div><div class="campo" data-tipo="fecha"><span>2026-10-25</span><span>▾</span></div>
+<div class="hint">Máximo 92 días · sin fechas futuras</div>
+<div class="et"><i>3</i>Servicio</div><div><span class="chip sel" data-valor="todos">Todos</span><span class="chip" data-valor="medicina">Medicina</span><span class="chip" data-valor="cirugia">Cirugía</span><span class="chip" data-valor="pediatria">Pediatría</span></div></div>
+<div class="pie"><i>4</i><div class="btn pri">Ver reporte</div></div></div>
+<div class="tel"><div class="top">Reportes</div><div class="cuerpo">
+<div class="ban w"><i>5</i>Corrija 1 campo para continuar.</div>
+<div class="et">Desde</div><div class="campo"><span>2026-07-01</span><span>▾</span></div>
+<div class="et">Hasta</div><div class="campo err"><span>2026-10-25</span><span>▾</span></div>
+<div class="t"><i>6</i>El rango no puede pasar de 92 días. Elija un «Desde» más reciente.</div></div>
+<div class="pie"><div class="btn pri">Ver reporte</div></div></div>
+<div class="n"><ol><li>Los reportes y servicios son botones del catálogo; nadie escribe un nombre de vista</li><li>Las fechas se eligen con el selector del teléfono; «Hasta» no deja pasar de hoy ni de 92 días después de «Desde»</li><li>Servicio: opciones que bajan de línea si no caben</li><li>El botón principal queda fijo al pie</li><li>Resumen arriba cuando el servidor rechaza algo</li><li>Mensaje debajo del campo, con qué hacer; el campo se desplaza hasta quedar visible</li></ol></div></div></section>
+
+<section class="wf" id="m2"><h2>M2 · Vista previa (una tarjeta por fila)</h2><div class="row">
+<div class="tel"><div class="top">Censo · 2 filas</div><div class="cuerpo">
+<div class="hint"><i>1</i>2026-10-01 a 2026-10-25 · todos los servicios</div>
+<div class="card"><b>Cirugía</b> · cama B2<br>2026-10-21<br><i>2</i>Paciente: No disponible por su permiso</div>
+<div class="card"><b>Medicina</b> · cama A1<br>2026-10-20<br>Paciente: No disponible por su permiso</div>
+<div class="hint"><i>3</i>Su permiso no incluye datos personales.</div></div>
+<div class="pie"><div class="btn pri">Exportar CSV</div><div class="btn">Cambiar filtros</div></div></div>
+<div class="tel"><div class="top">Censo · 0 filas</div><div class="cuerpo">
+<div class="hint">Cargando reporte…</div><div class="card">&nbsp;</div>
+<div class="ban"><i>4</i>No hay filas con esos filtros. Pruebe con otro rango o servicio.</div></div>
+<div class="pie"><div class="btn off">Exportar CSV</div><div class="btn pri">Cambiar filtros</div></div></div>
+<div class="n"><ol><li>Resumen de lo que se ve: reporte, rango y total de filas</li><li>La tabla pasa a tarjetas; el dato personal sin permiso se dice con palabras</li><li>Aviso del enmascarado</li><li>Vacío explicado; en lugar de exportar, la acción principal es cambiar filtros</li></ol></div></div></section>
+
+<section class="wf" id="m3"><h2>M3 · Confirmar la exportación</h2><div class="row">
+<div class="tel"><div class="top">Confirme la exportación</div><div class="cuerpo">
+<div class="ban"><i>1</i>Censo por servicio<br>2026-10-01 a 2026-10-25<br>Servicio: medicina<br>Formato: <b>CSV</b></div>
+<div class="hint"><i>2</i>Se registrará quién exporta, con qué filtros y el sello del archivo, para poder reproducirlo después.</div></div>
+<div class="pie"><div class="btn pri">Exportar</div><div class="btn">Volver</div></div></div>
+<div class="tel"><div class="top">Confirme la exportación</div><div class="cuerpo">
+<div class="ban w"><i>3</i>Este archivo incluirá nombre y documento de pacientes.</div>
+<div class="hint"><i>4</i>Se guardará en su teléfono. Bórrelo cuando termine y no lo comparta por mensajes.</div>
+<div class="ban">Censo por servicio<br>2026-10-01 a 2026-10-25<br>Formato: <b>CSV</b></div></div>
+<div class="pie"><div class="btn pri">Exportar</div><div class="btn">Volver</div></div></div>
+<div class="n"><ol><li>Dice qué se exporta, en qué formato y con qué corte</li><li>Explica el registro de la exportación</li><li>Borde punteado: el archivo lleva datos personales; solo se muestra si el permiso los incluye</li><li>En el teléfono el archivo queda guardado en el aparato: se avisa</li></ol></div></div></section>
+
+<section class="wf" id="m4"><h2>M4 · Exportación lista y comprobar</h2><div class="row">
+<div class="tel"><div class="top">Archivo generado</div><div class="cuerpo">
+<div class="ban"><i>1</i><b>Archivo generado.</b> 2 filas</div>
+<div class="card">Exportación<br><b>exp-3fa9c1d2e4b7</b><div class="btn">Copiar número</div></div>
+<div class="card">Sello (SHA-256)<br>9b1c…e07a<br>Corte: 2026-10-25 12:00</div>
+<div class="hint"><i>2</i>Con este número cualquier auditor puede comprobar que el archivo no cambió.</div></div>
+<div class="pie"><div class="btn pri">Comprobar</div><div class="btn">Hacer otro reporte</div></div></div>
+<div class="tel"><div class="top">Comprobar exportación</div><div class="cuerpo">
+<div class="et">Número de exportación</div><div class="campo"><span>exp-3fa9c1d2e4b7</span></div>
+<div class="ban"><i>3</i><b>✓ Coincide.</b> El archivo se vuelve a generar igual con los mismos filtros, corte y permiso.</div>
+<div class="ban w"><i>4</i><b>△ No coincide.</b> Los datos de origen cambiaron o el archivo fue alterado. Avise a quien administra el sistema.</div></div>
+<div class="pie"><div class="btn pri">Comprobar</div></div></div>
+<div class="n"><ol><li>Éxito con número y total de filas; «Copiar número» evita teclear 16 caracteres</li><li>Dice para qué sirve el número</li><li>Resultado con símbolo y texto, no solo color</li><li>Dos resultados posibles; se muestra uno solo a la vez (aquí juntos para compararlos)</li></ol></div></div></section>
+
+<section class="wf" id="m5"><h2>M5 · Sin conexión: no sabemos si se exportó</h2><div class="row">
+<div class="tel"><div class="top">No sabemos si se exportó</div><div class="cuerpo">
+<div class="ban w"><i>1</i><b>No recibimos respuesta.</b> Es posible que la exportación se haya registrado, pero el archivo no llegó.</div>
+<div class="card">Censo por servicio<br>2026-10-01 a 2026-10-25</div>
+<div class="hint"><i>2</i>No cierre esta pantalla. Si exporta de nuevo, se creará otro número.</div></div>
+<div class="pie"><div class="btn pri">Exportar de nuevo</div><div class="btn">Cambiar filtros</div></div></div>
+<div class="n"><ol><li>Primera línea: no se sabe; no dice «error»</li><li>Se conserva lo que se pidió; dice qué pasará si se reintenta</li></ol></div></div></section>
+</body></html>

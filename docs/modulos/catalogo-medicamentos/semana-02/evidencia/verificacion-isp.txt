@@ -1,0 +1,20 @@
+Verificación ISP - Catálogo de medicamentos (semana 2)
+PHP 8.4.26
+
+Cliente                      Diseño  Visibles Usados No usados  Ajenos
+BuscarMedicamentosVigentes   antes          12      1        11       2
+BuscarMedicamentosVigentes   después        2      1         1       0
+    no usados después: vigentePorCodigo
+ConsultarHistorial           antes          12      1        11       2
+ConsultarHistorial           después        1      1         0       0
+RegistrarMedicamento         antes          12      3         9       2
+RegistrarMedicamento         después        6      3         3       0
+    no usados después: reemplazarVigente, cerrar, eliminar
+EliminarRegistroSinUso       antes          12      2        10       2
+EliminarRegistroSinUso       después        6      2         4       0
+    no usados después: siguienteCodigo, agregar, reemplazarVigente, cerrar
+
+Total de métodos visibles no usados: antes 41, después 8
+Métodos ajenos al catálogo visibles: antes 8, después 0
+Métodos que debe implementar un doble para probar la búsqueda: antes 12, después 2
+Resultado: CUMPLE (menos métodos no usados y ninguno ajeno)

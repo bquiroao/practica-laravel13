@@ -1,0 +1,5 @@
+$ php semana-06/evidencia/probar-navegacion.php   # antes del cambio, sobre develop 093fff0
+GET /dashboard/navegacion/citas -> 404
+GET /dashboard/navegacion/camas -> 404
+GET /dashboard/navegacion/usuarios -> 404
+GET /dashboard/navegacion/citas (sin hospital) -> 404

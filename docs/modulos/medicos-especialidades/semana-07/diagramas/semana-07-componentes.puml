@@ -1,0 +1,29 @@
+@startuml semana-07-componentes
+!include <C4/C4_Component>
+title Componentes de Médicos, especialidades y disponibilidad — frontend y backend (semana 7)
+Person(adm, "Administración", "Registra médicos y especialidades")
+Person(rec, "Recepción, médico, Citas (M05)", "Consulta franjas libres")
+System_Boundary(fe, "Frontend (pantallas del módulo)") {
+  Component(f1, "FormularioMedico", "pantalla", "Registro y asociación de especialidad")
+  Component(f2, "ConsultaDisponibilidad", "pantalla", "Filtros, tabla de franjas, estados vacío/carga/error")
+  Component(f3, "AvisoConflicto", "componente", "Citas en conflicto con una ausencia")
+  Component(f4, "ClienteMedicosApi", "adaptador HTTP", "Único que conoce rutas, cabeceras y códigos de error")
+}
+System_Boundary(be, "Backend (Micro-HIS PHP 8.2+)") {
+  Component(b1, "Presentación", "Enrutador, MedicosControlador, VistaJson", "HTTP ↔ casos de uso")
+  Component(b2, "Aplicación", "RegistrarMedico, AsociarEspecialidad, ConsultarDisponibilidad", "Rol, rango, orquesta y lee por puertos")
+  Component(b3, "Dominio", "Vigencia, ReglasEspecialidad, Agenda::disponibles", "Reglas puras, sin I/O (refactor de la semana 7)")
+  Component(b4, "Persistencia", "MedicosPdo, EnMemoria", "Implementan RepositorioMedicos y FuenteHospital")
+}
+ContainerDb(bd, "Base HOSPITAL", "PostgreSQL / SQLite demo", "doctor_*, specialties, appointments, horarios_medico")
+Rel(adm, f1, "usa")
+Rel(rec, f2, "usa")
+Rel(f1, f4, "registrar(), asociar()")
+Rel(f2, f4, "disponibilidad()")
+Rel(f2, f3, "citas_en_conflicto")
+Rel(f4, b1, "JSON / HTTP", "/api/v1")
+Rel(b1, b2, "ejecutar(entrada, Usuario)")
+Rel(b2, b3, "exigirAsignable, exigirRango, disponibles")
+Rel(b2, b4, "puertos")
+Rel(b4, bd, "SQL preparado")
+@enduml

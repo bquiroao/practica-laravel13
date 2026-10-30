@@ -1,0 +1,30 @@
+@startuml semana-06-trazabilidad
+title Semana 6 — Hilo trazable de «navegar a un módulo» con el cambio de permisos (E6)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontSize 11
+actor "Usuario del hospital\n(S1, CU-01 a CU-04)" as A
+rectangle "Requisitos" {
+  card "RF-01 a RF-06\nR-01 a R-09 (S1-S2)" as RF
+  card "CU-03 con CU-05: una ruta\nescrita a mano no salta\nel permiso (R-02) -> E6" as CU3 #FFF3CD
+}
+rectangle "Contrato API (S5, versión 0.6.0)" {
+  card "GET /dashboard | GET /dashboard/tarjetas/{id}\n+ GET /dashboard/navegacion/{modulo}\n200 | 401 E1 | 403 E6 | 404 NF" as API #FFF3CD
+}
+rectangle "Micro-HIS por capas (S3-S4)" {
+  component "Presentación\nRutas -> ControladorDashboard\nVistaJson: E6 -> 403, NF -> 404" as P
+  component "Aplicación\nServicioDashboard::navegar\npuertos FuenteConteos y Reloj" as AP
+  component "Dominio\nCatalogo::destino (SRP)\nTarjeta, EstadoTarjeta" as D #FFF3CD
+  component "Persistencia\nRepositorioPdo | RepositorioEnMemoria\n(sin cambios)" as PE
+}
+card "Pruebas: 30 de 30\nContrato S5: 14 de 14\nS13: H-02 no reproducido" as T
+A --> RF
+RF --> CU3
+CU3 --> API
+API --> P
+P --> AP
+AP --> D
+AP --> PE
+D ..> T : verifica
+API ..> T : verifica
+@enduml

@@ -1,0 +1,23 @@
+@startuml c4-contexto
+' Catálogo de medicamentos - Semana 3 - C4 nivel 1 (contexto)
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title Contexto: Catálogo de medicamentos dentro del HIS
+
+Person(qf, "Químico farmacéutico del catálogo", "QF_CATALOGO: alta, versiones, bajas")
+Person(cli, "Personal clínico", "CONSULTA_CLINICA: busca medicamentos vigentes")
+Person(aud, "Auditor de calidad", "AUDITOR_CALIDAD: revisa el historial")
+
+System(cat, "Catálogo de medicamentos", "Alta, búsqueda y control de vigencia por hospital (tenant)")
+System_Ext(pre, "prescripciones-alergias", "Usa el catálogo para prescribir; informa si un código fue usado (pendiente de acordar)")
+System_Ext(far, "Farmacia / inventario (si existe)", "Existencias, lotes y precios: NO son del catálogo")
+SystemDb_Ext(hos, "Base HOSPITAL", "PostgreSQL federado; tabla medicamentos = propuesta del Micro-HIS")
+
+Rel(qf, cat, "Registra y mantiene")
+Rel(cli, cat, "Busca vigentes")
+Rel(aud, cat, "Consulta historial")
+Rel(pre, cat, "Lee medicamentos vigentes por código o búsqueda")
+Rel(cat, pre, "Pregunta si un código se usó (RN-02)")
+Rel(far, cat, "Lee por código")
+Rel(cat, hos, "Lee y escribe", "SQL preparado")
+@enduml

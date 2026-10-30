@@ -97,6 +97,23 @@ prueba('ARQ-09', 'Repository: los adaptadores EnMemoria y Pdo implementan exacta
     }
 });
 
+prueba('ARQ-10', 'Cliente-servidor: el Cliente se programa contra el contrato (no importa ninguna capa) y ninguna capa importa el Cliente', function () use ($archivosDe, $codigoDe, $capasUsadas): void {
+    $violaciones = [];
+    foreach ($archivosDe('Cliente') as $archivo) {
+        foreach ($capasUsadas($codigoDe($archivo)) as $capa) {
+            $violaciones[] = basename($archivo) . " → $capa";
+        }
+    }
+    foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {
+        foreach ($archivosDe($capa) as $archivo) {
+            if (str_contains($codigoDe($archivo), 'Qa\\Cliente\\')) {
+                $violaciones[] = basename($archivo) . ' → Cliente';
+            }
+        }
+    }
+    igual([], $violaciones, 'violaciones');
+});
+
 prueba('ARQ-07', 'LSP (semana 2): fuera de la fábrica, nadie pregunta por el subtipo de evidencia (instanceof Captura/RegistroTexto/ResultadoJUnit)', function () use ($archivosDe, $codigoDe): void {
     $violaciones = [];
     foreach (['Dominio', 'Aplicacion', 'Persistencia', 'Presentacion'] as $capa) {

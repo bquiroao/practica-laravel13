@@ -1,0 +1,48 @@
+@startuml semana-08-flujo-ingenieria-qa
+!pragma layout smetana
+title User flow · Ingeniería QA: registrar un escenario E2E y planificar las pruebas de una versión (W1, W2)
+skinparam defaultFontSize 11
+skinparam ActivityBackgroundColor #F5F9FF
+skinparam ActivityBorderColor #2E3A6E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+
+start
+:INICIO · «Escenarios E2E» (catálogo del hospital activo);
+:CARGA · esqueleto «Cargando escenarios…»;
+if (¿Hay escenarios?) then (no)
+  :VACÍO · «Aún no hay escenarios E2E.» [Registrar el primero] (M-01);
+else (sí)
+endif
+switch (DECISIÓN · qué hace)
+case (registrar escenario)
+  :Completa id E2E-###, título, módulo, ¿crítico?, RF que cubre y conjunto de datos SINT-…;
+  :VALIDACIÓN en el campo al salir: formato del id, RF-##, prefijo SINT- (M-02);
+  if (¿Marcó «crítico»?) then (sí)
+    :AYUDA · «Un crítico entra en TODOS los planes y su FALLA rechaza el gate» (A-01);
+  else (no)
+  endif
+  :CONFIRMACIÓN · resumen [Registrar escenario];
+  switch (Respuesta)
+  case (201)
+    #E8F5E9:ÉXITO · «E2E-107 registrado» y queda resaltado en la lista (M-03);
+  case (422 DATOS_NO_SINTETICOS)
+    #FDECEC:ERROR RECUPERABLE · el campo «datos» marcado: «Solo conjuntos sintéticos SINT-…; nunca pacientes reales» (M-04);
+  case (409 ESCENARIO_EXISTENTE)
+    #FFF4E5:«E2E-107 ya existe» [Ver E2E-107] · se conserva lo escrito (M-05);
+  endswitch
+case (planificar una versión)
+  :Elige la versión registrada por el pipeline (número, commit, digest abreviado);
+  :La UI propone: TODOS los críticos (bloqueados 🔒) + los de los módulos afectados;
+  :Agrega o quita los opcionales;
+  :CONFIRMACIÓN · «Plan de 2.5.0: 6 escenarios (4 críticos). Se congela al iniciar la primera ejecución.» [Guardar plan];
+  switch (Respuesta)
+  case (200)
+    #E8F5E9:ÉXITO · «Plan definido» → espera a que el pipeline inicie la ejecución (M-06);
+  case (422 PLAN_INCOMPLETO)
+    #FDECEC:«Faltan E2E-101, E2E-102 (críticos)» [Agregar los que faltan] (M-07);
+  case (409 PLAN_CONGELADO)
+    #FFF4E5:«El plan ya se usó en una ejecución; para cambiarlo, registre otra versión» (M-08);
+  endswitch
+endswitch
+stop
+@enduml

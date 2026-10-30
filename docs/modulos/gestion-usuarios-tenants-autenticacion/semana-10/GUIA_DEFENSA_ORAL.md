@@ -1,3 +1,4 @@
+Mostrar cinco pantallas a 320/375/430. Explicar rol/tenant legibles y credencial propia. Recorrer alta con error de red y cierre desconocido con comprobar estado antes de reintentar. Diferenciar borrar sesión local de revocar servidor. SVG no demuestra teclado, JWT ni seguridad; revisión de política de claves y pruebas funcionales pendientes.
 # Guía de defensa oral — Semana 10
 
 ## Resumen en 60 segundos
