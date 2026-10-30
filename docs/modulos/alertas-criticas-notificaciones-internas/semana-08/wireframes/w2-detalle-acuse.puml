@@ -1,0 +1,18 @@
+@startsalt w2-detalle-acuse
+{+
+  {* ← Bandeja | Alerta 3511c21a }
+  ==
+  <b>PAC-00451</b> · ‼ CRITICA · ENVIADA · nivel 0 (3)
+  Potasio sérico 6.8 mmol/L (ref. 3.5-5.1)
+  Origen: ingreso-resultados-laboratorio · LAB-77801
+  Vence en 09:12 → luego escala a jefe de servicio
+  ==
+  {[<b>Acusar alerta</b>] | (4) Su acuse queda registrado con usuario y hora }
+  ==
+  <b>Historial</b>
+  {#
+   1 | 10:00 | creada | sistema:laboratorio
+   2 | 10:00 | enviada | nivel 0: enf.turno01, med.tratante01
+  }
+}
+@endsalt
