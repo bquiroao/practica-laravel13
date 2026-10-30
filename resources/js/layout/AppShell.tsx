@@ -88,11 +88,18 @@ export function AppShell() {
                         {(hospitals.data ?? [session.hospital]).map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
                     </Select>
 
-                    <div className="relative hidden flex-1 md:block">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
-                        <input type="search" disabled placeholder="Buscar paciente por nombre, DPI o código (fase 2)" aria-label="Buscar paciente"
-                            className="h-10 w-full max-w-md rounded-lg bg-slate-100 pl-9 pr-3 text-sm placeholder:text-slate-400 disabled:cursor-not-allowed" />
-                    </div>
+                    {can('pacientes.ver') ? (
+                        <form role="search" className="relative hidden flex-1 md:block" onSubmit={(e) => {
+                            e.preventDefault();
+                            const q = new FormData(e.currentTarget).get('q')?.toString().trim() ?? '';
+                            navigate(q ? `/pacientes?q=${encodeURIComponent(q)}` : '/pacientes');
+                            e.currentTarget.reset();
+                        }}>
+                            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-500" aria-hidden />
+                            <input type="search" name="q" placeholder="Buscar paciente: nombre, DPI o código y Enter" aria-label="Buscar paciente"
+                                className="h-10 w-full max-w-md rounded-lg bg-slate-100 pl-9 pr-3 text-sm placeholder:text-slate-500 focus:bg-white focus:ring-2 focus:ring-nido-500" />
+                        </form>
+                    ) : <div className="flex-1" />}
 
                     <div className="ml-auto flex items-center gap-2">
                         {can('alertas.ver') && (

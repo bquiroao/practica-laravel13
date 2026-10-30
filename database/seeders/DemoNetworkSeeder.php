@@ -37,11 +37,23 @@ class DemoNetworkSeeder extends Seeder
         $central = $hospitals['HN-CEN'];
         foreach (array_keys(config('nido.roles')) as $role) {
             if ($role !== 'admin_red') {
-                $this->member($this->user(str_replace('_', '.', $role).'@nido.test', config("nido.roles.{$role}.0").' (demo)'), $central, $role);
+                $name = $role === 'medico' ? 'Dr. Carlos Ramírez Soto' : config("nido.roles.{$role}.0").' (demo)';
+                $this->member($this->user(str_replace('_', '.', $role).'@nido.test', $name), $central, $role);
             }
         }
-        // Un médico con acceso a dos hospitales, para probar el cambio de hospital.
+        // Un médico con acceso a dos hospitales, para probar el cambio de hospital, y dos especialistas más.
         $this->member(CentralUser::query()->where('email', 'medico@nido.test')->firstOrFail(), $hospitals['HN-NOR'], 'medico');
+        $this->member($this->user('pediatria@nido.test', 'Dra. Ana Lucía Méndez'), $central, 'medico');
+        $this->member($this->user('cardiologia@nido.test', 'Dr. Roberto Paz Orellana'), $central, 'medico');
+
+        // En desarrollo cada hospital tiene su propia base clínica; Central usa la de .env. En pruebas, todos usan la de pruebas.
+        if (app()->environment('local')) {
+            foreach ($hospitals as $code => $hospital) {
+                if ($code !== 'HN-CEN' && ! isset($hospital->metadata['database'])) {
+                    $hospital->forceFill(['metadata' => [...$hospital->metadata, 'database' => 'his_hospital_'.strtolower(substr($code, 3))]])->save();
+                }
+            }
+        }
     }
 
     private function user(string $email, string $name): CentralUser

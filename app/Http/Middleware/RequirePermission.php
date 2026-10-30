@@ -18,7 +18,10 @@ class RequirePermission
         $user = $request->user();
         $hospital = $request->attributes->get('hospital');
 
-        if (! $this->permissions->allows($user->user_id, $hospital->hospital_id, $permission)) {
+        // «permiso:a|b» basta con uno de los dos.
+        $allowed = collect(explode('|', $permission))->contains(fn (string $p) => $this->permissions->allows($user->user_id, $hospital->hospital_id, $p));
+
+        if (! $allowed) {
             $this->audit->record('rbac', 'ACCESO_DENEGADO', 'denegado', $hospital->hospital_id, $user->user_id,
                 $request->method().' '.$request->path(), ['permiso' => $permission], $request->ip());
 

@@ -1,5 +1,6 @@
-import { forwardRef, useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
-import { AlertTriangle, CheckCircle2, Info, Loader2, X } from 'lucide-react';
+import { forwardRef, useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 /*
@@ -40,7 +41,7 @@ export function Field({ label, error, hint, children, htmlFor }: { label: string
     );
 }
 
-const control = 'block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-nido-500 aria-[invalid=true]:ring-red-500';
+const control = 'block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-nido-500 aria-[invalid=true]:ring-red-500';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...props }, ref) {
     return <input ref={ref} className={cn(control, 'h-10', className)} {...props} />;
@@ -147,4 +148,30 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
 
 export function Logo({ className }: { className?: string }) {
     return <img src="/nido.svg" alt="" aria-hidden className={cn('size-9', className)} />;
+}
+
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function Textarea({ className, ...props }, ref) {
+    return <textarea ref={ref} rows={3} className={cn(control, 'min-h-20', className)} {...props} />;
+});
+
+/** Enlace de regreso visible arriba del título: el usuario siempre sabe cómo volver. */
+export function BackLink({ to, children }: { to: string; children: ReactNode }) {
+    return (
+        <Link to={to} className="mb-3 inline-flex items-center gap-1 text-sm font-semibold text-nido-700 hover:underline">
+            <ArrowLeft className="size-4" aria-hidden /> {children}
+        </Link>
+    );
+}
+
+/** Bloque de un formulario con título y una línea que explica para qué sirve. */
+export function FormSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+    return (
+        <fieldset className="grid gap-4 border-t border-slate-200 py-6 first:border-t-0 first:pt-0 md:grid-cols-3">
+            <div>
+                <legend className="font-bold text-nido-900">{title}</legend>
+                {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 md:col-span-2">{children}</div>
+        </fieldset>
+    );
 }

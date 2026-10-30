@@ -5,16 +5,24 @@ namespace App\Exceptions;
 use Illuminate\Http\JsonResponse;
 use RuntimeException;
 
-/** Regla de negocio rechazada: código estable para el cliente (p. ej. AUTOASIGNACION) y su estado HTTP. */
+/**
+ * Regla de negocio rechazada: código estable para el cliente (p. ej. AUTOASIGNACION), su estado HTTP y,
+ * si ayuda a decidir qué hacer, datos extra (p. ej. los posibles duplicados de un paciente).
+ */
 class DomainRuleException extends RuntimeException
 {
-    public function __construct(public readonly string $errorCode, string $message, public readonly int $status = 422)
+    /** @param array<string, mixed> $details */
+    public function __construct(public readonly string $errorCode, string $message, public readonly int $status = 422, public readonly array $details = [])
     {
         parent::__construct($message);
     }
 
     public function render(): JsonResponse
     {
-        return response()->json(['message' => $this->getMessage(), 'code' => $this->errorCode], $this->status);
+        return response()->json(array_filter([
+            'message' => $this->getMessage(),
+            'code' => $this->errorCode,
+            'details' => $this->details ?: null,
+        ], fn ($v) => $v !== null), $this->status);
     }
 }

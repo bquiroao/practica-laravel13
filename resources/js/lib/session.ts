@@ -1,7 +1,7 @@
 /** Datos de la sesión que devuelve /auth/login y /auth/me. */
 export interface Session {
     user: { id: string; name: string; email: string };
-    hospital: { id: string; code: string; name: string };
+    hospital: { id: string; code: string; name: string; timezone: string };
     roles: string[];
     permissions: string[];
 }

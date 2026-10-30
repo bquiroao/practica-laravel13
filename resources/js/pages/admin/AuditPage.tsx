@@ -93,7 +93,7 @@ export function AuditPage() {
                                     <tr key={l.id}>
                                         <td className={`${td} tabular-nums text-slate-500`}>{l.secuencia}</td>
                                         <td className={`${td} whitespace-nowrap`}>{new Date(l.ocurrido_en).toLocaleString('es-GT', { dateStyle: 'short', timeStyle: 'medium' })}</td>
-                                        <td className={td}>{l.usuario ?? <span className="text-slate-400">—</span>}</td>
+                                        <td className={td}>{l.usuario ?? <span className="text-slate-500">—</span>}</td>
                                         <td className={td}><p className="font-semibold">{l.accion}</p><p className="text-xs text-slate-500">{l.modulo}</p></td>
                                         <td className={`${td} text-xs`}>{l.recurso ?? '—'}{Object.keys(l.detalle).length > 0 && (
                                             <details className="mt-1"><summary className="cursor-pointer text-nido-700">Detalle</summary>
