@@ -15,7 +15,7 @@ final class Router
         $this->rutas[] = [$metodo, $regex, $accion];
     }
 
-    /** @param callable(int, string): Respuesta $error */
+    /** @param callable(int, string, list<string>): Respuesta $error recibe los métodos permitidos en el 405 */
     public function despachar(Peticion $p, callable $error): Respuesta
     {
         $metodosPermitidos = [];
@@ -30,8 +30,9 @@ final class Router
             $parametros = array_filter($m, 'is_string', ARRAY_FILTER_USE_KEY);
             return $accion($p, ...array_values($parametros));
         }
+        $metodosPermitidos = array_values(array_unique($metodosPermitidos));
         return $metodosPermitidos !== []
-            ? $error(405, 'Método no permitido')->conCabecera('Allow', implode(', ', array_unique($metodosPermitidos)))
+            ? $error(405, 'Método no permitido', $metodosPermitidos)->conCabecera('Allow', implode(', ', $metodosPermitidos))
             : $error(404, 'No existe la página solicitada');
     }
 }
