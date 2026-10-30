@@ -1,0 +1,4 @@
+$ php semana-06/evidencia/probar-auditoria.php   # antes del cambio, sobre develop 1595e00
+[PDO] marta marca obsoleta la 1.0.0 = 200 | datosRevision(1) = {"autor":"ana","estado":"obsolete"}
+[InMemory] marta marca obsoleta la 1.0.0 = 200 | datosRevision(1) = {"autor":"ana","estado":"obsolete"}
+[PDO] fila de la 1.0.0: reviewed_by = marta, obsoleted_by = (columna inexistente)
