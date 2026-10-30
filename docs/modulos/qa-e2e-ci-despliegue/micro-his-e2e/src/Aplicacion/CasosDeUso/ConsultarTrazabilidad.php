@@ -8,14 +8,16 @@ use E2e\Aplicacion\Puertos\PoliticaAcceso;
 use E2e\Aplicacion\Resultados\Salida;
 use E2e\Dominio\Excepciones\ErrorPersistencia;
 use E2e\Dominio\Modelo\Decision;
+use E2e\Dominio\Modelo\Despliegue;
 use E2e\Dominio\Modelo\Ejecucion;
 use E2e\Dominio\Modelo\Evidencia;
 use E2e\Dominio\Modelo\ResultadoEscenario;
+use E2e\Dominio\Puertos\RepositorioDespliegues;
 use E2e\Dominio\Puertos\RepositorioEjecuciones;
 use E2e\Dominio\Puertos\RepositorioEvaluaciones;
 use E2e\Dominio\Puertos\RepositorioVersiones;
 
-/** CU-12: versión ↔ plan ↔ ejecuciones ↔ resultados ↔ evidencias (solo huellas) ↔ evaluaciones del gate. */
+/** CU-12: versión ↔ plan ↔ ejecuciones ↔ resultados ↔ evidencias (solo huellas) ↔ evaluaciones del gate ↔ despliegues. */
 final class ConsultarTrazabilidad
 {
     public const PERMISO = 'e2e.consultar';
@@ -25,6 +27,7 @@ final class ConsultarTrazabilidad
         private readonly RepositorioVersiones $versiones,
         private readonly RepositorioEjecuciones $ejecuciones,
         private readonly RepositorioEvaluaciones $evaluaciones,
+        private readonly RepositorioDespliegues $despliegues,
     ) {
     }
 
@@ -40,6 +43,7 @@ final class ConsultarTrazabilidad
             }
             $ejecuciones = $this->ejecuciones->deVersion($tenant, $numero);
             $evaluaciones = $this->evaluaciones->deVersion($tenant, $numero);
+            $despliegues = $this->despliegues->deVersion($tenant, $numero);
         } catch (ErrorPersistencia) {
             return Salida::persistencia();
         }
@@ -55,6 +59,8 @@ final class ConsultarTrazabilidad
                     $e->resultados())], $ejecuciones),
             'evaluaciones' => array_map(static fn (Decision $d): array => ['ejecucion' => $d->ejecucion, 'decision' => $d->valor, 'causas' => $d->causas,
                 'politica' => $d->politica, 'evaluada_en' => $d->evaluadaEn->format(DATE_ATOM), 'por' => $d->evaluadaPor], $evaluaciones),
+            'despliegues' => array_map(static fn (Despliegue $d): array => ['id' => $d->id, 'entorno' => $d->entorno, 'digest' => $d->digest, 'estado' => $d->estado,
+                'guia' => $d->guia, 'operador' => $d->operador, 'revertido_a' => $d->revertidoA, 'en' => $d->en->format(DATE_ATOM)], $despliegues),
         ]);
     }
 }

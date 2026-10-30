@@ -146,6 +146,39 @@ CREATE TABLE evaluaciones (
 );
 CREATE TRIGGER evaluaciones_solo_agregar BEFORE UPDATE OR DELETE ON evaluaciones FOR EACH ROW EXECUTE FUNCTION solo_agregar();
 
+-- ---------- Despliegues (semana 6, R-11) ----------
+CREATE TABLE despliegues (
+    id           bigserial   PRIMARY KEY,
+    tenant       text        NOT NULL,
+    version      text        NOT NULL,
+    digest       text        NOT NULL,
+    entorno      text        NOT NULL CHECK (entorno ~ '^[a-z][a-z0-9-]{1,30}$'),
+    guia         text        NOT NULL CHECK (guia ~ '^guia-[0-9]{4}\.[0-9]+$'),
+    operador     text        NOT NULL,
+    estado       text        NOT NULL CHECK (estado IN ('DESPLEGADO', 'REVERTIDO')),
+    revertido_a  text,
+    en           timestamptz NOT NULL,
+    FOREIGN KEY (tenant, version) REFERENCES versiones (tenant, numero),
+    CONSTRAINT despliegues_revertido_coherente CHECK (estado = 'REVERTIDO' OR revertido_a IS NULL)
+);
+CREATE TRIGGER despliegues_solo_agregar BEFORE UPDATE OR DELETE ON despliegues FOR EACH ROW EXECUTE FUNCTION solo_agregar();
+
+-- R-11 en la base: el digest es el de la versión y la ÚLTIMA evaluación del gate es APROBADO sobre ese digest.
+CREATE FUNCTION despliegues_exigir_gate() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+    ultima evaluaciones%ROWTYPE;
+BEGIN
+    IF NEW.digest IS DISTINCT FROM (SELECT v.digest FROM versiones v WHERE v.tenant = NEW.tenant AND v.numero = NEW.version) THEN
+        RAISE EXCEPTION 'el despliegue tiene otro digest que su versión (R-11)' USING ERRCODE = 'P0001';
+    END IF;
+    SELECT * INTO ultima FROM evaluaciones WHERE tenant = NEW.tenant AND version = NEW.version ORDER BY id DESC LIMIT 1;
+    IF NOT FOUND OR ultima.decision <> 'APROBADO' OR ultima.digest <> NEW.digest THEN
+        RAISE EXCEPTION 'no hay un gate APROBADO para este digest (R-11)' USING ERRCODE = 'P0001';
+    END IF;
+    RETURN NEW;
+END $$;
+CREATE TRIGGER despliegues_exigir_gate BEFORE INSERT ON despliegues FOR EACH ROW EXECUTE FUNCTION despliegues_exigir_gate();
+
 -- ---------- Traza (R-14) ----------
 CREATE TABLE auditoria (
     id        bigserial PRIMARY KEY,

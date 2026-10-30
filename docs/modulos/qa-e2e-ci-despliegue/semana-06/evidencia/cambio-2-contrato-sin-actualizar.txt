@@ -1,0 +1,38 @@
+$ php tests/ejecutar.php --solo=API,CAM   # cambio implementado, contrato todavía 1.0.0
+Micro-HIS QA E2E, CI y despliegue - pruebas (PHP 8.4.26)
+
+== Cambio práctico de la semana 6: despliegue reproducible (CU-11, R-11) ==
+[PASA ] CAM-01   R-11: con el último gate APROBADO, vigente y el MISMO digest, el despliegue queda DESPLEGADO con la guía y el operador
+[PASA ] CAM-02   R-11: sin evaluación, o si la ÚLTIMA evaluación es RECHAZADO (aunque antes hubo un APROBADO), no se despliega: 409 GATE_NO_APROBADO
+[PASA ] CAM-03   R-03/R-11: el digest instalado tiene que ser el evaluado: otro digest → 409 DIGEST_DISTINTO
+[PASA ] CAM-04   R-11: la aprobación vence a las 72 h: 72 h exactas despliega, 72 h y 1 s → 409 APROBACION_VENCIDA
+[PASA ] CAM-05   R-11: si la verificación posterior (smoke) falla, queda REVERTIDO a la versión DESPLEGADA antes en ese entorno; la guía no versionada → 422
+[PASA ] CAM-06   R-13 por HTTP: el operador despliega (201) y el pipeline no puede (403); la trazabilidad muestra el despliegue
+
+== Contrato API (OpenAPI) = código ==
+[FALLA] API-01   Contrato = código: las 8 operaciones son las 8 rutas del código, y cada x-permiso es la constante PERMISO de su caso de uso
+         -> operaciones: esperado array (
+  0 => 'GET /api/v1/e2e/versiones/{p}/trazabilidad',
+  1 => 'POST /api/v1/e2e/ejecuciones/{p}/cierre',
+  2 => 'POST /api/v1/e2e/ejecuciones/{p}/resultados',
+  3 => 'POST /api/v1/e2e/escenarios',
+  4 => 'POST /api/v1/e2e/versiones',
+  5 => 'POST /api/v1/e2e/versiones/{p}/despliegues',
+  6 => 'POST /api/v1/e2e/versiones/{p}/ejecuciones',
+  7 => 'POST /api/v1/e2e/versiones/{p}/gate',
+  8 => 'POST /api/v1/e2e/versiones/{p}/plan',
+), obtenido array (
+  0 => 'GET /api/v1/e2e/versiones/{p}/trazabilidad',
+  1 => 'POST /api/v1/e2e/ejecuciones/{p}/cierre',
+  2 => 'POST /api/v1/e2e/ejecuciones/{p}/resultados',
+  3 => 'POST /api/v1/e2e/escenarios',
+  4 => 'POST /api/v1/e2e/versiones',
+  5 => 'POST /api/v1/e2e/versiones/{p}/ejecuciones',
+  6 => 'POST /api/v1/e2e/versiones/{p}/gate',
+  7 => 'POST /api/v1/e2e/versiones/{p}/plan',
+) (Arnes.php:41)
+[PASA ] API-02   Cada operación documenta su éxito y los errores transversales (400, 401, 403, 500, 503); no hay PUT ni DELETE
+[PASA ] API-03   En escenarios reales por el kernel, cada estado está documentado en SU operación y cada código de error está en el enum
+[PASA ] API-04   Estructura del contrato sin dependencias: cada $ref existe, cada {parámetro} de ruta está declarado, operationId únicos, sin tabulaciones
+
+Total: 10  Pasan: 9  Fallan: 1  Omitidas: 0

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Micro-HIS QA E2E, CI y guía de despliegue
-  version: 1.0.0
+  version: 1.1.0
   summary: Planificación de pruebas, ejecución E2E, conservación de evidencia y quality gates por versión.
   description: |
     Contrato del módulo QA E2E del Sistema Hospitalario Integrado. Lo consumen tres roles humanos (Ingeniero de
@@ -14,7 +14,8 @@ info:
     - Reportar un resultado exige Idempotency-Key: la misma clave con el mismo contenido devuelve 200 y el MISMO
       resultado, aunque la ejecución ya esté cerrada; con otro contenido, 409 CLAVE_REUTILIZADA.
     - La evidencia es fail-closed: si el almacén no confirma el artefacto, 503 EVIDENCIA_NO_DISPONIBLE y no se registra nada.
-    - No hay PUT ni DELETE: resultados, evidencias y evaluaciones solo se agregan.
+    - No hay PUT ni DELETE: resultados, evidencias, evaluaciones y despliegues solo se agregan.
+    - 1.1.0 (semana 6, aditiva): POST /versiones/{version}/despliegues y los errores GATE_NO_APROBADO y APROBACION_VENCIDA.
   contact:
     name: Boris Alexander Quiroa Orellana
 servers:
@@ -27,6 +28,7 @@ tags:
   - name: versiones
   - name: ejecuciones
   - name: gate
+  - name: despliegues
 paths:
   /api/v1/e2e/escenarios:
     post:
@@ -189,6 +191,40 @@ paths:
         '404':
           $ref: '#/components/responses/Error'
         '409':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+  /api/v1/e2e/versiones/{version}/despliegues:
+    post:
+      operationId: registrarDespliegue
+      summary: CU-11 desplegar con la guía versionada; solo con el último gate APROBADO, vigente y sobre el mismo digest (R-11)
+      tags: [despliegues]
+      x-permiso: e2e.desplegar
+      parameters:
+        - $ref: '#/components/parameters/Tenant'
+        - $ref: '#/components/parameters/Version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DespliegueNuevo'
+      responses:
+        '201':
+          $ref: '#/components/responses/Creado'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
           $ref: '#/components/responses/Error'
         '500':
           $ref: '#/components/responses/Error'
@@ -365,10 +401,10 @@ components:
       properties:
         error:
           type: string
-          enum: [BASE64_INVALIDO, CLAVE_REUTILIZADA, CUERPO_INVALIDO, DATOS_INVALIDOS, DATOS_NO_SINTETICOS, DIGEST_DISTINTO, DIGEST_EN_USO,
+          enum: [APROBACION_VENCIDA, BASE64_INVALIDO, CLAVE_REUTILIZADA, CUERPO_INVALIDO, DATOS_INVALIDOS, DATOS_NO_SINTETICOS, DIGEST_DISTINTO, DIGEST_EN_USO,
             EJECUCION_DE_OTRA_VERSION, EJECUCION_NO_ADMITE_RESULTADOS, EJECUCION_NO_COMPLETADA, ERROR_INTERNO, ERROR_PERSISTENCIA,
             ESCENARIOS_SIN_RESULTADO, ESCENARIO_EXISTENTE, ESCENARIO_FUERA_DEL_PLAN, ESCENARIO_INEXISTENTE, ESCENARIO_YA_REPORTADO,
-            ESTADO_NO_PERMITE_CERRAR, EVIDENCIA_DEMASIADO_GRANDE, EVIDENCIA_NO_DISPONIBLE, EVIDENCIA_VACIA, IDEMPOTENCY_KEY_REQUERIDA,
+            ESTADO_NO_PERMITE_CERRAR, EVIDENCIA_DEMASIADO_GRANDE, EVIDENCIA_NO_DISPONIBLE, EVIDENCIA_VACIA, GATE_NO_APROBADO, IDEMPOTENCY_KEY_REQUERIDA,
             JSON_INVALIDO, METODO_NO_PERMITIDO, MOTIVO_REQUERIDO, NO_AUTENTICADO, NO_ENCONTRADO, PERMISO_DENEGADO, PLAN_CONGELADO,
             PLAN_INCOMPLETO, RUTA_DESCONOCIDA, TENANT_AJENO, TENANT_REQUERIDO, TIPO_NO_PERMITIDO, VERSION_EXISTENTE, VERSION_SIN_PLAN]
         detalle:
@@ -486,6 +522,23 @@ components:
         abortar:
           type: string
           description: Motivo; si falta, se intenta completar
+    DespliegueNuevo:
+      type: object
+      required: [digest, entorno, guia, smoke]
+      properties:
+        digest:
+          type: string
+          description: El instalado; debe ser el de la versión y el de su último gate APROBADO (si no, 409 DIGEST_DISTINTO)
+        entorno:
+          type: string
+        guia:
+          type: string
+          pattern: '^guia-\d{4}\.\d+$'
+          description: Versión de la guía de despliegue usada (reproducible)
+        smoke:
+          type: string
+          enum: [PASA, FALLA]
+          description: Verificación posterior; FALLA deja el despliegue REVERTIDO a lo que estaba en ese entorno
     PedidoGate:
       type: object
       required: [ejecucion]

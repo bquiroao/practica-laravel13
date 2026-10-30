@@ -10,6 +10,7 @@ use E2e\Persistencia\Configuracion\PoliticaAccesoEstatica;
 use E2e\Persistencia\Configuracion\RelojSistema;
 use E2e\Persistencia\EnMemoria\AlmacenEvidenciasEnMemoria;
 use E2e\Persistencia\EnMemoria\RegistroAuditoriaEnMemoria;
+use E2e\Persistencia\EnMemoria\RepositorioDesplieguesEnMemoria;
 use E2e\Persistencia\EnMemoria\RepositorioEjecucionesEnMemoria;
 use E2e\Persistencia\EnMemoria\RepositorioEscenariosEnMemoria;
 use E2e\Persistencia\EnMemoria\RepositorioEvaluacionesEnMemoria;
@@ -17,6 +18,7 @@ use E2e\Persistencia\EnMemoria\RepositorioVersionesEnMemoria;
 use E2e\Persistencia\EnMemoria\TransaccionEnMemoria;
 use E2e\Persistencia\Pdo\FabricaConexion;
 use E2e\Persistencia\Pdo\PdoRegistroAuditoria;
+use E2e\Persistencia\Pdo\PdoRepositorioDespliegues;
 use E2e\Persistencia\Pdo\PdoRepositorioEjecuciones;
 use E2e\Persistencia\Pdo\PdoRepositorioEscenarios;
 use E2e\Persistencia\Pdo\PdoRepositorioEvaluaciones;
@@ -45,6 +47,7 @@ final class FabricaAdaptadores
             'versiones' => new PdoRepositorioVersiones($pdo),
             'ejecuciones' => new PdoRepositorioEjecuciones($pdo),
             'evaluaciones' => new PdoRepositorioEvaluaciones($pdo),
+            'despliegues' => new PdoRepositorioDespliegues($pdo),
             'almacen' => new AlmacenEvidenciasEnDisco($config['evidencias']),
             'auditoria' => new PdoRegistroAuditoria($pdo),
             'transaccion' => new PdoTransaccion($pdo),
@@ -65,6 +68,7 @@ final class FabricaAdaptadores
         $versiones = new RepositorioVersionesEnMemoria();
         $ejecuciones = new RepositorioEjecucionesEnMemoria();
         $evaluaciones = new RepositorioEvaluacionesEnMemoria();
+        $despliegues = new RepositorioDesplieguesEnMemoria();
         $auditoria = new RegistroAuditoriaEnMemoria();
 
         return [
@@ -73,9 +77,10 @@ final class FabricaAdaptadores
             'versiones' => $versiones,
             'ejecuciones' => $ejecuciones,
             'evaluaciones' => $evaluaciones,
+            'despliegues' => $despliegues,
             'almacen' => new AlmacenEvidenciasEnMemoria(),
             'auditoria' => $auditoria,
-            'transaccion' => new TransaccionEnMemoria([$escenarios, $versiones, $ejecuciones, $evaluaciones, $auditoria]),
+            'transaccion' => new TransaccionEnMemoria([$escenarios, $versiones, $ejecuciones, $evaluaciones, $despliegues, $auditoria]),
             'reloj' => new RelojSistema(),
         ];
     }
