@@ -8,7 +8,9 @@ if (!is_dir($raiz)) { echo "ENTRADA: el Micro-HIS no está en esta rama; llega c
 require $raiz . '/bootstrap.php';
 
 use MicroHis\Expediente\Aplicacion\Reloj;
-use MicroHis\Expediente\Presentacion\ControladorExpediente;
+use MicroHis\Expediente\Persistencia\{CentralPdo, HospitalPdo};
+use MicroHis\Expediente\Presentacion\VistaJson;
+use function MicroHis\Expediente\crearControlador;
 
 function linea(string $id, bool $reproducido, string $detalle): void { printf("%-5s %-15s %s\n", $id, $reproducido ? 'reproducido' : 'no reproducido', $detalle); }
 function columnas(PDO $db, string $tabla): array { return array_column($db->query("PRAGMA table_info($tabla)")->fetchAll(), 'name'); }
@@ -25,8 +27,8 @@ $central = new PDO('sqlite::memory:');
 $central->exec(file_get_contents("$raiz/database/schema-central.sql") . "INSERT INTO consents VALUES ('g1', 'h1', 0, NULL, 'active');
     INSERT INTO mpi_records VALUES ('g1', 'h1', 'EXP-p1'), ('g1', 'h2', 'EXP-H2-77');");
 $reloj = new class implements Reloj { public function ahora(): int { return 1000; } };
-$app = crearControlador($hospital, $central, $reloj, 'h1');
-$http = (new ReflectionClassConstant(ControladorExpediente::class, 'HTTP'))->getValue();
+$app = crearControlador(new HospitalPdo($hospital), new CentralPdo($central), $reloj, 'h1');
+$http = (new ReflectionClassConstant(VistaJson::class, 'HTTP'))->getValue();   // desde la semana 4, la vista es dueña de los códigos
 $eventos = fn () => (int) $hospital->query('SELECT COUNT(*) FROM audit_events')->fetchColumn();
 
 // H-01: los códigos no son los de la semana 1, donde E1 es «sin asignación activa» (403) y E4 «solo historia local».
@@ -49,5 +51,5 @@ linea('H-04', $cambiados > 0, "UPDATE de eventos rechazados a «ok»: $cambiados
 // H-05: RNF-04. Si CENTRAL falla, la excepción técnica no pasa por la auditoría: el intento no queda registrado.
 $antes = $eventos();
 $caida = new PDO('sqlite::memory:');   // CENTRAL sin tablas
-$r = crearControlador($hospital, $caida, $reloj, 'h1')->atender('consultar', ['paciente' => 'p1', 'profesional' => 'm1', 'longitudinal' => true]);
+$r = crearControlador(new HospitalPdo($hospital), new CentralPdo($caida), $reloj, 'h1')->atender('consultar', ['paciente' => 'p1', 'profesional' => 'm1', 'longitudinal' => true]);
 linea('H-05', $eventos() === $antes, "consulta longitudinal con CENTRAL caída = {$resultado($r)}; eventos nuevos en la auditoría: " . ($eventos() - $antes));
