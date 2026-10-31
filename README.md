@@ -163,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están integrados** y funcionando. Los 6 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **25 están integrados** y funcionando. Los 5 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -192,7 +192,7 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están in
 | | `recepcion-muestras` | ✅ Integrado (con catálogo provisional) |
 | | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
 | | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
-| Gestión | `reportes-analytics-basicos` | 🟦 **Disponible** (sección 7.3) |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (15 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -311,7 +311,7 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos seis módulos están listos para tomarse. En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (el 7.3 ya está integrado y queda como guía para conectarse a él). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
 ### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
 - **Ya existe:**
@@ -346,15 +346,19 @@ Estos seis módulos están listos para tomarse. En cada uno se indica qué exist
   - la pantalla `/camas` (`resources/js/pages/beds/BedsPage.tsx`): agrega ahí el botón «Admitir paciente» en las camas disponibles.
 - **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas trabajan sobre esa estancia.
 
-### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos`
-- **Ya existe:**
+### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos` ✅ Integrado
+- **Qué hay:**
+  - 15 indicadores trazables en la pestaña «Indicadores» de `/reportes`: indicador, desglose y registros de origen;
   - el permiso `reportes.ver` (dirección, administrador de hospital y calidad);
-  - la entrada del menú `/reportes`, compartida con reportes operativos exportables;
-  - el prototipo (`ReportRegistry`, `ReporteOcupacion`, `Indicador`, `Filtros`).
-- **Falta:**
-  - los indicadores, calculados con las tablas existentes (pacientes, citas y estancias) y filtros por fecha;
-  - la pantalla con tarjetas de indicadores y gráficas (se recomienda Recharts).
-- **Se conecta con:** reportes operativos exportables, que también vive en `/reportes`. Usen pestañas: «Indicadores» para este módulo y «Exportar» para el otro.
+  - el permiso `reportes.citas_propias` (médico: solo el indicador de citas, con sus propias citas).
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Cómo lo usan los módulos disponibles:**
+  - los indicadores leen las tablas en modo de solo lectura. Lo que registren admisión (`care_episodes`, `bed_stays`), alergias (`allergies`) y prescripciones aparece solo en ingresos, ocupación, estancia, alergias y recetas;
+  - para **agregar un indicador** (por ejemplo, «alertas reconocidas a tiempo»):
+    1. crea una clase en `app/Services/Analytics/Indicators/` que extienda `Indicator`. Debe devolver los casos del numerador (`peso`, `dims`, `fila`) y, si es tasa o promedio, su `denominator()`;
+    2. agrégala en `IndicatorRegistry::INDICATORS` y quita su entrada de `IndicatorRegistry::PENDING`.
+
+    La pantalla y las pruebas de contrato de `AnalyticsTest` la toman sin más cambios.
 
 ### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas`
 - **Ya existe:**
@@ -435,7 +439,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **137 correctas y 2 incompletas**. Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **144 correctas y 2 incompletas**. Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
 
 ---
 
@@ -504,6 +508,9 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/expediente/{paciente}/recetas` · `/recetas/{id}/anular` | `prescripciones.crear` / `prescripciones.anular` |
 | GET | `/reportes/operativos?tipo=&desde=&hasta=` (vista previa) | `reportes.ver` o `reportes.exportar` |
 | GET | `/reportes/operativos/exportar?…` (CSV con huella SHA-256 en la bitácora) | `reportes.exportar` |
+| GET | `/reportes/indicadores` · `/reportes/indicadores/resumen?desde=&hasta=` (catálogo y tarjetas) | `reportes.ver` o `reportes.citas_propias` |
+| GET | `/reportes/{tipo}?desde=&hasta=[&granularidad=dia\|semana\|mes]` (indicador, comparación, tendencia y ficha) | `reportes.ver`; con `reportes.citas_propias`, solo `citas` y sus propias citas |
+| GET | `/reportes/{tipo}/desglose?…[&dimension=]` · `/reportes/{tipo}/registros?…&parte=[&pagina=]` | Igual que `/reportes/{tipo}` |
 | GET / POST | `/calidad/defectos` · POST `/calidad/defectos/{id}/estado` | `calidad.gestionar` |
 | GET / POST | `/calidad/ejecuciones` · GET `/calidad/gate/{versión}` | `versiones.gestionar` o `calidad.gestionar` |
 | POST | `/calidad/ci/ejecuciones` (desde el CI, con `Authorization: Bearer NIDO_CI_TOKEN`) | Token de CI |
