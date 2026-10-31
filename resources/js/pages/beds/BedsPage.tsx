@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BedDouble, Plus } from 'lucide-react';
+import { BedDouble, Plus, UserPlus } from 'lucide-react';
+import { AdmissionDialog, type PresetBed } from '@/modules/admissions/AdmissionDialog';
+import { AdmissionOrdersPanel } from '@/modules/admissions/AdmissionOrders';
+import { AdmissionTrace } from '@/modules/admissions/AdmissionTrace';
 import { useAuth } from '@/auth/AuthContext';
 import { api, errorMessage, fieldErrors } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -36,16 +39,21 @@ export function BedsPage() {
     const [newBed, setNewBed] = useState<WardItem | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const [filter, setFilter] = useState('');
+    // Módulo admisión: null = cerrado; 'libre' = elegir cama en el asistente; o la cama desde la que se abrió.
+    const [admit, setAdmit] = useState<PresetBed | 'libre' | null>(null);
     const map = useQuery({ queryKey: ['camas'], queryFn: async () => (await api.get<{ data: WardItem[] }>('/camas')).data.data });
 
     const wards = map.data ?? [];
     const visible = filter ? wards.map((w) => ({ ...w, beds: w.beds.filter((b) => b.status === filter) })) : wards;
-    const done = (text: string) => { setSelected(null); setNewWard(false); setNewBed(null); setNotice(text); };
+    const done = (text: string) => { setSelected(null); setNewWard(false); setNewBed(null); setAdmit(null); setNotice(text); };
 
     return (
         <>
             <PageHeader title="Camas" description="Toque una cama para ver quién la ocupa o cambiar su estado."
-                actions={can('camas.gestionar') && <Button onClick={() => setNewWard(true)}><Plus className="size-4" aria-hidden /> Nueva sala</Button>} />
+                actions={<>
+                    {can('admisiones.gestionar') && <Button onClick={() => setAdmit('libre')}><UserPlus className="size-4" aria-hidden /> Admitir paciente</Button>}
+                    {can('camas.gestionar') && <Button variant={can('admisiones.gestionar') ? 'secondary' : 'primary'} onClick={() => setNewWard(true)}><Plus className="size-4" aria-hidden /> Nueva sala</Button>}
+                </>} />
 
             <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por estado">
                 <button onClick={() => setFilter('')} className={cn('rounded-full px-3 py-1 text-sm font-semibold ring-1', filter === '' ? 'bg-nido-700 text-white ring-nido-700' : 'bg-white text-slate-700 ring-slate-300')}>Todas</button>
@@ -59,6 +67,8 @@ export function BedsPage() {
             </div>
 
             {notice && <div className="mb-4"><Alert tone="success">{notice}</Alert></div>}
+            {/* Mejora del módulo admisión: pacientes con orden de ingreso que esperan cama. */}
+            <AdmissionOrdersPanel onDone={done} />
             {map.isLoading ? <Spinner /> : map.isError ? <Alert tone="error">{errorMessage(map.error)}</Alert> : wards.length === 0 ? (
                 <Card><EmptyState title="Todavía no hay salas.">{can('camas.gestionar') ? 'Cree la primera con «Nueva sala».' : 'Pida al administrador que las registre.'}</EmptyState></Card>
             ) : (
@@ -95,14 +105,16 @@ export function BedsPage() {
                 </div>
             )}
 
-            {selected && <BedDialog bed={selected.bed} ward={selected.ward} wards={wards} onClose={() => setSelected(null)} onDone={done} />}
+            {selected && <BedDialog bed={selected.bed} ward={selected.ward} wards={wards} onClose={() => setSelected(null)} onDone={done}
+                onAdmit={() => { setAdmit({ id: selected.bed.id, code: selected.bed.code, type: selected.bed.type, ward: { id: selected.ward.id, name: selected.ward.name } }); setSelected(null); }} />}
+            {admit && <AdmissionDialog preset={admit === 'libre' ? undefined : admit} wards={wards} onClose={() => setAdmit(null)} onDone={done} />}
             {newWard && <NewWardDialog onClose={() => setNewWard(false)} onDone={done} />}
             {newBed && <NewBedDialog ward={newBed} onClose={() => setNewBed(null)} onDone={done} />}
         </>
     );
 }
 
-function BedDialog({ bed, ward, wards, onClose, onDone }: { bed: BedItem; ward: WardItem; wards: WardItem[]; onClose: () => void; onDone: (t: string) => void }) {
+function BedDialog({ bed, ward, wards, onClose, onDone, onAdmit }: { bed: BedItem; ward: WardItem; wards: WardItem[]; onClose: () => void; onDone: (t: string) => void; onAdmit: () => void }) {
     const { can, session } = useAuth();
     const queryClient = useQueryClient();
     const [mode, setMode] = useState<'view' | 'transfer' | 'discharge' | 'status'>('view');
@@ -143,6 +155,10 @@ function BedDialog({ bed, ward, wards, onClose, onDone }: { bed: BedItem; ward: 
                         <Link to={`/pacientes/${bed.occupant.patient.id}`} className="font-bold text-nido-800 hover:underline">{bed.occupant.patient.name}</Link>
                         <p className="text-slate-600">{bed.occupant.patient.code} · desde el {formatDate(bed.occupant.since, session?.hospital.timezone)}</p>
                         <p className="text-slate-600">Motivo de ingreso: {bed.occupant.reason}</p>
+                        <details className="mt-2">
+                            <summary className="cursor-pointer font-semibold text-nido-700">Ver admisión y trazabilidad</summary>
+                            <div className="mt-2"><AdmissionTrace admissionId={bed.occupant.episode_id} /></div>
+                        </details>
                     </div>
                 ) : bed.status_reason && <p className="text-sm text-slate-600">Último cambio: {bed.status_reason}</p>}
 
@@ -155,7 +171,9 @@ function BedDialog({ bed, ward, wards, onClose, onDone }: { bed: BedItem; ward: 
                             <Button variant="secondary" onClick={() => setMode('discharge')}>Dar de alta</Button>
                         </>}
                         {!bed.occupant && can('camas.gestionar') && bed.next.length > 0 && <Button variant="secondary" onClick={() => setMode('status')}>Cambiar estado</Button>}
-                        {!bed.occupant && bed.status === 'available' && <p className="text-sm text-slate-600">Cama lista para un nuevo ingreso.</p>}
+                        {!bed.occupant && bed.status === 'available' && (can('admisiones.gestionar')
+                            ? <Button onClick={onAdmit}><UserPlus className="size-4" aria-hidden /> Admitir paciente</Button>
+                            : <p className="text-sm text-slate-600">Cama lista para un nuevo ingreso.</p>)}
                     </div>
                 )}
 

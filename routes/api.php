@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AuditController;
 use App\Http\Controllers\Api\V1\Admin\MembershipController;
 use App\Http\Controllers\Api\V1\Admin\QualityController;
@@ -8,10 +9,16 @@ use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\SystemController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\Clinical\AdmissionController;
+use App\Http\Controllers\Api\V1\Clinical\AdmissionOrderController;
+use App\Http\Controllers\Api\V1\Clinical\AllergyController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
+use App\Http\Controllers\Api\V1\Clinical\CriticalAlertController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\LabController;
+use App\Http\Controllers\Api\V1\Clinical\LabTestCatalogController;
+use App\Http\Controllers\Api\V1\Clinical\MedicationCatalogController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
 use App\Http\Controllers\Api\V1\Clinical\PrescriptionController;
 use App\Http\Controllers\Api\V1\Clinical\RecordController;
@@ -118,5 +125,65 @@ Route::middleware('tenant')->group(function (): void {
         Route::get('/calidad/gate/{version}', [QualityController::class, 'gate'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
         Route::get('/sistema/base-datos', [SystemController::class, 'database'])->middleware('permiso:base_datos.verificar');
         Route::get('/sistema/openapi', [SystemController::class, 'openapi']);
+
+        // Módulo admisión hospitalaria y asignación de cama: abre el internamiento y su estancia en una cama disponible.
+        Route::get('/camas-disponibles', [AdmissionController::class, 'availableBeds'])->middleware('permiso:admisiones.gestionar');
+        Route::post('/admisiones', [AdmissionController::class, 'store'])->middleware('permiso:admisiones.gestionar');
+        // Mejora del módulo admisión: orden de ingreso pendiente de cama (lista de espera).
+        Route::get('/admisiones/ordenes', [AdmissionOrderController::class, 'index'])->middleware('permiso:admisiones.gestionar|camas.ver');
+        Route::post('/admisiones/ordenes', [AdmissionOrderController::class, 'store'])->middleware('permiso:admisiones.gestionar');
+        Route::post('/admisiones/ordenes/{order}/asignar', [AdmissionOrderController::class, 'assign'])->middleware('permiso:admisiones.gestionar')->whereUuid('order');
+        Route::post('/admisiones/ordenes/{order}/cancelar', [AdmissionOrderController::class, 'cancel'])->middleware('permiso:admisiones.gestionar')->whereUuid('order');
+        Route::get('/admisiones/{admission}', [AdmissionController::class, 'show'])->middleware('permiso:admisiones.gestionar|camas.ver')->whereUuid('admission');
+        Route::get('/admisiones/{admission}/eventos', [AdmissionController::class, 'events'])->middleware('permiso:admisiones.gestionar|auditoria.consultar')->whereUuid('admission');
+
+        // Módulo alergias clínicas y alerta visual en el expediente: único que escribe en allergies.
+        Route::get('/expediente/{patient}/alergias', [AllergyController::class, 'show'])->middleware('permiso:expediente.leer|alergias.gestionar|prescripciones.crear')->whereUuid('patient');
+        Route::post('/expediente/{patient}/alergias', [AllergyController::class, 'store'])->middleware('permiso:alergias.gestionar')->whereUuid('patient');
+        Route::post('/expediente/{patient}/alergias/reconocimiento', [AllergyController::class, 'acknowledge'])->middleware('permiso:expediente.leer|alergias.gestionar')->whereUuid('patient');
+        Route::patch('/alergias/{allergy}/estado', [AllergyController::class, 'updateStatus'])->middleware('permiso:alergias.gestionar')->whereUuid('allergy');
+
+        // Módulo catálogo de medicamentos: único que escribe en medications; prescripciones lo lee por MedicationDirectory.
+        Route::prefix('catalogo/medicamentos')->group(function (): void {
+            Route::get('/opciones', [MedicationCatalogController::class, 'options'])->middleware('permiso:medicamentos.ver|auditoria.consultar');
+            Route::get('/', [MedicationCatalogController::class, 'index'])->middleware('permiso:medicamentos.ver|prescripciones.crear|auditoria.consultar');
+            Route::post('/', [MedicationCatalogController::class, 'store'])->middleware('permiso:medicamentos.gestionar');
+            Route::get('/{code}', [MedicationCatalogController::class, 'show'])->middleware('permiso:medicamentos.ver|prescripciones.crear|auditoria.consultar')->where('code', '[A-Za-z0-9-]+');
+            Route::get('/{code}/versiones', [MedicationCatalogController::class, 'history'])->middleware('permiso:medicamentos.ver|auditoria.consultar')->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/versiones', [MedicationCatalogController::class, 'storeVersion'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/baja', [MedicationCatalogController::class, 'retire'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+            Route::delete('/{code}', [MedicationCatalogController::class, 'destroy'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+        });
+
+        // Módulo alertas críticas y notificaciones internas: las crea al escuchar a laboratorio y signos vitales (AppServiceProvider).
+        Route::prefix('alertas')->group(function (): void {
+            Route::get('/resumen', [CriticalAlertController::class, 'summary'])->middleware('permiso:alertas.ver');
+            Route::get('/politicas', [CriticalAlertController::class, 'policies'])->middleware('permiso:alertas.ver|alertas.configurar');
+            Route::put('/politicas', [CriticalAlertController::class, 'updatePolicies'])->middleware('permiso:alertas.configurar');
+            Route::get('/', [CriticalAlertController::class, 'index'])->middleware('permiso:alertas.ver');
+            Route::get('/{alert}', [CriticalAlertController::class, 'show'])->middleware('permiso:alertas.ver')->whereUuid('alert');
+            Route::post('/{alert}/acuse', [CriticalAlertController::class, 'acknowledge'])->middleware('permiso:alertas.ver')->whereUuid('alert');
+            Route::post('/{alert}/cierre', [CriticalAlertController::class, 'close'])->middleware('permiso:alertas.cerrar')->whereUuid('alert');
+        });
+
+        // Módulo catálogo de pruebas de laboratorio: único que escribe en lab_tests; órdenes y resultados lo leen por LabTestDirectory.
+        Route::prefix('catalogo/pruebas-laboratorio')->group(function (): void {
+            $read = 'permiso:pruebas_lab.ver|pruebas_lab.gestionar|ordenes_lab.crear';
+            Route::get('/opciones', [LabTestCatalogController::class, 'options'])->middleware($read);
+            Route::get('/', [LabTestCatalogController::class, 'index'])->middleware($read);
+            Route::post('/', [LabTestCatalogController::class, 'store'])->middleware('permiso:pruebas_lab.gestionar');
+            Route::get('/{code}', [LabTestCatalogController::class, 'show'])->middleware($read)->where('code', '[A-Za-z0-9-]+');
+            Route::get('/{code}/versiones', [LabTestCatalogController::class, 'history'])->middleware($read)->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/versiones', [LabTestCatalogController::class, 'storeVersion'])->middleware('permiso:pruebas_lab.gestionar')->where('code', '[A-Za-z0-9-]+');
+        });
+
+        // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
+        // Van después de /reportes/operativos para que esas rutas fijas no las tome {tipo}.
+        $analytics = 'permiso:reportes.ver|reportes.citas_propias';
+        Route::get('/reportes/indicadores', [AnalyticsController::class, 'catalog'])->middleware($analytics);
+        Route::get('/reportes/indicadores/resumen', [AnalyticsController::class, 'summary'])->middleware($analytics);
+        Route::get('/reportes/{tipo}', [AnalyticsController::class, 'show'])->middleware($analytics)->where('tipo', '[a-z_]+');
+        Route::get('/reportes/{tipo}/desglose', [AnalyticsController::class, 'breakdown'])->middleware($analytics)->where('tipo', '[a-z_]+');
+        Route::get('/reportes/{tipo}/registros', [AnalyticsController::class, 'records'])->middleware($analytics)->where('tipo', '[a-z_]+');
     });
 });

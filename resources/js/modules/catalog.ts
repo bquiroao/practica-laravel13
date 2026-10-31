@@ -57,8 +57,8 @@ export const sections: Section[] = [
             { path: '/prescripciones', label: 'Prescripciones', icon: Pill, anyOf: ['prescripciones.crear', 'medicamentos.ver'],
                 modules: ['prescripciones-alergias', 'catalogo-medicamentos'], phase: 4, ready: true,
                 summary: 'Recetas electrónicas que se bloquean ante una alergia, y catálogo de medicamentos.' },
-            { path: '/alertas', label: 'Alertas', icon: BellRing, anyOf: ['alertas.ver'], modules: ['alertas-criticas-notificaciones-internas'],
-                phase: 4, ready: false, summary: 'Alertas críticas con reconocimiento y escalamiento.' },
+            { path: '/alertas', label: 'Alertas', icon: BellRing, anyOf: ['alertas.ver', 'alertas.configurar'], modules: ['alertas-criticas-notificaciones-internas'],
+                phase: 4, ready: true, summary: 'Alertas críticas con reconocimiento y escalamiento.' },
         ],
     },
     {
@@ -73,7 +73,7 @@ export const sections: Section[] = [
     {
         title: 'Gestión',
         items: [
-            { path: '/reportes', label: 'Reportes', icon: BarChart3, anyOf: ['reportes.ver', 'reportes.exportar'],
+            { path: '/reportes', label: 'Reportes', icon: BarChart3, anyOf: ['reportes.ver', 'reportes.exportar', 'reportes.citas_propias'],
                 modules: ['reportes-analytics-basicos', 'reportes-operativos-exportables'], phase: 6, ready: true,
                 summary: 'Indicadores, filtros administrativos y exportación a PDF y Excel.' },
             { path: '/calidad', label: 'Calidad', icon: BadgeCheck, anyOf: ['calidad.gestionar', 'versiones.gestionar'],

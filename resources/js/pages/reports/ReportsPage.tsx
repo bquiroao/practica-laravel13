@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { lazy, Suspense, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Printer } from 'lucide-react';
 import { useAuth } from '@/auth/AuthContext';
@@ -9,21 +9,30 @@ import { Alert, Button, Card, EmptyState, Field, Input, PageHeader, Select, Spin
 
 interface Report { type: string; title: string; columns: string[]; rows: string[][]; cutoff: string; from: string; to: string; total: number }
 
+// Módulo reportes y analytics básicos: se descarga aparte, con sus gráficas, al abrir la pestaña.
+const IndicatorsPanel = lazy(() => import('./IndicatorsPanel').then((m) => ({ default: m.IndicatorsPanel })));
+
 /** Reportes: «Exportar» (módulo reportes operativos exportables) e «Indicadores» (módulo reportes y analytics básicos). */
 export function ReportsPage() {
-    const [tab, setTab] = useState<'exportar' | 'indicadores'>('exportar');
+    const { can } = useAuth();
+    // El Médico solo tiene el indicador de sus citas; los reportes operativos no son para su rol.
+    const operational = can('reportes.ver') || can('reportes.exportar');
+    const indicators = can('reportes.ver') || can('reportes.citas_propias');
+    const [tab, setTab] = useState<'exportar' | 'indicadores'>(operational ? 'exportar' : 'indicadores');
+    const tabs = ([['exportar', 'Reportes operativos', operational], ['indicadores', 'Indicadores', indicators]] as const).filter(([, , allowed]) => allowed);
     return (
         <>
-            <PageHeader title="Reportes" description="Elija el reporte y las fechas, revise la vista previa y descárguelo." />
-            <div role="tablist" aria-label="Secciones" className="mb-4 inline-flex rounded-lg bg-white p-1 ring-1 ring-slate-200 print:hidden">
-                {([['exportar', 'Reportes operativos'], ['indicadores', 'Indicadores']] as const).map(([k, l]) => (
-                    <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-                        className={cn('rounded-md px-4 py-1.5 text-sm font-semibold', tab === k ? 'bg-nido-700 text-white' : 'text-slate-600 hover:bg-slate-100')}>{l}</button>
-                ))}
-            </div>
-            {tab === 'exportar' ? <OperationalReports /> : (
-                <Card><EmptyState title="Indicadores en construcción">Los integra el módulo «Reportes y analytics básicos» (README, sección 7.3).</EmptyState></Card>
+            <PageHeader title="Reportes" description={tab === 'exportar' ? 'Elija el reporte y las fechas, revise la vista previa y descárguelo.'
+                : 'Indicadores del hospital para un período. Abra «¿De dónde sale?» para bajar del número a los registros que lo forman.'} />
+            {tabs.length > 1 && (
+                <div role="tablist" aria-label="Secciones" className="mb-4 inline-flex rounded-lg bg-white p-1 ring-1 ring-slate-200 print:hidden">
+                    {tabs.map(([k, l]) => (
+                        <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+                            className={cn('rounded-md px-4 py-1.5 text-sm font-semibold', tab === k ? 'bg-nido-700 text-white' : 'text-slate-600 hover:bg-slate-100')}>{l}</button>
+                    ))}
+                </div>
             )}
+            {tab === 'exportar' ? <OperationalReports /> : <Suspense fallback={<Spinner label="Cargando indicadores…" />}><IndicatorsPanel /></Suspense>}
         </>
     );
 }

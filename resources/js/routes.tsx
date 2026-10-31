@@ -30,6 +30,8 @@ const QualityPage = lazy(() => import('@/pages/quality/QualityPage').then((m) =>
 const ApiDocsPage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.ApiDocsPage })));
 const DatabasePage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.DatabasePage })));
 const MobilePage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.MobilePage })));
+// Módulo alertas-criticas-notificaciones-internas.
+const AlertsPage = lazy(() => import('@/pages/alerts/AlertsPage').then((m) => ({ default: m.AlertsPage })));
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then((m) => ({ default: m.NewAppointmentPage })));
 
 const ready: Record<string, ReactNode> = {
@@ -50,6 +52,7 @@ const ready: Record<string, ReactNode> = {
     '/admin/api': <ApiDocsPage />,
     '/admin/base-datos': <DatabasePage />,
     '/movil': <MobilePage />,
+    '/alertas': <AlertsPage />,
 };
 
 // Pantallas internas de un módulo: mismo permiso que pida la acción.

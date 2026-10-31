@@ -83,7 +83,7 @@ function PrescriptionForm({ patientId, onClose, onDone }: { patientId: string; o
             <p className="mt-1 text-sm text-slate-600">Antes de emitirla, el sistema revisa las alergias del paciente.</p>
             <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(undefined); }}>
                 <div className="sm:col-span-2">
-                    <Field label="Medicamento" htmlFor="rx-med" error={errors.medication_code} hint={med ? `${med.presentation} · vía ${med.route}` : 'Catálogo provisional hasta que exista el catálogo de medicamentos.'}>
+                    <Field label="Medicamento" htmlFor="rx-med" error={errors.medication_code} hint={med ? `${med.presentation} · vía ${med.route}` : 'Medicamentos vigentes hoy en el catálogo del hospital.'}>
                         <Select id="rx-med" value={form.medication_code} onChange={(e) => { set('medication_code')(e); save.reset(); }}>
                             <option value="">Seleccione…</option>
                             {meds.data?.map((m) => <option key={m.code} value={m.code}>{m.name}</option>)}

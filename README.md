@@ -108,9 +108,15 @@ php artisan serve
 ```
 Abre **http://localhost:8000** y entra con un usuario de la [sección 3](#3-usuarios-de-demostración).
 
+Para que las alertas críticas se escalen solas cuando vence su plazo, deja abierto el planificador en otra terminal:
+```bash
+php artisan schedule:work
+```
+
 ### Las siguientes veces
 ```bash
 php artisan serve
+php artisan schedule:work      # en otra terminal: escalamiento de alertas
 ```
 
 ### Cuando traigas cambios de `develop`
@@ -163,7 +169,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están integrados** y funcionando. Los 6 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **Los 30 están integrados** y funcionando. La sección 7 queda como guía para conectarse a los últimos que se integraron.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -177,22 +183,22 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están in
 | | `medicos-especialidades` | ✅ Integrado |
 | | `citas-medicas` | ✅ Integrado |
 | Camas | `catalogo-salas-camas` | ✅ Integrado |
-| | `admision-hospitalaria-asignacion-cama` | 🟦 **Disponible** (sección 7.2) |
+| | `admision-hospitalaria-asignacion-cama` | ✅ Integrado (asistente en `/camas`) |
 | | `traslados-altas-camas` | ✅ Integrado |
 | | `dashboard-ocupacion` | ✅ Integrado |
 | Clínico | `expediente-medico` | ✅ Integrado |
 | | `notas-soap-diagnosticos` | ✅ Integrado |
 | | `signos-vitales-alertas` | ✅ Integrado |
-| | `alergias-clinicas-alerta-visual-expediente` | 🟦 **Disponible** (sección 7.5) |
-| | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
-| | `prescripciones-alergias` | ✅ Integrado (con catálogo provisional) |
-| | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
-| Laboratorio | `catalogo-pruebas-laboratorio` | 🟦 **Disponible** (sección 7.1) |
-| | `ordenes-laboratorio-emr` | ✅ Integrado (con catálogo provisional) |
-| | `recepcion-muestras` | ✅ Integrado (con catálogo provisional) |
-| | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
-| | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
-| Gestión | `reportes-analytics-basicos` | 🟦 **Disponible** (sección 7.3) |
+| | `alergias-clinicas-alerta-visual-expediente` | ✅ Integrado (banner en la ficha y el expediente) |
+| | `catalogo-medicamentos` | ✅ Integrado (catálogo administrable en `/prescripciones`) |
+| | `prescripciones-alergias` | ✅ Integrado (receta desde el catálogo de medicamentos) |
+| | `alertas-criticas-notificaciones-internas` | ✅ Integrado (campana y `/alertas`, con escalamiento por tiempo) |
+| Laboratorio | `catalogo-pruebas-laboratorio` | ✅ Integrado (catálogo administrable en `/laboratorio`) |
+| | `ordenes-laboratorio-emr` | ✅ Integrado (ordena desde el catálogo de pruebas) |
+| | `recepcion-muestras` | ✅ Integrado |
+| | `ingreso-resultados-laboratorio` | ✅ Integrado |
+| | `validacion-resultados-bioquimico` | ✅ Integrado |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (20 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -200,7 +206,6 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están in
 
 **Leyenda:**
 - ✅ funciona de punta a punta, con pruebas;
-- 🟦 listo para tomarse: la base, los permisos y la entrada del menú ya existen.
 
 ---
 
@@ -311,94 +316,88 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos seis módulos están listos para tomarse. En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (ya están todos integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
-### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
-- **Ya existe:**
-  - los permisos `pruebas_lab.ver` y `pruebas_lab.gestionar` (laboratorio, bioquímico y administrador de hospital; el médico solo ve);
-  - la entrada del menú `/laboratorio`, compartida con los demás módulos de laboratorio;
-  - el prototipo en `docs/modulos/catalogo-pruebas-laboratorio/micro-his/` (`LabTest`, `RequisitoMuestra`, `Vigencia`, `VigenciaSuperpuesta`).
-- **Falta:**
-  - las tablas del laboratorio: el esquema base las dejó pendientes (tarea 3.6 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md`);
-  - el registro de pruebas con vigencias que no se crucen;
-  - la pantalla del catálogo.
-- **Se conecta con:** órdenes, recepción, ingreso y validación de resultados, que **ya están integrados** con un catálogo provisional (`config/nido_catalogos.php`). Para conectar tu catálogo:
-  1. implementa `App\Services\Catalogs\LabTestDirectory` sobre tu tabla. Devuelve `code`, `name`, `specimen_type`, `unit`, `ref_low`, `ref_high`, `critical_low` y `critical_high`, y respeta la vigencia;
-  2. en `AppServiceProvider`, cambia el `bind` de `LabTestDirectory` por tu clase.
+### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio` ✅ Integrado
+- **Qué hay:**
+  - la tabla `lab_tests`: una fila por versión, con los requisitos de muestra, los valores de referencia y críticos, y la vigencia `[valid_from, valid_to]` (`valid_to` es el último día vigente). La base repite las reglas: dos versiones del mismo código no se cruzan, cada columna tiene los límites de la API y una versión no se edita ni se borra;
+  - `App\Services\LabCatalog\LabTestCatalogService`: buscar lo vigente en una fecha, registrar y crear una versión nueva. Es el único que escribe en `lab_tests`. La regla de vigencia (RN-05) está aparte, en `ValidityPlan`;
+  - el catálogo inicial: las 10 pruebas del catálogo provisional, con sus requisitos de muestra. **Conservan su código** (`HB`, `GLU`…), porque las órdenes, los resultados y el aviso de resultado crítico ya lo usan; las pruebas nuevas usan el formato `AAA-000`;
+  - la pantalla `LabTestCatalog` (`resources/js/modules/labtests/`), en la pestaña «Pruebas disponibles» de `/laboratorio`;
+  - el indicador «Pruebas por área del laboratorio» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - órdenes, recepción, ingreso y validación leen el catálogo con `App\Services\LabCatalog\DatabaseLabTestDirectory`, registrado en `AppServiceProvider`. Solo se puede ordenar lo vigente hoy;
+  - `LabTestDirectory` devuelve `code`, `name`, `specimen_type`, `unit`, `ref_low`, `ref_high`, `critical_low` y `critical_high`, y además `section`, `fasting_hours`, `preparation_instructions` y `turnaround_hours`;
+  - las órdenes siguen guardando una copia de los datos de cada prueba al pedirla, así que una versión nueva no cambia la historia clínica;
+  - la lista `pruebas_laboratorio` de `config/nido_catalogos.php` y `ConfigLabTestDirectory` ya no se usan.
 
-  Las órdenes guardan una copia de los datos de cada prueba al pedirla, así que editar el catálogo no cambia la historia clínica.
-- **Pantalla:** reemplaza la pestaña «Pruebas disponibles» de `/laboratorio` (`resources/js/pages/lab/LabPage.tsx`) por tu catálogo administrable.
-
-### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama`
-- **Ya existe:**
-  - las tablas `care_episodes` (episodio de atención), `bed_stays` (estancia en una cama; la base impide dos estancias a la vez en la misma cama), `wards` y `beds`;
+### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama` ✅ Integrado
+- **Qué hay:**
+  - `App\Services\Admissions\AdmissionService`: abre el internamiento (`care_episode` «inpatient») y su `bed_stay` en una cama disponible y compatible, todo en una transacción;
+  - las reglas de elegibilidad de la cama, una clase por criterio en `app/Services/Admissions/Eligibility/`: cama operativa, sala, tipo de cama y aislamiento;
+  - el asistente «Admitir paciente» en `/camas` (`resources/js/modules/admissions/`), y la trazabilidad de cada admisión en la cama ocupada;
   - el permiso `admisiones.gestionar` (médico y recepción);
-  - el prototipo, con las reglas de aislamiento, cama operativa y concurrencia.
-- **Falta:**
-  - el servicio de admisión: abrir un episodio `inpatient` y asignar una cama disponible, todo en una transacción;
-  - la pantalla dentro de `/camas`.
-- **Defectos abiertos que le tocan** (`tests/Database/Verification/ConstraintBoundaryTest`):
-  - **AU-01:** un episodio cerrado sin fecha de fin se guarda;
-  - **AU-05:** una cama con estancia abierta sigue figurando como disponible.
-- **Se conecta con:**
-  - el catálogo de salas y camas (integrado), que da de alta salas y camas en `/camas`;
-  - traslados y altas (integrado, `BedMovementService`), que cierran o mueven la estancia;
-  - la pantalla `/camas` (`resources/js/pages/beds/BedsPage.tsx`): agrega ahí el botón «Admitir paciente» en las camas disponibles.
-- **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas trabajan sobre esa estancia.
+  - **la orden de ingreso pendiente de cama** (`admission_orders`, `AdmissionOrderService`): el médico ordena el ingreso, el paciente queda en la lista «Esperando cama» de `/camas` y, al asignarle una cama, se crea el internamiento de siempre. De ahí sale el indicador «Tiempo de espera de cama».
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Defectos cerrados:**
+  - **AU-01:** un episodio cerrado o anulado ahora exige fecha de fin;
+  - **AU-05:** al abrir una estancia, la cama queda «occupied» (trigger de la base).
+- **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas (`BedMovementService`) trabajan sobre esa estancia. El origen (emergencia, consulta externa o referencia) queda en `care_episodes.admission_source`, y el indicador «Ingresos hospitalarios» se desglosa por él.
 
-### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos`
-- **Ya existe:**
+### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos` ✅ Integrado
+- **Qué hay:**
+  - 15 indicadores trazables en la pestaña «Indicadores» de `/reportes`: indicador, desglose y registros de origen;
   - el permiso `reportes.ver` (dirección, administrador de hospital y calidad);
-  - la entrada del menú `/reportes`, compartida con reportes operativos exportables;
-  - el prototipo (`ReportRegistry`, `ReporteOcupacion`, `Indicador`, `Filtros`).
-- **Falta:**
-  - los indicadores, calculados con las tablas existentes (pacientes, citas y estancias) y filtros por fecha;
-  - la pantalla con tarjetas de indicadores y gráficas (se recomienda Recharts).
-- **Se conecta con:** reportes operativos exportables, que también vive en `/reportes`. Usen pestañas: «Indicadores» para este módulo y «Exportar» para el otro.
+  - el permiso `reportes.citas_propias` (médico: solo el indicador de citas, con sus propias citas).
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Cómo lo usan los módulos disponibles:**
+  - los indicadores leen las tablas en modo de solo lectura. Lo que registren admisión (`care_episodes`, `bed_stays`), alergias (`allergies`) y prescripciones aparece solo en ingresos, ocupación, estancia, alergias y recetas;
+  - para **agregar un indicador** (por ejemplo, «alertas reconocidas a tiempo»):
+    1. crea una clase en `app/Services/Analytics/Indicators/` que extienda `Indicator`. Debe devolver los casos del numerador (`peso`, `dims`, `fila`) y, si es tasa o promedio, su `denominator()`;
+    2. agrégala en `IndicatorRegistry::INDICATORS` y quita su entrada de `IndicatorRegistry::PENDING`.
 
-### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas`
-- **Ya existe:**
-  - los permisos `alertas.ver` y `alertas.gestionar`;
-  - la entrada del menú `/alertas`;
-  - la campana de la barra superior (`resources/js/layout/AppShell.tsx`), lista para mostrar el número de alertas;
-  - el prototipo (`Alerta`, `Prioridad`, `PoliticaEscalamiento`, `EstadoAlerta`).
-- **Falta:**
-  - la tabla de alertas;
-  - el reconocimiento y el escalamiento;
-  - la pantalla y el contador de la campana.
-- **Se conecta con:** signos vitales fuera de rango y resultados críticos de laboratorio, ambos ya integrados. Al validar un resultado crítico se dispara `App\Events\LabResultCritical` (paciente, prueba, valor, unidad y marca). Para no acoplar los módulos, se usan **eventos de Laravel**:
-  - al guardar una toma con valores anormales o críticos, `VitalSignService` dispara `App\Events\VitalSignsOutOfRange`;
-  - el evento trae hospital, paciente, código del paciente, episodio, toma y la lista de hallazgos (`signo`, `etiqueta`, `valor`, `nivel`: `anormal` o `critica`), y `isCritical()`;
-  - para crear la alerta, registra un *listener* en `AppServiceProvider` con `Event::listen(VitalSignsOutOfRange::class, …)`.
+    La pantalla y las pruebas de contrato de `AnalyticsTest` la toman sin más cambios.
 
-### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente`
-- **Ya existe:**
-  - la tabla `allergies`: alérgeno, tipo, severidad y estado, con una regla que impide duplicar una alergia activa;
-  - el permiso `alergias.gestionar` (médico y enfermería);
-  - el prototipo (`CalculadorAlerta`, `NivelAlerta`, `ReglaNivelAlerta`).
-- **Falta:**
-  - el registro y la confirmación de alergias;
-  - el cálculo del nivel de alerta;
-  - **el banner visual**, siempre visible en la ficha del paciente y en el expediente.
-- **Se conecta con:**
-  - la ficha del paciente (`resources/js/pages/patients/PatientDetailPage.tsx`);
-  - el expediente (`resources/js/pages/records/RecordPage.tsx`), que ya tiene marcado con un comentario el lugar del banner, debajo del nombre del paciente;
-  - prescripciones (ya integrado), que **lee** las alergias activas de la tabla `allergies` para bloquear o advertir. Lo que registres aparece ahí sin más cambios. En la demostración se cargan dos alergias de ejemplo.
-- **Acuerdo de integración:** exporta un componente `AllergyBanner` en `resources/js/modules/allergies/` que reciba el id del paciente, para que las demás pantallas solo tengan que colocarlo.
+### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas` ✅ Integrado
+- **Qué hay:**
+  - las tablas `critical_alerts`, `critical_alert_notifications`, `critical_alert_events` (historial que solo crece) y `critical_alert_policies` (plazo de acuse por prioridad: crítica 15 min, alta 30 min, configurable de 5 a 60);
+  - `App\Services\Alerts\CriticalAlertService`: crear la alerta sin duplicarla, enviarla, acusarla, cerrarla con nota y escalarla. Cada responsabilidad va en su clase: `RecipientResolver` (destinatarios por nivel), `NotificationDispatcher` (envío y hasta 3 intentos), `EscalationPolicy` (plazos y niveles) y `AlertHistory`;
+  - los niveles: **0** enfermería y médico tratante, **1** médicos del hospital, **2** dirección médica;
+  - el canal de notificación es un puerto, `App\Services\Alerts\Channels\AlertChannel`. Hoy el adaptador es la bandeja interna (`InternalInboxChannel`): **no se envían correos, SMS ni push**;
+  - el comando `php artisan nido:alertas-escalar`, que el planificador corre cada minuto (`routes/console.php`);
+  - los permisos nuevos `alertas.cerrar` (médico y dirección médica) y `alertas.configurar` (administrador de hospital y dirección médica);
+  - la página `/alertas` y el número de la campana (`resources/js/modules/alerts/`);
+  - el indicador «Alertas críticas reconocidas a tiempo» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - las alertas nacen de **eventos de Laravel**, escuchados en `AppServiceProvider`: `App\Events\LabResultCritical` (resultado crítico validado) y `App\Events\VitalSignsOutOfRange` (toma con valores anormales o críticos). Los módulos que los disparan no cambiaron;
+  - para que otro módulo cree alertas, dispara su propio evento y agrega un *listener* que llame a `CriticalAlertService::register()` con paciente, origen, id de origen, prioridad, título y descripción. El mismo origen e id de origen nunca crea dos alertas;
+  - la alerta guarda solo el código del paciente, nunca su nombre.
 
-### 7.6 Catálogo de medicamentos — `catalogo-medicamentos`
-- **Ya existe:**
-  - los permisos `medicamentos.ver` y `medicamentos.gestionar` (farmacia y administrador de hospital; médico y enfermería solo ven);
-  - la entrada del menú `/prescripciones`, compartida con prescripciones;
-  - el prototipo (`CodigoMedicamento`, `Concentracion`, `ClaveEquivalencia`, `BusquedaCatalogo`).
-- **Falta:**
-  - las tablas de medicamentos: el esquema base las dejó pendientes (tarea 3.5 del mismo `tasks.md`);
-  - el registro y la búsqueda de medicamentos;
-  - la pantalla.
-- **Se conecta con:** prescripciones, que **ya está integrado** con un catálogo provisional. Para conectar tu catálogo:
-  1. implementa `App\Services\Catalogs\MedicationDirectory` sobre tu tabla. Devuelve `code`, `name`, `presentation`, `route` y `groups`. `groups` son las familias para las alergias cruzadas, por ejemplo `['penicilinas']`; las palabras de cada familia están en `config/nido_catalogos.php`, en `familias_alergia`;
-  2. en `AppServiceProvider`, cambia el `bind` de `MedicationDirectory` por tu clase.
-- **Pantalla:** reemplaza la pestaña «Catálogo de medicamentos» de `/prescripciones` (`resources/js/pages/prescriptions/PrescriptionsPage.tsx`) por tu catálogo administrable.
+### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente` ✅ Integrado
+- **Qué hay:**
+  - `App\Services\Allergies\AllergyService`: registrar, inactivar o resolver (nunca borrar) y reconocer la alerta. Es el único que escribe en `allergies`;
+  - el nivel de alerta: una regla por clase en `app/Services/Allergies/Rules/` (severidad y reacción anafiláctica). Para agregar una regla se crea una clase nueva;
+  - la tabla `allergy_alert_acknowledgements`: quién reconoció qué alerta, por usuario y por huella;
+  - el banner `AllergyBanner` (`resources/js/modules/allergies/`), colocado en la ficha del paciente y en el expediente.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - para mostrar las alergias en otra pantalla, coloca `<AllergyBanner patientId={id} />`. Solo se muestra a quien tiene `expediente.leer`, `alergias.gestionar` o `prescripciones.crear`;
+  - prescripciones sigue **leyendo** la tabla por su cuenta: una alergia inactivada o resuelta deja de bloquear sin más cambios.
+
+### 7.6 Catálogo de medicamentos — `catalogo-medicamentos` ✅ Integrado
+- **Qué hay:**
+  - la tabla `medications`: una fila por versión, con el código `MED-NNNNNN` que no cambia entre versiones y la vigencia `[valid_from, valid_to)`. La base repite las reglas: dos versiones del mismo código no se cruzan, dos medicamentos equivalentes no están vigentes a la vez, una versión no se edita (solo se cierra) y un código recetado no se borra;
+  - `App\Services\Medications\MedicationCatalogService`: buscar lo vigente en una fecha, registrar, crear una versión nueva, dar de baja y eliminar un registro erróneo que nunca se usó. Es el único que escribe en `medications`;
+  - el catálogo inicial: los 13 medicamentos del catálogo provisional, con su ficha completa. Conservan su código anterior (`legacy_code`, p. ej. `AMOX500`), así las recetas anteriores siguen resolviendo;
+  - la pantalla `MedicationCatalog` (`resources/js/modules/medications/`), en la pestaña «Catálogo de medicamentos» de `/prescripciones`;
+  - el indicador «Recetas por grupo terapéutico» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - prescripciones receta desde el catálogo con `App\Services\Medications\DatabaseMedicationDirectory`, registrado en `AppServiceProvider`. Solo ve lo vigente hoy: un medicamento dado de baja deja de poder recetarse;
+  - `MedicationDirectory::find()` acepta el código nuevo o el anterior. Devuelve `code`, `name`, `presentation`, `route` y `groups` (las familias para las alergias cruzadas; sus palabras siguen en `config/nido_catalogos.php`, en `familias_alergia`);
+  - la lista `medicamentos` de `config/nido_catalogos.php` y `ConfigMedicationDirectory` ya no se usan. Se dejaron sin borrar para no tocar el archivo que comparte con el catálogo provisional de laboratorio.
 
 **Para evitar conflictos al unir ramas:**
 - `routes/api.php`, `config/nido.php`, `resources/js/routes.tsx` y `resources/js/modules/catalog.ts` los comparten todos los módulos.
@@ -435,7 +434,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **137 correctas y 2 incompletas**. Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **195 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -489,21 +488,41 @@ Todas las rutas están bajo `/api/v1`.
 | PATCH | `/camas/{id}/estado` | `camas.gestionar` |
 | POST | `/internamientos/{episodio}/traslado` · `/internamientos/{episodio}/alta` | `traslados.gestionar` |
 | GET | `/ocupacion` | `ocupacion.ver` |
+| GET | `/camas-disponibles?bed_type=&isolation=[&ward_id=]` (camas libres y compatibles) | `admisiones.gestionar` |
+| POST | `/admisiones` (internamiento y cama en una transacción; `X-Request-Id` opcional, UUID) | `admisiones.gestionar` |
+| GET | `/admisiones/ordenes[?estado=todas]` (lista de espera de cama: urgentes primero) | `admisiones.gestionar` o `camas.ver` |
+| POST | `/admisiones/ordenes` · `/admisiones/ordenes/{id}/asignar` (cama → internamiento) · `/admisiones/ordenes/{id}/cancelar` (con motivo) | `admisiones.gestionar` |
+| GET | `/admisiones/{id}` · `/admisiones/{id}/eventos` (trazabilidad) | `admisiones.gestionar` o `camas.ver` / `admisiones.gestionar` o `auditoria.consultar` |
 | GET | `/expediente/{paciente}` (notas, diagnósticos, signos vitales y atenciones) | `expediente.leer` |
 | POST | `/expediente/{paciente}/notas` · PUT `/notas/{id}` (borrador; `sign: true` firma) | `notas.registrar` (+ `notas.firmar` para firmar) |
 | POST | `/notas/{id}/correccion` | `notas.firmar` |
 | POST | `/expediente/{paciente}/signos` | `signos_vitales.registrar` |
+| GET | `/expediente/{paciente}/alergias` (nivel de alerta, alergias activas e historial) | `expediente.leer`, `alergias.gestionar` o `prescripciones.crear` |
+| POST | `/expediente/{paciente}/alergias` · PATCH `/alergias/{id}/estado` (inactivar o resolver, con motivo) | `alergias.gestionar` |
+| POST | `/expediente/{paciente}/alergias/reconocimiento` (con la huella que se vio) | `expediente.leer` o `alergias.gestionar` |
 | POST | `/expediente/{paciente}/consulta` · `/episodios/{id}/terminar` | `notas.registrar` |
 | GET | `/laboratorio/pruebas` · `/expediente/{paciente}/laboratorio` | permisos de laboratorio o `expediente.leer` |
+| GET | `/catalogo/pruebas-laboratorio?q=&seccion=&muestra=&fecha=` · `/catalogo/pruebas-laboratorio/{código}?fecha=` (404 `PRUEBA_NO_VIGENTE` con su vigencia) · `/opciones` · `/{código}/versiones` | `pruebas_lab.ver`, `pruebas_lab.gestionar` u `ordenes_lab.crear` |
+| POST | `/catalogo/pruebas-laboratorio` (alta) · `/catalogo/pruebas-laboratorio/{código}/versiones` | `pruebas_lab.gestionar` |
 | POST | `/expediente/{paciente}/laboratorio` (orden) | `ordenes_lab.crear` |
 | GET | `/laboratorio/trabajo?etapa=recepcion, resultados o validacion` | `muestras.recibir`, `resultados.registrar` o `resultados.validar` |
 | POST | `/laboratorio/items/{id}/recibir` · `/laboratorio/items/{id}/rechazar` | `muestras.recibir` |
 | POST | `/laboratorio/items/{id}/resultado` | `resultados.registrar` |
 | POST | `/laboratorio/resultados/{id}/revision` | `resultados.validar` |
 | GET | `/medicamentos` · `/recetas[?paciente=]` | `medicamentos.ver`, `prescripciones.crear` o `expediente.leer` |
+| GET | `/catalogo/medicamentos?q=&forma=&fecha=` (vigentes en la fecha, máximo 50) · `/catalogo/medicamentos/{código}?fecha=` | `medicamentos.ver`, `prescripciones.crear` o `auditoria.consultar` |
+| GET | `/catalogo/medicamentos/opciones` · `/catalogo/medicamentos/{código}/versiones` (historial) | `medicamentos.ver` o `auditoria.consultar` |
+| POST | `/catalogo/medicamentos` (alta) · `/catalogo/medicamentos/{código}/versiones` · `/catalogo/medicamentos/{código}/baja` | `medicamentos.gestionar` |
+| DELETE | `/catalogo/medicamentos/{código}` (solo si nunca se recetó) | `medicamentos.gestionar` |
 | POST | `/expediente/{paciente}/recetas` · `/recetas/{id}/anular` | `prescripciones.crear` / `prescripciones.anular` |
 | GET | `/reportes/operativos?tipo=&desde=&hasta=` (vista previa) | `reportes.ver` o `reportes.exportar` |
 | GET | `/reportes/operativos/exportar?…` (CSV con huella SHA-256 en la bitácora) | `reportes.exportar` |
+| GET | `/reportes/indicadores` · `/reportes/indicadores/resumen?desde=&hasta=` (catálogo y tarjetas) | `reportes.ver` o `reportes.citas_propias` |
+| GET | `/reportes/{tipo}?desde=&hasta=[&granularidad=dia\|semana\|mes]` (indicador, comparación, tendencia y ficha) | `reportes.ver`; con `reportes.citas_propias`, solo `citas` y sus propias citas |
+| GET | `/reportes/{tipo}/desglose?…[&dimension=]` · `/reportes/{tipo}/registros?…&parte=[&pagina=]` | Igual que `/reportes/{tipo}` |
+| GET | `/alertas?vista=mias, abiertas o recientes` · `/alertas/resumen` (la campana) · `/alertas/{id}` (con historial) | `alertas.ver` |
+| POST | `/alertas/{id}/acuse` (solo quien la recibió) · `/alertas/{id}/cierre` (con nota) | `alertas.ver` / `alertas.cerrar` |
+| GET / PUT | `/alertas/politicas` (plazo de acuse por prioridad, de 5 a 60 min) | `alertas.ver` o `alertas.configurar` / `alertas.configurar` |
 | GET / POST | `/calidad/defectos` · POST `/calidad/defectos/{id}/estado` | `calidad.gestionar` |
 | GET / POST | `/calidad/ejecuciones` · GET `/calidad/gate/{versión}` | `versiones.gestionar` o `calidad.gestionar` |
 | POST | `/calidad/ci/ejecuciones` (desde el CI, con `Authorization: Bearer NIDO_CI_TOKEN`) | Token de CI |

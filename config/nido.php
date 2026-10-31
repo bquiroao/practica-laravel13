@@ -54,6 +54,9 @@ return [
         'medicamentos.gestionar' => ['catalogo-medicamentos', 'Gestionar el catálogo de medicamentos'],
         'alertas.ver' => ['alertas-criticas-notificaciones-internas', 'Ver alertas críticas'],
         'alertas.gestionar' => ['alertas-criticas-notificaciones-internas', 'Reconocer y escalar alertas críticas'],
+        // Módulo alertas-criticas-notificaciones-internas: cerrar con nota (RN-09) y configurar los plazos (CU-08).
+        'alertas.cerrar' => ['alertas-criticas-notificaciones-internas', 'Cerrar alertas críticas acusadas, con nota'],
+        'alertas.configurar' => ['alertas-criticas-notificaciones-internas', 'Configurar los plazos de acuse de las alertas'],
         // Laboratorio
         'pruebas_lab.ver' => ['catalogo-pruebas-laboratorio', 'Consultar el catálogo de pruebas'],
         'pruebas_lab.gestionar' => ['catalogo-pruebas-laboratorio', 'Gestionar el catálogo de pruebas'],
@@ -64,6 +67,7 @@ return [
         // Reportes
         'dashboard.ver' => ['dashboard-base', 'Ver el tablero de inicio'],
         'reportes.ver' => ['reportes-analytics-basicos', 'Ver reportes e indicadores'],
+        'reportes.citas_propias' => ['reportes-analytics-basicos', 'Ver el indicador de citas, solo con sus propias citas'],
         'reportes.exportar' => ['reportes-operativos-exportables', 'Exportar reportes operativos'],
         // Calidad
         'calidad.gestionar' => ['qa-regresion-defectos', 'Gestionar campañas de regresión y defectos'],
@@ -79,16 +83,20 @@ return [
             'contratos_api.ver', 'base_datos.verificar', 'medicos.ver', 'medicos.gestionar', 'camas.ver', 'camas.gestionar',
             'ocupacion.ver', 'medicamentos.ver', 'medicamentos.gestionar', 'pruebas_lab.ver', 'pruebas_lab.gestionar',
             'dashboard.ver', 'reportes.ver', 'reportes.exportar',
+            'alertas.configurar', // módulo alertas-criticas-notificaciones-internas
         ]],
         'direccion' => ['Dirección médica', 'hospital', [
             'pacientes.ver', 'citas.ver', 'medicos.ver', 'camas.ver', 'ocupacion.ver', 'alertas.ver', 'dashboard.ver',
             'reportes.ver', 'reportes.exportar', 'auditoria.consultar',
+            'alertas.cerrar', 'alertas.configurar', // módulo alertas-criticas-notificaciones-internas
         ]],
         'medico' => ['Médico', 'hospital', [
             'pacientes.ver', 'citas.ver', 'citas.gestionar', 'medicos.ver', 'camas.ver', 'ocupacion.ver', 'admisiones.gestionar', 'traslados.gestionar',
             'expediente.leer', 'notas.registrar', 'notas.firmar', 'signos_vitales.registrar', 'alergias.gestionar',
             'prescripciones.crear', 'prescripciones.anular', 'medicamentos.ver', 'alertas.ver', 'alertas.gestionar',
             'pruebas_lab.ver', 'ordenes_lab.crear', 'dashboard.ver', 'movil.usar',
+            'reportes.citas_propias',
+            'alertas.cerrar', // módulo alertas-criticas-notificaciones-internas
         ]],
         'enfermeria' => ['Enfermería', 'hospital', [
             'pacientes.ver', 'citas.ver', 'camas.ver', 'ocupacion.ver', 'traslados.gestionar', 'expediente.leer',

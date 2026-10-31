@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn';
 import { sections } from '@/modules/catalog';
 import { Logo, Select } from '@/components/ui';
 import { roleName } from '@/modules/roles';
+import { AlertBell } from '@/modules/alerts/AlertBell';
 
 interface HospitalOption { id: string; code: string; name: string }
 
@@ -105,6 +106,8 @@ export function AppShell() {
                         {can('alertas.ver') && (
                             <NavLink to="/alertas" className="relative rounded-lg p-2 text-nido-800 hover:bg-nido-50" aria-label="Alertas críticas">
                                 <Bell className="size-5" aria-hidden />
+                                {/* Módulo alertas-criticas-notificaciones-internas: alertas que esperan el acuse de este usuario. */}
+                                <AlertBell />
                             </NavLink>
                         )}
                         <div className="hidden text-right leading-tight sm:block">
