@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\SystemController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\Clinical\AdmissionController;
+use App\Http\Controllers\Api\V1\Clinical\AdmissionOrderController;
 use App\Http\Controllers\Api\V1\Clinical\AllergyController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
@@ -128,6 +129,11 @@ Route::middleware('tenant')->group(function (): void {
         // Módulo admisión hospitalaria y asignación de cama: abre el internamiento y su estancia en una cama disponible.
         Route::get('/camas-disponibles', [AdmissionController::class, 'availableBeds'])->middleware('permiso:admisiones.gestionar');
         Route::post('/admisiones', [AdmissionController::class, 'store'])->middleware('permiso:admisiones.gestionar');
+        // Mejora del módulo admisión: orden de ingreso pendiente de cama (lista de espera).
+        Route::get('/admisiones/ordenes', [AdmissionOrderController::class, 'index'])->middleware('permiso:admisiones.gestionar|camas.ver');
+        Route::post('/admisiones/ordenes', [AdmissionOrderController::class, 'store'])->middleware('permiso:admisiones.gestionar');
+        Route::post('/admisiones/ordenes/{order}/asignar', [AdmissionOrderController::class, 'assign'])->middleware('permiso:admisiones.gestionar')->whereUuid('order');
+        Route::post('/admisiones/ordenes/{order}/cancelar', [AdmissionOrderController::class, 'cancel'])->middleware('permiso:admisiones.gestionar')->whereUuid('order');
         Route::get('/admisiones/{admission}', [AdmissionController::class, 'show'])->middleware('permiso:admisiones.gestionar|camas.ver')->whereUuid('admission');
         Route::get('/admisiones/{admission}/eventos', [AdmissionController::class, 'events'])->middleware('permiso:admisiones.gestionar|auditoria.consultar')->whereUuid('admission');
 

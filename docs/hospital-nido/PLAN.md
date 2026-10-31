@@ -523,6 +523,30 @@ Se integró en su propia rama, siguiendo la sección 7.4 del `README.md`. Es el 
 - 11 pruebas Feature nuevas (`CriticalAlertTest`), con los criterios CA-01 a CA-16 y el reloj controlado (`travelTo`, RNF-04);
 - en total, **189 correctas y ninguna incompleta**.
 
+## Admisión: orden de ingreso y tiempo de espera de cama (mejora)
+
+Mejora del módulo de admisión, en su propia rama. Antes, la admisión creaba el internamiento y asignaba la cama en el mismo paso, así que no había espera que medir y el indicador «Tiempo de espera de cama» seguía como «Próximamente».
+
+**Flujo nuevo:**
+- el médico (o recepción) **ordena el ingreso**: paciente, tipo de cama, aislamiento, origen, prioridad (urgente o programada) y motivo;
+- el paciente queda en la lista **«Esperando cama»** de `/camas`, con las urgentes primero y cuánto lleva esperando;
+- al **asignarle una cama** compatible se crea el internamiento como en una admisión directa (misma transacción y mismas reglas) y la orden queda «asignada»;
+- la orden también se puede **cancelar** con motivo;
+- si alguien admite directamente a un paciente que tenía una orden pendiente, la admisión cumple esa orden.
+
+**Por qué una tabla aparte (`admission_orders`, migración `2026_11_01_000100`):** un internamiento abierto sin cama habría afectado a ocupación, traslados, altas, la regla de un internamiento abierto por paciente y signos vitales. Con la tabla aparte, nada de eso cambia.
+
+**Reglas:**
+- una sola orden pendiente por paciente, y no para quien ya está internado (también lo impide la base);
+- cada estado lleva sus datos: asignada = internamiento y hora; cancelada = motivo y hora;
+- la bitácora guarda `ORDEN_INGRESO_CREADA`, `ORDEN_INGRESO_CANCELADA`, y en `ADMISION_CREADA` la orden y los minutos de espera.
+
+**Indicador «Tiempo de espera de cama»:** minutos entre la orden y la cama asignada ÷ órdenes con cama asignada en el período, con desglose por prioridad y tipo de cama. Se muestra como «2 h 15 min». Las admisiones directas, sin orden, no cuentan. Con él ya no queda ningún indicador «Próximamente».
+
+**Verificación:**
+- 6 pruebas Feature nuevas (`AdmissionOrderTest`), con el reloj controlado;
+- en total, **195 correctas y ninguna incompleta**.
+
 ## Pendientes conocidos
 
 - **Diseño de Stitch:** la paleta y los componentes actuales son provisionales. Al llegar el diseño se ajustan `resources/css/app.css` y `resources/js/components/ui.tsx`, y el cambio se propaga a todas las pantallas.

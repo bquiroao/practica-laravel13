@@ -159,7 +159,7 @@ class AnalyticsTest extends ClinicalTestCase
         $summary = collect($this->getJson("/api/v1/reportes/indicadores/resumen?{$query}", $headers)->assertOk()->json('data'))->keyBy('clave');
 
         foreach ($catalog->json('data') as $meta) {
-            $this->assertContains($meta['unidad'], ['%', 'cantidad', 'dias']);
+            $this->assertContains($meta['unidad'], ['%', 'cantidad', 'dias', 'minutos']);
             $this->assertNotEmpty($meta['dimensiones'], "{$meta['clave']} declara sus dimensiones");
             $this->assertArrayHasKey($meta['clave'], $summary->all());
             foreach ($meta['dimensiones'] as $dimension) {

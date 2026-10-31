@@ -198,7 +198,7 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **Los 30 está
 | | `recepcion-muestras` | ✅ Integrado |
 | | `ingreso-resultados-laboratorio` | ✅ Integrado |
 | | `validacion-resultados-bioquimico` | ✅ Integrado |
-| Gestión | `reportes-analytics-basicos` | ✅ Integrado (19 indicadores trazables) |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (20 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -337,7 +337,8 @@ Estos módulos están listos para tomarse (ya están todos integrados y quedan c
   - `App\Services\Admissions\AdmissionService`: abre el internamiento (`care_episode` «inpatient») y su `bed_stay` en una cama disponible y compatible, todo en una transacción;
   - las reglas de elegibilidad de la cama, una clase por criterio en `app/Services/Admissions/Eligibility/`: cama operativa, sala, tipo de cama y aislamiento;
   - el asistente «Admitir paciente» en `/camas` (`resources/js/modules/admissions/`), y la trazabilidad de cada admisión en la cama ocupada;
-  - el permiso `admisiones.gestionar` (médico y recepción).
+  - el permiso `admisiones.gestionar` (médico y recepción);
+  - **la orden de ingreso pendiente de cama** (`admission_orders`, `AdmissionOrderService`): el médico ordena el ingreso, el paciente queda en la lista «Esperando cama» de `/camas` y, al asignarle una cama, se crea el internamiento de siempre. De ahí sale el indicador «Tiempo de espera de cama».
   - Detalle en `docs/hospital-nido/PLAN.md`.
 - **Defectos cerrados:**
   - **AU-01:** un episodio cerrado o anulado ahora exige fecha de fin;
@@ -433,7 +434,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **189 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
+Hoy la suite da **195 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -489,6 +490,8 @@ Todas las rutas están bajo `/api/v1`.
 | GET | `/ocupacion` | `ocupacion.ver` |
 | GET | `/camas-disponibles?bed_type=&isolation=[&ward_id=]` (camas libres y compatibles) | `admisiones.gestionar` |
 | POST | `/admisiones` (internamiento y cama en una transacción; `X-Request-Id` opcional, UUID) | `admisiones.gestionar` |
+| GET | `/admisiones/ordenes[?estado=todas]` (lista de espera de cama: urgentes primero) | `admisiones.gestionar` o `camas.ver` |
+| POST | `/admisiones/ordenes` · `/admisiones/ordenes/{id}/asignar` (cama → internamiento) · `/admisiones/ordenes/{id}/cancelar` (con motivo) | `admisiones.gestionar` |
 | GET | `/admisiones/{id}` · `/admisiones/{id}/eventos` (trazabilidad) | `admisiones.gestionar` o `camas.ver` / `admisiones.gestionar` o `auditoria.consultar` |
 | GET | `/expediente/{paciente}` (notas, diagnósticos, signos vitales y atenciones) | `expediente.leer` |
 | POST | `/expediente/{paciente}/notas` · PUT `/notas/{id}` (borrador; `sign: true` firma) | `notas.registrar` (+ `notas.firmar` para firmar) |

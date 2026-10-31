@@ -6,6 +6,7 @@ use App\Exceptions\DomainRuleException;
 use App\Services\Analytics\Indicators\AdmissionIndicator;
 use App\Services\Analytics\Indicators\AllergyIndicator;
 use App\Services\Analytics\Indicators\AppointmentIndicator;
+use App\Services\Analytics\Indicators\BedWaitIndicator;
 use App\Services\Analytics\Indicators\CancellationIndicator;
 use App\Services\Analytics\Indicators\CriticalAlertIndicator;
 use App\Services\Analytics\Indicators\CriticalLabResultIndicator;
@@ -32,6 +33,7 @@ class IndicatorRegistry
         OccupancyIndicator::class,
         LengthOfStayIndicator::class,
         AdmissionIndicator::class,
+        BedWaitIndicator::class,
         DischargeIndicator::class,
         MortalityIndicator::class,
         AppointmentIndicator::class,
@@ -54,10 +56,7 @@ class IndicatorRegistry
      * Indicadores que necesitan datos que todavía no genera el sistema. Se muestran en la pantalla para que se sepa
      * qué módulo los habilita; al integrarse, se agregan como clase en INDICATORS.
      */
-    public const PENDING = [
-        ['nombre' => 'Tiempo de espera de cama', 'area' => 'Hospitalización', 'modulo' => 'admision-hospitalaria-asignacion-cama',
-            'descripcion' => 'Horas entre la orden de ingreso y la asignación de una cama disponible.'],
-    ];
+    public const PENDING = [];
 
     /** @var array<string, Indicator> */
     private array $indicators = [];
