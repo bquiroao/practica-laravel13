@@ -1,0 +1,34 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 apertura: inactivo y fallecido = E2; con expediente = E3; activo sin expediente = EXP-p1 (R-01 a R-03)
+OK    U-02 vigencia [desde, hasta): sin consentimiento no; 99 no, 100 sí, 199 sí, 200 no; sin fin vale siempre (R-06, R-10)
+OK    U-03 acceso autorizado: sin asignación activa = E4; con asignación y sin expediente = NF; abierto, la consulta local solo trae el número (R-05)
+OK    U-04 longitudinal: vinculado con consentimiento = otros hospitales (solo hospital y número); sin vínculo MPI = solo local; consentimiento vencido = E5 (R-06, R-09, R-10)
+OK    U-05 integridad de la auditoría: cada operación deja un evento con su resultado, también los rechazos y el fallo de CENTRAL (R-08, RNF-04, semana 6)
+OK    U-06 cada código de rechazo (E2, E3, E4, NF, E5) tiene su HTTP fijo
+== Caja blanca
+OK    CB-01 consultar(): 7 caminos (V(G) = 7): E4, E2, NF, local, solo local, E5 y externos; solo los dos últimos tocan CENTRAL y todos auditan 1 evento
+OK    CB-02 MC/DC de vigente() (null, antes, sin fin, antes del fin, en el fin) y las 3 salidas de auditado(): rechazo, caída de la auditoría y caída de CENTRAL con su evento
+== Caja negra (HTTP)
+OK    CN-01 equivalencia de la apertura: activo = 201 EXP-p1; otra vez = 409 E3; inactivo, fallecido e inexistente = 422 E2 (R-01 a R-03)
+OK    CN-02 consulta autorizada: asignado = 200; sin asignación y con asignación cerrada = 403 E4; asignado sin expediente = 404 NF (R-05)
+OK    CN-03 longitudinal: consentimiento vigente = 200 con h2 y h3 (no el propio); vencido hace 60 s = 403 E5; sin vínculo MPI = solo local (R-06, R-10)
+FALLA CN-04 permisos y sesión: abrir sin profesional = 401, abrir sin relación de atención = 403 y consultar sin hospital = 401 (CP-04 de la semana 14, H-02 de la semana 13)
+      obtenido: 201, 201, 200
+OK    CN-05 errores del cliente: borrar el expediente (R-04), abrir por la ruta externa, ruta sin /record y barra final = 404
+OK    CN-06 auditoría por HTTP: consulta aceptada, consulta rechazada y apertura rechazada dejan 3 eventos con su resultado (R-08, RF-05)
+FALLA CN-07 integridad: la base HOSPITAL rechaza cambiar un evento de auditoría (R-08, H-04 de la semana 13)
+      obtenido: UPDATE aceptado: 3 filas cambiadas de E4 a ok
+OK    CN-08 CENTRAL caída: la consulta longitudinal = 503 E8 sin detalles y deja su evento E8 (RNF-04, semana 6)
+FALLA CN-09 base HOSPITAL no disponible al arrancar = 503 E8 con el mensaje amable, sin detalles técnicos (RNF-04)
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 14 de 17 pruebas pasan; 3 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-expediente/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal; solo se listan las pruebas que pasaban y ahora fallan
+M1: Consentimiento::vigente acepta el instante de fin (<= en vez de <) -> fallan: U-02 U-04 CB-01 CB-02
+M2: la consulta longitudinal ignora el vínculo con el MPI -> fallan: U-04 CB-01
