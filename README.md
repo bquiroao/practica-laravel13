@@ -54,87 +54,91 @@ El plan de integración, las decisiones de diseño y lo entregado en cada fase e
 
 ## 2. Cómo levantar el sistema
 
-**Requisitos:**
-- PHP 8.2+ con las extensiones `pdo_pgsql` y `pgsql`;
+**Requisitos** (en Windows, Linux o macOS):
+- PHP 8.2 o superior, con las extensiones `pdo_pgsql` y `pgsql` activadas en `php.ini`;
 - Composer 2;
-- Node.js 20+;
-- PostgreSQL 15+ (probado con 18).
+- Node.js 20 o superior;
+- PostgreSQL 15 o superior (probado con 16 y 18).
 
-Los comandos son para PowerShell en Windows. En Linux o macOS son los mismos, cambiando la ruta de `createdb`.
+Necesitas la contraseña de tu usuario `postgres`. Si no la recuerdas, en la sección «Problemas comunes» explicamos cómo poner una nueva.
 
-**1. Traer el proyecto e instalar dependencias:**
-```powershell
+### Primera vez (unos 5 minutos)
+
+**1. Descargar el proyecto e instalar dependencias:**
+```bash
+git clone https://github.com/compilations-teams/sistema-hospitalario-integrado-SistenasII-2026-G1.git
+cd sistema-hospitalario-integrado-SistenasII-2026-G1
 git checkout develop
-git pull origin develop
 composer install
 npm install
 ```
 
-**2. Crear el archivo de configuración** (solo la primera vez):
-```powershell
-copy .env.example .env
+**2. Crear la configuración:**
+```bash
+cp .env.example .env          # en PowerShell: copy .env.example .env
 php artisan key:generate
 php artisan jwt:secret
 ```
 
-**3. En `.env`, poner los datos de tu PostgreSQL** (puerto y contraseña del usuario `postgres`):
+**3. En `.env`, poner el puerto y la contraseña de tu PostgreSQL**, en las dos secciones:
 ```
 CENTRAL_DB_PORT=5432
 CENTRAL_DB_PASSWORD=tu_contraseña
 HOSPITAL_DB_PORT=5432
 HOSPITAL_DB_PASSWORD=tu_contraseña
 ```
-Para comprobar la conexión: `php artisan db:show --database=central`.
 
-**4. Crear las dos bases principales.** Si dice que ya existen, sigue al paso 5.
-```powershell
-& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_central
-& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres -h 127.0.0.1 his_hospital
+**4. Instalar todo con un solo comando:**
+```bash
+php artisan nido:instalar
 ```
+El comando:
+- comprueba la conexión a PostgreSQL;
+- crea las bases que falten: `his_central`, `his_hospital`, y una por cada hospital adicional (`his_hospital_nor`, `his_hospital_ori` y `his_hospital_occ`);
+- crea las tablas;
+- carga roles, permisos, los 4 hospitales, usuarios, especialidades y médicos;
+- agrega datos de ejemplo: pacientes, citas, camas, internados y alergias.
 
-**5. Crear las tablas de CENTRAL:**
-```powershell
-php artisan migrate --database=central --path=database/migrations/central
-php artisan migrate --database=central --path=database/migrations/framework
-```
+Debe terminar con `Listo`. Con `--fresh` vuelve a empezar desde cero; **se pierde todo lo que haya**.
 
-**6. Cargar roles, permisos, los 4 hospitales y los usuarios de demostración:**
-```powershell
-php artisan db:seed
-```
-
-**7. Crear la base de cada hospital con datos de ejemplo:**
-```powershell
-php artisan nido:hospitales --demo
-```
-Este comando:
-- crea la base que falte (Central usa `his_hospital`; Norte, Oriente y Occidente usan `his_hospital_nor`, `his_hospital_ori` y `his_hospital_occ`);
-- la migra y carga el catálogo de especialidades;
-- con `--demo`, agrega médicos con horario, pacientes ficticios y citas;
-- con `--fresh`, borra y recrea el esquema de cada base.
-
-**8. Compilar las pantallas y encender:**
-```powershell
+**5. Compilar las pantallas y encender:**
+```bash
 npm run build
 php artisan serve
 ```
-Abre **http://localhost:8000**. Mientras programas, abre en otra terminal `npm run dev` para ver los cambios de React al instante.
+Abre **http://localhost:8000** y entra con un usuario de la [sección 3](#3-usuarios-de-demostración).
 
-**Cada vez que traigas cambios de `develop`:**
-1. `git pull`;
-2. `composer install` y `npm install`, si cambiaron dependencias;
-3. `php artisan migrate --database=central --path=database/migrations/central`;
-4. `php artisan nido:hospitales` (migra todas las bases de hospital);
-5. `npm run build`.
+### Las siguientes veces
+```bash
+php artisan serve
+```
 
-**Problemas comunes:**
+### Cuando traigas cambios de `develop`
+```bash
+git pull origin develop
+composer install
+npm install
+php artisan nido:instalar      # aplica las migraciones nuevas sin borrar datos
+npm run build
+```
+
+Mientras programas, deja `npm run dev` abierto en otra terminal para ver los cambios de React al instante.
+
+### Problemas comunes
 
 | Mensaje | Solución |
 |---|---|
 | `password authentication failed` | La contraseña de `.env` no es la de tu usuario `postgres`. |
+| `could not find driver` | Activa `extension=pdo_pgsql` y `extension=pgsql` en `php.ini` y vuelve a abrir la terminal. |
 | «Demasiados intentos» al iniciar sesión | `php artisan cache:clear` |
 | La página sale en blanco | `npm run build` |
-| `relation "..." does not exist` | Falta migrar: pasos 5 y 7. |
+| `relation "..." does not exist` | `php artisan nido:instalar` |
+
+**No recuerdo la contraseña de `postgres` (Windows):**
+1. En una terminal **como administrador**, abre `C:\Program Files\PostgreSQL\18\data\pg_hba.conf`. En las líneas `host … 127.0.0.1/32` y `host … ::1/128`, cambia `scram-sha-256` por `trust` y guarda.
+2. Ejecuta `Restart-Service postgresql-x64-18`.
+3. Ejecuta `& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h 127.0.0.1 -c "ALTER USER postgres PASSWORD 'NuevaClave';"`.
+4. Regresa esas líneas a `scram-sha-256`, guarda y reinicia el servicio otra vez.
 
 ---
 
@@ -159,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no se integran aparecen con la marca «pronto» y muestran de qué módulos salen.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **24 están integrados** y funcionando. Los 6 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -167,8 +171,8 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no 
 | | `rbac` | ✅ Integrado |
 | | `gobernanza-auditoria` | ✅ Integrado |
 | | `dashboard-base` | ✅ Integrado (inicio por rol) |
-| | `contratos-api` | 🔜 En el plan |
-| | `verificacion-bd-postgresql` | 🔜 En el plan |
+| | `contratos-api` | ✅ Integrado |
+| | `verificacion-bd-postgresql` | ✅ Integrado |
 | Pacientes y agenda | `pacientes` | ✅ Integrado |
 | | `medicos-especialidades` | ✅ Integrado |
 | | `citas-medicas` | ✅ Integrado |
@@ -189,16 +193,14 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el menú. Los que aún no 
 | | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
 | | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
 | Gestión | `reportes-analytics-basicos` | 🟦 **Disponible** (sección 7.3) |
-| | `reportes-operativos-exportables` | 🔜 En el plan |
-| Calidad | `qa-regresion-defectos` | 🔜 En el plan |
-| | `qa-e2e-ci-despliegue` | 🔜 En el plan |
-| Móvil | `investigacion-prototipo-nativephp` | 🔜 En el plan |
+| | `reportes-operativos-exportables` | ✅ Integrado |
+| Calidad | `qa-regresion-defectos` | ✅ Integrado |
+| | `qa-e2e-ci-despliegue` | ✅ Integrado |
+| Móvil | `investigacion-prototipo-nativephp` | ✅ Integrado (aplicación instalable, PWA) |
 
 **Leyenda:**
 - ✅ funciona de punta a punta, con pruebas;
-- 🟦 listo para tomarse (la base, los permisos y la entrada del menú ya existen);
-- 🔜 programado en las siguientes fases;
-- ⏳ depende de otro módulo.
+- 🟦 listo para tomarse: la base, los permisos y la entrada del menú ya existen.
 
 ---
 
@@ -433,7 +435,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **131 correctas y 2 incompletas**. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **137 correctas y 2 incompletas**. Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
 
 ---
 
@@ -500,3 +502,10 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/laboratorio/resultados/{id}/revision` | `resultados.validar` |
 | GET | `/medicamentos` · `/recetas[?paciente=]` | `medicamentos.ver`, `prescripciones.crear` o `expediente.leer` |
 | POST | `/expediente/{paciente}/recetas` · `/recetas/{id}/anular` | `prescripciones.crear` / `prescripciones.anular` |
+| GET | `/reportes/operativos?tipo=&desde=&hasta=` (vista previa) | `reportes.ver` o `reportes.exportar` |
+| GET | `/reportes/operativos/exportar?…` (CSV con huella SHA-256 en la bitácora) | `reportes.exportar` |
+| GET / POST | `/calidad/defectos` · POST `/calidad/defectos/{id}/estado` | `calidad.gestionar` |
+| GET / POST | `/calidad/ejecuciones` · GET `/calidad/gate/{versión}` | `versiones.gestionar` o `calidad.gestionar` |
+| POST | `/calidad/ci/ejecuciones` (desde el CI, con `Authorization: Bearer NIDO_CI_TOKEN`) | Token de CI |
+| GET | `/sistema/base-datos` (verificación en vivo) | `base_datos.verificar` |
+| GET | `/sistema/openapi[?completo=1]` (contrato OpenAPI 3 generado de las rutas) | Sesión (`contratos_api.ver` para el contrato completo) |

@@ -7,6 +7,9 @@ return [
 
     'name' => 'Hospital Nido',
 
+    // Token con el que el pipeline de CI registra sus ejecuciones (POST /api/v1/calidad/ci/ejecuciones). Vacío = deshabilitado.
+    'ci_token' => env('NIDO_CI_TOKEN', ''),
+
     'auth' => [
         // Módulo usuarios/tenants: contraseña de 12 o más caracteres con letra y dígito.
         'password_min_length' => 12,

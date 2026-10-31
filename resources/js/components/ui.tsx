@@ -92,7 +92,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 
 export function Spinner({ label = 'Cargando…' }: { label?: string }) {
     return (
-        <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500" role="status">
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-600" role="status">
             <Loader2 className="size-5 animate-spin" aria-hidden /> {label}
         </div>
     );
@@ -102,7 +102,7 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
     return (
         <div className="py-10 text-center">
             <p className="font-semibold text-slate-700">{title}</p>
-            {children && <div className="mt-1 text-sm text-slate-500">{children}</div>}
+            {children && <div className="mt-1 text-sm text-slate-600">{children}</div>}
         </div>
     );
 }

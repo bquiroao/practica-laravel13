@@ -22,3 +22,8 @@ createRoot(document.getElementById('app')!).render(
         </QueryClientProvider>
     </StrictMode>,
 );
+
+// Aplicación instalable (PWA): solo en la versión compilada, para no interferir con el servidor de desarrollo.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
+}

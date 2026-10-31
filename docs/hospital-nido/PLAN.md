@@ -37,9 +37,9 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas | **Lista** |
 | 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
-| 6 | Reportes | reportes-operativos-exportables | Pendiente |
-| 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | Pendiente |
-| 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | Pendiente |
+| 6 | Reportes | reportes-operativos-exportables | **Lista** |
+| 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
+| 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
 | Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, reportes-analytics-basicos, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
 
 Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 1 + 4 + 1 en las fases, más los 6 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
@@ -201,6 +201,48 @@ Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 1 + 4 + 1 en las fases, más los 6 disponib
 - 6 pruebas Feature nuevas;
 - recorrido en Chrome: 18/18, con médico, laboratorio, bioquímico y vista de celular;
 - se corrigió el contraste de los botones de acción peligrosa: el coral no llegaba a AA y ahora son rojo oscuro.
+
+## Fases 6, 7 y 8: qué se entregó
+
+**Reportes operativos:**
+- cinco reportes: citas, pacientes, internamientos, laboratorio y recetas;
+- filtros validados, con un rango de hasta 92 días;
+- vista previa en pantalla;
+- CSV con BOM, para que Excel muestre bien las tildes;
+- PDF desde el navegador, con una hoja de impresión limpia;
+- cada exportación queda en la bitácora con sus filtros, la fecha de corte y la huella SHA-256 del archivo.
+
+**Calidad:**
+- **Defectos:** pasan por abierto, en corrección, corregido y cerrado; también se pueden reabrir. Para cerrar uno hay que describir la re-ejecución que lo comprobó.
+- **Ejecuciones por versión:** se registran a mano o desde el CI, con su token.
+- **Quality gate:** una versión queda bloqueada si su última ejecución de alguna suite tiene fallas, o si quedan defectos críticos o altos sin cerrar. Las pruebas inestables se marcan como aviso.
+- **CI en GitHub Actions:** en cada push y PR corre PHPUnit contra PostgreSQL, revisa los tipos, compila las pantallas y revisa el formato.
+
+**Contratos API:**
+- OpenAPI 3 generado de las rutas reales, así que nunca se desactualiza;
+- cada usuario ve solo las operaciones que su rol puede usar;
+- con el permiso `contratos_api.ver`, se puede ver y descargar el contrato completo.
+
+**Verificación de la base de datos:**
+- conexión y versión de las dos bases;
+- migraciones pendientes;
+- extensión `btree_gist`;
+- integridad de la bitácora;
+- coherencia de las camas;
+- cantidad de registros por tabla.
+
+**App móvil:**
+- la investigación evaluó NativePHP;
+- se entrega como **aplicación web instalable (PWA)**, con manifiesto, íconos y service worker;
+- en el dispositivo solo se guarda la estructura de la aplicación, nunca datos clínicos.
+
+**Instalación:** `php artisan nido:instalar` deja el sistema listo en un solo paso.
+
+**Verificación:**
+- 6 pruebas Feature nuevas; en total, 137 correctas;
+- recorrido en Chrome de la fase: 19/19;
+- todos los recorridos juntos: 120/120 comprobaciones, sin violaciones WCAG A/AA y sin desborde a 375 px;
+- se corrigieron el contraste del texto «Cargando…» y del estado vacío sobre el fondo arena, y el ancho de la barra superior en el celular.
 
 ## Pendientes conocidos
 
