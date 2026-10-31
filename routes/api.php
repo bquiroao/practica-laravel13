@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Clinical\AdmissionController;
 use App\Http\Controllers\Api\V1\Clinical\AllergyController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
+use App\Http\Controllers\Api\V1\Clinical\CriticalAlertController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\LabController;
 use App\Http\Controllers\Api\V1\Clinical\LabTestCatalogController;
@@ -146,6 +147,17 @@ Route::middleware('tenant')->group(function (): void {
             Route::post('/{code}/versiones', [MedicationCatalogController::class, 'storeVersion'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
             Route::post('/{code}/baja', [MedicationCatalogController::class, 'retire'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
             Route::delete('/{code}', [MedicationCatalogController::class, 'destroy'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+        });
+
+        // Módulo alertas críticas y notificaciones internas: las crea al escuchar a laboratorio y signos vitales (AppServiceProvider).
+        Route::prefix('alertas')->group(function (): void {
+            Route::get('/resumen', [CriticalAlertController::class, 'summary'])->middleware('permiso:alertas.ver');
+            Route::get('/politicas', [CriticalAlertController::class, 'policies'])->middleware('permiso:alertas.ver|alertas.configurar');
+            Route::put('/politicas', [CriticalAlertController::class, 'updatePolicies'])->middleware('permiso:alertas.configurar');
+            Route::get('/', [CriticalAlertController::class, 'index'])->middleware('permiso:alertas.ver');
+            Route::get('/{alert}', [CriticalAlertController::class, 'show'])->middleware('permiso:alertas.ver')->whereUuid('alert');
+            Route::post('/{alert}/acuse', [CriticalAlertController::class, 'acknowledge'])->middleware('permiso:alertas.ver')->whereUuid('alert');
+            Route::post('/{alert}/cierre', [CriticalAlertController::class, 'close'])->middleware('permiso:alertas.cerrar')->whereUuid('alert');
         });
 
         // Módulo catálogo de pruebas de laboratorio: único que escribe en lab_tests; órdenes y resultados lo leen por LabTestDirectory.

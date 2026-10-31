@@ -7,6 +7,7 @@ use App\Services\Analytics\Indicators\AdmissionIndicator;
 use App\Services\Analytics\Indicators\AllergyIndicator;
 use App\Services\Analytics\Indicators\AppointmentIndicator;
 use App\Services\Analytics\Indicators\CancellationIndicator;
+use App\Services\Analytics\Indicators\CriticalAlertIndicator;
 use App\Services\Analytics\Indicators\CriticalLabResultIndicator;
 use App\Services\Analytics\Indicators\DiagnosisIndicator;
 use App\Services\Analytics\Indicators\DischargeIndicator;
@@ -44,6 +45,7 @@ class IndicatorRegistry
         LabTestIndicator::class,
         LabSectionIndicator::class,
         CriticalLabResultIndicator::class,
+        CriticalAlertIndicator::class,
         PrescriptionIndicator::class,
         PrescriptionGroupIndicator::class,
     ];
@@ -53,8 +55,6 @@ class IndicatorRegistry
      * qué módulo los habilita; al integrarse, se agregan como clase en INDICATORS.
      */
     public const PENDING = [
-        ['nombre' => 'Alertas críticas reconocidas a tiempo', 'area' => 'Clínico', 'modulo' => 'alertas-criticas-notificaciones-internas',
-            'descripcion' => 'Porcentaje de alertas críticas que el personal reconoció dentro del tiempo de escalamiento.'],
         ['nombre' => 'Tiempo de espera de cama', 'area' => 'Hospitalización', 'modulo' => 'admision-hospitalaria-asignacion-cama',
             'descripcion' => 'Horas entre la orden de ingreso y la asignación de una cama disponible.'],
     ];
