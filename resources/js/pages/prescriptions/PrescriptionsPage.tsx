@@ -5,15 +5,15 @@ import { api, errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { Alert, Badge, Card, EmptyState, PageHeader, Spinner } from '@/components/ui';
-import type { Medication, PrescriptionItem } from '@/pages/records/PrescriptionsTab';
+import type { PrescriptionItem } from '@/pages/records/PrescriptionsTab';
+import { MedicationCatalog } from '@/modules/medications/MedicationCatalog';
 
-/** Prescripciones: recetas recientes del hospital y el catálogo de medicamentos (provisional). */
+/** Prescripciones: recetas recientes del hospital y el catálogo de medicamentos. */
 export function PrescriptionsPage() {
     const { session } = useAuth();
     const [params, setParams] = useSearchParams();
     const tab = params.get('vista') === 'catalogo' ? 'catalogo' : 'recetas';
     const list = useQuery({ queryKey: ['recetas', 'todas'], queryFn: async () => (await api.get<{ data: PrescriptionItem[] }>('/recetas')).data.data, enabled: tab === 'recetas' });
-    const meds = useQuery({ queryKey: ['medicamentos'], queryFn: async () => (await api.get<{ data: Medication[] }>('/medicamentos')).data.data, enabled: tab === 'catalogo' });
 
     return (
         <>
@@ -41,14 +41,8 @@ export function PrescriptionsPage() {
                     </ul>
                 </Card>
             )) : (
-                <Card>
-                    <p className="border-b border-slate-200 px-5 py-3 text-sm text-slate-600">Catálogo provisional. Lo administrará el módulo de catálogo de medicamentos.</p>
-                    {meds.isLoading ? <Spinner /> : (
-                        <ul className="divide-y divide-slate-100">
-                            {meds.data?.map((m) => <li key={m.code} className="flex justify-between gap-2 px-5 py-3 text-sm"><span><strong>{m.name}</strong> <span className="font-mono text-xs text-slate-500">{m.code}</span></span><span className="text-slate-600">{m.presentation} · {m.route}</span></li>)}
-                        </ul>
-                    )}
-                </Card>
+                // Módulo catalogo-medicamentos: catálogo administrable (búsqueda, alta, versiones, baja e historial).
+                <MedicationCatalog />
             )}
         </>
     );

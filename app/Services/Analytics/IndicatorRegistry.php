@@ -17,6 +17,7 @@ use App\Services\Analytics\Indicators\LengthOfStayIndicator;
 use App\Services\Analytics\Indicators\MortalityIndicator;
 use App\Services\Analytics\Indicators\OccupancyIndicator;
 use App\Services\Analytics\Indicators\PatientIndicator;
+use App\Services\Analytics\Indicators\PrescriptionGroupIndicator;
 use App\Services\Analytics\Indicators\PrescriptionIndicator;
 use App\Services\Analytics\Indicators\VitalSignIndicator;
 use Illuminate\Contracts\Container\Container;
@@ -42,6 +43,7 @@ class IndicatorRegistry
         LabTestIndicator::class,
         CriticalLabResultIndicator::class,
         PrescriptionIndicator::class,
+        PrescriptionGroupIndicator::class,
     ];
 
     /**
@@ -53,8 +55,6 @@ class IndicatorRegistry
             'descripcion' => 'Porcentaje de alertas críticas que el personal reconoció dentro del tiempo de escalamiento.'],
         ['nombre' => 'Tiempo de espera de cama', 'area' => 'Hospitalización', 'modulo' => 'admision-hospitalaria-asignacion-cama',
             'descripcion' => 'Horas entre la orden de ingreso y la asignación de una cama disponible.'],
-        ['nombre' => 'Recetas por familia de medicamento', 'area' => 'Farmacia', 'modulo' => 'catalogo-medicamentos',
-            'descripcion' => 'Recetas agrupadas por grupo terapéutico del catálogo oficial.'],
         ['nombre' => 'Pruebas por área del laboratorio', 'area' => 'Laboratorio', 'modulo' => 'catalogo-pruebas-laboratorio',
             'descripcion' => 'Pruebas pedidas por sección (hematología, química, microbiología…) según el catálogo.'],
     ];

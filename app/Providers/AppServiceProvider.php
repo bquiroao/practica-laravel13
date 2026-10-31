@@ -4,10 +4,10 @@ namespace App\Providers;
 
 use App\Services\Access\PermissionResolver;
 use App\Services\Catalogs\ConfigLabTestDirectory;
-use App\Services\Catalogs\ConfigMedicationDirectory;
 use App\Services\Catalogs\LabTestDirectory;
 use App\Services\Catalogs\MedicationDirectory;
 use App\Services\Hospital\HospitalDatabase;
+use App\Services\Medications\DatabaseMedicationDirectory;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,7 +22,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(HospitalDatabase::class);
         // Catálogos provisionales: los módulos de catálogo de pruebas y de medicamentos registran aquí su implementación.
         $this->app->bind(LabTestDirectory::class, ConfigLabTestDirectory::class);
-        $this->app->bind(MedicationDirectory::class, ConfigMedicationDirectory::class);
+        // Módulo catalogo-medicamentos: prescripciones receta desde el catálogo administrable.
+        $this->app->bind(MedicationDirectory::class, DatabaseMedicationDirectory::class);
     }
 
     /**
