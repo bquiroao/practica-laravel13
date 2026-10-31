@@ -6,6 +6,7 @@ use App\Models\Hospital\Appointment;
 use App\Models\Hospital\CareEpisode;
 use App\Models\Hospital\LocalPatient;
 use App\Services\Analytics\AnalyticsService;
+use App\Services\Analytics\IndicatorRegistry;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -154,7 +155,7 @@ class AnalyticsTest extends ClinicalTestCase
         $query = "desde={$from}&hasta={$this->today()}";
 
         $catalog = $this->getJson('/api/v1/reportes/indicadores', $headers)->assertOk();
-        $this->assertCount(5, $catalog->json('pendientes'), 'Los indicadores que esperan a los módulos por integrar');
+        $this->assertCount(count(IndicatorRegistry::PENDING), $catalog->json('pendientes'), 'Los indicadores que esperan a los módulos por integrar');
         $summary = collect($this->getJson("/api/v1/reportes/indicadores/resumen?{$query}", $headers)->assertOk()->json('data'))->keyBy('clave');
 
         foreach ($catalog->json('data') as $meta) {

@@ -163,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **26 están integrados** y funcionando. Los 4 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **27 están integrados** y funcionando. Los 3 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -183,7 +183,7 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **26 están in
 | Clínico | `expediente-medico` | ✅ Integrado |
 | | `notas-soap-diagnosticos` | ✅ Integrado |
 | | `signos-vitales-alertas` | ✅ Integrado |
-| | `alergias-clinicas-alerta-visual-expediente` | 🟦 **Disponible** (sección 7.5) |
+| | `alergias-clinicas-alerta-visual-expediente` | ✅ Integrado (banner en la ficha y el expediente) |
 | | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
 | | `prescripciones-alergias` | ✅ Integrado (con catálogo provisional) |
 | | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
@@ -311,7 +311,7 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos módulos están listos para tomarse (el 7.2 y el 7.3 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (el 7.2, el 7.3 y el 7.5 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
 ### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
 - **Ya existe:**
@@ -370,20 +370,16 @@ Estos módulos están listos para tomarse (el 7.2 y el 7.3 ya están integrados 
   - el evento trae hospital, paciente, código del paciente, episodio, toma y la lista de hallazgos (`signo`, `etiqueta`, `valor`, `nivel`: `anormal` o `critica`), y `isCritical()`;
   - para crear la alerta, registra un *listener* en `AppServiceProvider` con `Event::listen(VitalSignsOutOfRange::class, …)`.
 
-### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente`
-- **Ya existe:**
-  - la tabla `allergies`: alérgeno, tipo, severidad y estado, con una regla que impide duplicar una alergia activa;
-  - el permiso `alergias.gestionar` (médico y enfermería);
-  - el prototipo (`CalculadorAlerta`, `NivelAlerta`, `ReglaNivelAlerta`).
-- **Falta:**
-  - el registro y la confirmación de alergias;
-  - el cálculo del nivel de alerta;
-  - **el banner visual**, siempre visible en la ficha del paciente y en el expediente.
-- **Se conecta con:**
-  - la ficha del paciente (`resources/js/pages/patients/PatientDetailPage.tsx`);
-  - el expediente (`resources/js/pages/records/RecordPage.tsx`), que ya tiene marcado con un comentario el lugar del banner, debajo del nombre del paciente;
-  - prescripciones (ya integrado), que **lee** las alergias activas de la tabla `allergies` para bloquear o advertir. Lo que registres aparece ahí sin más cambios. En la demostración se cargan dos alergias de ejemplo.
-- **Acuerdo de integración:** exporta un componente `AllergyBanner` en `resources/js/modules/allergies/` que reciba el id del paciente, para que las demás pantallas solo tengan que colocarlo.
+### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente` ✅ Integrado
+- **Qué hay:**
+  - `App\Services\Allergies\AllergyService`: registrar, inactivar o resolver (nunca borrar) y reconocer la alerta. Es el único que escribe en `allergies`;
+  - el nivel de alerta: una regla por clase en `app/Services/Allergies/Rules/` (severidad y reacción anafiláctica). Para agregar una regla se crea una clase nueva;
+  - la tabla `allergy_alert_acknowledgements`: quién reconoció qué alerta, por usuario y por huella;
+  - el banner `AllergyBanner` (`resources/js/modules/allergies/`), colocado en la ficha del paciente y en el expediente.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - para mostrar las alergias en otra pantalla, coloca `<AllergyBanner patientId={id} />`. Solo se muestra a quien tiene `expediente.leer`, `alergias.gestionar` o `prescripciones.crear`;
+  - prescripciones sigue **leyendo** la tabla por su cuenta: una alergia inactivada o resuelta deja de bloquear sin más cambios.
 
 ### 7.6 Catálogo de medicamentos — `catalogo-medicamentos`
 - **Ya existe:**
@@ -434,7 +430,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **152 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
+Hoy la suite da **159 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -495,6 +491,9 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/expediente/{paciente}/notas` · PUT `/notas/{id}` (borrador; `sign: true` firma) | `notas.registrar` (+ `notas.firmar` para firmar) |
 | POST | `/notas/{id}/correccion` | `notas.firmar` |
 | POST | `/expediente/{paciente}/signos` | `signos_vitales.registrar` |
+| GET | `/expediente/{paciente}/alergias` (nivel de alerta, alergias activas e historial) | `expediente.leer`, `alergias.gestionar` o `prescripciones.crear` |
+| POST | `/expediente/{paciente}/alergias` · PATCH `/alergias/{id}/estado` (inactivar o resolver, con motivo) | `alergias.gestionar` |
+| POST | `/expediente/{paciente}/alergias/reconocimiento` (con la huella que se vio) | `expediente.leer` o `alergias.gestionar` |
 | POST | `/expediente/{paciente}/consulta` · `/episodios/{id}/terminar` | `notas.registrar` |
 | GET | `/laboratorio/pruebas` · `/expediente/{paciente}/laboratorio` | permisos de laboratorio o `expediente.leer` |
 | POST | `/expediente/{paciente}/laboratorio` (orden) | `ordenes_lab.crear` |

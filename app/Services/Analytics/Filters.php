@@ -64,10 +64,15 @@ final class Filters
         return $this->from <= $this->now;
     }
 
-    /** @return array{0: CarbonImmutable, 1: CarbonImmutable} instantes en UTC para consultar la base */
+    /**
+     * Instantes para consultar la base, con microsegundos y zona: si se pasaran como Carbon, Laravel los recorta al
+     * segundo y quedaría fuera lo registrado en el mismo segundo de la consulta.
+     *
+     * @return array{0: string, 1: string}
+     */
     public function range(): array
     {
-        return [$this->from->utc(), $this->end()->utc()];
+        return [$this->from->utc()->format('Y-m-d H:i:s.uP'), $this->end()->utc()->format('Y-m-d H:i:s.uP')];
     }
 
     /** Días de calendario transcurridos del período (hasta hoy). */
