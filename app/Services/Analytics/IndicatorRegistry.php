@@ -12,6 +12,7 @@ use App\Services\Analytics\Indicators\DiagnosisIndicator;
 use App\Services\Analytics\Indicators\DischargeIndicator;
 use App\Services\Analytics\Indicators\DoctorProductivityIndicator;
 use App\Services\Analytics\Indicators\HighRiskAllergyIndicator;
+use App\Services\Analytics\Indicators\LabSectionIndicator;
 use App\Services\Analytics\Indicators\LabTestIndicator;
 use App\Services\Analytics\Indicators\LengthOfStayIndicator;
 use App\Services\Analytics\Indicators\MortalityIndicator;
@@ -41,6 +42,7 @@ class IndicatorRegistry
         AllergyIndicator::class,
         HighRiskAllergyIndicator::class,
         LabTestIndicator::class,
+        LabSectionIndicator::class,
         CriticalLabResultIndicator::class,
         PrescriptionIndicator::class,
         PrescriptionGroupIndicator::class,
@@ -55,8 +57,6 @@ class IndicatorRegistry
             'descripcion' => 'Porcentaje de alertas críticas que el personal reconoció dentro del tiempo de escalamiento.'],
         ['nombre' => 'Tiempo de espera de cama', 'area' => 'Hospitalización', 'modulo' => 'admision-hospitalaria-asignacion-cama',
             'descripcion' => 'Horas entre la orden de ingreso y la asignación de una cama disponible.'],
-        ['nombre' => 'Pruebas por área del laboratorio', 'area' => 'Laboratorio', 'modulo' => 'catalogo-pruebas-laboratorio',
-            'descripcion' => 'Pruebas pedidas por sección (hematología, química, microbiología…) según el catálogo.'],
     ];
 
     /** @var array<string, Indicator> */

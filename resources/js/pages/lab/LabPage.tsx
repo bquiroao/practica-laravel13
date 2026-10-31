@@ -5,8 +5,9 @@ import { useAuth } from '@/auth/AuthContext';
 import { api, errorMessage } from '@/lib/api';
 import { formatDate, formatTime } from '@/lib/format';
 import { cn } from '@/lib/cn';
-import { flagLabel, range, type Flag, type LabItem, type LabTest } from '@/modules/clinical/lab';
+import { flagLabel, range, type Flag, type LabItem } from '@/modules/clinical/lab';
 import { Alert, Badge, Button, Card, Dialog, EmptyState, Field, Input, PageHeader, Spinner, Textarea } from '@/components/ui';
+import { LabTestCatalog } from '@/modules/labtests/LabTestCatalog';
 
 type WorkItem = LabItem & { order_id: string; priority: 'routine' | 'urgent'; indication: string; ordered_at: string; patient: { id: string; code: string; name: string } };
 type Stage = 'recepcion' | 'resultados' | 'validacion' | 'pruebas';
@@ -35,26 +36,9 @@ export function LabPage() {
                         className={cn('rounded-md px-4 py-1.5 text-sm font-semibold', stage === key ? 'bg-nido-700 text-white' : 'text-slate-600 hover:bg-slate-100')}>{label}</button>
                 ))}
             </div>
-            {stage === 'pruebas' ? <TestsList /> : <Worklist stage={stage} />}
+            {/* Módulo catalogo-pruebas-laboratorio: catálogo administrable (búsqueda, requisitos de muestra, alta y versiones). */}
+            {stage === 'pruebas' ? <LabTestCatalog /> : <Worklist stage={stage} />}
         </>
-    );
-}
-
-function TestsList() {
-    const tests = useQuery({ queryKey: ['lab', 'pruebas'], queryFn: async () => (await api.get<{ data: LabTest[] }>('/laboratorio/pruebas')).data.data });
-    if (tests.isLoading) return <Spinner />;
-    return (
-        <Card>
-            <p className="border-b border-slate-200 px-5 py-3 text-sm text-slate-600">Catálogo provisional. Lo administrará el módulo de catálogo de pruebas de laboratorio.</p>
-            <ul className="divide-y divide-slate-100">
-                {tests.data?.map((t) => (
-                    <li key={t.code} className="flex flex-wrap justify-between gap-2 px-5 py-3 text-sm">
-                        <span><strong>{t.name}</strong> <span className="font-mono text-xs text-slate-500">{t.code}</span><span className="block text-xs text-slate-600">{t.specimen_type}</span></span>
-                        <span className="text-slate-700">Referencia: {range(t)}</span>
-                    </li>
-                ))}
-            </ul>
-        </Card>
     );
 }
 

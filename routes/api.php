@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\LabController;
+use App\Http\Controllers\Api\V1\Clinical\LabTestCatalogController;
 use App\Http\Controllers\Api\V1\Clinical\MedicationCatalogController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
 use App\Http\Controllers\Api\V1\Clinical\PrescriptionController;
@@ -145,6 +146,17 @@ Route::middleware('tenant')->group(function (): void {
             Route::post('/{code}/versiones', [MedicationCatalogController::class, 'storeVersion'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
             Route::post('/{code}/baja', [MedicationCatalogController::class, 'retire'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
             Route::delete('/{code}', [MedicationCatalogController::class, 'destroy'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+        });
+
+        // Módulo catálogo de pruebas de laboratorio: único que escribe en lab_tests; órdenes y resultados lo leen por LabTestDirectory.
+        Route::prefix('catalogo/pruebas-laboratorio')->group(function (): void {
+            $read = 'permiso:pruebas_lab.ver|pruebas_lab.gestionar|ordenes_lab.crear';
+            Route::get('/opciones', [LabTestCatalogController::class, 'options'])->middleware($read);
+            Route::get('/', [LabTestCatalogController::class, 'index'])->middleware($read);
+            Route::post('/', [LabTestCatalogController::class, 'store'])->middleware('permiso:pruebas_lab.gestionar');
+            Route::get('/{code}', [LabTestCatalogController::class, 'show'])->middleware($read)->where('code', '[A-Za-z0-9-]+');
+            Route::get('/{code}/versiones', [LabTestCatalogController::class, 'history'])->middleware($read)->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/versiones', [LabTestCatalogController::class, 'storeVersion'])->middleware('permiso:pruebas_lab.gestionar')->where('code', '[A-Za-z0-9-]+');
         });
 
         // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
