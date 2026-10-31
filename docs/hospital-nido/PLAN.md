@@ -35,14 +35,14 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | **Lista** |
-| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas | **Lista** |
+| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente | **Lista** |
 | 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas, catalogo-medicamentos | Disponibles |
 
-Son 30 módulos: 4 + 3 + 4 + 3 + 5 + 2 + 4 + 1 en las fases, más los 4 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 4 + 4 + 5 + 2 + 4 + 1 en las fases, más los 3 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -322,6 +322,56 @@ Se integró en su propia rama, siguiendo la sección 7.2 del `README.md`. Comple
 **Verificación:**
 - 6 pruebas Feature nuevas (`AdmissionTest`);
 - en total, **152 correctas y ninguna incompleta**: AU-01 y AU-05 pasan.
+
+## Alergias clínicas y alerta visual en el expediente: qué se entregó
+
+Se integró en su propia rama, siguiendo la sección 7.5 del `README.md`. Es el único módulo que escribe en `allergies`. Prescripciones las sigue leyendo por su cuenta.
+
+**Registro** (CU-01, CU-02):
+- **Alérgeno (RN-01):** se identifica por nombre o por código.
+- **Tipo y severidad (RN-02):** de un catálogo cerrado.
+- **Reacción (RN-04):** opcional, de hasta 500 caracteres.
+- **Fecha de inicio (RN-05):** no puede ser futura.
+- **Paciente (RN-06):** solo pacientes activos.
+- **Verificación (RN-07):** la alergia queda verificada por quien la registra.
+- **Sin duplicados (RN-03):**
+  - mismo tipo y alérgeno, sin importar mayúsculas ni espacios;
+  - también lo valida el índice de la base, por si dos personas registran a la vez.
+
+**Nivel de alerta** (CU-04, RN-08):
+- es el mayor que asigne cualquier regla a cualquier alergia activa;
+- cada regla es una clase (OCP): `SeverityRule` y `AnaphylaxisRule`;
+- la severidad desconocida cuenta como ALTA;
+- una reacción anafiláctica siempre es CRÍTICA;
+- `SIN_REGISTRO` se muestra en gris y aclara que no confirma que no tenga alergias (DEC-02).
+
+**Reconocimiento** (CU-05, RN-09):
+- una alerta ALTA o CRÍTICA pide «He leído la alerta» a cada usuario;
+- vale solo para la huella que vio: si cambian las alergias activas o su severidad, se vuelve a pedir, y la huella vieja responde `ALERTA_CAMBIO`;
+- se guarda en `allergy_alert_acknowledgements` (migración `2026_10_31_000300`), que no se puede modificar ni borrar.
+
+**Inactivar o resolver** (CU-06, RN-10):
+- una alergia no se borra: queda en el historial con fecha y motivo;
+- deja de mostrarse en la alerta y de bloquear recetas.
+
+**Defectos de la semana 15, corregidos:**
+- **D-01:** una alergia con código y nombre, y otra solo con el mismo nombre, ya no quedan duplicadas.
+- **D-02:** «anafiláctica» con tilde se detecta, y la alerta es CRÍTICA.
+- **D-03:** un campo que no es texto se rechaza en lugar de descartarse.
+
+**Pantalla:**
+- `AllergyBanner` (`resources/js/modules/allergies/`), colocado debajo del nombre del paciente en la ficha y en el expediente;
+- el color va por nivel, y el texto dice el nivel, no solo el color;
+- tiene «Registrar alergia», «Inactivar o resolver» e historial;
+- solo lo ven los roles clínicos.
+
+**Reportes:** el indicador «Alergias de alto riesgo» reemplaza el pendiente «Pacientes con alergia grave confirmada». Usa el mismo calculador de nivel del módulo.
+
+**Corrección en reportes:** `Filters::range()` envía las fechas con microsegundos. Antes, lo registrado en el mismo segundo de la consulta quedaba fuera del período.
+
+**Verificación:**
+- 7 pruebas Feature nuevas (`AllergyTest`);
+- en total, **159 correctas y ninguna incompleta**.
 
 ## Pendientes conocidos
 
