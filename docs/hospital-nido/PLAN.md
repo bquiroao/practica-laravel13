@@ -37,12 +37,12 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas | **Lista** |
 | 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
-| 6 | Reportes | reportes-operativos-exportables | **Lista** |
+| 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, reportes-analytics-basicos, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
 
-Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 1 + 4 + 1 en las fases, más los 6 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 2 + 4 + 1 en las fases, más los 5 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -243,6 +243,49 @@ Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 1 + 4 + 1 en las fases, más los 6 disponib
 - recorrido en Chrome de la fase: 19/19;
 - todos los recorridos juntos: 120/120 comprobaciones, sin violaciones WCAG A/AA y sin desborde a 375 px;
 - se corrigieron el contraste del texto «Cargando…» y del estado vacío sobre el fondo arena, y el ancho de la barra superior en el celular.
+
+## Reportes y analytics básicos: qué se entregó
+
+Se integró en su propia rama (PR #560), siguiendo la sección 7.3 del `README.md`. Comparte `/reportes` con los reportes operativos: pestaña «Indicadores».
+
+**Indicadores trazables** (módulo reportes-analytics-basicos):
+- 15 indicadores de solo lectura sobre las tablas que ya llenan los demás módulos:
+  - **hospitalización:** ocupación de camas, estancia promedio, ingresos, egresos y mortalidad;
+  - **consulta externa:** citas, cancelación de citas y consultas atendidas;
+  - **pacientes y clínico:** pacientes nuevos, diagnósticos CIE-10, signos vitales fuera de rango y alergias;
+  - **laboratorio y farmacia:** pruebas solicitadas, resultados críticos y recetas emitidas.
+- Tres niveles con los mismos filtros y permisos (RN-08): el **indicador**, su **desglose** por una dimensión y los **registros** que forman cada parte.
+- La suma del desglose es el numerador, y la de los registros es su parte (RN-07): las tres salen de los mismos casos. Por eso un promedio (estancia) se desglosa en días y egresos, nunca promediando promedios.
+- Ficha de trazabilidad con fórmula, período, filtros, fuente y fecha del cálculo (RN-05).
+- Comparación con el período anterior del mismo largo, y tendencia por día, semana o mes, con los períodos parciales marcados (RN-03).
+- «Sin datos» en lugar de un cero (RN-06).
+- Los grupos con menos de 3 casos se juntan en «Otros» sin cambiar el total (RN-04).
+- El paciente aparece solo con su código (RN-09).
+- Período de hasta 366 días.
+- El valor se calcula completo y se redondea solo en la pantalla (`resources/js/modules/analytics/format.ts`).
+- **Médico:** con el permiso nuevo `reportes.citas_propias`, solo ve el indicador de citas y solo con sus propias citas. Pedir las de otro médico responde 403 (CA-07).
+- Se corrigieron dos defectos de las pruebas de la semana 15:
+  - **D-01:** una parte que no existe en el desglose responde 422;
+  - **D-02:** el período tiene límite.
+- Cada respuesta lleva `X-Correlation-Id` y su duración queda en el log (RNF-01). Si la base no responde, sale un 503 sin detalles técnicos.
+- **Un indicador nuevo es una clase nueva** en `app/Services/Analytics/Indicators/`, registrada en `IndicatorRegistry` (RNF-05).
+- Cinco indicadores esperan datos de los módulos disponibles y se muestran como «Próximamente»:
+  - alertas reconocidas a tiempo;
+  - tiempo de espera de cama;
+  - recetas por familia de medicamento;
+  - pruebas por área del laboratorio;
+  - pacientes con alergia grave confirmada.
+- Ingresos, estancia, alergias, recetas y resultados críticos ya leen las tablas que esos módulos van a llenar.
+
+**Pantalla:**
+- tarjetas por área con su comparación;
+- el detalle tiene la ficha, la tendencia y el desglose en gráficas (Recharts), cada una con su tabla para lectores de pantalla;
+- registros paginados, de 10 en 10;
+- las gráficas se descargan aparte, solo al abrir la pestaña.
+
+**Verificación:**
+- 7 pruebas Feature nuevas (`AnalyticsTest`), entre ellas una prueba de contrato que exige RN-07 a los 15 indicadores en todas sus dimensiones;
+- en total, 144 correctas y 2 incompletas (AU-01 y AU-05).
 
 ## Pendientes conocidos
 
