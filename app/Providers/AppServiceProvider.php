@@ -2,12 +2,19 @@
 
 namespace App\Providers;
 
+use App\Events\LabResultCritical;
+use App\Events\VitalSignsOutOfRange;
 use App\Services\Access\PermissionResolver;
+use App\Services\Alerts\Channels\AlertChannel;
+use App\Services\Alerts\Channels\InternalInboxChannel;
+use App\Services\Alerts\Listeners\CreateAlertFromLabResult;
+use App\Services\Alerts\Listeners\CreateAlertFromVitalSigns;
 use App\Services\Catalogs\LabTestDirectory;
 use App\Services\Catalogs\MedicationDirectory;
 use App\Services\Hospital\HospitalDatabase;
 use App\Services\LabCatalog\DatabaseLabTestDirectory;
 use App\Services\Medications\DatabaseMedicationDirectory;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LabTestDirectory::class, DatabaseLabTestDirectory::class);
         // Módulo catalogo-medicamentos: prescripciones receta desde el catálogo administrable.
         $this->app->bind(MedicationDirectory::class, DatabaseMedicationDirectory::class);
+        // Módulo alertas-criticas-notificaciones-internas: canal de notificación interno (sin correo, SMS ni push).
+        $this->app->bind(AlertChannel::class, InternalInboxChannel::class);
     }
 
     /**
@@ -32,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Módulo alertas-criticas-notificaciones-internas: escucha a laboratorio y signos vitales sin acoplarse a ellos.
+        Event::listen(LabResultCritical::class, CreateAlertFromLabResult::class);
+        Event::listen(VitalSignsOutOfRange::class, CreateAlertFromVitalSigns::class);
     }
 }
