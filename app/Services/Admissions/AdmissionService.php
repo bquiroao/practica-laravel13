@@ -6,6 +6,7 @@ use App\Exceptions\DomainRuleException;
 use App\Models\Central\AuditLog;
 use App\Models\Central\CentralUser;
 use App\Models\Central\Hospital;
+use App\Models\Hospital\AdmissionOrder;
 use App\Models\Hospital\Bed;
 use App\Models\Hospital\BedStay;
 use App\Models\Hospital\CareEpisode;
@@ -89,6 +90,10 @@ class AdmissionService
                 BedStay::query()->create(['care_episode_id' => $episode->care_episode_id, 'bed_id' => $bed->bed_id,      // A-12, RN-01
                     'assigned_by_user_ref_id' => $ref->local_user_ref_id, 'started_at' => $now, 'reason' => 'Admisión']);
                 $bed->forceFill(['status' => 'occupied', 'status_reason' => 'Admisión del paciente', 'status_changed_at' => $now])->save();
+                // Mejora: si el paciente esperaba con una orden de ingreso, la cama la cumple; de ahí sale la espera.
+                AdmissionOrder::query()->where('local_patient_id', $patient->local_patient_id)->where('status', 'pendiente')->lockForUpdate()->first()
+                    ?->forceFill(['status' => 'asignada', 'care_episode_id' => $episode->care_episode_id, 'assigned_at' => $now,
+                        'assigned_by_user_ref_id' => $ref->local_user_ref_id])->save();
 
                 return $episode;
             });
@@ -101,6 +106,10 @@ class AdmissionService
         $stay = $episode->stays->first();
         $detail = ['paciente' => $patient->code, 'cama' => $stay->bed->ward->code.'/'.$stay->bed->code, 'origen' => $data['source'],
             'rol' => implode(', ', $this->permissions->rolesFor($actor->user_id, $hospital->hospital_id))];
+        $order = AdmissionOrder::query()->where('care_episode_id', $episode->care_episode_id)->first();
+        if ($order !== null) {
+            $detail += ['orden' => $order->admission_order_id, 'espera_minutos' => (int) $order->ordered_at->diffInMinutes($order->assigned_at)];
+        }
         $resource = 'admision:'.$episode->care_episode_id;
         $this->audit->record('admisiones', 'ADMISION_CREADA', 'exito', $hospital->hospital_id, $actor->user_id, $resource, $detail, $ip, $requestId);
         $this->audit->record('admisiones', 'CAMA_ASIGNADA', 'exito', $hospital->hospital_id, $actor->user_id, $resource,
