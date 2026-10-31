@@ -73,7 +73,7 @@ export const sections: Section[] = [
     {
         title: 'Gestión',
         items: [
-            { path: '/reportes', label: 'Reportes', icon: BarChart3, anyOf: ['reportes.ver', 'reportes.exportar'],
+            { path: '/reportes', label: 'Reportes', icon: BarChart3, anyOf: ['reportes.ver', 'reportes.exportar', 'reportes.citas_propias'],
                 modules: ['reportes-analytics-basicos', 'reportes-operativos-exportables'], phase: 6, ready: true,
                 summary: 'Indicadores, filtros administrativos y exportación a PDF y Excel.' },
             { path: '/calidad', label: 'Calidad', icon: BadgeCheck, anyOf: ['calidad.gestionar', 'versiones.gestionar'],
