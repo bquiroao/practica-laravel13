@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\SystemController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\Clinical\AdmissionController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
@@ -119,6 +120,12 @@ Route::middleware('tenant')->group(function (): void {
         Route::get('/calidad/gate/{version}', [QualityController::class, 'gate'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
         Route::get('/sistema/base-datos', [SystemController::class, 'database'])->middleware('permiso:base_datos.verificar');
         Route::get('/sistema/openapi', [SystemController::class, 'openapi']);
+
+        // Módulo admisión hospitalaria y asignación de cama: abre el internamiento y su estancia en una cama disponible.
+        Route::get('/camas-disponibles', [AdmissionController::class, 'availableBeds'])->middleware('permiso:admisiones.gestionar');
+        Route::post('/admisiones', [AdmissionController::class, 'store'])->middleware('permiso:admisiones.gestionar');
+        Route::get('/admisiones/{admission}', [AdmissionController::class, 'show'])->middleware('permiso:admisiones.gestionar|camas.ver')->whereUuid('admission');
+        Route::get('/admisiones/{admission}/eventos', [AdmissionController::class, 'events'])->middleware('permiso:admisiones.gestionar|auditoria.consultar')->whereUuid('admission');
 
         // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
         // Van después de /reportes/operativos para que esas rutas fijas no las tome {tipo}.
