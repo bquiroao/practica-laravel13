@@ -11,6 +11,7 @@ use App\Services\Analytics\Indicators\CriticalLabResultIndicator;
 use App\Services\Analytics\Indicators\DiagnosisIndicator;
 use App\Services\Analytics\Indicators\DischargeIndicator;
 use App\Services\Analytics\Indicators\DoctorProductivityIndicator;
+use App\Services\Analytics\Indicators\HighRiskAllergyIndicator;
 use App\Services\Analytics\Indicators\LabTestIndicator;
 use App\Services\Analytics\Indicators\LengthOfStayIndicator;
 use App\Services\Analytics\Indicators\MortalityIndicator;
@@ -37,6 +38,7 @@ class IndicatorRegistry
         DiagnosisIndicator::class,
         VitalSignIndicator::class,
         AllergyIndicator::class,
+        HighRiskAllergyIndicator::class,
         LabTestIndicator::class,
         CriticalLabResultIndicator::class,
         PrescriptionIndicator::class,
@@ -55,8 +57,6 @@ class IndicatorRegistry
             'descripcion' => 'Recetas agrupadas por grupo terapéutico del catálogo oficial.'],
         ['nombre' => 'Pruebas por área del laboratorio', 'area' => 'Laboratorio', 'modulo' => 'catalogo-pruebas-laboratorio',
             'descripcion' => 'Pruebas pedidas por sección (hematología, química, microbiología…) según el catálogo.'],
-        ['nombre' => 'Pacientes con alergia grave confirmada', 'area' => 'Clínico', 'modulo' => 'alergias-clinicas-alerta-visual-expediente',
-            'descripcion' => 'Pacientes atendidos con una alergia grave confirmada y su alerta visible en el expediente.'],
     ];
 
     /** @var array<string, Indicator> */
