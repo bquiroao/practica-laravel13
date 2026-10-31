@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Hospital\Specialty;
 use Illuminate\Database\Seeder;
 
-/** Especialidades y medicamentos base de la base clínica del hospital actual. Idempotente. */
+/** Especialidades, medicamentos y pruebas de laboratorio base de la base clínica del hospital actual. Idempotente. */
 class HospitalCatalogSeeder extends Seeder
 {
     public const SPECIALTIES = [
@@ -28,5 +28,7 @@ class HospitalCatalogSeeder extends Seeder
         }
         // Módulo catalogo-medicamentos: catálogo inicial de medicamentos del hospital.
         (new MedicationCatalogSeeder)->run();
+        // Módulo catalogo-pruebas-laboratorio: catálogo inicial de pruebas del hospital.
+        (new LabTestCatalogSeeder)->run();
     }
 }
