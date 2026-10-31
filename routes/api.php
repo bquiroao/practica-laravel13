@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
 use App\Http\Controllers\Api\V1\Clinical\LabController;
+use App\Http\Controllers\Api\V1\Clinical\MedicationCatalogController;
 use App\Http\Controllers\Api\V1\Clinical\PatientController;
 use App\Http\Controllers\Api\V1\Clinical\PrescriptionController;
 use App\Http\Controllers\Api\V1\Clinical\RecordController;
@@ -133,6 +134,18 @@ Route::middleware('tenant')->group(function (): void {
         Route::post('/expediente/{patient}/alergias', [AllergyController::class, 'store'])->middleware('permiso:alergias.gestionar')->whereUuid('patient');
         Route::post('/expediente/{patient}/alergias/reconocimiento', [AllergyController::class, 'acknowledge'])->middleware('permiso:expediente.leer|alergias.gestionar')->whereUuid('patient');
         Route::patch('/alergias/{allergy}/estado', [AllergyController::class, 'updateStatus'])->middleware('permiso:alergias.gestionar')->whereUuid('allergy');
+
+        // Módulo catálogo de medicamentos: único que escribe en medications; prescripciones lo lee por MedicationDirectory.
+        Route::prefix('catalogo/medicamentos')->group(function (): void {
+            Route::get('/opciones', [MedicationCatalogController::class, 'options'])->middleware('permiso:medicamentos.ver|auditoria.consultar');
+            Route::get('/', [MedicationCatalogController::class, 'index'])->middleware('permiso:medicamentos.ver|prescripciones.crear|auditoria.consultar');
+            Route::post('/', [MedicationCatalogController::class, 'store'])->middleware('permiso:medicamentos.gestionar');
+            Route::get('/{code}', [MedicationCatalogController::class, 'show'])->middleware('permiso:medicamentos.ver|prescripciones.crear|auditoria.consultar')->where('code', '[A-Za-z0-9-]+');
+            Route::get('/{code}/versiones', [MedicationCatalogController::class, 'history'])->middleware('permiso:medicamentos.ver|auditoria.consultar')->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/versiones', [MedicationCatalogController::class, 'storeVersion'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+            Route::post('/{code}/baja', [MedicationCatalogController::class, 'retire'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+            Route::delete('/{code}', [MedicationCatalogController::class, 'destroy'])->middleware('permiso:medicamentos.gestionar')->where('code', '[A-Za-z0-9-]+');
+        });
 
         // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
         // Van después de /reportes/operativos para que esas rutas fijas no las tome {tipo}.
