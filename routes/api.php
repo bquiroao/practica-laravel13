@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\Api\V1\Admin\AuditController;
 use App\Http\Controllers\Api\V1\Admin\MembershipController;
+use App\Http\Controllers\Api\V1\Admin\QualityController;
+use App\Http\Controllers\Api\V1\Admin\ReportController;
 use App\Http\Controllers\Api\V1\Admin\RoleController;
+use App\Http\Controllers\Api\V1\Admin\SystemController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
@@ -17,6 +20,9 @@ use App\Http\Controllers\Api\V1\HospitalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/hospitales', [HospitalController::class, 'index']);
+
+// El pipeline de CI registra sus ejecuciones con NIDO_CI_TOKEN (sin hospital ni sesión).
+Route::post('/calidad/ci/ejecuciones', [QualityController::class, 'storeCiRun']);
 
 Route::middleware('tenant')->group(function (): void {
     Route::post('/auth/login', [AuthController::class, 'login']);
@@ -99,5 +105,18 @@ Route::middleware('tenant')->group(function (): void {
         Route::get('/recetas', [PrescriptionController::class, 'index'])->middleware('permiso:prescripciones.crear|medicamentos.ver|expediente.leer');
         Route::post('/expediente/{patient}/recetas', [PrescriptionController::class, 'store'])->middleware('permiso:prescripciones.crear')->whereUuid('patient');
         Route::post('/recetas/{prescription}/anular', [PrescriptionController::class, 'cancel'])->middleware('permiso:prescripciones.anular')->whereUuid('prescription');
+
+        // Fase 6: reportes operativos, calidad (defectos, ejecuciones y quality gate), verificación de BD y contratos API.
+        Route::get('/reportes/operativos/tipos', [ReportController::class, 'types'])->middleware('permiso:reportes.ver|reportes.exportar');
+        Route::get('/reportes/operativos', [ReportController::class, 'preview'])->middleware('permiso:reportes.ver|reportes.exportar');
+        Route::get('/reportes/operativos/exportar', [ReportController::class, 'export'])->middleware('permiso:reportes.exportar');
+        Route::get('/calidad/defectos', [QualityController::class, 'defects'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
+        Route::post('/calidad/defectos', [QualityController::class, 'storeDefect'])->middleware('permiso:calidad.gestionar');
+        Route::post('/calidad/defectos/{defect}/estado', [QualityController::class, 'transitionDefect'])->middleware('permiso:calidad.gestionar')->whereUuid('defect');
+        Route::get('/calidad/ejecuciones', [QualityController::class, 'runs'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
+        Route::post('/calidad/ejecuciones', [QualityController::class, 'storeRun'])->middleware('permiso:versiones.gestionar');
+        Route::get('/calidad/gate/{version}', [QualityController::class, 'gate'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
+        Route::get('/sistema/base-datos', [SystemController::class, 'database'])->middleware('permiso:base_datos.verificar');
+        Route::get('/sistema/openapi', [SystemController::class, 'openapi']);
     });
 });

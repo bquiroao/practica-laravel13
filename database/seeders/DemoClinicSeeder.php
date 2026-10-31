@@ -50,10 +50,12 @@ class DemoClinicSeeder
         $profiles = [];
         foreach (CentralUser::query()->whereIn('user_id', $doctorIds)->orderBy('email')->get() as $i => $user) {
             $ref = $refs->forUser($user, $hospital, 'medico');
-            $profile = DoctorProfile::query()->firstOrCreate(['local_user_ref_id' => $ref->local_user_ref_id], [
-                'license_number' => 'COL-'.$hospital->code.'-'.str_pad((string) (1001 + $i), 5, '0', STR_PAD_LEFT), 'status' => 'active',
-                'valid_from' => now()->subYear()->toDateString(),
-            ]);
+            $license = 'COL-'.$hospital->code.'-'.str_pad((string) (1001 + $i), 5, '0', STR_PAD_LEFT);
+            // Si la base del hospital ya tenía datos de una instalación anterior, se reutiliza el perfil existente.
+            $profile = DoctorProfile::query()->where('local_user_ref_id', $ref->local_user_ref_id)->first()
+                ?? DoctorProfile::query()->where('license_number', $license)->first()
+                ?? DoctorProfile::query()->create(['local_user_ref_id' => $ref->local_user_ref_id, 'license_number' => $license, 'status' => 'active',
+                    'valid_from' => now()->subYear()->toDateString()]);
             $codes = $plan[$user->email] ?? ['MEDICINA_GENERAL'];
             foreach ($codes as $j => $code) {
                 $profile->specialties()->firstOrCreate(['specialty_id' => $specialties[$code]],

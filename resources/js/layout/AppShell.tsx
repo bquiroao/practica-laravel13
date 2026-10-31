@@ -79,11 +79,11 @@ export function AppShell() {
             {open && <div className="fixed inset-0 z-30 bg-nido-900/40 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
 
             <div className="min-w-0">
-                <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+                <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-slate-200 bg-white/95 px-3 backdrop-blur sm:gap-3 sm:px-6">
                     <button className="rounded p-2 text-nido-800 lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menú"><Menu className="size-5" /></button>
 
                     <label className="sr-only" htmlFor="hospital-actual">Hospital</label>
-                    <Select id="hospital-actual" className="w-auto max-w-56 font-semibold" value={session.hospital.id} disabled={switching || !hospitals.data}
+                    <Select id="hospital-actual" className="w-auto min-w-0 max-w-[10.5rem] font-semibold sm:max-w-56" value={session.hospital.id} disabled={switching || !hospitals.data}
                         onChange={(e) => onSwitch(e.target.value)}>
                         {(hospitals.data ?? [session.hospital]).map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
                     </Select>

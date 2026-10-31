@@ -25,6 +25,11 @@ const RecordSearchPage = lazy(() => import('@/pages/records/RecordSearchPage').t
 const RecordPage = lazy(() => import('@/pages/records/RecordPage').then((m) => ({ default: m.RecordPage })));
 const LabPage = lazy(() => import('@/pages/lab/LabPage').then((m) => ({ default: m.LabPage })));
 const PrescriptionsPage = lazy(() => import('@/pages/prescriptions/PrescriptionsPage').then((m) => ({ default: m.PrescriptionsPage })));
+const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const QualityPage = lazy(() => import('@/pages/quality/QualityPage').then((m) => ({ default: m.QualityPage })));
+const ApiDocsPage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.ApiDocsPage })));
+const DatabasePage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.DatabasePage })));
+const MobilePage = lazy(() => import('@/pages/admin/SystemPages').then((m) => ({ default: m.MobilePage })));
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then((m) => ({ default: m.NewAppointmentPage })));
 
 const ready: Record<string, ReactNode> = {
@@ -40,6 +45,11 @@ const ready: Record<string, ReactNode> = {
     '/expediente': <RecordSearchPage />,
     '/laboratorio': <LabPage />,
     '/prescripciones': <PrescriptionsPage />,
+    '/reportes': <ReportsPage />,
+    '/calidad': <QualityPage />,
+    '/admin/api': <ApiDocsPage />,
+    '/admin/base-datos': <DatabasePage />,
+    '/movil': <MobilePage />,
 };
 
 // Pantallas internas de un módulo: mismo permiso que pida la acción.
