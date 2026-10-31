@@ -75,7 +75,8 @@ class SchedulingAndBedIntegrityTest extends TestCase
 
     public function test_h3_rollback_removes_and_recreates_constraints(): void
     {
-        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => 3, '--force' => true]);
+        // Revierte desde H3 (agenda y camas) en adelante: los pasos se cuentan, así las migraciones nuevas no rompen la prueba.
+        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => $this->hospitalMigrationsFrom('2026_08_11_000300'), '--force' => true]);
         $this->assertFalse($this->tableExists('appointments'));
         $this->assertFalse($this->tableExists('bed_stays'));
         Artisan::call('migrate', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--force' => true]);

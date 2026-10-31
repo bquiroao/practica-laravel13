@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Services\Access\PermissionResolver;
+use App\Services\Catalogs\ConfigLabTestDirectory;
+use App\Services\Catalogs\ConfigMedicationDirectory;
+use App\Services\Catalogs\LabTestDirectory;
+use App\Services\Catalogs\MedicationDirectory;
+use App\Services\Hospital\HospitalDatabase;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +17,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Una caché de permisos por petición: un rol revocado se nota en la petición siguiente.
+        $this->app->scoped(PermissionResolver::class);
+        $this->app->singleton(HospitalDatabase::class);
+        // Catálogos provisionales: los módulos de catálogo de pruebas y de medicamentos registran aquí su implementación.
+        $this->app->bind(LabTestDirectory::class, ConfigLabTestDirectory::class);
+        $this->app->bind(MedicationDirectory::class, ConfigMedicationDirectory::class);
     }
 
     /**

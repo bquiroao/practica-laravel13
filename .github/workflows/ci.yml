@@ -1,0 +1,70 @@
+# Integración continua de Hospital Nido (módulo QA E2E, CI y despliegue): en cada push y PR a develop o main
+# corre todas las pruebas contra PostgreSQL real, revisa los tipos de TypeScript y compila las pantallas.
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CENTRAL_DB_HOST: 127.0.0.1
+      CENTRAL_DB_PORT: 5432
+      CENTRAL_DB_PASSWORD: postgres
+      HOSPITAL_DB_HOST: 127.0.0.1
+      HOSPITAL_DB_PORT: 5432
+      HOSPITAL_DB_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP 8.4 con PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pgsql, mbstring, sodium
+          coverage: none
+
+      - name: Dependencias de PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Bases de prueba
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE his_central_test"
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE his_hospital_test"
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d his_hospital_test -c "CREATE EXTENSION IF NOT EXISTS btree_gist"
+
+      - name: Configuración
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan jwt:secret --force
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Pantallas (tipos y compilación)
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm run build
+
+      - name: Pruebas (PHPUnit contra PostgreSQL)
+        run: php artisan test
+
+      - name: Formato del código PHP
+        run: vendor/bin/pint --test app tests/Feature database/seeders routes config/nido.php config/nido_catalogos.php

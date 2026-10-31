@@ -1,0 +1,33 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 ocupación = ocupadas / (disponibles + ocupadas): 1 de 2 = 50.0 aunque haya mantenimiento e inactiva aparte; 1 de 3 = 33.3 (R-01)
+OK    U-02 sin camas operativas o sin camas = «no aplica», nunca división entre cero; todas ocupadas = 100.0 (R-02)
+OK    U-03 inconsistencias: ocupada sin estancia, ocupada con dos y disponible con una se marcan; las coherentes no (R-04, semana 6)
+OK    U-04 actualización: 900 s no es viejo, 901 s sí (más de 15 minutos), 0 s no (R-06)
+OK    U-05 filtro por estado de cama: sin filtro todas; «occupied» solo B; «inactive» ninguna; mayúsculas y vacío = E3 (CU-03)
+OK    U-06 procedencia: solo salas activas (sin X), la sala sin camas da «no aplica», el corte guarda su hora y solo lleva cifras (R-03, R-05, R-07)
+== Caja blanca
+OK    CB-01 consultar() + filtrar(): 4 caminos (V(G) = 4): sin corte = vacío (aunque el filtro sea inválido), sin filtro, estado inválido = E3 y filtrado; más el aviso de viejo
+OK    CB-02 consolidar(): la lectura que falla sube antes de guardar (0 escrituras) y «cama === null» con una sala sin camas; condición de R-04 con 5 combinaciones
+== Caja negra (HTTP)
+OK    CN-01 equivalencia del corte: sin corte = estado vacío; consolidar = 201 con 2 salas activas; A = 75.0, M = «no aplica»; A3 y A4 inconsistentes (R-01 a R-04, E4)
+OK    CN-02 alrededor del límite de 15 min (con margen por el reloj del servidor; el límite exacto está en U-04): 0 s y 880 s sin aviso; 920 s con aviso (R-05, R-06)
+OK    CN-03 filtro y solo lectura: «occupied» = A; «maintenance» = M; mayúsculas y vacío = 422; consolidar no cambia ninguna cama (CU-03, RNF-02, R-09)
+FALLA CN-04 permisos: consultar sin permiso de ocupación, y consultar o consolidar con un hospital ajeno = 403 (RNF-01, R-08, H-01 de la semana 13)
+      obtenido: 200, 200, 201
+OK    CN-05 errores del cliente: GET de cortes, DELETE del tablero y ruta inexistente = 404
+OK    CN-06 falla de lectura: consolidar = 503 E8 sin detalles y la consulta sigue mostrando el corte anterior (R-09, RF-06, RNF-04)
+FALLA CN-07 procedencia: la cama X1, ocupada y con estancia abierta en la sala inactiva X, queda visible como inconsistencia (R-03, R-04, H-04 de la semana 13)
+      obtenido: inconsistentes = ["A3","A4"]; X1 no aparece en el corte
+FALLA CN-08 base no disponible al arrancar = 503 E8 con el mensaje amable, sin detalles técnicos (R-09, RNF-04)
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 13 de 16 pruebas pasan; 3 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-dashboard-ocupacion/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal; solo se listan las pruebas que pasaban y ahora fallan
+M1: la ocupación cuenta las camas en mantenimiento -> fallan: U-01 U-02
+M2: Corte::esViejo avisa con 15 minutos exactos (>= en vez de >) -> fallan: U-04

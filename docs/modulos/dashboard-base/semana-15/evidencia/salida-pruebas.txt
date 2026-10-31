@@ -1,0 +1,39 @@
+$ php semana-15/pruebas/pruebas-s15.php   # PHP 8.4.23 (CLI), Micro-HIS de develop
+== Unitarias
+OK    U-01 estados y textos de tarjeta: 0 = vacío con sugerencia, 1 = singular, 2 = plural, cargando y error sin detalles (R-04, R-05, R-09)
+OK    U-02 menú y tarjetas por permiso: sin permisos nada; uno solo lo suyo; mayúsculas o ajenos nada; los 3 en orden fijo (R-02)
+OK    U-03 resumen inicial: sin hospital o con espacios = E1; con hospital, el menú del rol y todas las tarjetas en «cargando» (R-01, R-04)
+OK    U-04 cada tarjeta por su cuenta: la que falla queda en error y las otras no; la vista solo lleva id, estado y texto (R-03, R-06)
+PEND. U-05 navegación (CU-03): Catalogo::destino llega con la semana 6 (PR #446, sin integrar)
+OK    U-06 cada código de rechazo (E4, E1) tiene su HTTP fijo
+== Caja blanca
+OK    CB-01 tarjeta(): 5 caminos (V(G) = 5): E1, E4, error, vacío y resumen; solo los tres últimos leen la base
+OK    CB-02 decisiones de texto(): las 4 ramas del match y las 2 del singular; «trim(hospital) === ''» con « h1 »; in_array estricto con «citas.ver »
+== Caja negra (HTTP)
+OK    CN-01 equivalencia del conteo: 1 (singular), 2 (plural; no cuenta la cancelada ni la de mañana) y 0 (vacío con sugerencia) (RF-01, RF-02)
+OK    CN-02 límites de sesión y permisos: sin hospital y con un espacio = 401 E1; sin permisos = 200 y 0 tarjetas; «camas.ver,» = 1 tarjeta; id en mayúsculas = 404 (R-01, RF-04)
+OK    CN-03 permisos del rol: tarjeta sin permiso = 403 E4 (el cliente la oculta); el menú solo muestra lo permitido (R-02, RF-05)
+FALLA CN-04 tenant: un hospital al que el usuario no pertenece = 403 en el resumen y en la tarjeta (CP-04 de la semana 14, H-01 de la semana 13)
+      obtenido: 200, 200
+FALLA CN-05 errores del cliente: tarjeta que no existe = 404 y no 403 (H-03 de la semana 13); ruta desconocida y método distinto = 404
+      obtenido: 403 E4, 404, 404
+OK    CN-06 falla de una tarjeta: camas = 503 E5 con texto amable y pacientes sigue en 200; sin detalles técnicos (R-03, R-09, RF-06)
+FALLA CN-07 base no disponible al arrancar = 503 E5 con texto amable, sin detalles técnicos (R-09, RNF-01)
+      obtenido: 200; el cuerpo muestra el «Fatal error» de PHP con SQLSTATE y la ruta de index.php
+RESULTADO: 11 de 14 pruebas pasan; 3 fallan (ver defectos)
+(exit 1)
+
+$ php micro-his-dashboard-base/pruebas/pruebas.php   # regresión: las pruebas de las semanas 3 y 4 siguen pasando
+RESULTADO: todo correcto
+(exit 0)
+
+$ # el mismo archivo contra el Micro-HIS de la semana 6 (PR #446, sin integrar), en una copia temporal
+OK    U-05 navegación (CU-03): ruta permitida; ruta del menú sin permiso = E6; ruta que no existe = NF (R-02, H-02 de la semana 13)
+FALLA CN-04 tenant: un hospital al que el usuario no pertenece = 403 en el resumen y en la tarjeta (CP-04 de la semana 14, H-01 de la semana 13)
+FALLA CN-05 errores del cliente: tarjeta que no existe = 404 y no 403 (H-03 de la semana 13); ruta desconocida y método distinto = 404
+FALLA CN-07 base no disponible al arrancar = 503 E5 con texto amable, sin detalles técnicos (R-09, RNF-01)
+RESULTADO: 12 de 15 pruebas pasan; 3 fallan (ver defectos)
+
+$ # sensibilidad: 2 mutaciones de 1 línea en una copia temporal; solo se listan las pruebas que pasaban y ahora fallan
+M1: EstadoTarjeta::deConteo nunca da vacío -> fallan: U-01 U-04 CB-01
+M2: ServicioDashboard::tarjeta ignora el permiso (sin E4) -> fallan: CB-01

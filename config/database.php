@@ -56,6 +56,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('CENTRAL_DB_SSLMODE', 'prefer'),
+            'timezone' => 'UTC',
         ],
 
         'hospital' => [
@@ -70,6 +71,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('HOSPITAL_DB_SSLMODE', 'prefer'),
+            'timezone' => 'UTC',
         ],
 
         'mysql' => [

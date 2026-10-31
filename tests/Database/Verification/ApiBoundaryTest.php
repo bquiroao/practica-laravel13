@@ -26,7 +26,8 @@ class ApiBoundaryTest extends TestCase
     {
         return [
             'login sin X-Tenant-ID' => ['POST', '/api/v1/auth/login', ['email' => 'ana@hospital.test', 'password' => 'x'], []],
-            'registro con X-Tenant-ID vacío' => ['POST', '/api/v1/auth/register', ['name' => 'Ana'], ['X-Tenant-ID' => '']],
+            // Hospital Nido: ya no hay autorregistro (el administrador da de alta a los usuarios); se prueba el login.
+            'login con X-Tenant-ID vacío' => ['POST', '/api/v1/auth/login', ['email' => 'ana@hospital.test'], ['X-Tenant-ID' => '']],
             'refresh sin tenant ni token' => ['POST', '/api/v1/auth/refresh', [], []],
             'login con inyección SQL y sin tenant' => ['POST', '/api/v1/auth/login', ['email' => "x' OR 1=1; DROP TABLE local_patients; --", 'password' => str_repeat('a', 10000)], []],
         ];
@@ -49,7 +50,7 @@ class ApiBoundaryTest extends TestCase
     {
         return [
             'tenant inexistente' => ['POST', '/api/v1/auth/login', ['X-Tenant-ID' => '00000000-0000-0000-0000-0000000000aa'], 404, 'E-01: App\\Models\\Tenant y la tabla tenants no existen'],
-            'ruta de API que no existe' => ['POST', '/api/v1/pacientes', [], 404, 'E-07: la ruta web /{any?} también atrapa /api/v1/*'],
+            'ruta de API que no existe' => ['POST', '/api/v1/ruta-inexistente', [], 404, 'E-07: la ruta web /{any?} también atrapa /api/v1/*'],
             'método no permitido' => ['GET', '/api/v1/auth/login', [], 405, 'E-07: la ruta web /{any?} responde la vista de la SPA en vez de 405'],
         ];
     }

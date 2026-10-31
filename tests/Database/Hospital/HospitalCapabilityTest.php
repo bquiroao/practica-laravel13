@@ -25,7 +25,8 @@ class HospitalCapabilityTest extends TestCase
         $this->assertSame('btree_gist', $db->scalar("SELECT extname FROM pg_extension WHERE extname = 'btree_gist'"));
         $this->assertSame(1, (int) $db->scalar("SELECT count(*) FROM migrations WHERE migration = '2026_08_11_000000_enable_hospital_extensions'"));
 
-        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => 5, '--force' => true]);
+        // Revierte todas las migraciones posteriores a la de extensiones: los pasos se cuentan, así las migraciones nuevas no rompen la prueba.
+        Artisan::call('migrate:rollback', ['--database' => 'hospital', '--path' => database_path('migrations/hospital'), '--realpath' => true, '--step' => $this->hospitalMigrationsFrom('2026_08_11_000100'), '--force' => true]);
 
         $this->assertSame('btree_gist', $db->scalar("SELECT extname FROM pg_extension WHERE extname = 'btree_gist'"));
         $this->assertFalse($this->tableExists('local_user_refs'));
