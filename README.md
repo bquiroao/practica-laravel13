@@ -108,9 +108,15 @@ php artisan serve
 ```
 Abre **http://localhost:8000** y entra con un usuario de la [sección 3](#3-usuarios-de-demostración).
 
+Para que las alertas críticas se escalen solas cuando vence su plazo, deja abierto el planificador en otra terminal:
+```bash
+php artisan schedule:work
+```
+
 ### Las siguientes veces
 ```bash
 php artisan serve
+php artisan schedule:work      # en otra terminal: escalamiento de alertas
 ```
 
 ### Cuando traigas cambios de `develop`
@@ -163,7 +169,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **29 están integrados** y funcionando. El disponible se puede tomar con la guía de la sección 7; mientras tanto, su pantalla muestra la marca «pronto».
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **Los 30 están integrados** y funcionando. La sección 7 queda como guía para conectarse a los últimos que se integraron.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -186,13 +192,13 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **29 están in
 | | `alergias-clinicas-alerta-visual-expediente` | ✅ Integrado (banner en la ficha y el expediente) |
 | | `catalogo-medicamentos` | ✅ Integrado (catálogo administrable en `/prescripciones`) |
 | | `prescripciones-alergias` | ✅ Integrado (receta desde el catálogo de medicamentos) |
-| | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
+| | `alertas-criticas-notificaciones-internas` | ✅ Integrado (campana y `/alertas`, con escalamiento por tiempo) |
 | Laboratorio | `catalogo-pruebas-laboratorio` | ✅ Integrado (catálogo administrable en `/laboratorio`) |
 | | `ordenes-laboratorio-emr` | ✅ Integrado (ordena desde el catálogo de pruebas) |
 | | `recepcion-muestras` | ✅ Integrado |
 | | `ingreso-resultados-laboratorio` | ✅ Integrado |
 | | `validacion-resultados-bioquimico` | ✅ Integrado |
-| Gestión | `reportes-analytics-basicos` | ✅ Integrado (18 indicadores trazables) |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (19 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -200,7 +206,6 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **29 están in
 
 **Leyenda:**
 - ✅ funciona de punta a punta, con pruebas;
-- 🟦 listo para tomarse: la base, los permisos y la entrada del menú ya existen.
 
 ---
 
@@ -311,7 +316,7 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos módulos están listos para tomarse (todos menos el 7.4 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (ya están todos integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
 ### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio` ✅ Integrado
 - **Qué hay:**
@@ -353,20 +358,21 @@ Estos módulos están listos para tomarse (todos menos el 7.4 ya están integrad
 
     La pantalla y las pruebas de contrato de `AnalyticsTest` la toman sin más cambios.
 
-### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas`
-- **Ya existe:**
-  - los permisos `alertas.ver` y `alertas.gestionar`;
-  - la entrada del menú `/alertas`;
-  - la campana de la barra superior (`resources/js/layout/AppShell.tsx`), lista para mostrar el número de alertas;
-  - el prototipo (`Alerta`, `Prioridad`, `PoliticaEscalamiento`, `EstadoAlerta`).
-- **Falta:**
-  - la tabla de alertas;
-  - el reconocimiento y el escalamiento;
-  - la pantalla y el contador de la campana.
-- **Se conecta con:** signos vitales fuera de rango y resultados críticos de laboratorio, ambos ya integrados. Al validar un resultado crítico se dispara `App\Events\LabResultCritical` (paciente, prueba, valor, unidad y marca). Para no acoplar los módulos, se usan **eventos de Laravel**:
-  - al guardar una toma con valores anormales o críticos, `VitalSignService` dispara `App\Events\VitalSignsOutOfRange`;
-  - el evento trae hospital, paciente, código del paciente, episodio, toma y la lista de hallazgos (`signo`, `etiqueta`, `valor`, `nivel`: `anormal` o `critica`), y `isCritical()`;
-  - para crear la alerta, registra un *listener* en `AppServiceProvider` con `Event::listen(VitalSignsOutOfRange::class, …)`.
+### 7.4 Alertas críticas y notificaciones internas — `alertas-criticas-notificaciones-internas` ✅ Integrado
+- **Qué hay:**
+  - las tablas `critical_alerts`, `critical_alert_notifications`, `critical_alert_events` (historial que solo crece) y `critical_alert_policies` (plazo de acuse por prioridad: crítica 15 min, alta 30 min, configurable de 5 a 60);
+  - `App\Services\Alerts\CriticalAlertService`: crear la alerta sin duplicarla, enviarla, acusarla, cerrarla con nota y escalarla. Cada responsabilidad va en su clase: `RecipientResolver` (destinatarios por nivel), `NotificationDispatcher` (envío y hasta 3 intentos), `EscalationPolicy` (plazos y niveles) y `AlertHistory`;
+  - los niveles: **0** enfermería y médico tratante, **1** médicos del hospital, **2** dirección médica;
+  - el canal de notificación es un puerto, `App\Services\Alerts\Channels\AlertChannel`. Hoy el adaptador es la bandeja interna (`InternalInboxChannel`): **no se envían correos, SMS ni push**;
+  - el comando `php artisan nido:alertas-escalar`, que el planificador corre cada minuto (`routes/console.php`);
+  - los permisos nuevos `alertas.cerrar` (médico y dirección médica) y `alertas.configurar` (administrador de hospital y dirección médica);
+  - la página `/alertas` y el número de la campana (`resources/js/modules/alerts/`);
+  - el indicador «Alertas críticas reconocidas a tiempo» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - las alertas nacen de **eventos de Laravel**, escuchados en `AppServiceProvider`: `App\Events\LabResultCritical` (resultado crítico validado) y `App\Events\VitalSignsOutOfRange` (toma con valores anormales o críticos). Los módulos que los disparan no cambiaron;
+  - para que otro módulo cree alertas, dispara su propio evento y agrega un *listener* que llame a `CriticalAlertService::register()` con paciente, origen, id de origen, prioridad, título y descripción. El mismo origen e id de origen nunca crea dos alertas;
+  - la alerta guarda solo el código del paciente, nunca su nombre.
 
 ### 7.5 Alergias clínicas y alerta visual en el expediente — `alergias-clinicas-alerta-visual-expediente` ✅ Integrado
 - **Qué hay:**
@@ -427,7 +433,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **178 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
+Hoy la suite da **189 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -511,6 +517,9 @@ Todas las rutas están bajo `/api/v1`.
 | GET | `/reportes/indicadores` · `/reportes/indicadores/resumen?desde=&hasta=` (catálogo y tarjetas) | `reportes.ver` o `reportes.citas_propias` |
 | GET | `/reportes/{tipo}?desde=&hasta=[&granularidad=dia\|semana\|mes]` (indicador, comparación, tendencia y ficha) | `reportes.ver`; con `reportes.citas_propias`, solo `citas` y sus propias citas |
 | GET | `/reportes/{tipo}/desglose?…[&dimension=]` · `/reportes/{tipo}/registros?…&parte=[&pagina=]` | Igual que `/reportes/{tipo}` |
+| GET | `/alertas?vista=mias, abiertas o recientes` · `/alertas/resumen` (la campana) · `/alertas/{id}` (con historial) | `alertas.ver` |
+| POST | `/alertas/{id}/acuse` (solo quien la recibió) · `/alertas/{id}/cierre` (con nota) | `alertas.ver` / `alertas.cerrar` |
+| GET / PUT | `/alertas/politicas` (plazo de acuse por prioridad, de 5 a 60 min) | `alertas.ver` o `alertas.configurar` / `alertas.configurar` |
 | GET / POST | `/calidad/defectos` · POST `/calidad/defectos/{id}/estado` | `calidad.gestionar` |
 | GET / POST | `/calidad/ejecuciones` · GET `/calidad/gate/{versión}` | `versiones.gestionar` o `calidad.gestionar` |
 | POST | `/calidad/ci/ejecuciones` (desde el CI, con `Authorization: Bearer NIDO_CI_TOKEN`) | Token de CI |

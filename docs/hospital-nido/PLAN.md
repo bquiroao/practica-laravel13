@@ -35,14 +35,13 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | **Lista** |
-| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente | **Lista** |
+| 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente, alertas-criticas-notificaciones-internas | **Lista** |
 | 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias, catalogo-medicamentos, catalogo-pruebas-laboratorio | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | alertas-criticas-notificaciones-internas | Disponible |
 
-Son 30 módulos: 4 + 3 + 4 + 4 + 7 + 2 + 4 + 1 en las fases, más el disponible. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 4 + 5 + 7 + 2 + 4 + 1, todos integrados. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -478,6 +477,51 @@ Se integró en su propia rama, siguiendo la sección 7.1 del `README.md`. Es el 
 **Verificación:**
 - 10 pruebas Feature nuevas (`LabTestCatalogTest`), con los criterios CA-01 a CA-10;
 - en total, **178 correctas y ninguna incompleta**.
+
+## Alertas críticas y notificaciones internas: qué se entregó
+
+Se integró en su propia rama, siguiendo la sección 7.4 del `README.md`. Es el único módulo que escribe en las tablas `critical_alert*` (migración `2026_10_31_000600`). Nace de los eventos que ya disparaban laboratorio y signos vitales; esos módulos no cambiaron.
+
+**Ciclo:** `CREADA → ENVIADA → (ESCALADA) → ACUSADA → CERRADA`. Una alerta escalada todavía se puede acusar.
+
+**Registro** (CU-01):
+- un resultado crítico validado crea una alerta **crítica**; una toma de signos vitales, **crítica** si algún valor es crítico y **alta** si solo hay valores anormales;
+- **RN-01:** exige paciente, origen, id de origen, prioridad y descripción;
+- **RN-02:** el mismo origen e id de origen (el resultado validado o la toma) devuelve la alerta existente; también lo impide la base;
+- **RNF-02:** guarda solo el código del paciente, nunca su nombre.
+
+**Envío y escalamiento** (CU-02, CU-03, CU-05, CU-09):
+- niveles: **0** enfermería y médico tratante (el que pidió el laboratorio o el asignado al episodio), **1** médicos del hospital, **2** dirección médica. No existe el rol «jefe de servicio», así que el nivel 1 son los médicos;
+- **RN-03:** un nivel sin personal pasa al siguiente;
+- **RN-04 y RN-05:** si nadie acusa en el plazo (crítica 15 min, alta 30 min), sube un nivel; en el nivel 2 se registra «escalamiento agotado» una sola vez. A las 10:15 ya escala una alerta de las 10:00; a las 10:14, no;
+- **RN-08:** hasta 3 intentos por destinatario; si alguno se agota, se escala de inmediato y la alerta no se pierde (RNF-05);
+- el comando `nido:alertas-escalar` lo corre el planificador cada minuto (`php artisan schedule:work`);
+- **RNF-06:** el canal es un puerto (`AlertChannel`); hoy es la bandeja interna, sin correo, SMS ni push.
+
+**Acuse y cierre** (CU-04, CU-06):
+- **RN-07:** solo acusa alguien a quien se le notificó; los demás reciben `ALERTA_NO_NOTIFICADA`;
+- **RN-06:** acusar dos veces no agrega nada, y una alerta acusada ya no se escala;
+- **RN-09:** se cierra solo si está acusada y con nota, y solo con el permiso nuevo `alertas.cerrar` (médico y dirección médica).
+
+**Historial** (CU-07, RN-10): cada paso guarda evento, nivel, actor y momento; la base impide editarlo o borrarlo.
+
+**Plazos** (CU-08, RN-11): de 5 a 60 minutos por prioridad, con el permiso nuevo `alertas.configurar` (administrador de hospital y dirección médica). Aplican a los plazos que empiezan desde ese momento.
+
+**Defectos de la semana 15:**
+- **D-03 (mayor), corregido:** enfermería ya no puede cerrar; el permiso `alertas.cerrar` lo valida la ruta.
+- **D-04, no aplica:** era del arranque del Micro-HIS; aquí toda la API responde JSON también con la base caída.
+- **D-05, corregido:** el canal registra la misma hora del sistema que el historial.
+
+**Pantalla:**
+- la campana muestra cuántas alertas esperan el acuse de cada usuario y se revisa cada 30 segundos;
+- **cambio de la semana 12:** el título de la pestaña dice «(2) …» aunque no esté activa;
+- `/alertas` con «Para mí», «Abiertas», «Recientes» y «Plazos de acuse»; el detalle tiene acusar, cerrar con nota, historial y a quién se notificó.
+
+**Reportes:** el indicador «Alertas críticas reconocidas a tiempo» (acusadas en el nivel 0 ÷ alertas del período) reemplaza su pendiente.
+
+**Verificación:**
+- 11 pruebas Feature nuevas (`CriticalAlertTest`), con los criterios CA-01 a CA-16 y el reloj controlado (`travelTo`, RNF-04);
+- en total, **189 correctas y ninguna incompleta**.
 
 ## Pendientes conocidos
 
