@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\SystemController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\Clinical\AdmissionController;
+use App\Http\Controllers\Api\V1\Clinical\AllergyController;
 use App\Http\Controllers\Api\V1\Clinical\AppointmentController;
 use App\Http\Controllers\Api\V1\Clinical\BedController;
 use App\Http\Controllers\Api\V1\Clinical\DoctorController;
@@ -126,6 +127,12 @@ Route::middleware('tenant')->group(function (): void {
         Route::post('/admisiones', [AdmissionController::class, 'store'])->middleware('permiso:admisiones.gestionar');
         Route::get('/admisiones/{admission}', [AdmissionController::class, 'show'])->middleware('permiso:admisiones.gestionar|camas.ver')->whereUuid('admission');
         Route::get('/admisiones/{admission}/eventos', [AdmissionController::class, 'events'])->middleware('permiso:admisiones.gestionar|auditoria.consultar')->whereUuid('admission');
+
+        // Módulo alergias clínicas y alerta visual en el expediente: único que escribe en allergies.
+        Route::get('/expediente/{patient}/alergias', [AllergyController::class, 'show'])->middleware('permiso:expediente.leer|alergias.gestionar|prescripciones.crear')->whereUuid('patient');
+        Route::post('/expediente/{patient}/alergias', [AllergyController::class, 'store'])->middleware('permiso:alergias.gestionar')->whereUuid('patient');
+        Route::post('/expediente/{patient}/alergias/reconocimiento', [AllergyController::class, 'acknowledge'])->middleware('permiso:expediente.leer|alergias.gestionar')->whereUuid('patient');
+        Route::patch('/alergias/{allergy}/estado', [AllergyController::class, 'updateStatus'])->middleware('permiso:alergias.gestionar')->whereUuid('allergy');
 
         // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
         // Van después de /reportes/operativos para que esas rutas fijas no las tome {tipo}.
