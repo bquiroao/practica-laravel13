@@ -36,13 +36,13 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente | **Lista** |
-| 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias, catalogo-medicamentos | **Lista** |
+| 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias, catalogo-medicamentos, catalogo-pruebas-laboratorio | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas | Disponibles |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | alertas-criticas-notificaciones-internas | Disponible |
 
-Son 30 módulos: 4 + 3 + 4 + 4 + 6 + 2 + 4 + 1 en las fases, más los 2 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 4 + 4 + 7 + 2 + 4 + 1 en las fases, más el disponible. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -434,9 +434,54 @@ Se integró en su propia rama, siguiendo la sección 7.6 del `README.md`. Es el 
 - 9 pruebas Feature nuevas (`MedicationCatalogTest`), con los criterios CA-01 a CA-13;
 - en total, **168 correctas y ninguna incompleta**.
 
+## Catálogo de pruebas de laboratorio: qué se entregó
+
+Se integró en su propia rama, siguiendo la sección 7.1 del `README.md`. Es el único módulo que escribe en `lab_tests` (migración `2026_10_31_000500`). Órdenes, recepción, ingreso y validación lo leen por `LabTestDirectory`.
+
+**Tabla `lab_tests`:**
+- una fila por versión, con los datos de la prueba, los requisitos de muestra y la vigencia `[valid_from, valid_to]`: `valid_to` es el último día vigente (RN-04);
+- incluye la unidad y los valores de referencia y críticos. La semana 1 los dejó «por confirmar»; quedan aquí porque ingreso y validación de resultados ya los usan para marcar valores bajos, altos y críticos;
+- la base repite las reglas: dos versiones del mismo código no se cruzan (RN-05), cada columna tiene los límites de la API (RN-02, RN-03) y una versión no se edita ni se borra; solo se adelanta su cierre (RN-08).
+
+**Alta** (CU-01 a CU-03):
+- código `AAA-000`, único en el hospital (`CODIGO_EXISTENTE` si ya está); nombre, sección y tiempo de respuesta;
+- requisitos de muestra: tipo, contenedor, volumen mínimo, ayuno, preparación, conservación y estabilidad;
+- vigencia desde hoy o después, con fecha hasta opcional; queda registrado quién la creó (RN-08).
+
+**Versión nueva** (RN-05):
+- se envía la ficha completa; si la vigente se cruza, se cierra el día previo, y si empieza el mismo día o antes responde `VIGENCIA_SUPERPUESTA`;
+- la decisión vive en su propia clase, `ValidityPlan`, separada del guardado (SRP, semana 2);
+- todo se guarda en una transacción: si la base falla, responde 500 `ERROR_PERSISTENCIA` y la versión anterior conserva su vigencia (RN-07, CA-10);
+- si otra persona registró una versión mientras se editaba, responde `CONFLICTO_CONCURRENTE`.
+
+**Consulta** (CU-04, CU-05):
+- solo lo vigente en la fecha (hoy, si no se indica), por texto, sección y tipo de muestra;
+- el detalle de una prueba que no está vigente en esa fecha responde 404 `PRUEBA_NO_VIGENTE` con su vigencia (RN-06).
+
+**Catálogo inicial:** las 10 pruebas del catálogo provisional, con sus requisitos de muestra. Conservan su código (`HB`, `GLU`…) porque las órdenes, los resultados y el aviso de resultado crítico ya lo usan. Se carga con `HospitalCatalogSeeder` al instalar.
+
+**Defectos de la semana 15, corregidos:**
+- **D-02:** un volumen de 10000 mL o más da 422, no 500.
+- **D-03:** los textos más largos que su columna (nombre, contenedor, preparación) dan 422, no 500.
+- **D-04:** `%` y `_` se buscan como texto, no como comodines.
+
+**Observabilidad (RNF-06):** cada respuesta lleva `X-Request-Id`, y cada petición deja en el registro su identificador, la ruta y el estado, sin datos clínicos.
+
+**Pantalla:**
+- `LabTestCatalog` (`resources/js/modules/labtests/`), en la pestaña «Pruebas disponibles» de `/laboratorio`;
+- búsqueda por texto, sección, muestra y fecha; la ficha con los requisitos de muestra, los rangos y el historial;
+- el jefe de laboratorio (bioquímico) y el administrador del hospital registran pruebas y versiones nuevas;
+- **cambio de la semana 12:** una prueba que vence en 7 días o menos muestra «Vence el … (en N días)», con texto y no solo color, y la ficha dice qué versión rige después.
+
+**Reportes:** el indicador «Pruebas por área del laboratorio» reemplaza el último pendiente de este módulo. La sección sale del catálogo.
+
+**Verificación:**
+- 10 pruebas Feature nuevas (`LabTestCatalogTest`), con los criterios CA-01 a CA-10;
+- en total, **178 correctas y ninguna incompleta**.
+
 ## Pendientes conocidos
 
 - **Diseño de Stitch:** la paleta y los componentes actuales son provisionales. Al llegar el diseño se ajustan `resources/css/app.css` y `resources/js/components/ui.tsx`, y el cambio se propaga a todas las pantallas.
 - **Identidad protegida (R-11 del módulo pacientes):** pacientes confidenciales visibles solo con un permiso especial. Queda para una fase posterior, porque necesita permisos nuevos.
-- **Esquema de Richard:** siguen pendientes las tareas 3.6 y 3.7 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md` (laboratorio y auditoría local). La 3.5 (medicamentos) la cubrió el catálogo de medicamentos.
+- **Esquema de Richard:** sigue pendiente la tarea 3.7 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md` (auditoría local). La 3.5 (medicamentos) y la 3.6 (laboratorio) las cubrieron los catálogos de medicamentos y de pruebas.
 - **Dependencias:** `composer audit` reporta avisos de seguridad en paquetes del `composer.lock` heredado. Conviene actualizarlo en un PR aparte, con todas las pruebas.

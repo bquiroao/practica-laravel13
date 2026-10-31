@@ -163,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **28 están integrados** y funcionando. Los 2 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **29 están integrados** y funcionando. El disponible se puede tomar con la guía de la sección 7; mientras tanto, su pantalla muestra la marca «pronto».
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -187,12 +187,12 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **28 están in
 | | `catalogo-medicamentos` | ✅ Integrado (catálogo administrable en `/prescripciones`) |
 | | `prescripciones-alergias` | ✅ Integrado (receta desde el catálogo de medicamentos) |
 | | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
-| Laboratorio | `catalogo-pruebas-laboratorio` | 🟦 **Disponible** (sección 7.1) |
-| | `ordenes-laboratorio-emr` | ✅ Integrado (con catálogo provisional) |
-| | `recepcion-muestras` | ✅ Integrado (con catálogo provisional) |
-| | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
-| | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
-| Gestión | `reportes-analytics-basicos` | ✅ Integrado (17 indicadores trazables) |
+| Laboratorio | `catalogo-pruebas-laboratorio` | ✅ Integrado (catálogo administrable en `/laboratorio`) |
+| | `ordenes-laboratorio-emr` | ✅ Integrado (ordena desde el catálogo de pruebas) |
+| | `recepcion-muestras` | ✅ Integrado |
+| | `ingreso-resultados-laboratorio` | ✅ Integrado |
+| | `validacion-resultados-bioquimico` | ✅ Integrado |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (18 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -311,23 +311,21 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos módulos están listos para tomarse (el 7.2, el 7.3, el 7.5 y el 7.6 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (todos menos el 7.4 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
-### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
-- **Ya existe:**
-  - los permisos `pruebas_lab.ver` y `pruebas_lab.gestionar` (laboratorio, bioquímico y administrador de hospital; el médico solo ve);
-  - la entrada del menú `/laboratorio`, compartida con los demás módulos de laboratorio;
-  - el prototipo en `docs/modulos/catalogo-pruebas-laboratorio/micro-his/` (`LabTest`, `RequisitoMuestra`, `Vigencia`, `VigenciaSuperpuesta`).
-- **Falta:**
-  - las tablas del laboratorio: el esquema base las dejó pendientes (tarea 3.6 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md`);
-  - el registro de pruebas con vigencias que no se crucen;
-  - la pantalla del catálogo.
-- **Se conecta con:** órdenes, recepción, ingreso y validación de resultados, que **ya están integrados** con un catálogo provisional (`config/nido_catalogos.php`). Para conectar tu catálogo:
-  1. implementa `App\Services\Catalogs\LabTestDirectory` sobre tu tabla. Devuelve `code`, `name`, `specimen_type`, `unit`, `ref_low`, `ref_high`, `critical_low` y `critical_high`, y respeta la vigencia;
-  2. en `AppServiceProvider`, cambia el `bind` de `LabTestDirectory` por tu clase.
-
-  Las órdenes guardan una copia de los datos de cada prueba al pedirla, así que editar el catálogo no cambia la historia clínica.
-- **Pantalla:** reemplaza la pestaña «Pruebas disponibles» de `/laboratorio` (`resources/js/pages/lab/LabPage.tsx`) por tu catálogo administrable.
+### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio` ✅ Integrado
+- **Qué hay:**
+  - la tabla `lab_tests`: una fila por versión, con los requisitos de muestra, los valores de referencia y críticos, y la vigencia `[valid_from, valid_to]` (`valid_to` es el último día vigente). La base repite las reglas: dos versiones del mismo código no se cruzan, cada columna tiene los límites de la API y una versión no se edita ni se borra;
+  - `App\Services\LabCatalog\LabTestCatalogService`: buscar lo vigente en una fecha, registrar y crear una versión nueva. Es el único que escribe en `lab_tests`. La regla de vigencia (RN-05) está aparte, en `ValidityPlan`;
+  - el catálogo inicial: las 10 pruebas del catálogo provisional, con sus requisitos de muestra. **Conservan su código** (`HB`, `GLU`…), porque las órdenes, los resultados y el aviso de resultado crítico ya lo usan; las pruebas nuevas usan el formato `AAA-000`;
+  - la pantalla `LabTestCatalog` (`resources/js/modules/labtests/`), en la pestaña «Pruebas disponibles» de `/laboratorio`;
+  - el indicador «Pruebas por área del laboratorio» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - órdenes, recepción, ingreso y validación leen el catálogo con `App\Services\LabCatalog\DatabaseLabTestDirectory`, registrado en `AppServiceProvider`. Solo se puede ordenar lo vigente hoy;
+  - `LabTestDirectory` devuelve `code`, `name`, `specimen_type`, `unit`, `ref_low`, `ref_high`, `critical_low` y `critical_high`, y además `section`, `fasting_hours`, `preparation_instructions` y `turnaround_hours`;
+  - las órdenes siguen guardando una copia de los datos de cada prueba al pedirla, así que una versión nueva no cambia la historia clínica;
+  - la lista `pruebas_laboratorio` de `config/nido_catalogos.php` y `ConfigLabTestDirectory` ya no se usan.
 
 ### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama` ✅ Integrado
 - **Qué hay:**
@@ -429,7 +427,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **168 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
+Hoy la suite da **178 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -495,6 +493,8 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/expediente/{paciente}/alergias/reconocimiento` (con la huella que se vio) | `expediente.leer` o `alergias.gestionar` |
 | POST | `/expediente/{paciente}/consulta` · `/episodios/{id}/terminar` | `notas.registrar` |
 | GET | `/laboratorio/pruebas` · `/expediente/{paciente}/laboratorio` | permisos de laboratorio o `expediente.leer` |
+| GET | `/catalogo/pruebas-laboratorio?q=&seccion=&muestra=&fecha=` · `/catalogo/pruebas-laboratorio/{código}?fecha=` (404 `PRUEBA_NO_VIGENTE` con su vigencia) · `/opciones` · `/{código}/versiones` | `pruebas_lab.ver`, `pruebas_lab.gestionar` u `ordenes_lab.crear` |
+| POST | `/catalogo/pruebas-laboratorio` (alta) · `/catalogo/pruebas-laboratorio/{código}/versiones` | `pruebas_lab.gestionar` |
 | POST | `/expediente/{paciente}/laboratorio` (orden) | `ordenes_lab.crear` |
 | GET | `/laboratorio/trabajo?etapa=recepcion, resultados o validacion` | `muestras.recibir`, `resultados.registrar` o `resultados.validar` |
 | POST | `/laboratorio/items/{id}/recibir` · `/laboratorio/items/{id}/rechazar` | `muestras.recibir` |
