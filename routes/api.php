@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AuditController;
 use App\Http\Controllers\Api\V1\Admin\MembershipController;
 use App\Http\Controllers\Api\V1\Admin\QualityController;
@@ -118,5 +119,14 @@ Route::middleware('tenant')->group(function (): void {
         Route::get('/calidad/gate/{version}', [QualityController::class, 'gate'])->middleware('permiso:calidad.gestionar|versiones.gestionar');
         Route::get('/sistema/base-datos', [SystemController::class, 'database'])->middleware('permiso:base_datos.verificar');
         Route::get('/sistema/openapi', [SystemController::class, 'openapi']);
+
+        // Módulo reportes y analytics básicos: indicadores trazables en tres niveles (indicador, desglose y registros).
+        // Van después de /reportes/operativos para que esas rutas fijas no las tome {tipo}.
+        $analytics = 'permiso:reportes.ver|reportes.citas_propias';
+        Route::get('/reportes/indicadores', [AnalyticsController::class, 'catalog'])->middleware($analytics);
+        Route::get('/reportes/indicadores/resumen', [AnalyticsController::class, 'summary'])->middleware($analytics);
+        Route::get('/reportes/{tipo}', [AnalyticsController::class, 'show'])->middleware($analytics)->where('tipo', '[a-z_]+');
+        Route::get('/reportes/{tipo}/desglose', [AnalyticsController::class, 'breakdown'])->middleware($analytics)->where('tipo', '[a-z_]+');
+        Route::get('/reportes/{tipo}/registros', [AnalyticsController::class, 'records'])->middleware($analytics)->where('tipo', '[a-z_]+');
     });
 });
