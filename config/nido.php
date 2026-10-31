@@ -64,6 +64,7 @@ return [
         // Reportes
         'dashboard.ver' => ['dashboard-base', 'Ver el tablero de inicio'],
         'reportes.ver' => ['reportes-analytics-basicos', 'Ver reportes e indicadores'],
+        'reportes.citas_propias' => ['reportes-analytics-basicos', 'Ver el indicador de citas, solo con sus propias citas'],
         'reportes.exportar' => ['reportes-operativos-exportables', 'Exportar reportes operativos'],
         // Calidad
         'calidad.gestionar' => ['qa-regresion-defectos', 'Gestionar campañas de regresión y defectos'],
@@ -89,6 +90,7 @@ return [
             'expediente.leer', 'notas.registrar', 'notas.firmar', 'signos_vitales.registrar', 'alergias.gestionar',
             'prescripciones.crear', 'prescripciones.anular', 'medicamentos.ver', 'alertas.ver', 'alertas.gestionar',
             'pruebas_lab.ver', 'ordenes_lab.crear', 'dashboard.ver', 'movil.usar',
+            'reportes.citas_propias',
         ]],
         'enfermeria' => ['Enfermería', 'hospital', [
             'pacientes.ver', 'citas.ver', 'camas.ver', 'ocupacion.ver', 'traslados.gestionar', 'expediente.leer',
