@@ -163,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **25 están integrados** y funcionando. Los 5 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **26 están integrados** y funcionando. Los 4 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -177,7 +177,7 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **25 están in
 | | `medicos-especialidades` | ✅ Integrado |
 | | `citas-medicas` | ✅ Integrado |
 | Camas | `catalogo-salas-camas` | ✅ Integrado |
-| | `admision-hospitalaria-asignacion-cama` | 🟦 **Disponible** (sección 7.2) |
+| | `admision-hospitalaria-asignacion-cama` | ✅ Integrado (asistente en `/camas`) |
 | | `traslados-altas-camas` | ✅ Integrado |
 | | `dashboard-ocupacion` | ✅ Integrado |
 | Clínico | `expediente-medico` | ✅ Integrado |
@@ -311,7 +311,7 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos módulos están listos para tomarse (el 7.3 ya está integrado y queda como guía para conectarse a él). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (el 7.2 y el 7.3 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
 ### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
 - **Ya existe:**
@@ -329,22 +329,17 @@ Estos módulos están listos para tomarse (el 7.3 ya está integrado y queda com
   Las órdenes guardan una copia de los datos de cada prueba al pedirla, así que editar el catálogo no cambia la historia clínica.
 - **Pantalla:** reemplaza la pestaña «Pruebas disponibles» de `/laboratorio` (`resources/js/pages/lab/LabPage.tsx`) por tu catálogo administrable.
 
-### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama`
-- **Ya existe:**
-  - las tablas `care_episodes` (episodio de atención), `bed_stays` (estancia en una cama; la base impide dos estancias a la vez en la misma cama), `wards` y `beds`;
-  - el permiso `admisiones.gestionar` (médico y recepción);
-  - el prototipo, con las reglas de aislamiento, cama operativa y concurrencia.
-- **Falta:**
-  - el servicio de admisión: abrir un episodio `inpatient` y asignar una cama disponible, todo en una transacción;
-  - la pantalla dentro de `/camas`.
-- **Defectos abiertos que le tocan** (`tests/Database/Verification/ConstraintBoundaryTest`):
-  - **AU-01:** un episodio cerrado sin fecha de fin se guarda;
-  - **AU-05:** una cama con estancia abierta sigue figurando como disponible.
-- **Se conecta con:**
-  - el catálogo de salas y camas (integrado), que da de alta salas y camas en `/camas`;
-  - traslados y altas (integrado, `BedMovementService`), que cierran o mueven la estancia;
-  - la pantalla `/camas` (`resources/js/pages/beds/BedsPage.tsx`): agrega ahí el botón «Admitir paciente» en las camas disponibles.
-- **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas trabajan sobre esa estancia.
+### 7.2 Admisión hospitalaria y asignación de cama — `admision-hospitalaria-asignacion-cama` ✅ Integrado
+- **Qué hay:**
+  - `App\Services\Admissions\AdmissionService`: abre el internamiento (`care_episode` «inpatient») y su `bed_stay` en una cama disponible y compatible, todo en una transacción;
+  - las reglas de elegibilidad de la cama, una clase por criterio en `app/Services/Admissions/Eligibility/`: cama operativa, sala, tipo de cama y aislamiento;
+  - el asistente «Admitir paciente» en `/camas` (`resources/js/modules/admissions/`), y la trazabilidad de cada admisión en la cama ocupada;
+  - el permiso `admisiones.gestionar` (médico y recepción).
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Defectos cerrados:**
+  - **AU-01:** un episodio cerrado o anulado ahora exige fecha de fin;
+  - **AU-05:** al abrir una estancia, la cama queda «occupied» (trigger de la base).
+- **Acuerdo de integración:** la admisión crea un `care_episode` abierto con una `bed_stay` abierta, y traslados y altas (`BedMovementService`) trabajan sobre esa estancia. El origen (emergencia, consulta externa o referencia) queda en `care_episodes.admission_source`, y el indicador «Ingresos hospitalarios» se desglosa por él.
 
 ### 7.3 Reportes y analytics básicos — `reportes-analytics-basicos` ✅ Integrado
 - **Qué hay:**
@@ -439,7 +434,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **144 correctas y 2 incompletas**. Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas. Las 2 incompletas son los defectos AU-01 y AU-05 de admisión (sección 7.2).
+Hoy la suite da **152 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -493,6 +488,9 @@ Todas las rutas están bajo `/api/v1`.
 | PATCH | `/camas/{id}/estado` | `camas.gestionar` |
 | POST | `/internamientos/{episodio}/traslado` · `/internamientos/{episodio}/alta` | `traslados.gestionar` |
 | GET | `/ocupacion` | `ocupacion.ver` |
+| GET | `/camas-disponibles?bed_type=&isolation=[&ward_id=]` (camas libres y compatibles) | `admisiones.gestionar` |
+| POST | `/admisiones` (internamiento y cama en una transacción; `X-Request-Id` opcional, UUID) | `admisiones.gestionar` |
+| GET | `/admisiones/{id}` · `/admisiones/{id}/eventos` (trazabilidad) | `admisiones.gestionar` o `camas.ver` / `admisiones.gestionar` o `auditoria.consultar` |
 | GET | `/expediente/{paciente}` (notas, diagnósticos, signos vitales y atenciones) | `expediente.leer` |
 | POST | `/expediente/{paciente}/notas` · PUT `/notas/{id}` (borrador; `sign: true` firma) | `notas.registrar` (+ `notas.firmar` para firmar) |
 | POST | `/notas/{id}/correccion` | `notas.firmar` |

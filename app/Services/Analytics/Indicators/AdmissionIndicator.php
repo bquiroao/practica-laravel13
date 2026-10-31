@@ -2,6 +2,7 @@
 
 namespace App\Services\Analytics\Indicators;
 
+use App\Services\Admissions\AdmissionService;
 use App\Services\Analytics\Filters;
 use App\Services\Analytics\Indicator;
 use Carbon\CarbonImmutable;
@@ -47,12 +48,18 @@ class AdmissionIndicator extends Indicator
 
     public function dimensions(): array
     {
-        return ['sala' => 'Sala de ingreso', 'grupo_edad' => 'Grupo de edad', 'sexo' => 'Sexo'];
+        return ['sala' => 'Sala de ingreso', 'origen' => 'Origen de la admisión', 'grupo_edad' => 'Grupo de edad', 'sexo' => 'Sexo'];
+    }
+
+    /** El origen es administrativo (emergencia, consulta externa o referencia): no identifica a nadie. */
+    public function groupsSmallCases(string $dimension): bool
+    {
+        return $dimension !== 'origen' && parent::groupsSmallCases($dimension);
     }
 
     public function columns(): array
     {
-        return ['paciente' => 'Paciente', 'ingreso' => 'Ingreso', 'sala' => 'Sala de ingreso', 'estado' => 'Situación actual'];
+        return ['paciente' => 'Paciente', 'ingreso' => 'Ingreso', 'sala' => 'Sala de ingreso', 'origen' => 'Origen', 'estado' => 'Situación actual'];
     }
 
     public function numeratorLabel(): string
@@ -80,14 +87,19 @@ class AdmissionIndicator extends Indicator
             ->where('e.type', 'inpatient')->where('e.status', '<>', 'cancelled')
             ->whereBetween('e.started_at', $f->range())
             ->orderBy('e.started_at')->orderBy('e.care_episode_id')
-            ->select(['e.started_at', 'e.status', 'p.code as patient', 'p.birth_date', 'p.sex'])->selectSub($firstWard, 'ward')
+            ->select(['e.started_at', 'e.status', 'e.admission_source', 'p.code as patient', 'p.birth_date', 'p.sex'])->selectSub($firstWard, 'ward')
             ->get()
-            ->map(fn ($r) => [
-                'peso' => 1,
-                'dims' => ['sala' => $r->ward ?? 'Sin cama asignada', 'grupo_edad' => self::ageGroup(CarbonImmutable::parse($r->birth_date)->diffInYears(CarbonImmutable::parse($r->started_at))),
-                    'sexo' => $sexes[$r->sex] ?? $r->sex],
-                'fila' => ['paciente' => $r->patient, 'ingreso' => $f->localDateTime($r->started_at), 'sala' => $r->ward ?? 'Sin cama asignada',
-                    'estado' => $r->status === 'open' ? 'Internado' : 'Egresado'],
-            ])->all();
+            ->map(function ($r) use ($f, $sexes) {
+                $source = AdmissionService::SOURCES[$r->admission_source] ?? 'Sin registrar';
+
+                return [
+                    'peso' => 1,
+                    'dims' => ['sala' => $r->ward ?? 'Sin cama asignada', 'origen' => $source,
+                        'grupo_edad' => self::ageGroup(CarbonImmutable::parse($r->birth_date)->diffInYears(CarbonImmutable::parse($r->started_at))),
+                        'sexo' => $sexes[$r->sex] ?? $r->sex],
+                    'fila' => ['paciente' => $r->patient, 'ingreso' => $f->localDateTime($r->started_at), 'sala' => $r->ward ?? 'Sin cama asignada',
+                        'origen' => $source, 'estado' => $r->status === 'open' ? 'Internado' : 'Egresado'],
+                ];
+            })->all();
     }
 }

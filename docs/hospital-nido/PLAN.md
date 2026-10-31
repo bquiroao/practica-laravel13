@@ -34,15 +34,15 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 |---|---|---|---|
 | 1 | Plataforma: login por hospital, cambio de hospital, usuarios, roles y permisos, auditoría, estructura de la aplicación | gestion-usuarios-tenants-autenticacion, rbac, gobernanza-auditoria, dashboard-base | **Lista** |
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
-| 3 | Camas | catalogo-salas-camas, traslados-altas-camas, dashboard-ocupacion | **Lista** |
+| 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas | **Lista** |
 | 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, admision-hospitalaria-asignacion-cama, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas, alergias-clinicas-alerta-visual-expediente, catalogo-medicamentos | Disponibles |
 
-Son 30 módulos: 4 + 3 + 3 + 3 + 5 + 2 + 4 + 1 en las fases, más los 5 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 4 + 3 + 5 + 2 + 4 + 1 en las fases, más los 4 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -286,6 +286,42 @@ Se integró en su propia rama (PR #560), siguiendo la sección 7.3 del `README.m
 **Verificación:**
 - 7 pruebas Feature nuevas (`AnalyticsTest`), entre ellas una prueba de contrato que exige RN-07 a los 15 indicadores en todas sus dimensiones;
 - en total, 144 correctas y 2 incompletas (AU-01 y AU-05).
+
+## Admisión hospitalaria y asignación de cama: qué se entregó
+
+Se integró en su propia rama, siguiendo la sección 7.2 del `README.md`. Completa el ciclo de las camas: admisión → traslados → alta.
+
+**Admisión** (módulo admision-hospitalaria-asignacion-cama):
+- Abre el internamiento (`care_episode` «inpatient») y su estancia en la cama, en una sola transacción: o queda todo, o nada.
+- Registra el origen: emergencia, consulta externa o referencia.
+- **Cama compatible (RN-03, RN-04):**
+  - una clase por criterio en `app/Services/Admissions/Eligibility/`: cama operativa, sala pedida, tipo de cama y aislamiento;
+  - una cama de aislamiento se reserva para quien lo requiere;
+  - si la cama no sirve, se dice por qué (`CAMA_NO_ELEGIBLE` con sus motivos).
+- **Concurrencia:**
+  - **RN-01:** una cama tiene una sola estancia abierta; lo garantiza la exclusión de `bed_stays`. Si otra persona la tomó, responde `CAMA_YA_ASIGNADA` y el asistente vuelve a la lista actualizada (CU-05);
+  - **RN-02:** un paciente tiene un solo internamiento abierto. Se valida con la fila del paciente bloqueada, así dos admisiones simultáneas no lo duplican;
+  - si la cama está bloqueada más de 2 s, responde `CONFLICTO_CONCURRENCIA`, que se puede reintentar.
+- **Trazabilidad (RN-05):** `ADMISION_CREADA` y `CAMA_ASIGNADA` van a la bitácora encadenada, con el rol y el `X-Request-Id` de la solicitud. La consulta de eventos junta también los traslados y el alta.
+- **Privacidad:** la respuesta identifica al paciente solo con su código. El hospital sale de la sesión: si viene en el cuerpo, se rechaza.
+
+**Migración `2026_10_31_000200`** (reversible):
+- columna `care_episodes.admission_source`;
+- cierre de **AU-01**: un episodio cerrado o anulado exige fecha de fin;
+- cierre de **AU-05**: al abrir una estancia, la cama queda «occupied».
+
+**Pantalla:**
+- botón «Admitir paciente» en `/camas`, arriba y en cada cama disponible;
+- el asistente tiene tres pasos: buscar paciente, qué necesita (origen, aislamiento, tipo de cama, sala y motivo) y elegir la cama;
+- muestra «Quedan N camas» y avisa cuando quedan 2 o menos (cambio preparado de la semana 12);
+- la confirmación muestra un resumen;
+- en la cama ocupada, «Ver admisión y trazabilidad».
+
+**Reportes:** el indicador «Ingresos hospitalarios» se desglosa ahora por origen de la admisión.
+
+**Verificación:**
+- 6 pruebas Feature nuevas (`AdmissionTest`);
+- en total, **152 correctas y ninguna incompleta**: AU-01 y AU-05 pasan.
 
 ## Pendientes conocidos
 
