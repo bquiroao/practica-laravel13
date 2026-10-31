@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BedDouble, Plus, UserPlus } from 'lucide-react';
 import { AdmissionDialog, type PresetBed } from '@/modules/admissions/AdmissionDialog';
+import { AdmissionOrdersPanel } from '@/modules/admissions/AdmissionOrders';
 import { AdmissionTrace } from '@/modules/admissions/AdmissionTrace';
 import { useAuth } from '@/auth/AuthContext';
 import { api, errorMessage, fieldErrors } from '@/lib/api';
@@ -66,6 +67,8 @@ export function BedsPage() {
             </div>
 
             {notice && <div className="mb-4"><Alert tone="success">{notice}</Alert></div>}
+            {/* Mejora del módulo admisión: pacientes con orden de ingreso que esperan cama. */}
+            <AdmissionOrdersPanel onDone={done} />
             {map.isLoading ? <Spinner /> : map.isError ? <Alert tone="error">{errorMessage(map.error)}</Alert> : wards.length === 0 ? (
                 <Card><EmptyState title="Todavía no hay salas.">{can('camas.gestionar') ? 'Cree la primera con «Nueva sala».' : 'Pida al administrador que las registre.'}</EmptyState></Card>
             ) : (
