@@ -163,7 +163,7 @@ Se crean con `php artisan db:seed`, solo en los entornos `local` y `testing`. **
 
 ## 4. Estado de los módulos
 
-Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **27 están integrados** y funcionando. Los 3 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
+Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **28 están integrados** y funcionando. Los 2 disponibles se pueden tomar con la guía de la sección 7; mientras tanto, sus pantallas muestran la marca «pronto», o funcionan con catálogos provisionales.
 
 | Área | Módulo (`docs/modulos/…`) | Estado |
 |---|---|---|
@@ -184,15 +184,15 @@ Los 30 módulos de `docs/modulos/` tienen su lugar en el sistema. **27 están in
 | | `notas-soap-diagnosticos` | ✅ Integrado |
 | | `signos-vitales-alertas` | ✅ Integrado |
 | | `alergias-clinicas-alerta-visual-expediente` | ✅ Integrado (banner en la ficha y el expediente) |
-| | `catalogo-medicamentos` | 🟦 **Disponible** (sección 7.6) |
-| | `prescripciones-alergias` | ✅ Integrado (con catálogo provisional) |
+| | `catalogo-medicamentos` | ✅ Integrado (catálogo administrable en `/prescripciones`) |
+| | `prescripciones-alergias` | ✅ Integrado (receta desde el catálogo de medicamentos) |
 | | `alertas-criticas-notificaciones-internas` | 🟦 **Disponible** (sección 7.4) |
 | Laboratorio | `catalogo-pruebas-laboratorio` | 🟦 **Disponible** (sección 7.1) |
 | | `ordenes-laboratorio-emr` | ✅ Integrado (con catálogo provisional) |
 | | `recepcion-muestras` | ✅ Integrado (con catálogo provisional) |
 | | `ingreso-resultados-laboratorio` | ✅ Integrado (con catálogo provisional) |
 | | `validacion-resultados-bioquimico` | ✅ Integrado (con catálogo provisional) |
-| Gestión | `reportes-analytics-basicos` | ✅ Integrado (15 indicadores trazables) |
+| Gestión | `reportes-analytics-basicos` | ✅ Integrado (17 indicadores trazables) |
 | | `reportes-operativos-exportables` | ✅ Integrado |
 | Calidad | `qa-regresion-defectos` | ✅ Integrado |
 | | `qa-e2e-ci-despliegue` | ✅ Integrado |
@@ -311,7 +311,7 @@ El ejemplo completo a imitar es el módulo de pacientes:
 
 ## 7. Guía de los módulos disponibles
 
-Estos módulos están listos para tomarse (el 7.2, el 7.3 y el 7.5 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
+Estos módulos están listos para tomarse (el 7.2, el 7.3, el 7.5 y el 7.6 ya están integrados y quedan como guía para conectarse a ellos). En cada uno se indica qué existe, qué falta y con qué se conecta. Trabaja cada uno en su propia rama ([sección 9](#9-flujo-de-trabajo-con-git)).
 
 ### 7.1 Catálogo de pruebas de laboratorio — `catalogo-pruebas-laboratorio`
 - **Ya existe:**
@@ -381,19 +381,18 @@ Estos módulos están listos para tomarse (el 7.2, el 7.3 y el 7.5 ya están int
   - para mostrar las alergias en otra pantalla, coloca `<AllergyBanner patientId={id} />`. Solo se muestra a quien tiene `expediente.leer`, `alergias.gestionar` o `prescripciones.crear`;
   - prescripciones sigue **leyendo** la tabla por su cuenta: una alergia inactivada o resuelta deja de bloquear sin más cambios.
 
-### 7.6 Catálogo de medicamentos — `catalogo-medicamentos`
-- **Ya existe:**
-  - los permisos `medicamentos.ver` y `medicamentos.gestionar` (farmacia y administrador de hospital; médico y enfermería solo ven);
-  - la entrada del menú `/prescripciones`, compartida con prescripciones;
-  - el prototipo (`CodigoMedicamento`, `Concentracion`, `ClaveEquivalencia`, `BusquedaCatalogo`).
-- **Falta:**
-  - las tablas de medicamentos: el esquema base las dejó pendientes (tarea 3.5 del mismo `tasks.md`);
-  - el registro y la búsqueda de medicamentos;
-  - la pantalla.
-- **Se conecta con:** prescripciones, que **ya está integrado** con un catálogo provisional. Para conectar tu catálogo:
-  1. implementa `App\Services\Catalogs\MedicationDirectory` sobre tu tabla. Devuelve `code`, `name`, `presentation`, `route` y `groups`. `groups` son las familias para las alergias cruzadas, por ejemplo `['penicilinas']`; las palabras de cada familia están en `config/nido_catalogos.php`, en `familias_alergia`;
-  2. en `AppServiceProvider`, cambia el `bind` de `MedicationDirectory` por tu clase.
-- **Pantalla:** reemplaza la pestaña «Catálogo de medicamentos» de `/prescripciones` (`resources/js/pages/prescriptions/PrescriptionsPage.tsx`) por tu catálogo administrable.
+### 7.6 Catálogo de medicamentos — `catalogo-medicamentos` ✅ Integrado
+- **Qué hay:**
+  - la tabla `medications`: una fila por versión, con el código `MED-NNNNNN` que no cambia entre versiones y la vigencia `[valid_from, valid_to)`. La base repite las reglas: dos versiones del mismo código no se cruzan, dos medicamentos equivalentes no están vigentes a la vez, una versión no se edita (solo se cierra) y un código recetado no se borra;
+  - `App\Services\Medications\MedicationCatalogService`: buscar lo vigente en una fecha, registrar, crear una versión nueva, dar de baja y eliminar un registro erróneo que nunca se usó. Es el único que escribe en `medications`;
+  - el catálogo inicial: los 13 medicamentos del catálogo provisional, con su ficha completa. Conservan su código anterior (`legacy_code`, p. ej. `AMOX500`), así las recetas anteriores siguen resolviendo;
+  - la pantalla `MedicationCatalog` (`resources/js/modules/medications/`), en la pestaña «Catálogo de medicamentos» de `/prescripciones`;
+  - el indicador «Recetas por grupo terapéutico» en reportes.
+  - Detalle en `docs/hospital-nido/PLAN.md`.
+- **Acuerdo de integración:**
+  - prescripciones receta desde el catálogo con `App\Services\Medications\DatabaseMedicationDirectory`, registrado en `AppServiceProvider`. Solo ve lo vigente hoy: un medicamento dado de baja deja de poder recetarse;
+  - `MedicationDirectory::find()` acepta el código nuevo o el anterior. Devuelve `code`, `name`, `presentation`, `route` y `groups` (las familias para las alergias cruzadas; sus palabras siguen en `config/nido_catalogos.php`, en `familias_alergia`);
+  - la lista `medicamentos` de `config/nido_catalogos.php` y `ConfigMedicationDirectory` ya no se usan. Se dejaron sin borrar para no tocar el archivo que comparte con el catálogo provisional de laboratorio.
 
 **Para evitar conflictos al unir ramas:**
 - `routes/api.php`, `config/nido.php`, `resources/js/routes.tsx` y `resources/js/modules/catalog.ts` los comparten todos los módulos.
@@ -430,7 +429,7 @@ npm run build
 vendor/bin/pint --dirty
 ```
 
-Hoy la suite da **159 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
+Hoy la suite da **168 correctas y ninguna incompleta**: el módulo de admisión cerró los defectos AU-01 y AU-05 (sección 7.2). Además, el **CI de GitHub** (`.github/workflows/ci.yml`) la corre en cada push y PR a `develop` y `main`, junto con la revisión de tipos y la compilación de las pantallas.
 
 ---
 
@@ -502,6 +501,10 @@ Todas las rutas están bajo `/api/v1`.
 | POST | `/laboratorio/items/{id}/resultado` | `resultados.registrar` |
 | POST | `/laboratorio/resultados/{id}/revision` | `resultados.validar` |
 | GET | `/medicamentos` · `/recetas[?paciente=]` | `medicamentos.ver`, `prescripciones.crear` o `expediente.leer` |
+| GET | `/catalogo/medicamentos?q=&forma=&fecha=` (vigentes en la fecha, máximo 50) · `/catalogo/medicamentos/{código}?fecha=` | `medicamentos.ver`, `prescripciones.crear` o `auditoria.consultar` |
+| GET | `/catalogo/medicamentos/opciones` · `/catalogo/medicamentos/{código}/versiones` (historial) | `medicamentos.ver` o `auditoria.consultar` |
+| POST | `/catalogo/medicamentos` (alta) · `/catalogo/medicamentos/{código}/versiones` · `/catalogo/medicamentos/{código}/baja` | `medicamentos.gestionar` |
+| DELETE | `/catalogo/medicamentos/{código}` (solo si nunca se recetó) | `medicamentos.gestionar` |
 | POST | `/expediente/{paciente}/recetas` · `/recetas/{id}/anular` | `prescripciones.crear` / `prescripciones.anular` |
 | GET | `/reportes/operativos?tipo=&desde=&hasta=` (vista previa) | `reportes.ver` o `reportes.exportar` |
 | GET | `/reportes/operativos/exportar?…` (CSV con huella SHA-256 en la bitácora) | `reportes.exportar` |

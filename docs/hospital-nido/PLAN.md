@@ -36,13 +36,13 @@ Cada fase deja algo que se puede usar y probar. El menú ya muestra todas las pa
 | 2 | Pacientes, médicos y citas | pacientes, medicos-especialidades, citas-medicas | **Lista** |
 | 3 | Camas | catalogo-salas-camas, admision-hospitalaria-asignacion-cama, traslados-altas-camas, dashboard-ocupacion | **Lista** |
 | 4 | Clínico | expediente-medico, notas-soap-diagnosticos, signos-vitales-alertas, alergias-clinicas-alerta-visual-expediente | **Lista** |
-| 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias | **Lista** |
+| 5 | Laboratorio y prescripciones | ordenes-laboratorio-emr, recepcion-muestras, ingreso-resultados-laboratorio, validacion-resultados-bioquimico, prescripciones-alergias, catalogo-medicamentos | **Lista** |
 | 6 | Reportes | reportes-operativos-exportables, reportes-analytics-basicos | **Lista** |
 | 7 | Calidad, contratos y despliegue | qa-regresion-defectos, qa-e2e-ci-despliegue, contratos-api, verificacion-bd-postgresql | **Lista** |
 | 8 | App móvil y de escritorio | investigacion-prototipo-nativephp | **Lista** (PWA) |
-| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas, catalogo-medicamentos | Disponibles |
+| Disponibles | Se integran en ramas propias, siguiendo la sección 7 del `README.md` | catalogo-pruebas-laboratorio, alertas-criticas-notificaciones-internas | Disponibles |
 
-Son 30 módulos: 4 + 3 + 4 + 4 + 5 + 2 + 4 + 1 en las fases, más los 3 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
+Son 30 módulos: 4 + 3 + 4 + 4 + 6 + 2 + 4 + 1 en las fases, más los 2 disponibles. La prueba `AccessControlTest::test_every_permission_belongs_to_a_documented_module` falla si un módulo de `docs/modulos/` queda sin permiso en el catálogo, o si un permiso apunta a un módulo que no existe.
 
 ## Fase 1: qué se entregó
 
@@ -373,9 +373,70 @@ Se integró en su propia rama, siguiendo la sección 7.5 del `README.md`. Es el 
 - 7 pruebas Feature nuevas (`AllergyTest`);
 - en total, **159 correctas y ninguna incompleta**.
 
+## Catálogo de medicamentos: qué se entregó
+
+Se integró en su propia rama, siguiendo la sección 7.6 del `README.md`. Es el único módulo que escribe en `medications` (migración `2026_10_31_000400`). Prescripciones lo lee por `MedicationDirectory`.
+
+**Tabla `medications`:**
+- una fila por versión. El código `MED-NNNNNN` no cambia entre versiones (RN-06) y la vigencia es `[valid_from, valid_to)`: el día `valid_to` ya no está vigente;
+- cada columna tiene los mismos límites que valida la API (RN-05), así un dato fuera de rango da 422, nunca un error de la base;
+- la base repite las reglas del dominio (RNF-04):
+  - dos versiones del mismo código no se cruzan (RN-01);
+  - dos medicamentos con la misma clave de equivalencia no están vigentes a la vez (RN-04);
+  - una versión no se edita, solo se cierra, y una versión cerrada no se reabre;
+  - un código que aparece en una receta no se borra (RN-02).
+
+**Alta** (CU-01):
+- el código es el siguiente libre del hospital. Se calcula con un candado, así dos altas a la vez toman códigos distintos;
+- **sin duplicados (RN-04):** principio activo, concentración, unidad, forma y vía. El principio activo se compara sin mayúsculas, tildes ni espacios repetidos, y «500», «500.0» y «500.000» son la misma concentración;
+- un equivalente dado de baja no cuenta como duplicado si las vigencias no se cruzan (CA-05);
+- las familias para alergias cruzadas se sugieren por el principio activo (amoxicilina → penicilinas), y quien registra las puede cambiar;
+- el grupo terapéutico agrupa las recetas en reportes.
+
+**Búsqueda** (CU-02, RF-04):
+- solo lo vigente en la fecha consultada (hoy, si no se indica), por texto en el código, el código anterior, el nombre o el principio activo, y por forma farmacéutica;
+- `%` y `_` se buscan como texto, no como comodines (RN-03), y la búsqueda no distingue tildes;
+- máximo 50 resultados, por nombre y código, con el total.
+
+**Versión nueva** (CU-03, RN-01):
+- se envía la ficha completa; la vigente se cierra el día en que empieza la nueva;
+- la nueva debe empezar después de la vigente (`SOLAPE_VIGENCIA`) y cambiar al menos un dato (`SIN_CAMBIOS`);
+- si otra persona cambió el medicamento mientras se editaba, responde `CONFLICTO_CONCURRENTE`.
+
+**Baja** (CU-04) y **eliminación** (CU-06):
+- la baja necesita fecha (desde hoy) y motivo, y deja el registro y su historial;
+- desde ese día el medicamento no aparece al buscar ni se puede recetar;
+- solo se elimina un registro que nunca se recetó; si se recetó, responde `EN_USO` y sugiere la baja (RN-02).
+
+**Historial** (CU-05): todas las versiones con quién las registró y quién las cerró. Lo puede consultar calidad (`auditoria.consultar`).
+
+**Bitácora:** `MEDICAMENTO_REGISTRADO`, `MEDICAMENTO_NUEVA_VERSION` (con los campos que cambiaron), `MEDICAMENTO_DADO_DE_BAJA`, `MEDICAMENTO_ELIMINADO` y `MEDICAMENTO_ELIMINACION_RECHAZADA`.
+
+**Catálogo inicial:**
+- los 13 medicamentos del catálogo provisional, con su ficha completa y registros sanitarios ficticios;
+- conservan su código anterior (`legacy_code`, p. ej. `AMOX500`), así las recetas anteriores siguen resolviendo y prescripciones acepta los dos códigos;
+- se carga con `HospitalCatalogSeeder`, en cada hospital, al instalar.
+
+**Defectos de la semana 15, corregidos:**
+- **D-01:** cada campo se valida por separado; una concentración «0» sin unidad informa los dos errores a la vez.
+- **D-02:** toda respuesta lleva `X-Request-Id`, también los errores. Si la base no responde, sale un 503 `PERSISTENCIA` con `Retry-After: 5` y sin detalles internos.
+- **D-03:** dos altas a la vez toman códigos distintos, en lugar de que la segunda falle.
+
+**Pantalla:**
+- `MedicationCatalog` (`resources/js/modules/medications/`), en la pestaña «Catálogo de medicamentos» de `/prescripciones`;
+- búsqueda por texto, forma y fecha; la ficha con su estado en texto (vigente, programada, reemplazada o dado de baja) y el historial;
+- farmacia y el administrador del hospital registran, versionan, dan de baja y eliminan; un duplicado ofrece abrir el medicamento que ya existe;
+- eliminar pide confirmación (hallazgo H-03 de la semana 9).
+
+**Reportes:** el indicador «Recetas por grupo terapéutico» reemplaza el pendiente «Recetas por familia de medicamento». El grupo sale de la ficha del catálogo.
+
+**Verificación:**
+- 9 pruebas Feature nuevas (`MedicationCatalogTest`), con los criterios CA-01 a CA-13;
+- en total, **168 correctas y ninguna incompleta**.
+
 ## Pendientes conocidos
 
 - **Diseño de Stitch:** la paleta y los componentes actuales son provisionales. Al llegar el diseño se ajustan `resources/css/app.css` y `resources/js/components/ui.tsx`, y el cambio se propaga a todas las pantallas.
 - **Identidad protegida (R-11 del módulo pacientes):** pacientes confidenciales visibles solo con un permiso especial. Queda para una fase posterior, porque necesita permisos nuevos.
-- **Esquema de Richard:** siguen pendientes las tareas 3.5 a 3.7 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md` (medicamentos, laboratorio, auditoría local). Se completan en las fases 4 y 5.
+- **Esquema de Richard:** siguen pendientes las tareas 3.6 y 3.7 de `openspec/changes/postgresql-federated-schema-rebuild/tasks.md` (laboratorio y auditoría local). La 3.5 (medicamentos) la cubrió el catálogo de medicamentos.
 - **Dependencias:** `composer audit` reporta avisos de seguridad en paquetes del `composer.lock` heredado. Conviene actualizarlo en un PR aparte, con todas las pruebas.
