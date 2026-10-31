@@ -5,6 +5,7 @@ import { useAuth } from '@/auth/AuthContext';
 import { api, errorMessage } from '@/lib/api';
 import { appointmentStatus, formatDate, formatTime, patientStatus, sexLabels, weekdayDate } from '@/lib/format';
 import type { Appointment, Patient } from '@/modules/clinical/types';
+import { AllergyBanner } from '@/modules/allergies/AllergyBanner';
 import { Alert, BackLink, Badge, Button, Card, EmptyState, Spinner } from '@/components/ui';
 
 /** Ficha del paciente: quién es, cómo contactarlo y sus citas. Las acciones principales, arriba y a la vista. */
@@ -53,6 +54,8 @@ export function PatientDetailPage() {
                         )}
                     </div>
                 </div>
+                {/* Banner de alergias del módulo alergias-clinicas-alerta-visual-expediente: solo lo ven los roles clínicos. */}
+                <AllergyBanner patientId={p.id} className="mt-4" />
 
                 <dl className="mt-6 grid gap-x-6 gap-y-4 border-t border-slate-200 pt-6 text-sm sm:grid-cols-2 lg:grid-cols-4">
                     <div><dt className="font-semibold text-slate-500">Documento</dt>

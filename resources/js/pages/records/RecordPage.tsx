@@ -7,6 +7,7 @@ import { api, errorMessage, ruleError } from '@/lib/api';
 import { formatDate, formatTime, sexLabels } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import type { Patient } from '@/modules/clinical/types';
+import { AllergyBanner } from '@/modules/allergies/AllergyBanner';
 import { LabTab } from '@/pages/records/LabTab';
 import { PrescriptionsTab } from '@/pages/records/PrescriptionsTab';
 import { Alert, BackLink, Badge, Button, Card, Dialog, EmptyState, Field, Input, Select, Spinner, Textarea } from '@/components/ui';
@@ -57,7 +58,8 @@ export function RecordPage() {
                     </div>
                     <Link to={`/pacientes/${p.id}`} className="text-sm font-semibold text-nido-700 underline">Datos y citas del paciente</Link>
                 </div>
-                {/* Aquí va el banner de alergias del módulo alergias-clinicas-alerta-visual-expediente (README, sección 7.5). */}
+                {/* Banner de alergias del módulo alergias-clinicas-alerta-visual-expediente (README, sección 7.5). */}
+                <AllergyBanner patientId={p.id} className="mt-4" />
                 <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-nido-50 px-3 py-2 text-sm text-nido-900 ring-1 ring-nido-200" aria-live="polite">
                     {current ? (
                         <>{current.type === 'inpatient' ? <BedDouble className="size-4" aria-hidden /> : <Stethoscope className="size-4" aria-hidden />}
