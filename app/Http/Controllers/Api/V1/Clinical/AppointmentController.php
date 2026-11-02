@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Clinical;
 
+use App\Exceptions\DomainRuleException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Hospital\Appointment;
@@ -12,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-/** Módulo citas médicas: agenda del día o de un rango, franjas libres, programar y cambiar el estado. */
+/** Módulo citas médicas: agenda del día o de un rango (el médico solo ve la suya, R-09), franjas libres, programar y cambiar el estado. */
 class AppointmentController extends Controller
 {
     public function __construct(private readonly AppointmentService $appointments) {}
@@ -30,13 +31,17 @@ class AppointmentController extends Controller
         $from = CarbonImmutable::parse($data['desde'], $tz)->startOfDay();
         $to = CarbonImmutable::parse($data['hasta'] ?? $data['desde'], $tz)->endOfDay();
         abort_if($from->diffInDays($to) > 31, 422, 'Consulte como máximo 31 días a la vez.');
+        $own = $this->appointments->ownDoctor($request->user());
+        if ($own !== null && ($data['medico'] ?? $own->doctor_profile_id) !== $own->doctor_profile_id) {
+            throw new DomainRuleException('SIN_PERMISO', 'Solo puede consultar sus propias citas.', 403);
+        }
 
         return AppointmentResource::collection(Appointment::query()->with(['patient', 'doctor.userRef', 'specialty'])
             ->whereBetween('starts_at', [$from->utc(), $to->utc()])
-            ->when($data['medico'] ?? null, fn ($q, $v) => $q->where('doctor_profile_id', $v))
+            ->when($own?->doctor_profile_id ?? $data['medico'] ?? null, fn ($q, $v) => $q->where('doctor_profile_id', $v))
             ->when($data['paciente'] ?? null, fn ($q, $v) => $q->where('local_patient_id', $v))
             ->when($data['estado'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->orderBy('starts_at')->limit(500)->get());
+            ->orderBy('starts_at')->limit(500)->get())->additional(['solo_medico' => $own?->name()]);
     }
 
     public function availability(Request $request, AvailabilityService $availability): JsonResponse
