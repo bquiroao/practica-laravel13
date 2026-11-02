@@ -137,6 +137,26 @@ class DoctorAndAppointmentTest extends ClinicalTestCase
             ->assertJsonFragment(['name' => 'Ana Lucía Morales Díaz'])->assertJsonFragment(['name' => 'Pediatría']);
     }
 
+    public function test_a_doctor_only_sees_and_changes_their_own_appointments(): void
+    {
+        $reception = $this->as('recepcion@nido.test');
+        $doctor = $this->as('medico@nido.test');
+        $monday = $this->nextMonday(10);
+        $own = $this->book($reception, 'Pérez López', 'medico@nido.test', 'MEDICINA_GENERAL', $monday->toIso8601String())->json('data.id');
+        $other = $this->book($reception, 'Morales Díaz', 'pediatria@nido.test', 'PEDIATRIA', $monday->toIso8601String())->json('data.id');
+        $day = '/api/v1/citas?desde='.$monday->toDateString();
+
+        $this->getJson($day, $doctor)->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $own)
+            ->assertJsonPath('solo_medico', $this->doctor('medico@nido.test')->name());
+        $this->getJson($day.'&medico='.$this->doctor('pediatria@nido.test')->doctor_profile_id, $doctor)
+            ->assertStatus(403)->assertJsonPath('code', 'SIN_PERMISO');
+        $this->postJson("/api/v1/citas/{$other}/estado", ['status' => 'confirmed'], $doctor)
+            ->assertStatus(403)->assertJsonPath('code', 'CITA_DE_OTRO_MEDICO');
+        $this->assertSame('scheduled', Appointment::query()->find($other)->status);
+
+        $this->getJson($day, $reception)->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('solo_medico', null);
+    }
+
     public function test_each_hospital_reads_its_own_clinical_database(): void
     {
         $databases = app(HospitalDatabase::class);
