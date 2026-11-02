@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Módulo citas médicas: E2 horario futuro y motivo, E3 especialidad vigente, E4/E5 sin cruces de médico ni de
- * paciente, E6 otra solicitud ganó el horario (la exclusión de la base es la última barrera), E7 transiciones.
+ * paciente, E6 otra solicitud ganó el horario (la exclusión de la base es la última barrera), E7 transiciones,
+ * R-09 el médico solo ve y cambia sus propias citas.
  */
 class AppointmentService
 {
@@ -72,8 +73,18 @@ class AppointmentService
         return $appointment;
     }
 
+    /** R-09: si el usuario es médico de este hospital, su agenda se limita a sus citas. Null: ve las de todos. */
+    public function ownDoctor(CentralUser $user): ?DoctorProfile
+    {
+        return DoctorProfile::query()->with('userRef')->ofUser($user->user_id)->first();
+    }
+
     public function transition(CentralUser $actor, Hospital $hospital, Appointment $appointment, string $to, string $reason, ?string $ip): Appointment
     {
+        $own = $this->ownDoctor($actor);
+        if ($own !== null && $own->doctor_profile_id !== $appointment->doctor_profile_id) {
+            throw new DomainRuleException('CITA_DE_OTRO_MEDICO', 'Solo puede cambiar sus propias citas.', 403);
+        }
         $from = $appointment->status;
         if (! in_array($to, Appointment::TRANSITIONS[$from] ?? [], true)) {
             throw new DomainRuleException('TRANSICION_INVALIDA', 'Una cita «'.self::label($from).'» no puede pasar a «'.self::label($to).'».');
