@@ -30,7 +30,7 @@ export function AgendaPage() {
     const doctors = useQuery({ queryKey: ['medicos'], queryFn: async () => (await api.get<{ data: Doctor[] }>('/medicos')).data.data });
     const agenda = useQuery({
         queryKey: ['citas', date, doctorId],
-        queryFn: async () => (await api.get<{ data: Appointment[] }>('/citas', { params: { desde: date, medico: doctorId || undefined } })).data.data,
+        queryFn: async () => (await api.get<{ data: Appointment[]; solo_medico: string | null }>('/citas', { params: { desde: date, medico: doctorId || undefined } })).data,
         placeholderData: keepPreviousData,
     });
     const change = useMutation({
@@ -43,7 +43,9 @@ export function AgendaPage() {
         },
     });
 
-    const items = agenda.data ?? [];
+    const items = agenda.data?.data ?? [];
+    /** R-09: el médico solo ve su agenda, así que no elige médico. */
+    const ownDoctor = agenda.data?.solo_medico;
     const active = items.filter((a) => a.status !== 'cancelled');
 
     return (
@@ -59,12 +61,14 @@ export function AgendaPage() {
                 </div>
                 <p className="min-w-48 flex-1 text-lg font-bold first-letter:uppercase text-nido-900" aria-live="polite">{weekdayDate(`${date}T12:00:00Z`, 'UTC')}</p>
                 <Field label="Fecha" htmlFor="agenda-fecha"><Input id="agenda-fecha" type="date" value={date} onChange={(e) => setParam('fecha', e.target.value)} /></Field>
-                <Field label="Médico" htmlFor="agenda-medico">
-                    <Select id="agenda-medico" value={doctorId} onChange={(e) => setParam('medico', e.target.value)}>
-                        <option value="">Todos los médicos</option>
-                        {doctors.data?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                    </Select>
-                </Field>
+                {ownDoctor ? <p className="pb-2 text-sm text-slate-600">Sus citas · <strong className="text-slate-900">{ownDoctor}</strong></p> : (
+                    <Field label="Médico" htmlFor="agenda-medico">
+                        <Select id="agenda-medico" value={doctorId} onChange={(e) => setParam('medico', e.target.value)}>
+                            <option value="">Todos los médicos</option>
+                            {doctors.data?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </Select>
+                    </Field>
+                )}
             </Card>
 
             {notice && <div className="mb-4"><Alert tone="success">{notice}</Alert></div>}
